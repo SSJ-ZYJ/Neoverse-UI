@@ -1,0 +1,160 @@
+import { rm } from 'node:fs/promises';
+
+const output = new URL('../dist/contract.css', import.meta.url);
+
+try {
+  const css = await Bun.file(output).text();
+  const expectedSelectors = [
+    '.bg-surface-canvas',
+    '.bg-surface-subtle',
+    '.bg-surface-raised',
+    '.bg-surface-glass',
+    '.bg-surface-overlay',
+    '.text-primary',
+    '.text-secondary',
+    '.text-muted',
+    '.text-disabled',
+    '.text-inverse',
+    '.text-on-accent',
+    '.bg-accent-primary',
+    '.bg-accent-secondary',
+    '.bg-accent-tertiary',
+    '.bg-accent-soft',
+    '.bg-action-primary',
+    '.bg-action-primary-hover',
+    '.bg-action-primary-active',
+    '.bg-action-secondary',
+    '.hover\\:bg-action-secondary-hover',
+    '.active\\:bg-action-secondary-active',
+    '.bg-action-disabled',
+    '.text-action-primary-foreground',
+    '.text-action-secondary-foreground',
+    '.text-action-disabled-foreground',
+    '.border-subtle',
+    '.border-default',
+    '.border-strong',
+    '.border-interactive',
+    '.bg-status-info',
+    '.bg-status-success',
+    '.bg-status-warning',
+    '.bg-status-danger',
+    '.text-status-info-foreground',
+    '.text-status-success-foreground',
+    '.text-status-warning-foreground',
+    '.text-status-danger-foreground',
+    '.text-display',
+    '.text-heading',
+    '.text-subtitle',
+    '.text-body',
+    '.text-label',
+    '.text-caption',
+    '.text-code',
+    '.font-display',
+    '.font-heading',
+    '.font-body',
+    '.leading-display',
+    '.leading-body',
+    '.tracking-display',
+    '.tracking-body',
+    '.p-4',
+    '.px-gutter-inline',
+    '.py-gutter-block',
+    '.gap-grid',
+    '.rounded-control',
+    '.rounded-card',
+    '.rounded-panel',
+    '.rounded-pill',
+    '.shadow-control',
+    '.shadow-raised',
+    '.shadow-card',
+    '.shadow-overlay',
+    '.shadow-modal',
+    '.shadow-inset',
+    '.max-w-container-sm',
+    '.max-w-container-md',
+    '.max-w-container-lg',
+    '.max-w-container-xl',
+    '.max-w-container-2xl',
+    '.z-layer-base',
+    '.z-layer-raised',
+    '.z-layer-sticky',
+    '.z-layer-overlay',
+    '.z-layer-modal',
+    '.z-layer-toast',
+    '.focus-visible\\:outline-none',
+    '.focus-visible\\:ring-2',
+    '.focus-visible\\:ring-focus',
+    '.focus-visible\\:ring-offset-2',
+    '.hover\\:bg-action-primary-hover',
+    '.material-glass-subtle',
+    '.material-glass-elevated',
+    '.material-glass-immersive',
+    '.duration-fast',
+    '.duration-standard',
+    '.duration-expressive',
+    '.ease-linear',
+    '.ease-standard',
+    '.ease-emphasized',
+  ];
+  const missingSelectors = expectedSelectors.filter((selector) => !css.includes(selector));
+  const forbiddenSelectors = ['.bg-background', '.text-foreground', '.border-border', '.shadow-sm'];
+  const emittedForbiddenSelectors = forbiddenSelectors.filter((selector) => css.includes(selector));
+  const expectedValues = [
+    '--neoverse-color-surface-canvas',
+    '--neoverse-color-text-primary',
+    '--neoverse-shadow-card',
+    '--neoverse-radius-control',
+    '--neoverse-layout-container-lg',
+    '--neoverse-layout-layer-modal',
+    '--neoverse-material-blur-md',
+    '--neoverse-material-saturation-immersive',
+    '--neoverse-material-edge-highlight-elevated',
+    '--neoverse-material-refraction-gradient-immersive',
+    '--neoverse-material-glass-subtle-background',
+    '--neoverse-material-glass-immersive-background',
+    '--neoverse-material-transparency-subtle:100%',
+    '--neoverse-material-glass-elevated-background:var(--neoverse-color-surface-glass)',
+    '--neoverse-motion-duration-fast',
+    '--neoverse-motion-duration-standard',
+    '--neoverse-motion-duration-expressive',
+    '--neoverse-motion-easing-standard',
+    '--neoverse-motion-easing-emphasized',
+    '--neoverse-motion-micro-property',
+    '--neoverse-motion-duration-fast:1ms',
+    '--neoverse-motion-spatial-distance:0px',
+  ];
+  const missingValues = expectedValues.filter((value) => !css.includes(value));
+  const expectedFragments = [
+    'background-color:color-mix(in srgb',
+    'backdrop-filter:blur(var(--neoverse-material-blur))',
+    '@media (prefers-reduced-motion:reduce)',
+    '-webkit-backdrop-filter:blur(var(--neoverse-material-blur))',
+    '@media (prefers-reduced-transparency:reduce)',
+    'background-color:var(--neoverse-color-surface-raised);border:var(--neoverse-border-width-thin)',
+    ':is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive){background-color:var(--neoverse-color-surface-raised)',
+    'transition-duration:var(--tw-duration)',
+    'transition-timing-function:var(--tw-ease)',
+  ];
+  const missingFragments = expectedFragments.filter((fragment) => !css.includes(fragment));
+
+  if (
+    missingSelectors.length > 0 ||
+    emittedForbiddenSelectors.length > 0 ||
+    missingValues.length > 0 ||
+    missingFragments.length > 0
+  ) {
+    const details = [
+      missingSelectors.length > 0 ? `Missing selectors: ${missingSelectors.join(', ')}` : '',
+      emittedForbiddenSelectors.length > 0
+        ? `Forbidden selectors emitted: ${emittedForbiddenSelectors.join(', ')}`
+        : '',
+      missingValues.length > 0 ? `Missing token references: ${missingValues.join(', ')}` : '',
+      missingFragments.length > 0 ? `Missing CSS fragments: ${missingFragments.join(', ')}` : '',
+    ].filter(Boolean);
+    throw new Error(['Tailwind semantic contract failed:', ...details].join('\n'));
+  }
+
+  console.log(`Tailwind semantic contract passed with ${expectedSelectors.length} selectors.`);
+} finally {
+  await rm(output, { force: true });
+}

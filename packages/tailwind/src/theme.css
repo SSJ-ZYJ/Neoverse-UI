@@ -1,0 +1,355 @@
+@import '@neoverse-ui/motion/css';
+
+@theme inline {
+  --color-surface-canvas: var(--neoverse-color-surface-canvas);
+  --color-surface-subtle: var(--neoverse-color-surface-subtle);
+  --color-surface-raised: var(--neoverse-color-surface-raised);
+  --color-surface-glass: var(--neoverse-color-surface-glass);
+  --color-surface-overlay: var(--neoverse-color-surface-overlay);
+
+  --color-primary: var(--neoverse-color-text-primary);
+  --color-secondary: var(--neoverse-color-text-secondary);
+  --color-muted: var(--neoverse-color-text-muted);
+  --color-disabled: var(--neoverse-color-text-disabled);
+  --color-inverse: var(--neoverse-color-text-inverse);
+  --color-on-accent: var(--neoverse-color-text-on-accent);
+
+  --color-accent-primary: var(--neoverse-color-accent-primary);
+  --color-accent-primary-foreground: var(--neoverse-color-accent-primary-foreground);
+  --color-accent-secondary: var(--neoverse-color-accent-secondary);
+  --color-accent-secondary-foreground: var(--neoverse-color-accent-secondary-foreground);
+  --color-accent-tertiary: var(--neoverse-color-accent-tertiary);
+  --color-accent-tertiary-foreground: var(--neoverse-color-accent-tertiary-foreground);
+  --color-accent-soft: var(--neoverse-color-accent-soft);
+
+  --color-action-primary: var(--neoverse-color-action-primary);
+  --color-action-primary-hover: var(--neoverse-color-action-primary-hover);
+  --color-action-primary-active: var(--neoverse-color-action-primary-active);
+  --color-action-primary-foreground: var(--neoverse-color-action-primary-foreground);
+  --color-action-secondary: var(--neoverse-color-action-secondary);
+  --color-action-secondary-hover: var(--neoverse-color-action-secondary-hover);
+  --color-action-secondary-active: var(--neoverse-color-action-secondary-active);
+  --color-action-secondary-foreground: var(--neoverse-color-action-secondary-foreground);
+  --color-action-disabled: var(--neoverse-color-action-disabled);
+  --color-action-disabled-foreground: var(--neoverse-color-action-disabled-foreground);
+
+  --color-subtle: var(--neoverse-color-border-subtle);
+  --color-default: var(--neoverse-color-border-default);
+  --color-strong: var(--neoverse-color-border-strong);
+  --color-interactive: var(--neoverse-color-border-interactive);
+
+  --color-status-info: var(--neoverse-color-status-info);
+  --color-status-info-foreground: var(--neoverse-color-status-info-foreground);
+  --color-status-success: var(--neoverse-color-status-success);
+  --color-status-success-foreground: var(--neoverse-color-status-success-foreground);
+  --color-status-warning: var(--neoverse-color-status-warning);
+  --color-status-warning-foreground: var(--neoverse-color-status-warning-foreground);
+  --color-status-danger: var(--neoverse-color-status-danger);
+  --color-status-danger-foreground: var(--neoverse-color-status-danger-foreground);
+
+  --color-focus: var(--neoverse-color-focus-ring);
+  --color-scrim: var(--neoverse-color-overlay-scrim);
+
+  --spacing-0: var(--neoverse-space-0);
+  --spacing-1: var(--neoverse-space-1);
+  --spacing-2: var(--neoverse-space-2);
+  --spacing-3: var(--neoverse-space-3);
+  --spacing-4: var(--neoverse-space-4);
+  --spacing-5: var(--neoverse-space-5);
+  --spacing-6: var(--neoverse-space-6);
+  --spacing-7: var(--neoverse-space-7);
+  --spacing-8: var(--neoverse-space-8);
+  --spacing-9: var(--neoverse-space-9);
+  --spacing-10: var(--neoverse-space-10);
+  --spacing-11: var(--neoverse-space-11);
+  --spacing-12: var(--neoverse-space-12);
+  --spacing-13: var(--neoverse-space-13);
+  --spacing-14: var(--neoverse-space-14);
+  --spacing-15: var(--neoverse-space-15);
+  --spacing-16: var(--neoverse-space-16);
+  --spacing-17: var(--neoverse-space-17);
+  --spacing-18: var(--neoverse-space-18);
+  --spacing-19: var(--neoverse-space-19);
+  --spacing-20: var(--neoverse-space-20);
+  --spacing-21: var(--neoverse-space-21);
+  --spacing-22: var(--neoverse-space-22);
+  --spacing-23: var(--neoverse-space-23);
+  --spacing-24: var(--neoverse-space-24);
+  --spacing-25: var(--neoverse-space-25);
+  --spacing-26: var(--neoverse-space-26);
+  --spacing-27: var(--neoverse-space-27);
+  --spacing-28: var(--neoverse-space-28);
+  --spacing-29: var(--neoverse-space-29);
+  --spacing-30: var(--neoverse-space-30);
+  --spacing-31: var(--neoverse-space-31);
+  --spacing-32: var(--neoverse-space-32);
+  --spacing-gutter-inline: var(--neoverse-layout-gutter-inline);
+  --spacing-gutter-block: var(--neoverse-layout-gutter-block);
+  --spacing-grid: var(--neoverse-layout-grid-gap);
+
+  --font-sans: var(--neoverse-font-family-sans);
+  --font-mono: var(--neoverse-font-family-mono);
+
+  --text-2xs: var(--neoverse-font-size-2xs);
+  --text-xs: var(--neoverse-font-size-xs);
+  --text-sm: var(--neoverse-font-size-sm);
+  --text-md: var(--neoverse-font-size-md);
+  --text-lg: var(--neoverse-font-size-lg);
+  --text-xl: var(--neoverse-font-size-xl);
+  --text-2xl: var(--neoverse-font-size-2xl);
+  --text-3xl: var(--neoverse-font-size-3xl);
+  --text-4xl: var(--neoverse-font-size-4xl);
+
+  --text-display: var(--neoverse-typography-display-size);
+  --text-display--line-height: var(--neoverse-typography-display-line-height);
+  --text-heading: var(--neoverse-typography-heading-size);
+  --text-heading--line-height: var(--neoverse-typography-heading-line-height);
+  --text-subtitle: var(--neoverse-typography-subtitle-size);
+  --text-subtitle--line-height: var(--neoverse-typography-subtitle-line-height);
+  --text-body: var(--neoverse-typography-body-size);
+  --text-body--line-height: var(--neoverse-typography-body-line-height);
+  --text-label: var(--neoverse-typography-label-size);
+  --text-label--line-height: var(--neoverse-typography-label-line-height);
+  --text-caption: var(--neoverse-typography-caption-size);
+  --text-caption--line-height: var(--neoverse-typography-caption-line-height);
+  --text-code: var(--neoverse-typography-code-size);
+  --text-code--line-height: var(--neoverse-typography-code-line-height);
+
+  --font-weight-regular: var(--neoverse-font-weight-regular);
+  --font-weight-medium: var(--neoverse-font-weight-medium);
+  --font-weight-semibold: var(--neoverse-font-weight-semibold);
+  --font-weight-bold: var(--neoverse-font-weight-bold);
+  --font-weight-display: var(--neoverse-typography-display-weight);
+  --font-weight-heading: var(--neoverse-typography-heading-weight);
+  --font-weight-subtitle: var(--neoverse-typography-subtitle-weight);
+  --font-weight-body: var(--neoverse-typography-body-weight);
+  --font-weight-label: var(--neoverse-typography-label-weight);
+  --font-weight-caption: var(--neoverse-typography-caption-weight);
+  --font-weight-code: var(--neoverse-typography-code-weight);
+
+  --leading-tight: var(--neoverse-line-height-tight);
+  --leading-snug: var(--neoverse-line-height-snug);
+  --leading-normal: var(--neoverse-line-height-normal);
+  --leading-relaxed: var(--neoverse-line-height-relaxed);
+  --leading-display: var(--neoverse-typography-display-line-height);
+  --leading-heading: var(--neoverse-typography-heading-line-height);
+  --leading-subtitle: var(--neoverse-typography-subtitle-line-height);
+  --leading-body: var(--neoverse-typography-body-line-height);
+  --leading-label: var(--neoverse-typography-label-line-height);
+  --leading-caption: var(--neoverse-typography-caption-line-height);
+  --leading-code: var(--neoverse-typography-code-line-height);
+
+  --tracking-tight: var(--neoverse-letter-spacing-tight);
+  --tracking-normal: var(--neoverse-letter-spacing-normal);
+  --tracking-wide: var(--neoverse-letter-spacing-wide);
+  --tracking-display: var(--neoverse-typography-display-letter-spacing);
+  --tracking-heading: var(--neoverse-typography-heading-letter-spacing);
+  --tracking-subtitle: var(--neoverse-typography-subtitle-letter-spacing);
+  --tracking-body: var(--neoverse-typography-body-letter-spacing);
+  --tracking-label: var(--neoverse-typography-label-letter-spacing);
+  --tracking-caption: var(--neoverse-typography-caption-letter-spacing);
+  --tracking-code: var(--neoverse-typography-code-letter-spacing);
+
+  --radius-none: var(--neoverse-radius-none);
+  --radius-xs: var(--neoverse-radius-xs);
+  --radius-sm: var(--neoverse-radius-sm);
+  --radius-md: var(--neoverse-radius-md);
+  --radius-lg: var(--neoverse-radius-lg);
+  --radius-xl: var(--neoverse-radius-xl);
+  --radius-2xl: var(--neoverse-radius-2xl);
+  --radius-pill: var(--neoverse-radius-pill);
+  --radius-control: var(--neoverse-radius-control);
+  --radius-card: var(--neoverse-radius-card);
+  --radius-panel: var(--neoverse-radius-panel);
+
+  --shadow-none: var(--neoverse-shadow-none);
+  --shadow-xs: var(--neoverse-shadow-xs);
+  --shadow-sm: var(--neoverse-shadow-sm);
+  --shadow-md: var(--neoverse-shadow-md);
+  --shadow-lg: var(--neoverse-shadow-lg);
+  --shadow-xl: var(--neoverse-shadow-xl);
+  --shadow-inset: var(--neoverse-shadow-inset);
+  --shadow-control: var(--neoverse-shadow-control);
+  --shadow-raised: var(--neoverse-shadow-raised);
+  --shadow-card: var(--neoverse-shadow-card);
+  --shadow-overlay: var(--neoverse-shadow-overlay);
+  --shadow-modal: var(--neoverse-shadow-modal);
+
+  --container-container-sm: var(--neoverse-layout-container-sm);
+  --container-container-md: var(--neoverse-layout-container-md);
+  --container-container-lg: var(--neoverse-layout-container-lg);
+  --container-container-xl: var(--neoverse-layout-container-xl);
+  --container-container-2xl: var(--neoverse-layout-container-2xl);
+
+  --z-index-layer-base: var(--neoverse-layout-layer-base);
+  --z-index-layer-raised: var(--neoverse-layout-layer-raised);
+  --z-index-layer-sticky: var(--neoverse-layout-layer-sticky);
+  --z-index-layer-overlay: var(--neoverse-layout-layer-overlay);
+  --z-index-layer-modal: var(--neoverse-layout-layer-modal);
+  --z-index-layer-toast: var(--neoverse-layout-layer-toast);
+
+  --breakpoint-sm: 40rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --breakpoint-xl: 80rem;
+  --breakpoint-2xl: 96rem;
+  --neoverse-duration-fast: var(--neoverse-motion-duration-fast);
+  --neoverse-duration-standard: var(--neoverse-motion-duration-standard);
+  --neoverse-duration-expressive: var(--neoverse-motion-duration-expressive);
+  --neoverse-ease-linear: var(--neoverse-motion-easing-linear);
+  --neoverse-ease-standard: var(--neoverse-motion-easing-standard);
+  --neoverse-ease-emphasized: var(--neoverse-motion-easing-emphasized);
+}
+
+@utility duration-* {
+  --tw-duration: --value(--neoverse-duration-*);
+
+  transition-duration: var(--tw-duration);
+}
+
+@utility ease-* {
+  --tw-ease: --value(--neoverse-ease-*);
+
+  transition-timing-function: var(--tw-ease);
+}
+
+@utility material-glass-subtle {
+  --neoverse-material-background: var(--neoverse-material-glass-subtle-background);
+  --neoverse-material-background-fallback: var(
+    --neoverse-material-glass-subtle-background-fallback
+  );
+  --neoverse-material-transparency: var(--neoverse-material-glass-subtle-transparency);
+  --neoverse-material-blur: var(--neoverse-material-glass-subtle-blur);
+  --neoverse-material-saturation: var(--neoverse-material-glass-subtle-saturation);
+  --neoverse-material-border: var(--neoverse-material-glass-subtle-border);
+  --neoverse-material-border-width: var(--neoverse-material-glass-subtle-border-width);
+  --neoverse-material-edge-highlight: var(--neoverse-material-glass-subtle-edge-highlight);
+  --neoverse-material-shadow: var(--neoverse-material-glass-subtle-shadow);
+  --neoverse-material-refraction-gradient: var(
+    --neoverse-material-glass-subtle-refraction-gradient
+  );
+}
+
+@utility material-glass-elevated {
+  --neoverse-material-background: var(--neoverse-material-glass-elevated-background);
+  --neoverse-material-background-fallback: var(
+    --neoverse-material-glass-elevated-background-fallback
+  );
+  --neoverse-material-transparency: var(--neoverse-material-glass-elevated-transparency);
+  --neoverse-material-blur: var(--neoverse-material-glass-elevated-blur);
+  --neoverse-material-saturation: var(--neoverse-material-glass-elevated-saturation);
+  --neoverse-material-border: var(--neoverse-material-glass-elevated-border);
+  --neoverse-material-border-width: var(--neoverse-material-glass-elevated-border-width);
+  --neoverse-material-edge-highlight: var(--neoverse-material-glass-elevated-edge-highlight);
+  --neoverse-material-shadow: var(--neoverse-material-glass-elevated-shadow);
+  --neoverse-material-refraction-gradient: var(
+    --neoverse-material-glass-elevated-refraction-gradient
+  );
+}
+
+@utility material-glass-immersive {
+  --neoverse-material-background: var(--neoverse-material-glass-immersive-background);
+  --neoverse-material-background-fallback: var(
+    --neoverse-material-glass-immersive-background-fallback
+  );
+  --neoverse-material-transparency: var(--neoverse-material-glass-immersive-transparency);
+  --neoverse-material-blur: var(--neoverse-material-glass-immersive-blur);
+  --neoverse-material-saturation: var(--neoverse-material-glass-immersive-saturation);
+  --neoverse-material-border: var(--neoverse-material-glass-immersive-border);
+  --neoverse-material-border-width: var(--neoverse-material-glass-immersive-border-width);
+  --neoverse-material-edge-highlight: var(--neoverse-material-glass-immersive-edge-highlight);
+  --neoverse-material-shadow: var(--neoverse-material-glass-immersive-shadow);
+  --neoverse-material-refraction-gradient: var(
+    --neoverse-material-glass-immersive-refraction-gradient
+  );
+}
+
+/* stylelint-disable property-no-vendor-prefix */
+@layer utilities {
+  .duration-fast {
+    transition-duration: var(--neoverse-motion-duration-fast);
+  }
+
+  .duration-standard {
+    transition-duration: var(--neoverse-motion-duration-standard);
+  }
+
+  .duration-expressive {
+    transition-duration: var(--neoverse-motion-duration-expressive);
+  }
+
+  .ease-linear {
+    transition-timing-function: var(--neoverse-motion-easing-linear);
+  }
+
+  .ease-standard {
+    transition-timing-function: var(--neoverse-motion-easing-standard);
+  }
+
+  .ease-emphasized {
+    transition-timing-function: var(--neoverse-motion-easing-emphasized);
+  }
+
+  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+    background-color: var(--neoverse-material-background-fallback);
+    background-image: none;
+    border: var(--neoverse-material-border-width) var(--neoverse-border-style-solid)
+      var(--neoverse-material-border);
+    box-shadow: var(--neoverse-material-edge-highlight), var(--neoverse-material-shadow);
+    isolation: isolate;
+    transition:
+      background-color var(--neoverse-motion-duration-standard)
+      var(--neoverse-motion-easing-emphasized),
+      border-color var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-emphasized),
+      box-shadow var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-emphasized);
+  }
+
+  @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) and
+    (background-color: color-mix(in srgb, white 50%, transparent)) {
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+      background-color: color-mix(
+        in srgb,
+        var(--neoverse-material-background) var(--neoverse-material-transparency),
+        transparent
+      );
+      background-image: var(--neoverse-material-refraction-gradient);
+      -webkit-backdrop-filter: blur(var(--neoverse-material-blur))
+        saturate(var(--neoverse-material-saturation));
+      backdrop-filter: blur(var(--neoverse-material-blur))
+        saturate(var(--neoverse-material-saturation));
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+      background-color: var(--neoverse-material-background-fallback);
+      background-image: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+
+  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+    background-color: var(--neoverse-color-surface-raised);
+    background-image: none;
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-color-border-default);
+    box-shadow: var(--neoverse-shadow-raised);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+/* stylelint-enable property-no-vendor-prefix */
+
+@layer base {
+  body {
+    background-color: var(--neoverse-color-surface-canvas);
+    color: var(--neoverse-color-text-primary);
+    font-family: var(--neoverse-font-family-sans);
+    font-size: var(--neoverse-typography-body-size);
+    line-height: var(--neoverse-typography-body-line-height);
+    font-weight: var(--neoverse-typography-body-weight);
+    letter-spacing: var(--neoverse-typography-body-letter-spacing);
+  }
+}

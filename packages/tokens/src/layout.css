@@ -1,0 +1,18 @@
+@layer neoverse.tokens {
+  :root {
+    --neoverse-layout-container-sm: 40rem;
+    --neoverse-layout-container-md: 48rem;
+    --neoverse-layout-container-lg: 64rem;
+    --neoverse-layout-container-xl: 80rem;
+    --neoverse-layout-container-2xl: 88rem;
+    --neoverse-layout-gutter-inline: clamp(1rem, 4vw, 4rem);
+    --neoverse-layout-gutter-block: clamp(1.25rem, 3.5vh, 3rem);
+    --neoverse-layout-grid-gap: var(--neoverse-space-4);
+    --neoverse-layout-layer-base: 0;
+    --neoverse-layout-layer-raised: 10;
+    --neoverse-layout-layer-sticky: 20;
+    --neoverse-layout-layer-overlay: 30;
+    --neoverse-layout-layer-modal: 40;
+    --neoverse-layout-layer-toast: 50;
+  }
+}

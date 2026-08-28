@@ -1,0 +1,24 @@
+{
+  "name": "@neoverse-ui/playground",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun run src/index.ts",
+    "build:client": "vite build",
+    "build": "bun run build:client && bun build ./src/index.ts --outdir ./dist --target bun --sourcemap",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "@neoverse-ui/motion": "workspace:*",
+    "@neoverse-ui/tailwind": "workspace:*",
+    "@neoverse-ui/tokens": "workspace:*",
+    "@neoverse-ui/vue": "workspace:*",
+    "vue": "^3.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.8",
+    "vite": "^8.2.2",
+    "vue-tsc": "^3.3.11"
+  }
+}

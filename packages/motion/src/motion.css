@@ -1,0 +1,28 @@
+@import '@neoverse-ui/tokens/css';
+
+@layer neoverse-motion {
+  :root {
+    --neoverse-motion-micro-duration: var(--neoverse-motion-duration-fast);
+    --neoverse-motion-micro-easing: var(--neoverse-motion-easing-standard);
+    --neoverse-motion-micro-property: color, background-color, border-color, opacity, transform;
+
+    --neoverse-motion-state-duration: var(--neoverse-motion-duration-standard);
+    --neoverse-motion-state-easing: var(--neoverse-motion-easing-standard);
+    --neoverse-motion-state-property: opacity, visibility, color, background-color, border-color;
+
+    --neoverse-motion-spatial-duration: var(--neoverse-motion-duration-expressive);
+    --neoverse-motion-spatial-easing: var(--neoverse-motion-easing-emphasized);
+    --neoverse-motion-spatial-property: transform, opacity;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :root {
+      --neoverse-motion-duration-fast: 1ms;
+      --neoverse-motion-duration-standard: 1ms;
+      --neoverse-motion-duration-expressive: 1ms;
+      --neoverse-motion-easing-standard: step-end;
+      --neoverse-motion-easing-emphasized: step-end;
+      --neoverse-motion-spatial-distance: 0px;
+    }
+  }
+}

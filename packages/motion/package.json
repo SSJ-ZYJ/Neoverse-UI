@@ -1,0 +1,27 @@
+{
+  "name": "@neoverse-ui/motion",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./css": "./dist/motion.css"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "bun run build:css && tsc --project tsconfig.build.json",
+    "build:css": "bun ./scripts/copy-css.ts",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "test": "bun run --filter @neoverse-ui/tokens build && bun run build:css && bun ./scripts/assert-css.ts && bun test src/index.test.ts"
+  },
+  "dependencies": {
+    "@neoverse-ui/tokens": "workspace:*"
+  }
+}

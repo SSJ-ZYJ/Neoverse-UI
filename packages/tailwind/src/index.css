@@ -1,0 +1,5 @@
+@import 'tailwindcss' source('../../../apps/playground/src');
+@import './theme.css';
+
+@source '../../vue/src';
+@source '../../react/src';

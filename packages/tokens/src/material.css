@@ -1,0 +1,123 @@
+@layer neoverse.tokens {
+  :root {
+    --neoverse-material-transparency-opaque: 100%;
+    --neoverse-material-transparency-subtle: 100%;
+    --neoverse-material-transparency-elevated: 100%;
+    --neoverse-material-transparency-immersive: 100%;
+
+    --neoverse-material-blur-none: 0px;
+    --neoverse-material-blur-sm: 12px;
+    --neoverse-material-blur-md: 16px;
+    --neoverse-material-blur-lg: 28px;
+
+    --neoverse-material-saturation-normal: 100%;
+    --neoverse-material-saturation-subtle: 110%;
+    --neoverse-material-saturation-elevated: 145%;
+    --neoverse-material-saturation-immersive: 165%;
+
+    --neoverse-material-edge-highlight-none: none;
+    --neoverse-material-edge-highlight-subtle: inset 0 1px 0 rgb(255 255 255 / 4%);
+    --neoverse-material-edge-highlight-elevated: inset 0 1px 0 rgb(255 255 255 / 4%);
+    --neoverse-material-edge-highlight-immersive: inset 0 1px 0 rgb(255 255 255 / 8%);
+
+    --neoverse-material-refraction-gradient-none: none;
+    --neoverse-material-refraction-gradient-subtle: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent),
+      transparent 42%,
+      color-mix(in srgb, var(--neoverse-color-accent-soft) 12%, transparent)
+    );
+    --neoverse-material-refraction-gradient-immersive: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--neoverse-color-text-primary) 10%, transparent),
+      transparent 42%,
+      color-mix(in srgb, var(--neoverse-color-accent-soft) 18%, transparent)
+    );
+
+    --neoverse-material-surface-solid-background: var(--neoverse-color-surface-canvas);
+    --neoverse-material-surface-solid-background-fallback: var(--neoverse-color-surface-canvas);
+    --neoverse-material-surface-solid-transparency: var(--neoverse-material-transparency-opaque);
+    --neoverse-material-surface-solid-blur: var(--neoverse-material-blur-none);
+    --neoverse-material-surface-solid-saturation: var(--neoverse-material-saturation-normal);
+    --neoverse-material-surface-solid-border: var(--neoverse-color-border-subtle);
+    --neoverse-material-surface-solid-border-width: var(--neoverse-border-width-thin);
+    --neoverse-material-surface-solid-edge-highlight: var(--neoverse-material-edge-highlight-none);
+    --neoverse-material-surface-solid-shadow: var(--neoverse-shadow-none);
+    --neoverse-material-surface-solid-refraction-gradient: var(
+      --neoverse-material-refraction-gradient-none
+    );
+
+    --neoverse-material-surface-subtle-background: var(--neoverse-color-surface-subtle);
+    --neoverse-material-surface-subtle-background-fallback: var(--neoverse-color-surface-subtle);
+    --neoverse-material-surface-subtle-transparency: var(--neoverse-material-transparency-opaque);
+    --neoverse-material-surface-subtle-blur: var(--neoverse-material-blur-none);
+    --neoverse-material-surface-subtle-saturation: var(--neoverse-material-saturation-normal);
+    --neoverse-material-surface-subtle-border: var(--neoverse-color-border-subtle);
+    --neoverse-material-surface-subtle-border-width: var(--neoverse-border-width-thin);
+    --neoverse-material-surface-subtle-edge-highlight: var(--neoverse-material-edge-highlight-none);
+    --neoverse-material-surface-subtle-shadow: var(--neoverse-shadow-none);
+    --neoverse-material-surface-subtle-refraction-gradient: var(
+      --neoverse-material-refraction-gradient-none
+    );
+
+    --neoverse-material-surface-elevated-background: var(--neoverse-color-surface-raised);
+    --neoverse-material-surface-elevated-background-fallback: var(--neoverse-color-surface-raised);
+    --neoverse-material-surface-elevated-transparency: var(--neoverse-material-transparency-opaque);
+    --neoverse-material-surface-elevated-blur: var(--neoverse-material-blur-none);
+    --neoverse-material-surface-elevated-saturation: var(--neoverse-material-saturation-normal);
+    --neoverse-material-surface-elevated-border: var(--neoverse-color-border-default);
+    --neoverse-material-surface-elevated-border-width: var(--neoverse-border-width-thin);
+    --neoverse-material-surface-elevated-edge-highlight: var(
+      --neoverse-material-edge-highlight-subtle
+    );
+    --neoverse-material-surface-elevated-shadow: var(--neoverse-shadow-raised);
+    --neoverse-material-surface-elevated-refraction-gradient: var(
+      --neoverse-material-refraction-gradient-none
+    );
+
+    --neoverse-material-glass-subtle-background: var(--neoverse-color-surface-subtle);
+    --neoverse-material-glass-subtle-background-fallback: var(--neoverse-color-surface-raised);
+    --neoverse-material-glass-subtle-transparency: var(--neoverse-material-transparency-subtle);
+    --neoverse-material-glass-subtle-blur: var(--neoverse-material-blur-sm);
+    --neoverse-material-glass-subtle-saturation: var(--neoverse-material-saturation-subtle);
+    --neoverse-material-glass-subtle-border: var(--neoverse-color-border-subtle);
+    --neoverse-material-glass-subtle-border-width: var(--neoverse-border-width-thin);
+    --neoverse-material-glass-subtle-edge-highlight: var(--neoverse-material-edge-highlight-subtle);
+    --neoverse-material-glass-subtle-shadow: var(--neoverse-shadow-raised);
+    --neoverse-material-glass-subtle-refraction-gradient: var(
+      --neoverse-material-refraction-gradient-subtle
+    );
+
+    --neoverse-material-glass-elevated-background: var(--neoverse-color-surface-glass);
+    --neoverse-material-glass-elevated-background-fallback: var(--neoverse-color-surface-raised);
+    --neoverse-material-glass-elevated-transparency: var(--neoverse-material-transparency-elevated);
+    --neoverse-material-glass-elevated-blur: var(--neoverse-material-blur-lg);
+    --neoverse-material-glass-elevated-saturation: var(--neoverse-material-saturation-elevated);
+    --neoverse-material-glass-elevated-border: var(--neoverse-color-border-subtle);
+    --neoverse-material-glass-elevated-border-width: var(--neoverse-border-width-thin);
+    --neoverse-material-glass-elevated-edge-highlight: var(
+      --neoverse-material-edge-highlight-elevated
+    );
+    --neoverse-material-glass-elevated-shadow: var(--neoverse-shadow-card);
+    --neoverse-material-glass-elevated-refraction-gradient: var(
+      --neoverse-material-refraction-gradient-subtle
+    );
+
+    --neoverse-material-glass-immersive-background: var(--neoverse-color-surface-glass);
+    --neoverse-material-glass-immersive-background-fallback: var(--neoverse-color-surface-raised);
+    --neoverse-material-glass-immersive-transparency: var(
+      --neoverse-material-transparency-immersive
+    );
+    --neoverse-material-glass-immersive-blur: 36px;
+    --neoverse-material-glass-immersive-saturation: var(--neoverse-material-saturation-immersive);
+    --neoverse-material-glass-immersive-border: var(--neoverse-color-border-default);
+    --neoverse-material-glass-immersive-border-width: var(--neoverse-border-width-thin);
+    --neoverse-material-glass-immersive-edge-highlight: var(
+      --neoverse-material-edge-highlight-immersive
+    );
+    --neoverse-material-glass-immersive-shadow: var(--neoverse-shadow-overlay);
+    --neoverse-material-glass-immersive-refraction-gradient: var(
+      --neoverse-material-refraction-gradient-immersive
+    );
+  }
+}

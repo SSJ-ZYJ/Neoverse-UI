@@ -1,0 +1,13 @@
+@layer neoverse.tokens {
+  :root {
+    --neoverse-motion-duration-fast: 180ms;
+    --neoverse-motion-duration-standard: 360ms;
+    --neoverse-motion-duration-expressive: 760ms;
+
+    --neoverse-motion-easing-linear: linear;
+    --neoverse-motion-easing-standard: cubic-bezier(0.22, 1, 0.36, 1);
+    --neoverse-motion-easing-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+
+    --neoverse-motion-spatial-distance: var(--neoverse-space-4);
+  }
+}

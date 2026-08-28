@@ -1,0 +1,32 @@
+@layer neoverse.tokens {
+  :root {
+    --neoverse-typography-display-size: clamp(2.5rem, 5.6vw, 4.8rem);
+    --neoverse-typography-display-line-height: var(--neoverse-line-height-tight);
+    --neoverse-typography-display-weight: var(--neoverse-font-weight-display);
+    --neoverse-typography-display-letter-spacing: -0.065em;
+    --neoverse-typography-heading-size: clamp(2rem, 4vw, 3rem);
+    --neoverse-typography-heading-line-height: var(--neoverse-line-height-tight);
+    --neoverse-typography-heading-weight: var(--neoverse-font-weight-bold);
+    --neoverse-typography-heading-letter-spacing: var(--neoverse-letter-spacing-tight);
+    --neoverse-typography-subtitle-size: clamp(1rem, 1.55vw, 1.25rem);
+    --neoverse-typography-subtitle-line-height: var(--neoverse-line-height-snug);
+    --neoverse-typography-subtitle-weight: var(--neoverse-font-weight-semibold);
+    --neoverse-typography-subtitle-letter-spacing: var(--neoverse-letter-spacing-normal);
+    --neoverse-typography-body-size: var(--neoverse-font-size-md);
+    --neoverse-typography-body-line-height: var(--neoverse-line-height-normal);
+    --neoverse-typography-body-weight: var(--neoverse-font-weight-regular);
+    --neoverse-typography-body-letter-spacing: var(--neoverse-letter-spacing-normal);
+    --neoverse-typography-label-size: var(--neoverse-font-size-sm);
+    --neoverse-typography-label-line-height: var(--neoverse-line-height-snug);
+    --neoverse-typography-label-weight: var(--neoverse-font-weight-semibold);
+    --neoverse-typography-label-letter-spacing: var(--neoverse-letter-spacing-normal);
+    --neoverse-typography-caption-size: var(--neoverse-font-size-xs);
+    --neoverse-typography-caption-line-height: var(--neoverse-line-height-normal);
+    --neoverse-typography-caption-weight: var(--neoverse-font-weight-regular);
+    --neoverse-typography-caption-letter-spacing: var(--neoverse-letter-spacing-normal);
+    --neoverse-typography-code-size: var(--neoverse-font-size-sm);
+    --neoverse-typography-code-line-height: var(--neoverse-line-height-normal);
+    --neoverse-typography-code-weight: var(--neoverse-font-weight-regular);
+    --neoverse-typography-code-letter-spacing: var(--neoverse-letter-spacing-normal);
+  }
+}

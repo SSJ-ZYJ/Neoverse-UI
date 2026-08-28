@@ -1,0 +1,30 @@
+{
+  "name": "@neoverse-ui/tailwind",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": "./dist/index.css",
+    "./index.css": "./dist/index.css",
+    "./theme.css": "./dist/theme.css"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "bun run build:theme && tailwindcss -i ./src/index.css -o ./dist/index.css --minify",
+    "build:theme": "bun ./scripts/copy-theme.ts",
+    "dev": "bun run build:theme && tailwindcss -i ./src/index.css -o ./dist/index.css --watch",
+    "test": "bun run --filter @neoverse-ui/tokens build && bun run --filter @neoverse-ui/motion build && bun run build:theme && tailwindcss -i ./src/contract.css -o ./dist/contract.css --minify && bun ./scripts/assert-contract.ts"
+  },
+  "dependencies": {
+    "@neoverse-ui/motion": "workspace:*",
+    "@neoverse-ui/tokens": "workspace:*"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "4.3.3",
+    "tailwindcss": "4.3.3"
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "name": "@neoverse-ui/react",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Reserved integration boundary for future React adapters."
+}
