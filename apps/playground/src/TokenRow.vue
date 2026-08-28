@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { onMounted, ref } from 'vue';
 import type { Locale, LocalizedText } from './playground-content';
 import { localize } from './playground-content';
 
@@ -13,6 +14,37 @@ interface TokenRowProps {
 }
 
 const props = defineProps<TokenRowProps>();
+const swatchElement = ref<HTMLElement | null>(null);
+const resolvedColor = ref('');
+
+function formatResolvedColor(value: string): string {
+  const match = /^rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)$/.exec(value);
+  if (match === null) {
+    return value;
+  }
+
+  const alpha = match[4];
+  if (alpha !== undefined && Number(alpha) === 0) {
+    return 'transparent';
+  }
+
+  if (alpha === undefined || Number(alpha) >= 1) {
+    const toHex = (channel: string | undefined): string =>
+      Number(channel).toString(16).padStart(2, '0');
+    return `#${toHex(match[1])}${toHex(match[2])}${toHex(match[3])}`;
+  }
+
+  const roundedAlpha = Math.round(Number(alpha) * 100) / 100;
+  return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${roundedAlpha})`;
+}
+
+onMounted(() => {
+  if (props.preview !== 'color' || swatchElement.value === null) {
+    return;
+  }
+
+  resolvedColor.value = formatResolvedColor(getComputedStyle(swatchElement.value).backgroundColor);
+});
 </script>
 
 <template>
@@ -21,6 +53,7 @@ const props = defineProps<TokenRowProps>();
   >
     <span
       v-if="props.preview === 'color'"
+      ref="swatchElement"
       class="size-10 shrink-0 rounded-control border border-default"
       :style="{ backgroundColor: `var(${props.variable})` }"
     />
@@ -66,5 +99,11 @@ const props = defineProps<TokenRowProps>();
         {{ props.className }}
       </code>
     </span>
+    <code
+      v-if="props.preview === 'color' && resolvedColor.length > 0"
+      class="ml-auto shrink-0 text-code text-secondary"
+    >
+      {{ resolvedColor }}
+    </code>
   </div>
 </template>
