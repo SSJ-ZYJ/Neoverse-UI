@@ -435,13 +435,17 @@ export const moduleCopy = {
   skeleton: {
     label: localized('Skeleton', '骨架屏'),
     description: localized(
-      'Real placeholder shapes; motion-safe pulse stops under prefers-reduced-motion.',
-      '真实的占位形状；在 prefers-reduced-motion 下停止脉冲动效。',
+      'Neutral placeholder surfaces with shimmer, pulse, edge highlight, and reduced-motion support.',
+      '中性占位表面提供 shimmer、pulse、边缘高光，并支持 reduced-motion。',
     ),
     controls: {
       text: localized('Text', '文本'),
+      title: localized('Title', '标题'),
       rect: localized('Rect', '矩形'),
+      avatar: localized('Avatar', '头像'),
       circle: localized('Circle', '圆形'),
+      pulse: localized('Pulse', '脉冲'),
+      static: localized('Static', '静态'),
     },
     body: localized(
       'Skeleton is aria-hidden by default; the loading relationship belongs to the surrounding content container.',

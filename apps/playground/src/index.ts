@@ -10,6 +10,7 @@ const port = Number.parseInt(process.env.PORT ?? '3000', 10);
 const liveReload = process.env.LIVE_RELOAD === '1';
 const stylesheet = Bun.file(new URL('../../../packages/tailwind/dist/index.css', import.meta.url));
 const clientBundle = Bun.file(new URL('../dist/assets/playground.js', import.meta.url));
+const materialBackground = Bun.file(new URL('../dist/assets/material-background.png', import.meta.url));
 
 const isFrameTheme = (value: string | null): value is FrameTheme =>
   value === 'light' || value === 'dark';
@@ -69,7 +70,11 @@ const missingAssetResponse = (asset: string, locale: Locale): Response =>
     },
   });
 const ensureDesignLabAssets = async (locale: Locale): Promise<Response | undefined> => {
-  if (!(await stylesheet.exists()) || !(await clientBundle.exists())) {
+  if (
+    !(await stylesheet.exists()) ||
+    !(await clientBundle.exists()) ||
+    !(await materialBackground.exists())
+  ) {
     return missingAssetResponse(localize(appCopy.server.assetsLabel, locale), locale);
   }
 
@@ -115,6 +120,19 @@ const server = Bun.serve({
         headers: {
           'cache-control': 'no-cache',
           'content-type': 'text/javascript; charset=utf-8',
+        },
+      });
+    }
+
+    if (url.pathname === '/material-background.png') {
+      if (!(await materialBackground.exists())) {
+        return missingAssetResponse('/material-background.png', locale);
+      }
+
+      return new Response(materialBackground, {
+        headers: {
+          'cache-control': 'no-cache',
+          'content-type': 'image/png',
         },
       });
     }
