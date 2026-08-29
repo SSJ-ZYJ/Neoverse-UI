@@ -8,9 +8,9 @@ type RenderOptions = {
 
 const port = Number.parseInt(process.env.PORT ?? '3000', 10);
 const liveReload = process.env.LIVE_RELOAD === '1';
-const stylesheet = Bun.file(new URL('../../../packages/tailwind/dist/index.css', import.meta.url));
-const clientBundle = Bun.file(new URL('../dist/assets/playground.js', import.meta.url));
-const materialBackground = Bun.file(new URL('../dist/assets/material-background.png', import.meta.url));
+const stylesheetPath = new URL('../../../packages/tailwind/dist/index.css', import.meta.url);
+const clientBundlePath = new URL('../dist/assets/playground.js', import.meta.url);
+const materialBackgroundPath = new URL('../dist/assets/material-background.png', import.meta.url);
 
 const isFrameTheme = (value: string | null): value is FrameTheme =>
   value === 'light' || value === 'dark';
@@ -70,6 +70,10 @@ const missingAssetResponse = (asset: string, locale: Locale): Response =>
     },
   });
 const ensureDesignLabAssets = async (locale: Locale): Promise<Response | undefined> => {
+  const stylesheet = Bun.file(stylesheetPath);
+  const clientBundle = Bun.file(clientBundlePath);
+  const materialBackground = Bun.file(materialBackgroundPath);
+
   if (
     !(await stylesheet.exists()) ||
     !(await clientBundle.exists()) ||
@@ -89,6 +93,7 @@ const server = Bun.serve({
     const locale: Locale = isLocale(queryLocale) ? queryLocale : 'en';
 
     if (url.pathname === '/styles.css') {
+      const stylesheet = Bun.file(stylesheetPath);
       if (!(await stylesheet.exists())) {
         return missingAssetResponse('/styles.css', locale);
       }
@@ -102,6 +107,8 @@ const server = Bun.serve({
     }
 
     if (liveReload && url.pathname === '/__live') {
+      const stylesheet = Bun.file(stylesheetPath);
+      const clientBundle = Bun.file(clientBundlePath);
       const [cssStat, jsStat] = await Promise.all([stylesheet.stat(), clientBundle.stat()]);
       return new Response(JSON.stringify({ css: cssStat.mtimeMs, js: jsStat.mtimeMs }), {
         headers: {
@@ -112,6 +119,7 @@ const server = Bun.serve({
     }
 
     if (url.pathname === '/assets/playground.js') {
+      const clientBundle = Bun.file(clientBundlePath);
       if (!(await clientBundle.exists())) {
         return missingAssetResponse('/assets/playground.js', locale);
       }
@@ -125,6 +133,7 @@ const server = Bun.serve({
     }
 
     if (url.pathname === '/material-background.png') {
+      const materialBackground = Bun.file(materialBackgroundPath);
       if (!(await materialBackground.exists())) {
         return missingAssetResponse('/material-background.png', locale);
       }
