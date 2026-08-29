@@ -1,0 +1,227 @@
+@layer components {
+  /* Button hierarchy follows the reference projects: primary is the only
+     filled accent CTA, secondary is a neutral refractive surface, and ghost
+     stays transparent until interaction. */
+  .ui-button--primary,
+  .ui-button--secondary {
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-color-border-subtle);
+  }
+
+  .ui-button--primary {
+    color: var(--neoverse-color-action-primary-foreground);
+    border-color: var(--neoverse-control-primary-border);
+    background: var(--neoverse-control-primary-background);
+    box-shadow: var(--neoverse-control-primary-shadow);
+  }
+
+  .ui-button--secondary {
+    color: var(--neoverse-color-text-secondary);
+    border-color: var(--neoverse-color-border-subtle);
+    background: var(--neoverse-control-secondary-background);
+    box-shadow: var(--neoverse-control-secondary-shadow);
+    -webkit-backdrop-filter: var(--neoverse-control-secondary-filter);
+    backdrop-filter: var(--neoverse-control-secondary-filter);
+  }
+
+  .ui-button--ghost {
+    color: var(--neoverse-color-text-muted);
+    background: transparent;
+  }
+
+  @media (hover: hover) {
+    .ui-button--primary:hover:not(:disabled) {
+      transform: translateY(-1px);
+    }
+
+    .ui-button--secondary:hover:not(:disabled) {
+      color: var(--neoverse-color-text-primary);
+      background: var(--neoverse-control-secondary-hover-background);
+      box-shadow: var(--neoverse-control-secondary-hover-shadow);
+    }
+
+    .ui-button--ghost:hover:not(:disabled) {
+      color: var(--neoverse-color-text-primary);
+      background: var(--neoverse-control-hover-background);
+    }
+  }
+
+  .ui-button--primary:active:not(:disabled),
+  .ui-button--secondary:active:not(:disabled),
+  .ui-button--ghost:active:not(:disabled) {
+    transform: translateY(0) scale(0.99);
+  }
+
+  .ui-button--ghost:active:not(:disabled) {
+    color: var(--neoverse-color-accent-secondary);
+    background: var(--neoverse-control-active-background);
+  }
+
+  /* Compact controls share one refractive outer surface and one moving active
+     layer. Individual options stay transparent so the group reads as a single
+     control, matching the product segmented controls. */
+  .ui-segmented-control {
+    position: relative;
+    max-width: 100%;
+    overflow: hidden;
+  }
+
+  .ui-segmented-control__options {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    grid-template-columns: repeat(var(--segment-count), minmax(0, 1fr));
+    align-items: stretch;
+    gap: 0.24rem;
+  }
+
+  .ui-segmented-control__slider {
+    position: absolute;
+    z-index: 0;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: calc((100% - (var(--segment-count) - 1) * 0.24rem) / var(--segment-count));
+    border-radius: calc(var(--neoverse-radius-control) - 0.18rem);
+    background: var(--neoverse-control-active-background);
+    box-shadow: var(--neoverse-control-active-highlight), var(--neoverse-control-active-shadow);
+    pointer-events: none;
+    transform: translateX(calc(var(--segment-index) * (100% + 0.24rem)));
+    transition: transform var(--neoverse-motion-duration-standard)
+      var(--neoverse-motion-easing-emphasized);
+    will-change: transform;
+  }
+
+  .ui-segmented-control__option {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    min-width: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: calc(var(--neoverse-radius-control) - 0.18rem);
+    background: transparent;
+    color: var(--neoverse-color-text-secondary);
+    cursor: pointer;
+    line-height: 1;
+    white-space: nowrap;
+    transition:
+      background-color var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
+      color var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
+      transform var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
+  }
+
+  .ui-segmented-control__option--active {
+    color: var(--neoverse-color-text-primary);
+  }
+
+  @media (hover: hover) {
+    .ui-segmented-control__option:not(.ui-segmented-control__option--active):hover:not(:disabled) {
+      background: var(--neoverse-control-hover-background);
+      color: var(--neoverse-color-text-primary);
+    }
+  }
+
+  .ui-segmented-control__option:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .ui-segmented-control__option:disabled {
+    cursor: not-allowed;
+  }
+
+  .ui-segmented-control[aria-disabled='true'] {
+    opacity: 0.62;
+  }
+
+  .ui-segmented-control__loading {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    color: var(--neoverse-color-text-secondary);
+  }
+
+  /* Skeleton surfaces use a neutral base, a directional sheen, and a subtle
+     top edge. The component variant classes only control geometry. */
+  .ui-skeleton,
+  .skeleton-surface {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-height: 0.86rem;
+    overflow: hidden;
+    background: var(--neoverse-skeleton-fill);
+    box-shadow: var(--neoverse-skeleton-edge);
+  }
+
+  .ui-skeleton--text {
+    min-height: 0.86rem;
+  }
+
+  .ui-skeleton--title {
+    min-height: 1.15rem;
+    border-radius: var(--neoverse-radius-xs);
+  }
+
+  .ui-skeleton--avatar,
+  .ui-skeleton--circle {
+    min-height: 0;
+  }
+
+  .ui-skeleton--rect {
+    border-radius: var(--ui-skeleton-radius, var(--neoverse-radius-xs));
+  }
+
+  .ui-skeleton--shimmer::after,
+  .skeleton-surface::after {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 24%,
+      var(--neoverse-skeleton-highlight) 50%,
+      transparent 76%
+    );
+    content: '';
+    pointer-events: none;
+    transform: translateX(-100%);
+    animation: ui-skeleton-shimmer var(--neoverse-skeleton-shimmer-duration)
+      var(--neoverse-skeleton-shimmer-easing) infinite;
+  }
+
+  .ui-skeleton--pulse,
+  .skeleton-surface--pulse {
+    animation: ui-skeleton-pulse var(--neoverse-skeleton-shimmer-duration)
+      var(--neoverse-motion-easing-standard) infinite;
+  }
+
+  .ui-skeleton--static::after,
+  .skeleton-surface--static::after {
+    display: none;
+  }
+
+  @keyframes ui-skeleton-shimmer {
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes ui-skeleton-pulse {
+    50% {
+      opacity: 0.58;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-segmented-control__slider {
+      transition: none;
+    }
+
+    .ui-skeleton--shimmer::after,
+    .skeleton-surface::after,
+    .ui-skeleton--pulse,
+    .skeleton-surface--pulse {
+      animation: none;
+    }
+  }
+}

@@ -1,4 +1,5 @@
 @import '@neoverse-ui/motion/css';
+@import './components.css';
 
 @theme inline {
   --color-surface-canvas: var(--neoverse-color-surface-canvas);

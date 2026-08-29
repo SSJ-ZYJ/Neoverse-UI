@@ -86,9 +86,16 @@ try {
     '.focus-visible\\:ring-focus',
     '.focus-visible\\:ring-offset-2',
     '.hover\\:bg-action-primary-hover',
+    '.ui-button--primary',
+    '.ui-button--secondary',
+    '.ui-button--ghost',
     '.material-glass-subtle',
     '.material-glass-elevated',
     '.material-glass-immersive',
+    '.ui-segmented-control',
+    '.ui-segmented-control__slider',
+    '.ui-skeleton',
+    '.skeleton-surface',
     '.duration-fast',
     '.duration-standard',
     '.duration-expressive',
@@ -102,6 +109,7 @@ try {
   const expectedValues = [
     '--neoverse-color-surface-canvas',
     '--neoverse-color-text-primary',
+    '--neoverse-color-edge-light',
     '--neoverse-shadow-card',
     '--neoverse-radius-control',
     '--neoverse-layout-container-lg',
@@ -112,7 +120,9 @@ try {
     '--neoverse-material-refraction-gradient-immersive',
     '--neoverse-material-glass-subtle-background',
     '--neoverse-material-glass-immersive-background',
-    '--neoverse-material-transparency-subtle:100%',
+    '--neoverse-material-transparency-subtle:30%',
+    '--neoverse-material-transparency-elevated:20%',
+    '--neoverse-material-transparency-immersive:12%',
     '--neoverse-material-glass-elevated-background:var(--neoverse-color-surface-glass)',
     '--neoverse-motion-duration-fast',
     '--neoverse-motion-duration-standard',
@@ -122,6 +132,11 @@ try {
     '--neoverse-motion-micro-property',
     '--neoverse-motion-duration-fast:1ms',
     '--neoverse-motion-spatial-distance:0px',
+    '--neoverse-control-active-background',
+    '--neoverse-control-primary-background',
+    '--neoverse-control-secondary-background',
+    '--neoverse-control-secondary-filter',
+    '--neoverse-skeleton-fill',
   ];
   const missingValues = expectedValues.filter((value) => !css.includes(value));
   const expectedFragments = [
@@ -134,6 +149,14 @@ try {
     ':is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive){background-color:var(--neoverse-color-surface-raised)',
     'transition-duration:var(--tw-duration)',
     'transition-timing-function:var(--tw-ease)',
+    '@keyframes ui-skeleton-shimmer',
+    'transform:translateX(calc(var(--segment-index)',
+    '.ui-button--primary{',
+    '.ui-button--secondary{',
+    '.ui-button--ghost{',
+    'background:var(--neoverse-control-primary-background)',
+    'background:var(--neoverse-control-secondary-background)',
+    'backdrop-filter:var(--neoverse-control-secondary-filter)',
   ];
   const missingFragments = expectedFragments.filter((fragment) => !css.includes(fragment));
 
