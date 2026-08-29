@@ -7,11 +7,33 @@ type RenderOptions = {
 };
 
 const port = Number.parseInt(process.env.PORT ?? '3000', 10);
+const liveReload = process.env.LIVE_RELOAD === '1';
 const stylesheet = Bun.file(new URL('../../../packages/tailwind/dist/index.css', import.meta.url));
 const clientBundle = Bun.file(new URL('../dist/assets/playground.js', import.meta.url));
 
 const isFrameTheme = (value: string | null): value is FrameTheme =>
   value === 'light' || value === 'dark';
+
+// Dev-only: reload the page when either served asset changes on disk.
+const liveReloadScript = liveReload
+  ? `<script>
+  (() => {
+    let version = null;
+    setInterval(() => {
+      fetch('/__live', { cache: 'no-store' })
+        .then((response) => response.json())
+        .then((next) => {
+          const key = String(next.css) + ':' + String(next.js);
+          if (version !== null && version !== key) {
+            location.reload();
+          }
+          version = key;
+        })
+        .catch(() => {});
+    }, 500);
+  })();
+</script>`
+  : '';
 
 const renderDocument = ({ theme, locale }: RenderOptions): string => {
   const title =
@@ -33,6 +55,7 @@ const renderDocument = ({ theme, locale }: RenderOptions): string => {
   <body class="min-h-screen bg-surface-canvas font-sans text-primary antialiased">
     <div id="app"></div>
     <script type="module" src="/assets/playground.js"></script>
+    ${liveReloadScript}
   </body>
 </html>`;
 };
@@ -69,6 +92,16 @@ const server = Bun.serve({
         headers: {
           'cache-control': 'no-cache',
           'content-type': 'text/css; charset=utf-8',
+        },
+      });
+    }
+
+    if (liveReload && url.pathname === '/__live') {
+      const [cssStat, jsStat] = await Promise.all([stylesheet.stat(), clientBundle.stat()]);
+      return new Response(JSON.stringify({ css: cssStat.mtimeMs, js: jsStat.mtimeMs }), {
+        headers: {
+          'cache-control': 'no-store',
+          'content-type': 'application/json; charset=utf-8',
         },
       });
     }

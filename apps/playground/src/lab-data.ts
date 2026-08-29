@@ -25,8 +25,27 @@ export interface NamedToken {
 }
 
 const color = cssVariables.color;
+const primitiveColorFamilies = ['neutral', 'blue', 'cyan', 'mint', 'red', 'amber', 'green'] as const;
+const primitiveColorGroup = (family: (typeof primitiveColorFamilies)[number]): TokenGroup<NamedToken> => ({
+  label: localized(family, family),
+  items: Object.entries(color.primitive[family]).map(([shade, variable]) => ({
+    label: localized(`${family}-${shade}`, `${family}-${shade}`),
+    variable,
+  })),
+});
 
-export const colorGroups: TokenGroup<ColorToken>[] = [
+export const primitiveColorGroups: TokenGroup<NamedToken>[] = [
+  ...primitiveColorFamilies.map(primitiveColorGroup),
+  {
+    label: localized('Utility', '实用'),
+    items: (['white', 'black', 'transparent'] as const).map((name) => ({
+      label: localized(name, name),
+      variable: color.primitive[name],
+    })),
+  },
+];
+
+export const semanticColorGroups: TokenGroup<ColorToken>[] = [
   {
     label: tokenCopy.colorGroups.surface,
     items: [
@@ -286,11 +305,11 @@ export const typographyTokens: TypographyToken[] = [
   },
 ];
 
-export const spacingTokens: NamedToken[] = Object.entries(cssVariables.space).map(
+export const primitiveSpacingTokens: NamedToken[] = Object.entries(cssVariables.space).map(
   ([label, variable]) => ({ label: localized(label, label), variable }),
 );
 
-export const spacingAliases = [
+export const semanticSpacingTokens = [
   {
     label: tokenCopy.spacing.inlineGutter,
     className: 'px-gutter-inline',
@@ -308,9 +327,20 @@ export const spacingAliases = [
   },
 ];
 
-export const radiusTokens: NamedToken[] = Object.entries(cssVariables.radius).map(
-  ([label, variable]) => ({ label: localized(label, label), variable }),
-);
+const radiusAliasNames = ['control', 'card', 'panel'];
+const radiusTokenEntries = Object.entries(cssVariables.radius);
+const toRadiusToken = ([label, variable]: [string, string]): NamedToken => ({
+  label: localized(label, label),
+  variable,
+});
+
+export const primitiveRadiusTokens: NamedToken[] = radiusTokenEntries
+  .filter(([label]) => !radiusAliasNames.includes(label))
+  .map(toRadiusToken);
+
+export const semanticRadiusTokens: NamedToken[] = radiusTokenEntries
+  .filter(([label]) => radiusAliasNames.includes(label))
+  .map(toRadiusToken);
 
 export const borderWidthTokens: NamedToken[] = Object.entries(cssVariables.border.width).map(
   ([label, variable]) => ({ label: localized(label, label), variable }),
@@ -320,9 +350,20 @@ export const borderStyleTokens: NamedToken[] = Object.entries(cssVariables.borde
   ([label, variable]) => ({ label: localized(label, label), variable }),
 );
 
-export const shadowTokens: NamedToken[] = Object.entries(cssVariables.shadow).map(
-  ([label, variable]) => ({ label: localized(label, label), variable }),
-);
+const shadowAliasNames = ['control', 'raised', 'card', 'overlay', 'modal'];
+const shadowTokenEntries = Object.entries(cssVariables.shadow);
+const toShadowToken = ([label, variable]: [string, string]): NamedToken => ({
+  label: localized(label, label),
+  variable,
+});
+
+export const primitiveShadowTokens: NamedToken[] = shadowTokenEntries
+  .filter(([label]) => !shadowAliasNames.includes(label))
+  .map(toShadowToken);
+
+export const semanticShadowTokens: NamedToken[] = shadowTokenEntries
+  .filter(([label]) => shadowAliasNames.includes(label))
+  .map(toShadowToken);
 
 export const surfaceSamples = [
   { label: tokenCopy.surface.canvas, className: 'bg-surface-canvas border border-subtle' },
@@ -343,6 +384,10 @@ export const glassVariantLabels: Record<(typeof glassVariants)[number], Localize
   elevated: tokenCopy.glassVariants.elevated,
   immersive: tokenCopy.glassVariants.immersive,
 };
+export const motionBaseGroups = [
+  { label: tokenCopy.motion.durations, values: motionDurations },
+  { label: tokenCopy.motion.easings, values: motionEasings },
+] as const;
 
 export const motionSamples = [
   {

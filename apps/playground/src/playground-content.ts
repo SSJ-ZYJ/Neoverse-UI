@@ -127,9 +127,23 @@ export const moduleCopy = {
   colors: {
     label: localized('Colors', '色彩'),
     description: localized(
-      'Semantic color roles from @neoverse-ui/tokens, shown with their Tailwind aliases.',
-      '来自 @neoverse-ui/tokens 的语义色彩角色，并以对应的 Tailwind 别名呈现。',
+      'Primitive color scales and semantic roles from @neoverse-ui/tokens.',
+      '来自 @neoverse-ui/tokens 的基础色彩刻度与语义角色。',
     ),
+    primitive: {
+      label: localized('Primitive color scales', '基础色彩刻度'),
+      description: localized(
+        'Primitive palettes provide neutral, blue, cyan, mint, red, amber, green, and utility colors.',
+        '基础色板提供 neutral、blue、cyan、mint、red、amber、green 与实用色。',
+      ),
+    },
+    aliases: {
+      label: localized('Semantic color roles', '语义色彩角色'),
+      description: localized(
+        'Semantic roles map surfaces, text, borders, accents, actions, statuses, focus, and overlay behavior to the primitive palette.',
+        '语义角色将表面、文本、边框、强调色、操作、状态、焦点与遮罩映射到基础色板。',
+      ),
+    },
   },
   typography: {
     label: localized('Typography', '字体排印'),
@@ -145,30 +159,86 @@ export const moduleCopy = {
   spacing: {
     label: localized('Spacing', '间距'),
     description: localized(
-      'The complete four-pixel spacing scale plus layout aliases used by the workspace.',
-      '完整的四像素间距刻度，以及工作区使用的布局别名。',
+      'Base spacing tokens and layout aliases used by the workspace.',
+      '工作区使用基础间距刻度与布局别名。',
     ),
+    primitive: {
+      label: localized('Base spacing scale', '基础间距刻度'),
+      description: localized(
+        'The four-pixel base scale runs from 0 through 32.',
+        '基础间距刻度采用 4px 节奏，从 0 到 32。',
+      ),
+    },
+    aliases: {
+      label: localized('Layout aliases', '布局别名'),
+      description: localized(
+        'Layout aliases: px-gutter-inline=responsive, py-gutter-block=responsive, gap-grid=space-4.',
+        '布局别名对应：px-gutter-inline=响应式、py-gutter-block=响应式、gap-grid=space-4。',
+      ),
+    },
   },
   radius: {
     label: localized('Radius', '圆角'),
     description: localized(
-      'Radius aliases are previewed from CSS variables without primitive geometry classes.',
-      '从 CSS 变量预览圆角别名，不依赖基础几何类。',
+      'Base radius tokens and semantic role aliases.',
+      '基础圆角刻度与语义角色别名。',
     ),
+    primitive: {
+      label: localized('Base radius scale', '基础圆角刻度'),
+      description: localized(
+        'The base scale defines none, xs, sm, md, lg, xl, 2xl, and pill.',
+        '基础刻度包含 none、xs、sm、md、lg、xl、2xl 与 pill。',
+      ),
+    },
+    aliases: {
+      label: localized('Semantic aliases', '语义别名'),
+      description: localized(
+        'Role aliases reuse the base scale: control=md, card=lg, panel=xl.',
+        '角色别名复用基础刻度：control=md、card=lg、panel=xl。',
+      ),
+    },
   },
   border: {
     label: localized('Border', '边框'),
     description: localized(
-      'Token-backed border widths, with the solid border style and default semantic color.',
-      '由令牌驱动的边框宽度，使用实线样式与默认语义色。',
+      'Token-backed border widths and styles. Width controls thickness; style controls the stroke pattern.',
+      '由令牌驱动的边框宽度与样式。宽度控制粗细，样式控制描边模式。',
     ),
+    width: {
+      label: localized('Border width', '边框宽度'),
+      description: localized(
+        'Controls stroke thickness while the solid style and default semantic border color stay fixed.',
+        '控制描边粗细，同时保持实线样式与默认语义边框色不变。',
+      ),
+    },
+    style: {
+      label: localized('Border style', '边框样式'),
+      description: localized(
+        'Controls the stroke pattern. This token set currently exposes solid only; the preview uses the strong width so the style remains visible.',
+        '控制描边模式。当前令牌集仅提供实线；预览使用强调宽度以确保样式清晰可见。',
+      ),
+    },
   },
   shadow: {
     label: localized('Shadow', '阴影'),
     description: localized(
-      'Depth aliases rendered against the raised surface.',
-      '在抬升表面上呈现深度别名。',
+      'Primitive depth tokens and semantic aliases, previewed on theme surfaces.',
+      '在主题表面上呈现基础深度令牌与语义别名。',
     ),
+    primitive: {
+      label: localized('Primitive shadows', '基础阴影'),
+      description: localized(
+        'Geometry tokens define the depth scale from none through inset.',
+        '几何令牌定义从 none 到 inset 的深度刻度。',
+      ),
+    },
+    aliases: {
+      label: localized('Semantic aliases', '语义别名'),
+      description: localized(
+        'Role aliases reuse the scale: control=xs, raised=sm, card=md, overlay=lg, modal=xl.',
+        '角色别名复用基础刻度：control=xs、raised=sm、card=md、overlay=lg、modal=xl。',
+      ),
+    },
   },
   surface: {
     label: localized('Surface', '表面'),
@@ -191,9 +261,23 @@ export const moduleCopy = {
   motion: {
     label: localized('Motion', '动效'),
     description: localized(
-      'Motion aliases are visible on hover and respect prefers-reduced-motion in the foundation CSS.',
-      '动效别名通过悬停可见，并在基础 CSS 中遵循 prefers-reduced-motion。',
+      'Base motion values and semantic transition aliases, shown with their CSS variables.',
+      '展示基础动效值与语义过渡别名，并列出对应 CSS 变量。',
     ),
+    primitive: {
+      label: localized('Base motion values', '基础动效值'),
+      description: localized(
+        'Base values define fast, standard, and expressive durations plus linear, standard, and emphasized easings.',
+        '基础值定义 fast、standard、expressive 时长，以及 linear、standard、emphasized 缓动。',
+      ),
+    },
+    aliases: {
+      label: localized('Semantic transitions', '语义过渡'),
+      description: localized(
+        'Transition aliases reuse base values: micro=fast+standard, state=standard+standard, spatial=expressive+emphasized.',
+        '过渡别名复用基础值：micro=fast+standard、state=standard+standard、spatial=expressive+emphasized。',
+      ),
+    },
     cssVariables: localized('{label} CSS variables', '{label} CSS 变量'),
   },
   button: {
@@ -438,6 +522,8 @@ export const tokenCopy = {
     immersive: localized('Immersive', '沉浸'),
   },
   motion: {
+    durations: localized('Durations', '时长'),
+    easings: localized('Easings', '缓动'),
     micro: localized('Micro', '微动效'),
     state: localized('State', '状态'),
     spatial: localized('Spatial', '空间'),

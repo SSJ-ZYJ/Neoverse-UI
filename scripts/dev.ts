@@ -1,16 +1,26 @@
 import { resolve } from 'node:path';
 
-const commands: Array<{ args: string[]; cwd: string }> = [
+const rootDirectory = resolve(import.meta.dir, '..');
+
+// Live dev loop:
+// 1. playground server (with browser auto-reload enabled)
+// 2. vite --watch, rebuilding the client bundle on source edits
+// 3. dev-watch orchestrator, rebuilding tokens/motion/tailwind CSS on edits
+const commands: Array<{ args: string[]; cwd: string; env?: Record<string, string> }> = [
   {
-    args: ['bun', 'run', 'dev'],
-    cwd: resolve(import.meta.dir, '../packages/tailwind'),
+    args: ['bun', 'run', 'src/index.ts'],
+    cwd: resolve(import.meta.dir, '../apps/playground'),
+    env: { LIVE_RELOAD: '1' },
   },
   {
-    args: ['bun', 'run', 'dev'],
+    args: ['bun', 'run', 'dev:client'],
     cwd: resolve(import.meta.dir, '../apps/playground'),
   },
+  {
+    args: ['bun', 'run', 'scripts/dev-watch.ts'],
+    cwd: rootDirectory,
+  },
 ];
-const rootDirectory = resolve(import.meta.dir, '..');
 
 const main = async (): Promise<void> => {
   const build = Bun.spawn(['bun', 'run', 'build'], {
@@ -24,9 +34,10 @@ const main = async (): Promise<void> => {
     process.exit(buildExitCode);
   }
 
-  const children = commands.map(({ args, cwd }) =>
+  const children = commands.map(({ args, cwd, env }) =>
     Bun.spawn(args, {
       cwd,
+      env: { ...process.env, ...env },
       stdin: 'inherit',
       stderr: 'inherit',
       stdout: 'inherit',
