@@ -90,7 +90,7 @@ describe('display components', () => {
 
     const glass = mount(UiGlassSurface, { props: { variant: 'immersive' } });
     expect(glass.classes()).toEqual(
-      expect.arrayContaining(['material-glass-immersive', 'rounded-panel', 'p-4']),
+      expect.arrayContaining(['material-glass-immersive', 'rounded-card', 'p-4']),
     );
 
     const card = mount(UiCard, { attrs: { class: 'max-w-container-sm' } });

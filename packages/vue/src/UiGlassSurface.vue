@@ -14,7 +14,7 @@ const materialClasses: Record<GlassSurfaceVariant, string> = {
 
 const classes = computed(() => [
   materialClasses[props.variant as GlassSurfaceVariant] ?? materialClasses.subtle,
-  'rounded-panel p-4',
+  'rounded-card p-4',
 ]);
 </script>
 

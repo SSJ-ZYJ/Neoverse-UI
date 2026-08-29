@@ -1,7 +1,7 @@
 @layer neoverse.tokens {
   :root {
-    --neoverse-color-white: #fff;
-    --neoverse-color-black: #000;
+    --neoverse-color-white: #ffffff;
+    --neoverse-color-black: #000000;
     --neoverse-color-transparent: transparent;
     --neoverse-color-neutral-50: #f8fafc;
     --neoverse-color-neutral-100: #f1f5f9;

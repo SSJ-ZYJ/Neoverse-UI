@@ -12,7 +12,7 @@
     --neoverse-typography-subtitle-line-height: var(--neoverse-line-height-snug);
     --neoverse-typography-subtitle-weight: var(--neoverse-font-weight-semibold);
     --neoverse-typography-subtitle-letter-spacing: var(--neoverse-letter-spacing-normal);
-    --neoverse-typography-body-size: var(--neoverse-font-size-md);
+    --neoverse-typography-body-size: 1rem;
     --neoverse-typography-body-line-height: var(--neoverse-line-height-normal);
     --neoverse-typography-body-weight: var(--neoverse-font-weight-regular);
     --neoverse-typography-body-letter-spacing: var(--neoverse-letter-spacing-normal);
@@ -24,7 +24,7 @@
     --neoverse-typography-caption-line-height: var(--neoverse-line-height-normal);
     --neoverse-typography-caption-weight: var(--neoverse-font-weight-regular);
     --neoverse-typography-caption-letter-spacing: var(--neoverse-letter-spacing-normal);
-    --neoverse-typography-code-size: var(--neoverse-font-size-sm);
+    --neoverse-typography-code-size: var(--neoverse-typography-body-size);
     --neoverse-typography-code-line-height: var(--neoverse-line-height-normal);
     --neoverse-typography-code-weight: var(--neoverse-font-weight-regular);
     --neoverse-typography-code-letter-spacing: var(--neoverse-letter-spacing-normal);
