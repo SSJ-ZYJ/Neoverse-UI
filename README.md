@@ -36,7 +36,7 @@ bun run format
 bun run check
 ```
 
-`bun run dev` starts the playground and Tailwind watch process together. The playground is served at `http://localhost:3000` by default.
+`bun run dev` starts the playground server (with browser auto-reload), a `vite --watch` build for the client bundle, and a source watcher that rebuilds the tokens/motion/tailwind stylesheets on change. The playground is served at `http://localhost:3000` by default; edits to `packages/tokens/src`, `packages/tailwind/src`, `packages/motion/src` or playground/vue sources are reflected live without restarting.
 
 ## Tailwind Foundation
 

@@ -14,7 +14,7 @@ Owns raw design-token CSS Variables and TypeScript names for colors, geometry, l
 
 ### `@neoverse-ui/tailwind`
 
-Owns the Tailwind v4 CSS-first Foundation. `src/theme.css` imports the complete Motion CSS entry, maps semantic variables through `@theme inline`, and defines only the small custom Glass Material utilities. It contains no workspace-specific source paths. `src/index.css` adds Tailwind, scans workspace sources for the compiled playground stylesheet, and publishes the generated CSS. It does not define component selectors.
+Owns the Tailwind v4 CSS-first Foundation. `src/theme.css` imports the complete Motion CSS entry, maps semantic variables through `@theme inline`, and defines the custom Glass Material utilities plus the shared component selectors for button hierarchy, segmented controls, and skeleton surfaces. It contains no workspace-specific source paths. `src/index.css` adds Tailwind, scans workspace sources for the compiled playground stylesheet, and publishes the generated CSS.
 
 ### `@neoverse-ui/motion`
 
