@@ -91,14 +91,13 @@ onMounted(() => {
       data-preview="shadow"
       aria-hidden="true"
       class="flex h-16 w-32 shrink-0 items-center justify-center rounded-control border border-subtle"
-      :class="isDarkTheme ? 'bg-surface-raised p-2' : 'bg-surface-glass p-3'"
+      :class="isDarkTheme ? 'bg-surface-raised p-3' : 'bg-surface-glass p-3'"
       :style="{ backgroundColor: isDarkTheme ? 'var(--neoverse-color-neutral-400)' : undefined }"
     >
       <span
         class="block h-10 w-20 rounded-control bg-surface-raised"
         :style="{
           backgroundColor: isDarkTheme ? 'var(--neoverse-color-neutral-300)' : undefined,
-          transform: isDarkTheme ? 'scale(1.25)' : undefined,
           boxShadow: `var(${props.variable})`,
         }"
       />

@@ -50,12 +50,12 @@
       --neoverse-color-status-danger-foreground: var(--neoverse-color-neutral-950);
       --neoverse-color-focus-ring: var(--neoverse-color-accent-tertiary);
       --neoverse-color-overlay-scrim: rgb(0 0 0 / 64%);
-      --neoverse-shadow-xs: 0 1px 2px rgb(0 0 0 / 20%);
-      --neoverse-shadow-sm: 0 3px 8px -1px rgb(0 0 0 / 32%), 0 1px 2px rgb(0 0 0 / 16%);
-      --neoverse-shadow-md: 0 1rem 2.8rem -1.6rem rgb(0 0 0 / 62%);
-      --neoverse-shadow-lg: 0 1.25rem 3rem -1.7rem rgb(0 0 0 / 72%);
-      --neoverse-shadow-xl: 0 28px 64px -20px rgb(0 0 0 / 78%), 0 8px 16px -8px rgb(0 0 0 / 42%);
-      --neoverse-shadow-inset: inset 0 1px 2px rgb(0 0 0 / 32%);
+      --neoverse-shadow-xs: 0 1px 3px rgb(0 0 0 / 20%);
+      --neoverse-shadow-sm: 0 3px 8px -1px rgb(0 0 0 / 32%), 0 1px 3px rgb(0 0 0 / 16%);
+      --neoverse-shadow-md: 0 8px 20px -6px rgb(0 0 0 / 62%), 0 2px 6px -2px rgb(0 0 0 / 30%);
+      --neoverse-shadow-lg: 0 16px 40px -8px rgb(0 0 0 / 72%), 0 4px 12px -2px rgb(0 0 0 / 36%);
+      --neoverse-shadow-xl: 0 24px 56px -4px rgb(0 0 0 / 78%), 0 8px 16px -2px rgb(0 0 0 / 42%);
+      --neoverse-shadow-inset: inset 0 1px 0 rgb(0 0 0 / 32%);
     }
   }
 
@@ -105,12 +105,12 @@
     --neoverse-color-status-danger-foreground: var(--neoverse-color-neutral-950);
     --neoverse-color-focus-ring: var(--neoverse-color-accent-tertiary);
     --neoverse-color-overlay-scrim: rgb(0 0 0 / 64%);
-    --neoverse-shadow-xs: 0 1px 2px rgb(0 0 0 / 20%);
-    --neoverse-shadow-sm: 0 3px 8px -1px rgb(0 0 0 / 32%), 0 1px 2px rgb(0 0 0 / 16%);
-    --neoverse-shadow-md: 0 1rem 2.8rem -1.6rem rgb(0 0 0 / 62%);
-    --neoverse-shadow-lg: 0 1.25rem 3rem -1.7rem rgb(0 0 0 / 72%);
-    --neoverse-shadow-xl: 0 28px 64px -20px rgb(0 0 0 / 78%), 0 8px 16px -8px rgb(0 0 0 / 42%);
-    --neoverse-shadow-inset: inset 0 1px 2px rgb(0 0 0 / 32%);
+    --neoverse-shadow-xs: 0 1px 3px rgb(0 0 0 / 20%);
+    --neoverse-shadow-sm: 0 3px 8px -1px rgb(0 0 0 / 32%), 0 1px 3px rgb(0 0 0 / 16%);
+    --neoverse-shadow-md: 0 8px 20px -6px rgb(0 0 0 / 62%), 0 2px 6px -2px rgb(0 0 0 / 30%);
+    --neoverse-shadow-lg: 0 16px 40px -8px rgb(0 0 0 / 72%), 0 4px 12px -2px rgb(0 0 0 / 36%);
+    --neoverse-shadow-xl: 0 24px 56px -4px rgb(0 0 0 / 78%), 0 8px 16px -2px rgb(0 0 0 / 42%);
+    --neoverse-shadow-inset: inset 0 1px 0 rgb(0 0 0 / 32%);
   }
 
   :root.light:not([data-theme]),
