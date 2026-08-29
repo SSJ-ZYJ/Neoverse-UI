@@ -21,6 +21,25 @@ afterEach(() => {
 });
 
 describe('UiButton', () => {
+  it('uses the shared material hierarchy for visual variants', () => {
+    const primary = mount(UiButton, {
+      props: { variant: 'primary' },
+      slots: { default: 'Primary' },
+    });
+    const secondary = mount(UiButton, {
+      props: { variant: 'secondary' },
+      slots: { default: 'Secondary' },
+    });
+    const ghost = mount(UiButton, { props: { variant: 'ghost' }, slots: { default: 'Ghost' } });
+
+    expect(primary.classes()).toContain('ui-button--primary');
+    expect(secondary.classes()).toContain('ui-button--secondary');
+    expect(secondary.classes()).not.toContain('bg-action-secondary');
+    expect(secondary.classes()).not.toContain('text-action-secondary-foreground');
+    expect(ghost.classes()).toContain('ui-button--ghost');
+    expect(ghost.classes()).not.toContain('hover:bg-accent-soft');
+  });
+
   it('uses semantic classes and blocks native activation while loading', async () => {
     const onClick = vi.fn();
     const wrapper = mount(UiButton, {
@@ -33,9 +52,7 @@ describe('UiButton', () => {
     expect(button.attributes('type')).toBe('button');
     expect(button.classes()).toEqual(
       expect.arrayContaining([
-        'bg-action-secondary',
-        'hover:bg-action-secondary-hover',
-        'active:bg-action-secondary-active',
+        'ui-button--secondary',
         'focus-visible:ring-focus',
         'duration-fast',
         'ease-standard',
@@ -68,7 +85,7 @@ describe('UiIconButton', () => {
 
     expect(button.attributes('aria-label')).toBe('Open settings');
     expect(button.classes()).toEqual(
-      expect.arrayContaining(['bg-transparent', 'size-7', 'focus-visible:ring-2']),
+      expect.arrayContaining(['ui-button--ghost', 'size-7', 'focus-visible:ring-2']),
     );
 
     await wrapper.setProps({ loading: true });
@@ -106,8 +123,32 @@ describe('display components', () => {
     const skeleton = mount(UiSkeleton, { props: { variant: 'circle' } });
     expect(skeleton.attributes('aria-hidden')).toBe('true');
     expect(skeleton.classes()).toEqual(
-      expect.arrayContaining(['bg-surface-subtle', 'motion-safe:animate-pulse', 'rounded-pill']),
+      expect.arrayContaining([
+        'ui-skeleton',
+        'skeleton-surface',
+        'ui-skeleton--circle',
+        'ui-skeleton--shimmer',
+        'rounded-pill',
+      ]),
     );
+    expect(skeleton.attributes('data-effect')).toBe('shimmer');
+
+    const sizedRect = mount(UiSkeleton, {
+      props: {
+        variant: 'rect',
+        effect: 'none',
+        width: '7rem',
+        height: '2rem',
+        radius: '1rem',
+      },
+    });
+    expect(sizedRect.attributes('data-effect')).toBe('none');
+    expect(sizedRect.classes()).toEqual(
+      expect.arrayContaining(['ui-skeleton--rect', 'ui-skeleton--static']),
+    );
+    expect(sizedRect.attributes('style')).toContain('width: 7rem');
+    expect(sizedRect.attributes('style')).toContain('height: 2rem');
+    expect(sizedRect.attributes('style')).toContain('--ui-skeleton-radius: 1rem');
   });
 });
 
@@ -124,8 +165,14 @@ describe('UiSegmentedControl', () => {
     expect(wrapper.attributes('aria-orientation')).toBe('horizontal');
     expect(wrapper.classes()).toEqual(expect.arrayContaining(['border', 'border-subtle', 'gap-1']));
     expect(buttons[0]?.classes()).toEqual(
-      expect.arrayContaining(['material-glass-immersive', 'duration-standard', 'ease-emphasized']),
+      expect.arrayContaining([
+        'ui-segmented-control__option',
+        'ui-segmented-control__option--active',
+        'duration-standard',
+        'ease-emphasized',
+      ]),
     );
+    expect(wrapper.find('.ui-segmented-control__slider').exists()).toBe(true);
     expect(buttons[0]?.attributes('aria-checked')).toBe('true');
     expect(buttons[0]?.attributes('tabindex')).toBe('0');
     expect(buttons[1]?.attributes('disabled')).toBeDefined();

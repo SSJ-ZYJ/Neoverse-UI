@@ -44,13 +44,20 @@ const optionSizeClasses: Record<SegmentedControlSize, string> = {
   lg: 'h-11 px-4 text-label',
 };
 
-const selectedOptionClasses = 'material-glass-immersive text-primary';
-const unselectedOptionClasses = 'text-secondary hover:bg-surface-glass active:bg-surface-glass';
+const selectedOptionClasses = 'ui-segmented-control__option--active text-primary';
+const unselectedOptionClasses = 'text-secondary';
 const disabledOptionClasses =
-  'disabled:pointer-events-none disabled:bg-action-disabled disabled:text-action-disabled-foreground disabled:hover:bg-action-disabled disabled:active:bg-action-disabled';
+  'disabled:pointer-events-none disabled:text-disabled disabled:cursor-not-allowed';
 
 const isControlled = computed(() => props.modelValue !== undefined);
 const currentValue = computed(() => (isControlled.value ? props.modelValue : internalValue.value));
+const activeIndex = computed(() =>
+  props.options.findIndex((option) => !option.disabled && option.value === currentValue.value),
+);
+const segmentStyle = computed(() => ({
+  '--segment-count': Math.max(props.options.length, 1),
+  '--segment-index': Math.max(activeIndex.value, 0),
+}));
 const enabledIndexes = computed(() =>
   props.options.flatMap((option, index) => (option.disabled ? [] : [index])),
 );
@@ -67,7 +74,7 @@ const rovingIndex = computed(() => {
 });
 
 const classes = computed(() => [
-  'inline-flex items-center gap-1 rounded-control border border-subtle bg-surface-subtle p-1',
+  'ui-segmented-control inline-flex items-center gap-1 rounded-control border border-subtle p-1 material-glass-subtle',
 ]);
 const forwardedAttrs = computed(() => {
   const { class: _class, ...rest } = attrs;
@@ -210,9 +217,10 @@ function setOptionRef(element: Element | ComponentPublicInstance | null, index: 
 
 function optionClasses(option: SegmentOption): string[] {
   return [
-    'rounded-control',
+    'ui-segmented-control__option rounded-control',
     segmentedTransitionClasses,
     controlFocusClasses,
+    'font-label',
     optionSizeClasses[props.size as SegmentedControlSize] ?? optionSizeClasses.md,
     isSelected(option) ? selectedOptionClasses : unselectedOptionClasses,
     disabledOptionClasses,
@@ -224,30 +232,35 @@ function optionClasses(option: SegmentOption): string[] {
   <div
     v-bind="forwardedAttrs"
     :class="[classes, attrs.class]"
+    :style="[attrs.style, segmentStyle]"
     role="radiogroup"
     aria-orientation="horizontal"
+    :aria-disabled="props.disabled || undefined"
     :aria-busy="ariaBusy"
   >
-    <!-- biome-ignore lint/a11y/useSemanticElements: Custom radio widget needs button keyboard behavior. -->
-    <button
-      v-for="(option, index) in props.options"
-      :key="`${option.value}-${index}`"
-      :ref="(element) => setOptionRef(element, index)"
-      type="button"
-      role="radio"
-      :aria-checked="isSelected(option)"
-      :tabindex="index === rovingIndex ? 0 : -1"
-      :disabled="props.disabled || props.loading || option.disabled"
-      :class="optionClasses(option)"
-      @click="selectOption(option, index)"
-      @keydown="handleKeydown($event, index)"
-      @focus="focusedIndex = index"
-    >
-      {{ option.label }}
-    </button>
+    <span class="ui-segmented-control__options">
+      <span v-if="activeIndex >= 0" class="ui-segmented-control__slider" aria-hidden="true" />
+      <!-- biome-ignore lint/a11y/useSemanticElements: Custom radio widget needs button keyboard behavior. -->
+      <button
+        v-for="(option, index) in props.options"
+        :key="`${option.value}-${index}`"
+        :ref="(element) => setOptionRef(element, index)"
+        type="button"
+        role="radio"
+        :aria-checked="isSelected(option)"
+        :tabindex="index === rovingIndex ? 0 : -1"
+        :disabled="props.disabled || props.loading || option.disabled"
+        :class="optionClasses(option)"
+        @click="selectOption(option, index)"
+        @keydown="handleKeydown($event, index)"
+        @focus="focusedIndex = index"
+      >
+        {{ option.label }}
+      </button>
+    </span>
     <span
       v-if="props.loading"
-      class="ml-1 inline-flex size-4 items-center justify-center"
+      class="ui-segmented-control__loading ml-1 inline-flex size-4 items-center justify-center"
       aria-hidden="true"
     >
       <span :class="loadingIndicatorClasses" />

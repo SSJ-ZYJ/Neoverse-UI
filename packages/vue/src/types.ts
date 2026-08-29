@@ -50,8 +50,13 @@ export interface SegmentedControlProps {
   loading?: boolean;
 }
 
-export type SkeletonVariant = 'text' | 'rect' | 'circle';
+export type SkeletonVariant = 'text' | 'title' | 'avatar' | 'circle' | 'rect';
+export type SkeletonEffect = 'shimmer' | 'pulse' | 'none';
 
 export interface SkeletonProps {
   variant?: SkeletonVariant;
+  effect?: SkeletonEffect;
+  width?: string | number;
+  height?: string | number;
+  radius?: string;
 }

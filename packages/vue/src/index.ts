@@ -12,6 +12,7 @@ export type {
   SegmentedControlProps,
   SegmentedControlSize,
   SegmentOption,
+  SkeletonEffect,
   SkeletonProps,
   SkeletonVariant,
 } from './types';

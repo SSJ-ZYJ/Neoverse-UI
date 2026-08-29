@@ -1,22 +1,19 @@
-export const controlTransitionClasses = 'transition-colors duration-fast ease-standard';
+export const controlTransitionClasses = 'transition duration-fast ease-standard';
 export const segmentedTransitionClasses = 'transition-colors duration-standard ease-emphasized';
 
 export const controlFocusClasses =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2';
 
 export const disabledControlClasses =
-  'disabled:pointer-events-none disabled:bg-action-disabled disabled:text-action-disabled-foreground disabled:hover:bg-action-disabled disabled:active:bg-action-disabled';
+  'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-70';
 
 export const buttonBaseClasses =
-  'inline-flex shrink-0 items-center justify-center gap-2 rounded-control font-label';
+  'inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-2 rounded-control font-label';
 
 export const buttonVariantClasses = {
-  primary:
-    'bg-action-primary text-action-primary-foreground shadow-control hover:bg-action-primary-hover active:bg-action-primary-active',
-  secondary:
-    'bg-action-secondary text-action-secondary-foreground shadow-control hover:bg-action-secondary-hover active:bg-action-secondary-active',
-  ghost:
-    'bg-transparent text-secondary hover:bg-accent-soft hover:text-primary active:bg-surface-glass',
+  primary: 'ui-button--primary',
+  secondary: 'ui-button--secondary',
+  ghost: 'ui-button--ghost',
 } as const;
 
 export const buttonSizeClasses = {
