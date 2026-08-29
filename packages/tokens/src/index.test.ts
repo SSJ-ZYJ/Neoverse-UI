@@ -5,8 +5,29 @@ import { cssVariables, layoutBreakpoints } from './index.js';
 test('exposes semantic color variables under the Neoverse namespace', () => {
   expect(cssVariables.color.surface.canvas).toBe('--neoverse-color-surface-canvas');
   expect(cssVariables.color.text.primary).toBe('--neoverse-color-text-primary');
+  expect(cssVariables.color.edgeLight).toBe('--neoverse-color-edge-light');
   expect(cssVariables.color.action.primaryHover).toBe('--neoverse-color-action-primary-hover');
   expect(cssVariables.color.status.danger).toBe('--neoverse-color-status-danger');
+});
+
+test('exposes compact-control and skeleton effect tokens', () => {
+  expect(cssVariables.control.primaryBackground).toBe('--neoverse-control-primary-background');
+  expect(cssVariables.control.secondaryBackground).toBe('--neoverse-control-secondary-background');
+  expect(cssVariables.control.secondaryFilter).toBe('--neoverse-control-secondary-filter');
+  expect(cssVariables.control.activeBackground).toBe('--neoverse-control-active-background');
+  expect(cssVariables.control.hoverBackground).toBe('--neoverse-control-hover-background');
+  expect(cssVariables.skeleton.fill).toBe('--neoverse-skeleton-fill');
+  expect(cssVariables.skeleton.highlight).toBe('--neoverse-skeleton-highlight');
+  expect(cssVariables.skeleton.edge).toBe('--neoverse-skeleton-edge');
+});
+
+test('keeps skeleton motion at a calmer loading pace', async () => {
+  const semanticCss = await readTokenCss('semantic.css');
+  const duration = semanticCss
+    .match(/--neoverse-skeleton-shimmer-duration:\s*([^;]+)/)?.[1]
+    ?.trim();
+
+  expect(duration).toBe('1.25s');
 });
 
 test('provides the complete four-pixel spacing grid', () => {
@@ -136,18 +157,12 @@ const parseShadowLayers = (value: string): ShadowLayer[] =>
     const toPx = (token: string): number =>
       Number.parseFloat(token) * (token.endsWith('rem') ? 16 : 1);
 
-    return [
-      match[1] !== undefined,
-      toPx(offsetX),
-      toPx(offsetY),
-      toPx(blur),
-      toPx(spread),
-    ];
+    return [match[1] !== undefined, toPx(offsetX), toPx(offsetY), toPx(blur), toPx(spread)];
   });
 
 const shadowDeclarations = (css: string, name: string): string[] =>
-  [...css.matchAll(new RegExp(`--neoverse-shadow-${name}:\\s*([^;]+)`, 'g'))].flatMap(
-    (match) => (match[1] === undefined ? [] : [match[1].trim()]),
+  [...css.matchAll(new RegExp(`--neoverse-shadow-${name}:\\s*([^;]+)`, 'g'))].flatMap((match) =>
+    match[1] === undefined ? [] : [match[1].trim()],
   );
 
 const readTokenCss = async (fileName: string): Promise<string> => {
@@ -159,6 +174,19 @@ const readTokenCss = async (fileName: string): Promise<string> => {
 
   return Bun.file(new URL(`../src/${fileName}`, import.meta.url)).text();
 };
+
+test('keeps Glass transparency visible and ordered by depth', async () => {
+  const materialCss = await readTokenCss('material.css');
+  const transparency = ['subtle', 'elevated', 'immersive'].map((name) => {
+    const value = materialCss.match(
+      new RegExp(`--neoverse-material-transparency-${name}:\\s*(\\d+)%`),
+    )?.[1];
+
+    return Number(value);
+  });
+
+  expect(transparency).toEqual([30, 20, 12]);
+});
 
 test('keeps dark shadows aligned with the light hierarchy', async () => {
   const [geometryCss, themesCss] = await Promise.all([

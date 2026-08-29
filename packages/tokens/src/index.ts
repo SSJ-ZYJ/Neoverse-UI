@@ -111,6 +111,7 @@ export const cssVariables = {
       inverse: '--neoverse-color-text-inverse',
       onAccent: '--neoverse-color-text-on-accent',
     },
+    edgeLight: '--neoverse-color-edge-light',
     border: {
       subtle: '--neoverse-color-border-subtle',
       default: '--neoverse-color-border-default',
@@ -154,6 +155,27 @@ export const cssVariables = {
     overlay: {
       scrim: '--neoverse-color-overlay-scrim',
     },
+  },
+  control: {
+    primaryBackground: '--neoverse-control-primary-background',
+    primaryBorder: '--neoverse-control-primary-border',
+    primaryShadow: '--neoverse-control-primary-shadow',
+    secondaryBackground: '--neoverse-control-secondary-background',
+    secondaryHoverBackground: '--neoverse-control-secondary-hover-background',
+    secondaryShadow: '--neoverse-control-secondary-shadow',
+    secondaryHoverShadow: '--neoverse-control-secondary-hover-shadow',
+    secondaryFilter: '--neoverse-control-secondary-filter',
+    activeBackground: '--neoverse-control-active-background',
+    activeHighlight: '--neoverse-control-active-highlight',
+    activeShadow: '--neoverse-control-active-shadow',
+    hoverBackground: '--neoverse-control-hover-background',
+  },
+  skeleton: {
+    fill: '--neoverse-skeleton-fill',
+    highlight: '--neoverse-skeleton-highlight',
+    edge: '--neoverse-skeleton-edge',
+    shimmerDuration: '--neoverse-skeleton-shimmer-duration',
+    shimmerEasing: '--neoverse-skeleton-shimmer-easing',
   },
   space: {
     0: '--neoverse-space-0',

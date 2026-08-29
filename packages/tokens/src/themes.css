@@ -19,6 +19,7 @@
       --neoverse-color-text-disabled: var(--neoverse-color-neutral-500);
       --neoverse-color-text-inverse: var(--neoverse-color-neutral-800);
       --neoverse-color-text-on-accent: var(--neoverse-color-neutral-950);
+      --neoverse-color-edge-light: rgb(244 248 252 / 22%);
       --neoverse-color-border-subtle: rgb(219 234 254 / 13%);
       --neoverse-color-border-default: rgb(219 234 254 / 18%);
       --neoverse-color-border-strong: rgb(219 234 254 / 22%);
@@ -74,6 +75,7 @@
     --neoverse-color-text-disabled: var(--neoverse-color-neutral-500);
     --neoverse-color-text-inverse: var(--neoverse-color-neutral-800);
     --neoverse-color-text-on-accent: var(--neoverse-color-neutral-950);
+    --neoverse-color-edge-light: rgb(244 248 252 / 22%);
     --neoverse-color-border-subtle: rgb(219 234 254 / 13%);
     --neoverse-color-border-default: rgb(219 234 254 / 18%);
     --neoverse-color-border-strong: rgb(219 234 254 / 22%);

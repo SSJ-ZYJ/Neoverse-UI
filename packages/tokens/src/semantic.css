@@ -13,6 +13,7 @@
     --neoverse-color-text-disabled: var(--neoverse-color-neutral-400);
     --neoverse-color-text-inverse: var(--neoverse-color-neutral-100);
     --neoverse-color-text-on-accent: var(--neoverse-color-white);
+    --neoverse-color-edge-light: rgb(255 255 255 / 94%);
     --neoverse-color-border-subtle: rgb(15 23 42 / 14%);
     --neoverse-color-border-default: rgb(15 23 42 / 20%);
     --neoverse-color-border-strong: rgb(15 23 42 / 28%);
@@ -44,5 +45,77 @@
     --neoverse-color-status-danger-foreground: var(--neoverse-color-white);
     --neoverse-color-focus-ring: var(--neoverse-color-accent-tertiary);
     --neoverse-color-overlay-scrim: rgb(9 19 33 / 48%);
+
+    /* Shared compact-control feedback follows the Aurora glass language used
+       by the product surfaces: one moving selected layer, a restrained hover
+       tint, and a single inset highlight. */
+    --neoverse-control-primary-background: linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 26%, transparent),
+        transparent 48%
+      ),
+      linear-gradient(
+        120deg,
+        var(--neoverse-color-accent-primary),
+        color-mix(
+          in srgb,
+          var(--neoverse-color-accent-primary) 74%,
+          var(--neoverse-color-accent-tertiary)
+        )
+      );
+    --neoverse-control-primary-border: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-primary) 68%,
+      var(--neoverse-color-edge-light)
+    );
+    --neoverse-control-primary-shadow: inset 0 1px 0
+        color-mix(in srgb, var(--neoverse-color-edge-light) 78%, transparent),
+      0 1rem 2.4rem -1.35rem var(--neoverse-color-accent-primary);
+    --neoverse-control-secondary-background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--neoverse-color-text-secondary) 13%, transparent),
+      color-mix(in srgb, var(--neoverse-color-text-muted) 7%, transparent)
+    );
+    --neoverse-control-secondary-hover-background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--neoverse-color-text-secondary) 17%, transparent),
+      color-mix(in srgb, var(--neoverse-color-text-muted) 10%, transparent)
+    );
+    --neoverse-control-secondary-shadow: inset 0 1px 0
+        color-mix(in srgb, var(--neoverse-color-edge-light) 52%, transparent),
+      var(--neoverse-shadow-control);
+    --neoverse-control-secondary-hover-shadow: inset 0 1px 0
+        color-mix(in srgb, var(--neoverse-color-edge-light) 70%, transparent),
+      var(--neoverse-shadow-control);
+    --neoverse-control-secondary-filter: blur(36px) saturate(165%) brightness(108%);
+    --neoverse-control-active-background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 13%, transparent),
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 7%, transparent)
+    );
+    --neoverse-control-active-highlight: inset 0 1px 0
+      color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent);
+    --neoverse-control-active-shadow: var(--neoverse-shadow-xs);
+    --neoverse-control-hover-background: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-primary) 10%,
+      transparent
+    );
+
+    /* Skeletons use the same neutral loading material in both themes. */
+    --neoverse-skeleton-fill: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) 18%,
+      var(--neoverse-color-surface-canvas)
+    );
+    --neoverse-skeleton-highlight: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) 14%,
+      transparent
+    );
+    --neoverse-skeleton-edge: inset 0 1px 0
+      color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent);
+    --neoverse-skeleton-shimmer-duration: 1.25s;
+    --neoverse-skeleton-shimmer-easing: var(--neoverse-motion-easing-standard);
   }
 }

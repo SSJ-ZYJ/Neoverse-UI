@@ -1,9 +1,9 @@
 @layer neoverse.tokens {
   :root {
     --neoverse-material-transparency-opaque: 100%;
-    --neoverse-material-transparency-subtle: 100%;
-    --neoverse-material-transparency-elevated: 100%;
-    --neoverse-material-transparency-immersive: 100%;
+    --neoverse-material-transparency-subtle: 30%;
+    --neoverse-material-transparency-elevated: 20%;
+    --neoverse-material-transparency-immersive: 12%;
 
     --neoverse-material-blur-none: 0px;
     --neoverse-material-blur-sm: 12px;
