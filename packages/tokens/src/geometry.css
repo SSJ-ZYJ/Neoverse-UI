@@ -28,7 +28,11 @@
       0 6px 14px -1px rgb(5 16 23 / 16%);
     --neoverse-shadow-xl: 0 2rem 4.75rem -1.875rem rgb(5 16 23 / 48%),
       0 8px 18px -1px rgb(5 16 23 / 20%);
-    --neoverse-shadow-inset: inset 0 1px 0 rgb(15 23 42 / 8%);
+    /* Inset material uses a light catch on the upper edge and a cool, soft
+       lower falloff so translucent light surfaces do not read as flat. */
+    --neoverse-shadow-inset: inset 0 1px 0
+        color-mix(in srgb, var(--neoverse-color-edge-light) 76%, transparent),
+      inset 0 -1px 2px rgb(14 34 44 / 8%);
     --neoverse-shadow-control: var(--neoverse-shadow-xs);
     --neoverse-shadow-raised: var(--neoverse-shadow-sm);
     --neoverse-shadow-card: var(--neoverse-shadow-md);

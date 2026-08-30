@@ -85,7 +85,10 @@
     --neoverse-material-glass-subtle-transparency: var(--neoverse-material-transparency-subtle);
     --neoverse-material-glass-subtle-blur: var(--neoverse-material-blur-sm);
     --neoverse-material-glass-subtle-saturation: var(--neoverse-material-saturation-subtle);
-    --neoverse-material-glass-subtle-border: var(--neoverse-color-border-subtle);
+    /* Light Glass gets its silhouette from refraction and shadow; a dark
+       hairline fights the pale atmospheric canvas. Dark restores the
+       theme-specific border in themes.css. */
+    --neoverse-material-glass-subtle-border: transparent;
     --neoverse-material-glass-subtle-border-width: var(--neoverse-border-width-thin);
     --neoverse-material-glass-subtle-edge-highlight: var(--neoverse-material-edge-highlight-subtle);
     --neoverse-material-glass-subtle-shadow: var(--neoverse-shadow-raised);
@@ -98,7 +101,7 @@
     --neoverse-material-glass-elevated-transparency: var(--neoverse-material-transparency-elevated);
     --neoverse-material-glass-elevated-blur: var(--neoverse-material-blur-md);
     --neoverse-material-glass-elevated-saturation: var(--neoverse-material-saturation-elevated);
-    --neoverse-material-glass-elevated-border: var(--neoverse-color-border-subtle);
+    --neoverse-material-glass-elevated-border: transparent;
     --neoverse-material-glass-elevated-border-width: var(--neoverse-border-width-thin);
     --neoverse-material-glass-elevated-edge-highlight: var(
       --neoverse-material-edge-highlight-elevated
@@ -115,7 +118,7 @@
     );
     --neoverse-material-glass-immersive-blur: var(--neoverse-material-blur-lg);
     --neoverse-material-glass-immersive-saturation: var(--neoverse-material-saturation-immersive);
-    --neoverse-material-glass-immersive-border: var(--neoverse-color-border-default);
+    --neoverse-material-glass-immersive-border: transparent;
     --neoverse-material-glass-immersive-border-width: var(--neoverse-border-width-thin);
     --neoverse-material-glass-immersive-edge-highlight: var(
       --neoverse-material-edge-highlight-immersive

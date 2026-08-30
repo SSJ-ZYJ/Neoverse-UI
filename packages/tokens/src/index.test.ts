@@ -14,7 +14,9 @@ test('exposes semantic color variables under the Neoverse namespace', () => {
 test('exposes compact-control and skeleton effect tokens', () => {
   expect(cssVariables.control.primaryBackground).toBe('--neoverse-control-primary-background');
   expect(cssVariables.control.secondaryBackground).toBe('--neoverse-control-secondary-background');
+  expect(cssVariables.control.secondaryBorder).toBe('--neoverse-control-secondary-border');
   expect(cssVariables.control.secondaryFilter).toBe('--neoverse-control-secondary-filter');
+  expect(cssVariables.control.segmentedShadow).toBe('--neoverse-control-segmented-shadow');
   expect(cssVariables.control.activeBackground).toBe('--neoverse-control-active-background');
   expect(cssVariables.control.hoverBackground).toBe('--neoverse-control-hover-background');
   expect(cssVariables.skeleton.fill).toBe('--neoverse-skeleton-fill');
@@ -29,6 +31,25 @@ test('keeps skeleton motion at a calmer loading pace', async () => {
     ?.trim();
 
   expect(duration).toBe('1.25s');
+});
+
+test('keeps the light active control layer free of a dark outline', async () => {
+  const [semanticCss, themesCss] = await Promise.all([
+    readTokenCss('semantic.css'),
+    readTokenCss('themes.css'),
+  ]);
+
+  expect(semanticCss).toContain('--neoverse-control-active-highlight: none;');
+  expect(semanticCss).toContain('--neoverse-control-active-shadow: none;');
+  expect(semanticCss).toContain('--neoverse-control-segmented-shadow: none;');
+  expect(
+    themesCss.match(/--neoverse-control-active-shadow:\s*var\(--neoverse-shadow-xs\);/g),
+  ).toHaveLength(2);
+  expect(
+    themesCss.match(
+      /--neoverse-control-segmented-shadow:\s*var\(--neoverse-control-secondary-shadow\);/g,
+    ),
+  ).toHaveLength(2);
 });
 
 test('provides the complete four-pixel spacing grid', () => {
@@ -200,13 +221,35 @@ test('keeps Glass transparency visible and ordered by depth', async () => {
   expect(transparency).toEqual([30, 20, 12]);
 });
 
+test('keeps light Glass surfaces free of dark hairline borders', async () => {
+  const [materialCss, themesCss] = await Promise.all([
+    readTokenCss('material.css'),
+    readTokenCss('themes.css'),
+  ]);
+  const variants = ['subtle', 'elevated', 'immersive'];
+
+  for (const variant of variants) {
+    expect(materialCss).toContain(
+      `--neoverse-material-glass-${variant}-border: transparent;`,
+    );
+    expect(
+      themesCss.match(
+        new RegExp(
+          `--neoverse-material-glass-${variant}-border:\\s*var\\(--neoverse-color-border-(?:subtle|default)\\);`,
+          'g',
+        ),
+      ),
+    ).toHaveLength(2);
+  }
+});
+
 test('keeps dark shadows aligned with the light hierarchy', async () => {
   const [geometryCss, themesCss] = await Promise.all([
     readTokenCss('geometry.css'),
     readTokenCss('themes.css'),
   ]);
 
-  for (const name of ['xs', 'sm', 'md', 'lg', 'xl', 'inset']) {
+  for (const name of ['xs', 'sm', 'md', 'lg', 'xl']) {
     const lightValue = shadowDeclarations(geometryCss, name)[0];
     const darkValues = shadowDeclarations(themesCss, name);
 
@@ -222,6 +265,34 @@ test('keeps dark shadows aligned with the light hierarchy', async () => {
     for (const darkValue of darkValues) {
       expect(parseShadowLayers(darkValue)).toEqual(lightLayers);
     }
+  }
+});
+
+test('keeps inset material distinct between light and dark surfaces', async () => {
+  const [geometryCss, themesCss] = await Promise.all([
+    readTokenCss('geometry.css'),
+    readTokenCss('themes.css'),
+  ]);
+  const lightValue = shadowDeclarations(geometryCss, 'inset')[0];
+  const darkValues = shadowDeclarations(themesCss, 'inset');
+
+  expect(lightValue).toBeDefined();
+  expect(darkValues).toHaveLength(2);
+
+  if (lightValue === undefined) {
+    return;
+  }
+
+  expect(parseShadowLayers(lightValue)).toEqual([
+    [true, 0, 1, 0, 0],
+    [true, 0, -1, 2, 0],
+  ]);
+
+  for (const darkValue of darkValues) {
+    expect(parseShadowLayers(darkValue)).toEqual([
+      [true, 0, 1, 0, 0],
+      [true, 0, -1, 2, 0],
+    ]);
   }
 });
 
