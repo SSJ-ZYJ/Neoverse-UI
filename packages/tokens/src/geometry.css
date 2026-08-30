@@ -9,6 +9,7 @@
     --neoverse-radius-2xl: 32px;
     --neoverse-radius-pill: 9999px;
     --neoverse-radius-control: var(--neoverse-radius-md);
+    --neoverse-radius-control-inner: calc(var(--neoverse-radius-control) - 0.18rem);
     --neoverse-radius-card: var(--neoverse-radius-lg);
     --neoverse-radius-panel: var(--neoverse-radius-xl);
     --neoverse-border-width-none: 0px;
@@ -16,12 +17,18 @@
     --neoverse-border-width-strong: 2px;
     --neoverse-border-style-solid: solid;
     --neoverse-shadow-none: none;
-    --neoverse-shadow-xs: 0 1px 3px rgb(15 23 42 / 14%);
-    --neoverse-shadow-sm: 0 3px 8px -1px rgb(15 23 42 / 18%), 0 1px 3px rgb(15 23 42 / 8%);
-    --neoverse-shadow-md: 0 8px 20px -6px rgb(15 23 42 / 24%), 0 2px 6px -2px rgb(15 23 42 / 12%);
-    --neoverse-shadow-lg: 0 16px 40px -8px rgb(15 23 42 / 32%), 0 4px 12px -2px rgb(15 23 42 / 12%);
-    --neoverse-shadow-xl: 0 24px 56px -4px rgb(15 23 42 / 42%), 0 8px 16px -2px rgb(15 23 42 / 18%);
-    --neoverse-shadow-inset: inset 0 1px 0 rgb(15 23 42 / 12%);
+    /* Elevation is broad and quiet: the reference products use ambient depth
+       rather than the tight, high-contrast shadows of a generic component kit. */
+    --neoverse-shadow-xs: 0 1px 3px rgb(14 34 44 / 14%);
+    --neoverse-shadow-sm: 0 0.75rem 2rem -1.25rem rgb(14 34 44 / 30%),
+      0 3px 8px -1px rgb(14 34 44 / 12%);
+    --neoverse-shadow-md: 0 1rem 2.8rem -1.6rem rgb(14 34 44 / 38%),
+      0 4px 10px -1px rgb(14 34 44 / 14%);
+    --neoverse-shadow-lg: 0 1.5rem 4rem -1.75rem rgb(5 16 23 / 42%),
+      0 6px 14px -1px rgb(5 16 23 / 16%);
+    --neoverse-shadow-xl: 0 2rem 4.75rem -1.875rem rgb(5 16 23 / 48%),
+      0 8px 18px -1px rgb(5 16 23 / 20%);
+    --neoverse-shadow-inset: inset 0 1px 0 rgb(15 23 42 / 8%);
     --neoverse-shadow-control: var(--neoverse-shadow-xs);
     --neoverse-shadow-raised: var(--neoverse-shadow-sm);
     --neoverse-shadow-card: var(--neoverse-shadow-md);

@@ -6,6 +6,7 @@ test('exposes semantic color variables under the Neoverse namespace', () => {
   expect(cssVariables.color.surface.canvas).toBe('--neoverse-color-surface-canvas');
   expect(cssVariables.color.text.primary).toBe('--neoverse-color-text-primary');
   expect(cssVariables.color.edgeLight).toBe('--neoverse-color-edge-light');
+  expect(cssVariables.color.ambient.ice).toBe('--neoverse-color-ambient-ice');
   expect(cssVariables.color.action.primaryHover).toBe('--neoverse-color-action-primary-hover');
   expect(cssVariables.color.status.danger).toBe('--neoverse-color-status-danger');
 });
@@ -47,6 +48,7 @@ test('exposes the shared geometry and typography contracts', () => {
 
 test('exposes semantic geometry and focus aliases', () => {
   expect(cssVariables.radius.control).toBe('--neoverse-radius-control');
+  expect(cssVariables.radius.controlInner).toBe('--neoverse-radius-control-inner');
   expect(cssVariables.radius.card).toBe('--neoverse-radius-card');
   expect(cssVariables.shadow.overlay).toBe('--neoverse-shadow-overlay');
   expect(cssVariables.focus.ringWidth).toBe('--neoverse-focus-ring-width');
@@ -160,6 +162,16 @@ const parseShadowLayers = (value: string): ShadowLayer[] =>
     return [match[1] !== undefined, toPx(offsetX), toPx(offsetY), toPx(blur), toPx(spread)];
   });
 
+const firstShadowLayer = (value: string): ShadowLayer => {
+  const layer = parseShadowLayers(value)[0];
+
+  if (layer === undefined) {
+    throw new Error(`Missing shadow layer: ${value}`);
+  }
+
+  return layer;
+};
+
 const shadowDeclarations = (css: string, name: string): string[] =>
   [...css.matchAll(new RegExp(`--neoverse-shadow-${name}:\\s*([^;]+)`, 'g'))].flatMap((match) =>
     match[1] === undefined ? [] : [match[1].trim()],
@@ -210,5 +222,54 @@ test('keeps dark shadows aligned with the light hierarchy', async () => {
     for (const darkValue of darkValues) {
       expect(parseShadowLayers(darkValue)).toEqual(lightLayers);
     }
+  }
+});
+
+const shadowReach = ([, offsetX, offsetY, blur, spread]: ShadowLayer): number =>
+  Math.abs(offsetX) + Math.abs(offsetY) + blur + spread;
+
+test('keeps sm and md shadows visibly separated from xs', async () => {
+  const [geometryCss, themesCss] = await Promise.all([
+    readTokenCss('geometry.css'),
+    readTokenCss('themes.css'),
+  ]);
+
+  const lightValue = shadowDeclarations(geometryCss, 'xs')[0];
+  const lightSmValue = shadowDeclarations(geometryCss, 'sm')[0];
+  const lightMdValue = shadowDeclarations(geometryCss, 'md')[0];
+  const darkValues = ['xs', 'sm', 'md'].map((name) => shadowDeclarations(themesCss, name));
+  const shadowSets = [
+    [lightValue, lightSmValue, lightMdValue],
+    ...[0, 1].map((index) => darkValues.map((values) => values[index])),
+  ];
+
+  for (const [xsValue, smValue, mdValue] of shadowSets) {
+    expect(xsValue).toBeDefined();
+    expect(smValue).toBeDefined();
+    expect(mdValue).toBeDefined();
+
+    if (xsValue === undefined || smValue === undefined || mdValue === undefined) {
+      continue;
+    }
+
+    const smLayers = parseShadowLayers(smValue);
+    const mdLayers = parseShadowLayers(mdValue);
+    const xsLayer = firstShadowLayer(xsValue);
+    const smLayer = firstShadowLayer(smValue);
+    const mdLayer = firstShadowLayer(mdValue);
+    const smGroundingLayer = smLayers[1];
+    const mdGroundingLayer = mdLayers[1];
+
+    expect(smGroundingLayer).toBeDefined();
+    expect(mdGroundingLayer).toBeDefined();
+    expect(shadowReach(smLayer)).toBeGreaterThan(shadowReach(xsLayer));
+    expect(shadowReach(mdLayer)).toBeGreaterThan(shadowReach(smLayer));
+
+    if (smGroundingLayer === undefined || mdGroundingLayer === undefined) {
+      continue;
+    }
+
+    expect(shadowReach(smGroundingLayer)).toBeGreaterThan(shadowReach(xsLayer));
+    expect(shadowReach(mdGroundingLayer)).toBeGreaterThan(shadowReach(smGroundingLayer));
   }
 });

@@ -112,6 +112,11 @@ export const cssVariables = {
       onAccent: '--neoverse-color-text-on-accent',
     },
     edgeLight: '--neoverse-color-edge-light',
+    ambient: {
+      ice: '--neoverse-color-ambient-ice',
+      mint: '--neoverse-color-ambient-mint',
+      violet: '--neoverse-color-ambient-violet',
+    },
     border: {
       subtle: '--neoverse-color-border-subtle',
       default: '--neoverse-color-border-default',
@@ -302,6 +307,7 @@ export const cssVariables = {
     '2xl': '--neoverse-radius-2xl',
     pill: '--neoverse-radius-pill',
     control: '--neoverse-radius-control',
+    controlInner: '--neoverse-radius-control-inner',
     card: '--neoverse-radius-card',
     panel: '--neoverse-radius-panel',
   },

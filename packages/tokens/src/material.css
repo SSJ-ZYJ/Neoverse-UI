@@ -6,32 +6,37 @@
     --neoverse-material-transparency-immersive: 12%;
 
     --neoverse-material-blur-none: 0px;
-    --neoverse-material-blur-sm: 12px;
-    --neoverse-material-blur-md: 16px;
+    /* Glass stays readable at the same restrained blur steps as the product
+       surfaces: soft controls, standard panels, and deeper card material. */
+    --neoverse-material-blur-sm: 8px;
+    --neoverse-material-blur-md: 14px;
     --neoverse-material-blur-lg: 28px;
 
     --neoverse-material-saturation-normal: 100%;
-    --neoverse-material-saturation-subtle: 110%;
+    --neoverse-material-saturation-subtle: 132%;
     --neoverse-material-saturation-elevated: 145%;
     --neoverse-material-saturation-immersive: 165%;
 
     --neoverse-material-edge-highlight-none: none;
-    --neoverse-material-edge-highlight-subtle: inset 0 1px 0 rgb(255 255 255 / 4%);
-    --neoverse-material-edge-highlight-elevated: inset 0 1px 0 rgb(255 255 255 / 4%);
-    --neoverse-material-edge-highlight-immersive: inset 0 1px 0 rgb(255 255 255 / 8%);
+    --neoverse-material-edge-highlight-subtle: inset 0 1px 0
+      color-mix(in srgb, var(--neoverse-color-edge-light) 76%, transparent);
+    --neoverse-material-edge-highlight-elevated: inset 0 1px 0
+      color-mix(in srgb, var(--neoverse-color-edge-light) 84%, transparent);
+    --neoverse-material-edge-highlight-immersive: inset 0 1px 0
+      color-mix(in srgb, var(--neoverse-color-edge-light) 94%, transparent);
 
     --neoverse-material-refraction-gradient-none: none;
     --neoverse-material-refraction-gradient-subtle: linear-gradient(
       145deg,
-      color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent),
+      color-mix(in srgb, var(--neoverse-color-edge-light) 18%, transparent),
       transparent 42%,
-      color-mix(in srgb, var(--neoverse-color-accent-soft) 12%, transparent)
+      color-mix(in srgb, var(--neoverse-color-accent-soft) 28%, transparent)
     );
     --neoverse-material-refraction-gradient-immersive: linear-gradient(
       145deg,
-      color-mix(in srgb, var(--neoverse-color-text-primary) 10%, transparent),
+      color-mix(in srgb, var(--neoverse-color-edge-light) 22%, transparent),
       transparent 42%,
-      color-mix(in srgb, var(--neoverse-color-accent-soft) 18%, transparent)
+      color-mix(in srgb, var(--neoverse-color-accent-soft) 36%, transparent)
     );
 
     --neoverse-material-surface-solid-background: var(--neoverse-color-surface-canvas);
@@ -91,7 +96,7 @@
     --neoverse-material-glass-elevated-background: var(--neoverse-color-surface-glass);
     --neoverse-material-glass-elevated-background-fallback: var(--neoverse-color-surface-raised);
     --neoverse-material-glass-elevated-transparency: var(--neoverse-material-transparency-elevated);
-    --neoverse-material-glass-elevated-blur: var(--neoverse-material-blur-lg);
+    --neoverse-material-glass-elevated-blur: var(--neoverse-material-blur-md);
     --neoverse-material-glass-elevated-saturation: var(--neoverse-material-saturation-elevated);
     --neoverse-material-glass-elevated-border: var(--neoverse-color-border-subtle);
     --neoverse-material-glass-elevated-border-width: var(--neoverse-border-width-thin);
@@ -108,7 +113,7 @@
     --neoverse-material-glass-immersive-transparency: var(
       --neoverse-material-transparency-immersive
     );
-    --neoverse-material-glass-immersive-blur: 36px;
+    --neoverse-material-glass-immersive-blur: var(--neoverse-material-blur-lg);
     --neoverse-material-glass-immersive-saturation: var(--neoverse-material-saturation-immersive);
     --neoverse-material-glass-immersive-border: var(--neoverse-color-border-default);
     --neoverse-material-glass-immersive-border-width: var(--neoverse-border-width-thin);

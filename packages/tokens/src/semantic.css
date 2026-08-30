@@ -2,11 +2,12 @@
   :root,
   [data-theme='light'],
   :root.light:not([data-theme]) {
+    /* Light is an atmospheric blue-white canvas, not an inverted dark theme. */
     --neoverse-color-surface-canvas: var(--neoverse-color-neutral-50);
-    --neoverse-color-surface-subtle: var(--neoverse-color-neutral-100);
-    --neoverse-color-surface-raised: var(--neoverse-color-white);
-    --neoverse-color-surface-glass: rgb(226 232 240 / 42%);
-    --neoverse-color-surface-overlay: rgb(255 255 255 / 96%);
+    --neoverse-color-surface-subtle: rgb(255 255 255 / 30%);
+    --neoverse-color-surface-raised: rgb(255 255 255 / 54%);
+    --neoverse-color-surface-glass: rgb(244 250 255 / 34%);
+    --neoverse-color-surface-overlay: rgb(255 255 255 / 92%);
     --neoverse-color-text-primary: var(--neoverse-color-neutral-900);
     --neoverse-color-text-secondary: var(--neoverse-color-neutral-700);
     --neoverse-color-text-muted: var(--neoverse-color-neutral-500);
@@ -14,25 +15,26 @@
     --neoverse-color-text-inverse: var(--neoverse-color-neutral-100);
     --neoverse-color-text-on-accent: var(--neoverse-color-white);
     --neoverse-color-edge-light: rgb(255 255 255 / 94%);
-    --neoverse-color-border-subtle: rgb(15 23 42 / 14%);
-    --neoverse-color-border-default: rgb(15 23 42 / 20%);
-    --neoverse-color-border-strong: rgb(15 23 42 / 28%);
-    --neoverse-color-border-interactive: var(--neoverse-color-accent-secondary);
-    --neoverse-color-accent-primary: var(--neoverse-color-blue-600);
-    --neoverse-color-accent-primary-foreground: var(--neoverse-color-white);
-    --neoverse-color-accent-secondary: var(--neoverse-color-mint-700);
-    --neoverse-color-accent-secondary-foreground: var(--neoverse-color-white);
-    --neoverse-color-accent-tertiary: #4f46e5;
+    --neoverse-color-border-subtle: rgb(15 23 42 / 11%);
+    --neoverse-color-border-default: rgb(15 23 42 / 16%);
+    --neoverse-color-border-strong: rgb(15 23 42 / 24%);
+    --neoverse-color-border-interactive: rgb(116 186 229 / 48%);
+    /* Light uses a pale sky blue; the dark theme keeps its luminous cyan. */
+    --neoverse-color-accent-primary: #74bae5;
+    --neoverse-color-accent-primary-foreground: var(--neoverse-color-neutral-900);
+    --neoverse-color-accent-secondary: var(--neoverse-color-mint-500);
+    --neoverse-color-accent-secondary-foreground: var(--neoverse-color-neutral-950);
+    --neoverse-color-accent-tertiary: #7c6ee6;
     --neoverse-color-accent-tertiary-foreground: var(--neoverse-color-white);
-    --neoverse-color-accent-soft: rgb(2 132 199 / 12%);
-    --neoverse-color-action-primary: var(--neoverse-color-blue-600);
-    --neoverse-color-action-primary-hover: var(--neoverse-color-blue-700);
-    --neoverse-color-action-primary-active: var(--neoverse-color-blue-800);
-    --neoverse-color-action-primary-foreground: var(--neoverse-color-white);
-    --neoverse-color-action-secondary: var(--neoverse-color-mint-700);
-    --neoverse-color-action-secondary-hover: var(--neoverse-color-mint-800);
-    --neoverse-color-action-secondary-active: var(--neoverse-color-mint-900);
-    --neoverse-color-action-secondary-foreground: var(--neoverse-color-white);
+    --neoverse-color-accent-soft: rgb(116 186 229 / 16%);
+    --neoverse-color-action-primary: var(--neoverse-color-accent-primary);
+    --neoverse-color-action-primary-hover: #62a8d0;
+    --neoverse-color-action-primary-active: #5594b8;
+    --neoverse-color-action-primary-foreground: var(--neoverse-color-neutral-900);
+    --neoverse-color-action-secondary: var(--neoverse-color-mint-500);
+    --neoverse-color-action-secondary-hover: var(--neoverse-color-mint-600);
+    --neoverse-color-action-secondary-active: var(--neoverse-color-mint-700);
+    --neoverse-color-action-secondary-foreground: var(--neoverse-color-neutral-950);
     --neoverse-color-action-disabled: var(--neoverse-color-neutral-200);
     --neoverse-color-action-disabled-foreground: var(--neoverse-color-neutral-500);
     --neoverse-color-status-info: var(--neoverse-color-blue-600);
@@ -43,8 +45,11 @@
     --neoverse-color-status-warning-foreground: var(--neoverse-color-neutral-950);
     --neoverse-color-status-danger: var(--neoverse-color-red-600);
     --neoverse-color-status-danger-foreground: var(--neoverse-color-white);
-    --neoverse-color-focus-ring: var(--neoverse-color-accent-tertiary);
-    --neoverse-color-overlay-scrim: rgb(9 19 33 / 48%);
+    --neoverse-color-focus-ring: rgb(116 186 229 / 56%);
+    --neoverse-color-overlay-scrim: rgb(20 33 43 / 28%);
+    --neoverse-color-ambient-ice: rgb(56 189 248 / 18%);
+    --neoverse-color-ambient-mint: rgb(52 211 153 / 10%);
+    --neoverse-color-ambient-violet: rgb(124 110 230 / 9%);
 
     /* Shared compact-control feedback follows the Aurora glass language used
        by the product surfaces: one moving selected layer, a restrained hover
@@ -56,38 +61,50 @@
       ),
       linear-gradient(
         120deg,
-        var(--neoverse-color-accent-primary),
         color-mix(
           in srgb,
-          var(--neoverse-color-accent-primary) 74%,
-          var(--neoverse-color-accent-tertiary)
+          var(--neoverse-color-accent-primary) 70%,
+          var(--neoverse-color-white)
+        ),
+        color-mix(
+          in srgb,
+          var(--neoverse-color-accent-primary) 58%,
+          var(--neoverse-color-white)
         )
       );
     --neoverse-control-primary-border: color-mix(
       in srgb,
-      var(--neoverse-color-accent-primary) 68%,
+      var(--neoverse-color-accent-primary) 54%,
       var(--neoverse-color-edge-light)
     );
     --neoverse-control-primary-shadow: inset 0 1px 0
         color-mix(in srgb, var(--neoverse-color-edge-light) 78%, transparent),
-      0 1rem 2.4rem -1.35rem var(--neoverse-color-accent-primary);
+      0 1rem 2.4rem -1.35rem color-mix(
+        in srgb,
+        var(--neoverse-color-accent-primary) 24%,
+        transparent
+      );
     --neoverse-control-secondary-background: linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--neoverse-color-text-secondary) 13%, transparent),
-      color-mix(in srgb, var(--neoverse-color-text-muted) 7%, transparent)
-    );
+        135deg,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 18%, transparent),
+        transparent 48%
+      ),
+      var(--neoverse-color-surface-subtle);
     --neoverse-control-secondary-hover-background: linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--neoverse-color-text-secondary) 17%, transparent),
-      color-mix(in srgb, var(--neoverse-color-text-muted) 10%, transparent)
-    );
-    --neoverse-control-secondary-shadow: inset 0 1px 0
-        color-mix(in srgb, var(--neoverse-color-edge-light) 52%, transparent),
+        135deg,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 26%, transparent),
+        transparent 48%
+      ),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-surface-subtle) 78%,
+        var(--neoverse-color-accent-soft)
+      );
+    --neoverse-control-secondary-shadow: var(--neoverse-material-edge-highlight-subtle),
       var(--neoverse-shadow-control);
-    --neoverse-control-secondary-hover-shadow: inset 0 1px 0
-        color-mix(in srgb, var(--neoverse-color-edge-light) 70%, transparent),
+    --neoverse-control-secondary-hover-shadow: var(--neoverse-material-edge-highlight-elevated),
       var(--neoverse-shadow-control);
-    --neoverse-control-secondary-filter: blur(36px) saturate(165%) brightness(108%);
+    --neoverse-control-secondary-filter: blur(8px) saturate(132%) brightness(102%) contrast(101%);
     --neoverse-control-active-background: linear-gradient(
       145deg,
       color-mix(in srgb, var(--neoverse-color-accent-secondary) 13%, transparent),
