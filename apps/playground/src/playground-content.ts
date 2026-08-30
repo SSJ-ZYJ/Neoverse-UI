@@ -186,15 +186,15 @@ export const moduleCopy = {
     primitive: {
       label: localized('Base radius scale', '基础圆角刻度'),
       description: localized(
-        'The base scale defines none, xs, sm, md, lg, xl, 2xl, and pill.',
-        '基础刻度包含 none、xs、sm、md、lg、xl、2xl 与 pill。',
+        'The base scale defines none, xs, sm, md, lg, xl, and 2xl.',
+        '基础刻度包含 none、xs、sm、md、lg、xl 与 2xl。',
       ),
     },
     aliases: {
       label: localized('Semantic aliases', '语义别名'),
       description: localized(
-        'Role aliases reuse the base scale: control=md, card=lg, panel=xl.',
-        '角色别名复用基础刻度：control=md、card=lg、panel=xl。',
+        'Semantic aliases include pill=9999px, control=md (12px), controlInner=control - 0.18rem (9.12px), card=lg (16px), and panel=xl (24px).',
+        '语义别名包括 pill=9999px、control=md（12px）、controlInner=control - 0.18rem（9.12px）、card=lg（16px）与 panel=xl（24px）。',
       ),
     },
   },

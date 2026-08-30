@@ -10,7 +10,14 @@ const port = Number.parseInt(process.env.PORT ?? '3000', 10);
 const liveReload = process.env.LIVE_RELOAD === '1';
 const stylesheetPath = new URL('../../../packages/tailwind/dist/index.css', import.meta.url);
 const clientBundlePath = new URL('../dist/assets/playground.js', import.meta.url);
-const materialBackgroundPath = new URL('../dist/assets/material-background.png', import.meta.url);
+const materialBackgroundLightPath = new URL(
+  '../dist/assets/material-background-light.png',
+  import.meta.url,
+);
+const materialBackgroundDarkPath = new URL(
+  '../dist/assets/material-background-dark.png',
+  import.meta.url,
+);
 
 const isFrameTheme = (value: string | null): value is FrameTheme =>
   value === 'light' || value === 'dark';
@@ -72,12 +79,14 @@ const missingAssetResponse = (asset: string, locale: Locale): Response =>
 const ensureDesignLabAssets = async (locale: Locale): Promise<Response | undefined> => {
   const stylesheet = Bun.file(stylesheetPath);
   const clientBundle = Bun.file(clientBundlePath);
-  const materialBackground = Bun.file(materialBackgroundPath);
+  const materialBackgroundLight = Bun.file(materialBackgroundLightPath);
+  const materialBackgroundDark = Bun.file(materialBackgroundDarkPath);
 
   if (
     !(await stylesheet.exists()) ||
     !(await clientBundle.exists()) ||
-    !(await materialBackground.exists())
+    !(await materialBackgroundLight.exists()) ||
+    !(await materialBackgroundDark.exists())
   ) {
     return missingAssetResponse(localize(appCopy.server.assetsLabel, locale), locale);
   }
@@ -132,10 +141,17 @@ const server = Bun.serve({
       });
     }
 
-    if (url.pathname === '/material-background.png') {
-      const materialBackground = Bun.file(materialBackgroundPath);
+    if (
+      url.pathname === '/material-background-light.png' ||
+      url.pathname === '/material-background-dark.png'
+    ) {
+      const materialBackground = Bun.file(
+        url.pathname === '/material-background-dark.png'
+          ? materialBackgroundDarkPath
+          : materialBackgroundLightPath,
+      );
       if (!(await materialBackground.exists())) {
-        return missingAssetResponse('/material-background.png', locale);
+        return missingAssetResponse(url.pathname, locale);
       }
 
       return new Response(materialBackground, {

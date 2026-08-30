@@ -327,7 +327,7 @@ export const semanticSpacingTokens = [
   },
 ];
 
-const radiusAliasNames = ['control', 'card', 'panel'];
+const radiusAliasNames = ['pill', 'control', 'controlInner', 'card', 'panel'];
 const radiusTokenEntries = Object.entries(cssVariables.radius);
 const toRadiusToken = ([label, variable]: [string, string]): NamedToken => ({
   label: localized(label, label),

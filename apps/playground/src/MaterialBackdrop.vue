@@ -1,5 +1,11 @@
 <script setup lang="ts">
-import materialBackground from './assets/material-background.png';
+import materialBackgroundDark from './assets/material-background-dark.png';
+import materialBackgroundLight from './assets/material-background-light.png';
+
+const materialBackground =
+  document.documentElement.dataset.theme === 'dark'
+    ? materialBackgroundDark
+    : materialBackgroundLight;
 
 const backgroundStyle = {
   backgroundImage: `url(${materialBackground})`,
