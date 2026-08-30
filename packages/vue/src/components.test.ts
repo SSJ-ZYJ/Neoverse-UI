@@ -163,7 +163,8 @@ describe('UiSegmentedControl', () => {
 
     expect(wrapper.attributes('role')).toBe('radiogroup');
     expect(wrapper.attributes('aria-orientation')).toBe('horizontal');
-    expect(wrapper.classes()).toEqual(expect.arrayContaining(['border', 'border-subtle', 'gap-1']));
+    expect(wrapper.classes()).toEqual(expect.arrayContaining(['gap-1', 'rounded-control']));
+    expect(wrapper.classes()).not.toEqual(expect.arrayContaining(['border-subtle']));
     expect(buttons[0]?.classes()).toEqual(
       expect.arrayContaining([
         'ui-segmented-control__option',

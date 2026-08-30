@@ -74,7 +74,7 @@ const rovingIndex = computed(() => {
 });
 
 const classes = computed(() => [
-  'ui-segmented-control inline-flex items-center gap-1 rounded-control border border-subtle p-1',
+  'ui-segmented-control inline-flex items-center gap-1 rounded-control p-1',
 ]);
 const forwardedAttrs = computed(() => {
   const { class: _class, ...rest } = attrs;
