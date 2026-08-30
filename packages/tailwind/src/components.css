@@ -42,7 +42,6 @@
 
     .ui-button--ghost:hover:not(:disabled) {
       color: var(--neoverse-color-text-primary);
-      background: var(--neoverse-control-hover-background);
     }
   }
 
@@ -57,6 +56,42 @@
     background: var(--neoverse-control-active-background);
   }
 
+  /* Badges carry status through a quiet tint and colored hairline. The status
+     color is informative; the surface remains part of the shared material. */
+  .ui-badge {
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-color-border-subtle);
+    background: var(--neoverse-color-surface-subtle);
+    box-shadow: var(--neoverse-material-edge-highlight-subtle);
+    color: var(--neoverse-color-text-secondary);
+    white-space: nowrap;
+  }
+
+  .ui-badge--info,
+  .ui-badge--success,
+  .ui-badge--warning,
+  .ui-badge--danger {
+    background: color-mix(in srgb, var(--ui-badge-status) 10%, transparent);
+    border-color: color-mix(in srgb, var(--ui-badge-status) 30%, var(--neoverse-color-border-subtle));
+    color: var(--ui-badge-status);
+  }
+
+  .ui-badge--info {
+    --ui-badge-status: var(--neoverse-color-status-info);
+  }
+
+  .ui-badge--success {
+    --ui-badge-status: var(--neoverse-color-status-success);
+  }
+
+  .ui-badge--warning {
+    --ui-badge-status: var(--neoverse-color-status-warning);
+  }
+
+  .ui-badge--danger {
+    --ui-badge-status: var(--neoverse-color-status-danger);
+  }
+
   /* Compact controls share one refractive outer surface and one moving active
      layer. Individual options stay transparent so the group reads as a single
      control, matching the product segmented controls. */
@@ -64,6 +99,10 @@
     position: relative;
     max-width: 100%;
     overflow: hidden;
+    background: var(--neoverse-control-secondary-background);
+    box-shadow: var(--neoverse-control-secondary-shadow);
+    -webkit-backdrop-filter: var(--neoverse-control-secondary-filter);
+    backdrop-filter: var(--neoverse-control-secondary-filter);
   }
 
   .ui-segmented-control__options {
@@ -112,7 +151,7 @@
   }
 
   .ui-segmented-control__option--active {
-    color: var(--neoverse-color-text-primary);
+    color: var(--neoverse-color-accent-secondary);
   }
 
   @media (hover: hover) {

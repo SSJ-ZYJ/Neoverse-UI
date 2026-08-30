@@ -50,6 +50,9 @@
 
   --color-focus: var(--neoverse-color-focus-ring);
   --color-scrim: var(--neoverse-color-overlay-scrim);
+  --color-ambient-ice: var(--neoverse-color-ambient-ice);
+  --color-ambient-mint: var(--neoverse-color-ambient-mint);
+  --color-ambient-violet: var(--neoverse-color-ambient-violet);
 
   --spacing-0: var(--neoverse-space-0);
   --spacing-1: var(--neoverse-space-1);
@@ -90,6 +93,13 @@
 
   --font-sans: var(--neoverse-font-family-sans);
   --font-mono: var(--neoverse-font-family-mono);
+  --font-display: var(--neoverse-font-family-sans);
+  --font-heading: var(--neoverse-font-family-sans);
+  --font-subtitle: var(--neoverse-font-family-sans);
+  --font-body: var(--neoverse-font-family-sans);
+  --font-label: var(--neoverse-font-family-sans);
+  --font-caption: var(--neoverse-font-family-sans);
+  --font-code: var(--neoverse-font-family-mono);
 
   --text-2xs: var(--neoverse-font-size-2xs);
   --text-xs: var(--neoverse-font-size-xs);
@@ -160,6 +170,7 @@
   --radius-2xl: var(--neoverse-radius-2xl);
   --radius-pill: var(--neoverse-radius-pill);
   --radius-control: var(--neoverse-radius-control);
+  --radius-control-inner: var(--neoverse-radius-control-inner);
   --radius-card: var(--neoverse-radius-card);
   --radius-panel: var(--neoverse-radius-panel);
 
@@ -346,6 +357,11 @@
 @layer base {
   body {
     background-color: var(--neoverse-color-surface-canvas);
+    background-image:
+      radial-gradient(60rem 28rem at 8% -10%, var(--neoverse-color-ambient-ice), transparent 65%),
+      radial-gradient(44rem 26rem at 92% 10%, var(--neoverse-color-ambient-mint), transparent 68%),
+      radial-gradient(38rem 24rem at 52% 100%, var(--neoverse-color-ambient-violet), transparent 72%);
+    background-attachment: fixed;
     color: var(--neoverse-color-text-primary);
     font-family: var(--neoverse-font-family-sans);
     font-size: var(--neoverse-typography-body-size);
