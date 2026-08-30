@@ -20,7 +20,7 @@ const props = defineProps<StateRowProps>();
         {{ localize(props.hint, props.locale) }}
       </p>
     </div>
-    <div class="flex min-h-12 min-w-0 items-center gap-3 overflow-x-auto">
+    <div class="flex min-h-12 min-w-0 items-center gap-3 overflow-x-auto py-2">
       <slot />
     </div>
   </article>

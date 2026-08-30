@@ -32,10 +32,6 @@ export const appCopy = {
   brand: localized('Neoverse UI', 'Neoverse UI'),
   designLab: localized('Design Lab', '设计实验室'),
   sidebarDescription: localized(
-    'Tokens, materials, motion, and core components in one focused workspace.',
-    '在一个专注的工作区中查看设计令牌、材质、动效与核心组件。',
-  ),
-  headerDescription: localized(
     'A visual calibration surface for tokens, materials, motion, and core components.',
     '用于校准设计令牌、材质、动效与核心组件的视觉参考界面。',
   ),

@@ -340,8 +340,16 @@ function handleMessage(event: MessageEvent<unknown>): void {
     return;
   }
 
+  /* Only the first height for a freshly mounted frame should snap the view
+     back to the top. Later reports arrive whenever the browser zoom or the
+     window size reflows the iframe, and resetting there would throw away the
+     reader's place in the content and make zoom look anchored to the nav. */
+  const isInitialHeight = frameHeight.value === 0;
   frameHeight.value = Math.max(1, Math.ceil(event.data.height));
-  window.requestAnimationFrame(resetScrollPositions);
+
+  if (isInitialHeight) {
+    window.requestAnimationFrame(resetScrollPositions);
+  }
 }
 
 if (!isFrame) {
@@ -396,7 +404,7 @@ onBeforeUnmount(() => {
     <aside
       id="design-lab-navigation"
       :class="[
-        'fixed inset-y-0 left-0 z-layer-modal flex w-72 shrink-0 flex-col border-r border-subtle material-glass-elevated p-5 shadow-modal transition-transform duration-standard ease-standard lg:static lg:h-screen lg:w-60 lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-layer-modal flex w-72 shrink-0 flex-col border-r border-subtle material-glass-elevated p-5 shadow-modal transition-transform duration-standard ease-standard lg:relative lg:h-screen lg:w-60 lg:translate-x-0',
         isNavOpen ? 'translate-x-0' : '-translate-x-full',
       ]"
       :aria-label="localize(appCopy.navigation.label, locale)"
@@ -406,9 +414,9 @@ onBeforeUnmount(() => {
           <p class="text-label font-label text-accent-primary">
             {{ localize(appCopy.brand, locale) }}
           </p>
-          <p class="mt-1 text-subtitle font-heading tracking-heading text-primary">
+          <h1 class="mt-1 text-subtitle font-heading tracking-heading text-primary">
             {{ localize(appCopy.designLab, locale) }}
-          </p>
+          </h1>
         </div>
         <UiIconButton
           class="lg:hidden"
@@ -475,55 +483,72 @@ onBeforeUnmount(() => {
     </aside>
 
     <div class="flex min-h-0 min-w-0 flex-1 flex-col">
-      <header class="shrink-0 border-b border-subtle material-glass-subtle px-gutter-inline py-4">
-        <div
-          class="mx-auto flex w-full max-w-container-2xl flex-wrap items-center justify-between gap-4"
-        >
-          <div class="flex min-w-0 items-center gap-3">
-            <UiIconButton
-              class="lg:hidden"
-              variant="ghost"
-              size="sm"
-              :label="localize(appCopy.navigation.open, locale)"
-              :aria-expanded="isNavOpen"
-              aria-controls="design-lab-navigation"
-              @click="isNavOpen = true"
-            >
-              <LabIcon name="menu" />
-            </UiIconButton>
-            <div class="min-w-0">
-              <p class="text-label font-label text-accent-primary">
-                {{ localize(appCopy.brand, locale) }}
-              </p>
-              <h1 class="text-heading font-heading tracking-heading">
-                {{ localize(appCopy.designLab, locale) }}
-              </h1>
-            </div>
-          </div>
-          <div class="flex w-full flex-wrap justify-end gap-2 sm:w-auto">
-            <UiSegmentedControl
-              :aria-label="localize(appCopy.theme.label, locale)"
-              :options="themeOptions"
-              :model-value="themeMode"
-              @update:model-value="setTheme"
-            />
-            <UiSegmentedControl
-              :aria-label="localize(appCopy.language.label, locale)"
-              :options="languageOptions"
-              :model-value="locale"
-              @update:model-value="setLocale"
-            />
-          </div>
-        </div>
-        <p class="mx-auto mt-3 w-full max-w-container-2xl text-caption text-secondary">
-          {{ localize(appCopy.headerDescription, locale) }}
-        </p>
-      </header>
-
       <div ref="workspaceElement" class="min-h-0 flex-1 overflow-y-auto">
         <div
           class="mx-auto flex w-full max-w-container-2xl flex-col gap-grid px-gutter-inline py-gutter-block"
         >
+          <header
+            class="sticky top-0 z-layer-sticky -mx-gutter-inline -mt-gutter-block material-glass-subtle px-gutter-inline pt-gutter-block pb-3"
+          >
+            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
+              <div class="flex min-w-0 flex-1 items-center gap-x-3">
+                <UiIconButton
+                  class="shrink-0 lg:hidden"
+                  variant="ghost"
+                  size="sm"
+                  :label="localize(appCopy.navigation.open, locale)"
+                  :aria-expanded="isNavOpen"
+                  aria-controls="design-lab-navigation"
+                  @click="isNavOpen = true"
+                >
+                  <LabIcon name="menu" />
+                </UiIconButton>
+                <p v-if="!isOverview" class="hidden shrink-0 text-caption text-muted lg:block">
+                  {{ selectedGroup ? localize(selectedGroup.label, locale) : '' }}
+                  /
+                </p>
+                <h2
+                  v-if="!isOverview"
+                  id="module-title"
+                  ref="moduleHeading"
+                  tabindex="-1"
+                  class="min-w-0 truncate text-subtitle font-heading tracking-heading outline-none"
+                >
+                  {{ selectedModule ? localize(selectedModule.label, locale) : '' }}
+                </h2>
+              </div>
+              <div class="flex shrink-0 items-center gap-2">
+                <UiSegmentedControl
+                  :aria-label="localize(appCopy.theme.label, locale)"
+                  :options="themeOptions"
+                  :model-value="themeMode"
+                  @update:model-value="setTheme"
+                />
+                <UiSegmentedControl
+                  :aria-label="localize(appCopy.language.label, locale)"
+                  :options="languageOptions"
+                  :model-value="locale"
+                  @update:model-value="setLocale"
+                />
+                <UiButton
+                  v-if="!isOverview"
+                  variant="ghost"
+                  size="sm"
+                  class="hidden sm:inline-flex"
+                  @click="showOverview"
+                >
+                  {{ localize(appCopy.module.backToOverview, locale) }}
+                </UiButton>
+              </div>
+            </div>
+            <p
+              v-if="!isOverview"
+              class="mt-1 line-clamp-1 max-w-container-lg text-caption text-secondary lg:line-clamp-none"
+            >
+              {{ selectedModule ? localize(selectedModule.description, locale) : '' }}
+            </p>
+          </header>
+
           <section v-if="isOverview" aria-labelledby="overview-title" class="grid gap-grid">
             <header class="grid gap-3">
               <p class="text-label font-label text-accent-primary">
@@ -587,34 +612,6 @@ onBeforeUnmount(() => {
           </section>
 
           <section v-else aria-labelledby="module-title" class="grid gap-grid">
-            <header
-              class="sticky top-0 z-layer-sticky -mx-1 border-b border-subtle bg-surface-canvas px-1 py-4"
-            >
-              <div class="flex flex-wrap items-start justify-between gap-4">
-                <div class="min-w-0">
-                  <p class="text-caption text-secondary">
-                    {{ selectedGroup ? localize(selectedGroup.label, locale) : '' }}
-                    /
-                    {{ selectedModule ? localize(selectedModule.label, locale) : '' }}
-                  </p>
-                  <h2
-                    id="module-title"
-                    ref="moduleHeading"
-                    tabindex="-1"
-                    class="mt-1 text-heading font-heading tracking-heading outline-none"
-                  >
-                    {{ selectedModule ? localize(selectedModule.label, locale) : '' }}
-                  </h2>
-                  <p class="mt-2 max-w-container-md text-body text-secondary">
-                    {{ selectedModule ? localize(selectedModule.description, locale) : '' }}
-                  </p>
-                </div>
-                <UiButton variant="ghost" class="shrink-0" @click="showOverview">
-                  {{ localize(appCopy.module.backToOverview, locale) }}
-                </UiButton>
-              </div>
-            </header>
-
             <div
               class="overflow-hidden rounded-card material-glass-elevated"
             >
