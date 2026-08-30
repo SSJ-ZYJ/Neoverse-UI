@@ -133,9 +133,13 @@ try {
     '--neoverse-motion-duration-fast:1ms',
     '--neoverse-motion-spatial-distance:0px',
     '--neoverse-control-active-background',
+    '--neoverse-control-active-highlight',
+    '--neoverse-control-active-shadow',
     '--neoverse-control-primary-background',
     '--neoverse-control-secondary-background',
+    '--neoverse-control-secondary-border',
     '--neoverse-control-secondary-filter',
+    '--neoverse-control-segmented-shadow',
     '--neoverse-skeleton-fill',
   ];
   const missingValues = expectedValues.filter((value) => !css.includes(value));
@@ -156,6 +160,7 @@ try {
     '.ui-button--ghost{',
     'background:var(--neoverse-control-primary-background)',
     'background:var(--neoverse-control-secondary-background)',
+    'border:var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) var(--neoverse-control-secondary-border)',
     'backdrop-filter:var(--neoverse-control-secondary-filter)',
   ];
   const missingFragments = expectedFragments.filter((fragment) => !css.includes(fragment));

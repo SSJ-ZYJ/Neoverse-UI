@@ -99,8 +99,10 @@
     position: relative;
     max-width: 100%;
     overflow: hidden;
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-control-secondary-border);
     background: var(--neoverse-control-secondary-background);
-    box-shadow: var(--neoverse-control-secondary-shadow);
+    box-shadow: var(--neoverse-control-segmented-shadow);
     -webkit-backdrop-filter: var(--neoverse-control-secondary-filter);
     backdrop-filter: var(--neoverse-control-secondary-filter);
   }
