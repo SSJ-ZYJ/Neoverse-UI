@@ -8,11 +8,11 @@ const props = withDefaults(defineProps<BadgeProps>(), {
 });
 
 const variantClasses: Record<BadgeVariant, string> = {
-  neutral: 'bg-surface-subtle text-secondary',
-  info: 'bg-status-info text-status-info-foreground',
-  success: 'bg-status-success text-status-success-foreground',
-  warning: 'bg-status-warning text-status-warning-foreground',
-  danger: 'bg-status-danger text-status-danger-foreground',
+  neutral: 'ui-badge--neutral',
+  info: 'ui-badge--info',
+  success: 'ui-badge--success',
+  warning: 'ui-badge--warning',
+  danger: 'ui-badge--danger',
 };
 
 const sizeClasses: Record<BadgeSize, string> = {
@@ -21,7 +21,7 @@ const sizeClasses: Record<BadgeSize, string> = {
 };
 
 const classes = computed(() => [
-  'inline-flex items-center rounded-pill font-label',
+  'ui-badge inline-flex items-center rounded-pill font-label',
   variantClasses[props.variant as BadgeVariant] ?? variantClasses.neutral,
   sizeClasses[props.size as BadgeSize] ?? sizeClasses.sm,
 ]);

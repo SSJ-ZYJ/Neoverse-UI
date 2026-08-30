@@ -12,7 +12,7 @@ const props = withDefaults(defineProps<SkeletonProps>(), {
 const attrs = useAttrs();
 
 const variantClasses: Record<SkeletonVariant, string> = {
-  text: 'ui-skeleton--text rounded-control',
+  text: 'ui-skeleton--text rounded-control-inner',
   title: 'ui-skeleton--title',
   avatar: 'ui-skeleton--avatar aspect-square rounded-pill',
   circle: 'ui-skeleton--circle aspect-square rounded-pill',

@@ -5,10 +5,10 @@ export const controlFocusClasses =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2';
 
 export const disabledControlClasses =
-  'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-70';
+  'disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-60';
 
 export const buttonBaseClasses =
-  'inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-2 rounded-control font-label';
+  'inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-2 rounded-control-inner font-label';
 
 export const buttonVariantClasses = {
   primary: 'ui-button--primary',

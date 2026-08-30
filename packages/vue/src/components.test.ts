@@ -102,7 +102,7 @@ describe('display components', () => {
       slots: { default: 'Error' },
     });
     expect(badge.classes()).toEqual(
-      expect.arrayContaining(['bg-status-danger', 'text-status-danger-foreground', 'text-label']),
+      expect.arrayContaining(['ui-badge', 'ui-badge--danger', 'text-label']),
     );
 
     const glass = mount(UiGlassSurface, { props: { variant: 'immersive' } });
@@ -113,9 +113,9 @@ describe('display components', () => {
     const card = mount(UiCard, { attrs: { class: 'max-w-container-sm' } });
     expect(card.classes()).toEqual(
       expect.arrayContaining([
-        'bg-surface-raised',
+        'ui-card',
+        'material-glass-elevated',
         'rounded-card',
-        'shadow-card',
         'max-w-container-sm',
       ]),
     );

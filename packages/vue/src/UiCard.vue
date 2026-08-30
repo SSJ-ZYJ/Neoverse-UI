@@ -1,5 +1,5 @@
 <template>
-  <div class="rounded-card border border-subtle bg-surface-raised p-4 shadow-card">
+  <div class="ui-card material-glass-elevated rounded-card p-4">
     <slot />
   </div>
 </template>

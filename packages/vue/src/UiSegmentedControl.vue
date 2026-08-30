@@ -11,7 +11,7 @@ import type { SegmentedControlProps, SegmentedControlSize, SegmentOption } from 
 defineOptions({ inheritAttrs: false });
 
 const props = withDefaults(defineProps<SegmentedControlProps>(), {
-  size: 'md',
+  size: 'sm',
   disabled: false,
   loading: false,
 });
@@ -40,11 +40,11 @@ const optionRefs = ref<Array<HTMLButtonElement | null>>([]);
 
 const optionSizeClasses: Record<SegmentedControlSize, string> = {
   sm: 'h-7 px-2 text-caption',
-  md: 'h-10 px-3 text-label',
-  lg: 'h-11 px-4 text-label',
+  md: 'h-9 px-3 text-label',
+  lg: 'h-10 px-3 text-label',
 };
 
-const selectedOptionClasses = 'ui-segmented-control__option--active text-primary';
+const selectedOptionClasses = 'ui-segmented-control__option--active text-accent-secondary';
 const unselectedOptionClasses = 'text-secondary';
 const disabledOptionClasses =
   'disabled:pointer-events-none disabled:text-disabled disabled:cursor-not-allowed';
@@ -74,7 +74,7 @@ const rovingIndex = computed(() => {
 });
 
 const classes = computed(() => [
-  'ui-segmented-control inline-flex items-center gap-1 rounded-control border border-subtle p-1 material-glass-subtle',
+  'ui-segmented-control inline-flex items-center gap-1 rounded-control border border-subtle p-1',
 ]);
 const forwardedAttrs = computed(() => {
   const { class: _class, ...rest } = attrs;
@@ -217,7 +217,7 @@ function setOptionRef(element: Element | ComponentPublicInstance | null, index: 
 
 function optionClasses(option: SegmentOption): string[] {
   return [
-    'ui-segmented-control__option rounded-control',
+    'ui-segmented-control__option rounded-control-inner',
     segmentedTransitionClasses,
     controlFocusClasses,
     'font-label',
