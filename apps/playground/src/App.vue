@@ -396,7 +396,7 @@ onBeforeUnmount(() => {
     <aside
       id="design-lab-navigation"
       :class="[
-        'fixed inset-y-0 left-0 z-layer-modal flex w-72 shrink-0 flex-col border-r border-subtle bg-surface-raised p-5 shadow-modal transition-transform duration-standard ease-standard lg:static lg:h-screen lg:w-60 lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-layer-modal flex w-72 shrink-0 flex-col border-r border-subtle material-glass-elevated p-5 shadow-modal transition-transform duration-standard ease-standard lg:static lg:h-screen lg:w-60 lg:translate-x-0',
         isNavOpen ? 'translate-x-0' : '-translate-x-full',
       ]"
       :aria-label="localize(appCopy.navigation.label, locale)"
@@ -475,7 +475,7 @@ onBeforeUnmount(() => {
     </aside>
 
     <div class="flex min-h-0 min-w-0 flex-1 flex-col">
-      <header class="shrink-0 border-b border-subtle bg-surface-raised px-gutter-inline py-4">
+      <header class="shrink-0 border-b border-subtle material-glass-subtle px-gutter-inline py-4">
         <div
           class="mx-auto flex w-full max-w-container-2xl flex-wrap items-center justify-between gap-4"
         >
@@ -546,7 +546,7 @@ onBeforeUnmount(() => {
               <article
                 v-for="group in sectionsByGroup"
                 :key="group.id"
-                class="grid content-start gap-4 rounded-card border border-subtle bg-surface-raised p-5 shadow-card"
+                class="grid content-start gap-4 rounded-card material-glass-elevated p-5"
               >
                 <div class="flex items-start justify-between gap-3">
                   <div>
@@ -616,7 +616,7 @@ onBeforeUnmount(() => {
             </header>
 
             <div
-              class="overflow-hidden rounded-card border border-subtle bg-surface-raised shadow-card"
+              class="overflow-hidden rounded-card material-glass-elevated"
             >
               <iframe
                 ref="frameElement"

@@ -26,7 +26,7 @@ const motionBaseEntries = motionBaseGroups.map((group) => ({
           {{ localize(moduleCopy.motion.primitive.description, props.locale) }}
         </p>
       </header>
-      <div class="grid gap-3 rounded-control border border-subtle bg-surface-canvas p-4 md:grid-cols-2">
+      <div class="grid gap-3 rounded-control material-glass-subtle p-4 md:grid-cols-2">
         <div v-for="group in motionBaseEntries" :key="group.label.en" class="grid gap-1">
           <h3 class="text-label font-label text-primary">
             {{ localize(group.label, props.locale) }}
@@ -50,7 +50,7 @@ const motionBaseEntries = motionBaseGroups.map((group) => ({
         <article
           v-for="sample in motionSamples"
           :key="sample.label.en"
-          class="grid gap-3 rounded-control border border-subtle bg-surface-canvas p-4"
+          class="grid gap-3 rounded-control material-glass-subtle p-4"
         >
           <div
             :class="[
@@ -71,7 +71,7 @@ const motionBaseEntries = motionBaseGroups.map((group) => ({
           </div>
         </article>
       </div>
-      <div class="grid gap-3 rounded-control border border-subtle bg-surface-canvas p-4">
+      <div class="grid gap-3 rounded-control material-glass-subtle p-4">
         <div v-for="group in motionVariableEntries" :key="group.label.en" class="grid gap-1">
           <h3 class="text-label font-label text-primary">
             {{

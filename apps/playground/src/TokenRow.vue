@@ -50,7 +50,7 @@ onMounted(() => {
 
 <template>
   <div
-    class="flex min-w-0 items-center gap-3 rounded-control border border-subtle bg-surface-canvas p-3"
+    class="flex min-w-0 items-center gap-3 rounded-control material-glass-subtle p-3"
   >
     <span
       v-if="props.preview === 'color'"

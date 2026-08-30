@@ -11,7 +11,7 @@ const backgroundStyle = {
 
 <template>
   <div
-    class="overflow-hidden rounded-card border border-subtle p-4 md:p-5"
+    class="overflow-hidden rounded-card border border-subtle bg-surface-canvas p-4 md:p-5"
     :style="backgroundStyle"
   >
     <slot />

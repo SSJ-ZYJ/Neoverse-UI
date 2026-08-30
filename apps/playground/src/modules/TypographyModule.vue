@@ -11,7 +11,7 @@ const props = defineProps<LabModuleProps>();
     <article
       v-for="token in typographyTokens"
       :key="token.label.en"
-      class="grid gap-3 rounded-control border border-subtle bg-surface-canvas p-4"
+      class="grid gap-3 rounded-control material-glass-subtle p-4"
     >
       <div class="flex flex-wrap items-baseline justify-between gap-2">
         <h3 class="text-label font-label text-primary">

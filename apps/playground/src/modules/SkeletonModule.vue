@@ -9,31 +9,31 @@ const copy = moduleCopy.skeleton;
 
 <template>
   <div class="grid gap-grid sm:grid-cols-2 xl:grid-cols-5">
-    <article class="grid gap-3 rounded-control border border-subtle bg-surface-canvas p-4">
+    <article class="grid gap-3 rounded-control material-glass-subtle p-4">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.text, props.locale) }}
       </h3>
       <UiSkeleton variant="text" class="w-full" />
     </article>
-    <article class="grid gap-3 rounded-control border border-subtle bg-surface-canvas p-4">
+    <article class="grid gap-3 rounded-control material-glass-subtle p-4">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.title, props.locale) }}
       </h3>
       <UiSkeleton variant="title" class="w-4/5" />
     </article>
-    <article class="grid gap-3 rounded-control border border-subtle bg-surface-canvas p-4">
+    <article class="grid gap-3 rounded-control material-glass-subtle p-4">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.rect, props.locale) }}
       </h3>
       <UiSkeleton variant="rect" width="100%" height="6rem" radius="0.75rem" />
     </article>
-    <article class="grid gap-3 rounded-control border border-subtle bg-surface-canvas p-4">
+    <article class="grid gap-3 rounded-control material-glass-subtle p-4">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.circle, props.locale) }}
       </h3>
       <UiSkeleton variant="circle" class="size-16" />
     </article>
-    <article class="grid gap-3 rounded-control border border-subtle bg-surface-canvas p-4">
+    <article class="grid gap-3 rounded-control material-glass-subtle p-4">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.avatar, props.locale) }}
       </h3>
@@ -46,7 +46,7 @@ const copy = moduleCopy.skeleton;
       </div>
     </article>
   </div>
-  <div class="grid gap-2 rounded-control border border-subtle bg-surface-canvas p-4 sm:grid-cols-2">
+  <div class="grid gap-2 rounded-control material-glass-subtle p-4 sm:grid-cols-2">
     <div class="grid gap-2">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.pulse, props.locale) }}
