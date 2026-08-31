@@ -57,7 +57,7 @@ export const glassFragmentShader = `
     float inside = 1.0 - smoothstep(-1.0, 0.0, distance);
     // Softness only anti-aliases the silhouette. A large blur must not turn
     // into a second, visibly painted border.
-    float edgeFalloff = clamp(u_softness * 0.26, 0.65, 1.55);
+    float edgeFalloff = clamp(u_softness * 0.1, 0.35, 0.65);
     float edge = 1.0 - smoothstep(0.0, u_edge_width + edgeFalloff, -distance);
     float edgeMask = inside * edge;
 
@@ -76,26 +76,28 @@ export const glassFragmentShader = `
 
     // Keep a thick token edge narrow on screen, but let its chromatic response
     // become stronger. This is the refraction gain, not a white-line gain.
-    float thicknessScale = clamp(0.8 + (u_edge_width * 0.35), 0.85, 1.65);
-    float chromaticStrength = clamp(0.72 + ((thicknessScale - 1.0) * 0.75), 0.72, 1.25);
+    float thicknessScale = clamp(0.82 + (u_edge_width * 0.55), 0.9, 1.65);
+    float chromaticStrength = clamp(0.9 + ((thicknessScale - 1.0) * 1.4), 0.9, 1.8);
 
     // Keep the carrier and incident light restrained. Directional accent colors
     // do the visible refraction work; edgeLight must never close into a white
     // outline, especially on the light theme where it is near-white.
-    vec3 refractedBase = mix(u_primary, u_secondary, 0.32 + (bottomRightScatter * 0.2));
-    refractedBase = mix(refractedBase, u_carrier, 0.04);
-    float edgeLightCatch = (0.012 + (topLeftLight * 0.04)) * (2.0 - thicknessScale);
+    vec3 refractedBase = mix(u_primary, u_secondary, 0.48 + (bottomRightScatter * 0.2));
+    refractedBase = mix(refractedBase, u_carrier, 0.015);
+    float edgeLightCatch = (0.003 + (topLeftLight * 0.012)) * (2.0 - thicknessScale);
     vec3 lightBlend = mix(refractedBase, u_edge_light, edgeLightCatch);
     vec3 lowerBlend = mix(u_primary, u_secondary, 0.24 + (bottomRightScatter * 0.4));
-    lowerBlend = mix(lowerBlend, u_tertiary, rightCatch * 0.36 * chromaticStrength);
+    lowerBlend = mix(lowerBlend, u_tertiary, rightCatch * 0.52 * chromaticStrength);
     vec3 color = mix(lightBlend, lowerBlend, bottomCatch * 0.5);
-    color = mix(color, u_secondary, leftCatch * 0.32 * chromaticStrength);
-    color = mix(color, u_tertiary, rightCatch * 0.36 * chromaticStrength);
+    vec3 topLeftRefraction = mix(u_secondary, u_primary, 0.35);
+    color = mix(color, topLeftRefraction, topLeftLight * 0.24 * chromaticStrength);
+    color = mix(color, u_secondary, leftCatch * 0.46 * chromaticStrength);
+    color = mix(color, u_tertiary, rightCatch * 0.52 * chromaticStrength);
     vec3 cornerBlend = mix(u_secondary, u_tertiary, 0.5 + (normal.y * 0.18));
-    color = mix(color, cornerBlend, cornerCatch * 0.28 * chromaticStrength);
+    color = mix(color, cornerBlend, cornerCatch * 0.38 * chromaticStrength);
 
-    float coolFringe = ((rightCatch * 0.3) + (topCatch * 0.08)) * chromaticStrength;
-    float warmFringe = ((bottomCatch * 0.24) + (leftCatch * 0.08)) * chromaticStrength;
+    float coolFringe = ((rightCatch * 0.44) + (topCatch * 0.12)) * chromaticStrength;
+    float warmFringe = ((bottomCatch * 0.32) + (leftCatch * 0.1)) * chromaticStrength;
     color.r += warmFringe * 0.045;
     color.g += topLeftLight * 0.055 * chromaticStrength;
     color.b += coolFringe * 0.2;

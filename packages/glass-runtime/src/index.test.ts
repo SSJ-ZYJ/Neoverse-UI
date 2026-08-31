@@ -290,6 +290,24 @@ describe('Glass renderer', () => {
     expect(glassFragmentShader).toContain('float chromaticStrength');
     expect(glassFragmentShader).toContain('float edgeLightCatch');
     expect(glassFragmentShader).toContain('float cornerCatch');
+    expect(glassFragmentShader).toContain(
+      'float thicknessScale = clamp(0.82 + (u_edge_width * 0.55), 0.9, 1.65);',
+    );
+    expect(glassFragmentShader).toContain(
+      'float edgeFalloff = clamp(u_softness * 0.1, 0.35, 0.65);',
+    );
+    expect(glassFragmentShader).toContain(
+      'float chromaticStrength = clamp(0.9 + ((thicknessScale - 1.0) * 1.4), 0.9, 1.8);',
+    );
+    expect(glassFragmentShader).toContain(
+      'float edgeLightCatch = (0.003 + (topLeftLight * 0.012)) * (2.0 - thicknessScale);',
+    );
+    expect(glassFragmentShader).toContain(
+      'vec3 topLeftRefraction = mix(u_secondary, u_primary, 0.35);',
+    );
+    expect(glassFragmentShader).toContain(
+      'mix(u_primary, u_secondary, 0.48 + (bottomRightScatter * 0.2))',
+    );
     expect(glassFragmentShader).not.toContain('u_edge_light, 0.1 + (topLeftLight * 0.26)');
   });
 
