@@ -76,7 +76,9 @@ material-glass-elevated
 material-glass-immersive
 ```
 
-Their Background, Transparency, Blur, Saturation, Border, Edge Highlight, Shadow, and Refraction Gradient values come from `@neoverse-ui/tokens`. Border and spatial depth remain available when backdrop filtering is unsupported or reduced. Glass nested under another Glass material is downgraded to an opaque Surface.
+Their Background, Tint, Transparency, Blur, Saturation, Edge Filter, Edge Highlight, Inner Glow, Seam Glow, Bloom, Shadow, and Refraction values come from `@neoverse-ui/tokens`. Supported browsers render one continuous backdrop-sampled plane plus a narrow directional inset refraction field; the field follows the ambient tint without becoming a uniform painted ring or fixed white border. The host border stays transparent; a blurred shadow fallback remains available when backdrop filtering is unsupported or reduced. Glass nested under another Glass material is downgraded to an opaque Surface.
+
+The optional `@neoverse-ui/glass-runtime` package adds a shared, static WebGL edge pass. Call `createGlassRenderer().mount()` once per Document (an iframe owns its own Document) after the app mounts. It discovers the three `material-glass-*` utilities and also understands the existing Aurora Glass surface names `glass-card` and `glass-surface`, while accepting both the package's `--neoverse-*` tokens and the established `--aurora-*` / `--glass-*` aliases. CSS `backdrop-filter` remains responsible for real DOM background sampling; WebGL only draws the rounded edge thickness, top-left highlight, and lower/right chromatic ambient catches. WebGL2 is preferred with WebGL1 fallback. When WebGL is unavailable, the context is lost, or `prefers-reduced-transparency: reduce` is active, the canvas and activation marker are removed and the CSS refraction field remains the fallback.
 
 ## Motion Foundation
 

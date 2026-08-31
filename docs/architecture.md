@@ -20,6 +20,10 @@ Owns the Tailwind v4 CSS-first Foundation. `src/theme.css` imports the complete 
 
 Owns framework-agnostic semantic Motion aliases and the `./css` entry. Its CSS imports `@neoverse-ui/tokens/css`, exposes micro/state/spatial duration, easing, and transition-property Variables, and applies `prefers-reduced-motion` overrides. Its TypeScript exports are values and CSS Variable names only; it has no DOM, runtime animation, Vue, or React dependency.
 
+### `@neoverse-ui/glass-runtime`
+
+Owns the optional framework-agnostic static edge renderer for Aurora Glass. A mounted renderer creates at most one transparent, non-interactive Canvas per Document, discovers top-level `material-glass-subtle`, `material-glass-elevated`, and `material-glass-immersive` surfaces, and accepts the production `glass-card` / `glass-surface` aliases. WebGL2 is preferred and WebGL1 is the fallback context. The renderer uses a rounded-rectangle SDF for directional thickness, top-left light, and lower/right chromatic catches; it never captures the page into a texture or replaces CSS background sampling. Size, scroll, theme, and DOM changes schedule a redraw, but there is no sweep or pointer animation. Context loss and reduced transparency remove the Canvas and renderer marker so the CSS material field and opaque fallback remain authoritative.
+
 ### `@neoverse-ui/vue`
 
 Owns the Vue 3 SFC component integration. Core components expose semantic props, slots, native accessibility behavior, and Tailwind class composition; Vue is externalized as a peer dependency. Consumers import `@neoverse-ui/tailwind` separately for the semantic CSS foundation.
@@ -30,7 +34,7 @@ Reserves the future React integration boundary. It intentionally has no runtime 
 
 ### `@neoverse-ui/playground`
 
-Owns the Vue-driven Design Lab and visual reference surface. Bun.serve serves the HTML shell, theme-isolated frame documents, compiled Tailwind CSS, and the Vite browser bundle; the frames consume the real Vue package and are not a marketing page.
+Owns the Vue-driven Design Lab and visual reference surface. Bun.serve serves the HTML shell, theme-isolated frame documents, compiled Tailwind CSS, and the Vite browser bundle; the frames consume the real Vue package and are not a marketing page. The browser entry mounts the shared Glass runtime once in each top-level or iframe Document.
 
 ## Theme modes
 
@@ -40,6 +44,6 @@ The Tailwind package maps these variables into semantic namespaces such as `bg-s
 
 ## Surface / Glass Material System
 
-Material effect values are owned by `@neoverse-ui/tokens/src/material.css`. Surface Solid, Subtle, and Elevated are composed from normal Tailwind utilities. Only Glass Subtle, Elevated, and Immersive use `material-glass-*` custom utilities.
+Material effect values are owned by `@neoverse-ui/tokens/src/material.css`. Surface Solid, Subtle, and Elevated are composed from normal Tailwind utilities. Only Glass Subtle, Elevated, and Immersive use `material-glass-*` custom utilities; controls reuse the same filter, inner-glow, bloom, and edge-highlight tokens through their semantic aliases.
 
-Glass utilities apply opaque Surface fallback first, then progressively enhance with `color-mix`, `backdrop-filter`, saturation, and refraction gradient when supported. `prefers-reduced-transparency: reduce` disables those enhancements while retaining border, edge highlight, and shadow. A Glass descendant of another Glass is downgraded to `surface-raised` and does not apply a second filter or refraction layer.
+Glass utilities apply an opaque Surface fallback first, then progressively enhance with a tokenized tint, `backdrop-filter`, saturation, and chromatic ambient bloom. In supported browsers, the material remains one continuous backdrop-sampled plane with a transparent host border; a narrow inset field adds directional, softened refraction without expanding beyond the silhouette or drawing a uniform outer ring. The optional Glass runtime masks that CSS edge field only after its shared WebGL Canvas has activated, leaving the CSS field as the progressive-enhancement fallback. `prefers-reduced-transparency: reduce` disables the backdrop filter and refraction field while retaining the fallback surface, inner glow, and shadow. A Glass descendant of another Glass is downgraded to `surface-raised` and does not apply a second filter or refraction layer.
