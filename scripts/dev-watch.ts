@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 const rootDirectory = resolve(import.meta.dir, '..');
 const tokensDirectory = resolve(rootDirectory, 'packages/tokens');
 const motionDirectory = resolve(rootDirectory, 'packages/motion');
+const glassRuntimeDirectory = resolve(rootDirectory, 'packages/glass-runtime');
 const tailwindDirectory = resolve(rootDirectory, 'packages/tailwind');
 const playgroundDirectory = resolve(rootDirectory, 'apps/playground');
 const tailwindCli = resolve(
@@ -31,6 +32,8 @@ const buildTokensCss = (): Promise<void> =>
   run(tokensDirectory, 'bun', ['scripts/copy-css.ts']);
 const buildMotionCss = (): Promise<void> =>
   run(motionDirectory, 'bun', ['scripts/copy-css.ts']);
+const buildGlassRuntime = (): Promise<void> =>
+  run(glassRuntimeDirectory, 'bun', ['run', 'build']);
 const buildTailwind = async (): Promise<void> => {
   await run(tailwindDirectory, 'bun', ['scripts/copy-theme.ts']);
   await run(tailwindDirectory, tailwindCli, ['-i', 'src/index.css', '-o', 'dist/index.css']);
@@ -73,6 +76,10 @@ const onMotionChange = (): void => {
   });
 };
 
+const onGlassRuntimeChange = (): void => {
+  queue('glass runtime', buildGlassRuntime);
+};
+
 const onTailwindChange = (): void => {
   queue('tailwind', buildTailwind);
 };
@@ -86,6 +93,11 @@ const onSourceChange = (): void => {
 const directories: Array<{ path: string; extensions: string[]; handler: () => void }> = [
   { path: resolve(tokensDirectory, 'src'), extensions: ['.css'], handler: onTokensChange },
   { path: resolve(motionDirectory, 'src'), extensions: ['.css'], handler: onMotionChange },
+  {
+    path: resolve(glassRuntimeDirectory, 'src'),
+    extensions: ['.ts'],
+    handler: onGlassRuntimeChange,
+  },
   { path: resolve(tailwindDirectory, 'src'), extensions: ['.css'], handler: onTailwindChange },
   {
     path: resolve(playgroundDirectory, 'src'),
@@ -174,4 +186,4 @@ setInterval(() => {
   });
 }, 1000);
 
-console.log('[watch] watching tokens, motion, tailwind and playground sources…');
+console.log('[watch] watching tokens, motion, glass runtime, tailwind and playground sources…');
