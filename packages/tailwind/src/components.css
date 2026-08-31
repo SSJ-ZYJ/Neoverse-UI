@@ -17,7 +17,7 @@
 
   .ui-button--secondary {
     color: var(--neoverse-color-text-secondary);
-    border-color: var(--neoverse-color-border-subtle);
+    border-color: var(--neoverse-control-secondary-border);
     background: var(--neoverse-control-secondary-background);
     box-shadow: var(--neoverse-control-secondary-shadow);
     -webkit-backdrop-filter: var(--neoverse-control-secondary-filter);
@@ -31,6 +31,7 @@
 
   @media (hover: hover) {
     .ui-button--primary:hover:not(:disabled) {
+      background: var(--neoverse-control-primary-hover-background);
       transform: translateY(-1px);
     }
 
@@ -43,6 +44,10 @@
     .ui-button--ghost:hover:not(:disabled) {
       color: var(--neoverse-color-text-primary);
     }
+  }
+
+  .ui-button--primary:active:not(:disabled) {
+    background: var(--neoverse-control-primary-active-background);
   }
 
   .ui-button--primary:active:not(:disabled),
@@ -62,7 +67,8 @@
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
       var(--neoverse-color-border-subtle);
     background: var(--neoverse-color-surface-subtle);
-    box-shadow: var(--neoverse-material-edge-highlight-subtle);
+    box-shadow: var(--neoverse-material-edge-highlight-subtle),
+      var(--neoverse-material-inner-glow-subtle), var(--neoverse-material-bloom-subtle);
     color: var(--neoverse-color-text-secondary);
     white-space: nowrap;
   }
@@ -124,7 +130,7 @@
     width: calc((100% - (var(--segment-count) - 1) * 0.24rem) / var(--segment-count));
     border-radius: calc(var(--neoverse-radius-control) - 0.18rem);
     background: var(--neoverse-control-active-background);
-    box-shadow: var(--neoverse-control-active-highlight), var(--neoverse-control-active-shadow);
+    box-shadow: var(--neoverse-control-active-shadow);
     pointer-events: none;
     transform: translateX(calc(var(--segment-index) * (100% + 0.24rem)));
     transition: transform var(--neoverse-motion-duration-standard)
