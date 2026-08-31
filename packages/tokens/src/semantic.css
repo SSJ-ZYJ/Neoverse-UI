@@ -51,50 +51,41 @@
     --neoverse-color-ambient-mint: rgb(52 211 153 / 10%);
     --neoverse-color-ambient-violet: rgb(124 110 230 / 9%);
 
-    /* Shared compact-control feedback follows the Aurora glass language used
-       by the product surfaces: one moving selected layer, a restrained hover
-       tint, and a single inset highlight. */
+    /* The primary CTA wears the light blue at full strength — one thin top
+       sheen, no heavy white mixing — so it reads as a deliberate tint, not a
+       washed-out wash. */
     --neoverse-control-primary-background: linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--neoverse-color-edge-light) 26%, transparent),
-        transparent 48%
-      ),
-      linear-gradient(
-        120deg,
-        color-mix(
-          in srgb,
-          var(--neoverse-color-accent-primary) 70%,
-          var(--neoverse-color-white)
-        ),
-        color-mix(
-          in srgb,
-          var(--neoverse-color-accent-primary) 58%,
-          var(--neoverse-color-white)
-        )
-      );
+      165deg,
+      color-mix(in srgb, var(--neoverse-color-white) 10%, var(--neoverse-color-action-primary)),
+      var(--neoverse-color-action-primary) 44%
+    );
     --neoverse-control-primary-border: color-mix(
       in srgb,
-      var(--neoverse-color-accent-primary) 54%,
-      var(--neoverse-color-edge-light)
+      var(--neoverse-color-action-primary-hover) 34%,
+      transparent
     );
-    --neoverse-control-primary-shadow: inset 0 1px 0
-        color-mix(in srgb, var(--neoverse-color-edge-light) 78%, transparent),
-      0 1rem 2.4rem -1.35rem color-mix(
+    --neoverse-control-primary-shadow: var(--neoverse-material-edge-highlight-subtle),
+      0 0.6rem 1.6rem -0.7rem color-mix(
         in srgb,
-        var(--neoverse-color-accent-primary) 24%,
+        var(--neoverse-color-action-primary) 55%,
         transparent
-      );
-    --neoverse-control-secondary-background: linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--neoverse-color-edge-light) 18%, transparent),
-        transparent 48%
       ),
-      var(--neoverse-color-surface-subtle);
+      var(--neoverse-shadow-control);
+    --neoverse-control-primary-hover-background: linear-gradient(
+      165deg,
+      var(--neoverse-color-action-primary-hover),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-action-primary-active) 62%,
+        var(--neoverse-color-action-primary-hover)
+      )
+    );
+    --neoverse-control-primary-active-background: var(--neoverse-color-action-primary-active);
     /* The light glass surface already gets its silhouette from the edge
        highlight and quiet shadow. A dark hairline makes the control look
        cut out instead of refractive. */
     --neoverse-control-secondary-border: transparent;
-    --neoverse-control-segmented-shadow: none;
+    --neoverse-control-segmented-shadow: var(--neoverse-control-secondary-shadow);
     --neoverse-control-secondary-hover-background: linear-gradient(
         135deg,
         color-mix(in srgb, var(--neoverse-color-edge-light) 26%, transparent),
@@ -102,23 +93,25 @@
       ),
       color-mix(
         in srgb,
-        var(--neoverse-color-surface-subtle) 78%,
-        var(--neoverse-color-accent-soft)
+        var(--neoverse-material-tint-elevated) 78%,
+        transparent
       );
     --neoverse-control-secondary-shadow: var(--neoverse-material-edge-highlight-subtle),
+      var(--neoverse-material-inner-glow-subtle), var(--neoverse-material-bloom-subtle),
       var(--neoverse-shadow-control);
     --neoverse-control-secondary-hover-shadow: var(--neoverse-material-edge-highlight-elevated),
+      var(--neoverse-material-inner-glow-elevated), var(--neoverse-material-bloom-elevated),
       var(--neoverse-shadow-control);
-    --neoverse-control-secondary-filter: blur(8px) saturate(132%) brightness(102%) contrast(101%);
+    --neoverse-control-secondary-filter: var(--neoverse-material-filter-subtle);
     --neoverse-control-active-background: linear-gradient(
       145deg,
       color-mix(in srgb, var(--neoverse-color-accent-secondary) 13%, transparent),
       color-mix(in srgb, var(--neoverse-color-accent-primary) 7%, transparent)
     );
-    /* The light active fill is enough to signal selection; extra edge layers
-       make the selected option read as a hard outlined chip. */
+    /* The light active fill plus a compact outer shadow signals selection
+       without turning the selected option into a hard outlined chip. */
     --neoverse-control-active-highlight: none;
-    --neoverse-control-active-shadow: none;
+    --neoverse-control-active-shadow: var(--neoverse-shadow-control);
     --neoverse-control-hover-background: color-mix(
       in srgb,
       var(--neoverse-color-accent-primary) 10%,

@@ -33,22 +33,54 @@ test('keeps skeleton motion at a calmer loading pace', async () => {
   expect(duration).toBe('1.25s');
 });
 
-test('keeps the light active control layer free of a dark outline', async () => {
+test('keeps the light segmented control active layer visibly grounded', async () => {
   const [semanticCss, themesCss] = await Promise.all([
     readTokenCss('semantic.css'),
     readTokenCss('themes.css'),
   ]);
 
   expect(semanticCss).toContain('--neoverse-control-active-highlight: none;');
-  expect(semanticCss).toContain('--neoverse-control-active-shadow: none;');
-  expect(semanticCss).toContain('--neoverse-control-segmented-shadow: none;');
+  expect(semanticCss).toContain(
+    '--neoverse-control-active-shadow: var(--neoverse-shadow-control);',
+  );
+  expect(semanticCss).toContain(
+    '--neoverse-control-segmented-shadow: var(--neoverse-control-secondary-shadow);',
+  );
+  expect(semanticCss).toContain(
+    '--neoverse-control-secondary-shadow: var(--neoverse-material-edge-highlight-subtle),',
+  );
   expect(
-    themesCss.match(/--neoverse-control-active-shadow:\s*var\(--neoverse-shadow-xs\);/g),
+    themesCss.match(
+      /--neoverse-control-active-shadow:\s*var\(--neoverse-control-active-highlight\),\s*var\(--neoverse-shadow-xs\);/g,
+    ),
   ).toHaveLength(2);
   expect(
     themesCss.match(
       /--neoverse-control-segmented-shadow:\s*var\(--neoverse-control-secondary-shadow\);/g,
     ),
+  ).toHaveLength(2);
+});
+
+test('keeps light control buttons grounded by a compact theme-aware shadow', async () => {
+  const [geometryCss, semanticCss, themesCss] = await Promise.all([
+    readTokenCss('geometry.css'),
+    readTokenCss('semantic.css'),
+    readTokenCss('themes.css'),
+  ]);
+  const controlShadow = 'var(--neoverse-shadow-control)';
+
+  expect(geometryCss).toContain('--neoverse-shadow-control: 0 2px 6px -1px rgb(14 34 44 / 20%);');
+
+  for (const name of ['primary', 'secondary']) {
+    const declaration = semanticCss.match(
+      new RegExp(`--neoverse-control-${name}-shadow:([\\s\\S]*?);`),
+    )?.[1];
+
+    expect(declaration).toContain(controlShadow);
+  }
+
+  expect(
+    themesCss.match(/--neoverse-shadow-control:\s*var\(--neoverse-shadow-xs\);/g),
   ).toHaveLength(2);
 });
 
@@ -78,7 +110,7 @@ test('exposes semantic geometry and focus aliases', () => {
 });
 
 test('exposes shared Surface and Glass material contracts', () => {
-  const parameters = [
+  const surfaceParameters = [
     'background',
     'backgroundFallback',
     'transparency',
@@ -90,25 +122,71 @@ test('exposes shared Surface and Glass material contracts', () => {
     'shadow',
     'refractionGradient',
   ];
-  const roles = [
+  const glassParameters = [
+    'background',
+    'backgroundFallback',
+    'tint',
+    'transparency',
+    'blur',
+    'saturation',
+    'filter',
+    'edgeFilter',
+    'border',
+    'borderWidth',
+    'edgeRefractionOpacity',
+    'edgeRefractionWidth',
+    'edgeRefractionSoftness',
+    'edgeRefractionCarrier',
+    'edgeHighlight',
+    'innerGlow',
+    'seamGlow',
+    'bloom',
+    'shadow',
+    'refractionGradient',
+  ];
+  const surfaceRoles = [
     cssVariables.material.surface.solid,
     cssVariables.material.surface.subtle,
     cssVariables.material.surface.elevated,
+  ];
+  const glassRoles = [
     cssVariables.material.glass.subtle,
     cssVariables.material.glass.elevated,
     cssVariables.material.glass.immersive,
   ];
 
-  for (const role of roles) {
-    expect(Object.keys(role)).toEqual(parameters);
+  for (const role of surfaceRoles) {
+    expect(Object.keys(role)).toEqual(surfaceParameters);
+  }
+
+  for (const role of glassRoles) {
+    expect(Object.keys(role)).toEqual(glassParameters);
   }
 
   expect(cssVariables.material.scale.blur.md).toBe('--neoverse-material-blur-md');
   expect(cssVariables.material.scale.saturation.immersive).toBe(
     '--neoverse-material-saturation-immersive',
   );
+  expect(cssVariables.material.scale.filter.elevated).toBe('--neoverse-material-filter-elevated');
+  expect(cssVariables.material.scale.edgeFilter.immersive).toBe(
+    '--neoverse-material-edge-filter-immersive',
+  );
+  expect(cssVariables.material.scale.tint.subtle).toBe('--neoverse-material-tint-subtle');
+  expect(cssVariables.material.scale.innerGlow.elevated).toBe(
+    '--neoverse-material-inner-glow-elevated',
+  );
+  expect(cssVariables.material.scale.seamGlow.subtle).toBe('--neoverse-material-seam-glow-subtle');
+  expect(cssVariables.material.scale.bloom.immersive).toBe(
+    '--neoverse-material-bloom-immersive',
+  );
   expect(cssVariables.material.surface.elevated.shadow).toBe(
     '--neoverse-material-surface-elevated-shadow',
+  );
+  expect(cssVariables.material.glass.elevated.filter).toBe(
+    '--neoverse-material-glass-elevated-filter',
+  );
+  expect(cssVariables.material.glass.immersive.edgeRefractionSoftness).toBe(
+    '--neoverse-material-glass-immersive-edge-refraction-softness',
   );
   expect(cssVariables.material.glass.immersive.refractionGradient).toBe(
     '--neoverse-material-glass-immersive-refraction-gradient',
@@ -243,6 +321,74 @@ test('keeps light Glass surfaces free of dark hairline borders', async () => {
   }
 });
 
+test('keeps Glass edge highlights refractive and softly diffused', async () => {
+  const [materialCss, semanticCss, geometryCss, themesCss] = await Promise.all([
+    readTokenCss('material.css'),
+    readTokenCss('semantic.css'),
+    readTokenCss('geometry.css'),
+    readTokenCss('themes.css'),
+  ]);
+
+  for (const variant of ['subtle', 'elevated', 'immersive']) {
+    const declaration = materialCss.match(
+      new RegExp(`--neoverse-material-edge-highlight-${variant}:([\\s\\S]*?);`),
+    )?.[1];
+
+    expect(declaration).toContain('inset 0 1px 2px');
+    expect(declaration).toContain('inset 0 -1px 2px');
+    expect(declaration).toContain('inset 1px 0 2px');
+    expect(declaration).toContain('inset -1px 0 2px');
+    expect(declaration).toContain('var(--neoverse-color-accent-primary)');
+    expect(declaration).toContain('var(--neoverse-color-accent-secondary)');
+    expect(declaration).toContain('var(--neoverse-color-accent-tertiary)');
+
+    const darkDeclarations = themesCss.match(
+      new RegExp(`--neoverse-material-edge-highlight-${variant}:([\\s\\S]*?);`, 'g'),
+    );
+
+    expect(darkDeclarations).toHaveLength(2);
+    for (const darkDeclaration of darkDeclarations ?? []) {
+      expect(darkDeclaration).toContain('inset 0 1px 2px');
+      expect(darkDeclaration).toContain('inset 0 -1px 2px');
+      expect(darkDeclaration).toContain('inset 1px 0 2px');
+      expect(darkDeclaration).toContain('inset -1px 0 2px');
+      expect(darkDeclaration).toContain('var(--neoverse-color-accent-primary)');
+      expect(darkDeclaration).toContain('var(--neoverse-color-accent-secondary)');
+      expect(darkDeclaration).toContain('var(--neoverse-color-accent-tertiary)');
+    }
+  }
+
+  expect(semanticCss).toContain(
+    '--neoverse-control-primary-shadow: var(--neoverse-material-edge-highlight-subtle),',
+  );
+  expect(geometryCss).toContain(
+    '--neoverse-shadow-inset: var(--neoverse-material-edge-highlight-subtle),',
+  );
+  expect(materialCss).toContain('--neoverse-material-refraction-gradient-subtle: radial-gradient(');
+  expect(materialCss).toContain(
+    '--neoverse-material-refraction-gradient-immersive: radial-gradient(',
+  );
+  for (const token of [
+    'filter',
+    'edge-filter',
+    'tint',
+    'inner-glow',
+    'seam-glow',
+    'bloom',
+    'edge-refraction-width',
+    'edge-refraction-softness',
+  ]) {
+    expect(materialCss).toContain(`--neoverse-material-${token}-subtle:`);
+    expect(materialCss).toContain(`--neoverse-material-${token}-elevated:`);
+    expect(materialCss).toContain(`--neoverse-material-${token}-immersive:`);
+  }
+  expect(themesCss).toContain('--neoverse-material-filter-subtle: blur(10px)');
+  expect(themesCss).toContain('--neoverse-material-edge-filter-subtle: blur(12px)');
+  expect(themesCss).toContain(
+    '--neoverse-material-refraction-gradient-subtle: radial-gradient(',
+  );
+});
+
 test('keeps dark shadows aligned with the light hierarchy', async () => {
   const [geometryCss, themesCss] = await Promise.all([
     readTokenCss('geometry.css'),
@@ -269,28 +415,58 @@ test('keeps dark shadows aligned with the light hierarchy', async () => {
 });
 
 test('keeps inset material distinct between light and dark surfaces', async () => {
-  const [geometryCss, themesCss] = await Promise.all([
+  const [geometryCss, materialCss, themesCss] = await Promise.all([
     readTokenCss('geometry.css'),
+    readTokenCss('material.css'),
     readTokenCss('themes.css'),
   ]);
   const lightValue = shadowDeclarations(geometryCss, 'inset')[0];
+  const lightEdgeHighlight = materialCss.match(
+    /--neoverse-material-edge-highlight-subtle:([\s\S]*?);/,
+  )?.[1];
   const darkValues = shadowDeclarations(themesCss, 'inset');
+  const darkEdgeHighlights = [...themesCss.matchAll(
+    /--neoverse-material-edge-highlight-subtle:([\s\S]*?);/g,
+  )].flatMap((match) => (match[1] === undefined ? [] : [match[1]]));
 
   expect(lightValue).toBeDefined();
+  expect(lightEdgeHighlight).toBeDefined();
   expect(darkValues).toHaveLength(2);
+  expect(darkEdgeHighlights).toHaveLength(2);
 
-  if (lightValue === undefined) {
+  if (lightValue === undefined || lightEdgeHighlight === undefined) {
     return;
   }
 
-  expect(parseShadowLayers(lightValue)).toEqual([
-    [true, 0, 1, 0, 0],
+  expect(
+    parseShadowLayers(
+      lightValue.replace('var(--neoverse-material-edge-highlight-subtle)', lightEdgeHighlight),
+    ),
+  ).toEqual([
+    [true, 0, 1, 2, 0],
+    [true, 0, -1, 2, 0],
+    [true, 1, 0, 2, 0],
+    [true, -1, 0, 2, 0],
     [true, 0, -1, 2, 0],
   ]);
 
-  for (const darkValue of darkValues) {
-    expect(parseShadowLayers(darkValue)).toEqual([
-      [true, 0, 1, 0, 0],
+  for (const [index, darkValue] of darkValues.entries()) {
+    const darkEdgeHighlight = darkEdgeHighlights[index];
+
+    expect(darkEdgeHighlight).toBeDefined();
+    if (darkEdgeHighlight === undefined) {
+      continue;
+    }
+
+    expect(
+      parseShadowLayers(
+        darkValue.replace('var(--neoverse-material-edge-highlight-subtle)', darkEdgeHighlight),
+      ),
+    ).toEqual([
+      [true, 0, 1, 2, 0],
+      [true, 0, -1, 2, 0],
+      [true, 1, 0, 2, 0],
+      [true, -1, 0, 2, 0],
       [true, 0, -1, 2, 0],
     ]);
   }
