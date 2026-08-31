@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@neoverse-ui/motion": "workspace:*",
+    "@neoverse-ui/glass-runtime": "workspace:*",
     "@neoverse-ui/tailwind": "workspace:*",
     "@neoverse-ui/tokens": "workspace:*",
     "@neoverse-ui/vue": "workspace:*",
