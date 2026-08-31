@@ -1,0 +1,24 @@
+{
+  "name": "@neoverse-ui/glass-runtime",
+  "version": "0.1.0",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc --project tsconfig.build.json",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "test": "vitest run --environment happy-dom"
+  },
+  "devDependencies": {
+    "happy-dom": "^20.11.10",
+    "vitest": "^4.1.11"
+  }
+}

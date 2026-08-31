@@ -1,0 +1,118 @@
+export const glassVertexShader = `
+  attribute vec2 a_position;
+
+  uniform vec2 u_viewport;
+  uniform vec4 u_rect;
+
+  varying vec2 v_local;
+
+  void main() {
+    vec2 position = u_rect.xy + (a_position * u_rect.zw);
+    vec2 clip = (position / u_viewport) * 2.0 - 1.0;
+    clip.y *= -1.0;
+    gl_Position = vec4(clip, 0.0, 1.0);
+    v_local = a_position;
+  }
+`;
+
+export const glassFragmentShader = `
+  precision mediump float;
+
+  uniform vec2 u_rect_size;
+  uniform vec4 u_radii;
+  uniform float u_edge_width;
+  uniform float u_softness;
+  uniform float u_opacity;
+  uniform vec3 u_carrier;
+  uniform vec3 u_edge_light;
+  uniform vec3 u_primary;
+  uniform vec3 u_secondary;
+  uniform vec3 u_tertiary;
+
+  varying vec2 v_local;
+
+  float roundedBoxSdf(vec2 point, vec2 half_size, vec4 radii) {
+    vec2 signedPoint = point;
+    vec2 cornerPair = signedPoint.x > 0.0 ? radii.xy : radii.wz;
+    float radius = signedPoint.y > 0.0 ? cornerPair.y : cornerPair.x;
+    vec2 q = abs(signedPoint) - half_size + radius;
+    return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - radius;
+  }
+
+  float edgeDistance(vec2 point, vec2 half_size, vec4 radii) {
+    return roundedBoxSdf(point, half_size, radii);
+  }
+
+  void main() {
+    vec2 point = (v_local * u_rect_size) - (u_rect_size * 0.5);
+    vec2 halfSize = u_rect_size * 0.5;
+    vec2 sampleStep = max(vec2(1.0), u_rect_size) / max(u_rect_size, vec2(1.0));
+    float distance = edgeDistance(point, halfSize, u_radii);
+    float distanceX = edgeDistance(point + vec2(sampleStep.x, 0.0), halfSize, u_radii)
+      - edgeDistance(point - vec2(sampleStep.x, 0.0), halfSize, u_radii);
+    float distanceY = edgeDistance(point + vec2(0.0, sampleStep.y), halfSize, u_radii)
+      - edgeDistance(point - vec2(0.0, sampleStep.y), halfSize, u_radii);
+    vec2 normal = normalize(vec2(distanceX, distanceY) + vec2(0.0001));
+
+    float inside = 1.0 - smoothstep(-1.0, 0.0, distance);
+    // Softness only anti-aliases the silhouette. A large blur must not turn
+    // into a second, visibly painted border.
+    float edgeFalloff = clamp(u_softness * 0.26, 0.65, 1.55);
+    float edge = 1.0 - smoothstep(0.0, u_edge_width + edgeFalloff, -distance);
+    float edgeMask = inside * edge;
+
+    vec2 topLeftDirection = normalize(vec2(-0.58, -0.82));
+    vec2 bottomRightDirection = normalize(vec2(0.68, 0.74));
+    float topLeftLight = max(dot(normal, topLeftDirection), 0.0);
+    float bottomRightScatter = max(dot(normal, bottomRightDirection), 0.0);
+    float leftCatch = max(-normal.x, 0.0);
+    float rightCatch = max(normal.x, 0.0);
+    float topCatch = max(-normal.y, 0.0);
+    float bottomCatch = max(normal.y, 0.0);
+    // The opposing corners are orthogonal to both main light directions.
+    // Give them a small chromatic bridge so the rounded silhouette never
+    // appears to have a missing piece.
+    float cornerCatch = abs(normal.x * normal.y);
+
+    // Keep a thick token edge narrow on screen, but let its chromatic response
+    // become stronger. This is the refraction gain, not a white-line gain.
+    float thicknessScale = clamp(0.8 + (u_edge_width * 0.35), 0.85, 1.65);
+    float chromaticStrength = clamp(0.72 + ((thicknessScale - 1.0) * 0.75), 0.72, 1.25);
+
+    // Keep the carrier and incident light restrained. Directional accent colors
+    // do the visible refraction work; edgeLight must never close into a white
+    // outline, especially on the light theme where it is near-white.
+    vec3 refractedBase = mix(u_primary, u_secondary, 0.32 + (bottomRightScatter * 0.2));
+    refractedBase = mix(refractedBase, u_carrier, 0.04);
+    float edgeLightCatch = (0.012 + (topLeftLight * 0.04)) * (2.0 - thicknessScale);
+    vec3 lightBlend = mix(refractedBase, u_edge_light, edgeLightCatch);
+    vec3 lowerBlend = mix(u_primary, u_secondary, 0.24 + (bottomRightScatter * 0.4));
+    lowerBlend = mix(lowerBlend, u_tertiary, rightCatch * 0.36 * chromaticStrength);
+    vec3 color = mix(lightBlend, lowerBlend, bottomCatch * 0.5);
+    color = mix(color, u_secondary, leftCatch * 0.32 * chromaticStrength);
+    color = mix(color, u_tertiary, rightCatch * 0.36 * chromaticStrength);
+    vec3 cornerBlend = mix(u_secondary, u_tertiary, 0.5 + (normal.y * 0.18));
+    color = mix(color, cornerBlend, cornerCatch * 0.28 * chromaticStrength);
+
+    float coolFringe = ((rightCatch * 0.3) + (topCatch * 0.08)) * chromaticStrength;
+    float warmFringe = ((bottomCatch * 0.24) + (leftCatch * 0.08)) * chromaticStrength;
+    color.r += warmFringe * 0.045;
+    color.g += topLeftLight * 0.055 * chromaticStrength;
+    color.b += coolFringe * 0.2;
+    color = clamp(color, 0.0, 1.0);
+
+    // There is deliberately no uniform base alpha: these directional catches
+    // must break up instead of closing into a white outline around the card.
+    float directionalAlpha = smoothstep(0.16, 0.82, topLeftLight) * 0.42
+      + smoothstep(0.16, 0.82, bottomRightScatter) * 0.46
+      + (leftCatch * 0.04)
+      + (rightCatch * 0.06)
+      + (topCatch * 0.018)
+      + (bottomCatch * 0.05)
+      + (cornerCatch * 0.16);
+    float alpha = edgeMask * u_opacity * directionalAlpha * thicknessScale;
+    alpha = clamp(alpha, 0.0, 0.44);
+
+    gl_FragColor = vec4(color, alpha);
+  }
+`;
