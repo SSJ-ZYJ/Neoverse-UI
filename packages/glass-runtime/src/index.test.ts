@@ -164,6 +164,11 @@ describe('Glass renderer', () => {
     expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
     expect(document.documentElement.getAttribute(glassRendererAttribute)).toBe('webgl');
     expect(webgl2.drawArrays).toHaveBeenCalledTimes(1);
+    expect(webgl2.getUniformLocation).toHaveBeenCalledWith(expect.anything(), 'u_pixel_ratio');
+    expect(webgl2.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_pixel_ratio' }),
+      1,
+    );
     renderer.destroy();
   });
 
@@ -290,17 +295,55 @@ describe('Glass renderer', () => {
     expect(glassFragmentShader).toContain('float chromaticStrength');
     expect(glassFragmentShader).toContain('float edgeLightCatch');
     expect(glassFragmentShader).toContain('float cornerCatch');
+    expect(glassFragmentShader).toContain('uniform float u_pixel_ratio;');
+    expect(glassFragmentShader).toContain(
+      'vec2 pixelSize = u_rect_size / (u_viewport * u_pixel_ratio);',
+    );
+    expect(glassFragmentShader).toContain(
+      'float antiAlias = max(max(pixelSize.x, pixelSize.y) * 0.75, 0.35);',
+    );
+    expect(glassFragmentShader).toContain(
+      'float inside = 1.0 - smoothstep(-antiAlias, antiAlias, distance);',
+    );
+    expect(glassFragmentShader).toContain('#ifdef GL_FRAGMENT_PRECISION_HIGH');
     expect(glassFragmentShader).toContain(
       'float thicknessScale = clamp(0.82 + (u_edge_width * 0.55), 0.9, 1.65);',
     );
     expect(glassFragmentShader).toContain(
-      'float edgeFalloff = clamp(u_softness * 0.1, 0.35, 0.65);',
+      'float edgeFalloff = clamp(u_softness * 0.05, 0.2, 0.42);',
     );
     expect(glassFragmentShader).toContain(
       'float chromaticStrength = clamp(0.9 + ((thicknessScale - 1.0) * 1.4), 0.9, 1.8);',
     );
     expect(glassFragmentShader).toContain(
-      'float edgeLightCatch = (0.003 + (topLeftLight * 0.012)) * (2.0 - thicknessScale);',
+      'float edgeLightLuminance = dot(u_edge_light, vec3(0.2126, 0.7152, 0.0722));',
+    );
+    expect(glassFragmentShader).toContain(
+      'float lightSurface = smoothstep(0.55, 0.88, edgeLightLuminance);',
+    );
+    expect(glassFragmentShader).toContain(
+      'float chromaticVisibility = mix(1.0, 1.34, lightSurface);',
+    );
+    expect(glassFragmentShader).toContain(
+      'float edgeLightCatch = (0.003 + (topLeftLight * 0.012)) * (2.0 - thicknessScale) * mix(1.0, 0.24, lightSurface);',
+    );
+    expect(glassFragmentShader).toContain(
+      'float rightRefraction = clamp(rightCatch * 0.52 * chromaticStrength * chromaticVisibility, 0.0, 0.94);',
+    );
+    expect(glassFragmentShader).toContain(
+      'float lowerRightRefraction = rightCatch * bottomCatch * lightSurface;',
+    );
+    expect(glassFragmentShader).toContain(
+      'float lightAlphaGain = mix(1.0, 1.35, lightSurface);',
+    );
+    expect(glassFragmentShader).toContain(
+      'float alpha = edgeMask * u_opacity * directionalAlpha * thicknessScale * lightAlphaGain;',
+    );
+    expect(glassFragmentShader).toContain(
+      'vec3 lightChromaticColor = color * vec3(0.78, 0.88, 1.0);',
+    );
+    expect(glassFragmentShader).toContain(
+      'color = mix(color, lightChromaticColor, lightSurface * 0.72);',
     );
     expect(glassFragmentShader).toContain(
       'vec3 topLeftRefraction = mix(u_secondary, u_primary, 0.35);',

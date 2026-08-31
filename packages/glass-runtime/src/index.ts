@@ -39,6 +39,7 @@ type ProgramLocations = {
   viewport: WebGLUniformLocation | null;
   rect: WebGLUniformLocation | null;
   rectSize: WebGLUniformLocation | null;
+  pixelRatio: WebGLUniformLocation | null;
   radii: WebGLUniformLocation | null;
   edgeWidth: WebGLUniformLocation | null;
   softness: WebGLUniformLocation | null;
@@ -521,6 +522,7 @@ class GlassRendererImpl implements GlassRenderer {
       viewport: gl.getUniformLocation(program, 'u_viewport'),
       rect: gl.getUniformLocation(program, 'u_rect'),
       rectSize: gl.getUniformLocation(program, 'u_rect_size'),
+      pixelRatio: gl.getUniformLocation(program, 'u_pixel_ratio'),
       radii: gl.getUniformLocation(program, 'u_radii'),
       edgeWidth: gl.getUniformLocation(program, 'u_edge_width'),
       softness: gl.getUniformLocation(program, 'u_softness'),
@@ -736,6 +738,7 @@ class GlassRendererImpl implements GlassRenderer {
     gl.enableVertexAttribArray(locations.position);
     gl.vertexAttribPointer(locations.position, 2, gl.FLOAT, false, 0, 0);
     gl.uniform2f(locations.viewport, width, height);
+    gl.uniform1f(locations.pixelRatio, pixelRatio);
 
     const rootStyle = view.getComputedStyle(this.ownerDocument.documentElement);
     const edgeLight = resolveColor(
