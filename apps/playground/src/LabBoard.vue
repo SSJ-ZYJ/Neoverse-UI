@@ -2,25 +2,21 @@
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import LabSection from './LabSection.vue';
 import { labModules, type ModuleId } from './lab-modules';
-import { isLocale, type Locale, localize } from './playground-content';
-import type { FrameTheme } from './playground-types';
+import { localize } from './playground-content';
+import { applyFrameContextFromDocument, frameLocale, frameTheme } from './frame-state';
 
-interface LabBoardProps {
-  frameTheme: FrameTheme;
-}
-
-const props = defineProps<LabBoardProps>();
 const defaultModule: ModuleId = labModules[0].id;
 const isEmbedded = window.parent !== window;
-const queryLocale = new URLSearchParams(window.location.search).get('lang');
-const locale: Locale = isLocale(queryLocale) ? queryLocale : 'en';
+const locale = frameLocale;
 const activeModuleId = ref<ModuleId>(moduleFromHash());
 const activeModule = ref(labModules.find((module) => module.id === activeModuleId.value));
 const boardElement = ref<HTMLElement | null>(null);
 
 let resizeObserver: ResizeObserver | undefined;
+let attributeObserver: MutationObserver | undefined;
 
-document.documentElement.lang = locale === 'zh' ? 'zh-CN' : 'en';
+document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en';
+
 
 function isModuleId(value: unknown): value is ModuleId {
   return typeof value === 'string' && labModules.some((module) => module.id === value);
@@ -45,7 +41,7 @@ function notifyParentHeight(): void {
   window.parent.postMessage(
     {
       type: 'neoverse-design-lab-height',
-      theme: props.frameTheme,
+      theme: frameTheme.value,
       height: boardElement.value?.offsetHeight ?? 0,
     },
     window.location.origin,
@@ -66,6 +62,14 @@ onMounted(() => {
     resizeObserver.observe(document.documentElement);
   }
 
+  // The parent mutates data-theme/lang to re-skin this document in place;
+  // mirror those changes into the reactive context without a reload.
+  attributeObserver = new MutationObserver(applyFrameContextFromDocument);
+  attributeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme', 'lang'],
+  });
+
   notifyParentHeight();
 });
 
@@ -73,6 +77,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('load', notifyParentHeight);
   window.removeEventListener('hashchange', handleHashChange);
   resizeObserver?.disconnect();
+  attributeObserver?.disconnect();
 });
 </script>
 

@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import { UiButton, UiIconButton, UiSegmentedControl } from '@neoverse-ui/vue';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import LabBoard from './LabBoard.vue';
 import LabIcon from './LabIcon.vue';
+import { applyFrameContextFromDocument } from './frame-state';
 import { focusClasses } from './lab-data';
 import { labModules, type ModuleId, moduleGroups } from './lab-modules';
 import { appCopy, formatLocalized, isLocale, type Locale, localize } from './playground-content';
 import type { FrameTheme, ThemeMode } from './playground-types';
 
 const isFrame = window.location.pathname === '/frame';
-const frameTheme: FrameTheme = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
 const preferencesStorageKey = 'neoverse-design-lab.preferences';
 
 type SavedState = {
@@ -97,20 +97,19 @@ const locale = ref<Locale>(
 
 function initialModule(): ModuleId | null {
   const hash = readHash();
-  if (hash.length > 0) {
-    if (isModuleId(hash)) {
-      return hash;
-    }
-
+  if (hash.length === 0) {
+    /* A fresh visit (no hash) always opens the overview; only an explicit
+       #module hash reopens a module. Persisted module ids are still written
+       for deep-link sharing but are deliberately not restored on reload. */
     replaceLocation(null);
     return null;
   }
 
-  if (savedState.module !== undefined) {
-    replaceLocation(savedState.module);
-    return savedState.module;
+  if (isModuleId(hash)) {
+    return hash;
   }
 
+  replaceLocation(null);
   return null;
 }
 
@@ -151,28 +150,52 @@ const resolvedFrameTheme = computed<FrameTheme>(() =>
     ? 'dark'
     : 'light',
 );
-const frameSrc = computed(() => {
+/* The iframe rebuilds only when the module changes; the URL bakes in the
+   theme/lang current at that moment. Later theme or language switches are
+   written straight into the live frame document (data-theme/lang plus the
+   reactive frame context), so they neither reload the frame nor reset the
+   reader's scroll position. */
+const frameModuleKey = computed(() => selectedModule.value?.id ?? '');
+const frameSrc = ref('');
+function bakeFrameSrc(): void {
   const module = selectedModule.value;
   if (module === null) {
-    return '';
+    frameSrc.value = '';
+    return;
   }
 
   const url = new URL('/frame', window.location.origin);
   url.searchParams.set('theme', resolvedFrameTheme.value);
   url.searchParams.set('lang', locale.value);
   url.hash = module.id;
-  return `${url.pathname}${url.search}${url.hash}`;
+  frameSrc.value = `${url.pathname}${url.search}${url.hash}`;
+}
+watch(frameModuleKey, () => {
+  bakeFrameSrc();
+  frameHeight.value = 0;
+});
+watch(resolvedFrameTheme, (theme) => {
+  const frameDocument = frameElement.value?.contentDocument;
+  if (frameDocument !== undefined && frameDocument !== null) {
+    frameDocument.documentElement.dataset.theme = theme;
+  }
+});
+watch(locale, (value) => {
+  const frameDocument = frameElement.value?.contentDocument;
+  if (frameDocument !== undefined && frameDocument !== null) {
+    frameDocument.documentElement.lang = value === 'zh' ? 'zh-CN' : 'en';
+  }
 });
 
 const frameElement = ref<HTMLIFrameElement | null>(null);
 const shellElement = ref<HTMLElement | null>(null);
 const frameHeight = ref(0);
 const workspaceElement = ref<HTMLElement | null>(null);
+let systemMediaQuery: MediaQueryList | undefined;
+let frameAttributeObserver: MutationObserver | undefined;
 const overviewHeading = ref<HTMLElement | null>(null);
 const moduleHeading = ref<HTMLElement | null>(null);
 const isNavOpen = ref(false);
-let systemMediaQuery: MediaQueryList | undefined;
-
 const themeOptions = computed(
   () =>
     [
@@ -252,7 +275,6 @@ function setLocale(value: string): void {
   document.documentElement.lang = value === 'zh' ? 'zh-CN' : 'en';
   persistState({ locale: value });
   replaceQueryParameter('lang', value);
-  frameHeight.value = 0;
 }
 
 function resetScrollPositions(): void {
@@ -355,6 +377,7 @@ function handleMessage(event: MessageEvent<unknown>): void {
 if (!isFrame) {
   applyTheme(themeMode.value);
   document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en';
+  bakeFrameSrc();
 }
 
 onMounted(() => {
@@ -365,6 +388,14 @@ onMounted(() => {
   window.addEventListener('message', handleMessage);
   window.addEventListener('popstate', handleLocationChange);
   window.addEventListener('hashchange', handleLocationChange);
+
+  // LabBoard mirrors data-theme/lang mutations into its reactive context;
+  // this keeps the frame's rendering in step with in-place re-skins.
+  frameAttributeObserver = new MutationObserver(applyFrameContextFromDocument);
+  frameAttributeObserver.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['data-theme', 'lang'],
+  });
 
   if (typeof window.matchMedia === 'function') {
     systemMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
@@ -380,12 +411,13 @@ onBeforeUnmount(() => {
   window.removeEventListener('message', handleMessage);
   window.removeEventListener('popstate', handleLocationChange);
   window.removeEventListener('hashchange', handleLocationChange);
+  frameAttributeObserver?.disconnect();
   systemMediaQuery?.removeEventListener('change', handleSystemThemeChange);
 });
 </script>
 
 <template>
-  <LabBoard v-if="isFrame" :frame-theme="frameTheme" />
+  <LabBoard v-if="isFrame" />
 
   <main
     v-else
@@ -433,7 +465,7 @@ onBeforeUnmount(() => {
       </p>
 
       <nav
-        class="mt-5 min-h-0 flex-1 overflow-y-auto"
+        class="scrollbar-immersive mt-5 min-h-0 flex-1 overflow-y-auto"
         :aria-label="localize(appCopy.navigation.modulesLabel, locale)"
       >
         <a
@@ -444,7 +476,7 @@ onBeforeUnmount(() => {
             focusClasses,
             isOverview
               ? 'bg-accent-soft font-semibold text-accent-primary'
-              : 'text-secondary hover:bg-surface-subtle hover:text-primary',
+              : 'text-secondary hover:bg-accent-soft hover:text-primary',
           ]"
           @click.prevent="showOverview"
         >
@@ -469,7 +501,7 @@ onBeforeUnmount(() => {
                 focusClasses,
                 currentModuleId === module.id
                   ? 'bg-accent-soft font-semibold text-accent-primary'
-                  : 'text-secondary hover:bg-surface-subtle hover:text-primary',
+                  : 'text-secondary hover:bg-accent-soft hover:text-primary',
               ]"
               @click.prevent="selectModule(module.id)"
             >
@@ -486,7 +518,7 @@ onBeforeUnmount(() => {
     </aside>
 
     <div class="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div ref="workspaceElement" class="min-h-0 flex-1 overflow-y-auto">
+      <div ref="workspaceElement" class="scrollbar-immersive min-h-0 flex-1 overflow-y-auto">
         <div
           class="mx-auto flex w-full max-w-container-xl flex-col gap-grid px-gutter-inline pb-gutter-block pt-3"
         >
@@ -600,7 +632,7 @@ onBeforeUnmount(() => {
                 </ul>
                 <UiButton
                   variant="secondary"
-                  class="mt-1 w-full justify-center"
+              :key="frameModuleKey"
                   @click="selectModule(group.moduleIds[0])"
                 >
                   {{ formatLocalized(appCopy.overview.openGroup, locale, {
@@ -614,7 +646,7 @@ onBeforeUnmount(() => {
           <section v-else aria-labelledby="module-title" class="grid gap-grid">
             <iframe
               ref="frameElement"
-              :key="frameSrc"
+              :key="frameModuleKey"
               :src="frameSrc"
               :title="
                 selectedModule

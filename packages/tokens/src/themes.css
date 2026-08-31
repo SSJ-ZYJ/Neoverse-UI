@@ -426,6 +426,13 @@
       var(--neoverse-color-text-secondary) 18%,
       #091321
     );
+    /* Dark inherits the shared hover fill; pinned so light-theme contrast
+       tuning in semantic.css cannot leak into dark surfaces. */
+    --neoverse-control-hover-background: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-primary) 10%,
+      transparent
+    );
   }
 
   /* Dark Soft Glass keeps the canvas visible instead of adding a black veil.
@@ -683,6 +690,12 @@
         color-mix(in srgb, var(--neoverse-color-accent-tertiary) 12%, transparent),
         transparent 78%
       );
+    /* Same pinned dark hover fill as the explicit dark theme above. */
+    --neoverse-control-hover-background: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-primary) 10%,
+      transparent
+    );
   }
 
   :root.light:not([data-theme]),

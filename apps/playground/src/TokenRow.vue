@@ -88,12 +88,12 @@ onMounted(() => {
       v-else-if="props.preview === 'shadow'"
       data-preview="shadow"
       aria-hidden="true"
-      class="flex h-10 w-16 shrink-0 items-center justify-center rounded-control border border-subtle"
+      class="flex h-14 w-28 shrink-0 items-center justify-center rounded-control border border-subtle"
       :class="isDarkTheme ? 'bg-surface-raised p-2' : 'bg-surface-overlay p-2'"
       :style="{ backgroundColor: isDarkTheme ? 'var(--neoverse-color-neutral-400)' : undefined }"
     >
       <span
-        class="block h-5 w-10 rounded-control bg-surface-raised"
+        class="block h-8 w-16 rounded-control bg-surface-raised"
         :style="{
           backgroundColor: isDarkTheme ? 'var(--neoverse-color-neutral-300)' : undefined,
           boxShadow: `var(${props.variable})`,

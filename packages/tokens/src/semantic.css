@@ -114,7 +114,7 @@
     --neoverse-control-active-shadow: var(--neoverse-shadow-control);
     --neoverse-control-hover-background: color-mix(
       in srgb,
-      var(--neoverse-color-accent-primary) 10%,
+      var(--neoverse-color-accent-primary) 22%,
       transparent
     );
 
