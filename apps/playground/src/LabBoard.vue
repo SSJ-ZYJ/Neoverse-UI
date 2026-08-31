@@ -16,6 +16,7 @@ const queryLocale = new URLSearchParams(window.location.search).get('lang');
 const locale: Locale = isLocale(queryLocale) ? queryLocale : 'en';
 const activeModuleId = ref<ModuleId>(moduleFromHash());
 const activeModule = ref(labModules.find((module) => module.id === activeModuleId.value));
+const boardElement = ref<HTMLElement | null>(null);
 
 let resizeObserver: ResizeObserver | undefined;
 
@@ -45,7 +46,7 @@ function notifyParentHeight(): void {
     {
       type: 'neoverse-design-lab-height',
       theme: props.frameTheme,
-      height: document.documentElement.scrollHeight,
+      height: boardElement.value?.offsetHeight ?? 0,
     },
     window.location.origin,
   );
@@ -76,7 +77,10 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <main class="mx-auto flex max-w-container-2xl flex-col gap-grid px-gutter-inline py-gutter-block">
+  <main
+    ref="boardElement"
+    class="mx-auto flex max-w-container-xl flex-col gap-grid px-gutter-inline py-3"
+  >
     <LabSection
       v-if="activeModule"
       :id="activeModule.id"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiBadge, UiButton, UiIconButton, UiSegmentedControl } from '@neoverse-ui/vue';
+import { UiButton, UiIconButton, UiSegmentedControl } from '@neoverse-ui/vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import LabBoard from './LabBoard.vue';
 import LabIcon from './LabIcon.vue';
@@ -404,7 +404,7 @@ onBeforeUnmount(() => {
     <aside
       id="design-lab-navigation"
       :class="[
-        'fixed inset-y-0 left-0 z-layer-modal flex w-72 shrink-0 flex-col border-r border-subtle material-glass-elevated p-5 shadow-modal transition-transform duration-standard ease-standard lg:relative lg:h-screen lg:w-60 lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-layer-modal flex w-72 shrink-0 flex-col border-r border-subtle material-glass-elevated p-4 shadow-modal transition-transform duration-standard ease-standard lg:relative lg:h-screen lg:w-52 lg:translate-x-0',
         isNavOpen ? 'translate-x-0' : '-translate-x-full',
       ]"
       :aria-label="localize(appCopy.navigation.label, locale)"
@@ -428,19 +428,19 @@ onBeforeUnmount(() => {
           <LabIcon name="close" />
         </UiIconButton>
       </div>
-      <p class="mt-4 text-caption text-secondary">
+      <p class="mt-3 text-caption text-secondary lg:hidden">
         {{ localize(appCopy.sidebarDescription, locale) }}
       </p>
 
       <nav
-        class="mt-8 min-h-0 flex-1 overflow-y-auto"
+        class="mt-5 min-h-0 flex-1 overflow-y-auto"
         :aria-label="localize(appCopy.navigation.modulesLabel, locale)"
       >
         <a
           :href="locationHref(null)"
           :aria-current="isOverview ? 'page' : undefined"
           :class="[
-            'flex min-h-10 items-center rounded-control px-3 py-2 text-caption transition-colors duration-fast ease-standard',
+            'flex min-h-8 items-center rounded-control px-3 py-1 text-caption transition-colors duration-fast ease-standard',
             focusClasses,
             isOverview
               ? 'bg-accent-soft font-semibold text-accent-primary'
@@ -451,18 +451,21 @@ onBeforeUnmount(() => {
           {{ localize(appCopy.navigation.overview, locale) }}
         </a>
 
-        <div v-for="group in sectionsByGroup" :key="group.id" class="mt-7 first:mt-8">
-          <h2 class="px-3 text-label font-label text-muted">
+        <div v-for="group in sectionsByGroup" :key="group.id" class="mt-5 first:mt-1">
+          <h2
+            v-if="group.modules.length > 1"
+            class="px-3 text-2xs font-semibold uppercase tracking-wide text-muted"
+          >
             {{ localize(group.label, locale) }}
           </h2>
-          <div class="mt-2 grid gap-1">
+          <div class="mt-1 grid gap-0.5">
             <a
               v-for="module in group.modules"
               :key="module.id"
               :href="`#${module.id}`"
               :aria-current="currentModuleId === module.id ? 'page' : undefined"
               :class="[
-                'relative flex min-h-10 items-center rounded-control px-3 py-2 text-caption transition-colors duration-fast ease-standard',
+                'relative flex min-h-8 items-center rounded-control px-3 py-1 text-caption transition-colors duration-fast ease-standard',
                 focusClasses,
                 currentModuleId === module.id
                   ? 'bg-accent-soft font-semibold text-accent-primary'
@@ -485,10 +488,10 @@ onBeforeUnmount(() => {
     <div class="flex min-h-0 min-w-0 flex-1 flex-col">
       <div ref="workspaceElement" class="min-h-0 flex-1 overflow-y-auto">
         <div
-          class="mx-auto flex w-full max-w-container-2xl flex-col gap-grid px-gutter-inline py-gutter-block"
+          class="mx-auto flex w-full max-w-container-xl flex-col gap-grid px-gutter-inline pb-gutter-block pt-3"
         >
           <header
-            class="sticky top-0 z-layer-sticky -mx-gutter-inline -mt-gutter-block material-glass-subtle px-gutter-inline pt-gutter-block pb-3"
+            class="sticky top-0 z-layer-sticky -mx-gutter-inline material-glass-subtle px-gutter-inline pt-2 pb-2"
           >
             <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
               <div class="flex min-w-0 flex-1 items-center gap-x-3">
@@ -558,7 +561,7 @@ onBeforeUnmount(() => {
                 id="overview-title"
                 ref="overviewHeading"
                 tabindex="-1"
-                class="text-heading font-heading tracking-heading outline-none"
+                class="text-3xl font-heading tracking-heading outline-none md:text-4xl"
               >
                 {{ localize(appCopy.overview.title, locale) }}
               </h2>
@@ -571,20 +574,17 @@ onBeforeUnmount(() => {
               <article
                 v-for="group in sectionsByGroup"
                 :key="group.id"
-                class="grid content-start gap-4 rounded-card material-glass-elevated p-5"
+                class="grid content-start gap-3 rounded-card material-glass-elevated p-4"
               >
-                <div class="flex items-start justify-between gap-3">
-                  <div>
-                    <h3 class="text-subtitle font-heading tracking-heading">
-                      {{ localize(group.label, locale) }}
-                    </h3>
-                    <p class="mt-1 text-caption text-secondary">
-                      {{ formatLocalized(appCopy.overview.moduleCount, locale, {
-                          count: group.modules.length,
-                        }) }}
-                    </p>
-                  </div>
-                  <UiBadge variant="info">{{ group.modules.length }}</UiBadge>
+                <div>
+                  <h3 class="text-subtitle font-heading tracking-heading">
+                    {{ localize(group.label, locale) }}
+                  </h3>
+                  <p class="mt-1 text-caption text-secondary">
+                    {{ formatLocalized(appCopy.overview.moduleCount, locale, {
+                        count: group.modules.length,
+                      }) }}
+                  </p>
                 </div>
                 <p class="text-body text-secondary">
                   {{ localize(group.description, locale) }}
@@ -612,29 +612,25 @@ onBeforeUnmount(() => {
           </section>
 
           <section v-else aria-labelledby="module-title" class="grid gap-grid">
-            <div
-              class="overflow-hidden rounded-card material-glass-elevated"
-            >
-              <iframe
-                ref="frameElement"
-                :key="frameSrc"
-                :src="frameSrc"
-                :title="
-                  selectedModule
-                    ? formatLocalized(appCopy.module.frameTitle, locale, {
-                        label: localize(selectedModule.label, locale),
-                        theme: localize(
-                          appCopy.module.themeNames[resolvedFrameTheme],
-                          locale,
-                        ),
-                      })
-                    : ''
-                "
-                class="block w-full border-0 bg-surface-canvas"
-                :style="{ height: frameHeightStyle() }"
-                @load="handleFrameLoad"
-              />
-            </div>
+            <iframe
+              ref="frameElement"
+              :key="frameSrc"
+              :src="frameSrc"
+              :title="
+                selectedModule
+                  ? formatLocalized(appCopy.module.frameTitle, locale, {
+                      label: localize(selectedModule.label, locale),
+                      theme: localize(
+                        appCopy.module.themeNames[resolvedFrameTheme],
+                        locale,
+                      ),
+                    })
+                  : ''
+              "
+              class="block w-full rounded-card border-0"
+              :style="{ height: frameHeightStyle() }"
+              @load="handleFrameLoad"
+            />
           </section>
         </div>
       </div>

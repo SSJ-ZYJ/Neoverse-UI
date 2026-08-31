@@ -49,13 +49,11 @@ onMounted(() => {
 </script>
 
 <template>
-  <div
-    class="flex min-w-0 items-center gap-3 rounded-control material-glass-subtle p-3"
-  >
+  <div class="flex min-w-0 items-center gap-3 rounded-control material-glass-subtle p-2">
     <span
       v-if="props.preview === 'color'"
       ref="swatchElement"
-      class="size-10 shrink-0 rounded-control border border-default"
+      class="size-7 shrink-0 rounded-control border border-default"
       :style="{ backgroundColor: `var(${props.variable})` }"
     />
     <span
@@ -65,12 +63,12 @@ onMounted(() => {
     />
     <span
       v-else-if="props.preview === 'radius'"
-      class="h-20 w-32 shrink-0 border border-default bg-surface-raised"
+      class="h-9 w-14 shrink-0 border border-default bg-surface-raised"
       :style="{ borderRadius: `var(${props.variable})` }"
     />
     <span
       v-else-if="props.preview === 'border'"
-      class="h-10 w-20 shrink-0 bg-surface-raised"
+      class="h-7 w-12 shrink-0 bg-surface-raised"
       :style="{
         borderColor: `var(--neoverse-color-border-default)`,
         borderStyle: `var(--neoverse-border-style-solid)`,
@@ -79,7 +77,7 @@ onMounted(() => {
     />
     <span
       v-else-if="props.preview === 'border-style'"
-      class="h-10 w-20 shrink-0 bg-surface-raised"
+      class="h-7 w-12 shrink-0 bg-surface-raised"
       :style="{
         borderColor: `var(--neoverse-color-border-default)`,
         borderStyle: `var(${props.variable})`,
@@ -90,12 +88,12 @@ onMounted(() => {
       v-else-if="props.preview === 'shadow'"
       data-preview="shadow"
       aria-hidden="true"
-      class="flex h-16 w-32 shrink-0 items-center justify-center rounded-control border border-subtle"
-      :class="isDarkTheme ? 'bg-surface-raised p-3' : 'bg-surface-glass p-3'"
+      class="flex h-10 w-16 shrink-0 items-center justify-center rounded-control border border-subtle"
+      :class="isDarkTheme ? 'bg-surface-raised p-2' : 'bg-surface-overlay p-2'"
       :style="{ backgroundColor: isDarkTheme ? 'var(--neoverse-color-neutral-400)' : undefined }"
     >
       <span
-        class="block h-10 w-20 rounded-control bg-surface-raised"
+        class="block h-5 w-10 rounded-control bg-surface-raised"
         :style="{
           backgroundColor: isDarkTheme ? 'var(--neoverse-color-neutral-300)' : undefined,
           boxShadow: `var(${props.variable})`,
@@ -104,21 +102,21 @@ onMounted(() => {
     </span>
     <span
       v-else
-      class="h-10 w-20 shrink-0 rounded-control bg-surface-raised"
+      class="h-7 w-12 shrink-0 rounded-control bg-surface-raised"
       :style="{ boxShadow: `var(${props.variable})` }"
     />
     <span class="min-w-0">
       <span class="block truncate text-label font-label text-primary">
         {{ localize(props.label, props.locale) }}
       </span>
-      <code class="block truncate text-code text-secondary">{{ props.variable }}</code>
-      <code v-if="props.className" class="block truncate text-code text-muted">
+      <code class="block truncate text-xs text-secondary">{{ props.variable }}</code>
+      <code v-if="props.className" class="block truncate text-xs text-muted">
         {{ props.className }}
       </code>
     </span>
     <code
       v-if="props.preview === 'color' && resolvedColor.length > 0"
-      class="ml-auto shrink-0 text-code text-secondary"
+      class="ml-auto shrink-0 text-xs text-secondary"
     >
       {{ resolvedColor }}
     </code>

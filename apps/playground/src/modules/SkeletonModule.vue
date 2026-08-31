@@ -8,7 +8,7 @@ const copy = moduleCopy.skeleton;
 </script>
 
 <template>
-  <div class="grid gap-grid sm:grid-cols-2 xl:grid-cols-5">
+  <div class="grid gap-grid sm:grid-cols-2 lg:grid-cols-3">
     <article class="grid gap-3 rounded-control material-glass-subtle p-4">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.text, props.locale) }}

@@ -18,7 +18,7 @@ const props = defineProps<LabModuleProps>();
           {{ localize(moduleCopy.colors.primitive.description, props.locale) }}
         </p>
       </header>
-      <div class="grid gap-grid md:grid-cols-2">
+      <div class="grid gap-grid md:grid-cols-2 lg:grid-cols-3">
         <div v-for="group in primitiveColorGroups" :key="group.label.en" class="grid content-start gap-3">
           <h3 class="text-label font-label text-primary">{{ localize(group.label, props.locale) }}</h3>
           <TokenRow
@@ -41,7 +41,7 @@ const props = defineProps<LabModuleProps>();
           {{ localize(moduleCopy.colors.aliases.description, props.locale) }}
         </p>
       </header>
-      <div class="grid gap-grid md:grid-cols-2">
+      <div class="grid gap-grid md:grid-cols-2 lg:grid-cols-3">
         <div v-for="group in semanticColorGroups" :key="group.label.en" class="grid content-start gap-3">
           <h3 class="text-label font-label text-primary">{{ localize(group.label, props.locale) }}</h3>
           <TokenRow

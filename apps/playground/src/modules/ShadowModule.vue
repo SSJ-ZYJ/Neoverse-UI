@@ -18,7 +18,7 @@ const props = defineProps<LabModuleProps>();
           {{ localize(moduleCopy.shadow.primitive.description, props.locale) }}
         </p>
       </header>
-      <div class="grid gap-grid md:grid-cols-2">
+      <div class="grid gap-grid md:grid-cols-2 lg:grid-cols-3">
         <TokenRow
           v-for="token in primitiveShadowTokens"
           :key="token.variable"
@@ -38,7 +38,7 @@ const props = defineProps<LabModuleProps>();
           {{ localize(moduleCopy.shadow.aliases.description, props.locale) }}
         </p>
       </header>
-      <div class="grid gap-grid md:grid-cols-2">
+      <div class="grid gap-grid md:grid-cols-2 lg:grid-cols-3">
         <TokenRow
           v-for="token in semanticShadowTokens"
           :key="token.variable"

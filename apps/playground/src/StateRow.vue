@@ -12,7 +12,7 @@ const props = defineProps<StateRowProps>();
 </script>
 <template>
   <article
-    class="grid gap-3 rounded-control material-glass-subtle p-4 lg:grid-cols-2 lg:items-center"
+    class="grid gap-3 rounded-control material-glass-subtle p-3 lg:grid-cols-2 lg:items-center"
   >
     <div>
       <h3 class="text-label font-label text-primary">{{ localize(props.label, props.locale) }}</h3>
@@ -20,7 +20,7 @@ const props = defineProps<StateRowProps>();
         {{ localize(props.hint, props.locale) }}
       </p>
     </div>
-    <div class="flex min-h-12 min-w-0 items-center gap-3 overflow-x-auto py-2">
+    <div class="flex min-w-0 items-center gap-3 overflow-x-auto py-2">
       <slot />
     </div>
   </article>
