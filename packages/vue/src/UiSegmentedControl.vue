@@ -44,7 +44,7 @@ const optionSizeClasses: Record<SegmentedControlSize, string> = {
   lg: 'h-10 px-3 text-label',
 };
 
-const selectedOptionClasses = 'ui-segmented-control__option--active text-accent-secondary';
+const selectedOptionClasses = 'ui-segmented-control__option--active text-primary';
 const unselectedOptionClasses = 'text-secondary';
 const disabledOptionClasses =
   'disabled:pointer-events-none disabled:text-disabled disabled:cursor-not-allowed';
