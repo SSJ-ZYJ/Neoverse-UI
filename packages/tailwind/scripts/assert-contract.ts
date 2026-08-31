@@ -163,6 +163,8 @@ try {
     '[data-neoverse-glass-renderer=webgl]',
     '[data-neoverse-glass-renderer=webgl] :is(.glass-card,.glass-surface):before{display:none}',
     '[data-neoverse-glass-renderer=webgl] :is(.glass-card,.glass-surface){box-shadow:var(--neoverse-material-shadow',
+    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive){box-shadow:var(--neoverse-material-shadow',
+    'background-clip:padding-box',
     'border-color:#0000',
     'var(--neoverse-material-inner-glow)',
     'var(--neoverse-material-seam-glow)',

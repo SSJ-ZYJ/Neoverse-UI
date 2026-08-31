@@ -435,6 +435,9 @@
 
   [data-neoverse-glass-renderer='webgl']
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+    /* The WebGL field owns the silhouette. Keep a transparent border from
+       carrying the light surface fill into a false white hairline. */
+    background-clip: padding-box;
     box-shadow: var(--neoverse-material-shadow);
   }
 
