@@ -25,7 +25,7 @@
   }
 
   .ui-button--ghost {
-    color: var(--neoverse-color-text-muted);
+    color: var(--neoverse-color-text-secondary);
     background: transparent;
   }
 
@@ -159,7 +159,7 @@
   }
 
   .ui-segmented-control__option--active {
-    color: var(--neoverse-color-accent-secondary);
+    color: var(--neoverse-color-text-primary);
   }
 
   @media (hover: hover) {
