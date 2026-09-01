@@ -116,15 +116,15 @@
         transparent 52%
       ),
       color-mix(in srgb, var(--neoverse-color-surface-raised) 34%, transparent);
-    /* Segmented controls use a soft refractive rim instead of a closed
-       hairline. Every edge layer is translucent and blurred so the light
-       canvas remains visible through the control. */
+    /* Segmented controls use a readable sky-blue rim instead of a closed
+       hairline. Four low-alpha inner catches restore the silhouette while a
+       short outer blur keeps the control light. */
     --neoverse-control-segmented-shadow:
-      inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent),
-      inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 5%, transparent),
-      inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-text-primary) 5%, transparent),
-      inset -1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 5%, transparent),
-      var(--neoverse-shadow-control);
+      inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 14%, transparent),
+      inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 10%, transparent),
+      inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 9%, transparent),
+      inset -1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 8%, transparent),
+      0 2px 8px -2px color-mix(in srgb, var(--neoverse-color-accent-primary) 24%, transparent);
     --neoverse-control-secondary-hover-background:
       linear-gradient(
         135deg,
@@ -141,30 +141,44 @@
       inset 0 -1px 2px color-mix(in srgb, var(--neoverse-color-text-primary) 10%, transparent),
       var(--neoverse-shadow-control);
     --neoverse-control-secondary-filter: var(--neoverse-material-filter-subtle);
-    /* A segmented control needs a visible well in light mode. The slightly
-       darker track gives the active capsule a place to sit without turning
-       the whole control into a hard outlined chip. */
+    --neoverse-control-segmented-filter: blur(6px) saturate(112%) brightness(102%);
+    /* A segmented control needs a quiet well in light mode. A single
+       sky-blue family keeps the active capsule clear without the heavy
+       blue-green glass effect. */
     --neoverse-control-segmented-background: color-mix(
       in srgb,
-      var(--neoverse-color-text-primary) 5%,
+      var(--neoverse-color-accent-primary) 7%,
       transparent
+    );
+    --neoverse-control-segmented-foreground: color-mix(
+      in srgb,
+      var(--neoverse-color-neutral-500) 84%,
+      var(--neoverse-color-accent-primary) 16%
+    );
+    --neoverse-control-segmented-active-foreground: color-mix(
+      in srgb,
+      var(--neoverse-color-neutral-600) 70%,
+      var(--neoverse-color-accent-primary) 30%
     );
     --neoverse-control-segmented-border: transparent;
     --neoverse-control-active-background: linear-gradient(
       180deg,
-      color-mix(in srgb, var(--neoverse-color-accent-primary) 24%, transparent),
-      color-mix(in srgb, var(--neoverse-color-accent-secondary) 26%, transparent)
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 18%, transparent),
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 12%, transparent)
     );
     --neoverse-control-active-border: transparent;
-    /* The active edge is a translucent, blurred refraction. It provides
-       separation without introducing a white or high-contrast outline. */
+    /* The active edge is a translucent, blue-only refraction. */
     --neoverse-control-active-highlight:
-      inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 12%, transparent),
-      inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 8%, transparent),
-      inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent),
-      inset -1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 8%, transparent);
+      inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 14%, transparent),
+      inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 10%, transparent),
+      inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 9%, transparent),
+      inset -1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 8%, transparent);
     --neoverse-control-active-shadow:
-      var(--neoverse-control-active-highlight), var(--neoverse-shadow-control);
+      var(--neoverse-control-active-highlight),
+      0 2px 7px -2px color-mix(in srgb, var(--neoverse-color-accent-primary) 24%, transparent);
+    --neoverse-control-segmented-focus-shadow:
+      0 0 0 1px color-mix(in srgb, var(--neoverse-color-accent-primary) 30%, transparent),
+      0 0 4px 1px color-mix(in srgb, var(--neoverse-color-accent-primary) 18%, transparent);
     --neoverse-control-hover-background: color-mix(
       in srgb,
       var(--neoverse-color-accent-primary) 22%,

@@ -29,8 +29,16 @@ test('exposes compact-control and skeleton effect tokens', () => {
   expect(cssVariables.control.secondaryBorder).toBe('--neoverse-control-secondary-border');
   expect(cssVariables.control.secondaryFilter).toBe('--neoverse-control-secondary-filter');
   expect(cssVariables.control.segmentedBackground).toBe('--neoverse-control-segmented-background');
+  expect(cssVariables.control.segmentedForeground).toBe('--neoverse-control-segmented-foreground');
+  expect(cssVariables.control.segmentedActiveForeground).toBe(
+    '--neoverse-control-segmented-active-foreground',
+  );
   expect(cssVariables.control.segmentedBorder).toBe('--neoverse-control-segmented-border');
   expect(cssVariables.control.segmentedShadow).toBe('--neoverse-control-segmented-shadow');
+  expect(cssVariables.control.segmentedFilter).toBe('--neoverse-control-segmented-filter');
+  expect(cssVariables.control.segmentedFocusShadow).toBe(
+    '--neoverse-control-segmented-focus-shadow',
+  );
   expect(cssVariables.control.activeBackground).toBe('--neoverse-control-active-background');
   expect(cssVariables.control.activeBorder).toBe('--neoverse-control-active-border');
   expect(cssVariables.control.hoverBackground).toBe('--neoverse-control-hover-background');
@@ -78,17 +86,40 @@ test('keeps the light segmented control edges translucent and blurred', async ()
     readTokenCss('themes.css'),
   ]);
 
-  expect(semanticCss).toMatch(/--neoverse-control-segmented-background:\s*color-mix\(/);
+  expect(semanticCss).toContain(
+    '--neoverse-control-segmented-background: color-mix(\n      in srgb,\n      var(--neoverse-color-accent-primary) 7%',
+  );
   expect(semanticCss).toContain('--neoverse-control-segmented-border: transparent;');
   expect(semanticCss).toMatch(/--neoverse-control-segmented-shadow:\s*inset 0 1px 3px/);
+  expect(semanticCss).toContain(
+    '--neoverse-control-segmented-filter: blur(6px) saturate(112%) brightness(102%);',
+  );
+  expect(semanticCss).toMatch(/--neoverse-control-segmented-focus-shadow:\s*0 0 0 1px/);
+  expect(semanticCss).toMatch(/--neoverse-control-segmented-foreground:\s*color-mix\(/);
+  expect(semanticCss).toMatch(/--neoverse-control-segmented-active-foreground:\s*color-mix\(/);
+  const segmentedShadow =
+    semanticCss.match(/--neoverse-control-segmented-shadow:([\s\S]*?);/)?.[1] ?? '';
+  expect(segmentedShadow).not.toContain('var(--neoverse-color-text-primary)');
+  expect(segmentedShadow).not.toContain('var(--neoverse-color-accent-secondary)');
+  expect(segmentedShadow).toContain('inset 1px 0 3px');
+  expect(segmentedShadow).toContain('0 2px 8px -2px');
   expect(semanticCss).toMatch(/--neoverse-control-active-background:\s*linear-gradient\(/);
+  const activeBackground =
+    semanticCss.match(/--neoverse-control-active-background:([\s\S]*?);/)?.[1] ?? '';
+  expect(activeBackground).not.toContain('var(--neoverse-color-accent-secondary)');
   expect(semanticCss).toContain('--neoverse-control-active-border: transparent;');
   expect(semanticCss).toMatch(/--neoverse-control-active-highlight:\s*inset 0 1px 3px/);
   const activeHighlight =
     semanticCss.match(/--neoverse-control-active-highlight:([\s\S]*?);/)?.[1] ?? '';
   expect(activeHighlight).not.toContain('var(--neoverse-color-edge-light)');
+  expect(activeHighlight).not.toContain('var(--neoverse-color-text-primary)');
+  expect(activeHighlight).not.toContain('var(--neoverse-color-accent-secondary)');
+  const focusShadow =
+    semanticCss.match(/--neoverse-control-segmented-focus-shadow:([\s\S]*?);/)?.[1] ?? '';
+  expect(focusShadow).not.toContain('var(--neoverse-color-white)');
+  expect(focusShadow).not.toContain('rgb(255 255 255');
   expect(semanticCss).toContain(
-    '--neoverse-control-active-shadow:\n      var(--neoverse-control-active-highlight), var(--neoverse-shadow-control);',
+    '--neoverse-control-active-shadow:\n      var(--neoverse-control-active-highlight),\n      0 2px 7px -2px color-mix(in srgb, var(--neoverse-color-accent-primary) 24%, transparent);',
   );
   expect(semanticCss).toMatch(/--neoverse-control-secondary-shadow:\s*inset 0 1px 0/);
   expect(
@@ -99,6 +130,11 @@ test('keeps the light segmented control edges translucent and blurred', async ()
   expect(
     themesCss.match(
       /--neoverse-control-segmented-shadow:\s*var\(--neoverse-control-secondary-shadow\);/g,
+    ),
+  ).toHaveLength(2);
+  expect(
+    themesCss.match(
+      /--neoverse-control-segmented-filter:\s*var\(--neoverse-control-secondary-filter\);/g,
     ),
   ).toHaveLength(2);
   expect(

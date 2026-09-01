@@ -422,7 +422,7 @@ export const moduleCopy = {
     },
     controls: {
       small: localized('Small control', '小尺寸控件'),
-      large: localized('Large control', '大尺寸控件'),
+      medium: localized('Medium control', '中尺寸控件'),
       disabled: localized('Disabled control', '禁用控件'),
       loading: localized('Loading control', '加载中控件'),
       selected: localized('Selected: {value}', '已选择：{value}'),

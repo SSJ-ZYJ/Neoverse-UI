@@ -68,8 +68,11 @@
         var(--neoverse-material-edge-highlight-subtle), inset 0 -1px 2px rgb(0 0 0 / 18%);
       --neoverse-control-secondary-border: var(--neoverse-color-border-subtle);
       --neoverse-control-segmented-background: var(--neoverse-control-secondary-background);
+      --neoverse-control-segmented-foreground: var(--neoverse-color-text-secondary);
+      --neoverse-control-segmented-active-foreground: var(--neoverse-color-text-primary);
       --neoverse-control-segmented-border: var(--neoverse-control-secondary-border);
       --neoverse-control-segmented-shadow: var(--neoverse-control-secondary-shadow);
+      --neoverse-control-segmented-filter: var(--neoverse-control-secondary-filter);
       --neoverse-control-active-background: linear-gradient(
         180deg,
         color-mix(
@@ -296,8 +299,11 @@
       var(--neoverse-material-edge-highlight-subtle), inset 0 -1px 2px rgb(0 0 0 / 18%);
     --neoverse-control-secondary-border: var(--neoverse-color-border-subtle);
     --neoverse-control-segmented-background: var(--neoverse-control-secondary-background);
+    --neoverse-control-segmented-foreground: var(--neoverse-color-text-secondary);
+    --neoverse-control-segmented-active-foreground: var(--neoverse-color-text-primary);
     --neoverse-control-segmented-border: var(--neoverse-control-secondary-border);
     --neoverse-control-segmented-shadow: var(--neoverse-control-secondary-shadow);
+    --neoverse-control-segmented-filter: var(--neoverse-control-secondary-filter);
     --neoverse-control-active-background: linear-gradient(
       180deg,
       color-mix(

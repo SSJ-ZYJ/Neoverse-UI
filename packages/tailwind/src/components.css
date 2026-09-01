@@ -46,7 +46,7 @@
     }
 
     .ui-button--secondary:hover:not(:disabled) {
-      color: var(--neoverse-color-text-primary);
+      color: var(--neoverse-control-segmented-active-foreground);
       background: var(--neoverse-control-secondary-hover-background);
       transform: translateY(-1px);
     }
@@ -140,8 +140,8 @@
       var(--neoverse-control-segmented-border);
     background: var(--neoverse-control-segmented-background);
     box-shadow: var(--neoverse-control-segmented-shadow);
-    -webkit-backdrop-filter: var(--neoverse-control-secondary-filter);
-    backdrop-filter: var(--neoverse-control-secondary-filter);
+    -webkit-backdrop-filter: var(--neoverse-control-segmented-filter);
+    backdrop-filter: var(--neoverse-control-segmented-filter);
   }
 
   .ui-segmented-control__options {
@@ -171,7 +171,7 @@
     will-change: transform;
   }
 
-  .ui-segmented-control__option {
+  .ui-segmented-control .ui-segmented-control__option {
     position: relative;
     z-index: 1;
     display: inline-flex;
@@ -181,7 +181,7 @@
     border: 0;
     border-radius: calc(var(--neoverse-radius-control) - 0.18rem);
     background: transparent;
-    color: var(--neoverse-color-text-secondary);
+    color: var(--neoverse-control-segmented-foreground);
     cursor: pointer;
     line-height: 1;
     white-space: nowrap;
@@ -191,14 +191,14 @@
       transform var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
   }
 
-  .ui-segmented-control__option--active {
-    color: var(--neoverse-color-text-primary);
+  .ui-segmented-control .ui-segmented-control__option--active {
+    color: var(--neoverse-control-segmented-active-foreground);
   }
 
   @media (hover: hover) {
     .ui-segmented-control__option:not(.ui-segmented-control__option--active):hover:not(:disabled) {
       background: var(--neoverse-control-hover-background);
-      color: var(--neoverse-color-text-primary);
+      color: var(--neoverse-control-segmented-active-foreground);
     }
   }
 
@@ -303,6 +303,15 @@
     .skeleton-surface--pulse {
       animation: none;
     }
+  }
+}
+
+@layer utilities {
+  :root[data-theme='light'] .ui-segmented-control .ui-segmented-control__option:focus-visible,
+  :root.light:not([data-theme])
+    .ui-segmented-control
+    .ui-segmented-control__option:focus-visible {
+    box-shadow: var(--neoverse-control-segmented-focus-shadow);
   }
 }
 

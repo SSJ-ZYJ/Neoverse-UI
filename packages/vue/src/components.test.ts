@@ -172,6 +172,18 @@ describe('display components', () => {
 });
 
 describe('UiSegmentedControl', () => {
+  it('keeps the largest supported size compact', () => {
+    const wrapper = mount(UiSegmentedControl, {
+      props: { options, size: 'md' },
+    });
+    const firstButton = wrapper.find('button');
+
+    expect(firstButton.classes()).toEqual(
+      expect.arrayContaining(['h-9', 'px-3', 'text-label']),
+    );
+    expect(firstButton.classes()).not.toEqual(expect.arrayContaining(['h-10']));
+  });
+
   it('supports roving keyboard selection and skips disabled options', async () => {
     const wrapper = mount(UiSegmentedControl, {
       attachTo: document.body,

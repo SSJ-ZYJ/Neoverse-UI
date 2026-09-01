@@ -1,18 +1,22 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import materialBackgroundDark from './assets/material-background-dark.png';
 import materialBackgroundLight from './assets/material-background-light.png';
+import { frameTheme } from './frame-state';
 
-const materialBackground =
-  document.documentElement.dataset.theme === 'dark'
-    ? materialBackgroundDark
-    : materialBackgroundLight;
+/* The frame document's data-theme attribute drives frameTheme reactively, so
+   the backdrop swaps with in-place theme switches instead of waiting for a
+   reload. */
+const materialBackground = computed(() =>
+  frameTheme.value === 'dark' ? materialBackgroundDark : materialBackgroundLight,
+);
 
-const backgroundStyle = {
-  backgroundImage: `url(${materialBackground})`,
+const backgroundStyle = computed(() => ({
+  backgroundImage: `url(${materialBackground.value})`,
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
   backgroundSize: 'cover',
-};
+}));
 </script>
 
 <template>

@@ -34,8 +34,8 @@ const segmentedOptions = computed<readonly SegmentOption[]>(() => [
       :options="segmentedOptions"
     />
     <UiSegmentedControl
-      :aria-label="localize(copy.controls.large, props.locale)"
-      size="lg"
+      :aria-label="localize(copy.controls.medium, props.locale)"
+      size="md"
       :options="segmentedOptions"
     />
   </StateRow>

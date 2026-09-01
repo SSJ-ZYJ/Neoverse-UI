@@ -38,11 +38,10 @@ const optionRefs = ref<Array<HTMLButtonElement | null>>([]);
 const optionSizeClasses: Record<SegmentedControlSize, string> = {
   sm: 'h-7 px-2 text-caption',
   md: 'h-9 px-3 text-label',
-  lg: 'h-10 px-3 text-label',
 };
 
-const selectedOptionClasses = 'ui-segmented-control__option--active text-primary';
-const unselectedOptionClasses = 'text-secondary';
+const selectedOptionClasses = 'ui-segmented-control__option--active';
+const unselectedOptionClasses = '';
 const disabledOptionClasses = 'disabled:text-disabled disabled:cursor-not-allowed';
 
 const isControlled = computed(() => props.modelValue !== undefined);
