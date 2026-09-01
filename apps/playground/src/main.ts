@@ -1,5 +1,5 @@
-import { createApp } from 'vue';
 import { createGlassRenderer } from '@neoverse-ui/glass-runtime';
+import { createApp } from 'vue';
 import App from './App.vue';
 
 // Every playground token is rem-based, so raising the root font size on wide

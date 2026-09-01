@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { applyFrameContextFromDocument, frameLocale, frameTheme } from './frame-state';
 import LabSection from './LabSection.vue';
 import { labModules, type ModuleId } from './lab-modules';
 import { localize } from './playground-content';
-import { applyFrameContextFromDocument, frameLocale, frameTheme } from './frame-state';
 
 const defaultModule: ModuleId = labModules[0].id;
 const isEmbedded = window.parent !== window;

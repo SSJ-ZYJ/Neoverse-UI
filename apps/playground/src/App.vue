@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { UiButton, UiIconButton, UiSegmentedControl } from '@neoverse-ui/vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { applyFrameContextFromDocument } from './frame-state';
 import LabBoard from './LabBoard.vue';
 import LabIcon from './LabIcon.vue';
-import { applyFrameContextFromDocument } from './frame-state';
 import { focusClasses } from './lab-data';
 import { labModules, type ModuleId, moduleGroups } from './lab-modules';
 import { appCopy, formatLocalized, isLocale, type Locale, localize } from './playground-content';

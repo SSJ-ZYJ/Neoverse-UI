@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { UiGlassSurface } from '@neoverse-ui/vue';
 import { glassVariantLabels, glassVariants } from '../lab-data';
-import { localize, moduleCopy } from '../playground-content';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
+import { localize, moduleCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();

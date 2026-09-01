@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { surfaceSamples } from '../lab-data';
-import { localize } from '../playground-content';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
+import { localize } from '../playground-content';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
