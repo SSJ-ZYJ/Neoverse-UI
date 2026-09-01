@@ -308,9 +308,7 @@
 
 @layer utilities {
   :root[data-theme='light'] .ui-segmented-control .ui-segmented-control__option:focus-visible,
-  :root.light:not([data-theme])
-    .ui-segmented-control
-    .ui-segmented-control__option:focus-visible {
+  :root.light:not([data-theme]) .ui-segmented-control .ui-segmented-control__option:focus-visible {
     box-shadow: var(--neoverse-control-segmented-focus-shadow);
   }
 }

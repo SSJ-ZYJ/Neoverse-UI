@@ -178,9 +178,7 @@ describe('UiSegmentedControl', () => {
     });
     const firstButton = wrapper.find('button');
 
-    expect(firstButton.classes()).toEqual(
-      expect.arrayContaining(['h-7', 'px-2', 'text-caption']),
-    );
+    expect(firstButton.classes()).toEqual(expect.arrayContaining(['h-7', 'px-2', 'text-caption']));
     expect(firstButton.classes()).not.toEqual(expect.arrayContaining(['h-9']));
   });
 

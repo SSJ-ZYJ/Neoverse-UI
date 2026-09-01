@@ -848,13 +848,7 @@ class GlassRendererImpl implements GlassRenderer {
         continue;
       }
 
-      const scissor = getScissorRect(
-        style.rect,
-        viewport,
-        pixelRatio,
-        drawingWidth,
-        drawingHeight,
-      );
+      const scissor = getScissorRect(style.rect, viewport, pixelRatio, drawingWidth, drawingHeight);
       if (scissor.width === 0 || scissor.height === 0) {
         continue;
       }

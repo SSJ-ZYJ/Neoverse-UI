@@ -87,11 +87,7 @@
         var(--neoverse-control-active-highlight), var(--neoverse-shadow-xs);
       --neoverse-material-edge-highlight-subtle:
         inset 0 1px 2px
-        color-mix(
-          in srgb,
-          var(--neoverse-color-edge-light) 16%,
-          transparent
-        ),
+        color-mix(in srgb, var(--neoverse-color-edge-light) 16%, transparent),
         inset 0 -1px 2px
         color-mix(in srgb, var(--neoverse-color-text-primary) 3%, transparent),
         inset 1px 0 2px
@@ -100,11 +96,7 @@
         color-mix(in srgb, var(--neoverse-color-text-primary) 2%, transparent);
       --neoverse-material-edge-highlight-elevated:
         inset 0 1px 2px
-        color-mix(
-          in srgb,
-          var(--neoverse-color-edge-light) 18%,
-          transparent
-        ),
+        color-mix(in srgb, var(--neoverse-color-edge-light) 18%, transparent),
         inset 0 -1px 2px
         color-mix(in srgb, var(--neoverse-color-text-primary) 4%, transparent),
         inset 1px 0 2px
@@ -288,11 +280,7 @@
       var(--neoverse-control-active-highlight), var(--neoverse-shadow-xs);
     --neoverse-material-edge-highlight-subtle:
       inset 0 1px 2px
-      color-mix(
-        in srgb,
-        var(--neoverse-color-edge-light) 16%,
-        transparent
-      ),
+      color-mix(in srgb, var(--neoverse-color-edge-light) 16%, transparent),
       inset 0 -1px 2px
       color-mix(in srgb, var(--neoverse-color-text-primary) 3%, transparent),
       inset 1px 0 2px
@@ -301,11 +289,7 @@
       color-mix(in srgb, var(--neoverse-color-text-primary) 2%, transparent);
     --neoverse-material-edge-highlight-elevated:
       inset 0 1px 2px
-      color-mix(
-        in srgb,
-        var(--neoverse-color-edge-light) 18%,
-        transparent
-      ),
+      color-mix(in srgb, var(--neoverse-color-edge-light) 18%, transparent),
       inset 0 -1px 2px
       color-mix(in srgb, var(--neoverse-color-text-primary) 4%, transparent),
       inset 1px 0 2px
@@ -447,27 +431,19 @@
       --neoverse-material-seam-glow-immersive: 0 0 18px -4px
         color-mix(in srgb, var(--neoverse-color-accent-tertiary) 9%, transparent);
       --neoverse-material-bloom-subtle:
-        0 1.2rem 2.8rem -1.9rem
-        rgb(0 0 0 / 20%),
-        0 0.35rem 1.2rem -0.85rem
-        rgb(0 0 0 / 10%);
+        0 1.2rem 2.8rem -1.9rem rgb(0 0 0 / 20%), 0 0.35rem 1.2rem -0.85rem rgb(0 0 0 / 10%);
       --neoverse-material-bloom-elevated:
-        0 1.35rem 3.2rem -1.8rem
-        rgb(0 0 0 / 24%),
-        0 0.4rem 1.3rem -0.8rem
-        rgb(0 0 0 / 12%);
+        0 1.35rem 3.2rem -1.8rem rgb(0 0 0 / 24%), 0 0.4rem 1.3rem -0.8rem rgb(0 0 0 / 12%);
       --neoverse-material-glass-subtle-shadow:
-        0 0.75rem 2rem -1.25rem rgb(0 0 0 / 34%),
-        0 3px 8px -1px rgb(0 0 0 / 12%);
+        0 0.75rem 2rem -1.25rem rgb(0 0 0 / 34%), 0 3px 8px -1px rgb(0 0 0 / 12%);
       --neoverse-material-glass-elevated-shadow:
-        0 1rem 2.8rem -1.6rem rgb(0 0 0 / 38%),
-        0 4px 10px -1px rgb(0 0 0 / 16%);
+        0 1rem 2.8rem -1.6rem rgb(0 0 0 / 38%), 0 4px 10px -1px rgb(0 0 0 / 16%);
       --neoverse-material-bloom-immersive:
         0 1.5rem 3.8rem -1.75rem
         color-mix(in srgb, var(--neoverse-color-accent-primary) 18%, transparent),
         0 0.5rem 1.5rem -0.75rem
         color-mix(in srgb, var(--neoverse-color-accent-secondary) 8%, transparent);
-      --neoverse-material-edge-refraction-opacity-subtle: 0.30;
+      --neoverse-material-edge-refraction-opacity-subtle: 0.3;
       --neoverse-material-edge-refraction-opacity-elevated: 0.24;
       --neoverse-material-edge-refraction-opacity-immersive: 0.6;
       --neoverse-material-edge-refraction-carrier-subtle: color-mix(
@@ -599,27 +575,19 @@
     --neoverse-material-seam-glow-immersive: 0 0 18px -4px
       color-mix(in srgb, var(--neoverse-color-accent-tertiary) 9%, transparent);
     --neoverse-material-bloom-subtle:
-      0 1.2rem 2.8rem -1.9rem
-      rgb(0 0 0 / 20%),
-      0 0.35rem 1.2rem -0.85rem
-      rgb(0 0 0 / 10%);
+      0 1.2rem 2.8rem -1.9rem rgb(0 0 0 / 20%), 0 0.35rem 1.2rem -0.85rem rgb(0 0 0 / 10%);
     --neoverse-material-bloom-elevated:
-      0 1.35rem 3.2rem -1.8rem
-      rgb(0 0 0 / 24%),
-      0 0.4rem 1.3rem -0.8rem
-      rgb(0 0 0 / 12%);
+      0 1.35rem 3.2rem -1.8rem rgb(0 0 0 / 24%), 0 0.4rem 1.3rem -0.8rem rgb(0 0 0 / 12%);
     --neoverse-material-glass-subtle-shadow:
-      0 0.75rem 2rem -1.25rem rgb(0 0 0 / 34%),
-      0 3px 8px -1px rgb(0 0 0 / 12%);
+      0 0.75rem 2rem -1.25rem rgb(0 0 0 / 34%), 0 3px 8px -1px rgb(0 0 0 / 12%);
     --neoverse-material-glass-elevated-shadow:
-      0 1rem 2.8rem -1.6rem rgb(0 0 0 / 38%),
-      0 4px 10px -1px rgb(0 0 0 / 16%);
+      0 1rem 2.8rem -1.6rem rgb(0 0 0 / 38%), 0 4px 10px -1px rgb(0 0 0 / 16%);
     --neoverse-material-bloom-immersive:
       0 1.5rem 3.8rem -1.75rem
       color-mix(in srgb, var(--neoverse-color-accent-primary) 18%, transparent),
       0 0.5rem 1.5rem -0.75rem
       color-mix(in srgb, var(--neoverse-color-accent-secondary) 8%, transparent);
-    --neoverse-material-edge-refraction-opacity-subtle: 0.30;
+    --neoverse-material-edge-refraction-opacity-subtle: 0.3;
     --neoverse-material-edge-refraction-opacity-elevated: 0.24;
     --neoverse-material-edge-refraction-opacity-immersive: 0.6;
     --neoverse-material-edge-refraction-carrier-subtle: color-mix(

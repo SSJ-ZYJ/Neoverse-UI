@@ -142,17 +142,13 @@ test('keeps the light segmented control edges translucent and blurred', async ()
       /--neoverse-control-segmented-background:\s*var\(--neoverse-control-secondary-background\);/g,
     ),
   ).toHaveLength(2);
-  expect(
-    themesCss.match(/--neoverse-control-active-background:\s*color-mix\(/g),
-  ).toHaveLength(2);
+  expect(themesCss.match(/--neoverse-control-active-background:\s*color-mix\(/g)).toHaveLength(2);
   expect(themesCss.match(/--neoverse-control-active-border:\s*transparent;/g)).toHaveLength(2);
 });
 
 test('keeps dark segmented active surfaces flat and neutral', async () => {
   const themesCss = await readTokenCss('themes.css');
-  const activeBackgrounds = themesCss.match(
-    /--neoverse-control-active-background:([\s\S]*?);/g,
-  );
+  const activeBackgrounds = themesCss.match(/--neoverse-control-active-background:([\s\S]*?);/g);
 
   expect(activeBackgrounds).toHaveLength(2);
   for (const activeBackground of activeBackgrounds ?? []) {
@@ -578,7 +574,9 @@ test('keeps Glass edge highlights refractive and softly diffused', async () => {
       expect(darkDeclaration).toContain('inset 1px 0 2px');
       expect(darkDeclaration).toContain('inset -1px 0 2px');
       if (variant === 'elevated' || variant === 'subtle') {
-        expect(darkDeclaration).not.toMatch(/var\(--neoverse-color-accent-(?:primary|secondary|tertiary)\)/);
+        expect(darkDeclaration).not.toMatch(
+          /var\(--neoverse-color-accent-(?:primary|secondary|tertiary)\)/,
+        );
       } else {
         expect(darkDeclaration).toContain('var(--neoverse-color-accent-primary)');
         expect(darkDeclaration).toContain('var(--neoverse-color-accent-secondary)');
