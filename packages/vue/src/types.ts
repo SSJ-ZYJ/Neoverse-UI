@@ -39,7 +39,7 @@ export interface SegmentOption {
   disabled?: boolean;
 }
 
-export type SegmentedControlSize = 'sm' | 'md';
+export type SegmentedControlSize = 'sm';
 
 export interface SegmentedControlProps {
   options: readonly SegmentOption[];

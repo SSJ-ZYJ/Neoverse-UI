@@ -172,16 +172,16 @@ describe('display components', () => {
 });
 
 describe('UiSegmentedControl', () => {
-  it('keeps the largest supported size compact', () => {
+  it('falls back to the compact size for unsupported values', () => {
     const wrapper = mount(UiSegmentedControl, {
-      props: { options, size: 'md' },
+      props: { options, size: 'md' as never },
     });
     const firstButton = wrapper.find('button');
 
     expect(firstButton.classes()).toEqual(
-      expect.arrayContaining(['h-9', 'px-3', 'text-label']),
+      expect.arrayContaining(['h-7', 'px-2', 'text-caption']),
     );
-    expect(firstButton.classes()).not.toEqual(expect.arrayContaining(['h-10']));
+    expect(firstButton.classes()).not.toEqual(expect.arrayContaining(['h-9']));
   });
 
   it('supports roving keyboard selection and skips disabled options', async () => {

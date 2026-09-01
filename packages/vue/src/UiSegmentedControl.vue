@@ -37,7 +37,6 @@ const optionRefs = ref<Array<HTMLButtonElement | null>>([]);
 
 const optionSizeClasses: Record<SegmentedControlSize, string> = {
   sm: 'h-7 px-2 text-caption',
-  md: 'h-9 px-3 text-label',
 };
 
 const selectedOptionClasses = 'ui-segmented-control__option--active';
@@ -216,7 +215,7 @@ function optionClasses(option: SegmentOption): string[] {
     segmentedTransitionClasses,
     controlFocusClasses,
     'font-label',
-    optionSizeClasses[props.size as SegmentedControlSize] ?? optionSizeClasses.md,
+    optionSizeClasses[props.size as SegmentedControlSize] ?? optionSizeClasses.sm,
     isSelected(option) ? selectedOptionClasses : unselectedOptionClasses,
     disabledOptionClasses,
   ];
