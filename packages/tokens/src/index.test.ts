@@ -97,6 +97,10 @@ test('keeps the light segmented control edges translucent and blurred', async ()
   expect(semanticCss).toMatch(/--neoverse-control-segmented-focus-shadow:\s*0 0 0 1px/);
   expect(semanticCss).toMatch(/--neoverse-control-segmented-foreground:\s*color-mix\(/);
   expect(semanticCss).toMatch(/--neoverse-control-segmented-active-foreground:\s*color-mix\(/);
+  const activeForeground =
+    semanticCss.match(/--neoverse-control-segmented-active-foreground:([\s\S]*?);/)?.[1] ?? '';
+  expect(activeForeground).toContain('var(--neoverse-color-accent-secondary) 30%');
+  expect(activeForeground).not.toContain('var(--neoverse-color-accent-primary)');
   const segmentedShadow =
     semanticCss.match(/--neoverse-control-segmented-shadow:([\s\S]*?);/)?.[1] ?? '';
   expect(segmentedShadow).not.toContain('var(--neoverse-color-text-primary)');
@@ -106,25 +110,28 @@ test('keeps the light segmented control edges translucent and blurred', async ()
   expect(semanticCss).toMatch(/--neoverse-control-active-background:\s*linear-gradient\(/);
   const activeBackground =
     semanticCss.match(/--neoverse-control-active-background:([\s\S]*?);/)?.[1] ?? '';
-  expect(activeBackground).not.toContain('var(--neoverse-color-accent-secondary)');
+  expect(activeBackground).toContain('var(--neoverse-color-accent-secondary) 13%');
+  expect(activeBackground).toContain('var(--neoverse-color-accent-secondary) 7%');
+  expect(activeBackground).not.toContain('var(--neoverse-color-accent-primary)');
   expect(semanticCss).toContain('--neoverse-control-active-border: transparent;');
   expect(semanticCss).toMatch(/--neoverse-control-active-highlight:\s*inset 0 1px 3px/);
   const activeHighlight =
     semanticCss.match(/--neoverse-control-active-highlight:([\s\S]*?);/)?.[1] ?? '';
   expect(activeHighlight).not.toContain('var(--neoverse-color-edge-light)');
   expect(activeHighlight).not.toContain('var(--neoverse-color-text-primary)');
-  expect(activeHighlight).not.toContain('var(--neoverse-color-accent-secondary)');
+  expect(activeHighlight).not.toContain('var(--neoverse-color-accent-primary)');
+  expect(activeHighlight).toContain('var(--neoverse-color-accent-secondary) 14%');
   const focusShadow =
     semanticCss.match(/--neoverse-control-segmented-focus-shadow:([\s\S]*?);/)?.[1] ?? '';
   expect(focusShadow).not.toContain('var(--neoverse-color-white)');
   expect(focusShadow).not.toContain('rgb(255 255 255');
   expect(semanticCss).toContain(
-    '--neoverse-control-active-shadow:\n      var(--neoverse-control-active-highlight),\n      0 2px 7px -2px color-mix(in srgb, var(--neoverse-color-accent-primary) 24%, transparent);',
+    '--neoverse-control-active-shadow:\n      var(--neoverse-control-active-highlight),\n      0 2px 7px -2px color-mix(in srgb, var(--neoverse-color-accent-secondary) 24%, transparent);',
   );
   expect(semanticCss).toMatch(/--neoverse-control-secondary-shadow:\s*inset 0 1px 0/);
   expect(
     themesCss.match(
-      /--neoverse-control-active-shadow:\s*var\(--neoverse-control-active-highlight\),\s*var\(--neoverse-shadow-xs\);/g,
+      /--neoverse-control-active-shadow:\s*var\(--neoverse-control-active-highlight\);/g,
     ),
   ).toHaveLength(2);
   expect(
@@ -142,19 +149,37 @@ test('keeps the light segmented control edges translucent and blurred', async ()
       /--neoverse-control-segmented-background:\s*var\(--neoverse-control-secondary-background\);/g,
     ),
   ).toHaveLength(2);
-  expect(themesCss.match(/--neoverse-control-active-background:\s*color-mix\(/g)).toHaveLength(2);
+  expect(
+    themesCss.match(/--neoverse-control-active-background:\s*linear-gradient\(/g),
+  ).toHaveLength(2);
   expect(themesCss.match(/--neoverse-control-active-border:\s*transparent;/g)).toHaveLength(2);
 });
 
-test('keeps dark segmented active surfaces flat and neutral', async () => {
+test('keeps dark segmented active surfaces aligned with Neoverse navigation', async () => {
   const themesCss = await readTokenCss('themes.css');
   const activeBackgrounds = themesCss.match(/--neoverse-control-active-background:([\s\S]*?);/g);
 
   expect(activeBackgrounds).toHaveLength(2);
   for (const activeBackground of activeBackgrounds ?? []) {
-    expect(activeBackground).not.toContain('linear-gradient(');
-    expect(activeBackground).not.toContain('var(--neoverse-color-accent-secondary)');
-    expect(activeBackground).toContain('var(--neoverse-color-text-primary)');
+    expect(activeBackground).toContain('linear-gradient(');
+    expect(activeBackground).toContain('var(--neoverse-color-accent-secondary) 13%');
+    expect(activeBackground).toContain('var(--neoverse-color-accent-primary) 7%');
+    expect(activeBackground).not.toContain('var(--neoverse-color-blue-900)');
+    expect(activeBackground).not.toContain('var(--neoverse-color-text-primary)');
+  }
+
+  expect(
+    themesCss.match(
+      /--neoverse-control-segmented-active-foreground:\s*var\(--neoverse-color-accent-secondary\);/g,
+    ),
+  ).toHaveLength(2);
+
+  const activeHighlights = themesCss.match(/--neoverse-control-active-highlight:([\s\S]*?);/g);
+
+  expect(activeHighlights).toHaveLength(2);
+  for (const activeHighlight of activeHighlights ?? []) {
+    expect(activeHighlight).not.toContain('var(--neoverse-color-text-primary)');
+    expect(activeHighlight).toContain('var(--neoverse-color-edge-light) 62%');
   }
 });
 
@@ -217,7 +242,7 @@ test('keeps dark subtle state cards neutral and softly grounded', async () => {
       2,
     ],
     [/--neoverse-material-transparency-subtle:\s*24%;/g, 2],
-    [/--neoverse-material-edge-refraction-opacity-subtle:\s*0\.30;/g, 2],
+    [/--neoverse-material-edge-refraction-opacity-subtle:\s*0\.3(?:0)?;/g, 2],
     [
       /--neoverse-material-glass-subtle-shadow:\s*0 0\.75rem 2rem -1\.25rem rgb\(0 0 0 \/ 34%\),\s*0 3px 8px -1px rgb\(0 0 0 \/ 12%\);/g,
       2,

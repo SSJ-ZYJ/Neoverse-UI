@@ -158,24 +158,26 @@
     --neoverse-control-segmented-active-foreground: color-mix(
       in srgb,
       var(--neoverse-color-neutral-600) 70%,
-      var(--neoverse-color-accent-primary) 30%
+      var(--neoverse-color-accent-secondary) 30%
     );
     --neoverse-control-segmented-border: transparent;
+    /* Match Neoverse navigation with a light mint active tint. The low alpha
+       keeps the selected capsule airy on the blue-white canvas. */
     --neoverse-control-active-background: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--neoverse-color-accent-primary) 18%, transparent),
-      color-mix(in srgb, var(--neoverse-color-accent-primary) 12%, transparent)
+      145deg,
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 13%, transparent),
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 7%, transparent)
     );
     --neoverse-control-active-border: transparent;
-    /* The active edge is a translucent, blue-only refraction. */
+    /* The active edge follows the same mint refraction as the fill. */
     --neoverse-control-active-highlight:
-      inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 14%, transparent),
-      inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 10%, transparent),
-      inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 9%, transparent),
-      inset -1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 8%, transparent);
+      inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 14%, transparent),
+      inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 10%, transparent),
+      inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 9%, transparent),
+      inset -1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 8%, transparent);
     --neoverse-control-active-shadow:
       var(--neoverse-control-active-highlight),
-      0 2px 7px -2px color-mix(in srgb, var(--neoverse-color-accent-primary) 24%, transparent);
+      0 2px 7px -2px color-mix(in srgb, var(--neoverse-color-accent-secondary) 24%, transparent);
     --neoverse-control-segmented-focus-shadow:
       0 0 0 1px color-mix(in srgb, var(--neoverse-color-accent-primary) 30%, transparent),
       0 0 4px 1px color-mix(in srgb, var(--neoverse-color-accent-primary) 18%, transparent);

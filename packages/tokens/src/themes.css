@@ -69,22 +69,20 @@
       --neoverse-control-secondary-border: var(--neoverse-color-border-subtle);
       --neoverse-control-segmented-background: var(--neoverse-control-secondary-background);
       --neoverse-control-segmented-foreground: var(--neoverse-color-text-secondary);
-      --neoverse-control-segmented-active-foreground: var(--neoverse-color-text-primary);
+      --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
       --neoverse-control-segmented-border: var(--neoverse-control-secondary-border);
       --neoverse-control-segmented-shadow: var(--neoverse-control-secondary-shadow);
       --neoverse-control-segmented-filter: var(--neoverse-control-secondary-filter);
-      /* Keep the dark active state flat and neutral. A blue-green gradient
-         makes this compact selection read as a glowing badge. */
-      --neoverse-control-active-background: color-mix(
-        in srgb,
-        var(--neoverse-color-text-primary) 9%,
-        transparent
+      /* Match Neoverse navigation: a quiet mint-to-sky tint over graphite. */
+      --neoverse-control-active-background: linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--neoverse-color-accent-secondary) 13%, transparent),
+        color-mix(in srgb, var(--neoverse-color-accent-primary) 7%, transparent)
       );
       --neoverse-control-active-border: transparent;
       --neoverse-control-active-highlight: inset 0 1px 0
-        color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent);
-      --neoverse-control-active-shadow:
-        var(--neoverse-control-active-highlight), var(--neoverse-shadow-xs);
+        color-mix(in srgb, var(--neoverse-color-edge-light) 62%, transparent);
+      --neoverse-control-active-shadow: var(--neoverse-control-active-highlight);
       --neoverse-material-edge-highlight-subtle:
         inset 0 1px 2px
         color-mix(in srgb, var(--neoverse-color-edge-light) 16%, transparent),
@@ -262,22 +260,20 @@
     --neoverse-control-secondary-border: var(--neoverse-color-border-subtle);
     --neoverse-control-segmented-background: var(--neoverse-control-secondary-background);
     --neoverse-control-segmented-foreground: var(--neoverse-color-text-secondary);
-    --neoverse-control-segmented-active-foreground: var(--neoverse-color-text-primary);
+    --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
     --neoverse-control-segmented-border: var(--neoverse-control-secondary-border);
     --neoverse-control-segmented-shadow: var(--neoverse-control-secondary-shadow);
     --neoverse-control-segmented-filter: var(--neoverse-control-secondary-filter);
-    /* Keep the dark active state flat and neutral. A blue-green gradient
-       makes this compact selection read as a glowing badge. */
-    --neoverse-control-active-background: color-mix(
-      in srgb,
-      var(--neoverse-color-text-primary) 9%,
-      transparent
+    /* Match Neoverse navigation: a quiet mint-to-sky tint over graphite. */
+    --neoverse-control-active-background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 13%, transparent),
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 7%, transparent)
     );
     --neoverse-control-active-border: transparent;
     --neoverse-control-active-highlight: inset 0 1px 0
-      color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent);
-    --neoverse-control-active-shadow:
-      var(--neoverse-control-active-highlight), var(--neoverse-shadow-xs);
+      color-mix(in srgb, var(--neoverse-color-edge-light) 62%, transparent);
+    --neoverse-control-active-shadow: var(--neoverse-control-active-highlight);
     --neoverse-material-edge-highlight-subtle:
       inset 0 1px 2px
       color-mix(in srgb, var(--neoverse-color-edge-light) 16%, transparent),
