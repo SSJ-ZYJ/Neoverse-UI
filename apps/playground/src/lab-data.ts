@@ -25,8 +25,18 @@ export interface NamedToken {
 }
 
 const color = cssVariables.color;
-const primitiveColorFamilies = ['neutral', 'blue', 'cyan', 'mint', 'red', 'amber', 'green'] as const;
-const primitiveColorGroup = (family: (typeof primitiveColorFamilies)[number]): TokenGroup<NamedToken> => ({
+const primitiveColorFamilies = [
+  'neutral',
+  'blue',
+  'cyan',
+  'mint',
+  'red',
+  'amber',
+  'green',
+] as const;
+const primitiveColorGroup = (
+  family: (typeof primitiveColorFamilies)[number],
+): TokenGroup<NamedToken> => ({
   label: localized(family, family),
   items: Object.entries(color.primitive[family]).map(([shade, variable]) => ({
     label: localized(`${family}-${shade}`, `${family}-${shade}`),

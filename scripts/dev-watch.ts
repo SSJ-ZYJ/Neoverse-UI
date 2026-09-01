@@ -28,12 +28,9 @@ const run = (cwd: string, command: string, args: string[]): Promise<void> =>
     });
   });
 
-const buildTokensCss = (): Promise<void> =>
-  run(tokensDirectory, 'bun', ['scripts/copy-css.ts']);
-const buildMotionCss = (): Promise<void> =>
-  run(motionDirectory, 'bun', ['scripts/copy-css.ts']);
-const buildGlassRuntime = (): Promise<void> =>
-  run(glassRuntimeDirectory, 'bun', ['run', 'build']);
+const buildTokensCss = (): Promise<void> => run(tokensDirectory, 'bun', ['scripts/copy-css.ts']);
+const buildMotionCss = (): Promise<void> => run(motionDirectory, 'bun', ['scripts/copy-css.ts']);
+const buildGlassRuntime = (): Promise<void> => run(glassRuntimeDirectory, 'bun', ['run', 'build']);
 const buildTailwind = async (): Promise<void> => {
   await run(tailwindDirectory, 'bun', ['scripts/copy-theme.ts']);
   await run(tailwindDirectory, tailwindCli, ['-i', 'src/index.css', '-o', 'dist/index.css']);

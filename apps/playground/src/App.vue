@@ -632,7 +632,7 @@ onBeforeUnmount(() => {
                 </ul>
                 <UiButton
                   variant="secondary"
-              :key="frameModuleKey"
+                  :key="frameModuleKey"
                   @click="selectModule(group.moduleIds[0])"
                 >
                   {{ formatLocalized(appCopy.overview.openGroup, locale, {

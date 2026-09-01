@@ -28,6 +28,15 @@ type GlassStyle = {
   carrier: Color;
 };
 
+type CanvasViewport = {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+};
+
 type GlassGl = WebGLRenderingContext | WebGL2RenderingContext;
 type GlassWindow = Window & {
   ResizeObserver?: typeof ResizeObserver;
@@ -128,9 +137,7 @@ const parseColor = (value: string): Color | undefined => {
     ) as Color;
   }
 
-  const colorFunctionMatch = normalized.match(
-    /^color\(\s*srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/,
-  );
+  const colorFunctionMatch = normalized.match(/^color\(\s*srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/);
   if (colorFunctionMatch !== null) {
     return [
       Number.parseFloat(colorFunctionMatch[1] ?? '0'),
@@ -207,6 +214,54 @@ const getRadii = (style: CSSStyleDeclaration): Radii => [
   parsePixels(style.borderBottomLeftRadius, 16),
   parsePixels(style.borderTopLeftRadius, 16),
 ];
+
+const getCanvasViewport = (
+  canvas: HTMLCanvasElement,
+  ownerDocument: Document,
+  view: Window,
+): CanvasViewport => {
+  const canvasRect = canvas.getBoundingClientRect();
+  const documentElement = ownerDocument.documentElement;
+  const width = Math.max(
+    canvasRect.width || canvas.clientWidth || documentElement.clientWidth || view.innerWidth,
+    1,
+  );
+  const height = Math.max(
+    canvasRect.height || canvas.clientHeight || documentElement.clientHeight || view.innerHeight,
+    1,
+  );
+  const left = Number.isFinite(canvasRect.left) ? canvasRect.left : 0;
+  const top = Number.isFinite(canvasRect.top) ? canvasRect.top : 0;
+
+  return {
+    left,
+    top,
+    right: left + width,
+    bottom: top + height,
+    width,
+    height,
+  };
+};
+
+const getScissorRect = (
+  rect: DOMRect,
+  viewport: CanvasViewport,
+  pixelRatio: number,
+  drawingWidth: number,
+  drawingHeight: number,
+): { x: number; y: number; width: number; height: number } => {
+  const left = Math.max(Math.floor((rect.left - viewport.left) * pixelRatio), 0);
+  const top = Math.max(Math.floor((rect.top - viewport.top) * pixelRatio), 0);
+  const right = Math.min(Math.ceil((rect.right - viewport.left) * pixelRatio), drawingWidth);
+  const bottom = Math.min(Math.ceil((rect.bottom - viewport.top) * pixelRatio), drawingHeight);
+
+  return {
+    x: left,
+    y: Math.max(drawingHeight - bottom, 0),
+    width: Math.max(right - left, 0),
+    height: Math.max(bottom - top, 0),
+  };
+};
 
 const createShader = (gl: GlassGl, type: number, source: string): WebGLShader | undefined => {
   const shader = gl.createShader(type);
@@ -293,7 +348,9 @@ const resolveColor = (
   return resolved ?? fallback;
 };
 
-const getDefaultEdgeValues = (variant: GlassVariant): {
+const getDefaultEdgeValues = (
+  variant: GlassVariant,
+): {
   width: number;
   softness: number;
   opacity: number;
@@ -313,6 +370,7 @@ const readStyle = (
   element: HTMLElement,
   view: Window,
   colorProbe: HTMLElement,
+  viewport: CanvasViewport,
 ): GlassStyle | undefined => {
   const style = view.getComputedStyle(element);
   const rect = element.getBoundingClientRect();
@@ -321,8 +379,8 @@ const readStyle = (
     rect.height <= 0 ||
     rect.right <= 0 ||
     rect.bottom <= 0 ||
-    rect.left >= view.innerWidth ||
-    rect.top >= view.innerHeight ||
+    rect.left >= viewport.right ||
+    rect.top >= viewport.bottom ||
     style.display === 'none' ||
     style.visibility === 'hidden' ||
     style.opacity === '0'
@@ -539,9 +597,8 @@ class GlassRendererImpl implements GlassRenderer {
     this.program = program;
     this.locations = locations;
     this.buffer = buffer;
-    this.previousRendererAttribute = this.ownerDocument.documentElement.getAttribute(
-      glassRendererAttribute,
-    );
+    this.previousRendererAttribute =
+      this.ownerDocument.documentElement.getAttribute(glassRendererAttribute);
     this.ownerDocument.documentElement.setAttribute(glassRendererAttribute, 'webgl');
     this.ownerDocument.body.append(canvas);
     const colorProbe = this.ownerDocument.createElement('span');
@@ -670,13 +727,7 @@ class GlassRendererImpl implements GlassRenderer {
         subtree: true,
         childList: true,
         attributes: true,
-        attributeFilter: [
-          'class',
-          'style',
-          'hidden',
-          'data-theme',
-          glassRendererAttribute,
-        ],
+        attributeFilter: ['class', 'style', 'hidden', 'data-theme', glassRendererAttribute],
       });
       this.mutationObserver = mutationObserver;
     }
@@ -718,8 +769,9 @@ class GlassRendererImpl implements GlassRenderer {
       return;
     }
 
-    const width = Math.max(view.innerWidth, 1);
-    const height = Math.max(view.innerHeight, 1);
+    const viewport = getCanvasViewport(this.canvas, this.ownerDocument, view);
+    const width = viewport.width;
+    const height = viewport.height;
     const pixelRatio = Math.min(Math.max(view.devicePixelRatio || 1, 1), this.maxDevicePixelRatio);
     const drawingWidth = Math.max(Math.round(width * pixelRatio), 1);
     const drawingHeight = Math.max(Math.round(height * pixelRatio), 1);
@@ -731,6 +783,7 @@ class GlassRendererImpl implements GlassRenderer {
     const gl = this.gl;
     const locations = this.locations;
     gl.viewport(0, 0, drawingWidth, drawingHeight);
+    gl.disable(gl.SCISSOR_TEST);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     gl.useProgram(this.program);
@@ -766,8 +819,10 @@ class GlassRendererImpl implements GlassRenderer {
     const secondary = resolveColor(
       rootStyle,
       [
-        firstPropertyValue(rootStyle, ['--neoverse-color-accent-secondary', '--accent-secondary']) ??
-          'var(--neoverse-color-accent-secondary)',
+        firstPropertyValue(rootStyle, [
+          '--neoverse-color-accent-secondary',
+          '--accent-secondary',
+        ]) ?? 'var(--neoverse-color-accent-secondary)',
         'var(--accent-secondary)',
       ],
       view,
@@ -786,13 +841,33 @@ class GlassRendererImpl implements GlassRenderer {
       [0.48, 0.43, 0.9],
     );
 
+    gl.enable(gl.SCISSOR_TEST);
     for (const element of this.getGlassElements()) {
-      const style = readStyle(element, view, this.colorProbe);
+      const style = readStyle(element, view, this.colorProbe, viewport);
       if (style === undefined) {
         continue;
       }
 
-      gl.uniform4f(locations.rect, style.rect.left, style.rect.top, style.rect.width, style.rect.height);
+      const scissor = getScissorRect(
+        style.rect,
+        viewport,
+        pixelRatio,
+        drawingWidth,
+        drawingHeight,
+      );
+      if (scissor.width === 0 || scissor.height === 0) {
+        continue;
+      }
+
+      gl.scissor(scissor.x, scissor.y, scissor.width, scissor.height);
+
+      gl.uniform4f(
+        locations.rect,
+        style.rect.left - viewport.left,
+        style.rect.top - viewport.top,
+        style.rect.width,
+        style.rect.height,
+      );
       gl.uniform2f(locations.rectSize, style.rect.width, style.rect.height);
       gl.uniform4f(locations.radii, ...style.radii);
       gl.uniform1f(locations.edgeWidth, style.edgeWidth);
@@ -805,6 +880,7 @@ class GlassRendererImpl implements GlassRenderer {
       gl.uniform3f(locations.tertiary, ...tertiary);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
+    gl.disable(gl.SCISSOR_TEST);
   }
 
   private getGlassElements(): HTMLElement[] {
@@ -812,9 +888,7 @@ class GlassRendererImpl implements GlassRenderer {
       return [];
     }
 
-    const elements = Array.from(
-      this.ownerDocument.querySelectorAll<HTMLElement>(glassSelector),
-    );
+    const elements = Array.from(this.ownerDocument.querySelectorAll<HTMLElement>(glassSelector));
     const currentElements: HTMLElement[] = [];
 
     for (const element of elements) {

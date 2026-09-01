@@ -19,8 +19,14 @@ const props = defineProps<LabModuleProps>();
         </p>
       </header>
       <div class="grid gap-grid md:grid-cols-2 lg:grid-cols-3">
-        <div v-for="group in primitiveColorGroups" :key="group.label.en" class="grid content-start gap-3">
-          <h3 class="text-label font-label text-primary">{{ localize(group.label, props.locale) }}</h3>
+        <div
+          v-for="group in primitiveColorGroups"
+          :key="group.label.en"
+          class="grid content-start gap-3"
+        >
+          <h3 class="text-label font-label text-primary">
+            {{ localize(group.label, props.locale) }}
+          </h3>
           <TokenRow
             v-for="token in group.items"
             :key="token.variable"
@@ -42,8 +48,14 @@ const props = defineProps<LabModuleProps>();
         </p>
       </header>
       <div class="grid gap-grid md:grid-cols-2 lg:grid-cols-3">
-        <div v-for="group in semanticColorGroups" :key="group.label.en" class="grid content-start gap-3">
-          <h3 class="text-label font-label text-primary">{{ localize(group.label, props.locale) }}</h3>
+        <div
+          v-for="group in semanticColorGroups"
+          :key="group.label.en"
+          class="grid content-start gap-3"
+        >
+          <h3 class="text-label font-label text-primary">
+            {{ localize(group.label, props.locale) }}
+          </h3>
           <TokenRow
             v-for="token in group.items"
             :key="token.variable"

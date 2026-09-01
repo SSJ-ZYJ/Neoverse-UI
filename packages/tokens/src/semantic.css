@@ -51,72 +51,173 @@
     --neoverse-color-ambient-mint: rgb(52 211 153 / 10%);
     --neoverse-color-ambient-violet: rgb(124 110 230 / 9%);
 
-    /* The primary CTA wears the light blue at full strength — one thin top
-       sheen, no heavy white mixing — so it reads as a deliberate tint, not a
-       washed-out wash. */
+    /* Buttons are intentionally monochrome. Theme accents belong to status,
+       navigation, and selected states; button hierarchy comes from contrast,
+       surface density, and depth instead. */
     --neoverse-control-primary-background: linear-gradient(
-      165deg,
-      color-mix(in srgb, var(--neoverse-color-white) 10%, var(--neoverse-color-action-primary)),
-      var(--neoverse-color-action-primary) 44%
+      180deg,
+      color-mix(in srgb, var(--neoverse-color-edge-light) 14%, transparent),
+      color-mix(in srgb, var(--neoverse-color-text-primary) 4%, transparent) 100%
     );
+    --neoverse-control-primary-foreground: var(--neoverse-color-text-primary);
     --neoverse-control-primary-border: color-mix(
       in srgb,
-      var(--neoverse-color-action-primary-hover) 34%,
+      var(--neoverse-color-text-primary) 22%,
       transparent
     );
-    --neoverse-control-primary-shadow: var(--neoverse-material-edge-highlight-subtle),
-      0 0.6rem 1.6rem -0.7rem color-mix(
-        in srgb,
-        var(--neoverse-color-action-primary) 55%,
-        transparent
-      ),
+    --neoverse-control-primary-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 42%, transparent),
       var(--neoverse-shadow-control);
     --neoverse-control-primary-hover-background: linear-gradient(
-      165deg,
-      var(--neoverse-color-action-primary-hover),
-      color-mix(
-        in srgb,
-        var(--neoverse-color-action-primary-active) 62%,
-        var(--neoverse-color-action-primary-hover)
-      )
+      180deg,
+      color-mix(in srgb, var(--neoverse-color-edge-light) 22%, transparent),
+      color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent) 100%
     );
-    --neoverse-control-primary-active-background: var(--neoverse-color-action-primary-active);
-    /* The light glass surface already gets its silhouette from the edge
-       highlight and quiet shadow. A dark hairline makes the control look
-       cut out instead of refractive. */
-    --neoverse-control-secondary-border: transparent;
-    --neoverse-control-segmented-shadow: var(--neoverse-control-secondary-shadow);
-    --neoverse-control-secondary-hover-background: linear-gradient(
+    --neoverse-control-primary-hover-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 58%, transparent),
+      var(--neoverse-shadow-sm);
+    --neoverse-control-primary-active-background: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) 9%,
+      transparent
+    );
+    /* The reference control uses one refractive rim: a broad, low-contrast
+       light catch on the top and left, balanced by a quiet lower and right
+       falloff. The blur keeps the edge inside the silhouette from reading as
+       a second border or an overlapping layer. */
+    --neoverse-control-button-edge:
+      inset 0 1px 3px
+      color-mix(in srgb, var(--neoverse-color-edge-light) 28%, transparent),
+      inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-edge-light) 12%, transparent),
+      inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent),
+      inset -1px 0 3px color-mix(in srgb, var(--neoverse-color-text-primary) 5%, transparent);
+    --neoverse-control-button-hover-background: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) 6%,
+      transparent
+    );
+    --neoverse-control-button-active-background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--neoverse-color-text-primary) 9%, transparent),
+      color-mix(in srgb, var(--neoverse-color-text-secondary) 4%, transparent)
+    );
+    --neoverse-control-button-ghost-active-background: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) 8%,
+      transparent
+    );
+    /* Secondary is a neutral glass surface. It must remain visible in light
+       mode without borrowing the accent palette from the page. */
+    --neoverse-control-secondary-border: var(--neoverse-color-border-default);
+    --neoverse-control-secondary-background:
+      linear-gradient(
         135deg,
-        color-mix(in srgb, var(--neoverse-color-edge-light) 26%, transparent),
-        transparent 48%
+        color-mix(in srgb, var(--neoverse-color-edge-light) 10%, transparent),
+        transparent 52%
       ),
-      color-mix(
-        in srgb,
-        var(--neoverse-material-tint-elevated) 78%,
-        transparent
-      );
-    --neoverse-control-secondary-shadow: var(--neoverse-material-edge-highlight-subtle),
-      var(--neoverse-material-inner-glow-subtle), var(--neoverse-material-bloom-subtle),
+      color-mix(in srgb, var(--neoverse-color-surface-raised) 34%, transparent);
+    /* Segmented controls use a soft refractive rim instead of a closed
+       hairline. Every edge layer is translucent and blurred so the light
+       canvas remains visible through the control. */
+    --neoverse-control-segmented-shadow:
+      inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent),
+      inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 5%, transparent),
+      inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-text-primary) 5%, transparent),
+      inset -1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 5%, transparent),
       var(--neoverse-shadow-control);
-    --neoverse-control-secondary-hover-shadow: var(--neoverse-material-edge-highlight-elevated),
-      var(--neoverse-material-inner-glow-elevated), var(--neoverse-material-bloom-elevated),
+    --neoverse-control-secondary-hover-background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 16%, transparent),
+        transparent 50%
+      ),
+      color-mix(in srgb, var(--neoverse-color-surface-raised) 52%, transparent);
+    --neoverse-control-secondary-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 28%, transparent),
+      inset 0 -1px 2px color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent),
+      var(--neoverse-shadow-control);
+    --neoverse-control-secondary-hover-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 42%, transparent),
+      inset 0 -1px 2px color-mix(in srgb, var(--neoverse-color-text-primary) 10%, transparent),
       var(--neoverse-shadow-control);
     --neoverse-control-secondary-filter: var(--neoverse-material-filter-subtle);
-    --neoverse-control-active-background: linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--neoverse-color-accent-secondary) 13%, transparent),
-      color-mix(in srgb, var(--neoverse-color-accent-primary) 7%, transparent)
+    /* A segmented control needs a visible well in light mode. The slightly
+       darker track gives the active capsule a place to sit without turning
+       the whole control into a hard outlined chip. */
+    --neoverse-control-segmented-background: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) 5%,
+      transparent
     );
-    /* The light active fill plus a compact outer shadow signals selection
-       without turning the selected option into a hard outlined chip. */
-    --neoverse-control-active-highlight: none;
-    --neoverse-control-active-shadow: var(--neoverse-shadow-control);
+    --neoverse-control-segmented-border: transparent;
+    --neoverse-control-active-background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 24%, transparent),
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 26%, transparent)
+    );
+    --neoverse-control-active-border: transparent;
+    /* The active edge is a translucent, blurred refraction. It provides
+       separation without introducing a white or high-contrast outline. */
+    --neoverse-control-active-highlight:
+      inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 12%, transparent),
+      inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-primary) 8%, transparent),
+      inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent),
+      inset -1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 8%, transparent);
+    --neoverse-control-active-shadow:
+      var(--neoverse-control-active-highlight), var(--neoverse-shadow-control);
     --neoverse-control-hover-background: color-mix(
       in srgb,
       var(--neoverse-color-accent-primary) 22%,
       transparent
     );
+
+    /* Immersive scrollbars keep the rail close to the canvas. The neutral
+       resting thumb preserves quiet hierarchy; accent color appears only when
+       the user points at or drags the scroll position. */
+    --neoverse-scrollbar-immersive-size: 0.75rem;
+    --neoverse-scrollbar-immersive-track: color-mix(
+      in srgb,
+      var(--neoverse-color-surface-raised) 24%,
+      transparent
+    );
+    --neoverse-scrollbar-immersive-thumb: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) 46%,
+      transparent
+    );
+    --neoverse-scrollbar-immersive-thumb-hover: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-primary) 62%,
+      var(--neoverse-color-text-secondary) 38%
+    );
+    --neoverse-scrollbar-immersive-thumb-active: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-secondary) 68%,
+      var(--neoverse-color-text-secondary) 32%
+    );
+    --neoverse-scrollbar-immersive-thumb-background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--neoverse-color-edge-light) 46%, transparent),
+      var(--neoverse-scrollbar-immersive-thumb) 48%,
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 34%, transparent)
+    );
+    --neoverse-scrollbar-immersive-thumb-hover-background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--neoverse-color-edge-light) 58%, transparent),
+      var(--neoverse-scrollbar-immersive-thumb-hover) 48%,
+      color-mix(in srgb, var(--neoverse-color-accent-tertiary) 42%, transparent)
+    );
+    --neoverse-scrollbar-immersive-thumb-active-background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--neoverse-color-edge-light) 64%, transparent),
+      var(--neoverse-scrollbar-immersive-thumb-active) 48%,
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 48%, transparent)
+    );
+    --neoverse-scrollbar-immersive-thumb-edge:
+      inset 0 1px 1px color-mix(in srgb, var(--neoverse-color-edge-light) 42%, transparent),
+      inset 0 -1px 2px color-mix(in srgb, var(--neoverse-color-text-primary) 18%, transparent);
+    --neoverse-scrollbar-immersive-thumb-glow: 0 0 12px -4px
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 32%, transparent);
 
     /* Skeletons use the same neutral loading material in both themes. */
     --neoverse-skeleton-fill: color-mix(

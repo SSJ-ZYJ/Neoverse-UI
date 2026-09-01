@@ -12,6 +12,7 @@ type FakeGl = {
   LINK_STATUS: number;
   SRC_ALPHA: number;
   ONE_MINUS_SRC_ALPHA: number;
+  SCISSOR_TEST: number;
   STATIC_DRAW: number;
   TRIANGLE_STRIP: number;
   VERTEX_SHADER: number;
@@ -29,6 +30,7 @@ type FakeGl = {
   deleteProgram: ReturnType<typeof vi.fn>;
   deleteShader: ReturnType<typeof vi.fn>;
   drawArrays: ReturnType<typeof vi.fn>;
+  disable: ReturnType<typeof vi.fn>;
   enable: ReturnType<typeof vi.fn>;
   enableVertexAttribArray: ReturnType<typeof vi.fn>;
   getAttribLocation: ReturnType<typeof vi.fn>;
@@ -37,6 +39,7 @@ type FakeGl = {
   getUniformLocation: ReturnType<typeof vi.fn>;
   linkProgram: ReturnType<typeof vi.fn>;
   shaderSource: ReturnType<typeof vi.fn>;
+  scissor: ReturnType<typeof vi.fn>;
   uniform1f: ReturnType<typeof vi.fn>;
   uniform2f: ReturnType<typeof vi.fn>;
   uniform3f: ReturnType<typeof vi.fn>;
@@ -57,6 +60,7 @@ const createFakeGl = (): FakeGl => {
     LINK_STATUS: 0x8b82,
     SRC_ALPHA: 0x0302,
     ONE_MINUS_SRC_ALPHA: 0x0303,
+    SCISSOR_TEST: 0x0c11,
     STATIC_DRAW: 0x88e4,
     TRIANGLE_STRIP: 0x0005,
     VERTEX_SHADER: 0x8b31,
@@ -74,6 +78,7 @@ const createFakeGl = (): FakeGl => {
     deleteProgram: vi.fn(),
     deleteShader: vi.fn(),
     drawArrays: vi.fn(),
+    disable: vi.fn(),
     enable: vi.fn(),
     enableVertexAttribArray: vi.fn(),
     getAttribLocation: vi.fn(() => 0),
@@ -82,6 +87,7 @@ const createFakeGl = (): FakeGl => {
     getUniformLocation: vi.fn((_, name: string) => ({ name })),
     linkProgram: vi.fn(),
     shaderSource: vi.fn(),
+    scissor: vi.fn(),
     uniform1f: vi.fn(),
     uniform2f: vi.fn(),
     uniform3f: vi.fn(),
@@ -186,6 +192,50 @@ describe('Glass renderer', () => {
     expect(webgl.drawArrays).toHaveBeenCalledTimes(1);
     expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
     renderer.destroy();
+  });
+
+  it('uses the fixed canvas viewport and clips each edge draw to its surface', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, { left: 30, top: 40, width: 100, height: 60 });
+    document.body.append(glass);
+
+    const renderer = createTestRenderer({ maxDevicePixelRatio: 1 });
+    renderer.mount();
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    expect(canvas).not.toBeNull();
+    if (canvas === null) {
+      return;
+    }
+    setRect(canvas, { left: 10, top: 20, width: 240, height: 120 });
+
+    renderer.refresh();
+
+    expect(gl.viewport).toHaveBeenLastCalledWith(0, 0, 240, 120);
+    const viewportUniformCalls = gl.uniform2f.mock.calls.filter(
+      ([location]) => location?.name === 'u_viewport',
+    );
+    expect(viewportUniformCalls.at(-1)).toEqual([
+      expect.objectContaining({ name: 'u_viewport' }),
+      240,
+      120,
+    ]);
+    const rectUniformCalls = gl.uniform4f.mock.calls.filter(
+      ([location]) => location?.name === 'u_rect',
+    );
+    expect(rectUniformCalls.at(-1)).toEqual([
+      expect.objectContaining({ name: 'u_rect' }),
+      20,
+      20,
+      100,
+      60,
+    ]);
+    expect(gl.scissor).toHaveBeenLastCalledWith(20, 40, 100, 60);
+    expect(gl.disable).toHaveBeenLastCalledWith(gl.SCISSOR_TEST);
   });
 
   it('keeps the CSS fallback when no WebGL context is available', () => {
@@ -305,6 +355,7 @@ describe('Glass renderer', () => {
     expect(glassFragmentShader).toContain(
       'float inside = 1.0 - smoothstep(-antiAlias, antiAlias, distance);',
     );
+    expect(glassFragmentShader).toContain('float edgeMask = inside * edge;');
     expect(glassFragmentShader).toContain('#ifdef GL_FRAGMENT_PRECISION_HIGH');
     expect(glassFragmentShader).toContain(
       'float thicknessScale = clamp(0.82 + (u_edge_width * 0.55), 0.9, 1.65);',
@@ -333,9 +384,7 @@ describe('Glass renderer', () => {
     expect(glassFragmentShader).toContain(
       'float lowerRightRefraction = rightCatch * bottomCatch * lightSurface;',
     );
-    expect(glassFragmentShader).toContain(
-      'float lightAlphaGain = mix(1.0, 1.35, lightSurface);',
-    );
+    expect(glassFragmentShader).toContain('float lightAlphaGain = mix(1.0, 1.35, lightSurface);');
     expect(glassFragmentShader).toContain(
       'float alpha = edgeMask * u_opacity * directionalAlpha * thicknessScale * lightAlphaGain;',
     );

@@ -7,9 +7,9 @@ import {
   controlTransitionClasses,
   disabledControlClasses,
   iconButtonSizeClasses,
-  loadingIndicatorClasses,
 } from './classes';
 import type { ButtonSize, ButtonVariant, IconButtonProps } from './types';
+import UiLoadingIndicator from './UiLoadingIndicator.vue';
 
 defineOptions({ inheritAttrs: false });
 
@@ -59,7 +59,7 @@ const classes = computed(() => [
     :class="[classes, attrs.class]"
   >
     <span class="inline-flex shrink-0 items-center justify-center" aria-hidden="true">
-      <span v-if="props.loading" :class="loadingIndicatorClasses" />
+      <UiLoadingIndicator v-if="props.loading" />
       <slot v-else />
     </span>
   </button>

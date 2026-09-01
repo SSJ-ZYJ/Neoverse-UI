@@ -448,6 +448,38 @@ export const moduleCopy = {
       'Skeleton 默认设置为 aria-hidden；加载关系应由外层内容容器负责。',
     ),
   },
+  scrollbar: {
+    label: localized('Scrollbar', '滚动条'),
+    description: localized(
+      'A quiet glass rail keeps scrolling visible without bringing back the browser chrome.',
+      '克制的玻璃轨道让滚动状态保持可见，同时不带回浏览器默认的厚重控件。',
+    ),
+    preview: {
+      label: localized('Immersive scrollbar', '沉浸式滚动条'),
+      description: localized(
+        'The rail stays close to the canvas; the thumb gains contrast and an accent edge during interaction.',
+        '轨道融入画布；交互时滑块提高对比度并显出强调色边缘。',
+      ),
+      viewportLabel: localized('Scrollable viewport', '可滚动视口'),
+      viewportHint: localized(
+        'Scroll inside the panel to inspect the track, thumb, and hover state.',
+        '在面板内滚动，查看轨道、滑块与悬停状态。',
+      ),
+    },
+    tokens: {
+      label: localized('Semantic hooks', '语义钩子'),
+      description: localized(
+        'The utility consumes a theme-aware token family so the treatment follows light and dark surfaces.',
+        '该工具类使用主题感知的 token 家族，使样式跟随浅色与深色表面。',
+      ),
+      size: localized('Thickness', '厚度'),
+      track: localized('Track', '轨道'),
+      thumb: localized('Resting thumb', '静止滑块'),
+      hover: localized('Hover thumb', '悬停滑块'),
+      active: localized('Active thumb', '按下滑块'),
+      edge: localized('Edge and glow', '边缘与辉光'),
+    },
+  },
 } as const;
 
 export const tokenCopy = {

@@ -1,9 +1,12 @@
 import { rm } from 'node:fs/promises';
 
 const output = new URL('../dist/contract.css', import.meta.url);
+const source = new URL('../src/components.css', import.meta.url);
 
 try {
   const css = await Bun.file(output).text();
+  const componentCss = await Bun.file(source).text();
+  const buttonCss = componentCss.slice(0, componentCss.indexOf('/* Badges'));
   const expectedSelectors = [
     '.bg-surface-canvas',
     '.bg-surface-subtle',
@@ -89,6 +92,7 @@ try {
     '.ui-button--primary',
     '.ui-button--secondary',
     '.ui-button--ghost',
+    '.scrollbar-immersive',
     '.material-glass-subtle',
     '.material-glass-elevated',
     '.material-glass-immersive',
@@ -145,10 +149,29 @@ try {
     '--neoverse-control-active-highlight',
     '--neoverse-control-active-shadow',
     '--neoverse-control-primary-background',
+    '--neoverse-control-primary-foreground',
+    '--neoverse-control-primary-hover-shadow',
+    '--neoverse-control-button-edge',
+    '--neoverse-control-button-hover-background',
+    '--neoverse-control-button-active-background',
+    '--neoverse-control-button-ghost-active-background',
     '--neoverse-control-secondary-background',
     '--neoverse-control-secondary-border',
     '--neoverse-control-secondary-filter',
+    '--neoverse-control-segmented-background',
+    '--neoverse-control-segmented-border',
     '--neoverse-control-segmented-shadow',
+    '--neoverse-control-active-border',
+    '--neoverse-scrollbar-immersive-size',
+    '--neoverse-scrollbar-immersive-track',
+    '--neoverse-scrollbar-immersive-thumb',
+    '--neoverse-scrollbar-immersive-thumb-hover',
+    '--neoverse-scrollbar-immersive-thumb-active',
+    '--neoverse-scrollbar-immersive-thumb-background',
+    '--neoverse-scrollbar-immersive-thumb-hover-background',
+    '--neoverse-scrollbar-immersive-thumb-active-background',
+    '--neoverse-scrollbar-immersive-thumb-edge',
+    '--neoverse-scrollbar-immersive-thumb-glow',
     '--neoverse-skeleton-fill',
   ];
   const missingValues = expectedValues.filter((value) => !css.includes(value));
@@ -162,9 +185,10 @@ try {
     'data-neoverse-glass-renderer=webgl',
     '[data-neoverse-glass-renderer=webgl]',
     '[data-neoverse-glass-renderer=webgl] :is(.glass-card,.glass-surface):before{display:none}',
-    '[data-neoverse-glass-renderer=webgl] :is(.glass-card,.glass-surface){box-shadow:var(--neoverse-material-shadow',
-    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive){box-shadow:var(--neoverse-material-shadow',
-    'background-clip:padding-box',
+    '[data-neoverse-glass-renderer=webgl] :is(.glass-card,.glass-surface){box-shadow:var(--neoverse-shadow-none',
+    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive){box-shadow:var(--neoverse-shadow-none',
+    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive){box-shadow:var(--neoverse-shadow-none);-webkit-backdrop-filter:blur(var(--neoverse-material-blur)) saturate(var(--neoverse-material-saturation));backdrop-filter:blur(var(--neoverse-material-blur)) saturate(var(--neoverse-material-saturation))',
+    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive){box-shadow:var(--neoverse-shadow-none);-webkit-backdrop-filter:blur(var(--neoverse-material-blur)) saturate(var(--neoverse-material-saturation));backdrop-filter:blur(var(--neoverse-material-blur)) saturate(var(--neoverse-material-saturation));background-clip:border-box',
     'border-color:#0000',
     'var(--neoverse-material-inner-glow)',
     'var(--neoverse-material-seam-glow)',
@@ -179,21 +203,69 @@ try {
     '@keyframes ui-skeleton-shimmer',
     'transform:translateX(calc(var(--segment-index)',
     'box-shadow:var(--neoverse-control-active-shadow)',
+    'background:var(--neoverse-control-segmented-background)',
+    'border:var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) var(--neoverse-control-segmented-border)',
+    'border:var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) var(--neoverse-control-active-border)',
+    'scrollbar-color:var(--neoverse-scrollbar-immersive-thumb) var(--neoverse-scrollbar-immersive-track)',
+    'scrollbar-width:thin',
+    '::-webkit-scrollbar',
+    'background-clip:padding-box',
+    '@media (forced-colors:active)',
     '.ui-button--primary{',
     '.ui-button--secondary{',
     '.ui-button--ghost{',
     'background:var(--neoverse-control-primary-background)',
     'background:var(--neoverse-control-secondary-background)',
-    'border:var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) var(--neoverse-control-secondary-border)',
+    'box-shadow:var(--neoverse-control-button-edge)',
+    'border:0',
     'backdrop-filter:var(--neoverse-control-secondary-filter)',
   ];
   const missingFragments = expectedFragments.filter((fragment) => !css.includes(fragment));
+  const forbiddenWebglFragments = [
+    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive){box-shadow:var(--neoverse-shadow-none);-webkit-backdrop-filter:none;backdrop-filter:none',
+  ];
+  const emittedForbiddenWebglFragments = forbiddenWebglFragments.filter((fragment) =>
+    css.includes(fragment),
+  );
+  const expectedButtonFragments = [
+    'box-shadow: var(--neoverse-control-button-edge);',
+    'box-shadow: var(--neoverse-shadow-none);',
+  ];
+  const missingButtonFragments = expectedButtonFragments.filter(
+    (fragment) => !buttonCss.includes(fragment),
+  );
+  const ghostActiveCss =
+    buttonCss.match(/\.ui-button--ghost:active:not\(:disabled\) \{([\s\S]*?)\n {2}\}/)?.[1] ?? '';
+  const expectedGhostActiveFragments = [
+    'background-color: var(--neoverse-control-button-ghost-active-background);',
+    'box-shadow: var(--neoverse-control-button-edge);',
+    'transform: none;',
+  ];
+  const missingGhostActiveFragments = expectedGhostActiveFragments.filter(
+    (fragment) => !ghostActiveCss.includes(fragment),
+  );
+  const forbiddenButtonFragments = [
+    '::before',
+    'inset: 1px;',
+    'var(--neoverse-control-primary-shadow)',
+    'var(--neoverse-control-primary-hover-shadow)',
+    'var(--neoverse-control-secondary-shadow)',
+    'var(--neoverse-control-secondary-hover-shadow)',
+    'var(--neoverse-control-active-shadow)',
+  ];
+  const emittedForbiddenButtonFragments = forbiddenButtonFragments.filter((fragment) =>
+    buttonCss.includes(fragment),
+  );
 
   if (
     missingSelectors.length > 0 ||
     emittedForbiddenSelectors.length > 0 ||
     missingValues.length > 0 ||
-    missingFragments.length > 0
+    missingFragments.length > 0 ||
+    emittedForbiddenWebglFragments.length > 0 ||
+    missingButtonFragments.length > 0 ||
+    missingGhostActiveFragments.length > 0 ||
+    emittedForbiddenButtonFragments.length > 0
   ) {
     const details = [
       missingSelectors.length > 0 ? `Missing selectors: ${missingSelectors.join(', ')}` : '',
@@ -202,6 +274,18 @@ try {
         : '',
       missingValues.length > 0 ? `Missing token references: ${missingValues.join(', ')}` : '',
       missingFragments.length > 0 ? `Missing CSS fragments: ${missingFragments.join(', ')}` : '',
+      emittedForbiddenWebglFragments.length > 0
+        ? `Forbidden WebGL material fragments: ${emittedForbiddenWebglFragments.join(', ')}`
+        : '',
+      missingButtonFragments.length > 0
+        ? `Missing button edge fragments: ${missingButtonFragments.join(', ')}`
+        : '',
+      missingGhostActiveFragments.length > 0
+        ? `Missing Ghost active fragments: ${missingGhostActiveFragments.join(', ')}`
+        : '',
+      emittedForbiddenButtonFragments.length > 0
+        ? `Forbidden button edge fragments: ${emittedForbiddenButtonFragments.join(', ')}`
+        : '',
     ].filter(Boolean);
     throw new Error(['Tailwind semantic contract failed:', ...details].join('\n'));
   }

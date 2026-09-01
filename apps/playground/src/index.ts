@@ -53,7 +53,7 @@ const renderDocument = ({ theme, locale }: RenderOptions): string => {
         });
 
   return `<!doctype html>
-<html lang="${locale === 'zh' ? 'zh-CN' : 'en'}" data-theme="${theme ?? 'system'}">
+<html lang="${locale === 'zh' ? 'zh-CN' : 'en'}" data-theme="${theme ?? 'system'}" class="scrollbar-immersive">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

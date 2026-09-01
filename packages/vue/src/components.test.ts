@@ -56,7 +56,8 @@ describe('UiButton', () => {
         'focus-visible:ring-focus',
         'duration-fast',
         'ease-standard',
-        'h-11',
+        'font-medium',
+        'h-9',
         'px-4',
       ]),
     );
@@ -69,9 +70,24 @@ describe('UiButton', () => {
     expect(button.attributes('aria-busy')).toBe('true');
     expect(button.find('[aria-hidden="true"]').exists()).toBe(true);
 
+    const loadingIndicator = button.get('[aria-hidden="true"] svg');
+    expect(loadingIndicator.classes()).toContain('motion-safe:animate-spin');
+    expect(loadingIndicator.get('circle').attributes('stroke-linecap')).toBe('round');
+
     onClick.mockClear();
     button.element.click();
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('keeps disabled buttons targetable for the not-allowed cursor', () => {
+    const wrapper = mount(UiButton, {
+      props: { disabled: true },
+      slots: { default: 'Disabled' },
+    });
+    const button = wrapper.get('button');
+
+    expect(button.classes()).toContain('disabled:cursor-not-allowed');
+    expect(button.classes()).not.toContain('disabled:pointer-events-none');
   });
 });
 
@@ -91,7 +107,10 @@ describe('UiIconButton', () => {
     await wrapper.setProps({ loading: true });
     expect(button.element.disabled).toBe(true);
     expect(button.attributes('aria-busy')).toBe('true');
-    expect(button.find('[aria-hidden="true"] .motion-safe\\:animate-spin').exists()).toBe(true);
+
+    const loadingIndicator = button.get('[aria-hidden="true"] svg');
+    expect(loadingIndicator.classes()).toContain('motion-safe:animate-spin');
+    expect(loadingIndicator.get('circle').attributes('stroke-linecap')).toBe('round');
   });
 });
 
@@ -210,9 +229,10 @@ describe('UiSegmentedControl', () => {
 
     expect(wrapper.attributes('aria-busy')).toBe('true');
     expect(buttons.every((button) => button.element.disabled)).toBe(true);
-    expect(wrapper.find('[aria-hidden="true"] > span').classes()).toContain(
-      'motion-safe:animate-spin',
-    );
+
+    const loadingIndicator = wrapper.get('[aria-hidden="true"] > svg');
+    expect(loadingIndicator.classes()).toContain('motion-safe:animate-spin');
+    expect(loadingIndicator.get('circle').attributes('stroke-linecap')).toBe('round');
 
     await buttons[0]?.trigger('click');
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();

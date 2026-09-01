@@ -7,9 +7,9 @@ import {
   controlFocusClasses,
   controlTransitionClasses,
   disabledControlClasses,
-  loadingIndicatorClasses,
 } from './classes';
 import type { ButtonProps, ButtonSize, ButtonVariant } from './types';
+import UiLoadingIndicator from './UiLoadingIndicator.vue';
 
 defineOptions({ inheritAttrs: false });
 
@@ -70,7 +70,7 @@ const classes = computed(() => [
           <slot name="leading" />
         </span>
         <span class="absolute inset-0 inline-flex items-center justify-center" aria-hidden="true">
-          <span :class="loadingIndicatorClasses" />
+          <UiLoadingIndicator />
         </span>
       </template>
       <slot v-else name="leading" />

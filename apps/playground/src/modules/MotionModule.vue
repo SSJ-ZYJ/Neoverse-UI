@@ -31,7 +31,7 @@ const motionBaseEntries = motionBaseGroups.map((group) => ({
           <h3 class="text-label font-label text-primary">
             {{ localize(group.label, props.locale) }}
           </h3>
-          <code v-for="[key, value] in group.entries" :key="key" class="text-xs text-secondary">
+          <code v-for="[ key, value ] in group.entries" :key="key" class="text-xs text-secondary">
             {{ key }}: {{ value }}
           </code>
         </div>
@@ -63,7 +63,10 @@ const motionBaseEntries = motionBaseGroups.map((group) => ({
             </span>
             <LabIcon name="arrow-right" />
           </div>
-          <code class="block truncate text-xs text-secondary">{{ sample.duration }} · {{ sample.easing }}</code>
+          <code class="block truncate text-xs text-secondary"
+            >{{ sample.duration }}
+            · {{ sample.easing }}</code
+          >
           <div class="grid gap-1 text-xs text-muted">
             <span>{{ sample.transition.duration }}</span>
             <span>{{ sample.transition.easing }}</span>
@@ -74,17 +77,11 @@ const motionBaseEntries = motionBaseGroups.map((group) => ({
       <div class="grid gap-3 rounded-control material-glass-subtle p-4">
         <div v-for="group in motionVariableEntries" :key="group.label.en" class="grid gap-1">
           <h3 class="text-label font-label text-primary">
-            {{
-              formatLocalized(moduleCopy.motion.cssVariables, props.locale, {
+            {{ formatLocalized(moduleCopy.motion.cssVariables, props.locale, {
                 label: localize(group.label, props.locale),
-              })
-            }}
+              }) }}
           </h3>
-          <code
-            v-for="[key, value] in group.entries"
-            :key="key"
-            class="text-xs text-secondary"
-          >
+          <code v-for="[ key, value ] in group.entries" :key="key" class="text-xs text-secondary">
             {{ key }}: {{ value }}
           </code>
         </div>

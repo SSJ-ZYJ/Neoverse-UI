@@ -20,18 +20,18 @@
     /* Elevation is broad and quiet: the reference products use ambient depth
        rather than the tight, high-contrast shadows of a generic component kit. */
     --neoverse-shadow-xs: 0 1px 3px rgb(14 34 44 / 14%);
-    --neoverse-shadow-sm: 0 0.75rem 2rem -1.25rem rgb(14 34 44 / 30%),
-      0 3px 8px -1px rgb(14 34 44 / 12%);
-    --neoverse-shadow-md: 0 1rem 2.8rem -1.6rem rgb(14 34 44 / 38%),
-      0 4px 10px -1px rgb(14 34 44 / 14%);
-    --neoverse-shadow-lg: 0 1.5rem 4rem -1.75rem rgb(5 16 23 / 42%),
-      0 6px 14px -1px rgb(5 16 23 / 16%);
-    --neoverse-shadow-xl: 0 2rem 4.75rem -1.875rem rgb(5 16 23 / 48%),
-      0 8px 18px -1px rgb(5 16 23 / 20%);
+    --neoverse-shadow-sm:
+      0 0.75rem 2rem -1.25rem rgb(14 34 44 / 30%), 0 3px 8px -1px rgb(14 34 44 / 12%);
+    --neoverse-shadow-md:
+      0 1rem 2.8rem -1.6rem rgb(14 34 44 / 38%), 0 4px 10px -1px rgb(14 34 44 / 14%);
+    --neoverse-shadow-lg:
+      0 1.5rem 4rem -1.75rem rgb(5 16 23 / 42%), 0 6px 14px -1px rgb(5 16 23 / 16%);
+    --neoverse-shadow-xl:
+      0 2rem 4.75rem -1.875rem rgb(5 16 23 / 48%), 0 8px 18px -1px rgb(5 16 23 / 20%);
     /* Inset material shares the softened refractive edge catch used by Glass
        and keeps a cool, soft lower falloff so light surfaces do not read flat. */
-    --neoverse-shadow-inset: var(--neoverse-material-edge-highlight-subtle),
-      inset 0 -1px 2px rgb(14 34 44 / 8%);
+    --neoverse-shadow-inset:
+      var(--neoverse-material-edge-highlight-subtle), inset 0 -1px 2px rgb(14 34 44 / 8%);
     --neoverse-shadow-control: 0 2px 6px -1px rgb(14 34 44 / 20%);
     --neoverse-shadow-raised: var(--neoverse-shadow-sm);
     --neoverse-shadow-card: var(--neoverse-shadow-md);

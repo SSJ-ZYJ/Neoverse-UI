@@ -11,6 +11,7 @@ import RadiusModule from './modules/RadiusModule.vue';
 import SegmentedControlModule from './modules/SegmentedControlModule.vue';
 import ShadowModule from './modules/ShadowModule.vue';
 import SkeletonModule from './modules/SkeletonModule.vue';
+import ScrollbarModule from './modules/ScrollbarModule.vue';
 import SpacingModule from './modules/SpacingModule.vue';
 import SurfaceModule from './modules/SurfaceModule.vue';
 import TypographyModule from './modules/TypographyModule.vue';
@@ -122,6 +123,13 @@ export const labModules = [
     description: moduleCopy.skeleton.description,
     component: SkeletonModule,
   },
+  {
+    id: 'scrollbar',
+    groupId: 'components',
+    label: moduleCopy.scrollbar.label,
+    description: moduleCopy.scrollbar.description,
+    component: ScrollbarModule,
+  },
 ] as const satisfies readonly {
   id: string;
   groupId: string;
@@ -156,7 +164,15 @@ export const moduleGroups = [
     id: 'components',
     label: groupCopy.components.label,
     description: groupCopy.components.description,
-    moduleIds: ['button', 'icon-button', 'badge', 'card', 'segmented-control', 'skeleton'],
+    moduleIds: [
+      'button',
+      'icon-button',
+      'badge',
+      'card',
+      'segmented-control',
+      'skeleton',
+      'scrollbar',
+    ],
   },
 ] as const satisfies readonly {
   id: string;

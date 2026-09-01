@@ -26,12 +26,12 @@
       saturate(var(--neoverse-material-saturation-elevated)) brightness(105%) contrast(104%);
     --neoverse-material-filter-immersive: blur(var(--neoverse-material-blur-lg))
       saturate(var(--neoverse-material-saturation-immersive)) brightness(106%) contrast(106%);
-    --neoverse-material-edge-filter-subtle: blur(var(--neoverse-material-blur-sm))
-      saturate(146%) brightness(102%) contrast(105%);
-    --neoverse-material-edge-filter-elevated: blur(var(--neoverse-material-blur-md))
-      saturate(153%) brightness(103%) contrast(107%);
-    --neoverse-material-edge-filter-immersive: blur(var(--neoverse-material-blur-lg))
-      saturate(160%) brightness(104%) contrast(109%);
+    --neoverse-material-edge-filter-subtle: blur(var(--neoverse-material-blur-sm)) saturate(146%)
+      brightness(102%) contrast(105%);
+    --neoverse-material-edge-filter-elevated: blur(var(--neoverse-material-blur-md)) saturate(153%)
+      brightness(103%) contrast(107%);
+    --neoverse-material-edge-filter-immersive: blur(var(--neoverse-material-blur-lg)) saturate(160%)
+      brightness(104%) contrast(109%);
     /* Keep the environmental field close to the silhouette: a fine edge
        catches light without becoming a bright painted band. */
     --neoverse-material-edge-refraction-width-subtle: 1px;
@@ -55,14 +55,14 @@
       var(--neoverse-color-surface-glass) 82%,
       var(--neoverse-color-accent-tertiary) 18%
     );
-    --neoverse-material-inner-glow-subtle: inset 0 1px 3px
-        color-mix(in srgb, var(--neoverse-color-edge-light) 20%, transparent),
+    --neoverse-material-inner-glow-subtle:
+      inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-edge-light) 20%, transparent),
       inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 6%, transparent);
-    --neoverse-material-inner-glow-elevated: inset 0 1px 3px
-        color-mix(in srgb, var(--neoverse-color-edge-light) 24%, transparent),
+    --neoverse-material-inner-glow-elevated:
+      inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-edge-light) 24%, transparent),
       inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 8%, transparent);
-    --neoverse-material-inner-glow-immersive: inset 0 1px 4px
-        color-mix(in srgb, var(--neoverse-color-edge-light) 28%, transparent),
+    --neoverse-material-inner-glow-immersive:
+      inset 0 1px 4px color-mix(in srgb, var(--neoverse-color-edge-light) 28%, transparent),
       inset 0 -1px 4px color-mix(in srgb, var(--neoverse-color-accent-secondary) 10%, transparent);
     /* One broad environmental transition is less illustrative than a pair
        of inset strokes and lets the sampled edge do the material work. */
@@ -72,18 +72,21 @@
       color-mix(in srgb, var(--neoverse-color-accent-primary) 12%, transparent);
     --neoverse-material-seam-glow-immersive: 0 0 24px -3px
       color-mix(in srgb, var(--neoverse-color-accent-tertiary) 14%, transparent);
-    --neoverse-material-bloom-subtle: 0 1.2rem 2.8rem -1.9rem
-        color-mix(in srgb, var(--neoverse-color-accent-primary) 18%, transparent),
+    --neoverse-material-bloom-subtle:
+      0 1.2rem 2.8rem -1.9rem
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 18%, transparent),
       0 0.35rem 1.2rem -0.85rem
-        color-mix(in srgb, var(--neoverse-color-accent-secondary) 8%, transparent);
-    --neoverse-material-bloom-elevated: 0 1.35rem 3.2rem -1.8rem
-        color-mix(in srgb, var(--neoverse-color-accent-primary) 22%, transparent),
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 8%, transparent);
+    --neoverse-material-bloom-elevated:
+      0 1.35rem 3.2rem -1.8rem
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 22%, transparent),
       0 0.4rem 1.3rem -0.8rem
-        color-mix(in srgb, var(--neoverse-color-accent-secondary) 10%, transparent);
-    --neoverse-material-bloom-immersive: 0 1.5rem 3.8rem -1.75rem
-        color-mix(in srgb, var(--neoverse-color-accent-primary) 26%, transparent),
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 10%, transparent);
+    --neoverse-material-bloom-immersive:
+      0 1.5rem 3.8rem -1.75rem
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 26%, transparent),
       0 0.5rem 1.5rem -0.75rem
-        color-mix(in srgb, var(--neoverse-color-accent-secondary) 12%, transparent);
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 12%, transparent);
 
     --neoverse-material-edge-highlight-none: none;
     --neoverse-material-edge-refraction-opacity-subtle: 0.46;
@@ -107,84 +110,88 @@
     /* Keep a layered fallback for surfaces without the masked backdrop path;
        supported Glass utilities replace it with a filtered slice of the
        actual backdrop. Dark restores its lower-contrast fallback in themes.css. */
-    --neoverse-material-edge-highlight-subtle: inset 0 1px 2px
+    --neoverse-material-edge-highlight-subtle:
+      inset 0 1px 2px
       color-mix(
         in srgb,
         var(--neoverse-color-edge-light) 20%,
         var(--neoverse-color-accent-primary) 15%
       ),
       inset 0 -1px 2px
-        color-mix(
-          in srgb,
-          var(--neoverse-color-accent-secondary) 12%,
-          var(--neoverse-color-edge-light) 8%
-        ),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-secondary) 12%,
+        var(--neoverse-color-edge-light) 8%
+      ),
       inset 1px 0 2px
-        color-mix(
-          in srgb,
-          var(--neoverse-color-accent-primary) 10%,
-          var(--neoverse-color-edge-light) 8%
-        ),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-primary) 10%,
+        var(--neoverse-color-edge-light) 8%
+      ),
       inset -1px 0 2px
-        color-mix(
-          in srgb,
-          var(--neoverse-color-accent-tertiary) 8%,
-          var(--neoverse-color-edge-light) 8%
-        );
-    --neoverse-material-edge-highlight-elevated: inset 0 1px 2px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-tertiary) 8%,
+        var(--neoverse-color-edge-light) 8%
+      );
+    --neoverse-material-edge-highlight-elevated:
+      inset 0 1px 2px
       color-mix(
         in srgb,
         var(--neoverse-color-edge-light) 24%,
         var(--neoverse-color-accent-primary) 17%
       ),
       inset 0 -1px 2px
-        color-mix(
-          in srgb,
-          var(--neoverse-color-accent-secondary) 14%,
-          var(--neoverse-color-edge-light) 9%
-        ),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-secondary) 14%,
+        var(--neoverse-color-edge-light) 9%
+      ),
       inset 1px 0 2px
-        color-mix(
-          in srgb,
-          var(--neoverse-color-accent-primary) 12%,
-          var(--neoverse-color-edge-light) 9%
-        ),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-primary) 12%,
+        var(--neoverse-color-edge-light) 9%
+      ),
       inset -1px 0 2px
-        color-mix(
-          in srgb,
-          var(--neoverse-color-accent-tertiary) 10%,
-          var(--neoverse-color-edge-light) 9%
-        );
-    --neoverse-material-edge-highlight-immersive: inset 0 1px 2px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-tertiary) 10%,
+        var(--neoverse-color-edge-light) 9%
+      );
+    --neoverse-material-edge-highlight-immersive:
+      inset 0 1px 2px
       color-mix(
         in srgb,
         var(--neoverse-color-edge-light) 28%,
         var(--neoverse-color-accent-primary) 19%
       ),
       inset 0 -1px 2px
-        color-mix(
-          in srgb,
-          var(--neoverse-color-accent-secondary) 16%,
-          var(--neoverse-color-edge-light) 10%
-        ),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-secondary) 16%,
+        var(--neoverse-color-edge-light) 10%
+      ),
       inset 1px 0 2px
-        color-mix(
-          in srgb,
-          var(--neoverse-color-accent-primary) 14%,
-          var(--neoverse-color-edge-light) 10%
-        ),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-primary) 14%,
+        var(--neoverse-color-edge-light) 10%
+      ),
       inset -1px 0 2px
-        color-mix(
-          in srgb,
-          var(--neoverse-color-accent-tertiary) 12%,
-          var(--neoverse-color-edge-light) 10%
-        );
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-tertiary) 12%,
+        var(--neoverse-color-edge-light) 10%
+      );
 
     --neoverse-material-refraction-gradient-none: none;
     /* The edge field is directional and low alpha. backdrop-filter supplies
        the local canvas colour; these gradients only shape where the reflected
        light catches instead of painting a uniform contour. */
-    --neoverse-material-refraction-gradient-subtle: radial-gradient(
+    --neoverse-material-refraction-gradient-subtle:
+      radial-gradient(
         110% 38% at 50% -4%,
         color-mix(in srgb, var(--neoverse-color-edge-light) 26%, transparent),
         color-mix(in srgb, var(--neoverse-color-accent-secondary) 10%, transparent) 42%,
@@ -206,7 +213,8 @@
         color-mix(in srgb, var(--neoverse-color-accent-tertiary) 10%, transparent),
         transparent 70%
       );
-    --neoverse-material-refraction-gradient-immersive: radial-gradient(
+    --neoverse-material-refraction-gradient-immersive:
+      radial-gradient(
         110% 42% at 50% -4%,
         color-mix(in srgb, var(--neoverse-color-edge-light) 32%, transparent),
         color-mix(in srgb, var(--neoverse-color-accent-secondary) 14%, transparent) 42%,

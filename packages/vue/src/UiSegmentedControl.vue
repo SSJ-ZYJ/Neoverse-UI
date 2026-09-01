@@ -1,12 +1,9 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue';
 import { computed, nextTick, ref, useAttrs, watch } from 'vue';
-import {
-  controlFocusClasses,
-  loadingIndicatorClasses,
-  segmentedTransitionClasses,
-} from './classes';
+import { controlFocusClasses, segmentedTransitionClasses } from './classes';
 import type { SegmentedControlProps, SegmentedControlSize, SegmentOption } from './types';
+import UiLoadingIndicator from './UiLoadingIndicator.vue';
 
 defineOptions({ inheritAttrs: false });
 
@@ -46,8 +43,7 @@ const optionSizeClasses: Record<SegmentedControlSize, string> = {
 
 const selectedOptionClasses = 'ui-segmented-control__option--active text-primary';
 const unselectedOptionClasses = 'text-secondary';
-const disabledOptionClasses =
-  'disabled:pointer-events-none disabled:text-disabled disabled:cursor-not-allowed';
+const disabledOptionClasses = 'disabled:text-disabled disabled:cursor-not-allowed';
 
 const isControlled = computed(() => props.modelValue !== undefined);
 const currentValue = computed(() => (isControlled.value ? props.modelValue : internalValue.value));
@@ -263,7 +259,7 @@ function optionClasses(option: SegmentOption): string[] {
       class="ui-segmented-control__loading ml-1 inline-flex size-4 items-center justify-center"
       aria-hidden="true"
     >
-      <span :class="loadingIndicatorClasses" />
+      <UiLoadingIndicator />
     </span>
   </div>
 </template>

@@ -362,7 +362,8 @@
     /* Keep the border slot for geometry, but never paint a hard fallback
        contour; the fallback edge is supplied by blurred material shadows. */
     border: var(--neoverse-material-border-width) var(--neoverse-border-style-solid) transparent;
-    box-shadow: var(--neoverse-material-edge-highlight), var(--neoverse-material-inner-glow),
+    box-shadow:
+      var(--neoverse-material-edge-highlight), var(--neoverse-material-inner-glow),
       var(--neoverse-material-seam-glow), var(--neoverse-material-bloom),
       var(--neoverse-material-shadow);
     isolation: isolate;
@@ -429,16 +430,19 @@
      document. Keep the CSS field as the default and remove only this
      duplicate when the renderer has activated successfully. */
   [data-neoverse-glass-renderer='webgl']
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)::before {
+  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)::before {
     display: none;
   }
 
   [data-neoverse-glass-renderer='webgl']
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
-    /* The WebGL field owns the silhouette. Keep a transparent border from
-       carrying the light surface fill into a false white hairline. */
+    /* The WebGL edge field owns the directional silhouette. Keep the normal
+       material shadow and backdrop filter so the DOM surface still carries
+       the same depth and sampling as the CSS fallback. */
     background-clip: padding-box;
     box-shadow: var(--neoverse-material-shadow);
+    -webkit-backdrop-filter: var(--neoverse-material-filter);
+    backdrop-filter: var(--neoverse-material-filter);
   }
 
   /* Aurora Glass keeps the production aliases as first-class surfaces. Once
@@ -457,7 +461,8 @@
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
       background-color: var(--neoverse-material-background-fallback);
       background-image: none;
-      box-shadow: var(--neoverse-material-edge-highlight), var(--neoverse-material-inner-glow),
+      box-shadow:
+        var(--neoverse-material-edge-highlight), var(--neoverse-material-inner-glow),
         var(--neoverse-material-shadow);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
@@ -498,7 +503,11 @@
     background-image:
       radial-gradient(60rem 28rem at 8% -10%, var(--neoverse-color-ambient-ice), transparent 65%),
       radial-gradient(44rem 26rem at 92% 10%, var(--neoverse-color-ambient-mint), transparent 68%),
-      radial-gradient(38rem 24rem at 52% 100%, var(--neoverse-color-ambient-violet), transparent 72%);
+      radial-gradient(
+        38rem 24rem at 52% 100%,
+        var(--neoverse-color-ambient-violet),
+        transparent 72%
+      );
     background-attachment: fixed;
     color: var(--neoverse-color-text-primary);
     font-family: var(--neoverse-font-family-sans);

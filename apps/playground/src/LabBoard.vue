@@ -17,7 +17,6 @@ let attributeObserver: MutationObserver | undefined;
 
 document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en';
 
-
 function isModuleId(value: unknown): value is ModuleId {
   return typeof value === 'string' && labModules.some((module) => module.id === value);
 }
