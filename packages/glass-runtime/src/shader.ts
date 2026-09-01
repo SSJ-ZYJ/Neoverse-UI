@@ -122,6 +122,14 @@ export const glassFragmentShader = `
     vec3 lightChromaticColor = color * vec3(0.78, 0.88, 1.0);
     color = mix(color, lightChromaticColor, lightSurface * 0.72);
 
+    // Elevated dark cards use a low edge opacity. Keep their silhouette nearly
+    // neutral so a translucent surface does not turn into a blue-violet outline;
+    // the brighter elevated/light variants retain their refractive color.
+    float chromaticVariantStrength = smoothstep(0.3, 0.5, u_opacity);
+    vec3 neutralEdgeColor = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)));
+    float chromaticEdgeStrength = mix(0.12, 1.0, chromaticVariantStrength);
+    color = mix(neutralEdgeColor, color, chromaticEdgeStrength);
+
     // There is deliberately no uniform base alpha: these directional catches
     // must break up instead of closing into a white outline around the card.
     float directionalAlpha = smoothstep(0.16, 0.82, topLeftLight) * 0.42

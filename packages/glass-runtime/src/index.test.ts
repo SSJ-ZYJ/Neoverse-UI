@@ -403,6 +403,21 @@ describe('Glass renderer', () => {
     expect(glassFragmentShader).not.toContain('u_edge_light, 0.1 + (topLeftLight * 0.26)');
   });
 
+  it('keeps low-opacity dark elevated edge catches nearly neutral', () => {
+    expect(glassFragmentShader).toContain(
+      'float chromaticVariantStrength = smoothstep(0.3, 0.5, u_opacity);',
+    );
+    expect(glassFragmentShader).toContain(
+      'vec3 neutralEdgeColor = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)));',
+    );
+    expect(glassFragmentShader).toContain(
+      'float chromaticEdgeStrength = mix(0.12, 1.0, chromaticVariantStrength);',
+    );
+    expect(glassFragmentShader).toContain(
+      'color = mix(neutralEdgeColor, color, chromaticEdgeStrength);',
+    );
+  });
+
   it('refreshes from the window scroll event through one animation frame', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });

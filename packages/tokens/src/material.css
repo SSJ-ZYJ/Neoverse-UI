@@ -213,6 +213,9 @@
         color-mix(in srgb, var(--neoverse-color-accent-tertiary) 10%, transparent),
         transparent 70%
       );
+    --neoverse-material-refraction-gradient-elevated: var(
+      --neoverse-material-refraction-gradient-subtle
+    );
     --neoverse-material-refraction-gradient-immersive:
       radial-gradient(
         110% 42% at 50% -4%,
@@ -342,7 +345,7 @@
       --neoverse-material-edge-refraction-carrier-elevated
     );
     --neoverse-material-glass-elevated-refraction-gradient: var(
-      --neoverse-material-refraction-gradient-subtle
+      --neoverse-material-refraction-gradient-elevated
     );
 
     --neoverse-material-glass-immersive-background: var(--neoverse-color-surface-glass);

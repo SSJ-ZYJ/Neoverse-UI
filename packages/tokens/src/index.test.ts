@@ -143,9 +143,111 @@ test('keeps the light segmented control edges translucent and blurred', async ()
     ),
   ).toHaveLength(2);
   expect(
-    themesCss.match(/--neoverse-control-active-background:\s*linear-gradient\(/g),
+    themesCss.match(/--neoverse-control-active-background:\s*color-mix\(/g),
   ).toHaveLength(2);
   expect(themesCss.match(/--neoverse-control-active-border:\s*transparent;/g)).toHaveLength(2);
+});
+
+test('keeps dark segmented active surfaces flat and neutral', async () => {
+  const themesCss = await readTokenCss('themes.css');
+  const activeBackgrounds = themesCss.match(
+    /--neoverse-control-active-background:([\s\S]*?);/g,
+  );
+
+  expect(activeBackgrounds).toHaveLength(2);
+  for (const activeBackground of activeBackgrounds ?? []) {
+    expect(activeBackground).not.toContain('linear-gradient(');
+    expect(activeBackground).not.toContain('var(--neoverse-color-accent-secondary)');
+    expect(activeBackground).toContain('var(--neoverse-color-text-primary)');
+  }
+});
+
+test('keeps dark elevated cards neutral and softly edged', async () => {
+  const themesCss = await readTokenCss('themes.css');
+  const expectedOverrides = [
+    [
+      /--neoverse-material-filter-elevated:\s*blur\(14px\) saturate\(112%\) brightness\(102%\) contrast\(102%\);/g,
+      2,
+    ],
+    [
+      /--neoverse-material-edge-filter-elevated:\s*blur\(16px\) saturate\(118%\) brightness\(102%\)\s+contrast\(103%\);/g,
+      2,
+    ],
+    [
+      /--neoverse-material-tint-elevated:\s*color-mix\(\s*in srgb,\s*var\(--neoverse-color-surface-raised\) 84%,\s*var\(--neoverse-color-text-primary\) 16%\s*\);/g,
+      2,
+    ],
+    [/--neoverse-material-transparency-elevated:\s*26%;/g, 2],
+    [/--neoverse-material-edge-refraction-opacity-elevated:\s*0\.24;/g, 4],
+    [/--neoverse-material-refraction-gradient-elevated:\s*radial-gradient\(/g, 2],
+  ];
+
+  for (const [override, count] of expectedOverrides) {
+    expect(themesCss.match(override as RegExp)).toHaveLength(count as number);
+  }
+
+  for (const token of [
+    'tint-elevated',
+    'edge-highlight-elevated',
+    'inner-glow-elevated',
+    'seam-glow-elevated',
+    'bloom-elevated',
+  ]) {
+    const declarations = themesCss.match(
+      new RegExp(`--neoverse-material-${token}:([\\s\\S]*?);`, 'g'),
+    );
+
+    expect(declarations).toHaveLength(2);
+    for (const declaration of declarations ?? []) {
+      expect(declaration).not.toMatch(/accent-(?:primary|secondary|tertiary)/);
+    }
+  }
+  expect(themesCss).toContain('var(--neoverse-color-surface-raised)');
+});
+
+test('keeps dark subtle state cards neutral and softly grounded', async () => {
+  const themesCss = await readTokenCss('themes.css');
+  const expectedOverrides: Array<[RegExp, number]> = [
+    [
+      /--neoverse-material-filter-subtle:\s*blur\(10px\) saturate\(112%\) brightness\(102%\) contrast\(102%\);/g,
+      2,
+    ],
+    [
+      /--neoverse-material-edge-filter-subtle:\s*blur\(12px\) saturate\(118%\) brightness\(102%\)\s+contrast\(103%\);/g,
+      2,
+    ],
+    [
+      /--neoverse-material-tint-subtle:\s*color-mix\(\s*in srgb,\s*var\(--neoverse-color-surface-raised\) 84%,\s*var\(--neoverse-color-text-primary\) 16%\s*\);/g,
+      2,
+    ],
+    [/--neoverse-material-transparency-subtle:\s*24%;/g, 2],
+    [/--neoverse-material-edge-refraction-opacity-subtle:\s*0\.30;/g, 2],
+    [
+      /--neoverse-material-glass-subtle-shadow:\s*0 0\.75rem 2rem -1\.25rem rgb\(0 0 0 \/ 34%\),\s*0 3px 8px -1px rgb\(0 0 0 \/ 12%\);/g,
+      2,
+    ],
+    [/--neoverse-material-refraction-gradient-subtle:\s*radial-gradient\(/g, 4],
+  ];
+
+  for (const [override, count] of expectedOverrides) {
+    expect(themesCss.match(override)).toHaveLength(count);
+  }
+
+  for (const token of [
+    'edge-highlight-subtle',
+    'inner-glow-subtle',
+    'seam-glow-subtle',
+    'bloom-subtle',
+  ]) {
+    const declarations = themesCss.match(
+      new RegExp(`--neoverse-material-${token}:([\\s\\S]*?);`, 'g'),
+    );
+
+    expect(declarations).toHaveLength(2);
+    for (const declaration of declarations ?? []) {
+      expect(declaration).not.toMatch(/accent-(?:primary|secondary|tertiary)/);
+    }
+  }
 });
 
 test('keeps light control buttons grounded by a compact neutral shadow', async () => {
@@ -475,9 +577,13 @@ test('keeps Glass edge highlights refractive and softly diffused', async () => {
       expect(darkDeclaration).toContain('inset 0 -1px 2px');
       expect(darkDeclaration).toContain('inset 1px 0 2px');
       expect(darkDeclaration).toContain('inset -1px 0 2px');
-      expect(darkDeclaration).toContain('var(--neoverse-color-accent-primary)');
-      expect(darkDeclaration).toContain('var(--neoverse-color-accent-secondary)');
-      expect(darkDeclaration).toContain('var(--neoverse-color-accent-tertiary)');
+      if (variant === 'elevated' || variant === 'subtle') {
+        expect(darkDeclaration).not.toMatch(/var\(--neoverse-color-accent-(?:primary|secondary|tertiary)\)/);
+      } else {
+        expect(darkDeclaration).toContain('var(--neoverse-color-accent-primary)');
+        expect(darkDeclaration).toContain('var(--neoverse-color-accent-secondary)');
+        expect(darkDeclaration).toContain('var(--neoverse-color-accent-tertiary)');
+      }
     }
   }
 

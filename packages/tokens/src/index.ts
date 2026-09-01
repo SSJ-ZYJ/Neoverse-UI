@@ -451,6 +451,7 @@ export const cssVariables = {
       refractionGradient: {
         none: '--neoverse-material-refraction-gradient-none',
         subtle: '--neoverse-material-refraction-gradient-subtle',
+        elevated: '--neoverse-material-refraction-gradient-elevated',
         immersive: '--neoverse-material-refraction-gradient-immersive',
       },
     },
