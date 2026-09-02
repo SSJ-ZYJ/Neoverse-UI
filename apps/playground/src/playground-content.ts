@@ -374,20 +374,20 @@ export const moduleCopy = {
   card: {
     label: localized('Card', '卡片'),
     description: localized(
-      'UiCard provides the fixed raised surface; content hierarchy remains consumer-owned.',
-      'UiCard 提供固定的抬升表面；内容层级仍由使用方负责。',
+      'UiCard groups content without choosing a material; the usage boundary selects a semantic Surface.',
+      'UiCard 只负责内容分组，不选择材质；使用位置负责选择语义 Surface。',
     ),
     reference: localized('Reference card', '参考卡片'),
     ready: localized('Ready', '就绪'),
     body: localized(
-      'Card owns depth and radius. The content and layout stay with the consumer.',
-      '卡片负责深度与圆角；内容及布局由使用方决定。',
+      'Card keeps grouping and geometry predictable. Surface and Glass remain explicit at the composition boundary.',
+      'Card 让分组与几何关系保持可预测；Surface 与 Glass 在组合边界显式声明。',
     ),
     continue: localized('Continue', '继续'),
     externalClass: localized('External class', '外部类名'),
     externalBody: localized(
-      'This card demonstrates layout customization without redefining card tokens.',
-      '此卡片展示如何定制布局，而无需重新定义卡片令牌。',
+      'This card opts into a standard raised Surface; a Glass material remains an explicit UiGlassSurface choice.',
+      '此卡片显式使用标准抬升 Surface；Glass 材质仍由 UiGlassSurface 明确选择。',
     ),
   },
   segmentedControl: {

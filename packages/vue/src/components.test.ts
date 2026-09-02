@@ -21,6 +21,17 @@ afterEach(() => {
 });
 
 describe('UiButton', () => {
+  it('opts the shared button surface into the project Glass material', () => {
+    const wrapper = mount(UiButton, {
+      props: { variant: 'primary' },
+      slots: { default: 'Primary' },
+    });
+
+    expect(wrapper.classes()).toEqual(
+      expect.arrayContaining(['ui-button', 'material-glass-subtle', 'rounded-control-inner']),
+    );
+  });
+
   it('uses the shared material hierarchy for visual variants', () => {
     const primary = mount(UiButton, {
       props: { variant: 'primary' },
@@ -115,7 +126,7 @@ describe('UiIconButton', () => {
 });
 
 describe('display components', () => {
-  it('maps badge, glass, card, and skeleton variants to semantic classes', () => {
+  it('keeps Card grouping separate from Glass material', () => {
     const badge = mount(UiBadge, {
       props: { variant: 'danger', size: 'md' },
       slots: { default: 'Error' },
@@ -131,13 +142,18 @@ describe('display components', () => {
 
     const card = mount(UiCard, { attrs: { class: 'max-w-container-sm' } });
     expect(card.classes()).toEqual(
-      expect.arrayContaining([
-        'ui-card',
-        'material-glass-elevated',
-        'rounded-card',
-        'max-w-container-sm',
-      ]),
+      expect.arrayContaining(['ui-card', 'rounded-card', 'p-4', 'max-w-container-sm']),
     );
+    expect(card.classes()).not.toContain('material-glass-elevated');
+    expect(card.classes().some((className) => className.startsWith('material-glass-'))).toBe(false);
+
+    const standardSurfaceCard = mount(UiCard, {
+      attrs: { class: 'border border-default bg-surface-raised shadow-card' },
+    });
+    expect(standardSurfaceCard.classes()).toEqual(
+      expect.arrayContaining(['border-default', 'bg-surface-raised', 'shadow-card']),
+    );
+    expect(standardSurfaceCard.classes()).not.toContain('material-glass-elevated');
 
     const skeleton = mount(UiSkeleton, { props: { variant: 'circle' } });
     expect(skeleton.attributes('aria-hidden')).toBe('true');

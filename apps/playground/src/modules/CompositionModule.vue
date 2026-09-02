@@ -164,7 +164,7 @@ const navigationItems = computed(() => [
           </p>
         </header>
 
-        <UiCard class="grid gap-3">
+        <UiCard class="grid gap-3 border border-default bg-surface-raised shadow-card">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="min-w-0">
               <p class="text-caption text-accent-primary">
