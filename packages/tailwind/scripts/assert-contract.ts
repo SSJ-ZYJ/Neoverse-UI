@@ -152,6 +152,9 @@ try {
     '--neoverse-control-primary-foreground',
     '--neoverse-control-primary-hover-shadow',
     '--neoverse-control-button-edge',
+    '--neoverse-control-button-edge-active',
+    '--neoverse-control-button-refraction-gradient',
+    '--neoverse-control-button-press-glow',
     '--neoverse-control-button-hover-background',
     '--neoverse-control-button-active-background',
     '--neoverse-control-button-ghost-active-background',
@@ -190,8 +193,8 @@ try {
     '[data-neoverse-glass-renderer=webgl]',
     '[data-neoverse-glass-renderer=webgl] :is(.glass-card,.glass-surface):before{display:none}',
     '[data-neoverse-glass-renderer=webgl] :is(.glass-card,.glass-surface){box-shadow:var(--neoverse-material-shadow,var(--glass-shadow,none));border-color:#0000',
-    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive){box-shadow:var(--neoverse-material-shadow)',
-    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive){box-shadow:var(--neoverse-material-shadow);-webkit-backdrop-filter:var(--neoverse-material-filter);backdrop-filter:var(--neoverse-material-filter);background-clip:padding-box',
+    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow)',
+    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow);-webkit-backdrop-filter:var(--neoverse-material-filter);backdrop-filter:var(--neoverse-material-filter);background-clip:padding-box',
     'border-color:#0000',
     'var(--neoverse-material-inner-glow)',
     'var(--neoverse-material-seam-glow)',
@@ -200,7 +203,7 @@ try {
     '-webkit-backdrop-filter:var(--neoverse-material-filter)',
     '@media (prefers-reduced-transparency:reduce)',
     'background-color:var(--neoverse-color-surface-raised);border:var(--neoverse-border-width-thin)',
-    ':is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive){background-color:var(--neoverse-color-surface-raised)',
+    ':is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(.ui-button){background-color:var(--neoverse-color-surface-raised)',
     'transition-duration:var(--tw-duration)',
     'transition-timing-function:var(--tw-ease)',
     '@keyframes ui-skeleton-shimmer',
@@ -218,14 +221,15 @@ try {
     '::-webkit-scrollbar',
     'background-clip:padding-box',
     '@media (forced-colors:active)',
-    '.ui-button--primary{',
-    '.ui-button--secondary{',
-    '.ui-button--ghost{',
+    '.ui-button{',
+    '.ui-button.material-glass-subtle{',
+    '.ui-button--primary.material-glass-subtle{',
+    '.ui-button--secondary.material-glass-subtle{',
+    '.ui-button--ghost.material-glass-subtle{',
     'background:var(--neoverse-control-primary-background)',
     'background:var(--neoverse-control-secondary-background)',
-    'box-shadow:var(--neoverse-control-button-edge)',
     'border:0',
-    'backdrop-filter:var(--neoverse-control-secondary-filter)',
+    'backdrop-filter:var(--neoverse-material-filter-subtle)',
   ];
   const missingFragments = expectedFragments.filter((fragment) => !css.includes(fragment));
   const forbiddenWebglFragments = [
@@ -236,17 +240,22 @@ try {
     css.includes(fragment),
   );
   const expectedButtonFragments = [
-    'box-shadow: var(--neoverse-control-button-edge);',
-    'box-shadow: var(--neoverse-shadow-none);',
+    '--neoverse-material-shadow: var(--neoverse-control-button-edge);',
+    'background-clip: padding-box;',
+    'overflow: visible;',
+    '--neoverse-material-edge-highlight: 0 0 0 0 transparent;',
+    '.ui-button.material-glass-subtle:hover:not(:disabled)::after',
   ];
   const missingButtonFragments = expectedButtonFragments.filter(
     (fragment) => !buttonCss.includes(fragment),
   );
   const ghostActiveCss =
-    buttonCss.match(/\.ui-button--ghost:active:not\(:disabled\) \{([\s\S]*?)\n {2}\}/)?.[1] ?? '';
+    buttonCss.match(
+      /\.ui-button--ghost\.material-glass-subtle:active:not\(:disabled\) \{([\s\S]*?)\n {2}\}/,
+    )?.[1] ?? '';
   const expectedGhostActiveFragments = [
+    '--neoverse-material-shadow: var(--neoverse-control-button-edge-active);',
     'background-color: var(--neoverse-control-button-ghost-active-background);',
-    'box-shadow: var(--neoverse-control-button-edge);',
     'transform: none;',
   ];
   const missingGhostActiveFragments = expectedGhostActiveFragments.filter(
@@ -260,6 +269,7 @@ try {
     'var(--neoverse-control-secondary-shadow)',
     'var(--neoverse-control-secondary-hover-shadow)',
     'var(--neoverse-control-active-shadow)',
+    'var(--neoverse-control-segmented-active-foreground)',
   ];
   const emittedForbiddenButtonFragments = forbiddenButtonFragments.filter((fragment) =>
     buttonCss.includes(fragment),

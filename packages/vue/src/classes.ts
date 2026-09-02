@@ -7,7 +7,7 @@ export const controlFocusClasses =
 export const disabledControlClasses = 'disabled:cursor-not-allowed disabled:opacity-60';
 
 export const buttonBaseClasses =
-  'inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-2 rounded-control-inner font-label font-medium';
+  'ui-button material-glass-subtle inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-2 rounded-control-inner font-label font-medium';
 
 export const buttonVariantClasses = {
   primary: 'ui-button--primary',

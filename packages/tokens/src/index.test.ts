@@ -16,6 +16,11 @@ test('exposes compact-control and skeleton effect tokens', () => {
   expect(cssVariables.control.primaryForeground).toBe('--neoverse-control-primary-foreground');
   expect(cssVariables.control.primaryHoverShadow).toBe('--neoverse-control-primary-hover-shadow');
   expect(cssVariables.control.buttonEdge).toBe('--neoverse-control-button-edge');
+  expect(cssVariables.control.buttonEdgeActive).toBe('--neoverse-control-button-edge-active');
+  expect(cssVariables.control.buttonRefractionGradient).toBe(
+    '--neoverse-control-button-refraction-gradient',
+  );
+  expect(cssVariables.control.buttonPressGlow).toBe('--neoverse-control-button-press-glow');
   expect(cssVariables.control.buttonHoverBackground).toBe(
     '--neoverse-control-button-hover-background',
   );
@@ -294,7 +299,8 @@ test('keeps light control buttons grounded by a compact neutral shadow', async (
   expect(semanticCss).toContain(
     '--neoverse-control-primary-background: linear-gradient(\n      180deg,',
   );
-  expect(semanticCss).toMatch(/--neoverse-control-button-edge:\s*inset 0 1px 3px/);
+  expect(semanticCss).toMatch(/--neoverse-control-button-edge:\s*inset 0 0 7px/);
+  expect(semanticCss).toMatch(/--neoverse-control-button-edge-active:\s*inset 0 0 9px/);
 
   expect(
     themesCss.match(/--neoverse-shadow-control:\s*var\(--neoverse-shadow-xs\);/g),
@@ -312,6 +318,9 @@ test('keeps button surfaces independent of theme accents', async () => {
     'primary-hover-shadow',
     'primary-active-background',
     'button-edge',
+    'button-edge-active',
+    'button-refraction-gradient',
+    'button-press-glow',
     'button-hover-background',
     'button-active-background',
     'button-ghost-active-background',

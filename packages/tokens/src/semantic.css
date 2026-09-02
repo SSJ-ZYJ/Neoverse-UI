@@ -53,69 +53,106 @@
 
     /* Buttons are intentionally monochrome. Theme accents belong to status,
        navigation, and selected states; button hierarchy comes from contrast,
-       surface density, and depth instead. */
+       surface density, and depth instead. Glass buttons use the same neutral
+       edge field in both themes so their material, not a painted hue, carries
+       the interaction. */
     --neoverse-control-primary-background: linear-gradient(
       180deg,
-      color-mix(in srgb, var(--neoverse-color-edge-light) 14%, transparent),
-      color-mix(in srgb, var(--neoverse-color-text-primary) 4%, transparent) 100%
-    );
+      color-mix(in srgb, var(--neoverse-color-edge-light) 26%, transparent),
+      color-mix(in srgb, var(--neoverse-color-text-primary) 6%, transparent) 100%
+    ),
+      color-mix(in srgb, var(--neoverse-color-surface-raised) 26%, transparent);
     --neoverse-control-primary-foreground: var(--neoverse-color-text-primary);
-    --neoverse-control-primary-border: color-mix(
-      in srgb,
-      var(--neoverse-color-text-primary) 22%,
-      transparent
-    );
+    --neoverse-control-primary-border: transparent;
     --neoverse-control-primary-shadow:
       inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 42%, transparent),
       var(--neoverse-shadow-control);
     --neoverse-control-primary-hover-background: linear-gradient(
       180deg,
-      color-mix(in srgb, var(--neoverse-color-edge-light) 22%, transparent),
-      color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent) 100%
-    );
+      color-mix(in srgb, var(--neoverse-color-edge-light) 38%, transparent),
+      color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent) 100%
+    ),
+      color-mix(in srgb, var(--neoverse-color-surface-raised) 36%, transparent);
     --neoverse-control-primary-hover-shadow:
       inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 58%, transparent),
       var(--neoverse-shadow-sm);
-    --neoverse-control-primary-active-background: color-mix(
-      in srgb,
-      var(--neoverse-color-text-primary) 9%,
-      transparent
+    --neoverse-control-primary-active-background: var(
+      --neoverse-control-button-active-background
     );
-    /* The reference control uses one refractive rim: a broad, low-contrast
-       light catch on the top and left, balanced by a quiet lower and right
-       falloff. The blur keeps the edge inside the silhouette from reading as
-       a second border or an overlapping layer. */
+    /* The reference uses a single broad inner field rather than four crisp
+       strokes. Glass supplies the rounded edge sample; this is the soft CSS
+       fallback and the button's interaction catch. */
     --neoverse-control-button-edge:
-      inset 0 1px 3px
-      color-mix(in srgb, var(--neoverse-color-edge-light) 28%, transparent),
-      inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-edge-light) 12%, transparent),
-      inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent),
-      inset -1px 0 3px color-mix(in srgb, var(--neoverse-color-text-primary) 5%, transparent);
+      inset 0 0 7px color-mix(in srgb, var(--neoverse-color-edge-light) 26%, transparent),
+      inset 0 1px 5px color-mix(in srgb, var(--neoverse-color-edge-light) 20%, transparent),
+      inset 0 -2px 8px color-mix(in srgb, var(--neoverse-color-text-primary) 9%, transparent);
+    --neoverse-control-button-edge-active:
+      inset 0 0 9px color-mix(in srgb, var(--neoverse-color-edge-light) 38%, transparent),
+      inset 0 1px 6px color-mix(in srgb, var(--neoverse-color-edge-light) 34%, transparent),
+      inset 0 -2px 8px color-mix(in srgb, var(--neoverse-color-text-primary) 12%, transparent);
+    --neoverse-control-button-refraction-gradient:
+      radial-gradient(
+        120% 80% at 0% 0%,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 42%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        120% 80% at 100% 100%,
+        color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent),
+        transparent 74%
+      ),
+      radial-gradient(
+        70% 100% at 0% 50%,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 16%, transparent),
+        transparent 76%
+      ),
+      radial-gradient(
+        70% 100% at 100% 50%,
+        color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent),
+        transparent 76%
+      );
+    --neoverse-control-button-press-glow:
+      radial-gradient(
+        90% 140% at 50% -12%,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 56%, transparent),
+        transparent 68%
+      ),
+      radial-gradient(
+        75% 100% at 50% 100%,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 18%, transparent),
+        transparent 72%
+      );
     --neoverse-control-button-hover-background: color-mix(
-      in srgb,
-      var(--neoverse-color-text-primary) 6%,
-      transparent
-    );
-    --neoverse-control-button-active-background: linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--neoverse-color-text-primary) 9%, transparent),
-      color-mix(in srgb, var(--neoverse-color-text-secondary) 4%, transparent)
-    );
-    --neoverse-control-button-ghost-active-background: color-mix(
       in srgb,
       var(--neoverse-color-text-primary) 8%,
       transparent
     );
-    /* Secondary is a neutral glass surface. It must remain visible in light
-       mode without borrowing the accent palette from the page. */
+    --neoverse-control-button-active-background:
+      radial-gradient(
+        110% 135% at 50% -18%,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 48%, transparent),
+        transparent 68%
+      ),
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--neoverse-color-surface-raised) 58%, transparent),
+        color-mix(in srgb, var(--neoverse-color-text-primary) 11%, transparent)
+      );
+    --neoverse-control-button-ghost-active-background: color-mix(
+      in srgb,
+      var(--neoverse-color-surface-raised) 30%,
+      transparent
+    );
+    /* Secondary is the quieter neutral glass surface. It must remain visible
+       in light mode without borrowing the accent palette from the page. */
     --neoverse-control-secondary-border: var(--neoverse-color-border-default);
     --neoverse-control-secondary-background:
       linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--neoverse-color-edge-light) 10%, transparent),
-        transparent 52%
+        180deg,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 20%, transparent),
+        color-mix(in srgb, var(--neoverse-color-text-primary) 5%, transparent) 100%
       ),
-      color-mix(in srgb, var(--neoverse-color-surface-raised) 34%, transparent);
+      color-mix(in srgb, var(--neoverse-color-surface-raised) 20%, transparent);
     /* Segmented controls use a readable sky-blue rim instead of a closed
        hairline. Four low-alpha inner catches restore the silhouette while a
        short outer blur keeps the control light. */
@@ -127,11 +164,11 @@
       0 2px 8px -2px color-mix(in srgb, var(--neoverse-color-accent-primary) 24%, transparent);
     --neoverse-control-secondary-hover-background:
       linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--neoverse-color-edge-light) 16%, transparent),
-        transparent 50%
+        180deg,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 32%, transparent),
+        color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent) 100%
       ),
-      color-mix(in srgb, var(--neoverse-color-surface-raised) 52%, transparent);
+      color-mix(in srgb, var(--neoverse-color-surface-raised) 30%, transparent);
     --neoverse-control-secondary-shadow:
       inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 28%, transparent),
       inset 0 -1px 2px color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent),

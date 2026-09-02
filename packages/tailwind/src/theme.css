@@ -226,38 +226,40 @@
 }
 
 @utility material-glass-subtle {
-  --neoverse-material-background: var(--neoverse-material-glass-subtle-background);
-  --neoverse-material-background-fallback: var(
-    --neoverse-material-glass-subtle-background-fallback
-  );
-  --neoverse-material-transparency: var(--neoverse-material-glass-subtle-transparency);
-  --neoverse-material-blur: var(--neoverse-material-glass-subtle-blur);
-  --neoverse-material-saturation: var(--neoverse-material-glass-subtle-saturation);
-  --neoverse-material-filter: var(--neoverse-material-glass-subtle-filter);
-  --neoverse-material-edge-filter: var(--neoverse-material-glass-subtle-edge-filter);
-  --neoverse-material-tint: var(--neoverse-material-glass-subtle-tint);
-  --neoverse-material-border: var(--neoverse-material-glass-subtle-border);
-  --neoverse-material-border-width: var(--neoverse-material-glass-subtle-border-width);
-  --neoverse-material-edge-refraction-width: var(
-    --neoverse-material-glass-subtle-edge-refraction-width
-  );
-  --neoverse-material-edge-refraction-softness: var(
-    --neoverse-material-glass-subtle-edge-refraction-softness
-  );
-  --neoverse-material-edge-highlight: var(--neoverse-material-glass-subtle-edge-highlight);
-  --neoverse-material-inner-glow: var(--neoverse-material-glass-subtle-inner-glow);
-  --neoverse-material-seam-glow: var(--neoverse-material-glass-subtle-seam-glow);
-  --neoverse-material-bloom: var(--neoverse-material-glass-subtle-bloom);
-  --neoverse-material-shadow: var(--neoverse-material-glass-subtle-shadow);
-  --neoverse-material-refraction-gradient: var(
-    --neoverse-material-glass-subtle-refraction-gradient
-  );
-  --neoverse-material-edge-refraction-opacity: var(
-    --neoverse-material-glass-subtle-edge-refraction-opacity
-  );
-  --neoverse-material-edge-refraction-carrier: var(
-    --neoverse-material-glass-subtle-edge-refraction-carrier
-  );
+  &:not(.ui-button) {
+    --neoverse-material-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-material-background-fallback: var(
+      --neoverse-material-glass-subtle-background-fallback
+    );
+    --neoverse-material-transparency: var(--neoverse-material-glass-subtle-transparency);
+    --neoverse-material-blur: var(--neoverse-material-glass-subtle-blur);
+    --neoverse-material-saturation: var(--neoverse-material-glass-subtle-saturation);
+    --neoverse-material-filter: var(--neoverse-material-glass-subtle-filter);
+    --neoverse-material-edge-filter: var(--neoverse-material-glass-subtle-edge-filter);
+    --neoverse-material-tint: var(--neoverse-material-glass-subtle-tint);
+    --neoverse-material-border: var(--neoverse-material-glass-subtle-border);
+    --neoverse-material-border-width: var(--neoverse-material-glass-subtle-border-width);
+    --neoverse-material-edge-refraction-width: var(
+      --neoverse-material-glass-subtle-edge-refraction-width
+    );
+    --neoverse-material-edge-refraction-softness: var(
+      --neoverse-material-glass-subtle-edge-refraction-softness
+    );
+    --neoverse-material-edge-highlight: var(--neoverse-material-glass-subtle-edge-highlight);
+    --neoverse-material-inner-glow: var(--neoverse-material-glass-subtle-inner-glow);
+    --neoverse-material-seam-glow: var(--neoverse-material-glass-subtle-seam-glow);
+    --neoverse-material-bloom: var(--neoverse-material-glass-subtle-bloom);
+    --neoverse-material-shadow: var(--neoverse-material-glass-subtle-shadow);
+    --neoverse-material-refraction-gradient: var(
+      --neoverse-material-glass-subtle-refraction-gradient
+    );
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-material-glass-subtle-edge-refraction-opacity
+    );
+    --neoverse-material-edge-refraction-carrier: var(
+      --neoverse-material-glass-subtle-edge-refraction-carrier
+    );
+  }
 }
 
 @utility material-glass-elevated {
@@ -356,7 +358,7 @@
     transition-timing-function: var(--neoverse-motion-easing-emphasized);
   }
 
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(.ui-button) {
     background-color: var(--neoverse-material-background-fallback);
     background-image: none;
     /* Keep the border slot for geometry, but never paint a hard fallback
@@ -377,7 +379,9 @@
 
   @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) and
     (background-color: color-mix(in srgb, white 50%, transparent)) {
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+      .ui-button
+    ) {
       background-color: color-mix(
         in srgb,
         var(--neoverse-material-tint) var(--neoverse-material-transparency),
@@ -435,10 +439,13 @@
   }
 
   [data-neoverse-glass-renderer='webgl']
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+      :focus-visible
+    ) {
     /* The WebGL edge field owns the directional silhouette. Keep the normal
        material shadow and backdrop filter so the DOM surface still carries
-       the same depth and sampling as the CSS fallback. */
+       the same depth and sampling as the CSS fallback. Focus rings stay
+       outside this selector so the shared keyboard affordance remains visible. */
     background-clip: padding-box;
     box-shadow: var(--neoverse-material-shadow);
     -webkit-backdrop-filter: var(--neoverse-material-filter);
@@ -478,7 +485,9 @@
   }
 
   :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+      .ui-button
+    ) {
     background-color: var(--neoverse-color-surface-raised);
     background-image: none;
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
@@ -489,9 +498,13 @@
   }
 
   :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)::before,
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+      .ui-button
+    )::before,
   :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)::after {
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+      .ui-button
+    )::after {
     display: none;
   }
 }
