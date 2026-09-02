@@ -257,6 +257,9 @@ describe('Glass renderer', () => {
     const nested = document.createElement('div');
     nested.className = 'material-glass-subtle';
     setRect(nested, { width: 100, height: 80 });
+    const control = document.createElement('button');
+    control.className = 'ui-button material-glass-subtle';
+    setRect(control, { width: 100, height: 32 });
     const hidden = document.createElement('div');
     hidden.className = 'material-glass-subtle';
     hidden.style.display = 'none';
@@ -267,7 +270,7 @@ describe('Glass renderer', () => {
     const offscreen = document.createElement('div');
     offscreen.className = 'material-glass-subtle';
     setRect(offscreen, { left: window.innerWidth + 10, top: 20, width: 100, height: 80 });
-    outer.append(nested, hidden, zero, offscreen);
+    outer.append(nested, control, hidden, zero, offscreen);
     document.body.append(outer);
 
     const first = createTestRenderer();
@@ -276,7 +279,7 @@ describe('Glass renderer', () => {
     second.mount();
 
     expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
-    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
     second.destroy();
     first.destroy();
   });

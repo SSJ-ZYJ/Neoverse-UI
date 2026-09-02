@@ -169,6 +169,13 @@ const getVariant = (element: Element): GlassVariant | undefined => {
 };
 
 const hasGlassAncestor = (element: Element): boolean => {
+  // Interactive controls keep their own material edge even when they sit on
+  // a Glass card or Playground state row. Other nested Glass surfaces remain
+  // deduplicated so one parent does not paint the same backdrop twice.
+  if (element.classList.contains('ui-button')) {
+    return false;
+  }
+
   let ancestor = element.parentElement;
   while (ancestor !== null) {
     if (getVariant(ancestor) !== undefined) {
