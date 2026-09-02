@@ -4,6 +4,7 @@ import BorderModule from './modules/BorderModule.vue';
 import ButtonModule from './modules/ButtonModule.vue';
 import CardModule from './modules/CardModule.vue';
 import ColorsModule from './modules/ColorsModule.vue';
+import CompositionModule from './modules/CompositionModule.vue';
 import GlassModule from './modules/GlassModule.vue';
 import IconButtonModule from './modules/IconButtonModule.vue';
 import MotionModule from './modules/MotionModule.vue';
@@ -130,6 +131,13 @@ export const labModules = [
     description: moduleCopy.scrollbar.description,
     component: ScrollbarModule,
   },
+  {
+    id: 'composition',
+    groupId: 'components',
+    label: moduleCopy.composition.label,
+    description: moduleCopy.composition.description,
+    component: CompositionModule,
+  },
 ] as const satisfies readonly {
   id: string;
   groupId: string;
@@ -172,6 +180,7 @@ export const moduleGroups = [
       'segmented-control',
       'skeleton',
       'scrollbar',
+      'composition',
     ],
   },
 ] as const satisfies readonly {

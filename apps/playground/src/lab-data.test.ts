@@ -33,3 +33,26 @@ test('describes the radius aliases with their actual definitions', () => {
   expect(description).toContain('card=lg（16px）');
   expect(description).toContain('panel=xl（24px）');
 });
+
+test('keeps every composition scene localized in both supported locales', () => {
+  const sceneIds = [
+    'controlCluster',
+    'projectCard',
+    'floatingToolbar',
+    'docsArticleHeader',
+    'docsNavigationGroup',
+    'docsContentSurface',
+    'docsToolbar',
+  ] as const;
+  const scenes = moduleCopy.composition.scenes;
+
+  expect(Object.keys(scenes)).toEqual(Array.from(sceneIds));
+
+  for (const sceneId of sceneIds) {
+    const scene = scenes[sceneId];
+    expect(localize(scene.label, 'en')).not.toBe('');
+    expect(localize(scene.label, 'zh')).not.toBe('');
+    expect(localize(scene.description, 'en')).not.toBe('');
+    expect(localize(scene.description, 'zh')).not.toBe('');
+  }
+});
