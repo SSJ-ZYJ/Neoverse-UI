@@ -81,6 +81,13 @@ export const glassFragmentShader = `
     // Give them a small chromatic bridge so the rounded silhouette never
     // appears to have a missing piece.
     float cornerCatch = abs(normal.x * normal.y);
+    // The top-right and bottom-left corners sit between the two directional
+    // catches. Keep a separate, neutral bridge for those opposing quadrants
+    // so low-opacity dark Glass does not visually lose either corner.
+    float opposingCornerCatch = max(
+      max(normal.x, 0.0) * max(-normal.y, 0.0),
+      max(-normal.x, 0.0) * max(normal.y, 0.0)
+    );
 
     // Keep a thick token edge narrow on screen, but let its chromatic response
     // become stronger. This is the refraction gain, not a white-line gain.
@@ -138,7 +145,8 @@ export const glassFragmentShader = `
       + (rightCatch * 0.06)
       + (topCatch * 0.018)
       + (bottomCatch * 0.05)
-      + (cornerCatch * 0.16);
+      + (cornerCatch * 0.16)
+      + (opposingCornerCatch * 0.28);
     float lightAlphaGain = mix(1.0, 1.35, lightSurface);
     float alpha = edgeMask * u_opacity * directionalAlpha * thicknessScale * lightAlphaGain;
     alpha = clamp(alpha, 0.0, 0.34);

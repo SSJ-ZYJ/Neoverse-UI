@@ -232,12 +232,12 @@
         ),
         radial-gradient(
           52% 110% at 100% 0%,
-          color-mix(in srgb, var(--neoverse-color-text-secondary) 3%, transparent),
+          color-mix(in srgb, var(--neoverse-color-text-secondary) 4%, transparent),
           transparent 78%
         ),
         radial-gradient(
           52% 110% at 0% 100%,
-          color-mix(in srgb, var(--neoverse-color-text-primary) 2%, transparent),
+          color-mix(in srgb, var(--neoverse-color-text-primary) 3%, transparent),
           transparent 78%
         );
       --neoverse-material-refraction-gradient-immersive:
@@ -630,12 +630,12 @@
         ),
         radial-gradient(
           52% 110% at 100% 0%,
-          color-mix(in srgb, var(--neoverse-color-text-secondary) 4%, transparent),
+          color-mix(in srgb, var(--neoverse-color-text-secondary) 5%, transparent),
           transparent 78%
         ),
         radial-gradient(
           52% 110% at 0% 100%,
-          color-mix(in srgb, var(--neoverse-color-text-primary) 2%, transparent),
+          color-mix(in srgb, var(--neoverse-color-text-primary) 3%, transparent),
           transparent 78%
         );
       --neoverse-material-refraction-gradient-immersive:
@@ -753,12 +753,12 @@
       ),
       radial-gradient(
         52% 110% at 100% 0%,
-        color-mix(in srgb, var(--neoverse-color-text-secondary) 3%, transparent),
+        color-mix(in srgb, var(--neoverse-color-text-secondary) 4%, transparent),
         transparent 78%
       ),
       radial-gradient(
         52% 110% at 0% 100%,
-        color-mix(in srgb, var(--neoverse-color-text-primary) 2%, transparent),
+        color-mix(in srgb, var(--neoverse-color-text-primary) 3%, transparent),
         transparent 78%
       );
     --neoverse-material-refraction-gradient-elevated:
@@ -774,12 +774,12 @@
       ),
       radial-gradient(
         52% 110% at 100% 0%,
-        color-mix(in srgb, var(--neoverse-color-text-secondary) 4%, transparent),
+        color-mix(in srgb, var(--neoverse-color-text-secondary) 5%, transparent),
         transparent 78%
       ),
       radial-gradient(
         52% 110% at 0% 100%,
-        color-mix(in srgb, var(--neoverse-color-text-primary) 2%, transparent),
+        color-mix(in srgb, var(--neoverse-color-text-primary) 3%, transparent),
         transparent 78%
       );
     --neoverse-material-refraction-gradient-immersive:

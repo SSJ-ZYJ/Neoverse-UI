@@ -406,6 +406,16 @@ describe('Glass renderer', () => {
     expect(glassFragmentShader).not.toContain('u_edge_light, 0.1 + (topLeftLight * 0.26)');
   });
 
+  it('keeps the opposing rounded corners connected in the directional edge field', () => {
+    const directionalAlpha = glassFragmentShader.match(/float directionalAlpha =([\s\S]*?);/)?.[0];
+    const opposingCornerCoefficient = Number.parseFloat(
+      directionalAlpha?.match(/opposingCornerCatch \* ([\d.]+)/)?.[1] ?? '0',
+    );
+
+    expect(directionalAlpha).toContain('opposingCornerCatch');
+    expect(opposingCornerCoefficient).toBeGreaterThanOrEqual(0.24);
+  });
+
   it('keeps low-opacity dark elevated edge catches nearly neutral', () => {
     expect(glassFragmentShader).toContain(
       'float chromaticVariantStrength = smoothstep(0.3, 0.5, u_opacity);',
