@@ -596,9 +596,7 @@ test('keeps button edges restrained and stable beside segmented controls', async
   const declaration = (source: string, token: string): string =>
     source.match(new RegExp(`--neoverse-control-${token}:([\\s\\S]*?);`))?.[1] ?? '';
   const ghostDefault =
-    buttonCss.match(
-      /\.ui-button--ghost\.material-glass-subtle \{([\s\S]*?)\n {2}\}/,
-    )?.[1] ?? '';
+    buttonCss.match(/\.ui-button--ghost\.material-glass-subtle \{([\s\S]*?)\n {2}\}/)?.[1] ?? '';
   const ghostHover =
     buttonCss.match(
       /\.ui-button--ghost\.material-glass-subtle:hover:not\(:disabled\) \{([\s\S]*?)\n {2}\}/,
@@ -629,19 +627,13 @@ test('keeps button edges restrained and stable beside segmented controls', async
     'secondary-shadow',
     'secondary-hover-shadow',
   ]) {
-    expect(declaration(sharedControlCss, token)).not.toContain(
-      'var(--neoverse-color-edge-light)',
-    );
+    expect(declaration(sharedControlCss, token)).not.toContain('var(--neoverse-color-edge-light)');
   }
 
-  expect(ghostDefault).toContain(
-    '--neoverse-material-shadow: 0 0 0 0 transparent;',
-  );
+  expect(ghostDefault).toContain('--neoverse-material-shadow: 0 0 0 0 transparent;');
   expect(ghostDefault).toContain('border-color: transparent;');
   expect(ghostDefault).toContain('--neoverse-material-edge-refraction-opacity: 0;');
-  expect(ghostDefault).toContain(
-    'background: var(--neoverse-control-ghost-background);',
-  );
+  expect(ghostDefault).toContain('background: var(--neoverse-control-ghost-background);');
   expect(ghostHover).not.toContain('--neoverse-material-edge-refraction-opacity:');
   expect(ghostHover).not.toContain('--neoverse-material-shadow:');
   expect(ghostHover).not.toContain('--neoverse-material-edge-refraction-opacity:');

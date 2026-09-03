@@ -108,9 +108,7 @@ const tokenRows = [
                 {{ localize(copy.preview.viewportHint, props.locale) }}
               </p>
             </div>
-            <code class="text-code text-muted">
-              scrollbar-immersive
-            </code>
+            <code class="text-code text-muted"> scrollbar-immersive </code>
           </div>
 
           <div

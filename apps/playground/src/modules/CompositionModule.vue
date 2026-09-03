@@ -471,9 +471,7 @@ const navigationItems = computed(() => [
           </p>
         </header>
 
-        <article
-          class="grid gap-4 rounded-card bg-surface-raised p-4 shadow-raised"
-        >
+        <article class="grid gap-4 rounded-card bg-surface-raised p-4 shadow-raised">
           <header class="grid max-w-container-lg gap-2">
             <UiBadge size="sm">
               {{ localize(copy.scenes.docsContentSurface.eyebrow, props.locale) }}
