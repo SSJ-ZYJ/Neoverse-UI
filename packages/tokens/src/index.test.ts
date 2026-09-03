@@ -15,6 +15,20 @@ test('exposes compact-control and skeleton effect tokens', () => {
   expect(cssVariables.control.primaryBackground).toBe('--neoverse-control-primary-background');
   expect(cssVariables.control.primaryForeground).toBe('--neoverse-control-primary-foreground');
   expect(cssVariables.control.primaryHoverShadow).toBe('--neoverse-control-primary-hover-shadow');
+  expect(cssVariables.control.secondaryForeground).toBe('--neoverse-control-secondary-foreground');
+  expect(cssVariables.control.secondaryHoverForeground).toBe(
+    '--neoverse-control-secondary-hover-foreground',
+  );
+  expect(cssVariables.control.secondaryActiveForeground).toBe(
+    '--neoverse-control-secondary-active-foreground',
+  );
+  expect(cssVariables.control.ghostForeground).toBe('--neoverse-control-ghost-foreground');
+  expect(cssVariables.control.ghostHoverForeground).toBe(
+    '--neoverse-control-ghost-hover-foreground',
+  );
+  expect(cssVariables.control.ghostActiveForeground).toBe(
+    '--neoverse-control-ghost-active-foreground',
+  );
   expect(cssVariables.control.buttonEdge).toBe('--neoverse-control-button-edge');
   expect(cssVariables.control.buttonEdgeActive).toBe('--neoverse-control-button-edge-active');
   expect(cssVariables.control.buttonRefractionGradient).toBe(
@@ -276,6 +290,69 @@ test('keeps dark subtle state cards neutral and softly grounded', async () => {
   }
 });
 
+test('aligns dark button states with the segmented control color language', async () => {
+  const themesCss = await readTokenCss('themes.css');
+  const primaryBackgrounds = themesCss.match(/--neoverse-control-primary-background:([\s\S]*?);/g);
+
+  expect(primaryBackgrounds).toHaveLength(2);
+  for (const background of primaryBackgrounds ?? []) {
+    expect(background).toContain('var(--neoverse-control-active-background)');
+    expect(background).toContain('var(--neoverse-control-secondary-background)');
+  }
+
+  for (const token of [
+    'primary-foreground',
+    'secondary-hover-foreground',
+    'secondary-active-foreground',
+    'ghost-hover-foreground',
+    'ghost-active-foreground',
+  ]) {
+    expect(
+      themesCss.match(
+        new RegExp(
+          `--neoverse-control-${token}:\\s*var\\(\\s*--neoverse-control-segmented-active-foreground\\s*\\);`,
+          'g',
+        ),
+      ),
+    ).toHaveLength(2);
+  }
+
+  expect(
+    themesCss.match(
+      /--neoverse-control-secondary-foreground:\s*var\(--neoverse-control-segmented-foreground\);/g,
+    ),
+  ).toHaveLength(2);
+  expect(
+    themesCss.match(
+      /--neoverse-control-button-hover-background:\s*var\(--neoverse-control-hover-background\);/g,
+    ),
+  ).toHaveLength(2);
+  expect(
+    themesCss.match(
+      /--neoverse-control-button-active-background:\s*\n?\s*var\(--neoverse-control-active-background\),/g,
+    ),
+  ).toHaveLength(2);
+  expect(
+    themesCss.match(
+      /--neoverse-control-button-edge:\s*var\(--neoverse-control-secondary-shadow\);/g,
+    ),
+  ).toHaveLength(2);
+  expect(
+    themesCss.match(
+      /--neoverse-control-button-edge-active:\s*var\(--neoverse-control-active-shadow\);/g,
+    ),
+  ).toHaveLength(2);
+
+  const refractionGradients = themesCss.match(
+    /--neoverse-control-button-refraction-gradient:([\s\S]*?);/g,
+  );
+  expect(refractionGradients).toHaveLength(2);
+  for (const gradient of refractionGradients ?? []) {
+    expect(gradient).toContain('var(--neoverse-color-accent-secondary)');
+    expect(gradient).toContain('var(--neoverse-color-accent-primary)');
+  }
+});
+
 test('keeps light control buttons grounded by a compact neutral shadow', async () => {
   const [geometryCss, semanticCss, themesCss] = await Promise.all([
     readTokenCss('geometry.css'),
@@ -286,18 +363,15 @@ test('keeps light control buttons grounded by a compact neutral shadow', async (
 
   expect(geometryCss).toContain('--neoverse-shadow-control: 0 2px 6px -1px rgb(14 34 44 / 20%);');
 
-  for (const name of ['primary', 'secondary']) {
-    const declaration = semanticCss.match(
-      new RegExp(`--neoverse-control-${name}-shadow:([\\s\\S]*?);`),
-    )?.[1];
+  const primaryShadow = semanticCss.match(/--neoverse-control-primary-shadow:([\s\S]*?);/)?.[1];
+  expect(primaryShadow).toContain('var(--neoverse-control-active-shadow)');
 
-    expect(declaration).toContain(controlShadow);
-  }
+  const secondaryShadow = semanticCss.match(/--neoverse-control-secondary-shadow:([\s\S]*?);/)?.[1];
+  expect(secondaryShadow).toContain(controlShadow);
 
   expect(semanticCss).toMatch(/--neoverse-control-secondary-background:\s*linear-gradient\(/);
-  expect(semanticCss).toMatch(/--neoverse-control-primary-hover-shadow:\s*inset 0 1px 0/);
-  expect(semanticCss).toContain(
-    '--neoverse-control-primary-background: linear-gradient(\n      180deg,',
+  expect(semanticCss).toMatch(
+    /--neoverse-control-primary-hover-shadow:\s*var\(\s*--neoverse-control-active-shadow\s*\);/,
   );
   expect(semanticCss).toMatch(/--neoverse-control-button-edge:\s*inset 0 0 7px/);
   expect(semanticCss).toMatch(/--neoverse-control-button-edge-active:\s*inset 0 0 9px/);
@@ -305,6 +379,39 @@ test('keeps light control buttons grounded by a compact neutral shadow', async (
   expect(
     themesCss.match(/--neoverse-shadow-control:\s*var\(--neoverse-shadow-xs\);/g),
   ).toHaveLength(2);
+});
+
+test('aligns light buttons with the pale mint segmented-control surface', async () => {
+  const semanticCss = await readTokenCss('semantic.css');
+  const declaration = (token: string): string =>
+    semanticCss.match(new RegExp(`--neoverse-control-${token}:([\\s\\S]*?);`))?.[1] ?? '';
+
+  expect(declaration('primary-background')).toContain('var(--neoverse-control-active-background)');
+  expect(declaration('secondary-background')).not.toContain(
+    'var(--neoverse-control-active-background)',
+  );
+  expect(declaration('primary-foreground')).toMatch(
+    /var\(\s*--neoverse-control-segmented-active-foreground\s*\)/,
+  );
+  for (const token of [
+    'primary-hover-background',
+    'button-hover-background',
+    'button-active-background',
+    'button-ghost-active-background',
+  ]) {
+    expect(declaration(token)).toMatch(/var\(\s*--neoverse-control-active-background\s*\)/);
+  }
+
+  for (const token of [
+    'secondary-hover-foreground',
+    'secondary-active-foreground',
+    'ghost-hover-foreground',
+    'ghost-active-foreground',
+  ]) {
+    expect(declaration(token)).toMatch(
+      /var\(\s*--neoverse-control-segmented-active-foreground\s*\)/,
+    );
+  }
 });
 
 test('keeps button surfaces independent of theme accents', async () => {
@@ -340,6 +447,29 @@ test('keeps button surfaces independent of theme accents', async () => {
     expect(declaration).toBeDefined();
     expect(declaration).not.toMatch(/accent-(?:primary|secondary|tertiary)/);
     expect(declaration).not.toMatch(/material-(?:tint|edge-highlight|inner-glow|bloom)/);
+  }
+});
+
+test('positions the button press glow from pointer coordinates', async () => {
+  const semanticCss = await readTokenCss('semantic.css');
+  const themesCss = await readTokenCss('themes.css');
+  const pointerPosition =
+    /at var\(--neoverse-button-press-x,\s*50%\) var\(--neoverse-button-press-y,\s*50%\)/;
+
+  expect(semanticCss).toMatch(pointerPosition);
+  expect(themesCss).toMatch(pointerPosition);
+  expect(semanticCss).not.toContain('90% 140% at 50% -12%');
+  expect(themesCss).not.toContain('90% 140% at 50% -12%');
+});
+
+test('keeps dark keyboard focus aligned with the segmented-control accent', async () => {
+  const themesCss = await readTokenCss('themes.css');
+  const focusRings = themesCss.match(/--neoverse-color-focus-ring:\s*([^;]+);/g);
+
+  expect(focusRings).toHaveLength(2);
+  for (const focusRing of focusRings ?? []) {
+    expect(focusRing).toContain('var(--neoverse-color-accent-secondary)');
+    expect(focusRing).not.toContain('var(--neoverse-color-accent-tertiary)');
   }
 });
 
@@ -619,7 +749,9 @@ test('keeps Glass edge highlights refractive and softly diffused', async () => {
     }
   }
 
-  expect(semanticCss).toMatch(/--neoverse-control-primary-shadow:\s*inset 0 1px 0/);
+  expect(semanticCss).toMatch(
+    /--neoverse-control-primary-shadow:\s*var\(\s*--neoverse-control-active-shadow\s*\);/,
+  );
   expect(geometryCss).toMatch(
     /--neoverse-shadow-inset:\s*var\(--neoverse-material-edge-highlight-subtle\),/,
   );

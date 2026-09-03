@@ -23,9 +23,7 @@
       --neoverse-material-edge-refraction-softness-subtle
     );
     --neoverse-material-tint: var(--neoverse-color-surface-raised);
-    --neoverse-material-refraction-gradient: var(
-      --neoverse-control-button-refraction-gradient
-    );
+    --neoverse-material-refraction-gradient: var(--neoverse-control-button-refraction-gradient);
     --neoverse-material-edge-refraction-opacity: var(
       --neoverse-material-edge-refraction-opacity-subtle
     );
@@ -61,8 +59,7 @@
     content: '';
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--neoverse-motion-duration-fast)
-      var(--neoverse-motion-easing-standard);
+    transition: opacity var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
   }
 
   .ui-button > * {
@@ -85,7 +82,7 @@
   }
 
   .ui-button--secondary.material-glass-subtle {
-    color: var(--neoverse-color-text-secondary);
+    color: var(--neoverse-control-secondary-foreground);
     background: var(--neoverse-control-secondary-background);
     background-clip: padding-box;
   }
@@ -93,7 +90,7 @@
   .ui-button--ghost.material-glass-subtle {
     --neoverse-material-edge-refraction-opacity: 0;
     --neoverse-material-shadow: 0 0 0 0 transparent;
-    color: var(--neoverse-color-text-secondary);
+    color: var(--neoverse-control-ghost-foreground);
     background-color: transparent;
     background-image: none;
     background-clip: padding-box;
@@ -111,7 +108,7 @@
   }
 
   .ui-button--secondary.material-glass-subtle:hover:not(:disabled) {
-    color: var(--neoverse-color-text-primary);
+    color: var(--neoverse-control-secondary-hover-foreground);
     background: var(--neoverse-control-secondary-hover-background);
     background-clip: padding-box;
   }
@@ -121,9 +118,8 @@
       --neoverse-material-edge-refraction-opacity-subtle
     );
     --neoverse-material-shadow: var(--neoverse-control-button-edge);
-    color: var(--neoverse-color-text-primary);
-    background-color: var(--neoverse-control-button-hover-background);
-    background-image: none;
+    color: var(--neoverse-control-ghost-hover-foreground);
+    background: var(--neoverse-control-button-hover-background);
     background-clip: padding-box;
   }
 
@@ -137,7 +133,7 @@
   }
 
   .ui-button--secondary.material-glass-subtle:active:not(:disabled) {
-    color: var(--neoverse-color-text-primary);
+    color: var(--neoverse-control-secondary-active-foreground);
     background: var(--neoverse-control-button-active-background);
     background-clip: padding-box;
   }
@@ -152,8 +148,8 @@
       --neoverse-material-edge-refraction-opacity-subtle
     );
     --neoverse-material-shadow: var(--neoverse-control-button-edge-active);
-    color: var(--neoverse-color-text-primary);
-    background-color: var(--neoverse-control-button-ghost-active-background);
+    color: var(--neoverse-control-ghost-active-foreground);
+    background: var(--neoverse-control-button-ghost-active-background);
     background-clip: padding-box;
     transform: none;
   }

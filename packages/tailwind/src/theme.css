@@ -380,8 +380,8 @@
   @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) and
     (background-color: color-mix(in srgb, white 50%, transparent)) {
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-      .ui-button
-    ) {
+        .ui-button
+      ) {
       background-color: color-mix(
         in srgb,
         var(--neoverse-material-tint) var(--neoverse-material-transparency),

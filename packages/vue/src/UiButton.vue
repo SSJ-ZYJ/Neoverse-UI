@@ -10,6 +10,7 @@ import {
 } from './classes';
 import type { ButtonProps, ButtonSize, ButtonVariant } from './types';
 import UiLoadingIndicator from './UiLoadingIndicator.vue';
+import { updateButtonPointerGlow } from './button-pointer-glow';
 
 defineOptions({ inheritAttrs: false });
 
@@ -55,6 +56,7 @@ const classes = computed(() => [
     :disabled="props.disabled || props.loading"
     :aria-busy="ariaBusy"
     :class="[classes, attrs.class]"
+    @pointerdown="updateButtonPointerGlow"
   >
     <span
       v-if="props.loading || $slots.leading"

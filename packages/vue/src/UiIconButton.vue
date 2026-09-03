@@ -10,6 +10,7 @@ import {
 } from './classes';
 import type { ButtonSize, ButtonVariant, IconButtonProps } from './types';
 import UiLoadingIndicator from './UiLoadingIndicator.vue';
+import { updateButtonPointerGlow } from './button-pointer-glow';
 
 defineOptions({ inheritAttrs: false });
 
@@ -57,6 +58,7 @@ const classes = computed(() => [
     :aria-label="props.label"
     :aria-busy="ariaBusy"
     :class="[classes, attrs.class]"
+    @pointerdown="updateButtonPointerGlow"
   >
     <span class="inline-flex shrink-0 items-center justify-center" aria-hidden="true">
       <UiLoadingIndicator v-if="props.loading" />

@@ -160,6 +160,12 @@ try {
     '--neoverse-control-button-ghost-active-background',
     '--neoverse-control-secondary-background',
     '--neoverse-control-secondary-border',
+    '--neoverse-control-secondary-foreground',
+    '--neoverse-control-secondary-hover-foreground',
+    '--neoverse-control-secondary-active-foreground',
+    '--neoverse-control-ghost-foreground',
+    '--neoverse-control-ghost-hover-foreground',
+    '--neoverse-control-ghost-active-foreground',
     '--neoverse-control-secondary-filter',
     '--neoverse-control-segmented-background',
     '--neoverse-control-segmented-foreground',
@@ -255,7 +261,7 @@ try {
     )?.[1] ?? '';
   const expectedGhostActiveFragments = [
     '--neoverse-material-shadow: var(--neoverse-control-button-edge-active);',
-    'background-color: var(--neoverse-control-button-ghost-active-background);',
+    'background: var(--neoverse-control-button-ghost-active-background);',
     'transform: none;',
   ];
   const missingGhostActiveFragments = expectedGhostActiveFragments.filter(
