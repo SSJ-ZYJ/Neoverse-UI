@@ -10,7 +10,7 @@ const copy = moduleCopy.card;
 
 <template>
   <div class="grid gap-grid md:grid-cols-2">
-    <UiCard class="border border-default bg-surface-raised shadow-card">
+    <UiCard class="bg-surface-raised shadow-card">
       <div class="grid gap-3">
         <div class="flex items-center justify-between gap-3">
           <div class="flex items-center gap-2">
@@ -28,7 +28,7 @@ const copy = moduleCopy.card;
         </UiButton>
       </div>
     </UiCard>
-    <UiCard class="max-w-container-md border border-subtle bg-surface-subtle shadow-raised">
+    <UiCard class="max-w-container-md bg-surface-subtle shadow-raised">
       <div class="grid gap-2">
         <h3 class="text-label font-label text-primary">
           {{ localize(copy.externalClass, props.locale) }}

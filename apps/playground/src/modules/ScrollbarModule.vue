@@ -98,7 +98,7 @@ const tokenRows = [
       </header>
 
       <div class="grid gap-grid lg:grid-cols-2">
-        <article class="grid min-h-0 gap-3 rounded-card material-glass-elevated p-4">
+        <article class="grid min-h-0 gap-3 rounded-card bg-surface-raised p-5 shadow-card">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="min-w-0">
               <h3 class="text-label font-label text-primary">
@@ -108,20 +108,20 @@ const tokenRows = [
                 {{ localize(copy.preview.viewportHint, props.locale) }}
               </p>
             </div>
-            <code class="rounded-control bg-surface-raised px-2 py-1 text-code text-secondary">
+            <code class="text-code text-muted">
               scrollbar-immersive
             </code>
           </div>
 
           <div
-            class="scrollbar-immersive max-h-72 overflow-y-auto rounded-control bg-surface-raised p-2"
+            class="scrollbar-immersive max-h-72 overflow-y-auto rounded-control bg-surface-canvas p-2"
             :aria-label="localize(copy.preview.viewportLabel, props.locale)"
           >
-            <ol class="grid gap-1">
+            <ol class="grid divide-y divide-subtle">
               <li
                 v-for="item in previewItems"
                 :key="item.number"
-                class="flex items-center gap-3 rounded-control border border-subtle bg-surface-subtle px-3 py-2"
+                class="flex items-center gap-3 px-3 py-3"
               >
                 <span class="shrink-0 text-code text-accent-primary">{{ item.number }}</span>
                 <div class="min-w-0">
@@ -137,7 +137,7 @@ const tokenRows = [
           </div>
         </article>
 
-        <article class="grid gap-3 rounded-card material-glass-elevated p-4">
+        <article class="grid gap-3 rounded-card bg-surface-raised p-5 shadow-card">
           <header class="grid gap-1">
             <h3 class="text-label font-label text-primary">
               {{ localize(copy.tokens.label, props.locale) }}
@@ -147,11 +147,11 @@ const tokenRows = [
             </p>
           </header>
 
-          <dl class="grid gap-2">
+          <dl class="grid divide-y divide-subtle">
             <div
               v-for="token in tokenRows"
               :key="token.variable"
-              class="grid gap-1 rounded-control bg-surface-raised p-3"
+              class="grid gap-1 py-3 first:pt-0 last:pb-0"
             >
               <dt class="text-label font-label text-primary">
                 {{ localize(token.label, props.locale) }}

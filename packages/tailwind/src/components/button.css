@@ -1,7 +1,8 @@
 @layer components {
-  /* Buttons share the project's Glass surface. The variant only changes the
-     density of the neutral plane; the rounded edge is supplied by the shared
-     refraction field instead of a painted outer border. */
+  /* Filled buttons share the project's Glass surface. The variant only
+     changes the density of the plane; one tokenized cool border and the
+     shared refraction field keep the rounded edge consistent instead of
+     painting white rings. Ghost keeps the same geometry without that edge. */
   .ui-button {
     position: relative;
     transform: none;
@@ -27,9 +28,7 @@
     --neoverse-material-edge-refraction-opacity: var(
       --neoverse-material-edge-refraction-opacity-subtle
     );
-    --neoverse-material-edge-refraction-carrier: var(
-      --neoverse-material-edge-refraction-carrier-subtle
-    );
+    --neoverse-material-edge-refraction-carrier: var(--neoverse-control-button-edge-carrier);
     --neoverse-material-edge-filter: var(--neoverse-material-edge-filter-subtle);
     --neoverse-material-shadow: var(--neoverse-control-button-edge);
     /* Keep the shared Glass composition valid without adding an extra outer
@@ -39,10 +38,13 @@
     --neoverse-material-inner-glow: 0 0 0 0 transparent;
     --neoverse-material-seam-glow: 0 0 0 0 transparent;
     --neoverse-material-bloom: 0 0 0 0 transparent;
-    border: 0;
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-control-button-border);
     background-clip: padding-box;
     box-shadow: var(--neoverse-material-shadow);
-    overflow: visible;
+    /* The press field is an internal layer. Clip it at the button's border
+       radius so pointer highlights cannot square off or escape the silhouette. */
+    overflow: hidden;
     isolation: isolate;
     -webkit-backdrop-filter: var(--neoverse-material-filter-subtle);
     backdrop-filter: var(--neoverse-material-filter-subtle);
@@ -88,11 +90,13 @@
   }
 
   .ui-button--ghost.material-glass-subtle {
+    /* Ghost is intentionally borderless: preserve the box geometry while
+       leaving the surrounding surface and the Secondary hierarchy visible. */
     --neoverse-material-edge-refraction-opacity: 0;
     --neoverse-material-shadow: 0 0 0 0 transparent;
+    border-color: transparent;
     color: var(--neoverse-control-ghost-foreground);
-    background-color: transparent;
-    background-image: none;
+    background: var(--neoverse-control-ghost-background);
     background-clip: padding-box;
   }
 
@@ -114,10 +118,6 @@
   }
 
   .ui-button--ghost.material-glass-subtle:hover:not(:disabled) {
-    --neoverse-material-edge-refraction-opacity: var(
-      --neoverse-material-edge-refraction-opacity-subtle
-    );
-    --neoverse-material-shadow: var(--neoverse-control-button-edge);
     color: var(--neoverse-control-ghost-hover-foreground);
     background: var(--neoverse-control-button-hover-background);
     background-clip: padding-box;
@@ -128,11 +128,13 @@
   }
 
   .ui-button--primary.material-glass-subtle:active:not(:disabled) {
+    --neoverse-material-shadow: var(--neoverse-control-button-edge-active);
     background: var(--neoverse-control-primary-active-background);
     background-clip: padding-box;
   }
 
   .ui-button--secondary.material-glass-subtle:active:not(:disabled) {
+    --neoverse-material-shadow: var(--neoverse-control-button-edge-active);
     color: var(--neoverse-control-secondary-active-foreground);
     background: var(--neoverse-control-button-active-background);
     background-clip: padding-box;
@@ -144,10 +146,6 @@
   }
 
   .ui-button--ghost.material-glass-subtle:active:not(:disabled) {
-    --neoverse-material-edge-refraction-opacity: var(
-      --neoverse-material-edge-refraction-opacity-subtle
-    );
-    --neoverse-material-shadow: var(--neoverse-control-button-edge-active);
     color: var(--neoverse-control-ghost-active-foreground);
     background: var(--neoverse-control-button-ghost-active-background);
     background-clip: padding-box;
@@ -179,7 +177,7 @@
     }
 
     .ui-button--ghost.material-glass-subtle {
-      background-color: transparent;
+      background-color: var(--neoverse-control-ghost-background);
     }
 
     .ui-button.material-glass-subtle::after {

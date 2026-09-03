@@ -606,7 +606,7 @@ onBeforeUnmount(() => {
               <article
                 v-for="group in sectionsByGroup"
                 :key="group.id"
-                class="grid content-start gap-3 rounded-card material-glass-elevated p-4"
+                class="grid content-start gap-3 rounded-card bg-surface-raised p-4 shadow-card"
               >
                 <div>
                   <h3 class="text-subtitle font-heading tracking-heading">

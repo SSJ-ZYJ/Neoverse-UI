@@ -380,8 +380,8 @@ export const moduleCopy = {
     reference: localized('Reference card', '参考卡片'),
     ready: localized('Ready', '就绪'),
     body: localized(
-      'Card keeps grouping and geometry predictable. Surface and Glass remain explicit at the composition boundary.',
-      'Card 让分组与几何关系保持可预测；Surface 与 Glass 在组合边界显式声明。',
+      'Card keeps grouping and geometry predictable. Tonal surfaces carry hierarchy without a hard outline; Glass remains explicit at the composition boundary.',
+      'Card 让分组与几何关系保持可预测；层次由色面承担而不是硬描边，Glass 仍在组合边界显式声明。',
     ),
     continue: localized('Continue', '继续'),
     externalClass: localized('External class', '外部类名'),

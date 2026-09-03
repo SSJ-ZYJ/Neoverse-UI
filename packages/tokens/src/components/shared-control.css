@@ -1,29 +1,40 @@
 @layer neoverse.tokens {
   :root {
-    /* Shared neutral surface values used by Button and SegmentedControl. */
+    /* Filled controls and segmented controls share a cool, translucent edge
+       in both themes. Ghost intentionally opts out of this edge instead of
+       gaining a new outline only when hovered. */
     --neoverse-control-secondary-border: var(--neoverse-color-border-default);
+    --neoverse-control-button-border: var(--neoverse-color-border-default);
     --neoverse-control-secondary-background:
       linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--neoverse-color-edge-light) 20%, transparent),
-        color-mix(in srgb, var(--neoverse-color-text-primary) 5%, transparent) 100%
+        145deg,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-border-interactive) 10%,
+          var(--neoverse-color-surface-raised)
+        ),
+        var(--neoverse-color-surface-raised) 100%
       ),
-      color-mix(in srgb, var(--neoverse-color-surface-raised) 20%, transparent);
+      var(--neoverse-color-surface-raised);
     --neoverse-control-secondary-hover-background:
       linear-gradient(
-        180deg,
-        color-mix(in srgb, var(--neoverse-color-edge-light) 32%, transparent),
-        color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent) 100%
+        145deg,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-border-interactive) 16%,
+          var(--neoverse-color-surface-raised)
+        ),
+        var(--neoverse-color-surface-raised) 100%
       ),
-      color-mix(in srgb, var(--neoverse-color-surface-raised) 30%, transparent);
+      var(--neoverse-color-surface-raised);
     --neoverse-control-secondary-shadow:
-      inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 28%, transparent),
-      inset 0 -1px 2px color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent),
+      inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-border-interactive) 26%, transparent),
+      inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-border-interactive) 20%, transparent),
+      inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-border-default) 24%, transparent),
+      inset -1px 0 3px color-mix(in srgb, var(--neoverse-color-border-default) 20%, transparent),
+      0 2px 8px -2px color-mix(in srgb, var(--neoverse-color-border-interactive) 24%, transparent),
       var(--neoverse-shadow-control);
-    --neoverse-control-secondary-hover-shadow:
-      inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 42%, transparent),
-      inset 0 -1px 2px color-mix(in srgb, var(--neoverse-color-text-primary) 10%, transparent),
-      var(--neoverse-shadow-control);
+    --neoverse-control-secondary-hover-shadow: var(--neoverse-control-secondary-shadow);
     --neoverse-control-secondary-filter: var(--neoverse-material-filter-subtle);
 
     /* Active and hover fields are shared by buttons and segmented controls. */

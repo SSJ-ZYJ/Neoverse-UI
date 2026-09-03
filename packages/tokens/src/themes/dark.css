@@ -65,7 +65,7 @@
   --neoverse-control-segmented-background: var(--neoverse-control-secondary-background);
   --neoverse-control-segmented-foreground: var(--neoverse-color-text-secondary);
   --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
-  --neoverse-control-segmented-border: var(--neoverse-control-secondary-border);
+  --neoverse-control-segmented-border: var(--neoverse-control-button-border);
   --neoverse-control-segmented-shadow: var(--neoverse-control-secondary-shadow);
   --neoverse-control-segmented-filter: var(--neoverse-control-secondary-filter);
   --neoverse-control-active-background: linear-gradient(
@@ -80,7 +80,7 @@
   --neoverse-control-primary-background:
     var(--neoverse-control-active-background), var(--neoverse-control-secondary-background);
   --neoverse-control-primary-foreground: var(--neoverse-control-segmented-active-foreground);
-  --neoverse-control-primary-border: var(--neoverse-control-active-border);
+  --neoverse-control-primary-border: var(--neoverse-control-button-border);
   --neoverse-control-primary-shadow: var(--neoverse-control-active-shadow);
   --neoverse-control-primary-hover-background:
     linear-gradient(
@@ -104,6 +104,11 @@
   --neoverse-control-ghost-active-foreground: var(--neoverse-control-segmented-active-foreground);
   --neoverse-control-button-edge: var(--neoverse-control-secondary-shadow);
   --neoverse-control-button-edge-active: var(--neoverse-control-active-shadow);
+  --neoverse-control-button-edge-carrier: color-mix(
+    in srgb,
+    var(--neoverse-color-border-interactive) 42%,
+    transparent
+  );
   --neoverse-control-button-refraction-gradient:
     radial-gradient(
       120% 80% at 0% 0%,

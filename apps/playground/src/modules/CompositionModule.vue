@@ -164,7 +164,7 @@ const navigationItems = computed(() => [
           </p>
         </header>
 
-        <UiCard class="grid gap-3 border border-default bg-surface-raised shadow-card">
+        <UiCard class="grid gap-3 bg-surface-raised shadow-card">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="min-w-0">
               <p class="text-caption text-accent-primary">
@@ -370,7 +370,7 @@ const navigationItems = computed(() => [
         </header>
 
         <nav
-          class="grid gap-3 rounded-card border border-subtle bg-surface-subtle p-3"
+          class="grid gap-3 rounded-card bg-surface-subtle p-3 shadow-raised"
           :aria-label="localize(copy.scenes.docsNavigationGroup.navigationLabel, props.locale)"
         >
           <div class="flex items-center justify-between gap-2">
@@ -472,7 +472,7 @@ const navigationItems = computed(() => [
         </header>
 
         <article
-          class="grid gap-4 rounded-card border border-default bg-surface-raised p-4 shadow-raised"
+          class="grid gap-4 rounded-card bg-surface-raised p-4 shadow-raised"
         >
           <header class="grid max-w-container-lg gap-2">
             <UiBadge size="sm">

@@ -158,8 +158,10 @@ try {
     '--neoverse-control-primary-background',
     '--neoverse-control-primary-foreground',
     '--neoverse-control-primary-hover-shadow',
+    '--neoverse-control-button-border',
     '--neoverse-control-button-edge',
     '--neoverse-control-button-edge-active',
+    '--neoverse-control-button-edge-carrier',
     '--neoverse-control-button-refraction-gradient',
     '--neoverse-control-button-press-glow',
     '--neoverse-control-button-hover-background',
@@ -173,6 +175,7 @@ try {
     '--neoverse-control-ghost-foreground',
     '--neoverse-control-ghost-hover-foreground',
     '--neoverse-control-ghost-active-foreground',
+    '--neoverse-control-ghost-background',
     '--neoverse-control-secondary-filter',
     '--neoverse-control-segmented-background',
     '--neoverse-control-segmented-foreground',
@@ -260,10 +263,16 @@ try {
   );
   const expectedButtonFragments = [
     '--neoverse-material-shadow: var(--neoverse-control-button-edge);',
+    '--neoverse-material-edge-refraction-carrier: var(--neoverse-control-button-edge-carrier);',
+    'border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)',
+    'var(--neoverse-control-button-border);',
     'background-clip: padding-box;',
-    'overflow: visible;',
+    'overflow: hidden;',
     '--neoverse-material-edge-highlight: 0 0 0 0 transparent;',
     '.ui-button.material-glass-subtle:hover:not(:disabled)::after',
+    'background: var(--neoverse-control-ghost-background);',
+    'border-color: transparent;',
+    '--neoverse-material-edge-refraction-opacity: 0;',
   ];
   const missingButtonFragments = expectedButtonFragments.filter(
     (fragment) => !buttonCss.includes(fragment),
@@ -282,7 +291,6 @@ try {
       /\.ui-button--ghost\.material-glass-subtle:active:not\(:disabled\) \{([\s\S]*?)\n {2}\}/,
     )?.[1] ?? '';
   const expectedGhostActiveFragments = [
-    '--neoverse-material-shadow: var(--neoverse-control-button-edge-active);',
     'background: var(--neoverse-control-button-ghost-active-background);',
     'transform: none;',
   ];

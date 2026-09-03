@@ -15,6 +15,7 @@ test('exposes compact-control and skeleton effect tokens', () => {
   expect(cssVariables.control.primaryBackground).toBe('--neoverse-control-primary-background');
   expect(cssVariables.control.primaryForeground).toBe('--neoverse-control-primary-foreground');
   expect(cssVariables.control.primaryHoverShadow).toBe('--neoverse-control-primary-hover-shadow');
+  expect(cssVariables.control.buttonBorder).toBe('--neoverse-control-button-border');
   expect(cssVariables.control.secondaryForeground).toBe('--neoverse-control-secondary-foreground');
   expect(cssVariables.control.secondaryHoverForeground).toBe(
     '--neoverse-control-secondary-hover-foreground',
@@ -29,8 +30,10 @@ test('exposes compact-control and skeleton effect tokens', () => {
   expect(cssVariables.control.ghostActiveForeground).toBe(
     '--neoverse-control-ghost-active-foreground',
   );
+  expect(cssVariables.control.ghostBackground).toBe('--neoverse-control-ghost-background');
   expect(cssVariables.control.buttonEdge).toBe('--neoverse-control-button-edge');
   expect(cssVariables.control.buttonEdgeActive).toBe('--neoverse-control-button-edge-active');
+  expect(cssVariables.control.buttonEdgeCarrier).toBe('--neoverse-control-button-edge-carrier');
   expect(cssVariables.control.buttonRefractionGradient).toBe(
     '--neoverse-control-button-refraction-gradient',
   );
@@ -114,6 +117,7 @@ test('exposes component token namespaces while preserving compatibility aliases'
       cssVariables.control.secondaryActiveForeground,
     ],
     [cssVariables.components.button.secondary.filter, cssVariables.control.secondaryFilter],
+    [cssVariables.components.button.ghost.background, cssVariables.control.ghostBackground],
     [cssVariables.components.button.ghost.foreground, cssVariables.control.ghostForeground],
     [
       cssVariables.components.button.ghost.hoverForeground,
@@ -123,8 +127,10 @@ test('exposes component token namespaces while preserving compatibility aliases'
       cssVariables.components.button.ghost.activeForeground,
       cssVariables.control.ghostActiveForeground,
     ],
+    [cssVariables.components.button.border, cssVariables.control.buttonBorder],
     [cssVariables.components.button.edge, cssVariables.control.buttonEdge],
     [cssVariables.components.button.edgeActive, cssVariables.control.buttonEdgeActive],
+    [cssVariables.components.button.edgeCarrier, cssVariables.control.buttonEdgeCarrier],
     [
       cssVariables.components.button.refractionGradient,
       cssVariables.control.buttonRefractionGradient,
@@ -260,8 +266,12 @@ test('keeps the light segmented control edges translucent and blurred', async ()
   expect(semanticCss).toContain(
     '--neoverse-control-segmented-background: color-mix(\n      in srgb,\n      var(--neoverse-color-accent-primary) 7%',
   );
-  expect(semanticCss).toContain('--neoverse-control-segmented-border: transparent;');
-  expect(semanticCss).toMatch(/--neoverse-control-segmented-shadow:\s*inset 0 1px 3px/);
+  expect(semanticCss).toContain(
+    '--neoverse-control-segmented-border: var(--neoverse-control-button-border);',
+  );
+  expect(semanticCss).toMatch(
+    /--neoverse-control-segmented-shadow:\s*var\(--neoverse-control-secondary-shadow\);/,
+  );
   expect(semanticCss).toContain(
     '--neoverse-control-segmented-filter: blur(6px) saturate(112%) brightness(102%);',
   );
@@ -273,7 +283,7 @@ test('keeps the light segmented control edges translucent and blurred', async ()
   expect(activeForeground).toContain('var(--neoverse-color-accent-secondary) 30%');
   expect(activeForeground).not.toContain('var(--neoverse-color-accent-primary)');
   const segmentedShadow =
-    semanticCss.match(/--neoverse-control-segmented-shadow:([\s\S]*?);/)?.[1] ?? '';
+    sharedControlCss.match(/--neoverse-control-secondary-shadow:([\s\S]*?);/)?.[1] ?? '';
   expect(segmentedShadow).not.toContain('var(--neoverse-color-text-primary)');
   expect(segmentedShadow).not.toContain('var(--neoverse-color-accent-secondary)');
   expect(segmentedShadow).toContain('inset 1px 0 3px');
@@ -299,7 +309,7 @@ test('keeps the light segmented control edges translucent and blurred', async ()
   expect(semanticCss).toContain(
     '--neoverse-control-active-shadow:\n      var(--neoverse-control-active-highlight),\n      0 2px 7px -2px color-mix(in srgb, var(--neoverse-color-accent-secondary) 24%, transparent);',
   );
-  expect(semanticCss).toMatch(/--neoverse-control-secondary-shadow:\s*inset 0 1px 0/);
+  expect(semanticCss).toMatch(/--neoverse-control-secondary-shadow:\s*inset 0 1px 3px/);
   expect(
     themesCss.match(
       /--neoverse-control-active-shadow:\s*var\(--neoverse-control-active-highlight\);/g,
@@ -527,8 +537,12 @@ test('keeps light control buttons grounded by a compact neutral shadow', async (
   expect(semanticCss).toMatch(
     /--neoverse-control-primary-hover-shadow:\s*var\(\s*--neoverse-control-active-shadow\s*\);/,
   );
-  expect(semanticCss).toMatch(/--neoverse-control-button-edge:\s*inset 0 0 7px/);
-  expect(semanticCss).toMatch(/--neoverse-control-button-edge-active:\s*inset 0 0 9px/);
+  expect(semanticCss).toMatch(
+    /--neoverse-control-button-edge:\s*var\(--neoverse-control-secondary-shadow\);/,
+  );
+  expect(semanticCss).toMatch(
+    /--neoverse-control-button-edge-active:\s*var\(--neoverse-control-active-shadow\);/,
+  );
 
   expect(
     themesCss.match(/--neoverse-shadow-control:\s*var\(--neoverse-shadow-xs\);/g),
@@ -572,6 +586,90 @@ test('aligns light buttons with the pale mint segmented-control surface', async 
   }
 });
 
+test('keeps button edges restrained and stable beside segmented controls', async () => {
+  const [buttonTokensCss, buttonCss, sharedControlCss, segmentedCss] = await Promise.all([
+    readTokenCss('components/button.css'),
+    Bun.file(new URL('../../tailwind/src/components/button.css', import.meta.url)).text(),
+    readTokenCss('components/shared-control.css'),
+    readTokenCss('components/segmented-control.css'),
+  ]);
+  const declaration = (source: string, token: string): string =>
+    source.match(new RegExp(`--neoverse-control-${token}:([\\s\\S]*?);`))?.[1] ?? '';
+  const ghostDefault =
+    buttonCss.match(
+      /\.ui-button--ghost\.material-glass-subtle \{([\s\S]*?)\n {2}\}/,
+    )?.[1] ?? '';
+  const ghostHover =
+    buttonCss.match(
+      /\.ui-button--ghost\.material-glass-subtle:hover:not\(:disabled\) \{([\s\S]*?)\n {2}\}/,
+    )?.[1] ?? '';
+  const buttonSurface =
+    buttonCss.match(/\.ui-button\.material-glass-subtle \{([\s\S]*?)\n {2}\}/)?.[1] ?? '';
+  const pressLayer =
+    buttonCss.match(/\.ui-button\.material-glass-subtle::after \{([\s\S]*?)\n {2}\}/)?.[1] ?? '';
+
+  expect(buttonCss).toMatch(
+    /border:\s*var\(--neoverse-border-width-thin\)\s+var\(--neoverse-border-style-solid\)\s+var\(--neoverse-control-button-border\);/,
+  );
+  expect(buttonSurface).toContain('overflow: hidden;');
+  expect(pressLayer).toContain('inset: 0;');
+  expect(pressLayer).toContain('border-radius: inherit;');
+  expect(declaration(buttonTokensCss, 'button-edge')).not.toContain(
+    'var(--neoverse-color-edge-light)',
+  );
+  expect(declaration(buttonTokensCss, 'button-refraction-gradient')).not.toContain(
+    'var(--neoverse-color-edge-light)',
+  );
+  expect(declaration(buttonTokensCss, 'button-edge-carrier')).not.toContain(
+    'var(--neoverse-color-edge-light)',
+  );
+  for (const token of [
+    'secondary-background',
+    'secondary-hover-background',
+    'secondary-shadow',
+    'secondary-hover-shadow',
+  ]) {
+    expect(declaration(sharedControlCss, token)).not.toContain(
+      'var(--neoverse-color-edge-light)',
+    );
+  }
+
+  expect(ghostDefault).toContain(
+    '--neoverse-material-shadow: 0 0 0 0 transparent;',
+  );
+  expect(ghostDefault).toContain('border-color: transparent;');
+  expect(ghostDefault).toContain('--neoverse-material-edge-refraction-opacity: 0;');
+  expect(ghostDefault).toContain(
+    'background: var(--neoverse-control-ghost-background);',
+  );
+  expect(ghostHover).not.toContain('--neoverse-material-edge-refraction-opacity:');
+  expect(ghostHover).not.toContain('--neoverse-material-shadow:');
+  expect(ghostHover).not.toContain('--neoverse-material-edge-refraction-opacity:');
+
+  expect(declaration(segmentedCss, 'segmented-border')).toMatch(
+    /var\(\s*--neoverse-control-button-border\s*\)/,
+  );
+});
+
+test('keeps secondary and ghost button surfaces visually distinct', async () => {
+  const [buttonCss, sharedControlCss] = await Promise.all([
+    readTokenCss('components/button.css'),
+    readTokenCss('components/shared-control.css'),
+  ]);
+  const declaration = (source: string, token: string): string =>
+    source.match(new RegExp(`--neoverse-control-${token}:([\\s\\S]*?);`))?.[1] ?? '';
+  const secondaryBackground = declaration(sharedControlCss, 'secondary-background');
+  const ghostBackground = declaration(buttonCss, 'ghost-background');
+
+  expect(declaration(sharedControlCss, 'button-border').trim()).toBe(
+    'var(--neoverse-color-border-default)',
+  );
+  expect(secondaryBackground).toContain('var(--neoverse-color-surface-raised)');
+  expect(secondaryBackground).not.toContain('var(--neoverse-color-surface-canvas)');
+  expect(ghostBackground.trim()).toBe('transparent');
+  expect(secondaryBackground).not.toBe(ghostBackground);
+});
+
 test('keeps button surfaces independent of theme accents', async () => {
   const [buttonCss, sharedControlCss] = await Promise.all([
     readTokenCss('components/button.css'),
@@ -588,6 +686,7 @@ test('keeps button surfaces independent of theme accents', async () => {
     'primary-active-background',
     'button-edge',
     'button-edge-active',
+    'button-edge-carrier',
     'button-refraction-gradient',
     'button-press-glow',
     'button-hover-background',
