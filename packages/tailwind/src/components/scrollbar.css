@@ -1,0 +1,78 @@
+@layer utilities {
+  /* Immersive scrollbars let the canvas show through the rail while the thumb
+     keeps a readable touch target. The descendant selectors make one opt-in
+     class cover nested scroll containers in a Playground surface. */
+  .scrollbar-immersive,
+  .scrollbar-immersive * {
+    scrollbar-color: var(--neoverse-scrollbar-immersive-thumb)
+      var(--neoverse-scrollbar-immersive-track);
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-immersive::-webkit-scrollbar,
+  .scrollbar-immersive *::-webkit-scrollbar {
+    width: var(--neoverse-scrollbar-immersive-size);
+    height: var(--neoverse-scrollbar-immersive-size);
+  }
+
+  .scrollbar-immersive::-webkit-scrollbar-track,
+  .scrollbar-immersive *::-webkit-scrollbar-track {
+    border: 0.25rem solid transparent;
+    border-radius: var(--neoverse-radius-pill);
+    background: var(--neoverse-scrollbar-immersive-track);
+    background-clip: padding-box;
+  }
+
+  .scrollbar-immersive::-webkit-scrollbar-thumb,
+  .scrollbar-immersive *::-webkit-scrollbar-thumb {
+    min-height: 2.75rem;
+    border: 0.2rem solid transparent;
+    border-radius: var(--neoverse-radius-pill);
+    background: var(--neoverse-scrollbar-immersive-thumb-background);
+    background-clip: padding-box;
+    box-shadow:
+      var(--neoverse-scrollbar-immersive-thumb-edge), var(--neoverse-scrollbar-immersive-thumb-glow);
+  }
+
+  .scrollbar-immersive::-webkit-scrollbar-thumb:hover,
+  .scrollbar-immersive *::-webkit-scrollbar-thumb:hover {
+    background: var(--neoverse-scrollbar-immersive-thumb-hover-background);
+  }
+
+  .scrollbar-immersive::-webkit-scrollbar-thumb:active,
+  .scrollbar-immersive *::-webkit-scrollbar-thumb:active {
+    background: var(--neoverse-scrollbar-immersive-thumb-active-background);
+  }
+
+  .scrollbar-immersive::-webkit-scrollbar-button,
+  .scrollbar-immersive *::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .scrollbar-immersive::-webkit-scrollbar-corner,
+  .scrollbar-immersive *::-webkit-scrollbar-corner {
+    background: transparent;
+  }
+
+  @media (forced-colors: active) {
+    .scrollbar-immersive,
+    .scrollbar-immersive * {
+      scrollbar-color: auto;
+    }
+
+    .scrollbar-immersive::-webkit-scrollbar-track,
+    .scrollbar-immersive *::-webkit-scrollbar-track {
+      border-color: Canvas;
+      background: Canvas;
+    }
+
+    .scrollbar-immersive::-webkit-scrollbar-thumb,
+    .scrollbar-immersive *::-webkit-scrollbar-thumb {
+      border-color: Canvas;
+      background: ButtonText;
+      box-shadow: none;
+    }
+  }
+}

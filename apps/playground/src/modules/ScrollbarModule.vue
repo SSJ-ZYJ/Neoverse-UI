@@ -70,12 +70,18 @@ const previewItems = [
 ] as const;
 
 const tokenRows = [
-  { label: copy.tokens.size, variable: cssVariables.scrollbar.immersive.size },
-  { label: copy.tokens.track, variable: cssVariables.scrollbar.immersive.track },
-  { label: copy.tokens.thumb, variable: cssVariables.scrollbar.immersive.thumb },
-  { label: copy.tokens.hover, variable: cssVariables.scrollbar.immersive.thumbHover },
-  { label: copy.tokens.active, variable: cssVariables.scrollbar.immersive.thumbActive },
-  { label: copy.tokens.edge, variable: cssVariables.scrollbar.immersive.thumbEdge },
+  { label: copy.tokens.size, variable: cssVariables.components.scrollbar.immersive.size },
+  { label: copy.tokens.track, variable: cssVariables.components.scrollbar.immersive.track },
+  { label: copy.tokens.thumb, variable: cssVariables.components.scrollbar.immersive.thumb },
+  {
+    label: copy.tokens.hover,
+    variable: cssVariables.components.scrollbar.immersive.thumbHover,
+  },
+  {
+    label: copy.tokens.active,
+    variable: cssVariables.components.scrollbar.immersive.thumbActive,
+  },
+  { label: copy.tokens.edge, variable: cssVariables.components.scrollbar.immersive.thumbEdge },
 ] as const;
 </script>
 

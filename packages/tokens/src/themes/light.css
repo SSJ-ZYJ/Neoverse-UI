@@ -1,0 +1,59 @@
+@layer neoverse.tokens {
+  :root {
+    color-scheme: light;
+  }
+
+  :root,
+  [data-theme='light'],
+  :root.light:not([data-theme]) {
+    /* Light is an atmospheric blue-white canvas, not an inverted dark theme. */
+    --neoverse-color-surface-canvas: var(--neoverse-color-neutral-50);
+    --neoverse-color-surface-subtle: rgb(255 255 255 / 30%);
+    --neoverse-color-surface-raised: rgb(255 255 255 / 54%);
+    --neoverse-color-surface-glass: rgb(244 250 255 / 34%);
+    --neoverse-color-surface-overlay: rgb(255 255 255 / 92%);
+    --neoverse-color-text-primary: var(--neoverse-color-neutral-900);
+    --neoverse-color-text-secondary: var(--neoverse-color-neutral-700);
+    --neoverse-color-text-muted: var(--neoverse-color-neutral-500);
+    --neoverse-color-text-disabled: var(--neoverse-color-neutral-400);
+    --neoverse-color-text-inverse: var(--neoverse-color-neutral-100);
+    --neoverse-color-text-on-accent: var(--neoverse-color-white);
+    --neoverse-color-edge-light: rgb(255 255 255 / 94%);
+    --neoverse-color-border-subtle: rgb(15 23 42 / 11%);
+    --neoverse-color-border-default: rgb(15 23 42 / 16%);
+    --neoverse-color-border-strong: rgb(15 23 42 / 24%);
+    --neoverse-color-border-interactive: rgb(116 186 229 / 48%);
+    /* Light uses a pale sky blue; the dark theme keeps its luminous cyan. */
+    --neoverse-color-accent-primary: #74bae5;
+    --neoverse-color-accent-primary-foreground: var(--neoverse-color-neutral-900);
+    --neoverse-color-accent-secondary: var(--neoverse-color-mint-500);
+    --neoverse-color-accent-tertiary: #7c6ee6;
+    --neoverse-color-accent-tertiary-foreground: var(--neoverse-color-white);
+    --neoverse-color-accent-soft: rgb(116 186 229 / 16%);
+    --neoverse-color-action-primary-hover: #62a8d0;
+    --neoverse-color-action-primary-active: #5594b8;
+    --neoverse-color-action-primary-foreground: var(--neoverse-color-neutral-900);
+    --neoverse-color-action-secondary: var(--neoverse-color-mint-500);
+    --neoverse-color-action-secondary-hover: var(--neoverse-color-mint-600);
+    --neoverse-color-action-secondary-active: var(--neoverse-color-mint-700);
+    --neoverse-color-action-disabled: var(--neoverse-color-neutral-200);
+    --neoverse-color-status-info: var(--neoverse-color-blue-600);
+    --neoverse-color-status-info-foreground: var(--neoverse-color-white);
+    --neoverse-color-status-success: var(--neoverse-color-green-600);
+    --neoverse-color-status-success-foreground: var(--neoverse-color-white);
+    --neoverse-color-status-warning: var(--neoverse-color-amber-500);
+    --neoverse-color-status-warning-foreground: var(--neoverse-color-neutral-950);
+    --neoverse-color-status-danger: var(--neoverse-color-red-600);
+    --neoverse-color-status-danger-foreground: var(--neoverse-color-white);
+    --neoverse-color-focus-ring: rgb(116 186 229 / 56%);
+    --neoverse-color-overlay-scrim: rgb(20 33 43 / 28%);
+    --neoverse-color-ambient-ice: rgb(56 189 248 / 18%);
+    --neoverse-color-ambient-mint: rgb(52 211 153 / 10%);
+    --neoverse-color-ambient-violet: rgb(124 110 230 / 9%);
+  }
+
+  :root.light:not([data-theme]),
+  :root[data-theme='light'] {
+    color-scheme: light;
+  }
+}

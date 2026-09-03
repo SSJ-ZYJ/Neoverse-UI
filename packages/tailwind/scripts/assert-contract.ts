@@ -1,12 +1,17 @@
 import { rm } from 'node:fs/promises';
 
 const output = new URL('../dist/contract.css', import.meta.url);
-const source = new URL('../src/components.css', import.meta.url);
+const buttonSource = new URL('../src/components/button.css', import.meta.url);
+const badgeSource = new URL('../src/components/badge.css', import.meta.url);
+const componentsOutput = new URL('../dist/components.css', import.meta.url);
 
 try {
-  const css = await Bun.file(output).text();
-  const componentCss = await Bun.file(source).text();
-  const buttonCss = componentCss.slice(0, componentCss.indexOf('/* Badges'));
+  const [css, buttonCss, badgeCss, flattenedComponentsCss] = await Promise.all([
+    Bun.file(output).text(),
+    Bun.file(buttonSource).text(),
+    Bun.file(badgeSource).text(),
+    Bun.file(componentsOutput).text(),
+  ]);
   const expectedSelectors = [
     '.bg-surface-canvas',
     '.bg-surface-subtle',
@@ -92,6 +97,8 @@ try {
     '.ui-button--primary',
     '.ui-button--secondary',
     '.ui-button--ghost',
+    '.ui-badge',
+    '.ui-badge--info',
     '.scrollbar-immersive',
     '.material-glass-subtle',
     '.material-glass-elevated',
@@ -175,6 +182,9 @@ try {
     '--neoverse-control-segmented-filter',
     '--neoverse-control-segmented-focus-shadow',
     '--neoverse-control-active-border',
+    '--neoverse-badge-background',
+    '--neoverse-badge-border',
+    '--neoverse-badge-foreground',
     '--neoverse-scrollbar-immersive-size',
     '--neoverse-scrollbar-immersive-track',
     '--neoverse-scrollbar-immersive-thumb',
@@ -234,6 +244,9 @@ try {
     '.ui-button--ghost.material-glass-subtle{',
     'background:var(--neoverse-control-primary-background)',
     'background:var(--neoverse-control-secondary-background)',
+    'background:var(--neoverse-badge-background)',
+    'border:var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) var(--neoverse-badge-border)',
+    'color:var(--neoverse-badge-foreground)',
     'border:0',
     'backdrop-filter:var(--neoverse-material-filter-subtle)',
   ];
@@ -254,6 +267,15 @@ try {
   ];
   const missingButtonFragments = expectedButtonFragments.filter(
     (fragment) => !buttonCss.includes(fragment),
+  );
+  const expectedBadgeFragments = [
+    '--neoverse-badge-background',
+    '--neoverse-badge-border',
+    '--neoverse-badge-foreground',
+    '--ui-badge-status: var(--neoverse-color-status-info);',
+  ];
+  const missingBadgeFragments = expectedBadgeFragments.filter(
+    (fragment) => !badgeCss.includes(fragment),
   );
   const ghostActiveCss =
     buttonCss.match(
@@ -289,7 +311,9 @@ try {
     emittedForbiddenWebglFragments.length > 0 ||
     missingButtonFragments.length > 0 ||
     missingGhostActiveFragments.length > 0 ||
-    emittedForbiddenButtonFragments.length > 0
+    emittedForbiddenButtonFragments.length > 0 ||
+    missingBadgeFragments.length > 0 ||
+    flattenedComponentsCss.includes('@import')
   ) {
     const details = [
       missingSelectors.length > 0 ? `Missing selectors: ${missingSelectors.join(', ')}` : '',
@@ -309,6 +333,12 @@ try {
         : '',
       emittedForbiddenButtonFragments.length > 0
         ? `Forbidden button edge fragments: ${emittedForbiddenButtonFragments.join(', ')}`
+        : '',
+      missingBadgeFragments.length > 0
+        ? `Missing badge token fragments: ${missingBadgeFragments.join(', ')}`
+        : '',
+      flattenedComponentsCss.includes('@import')
+        ? 'Compiled component CSS still contains source imports'
         : '',
     ].filter(Boolean);
     throw new Error(['Tailwind semantic contract failed:', ...details].join('\n'));

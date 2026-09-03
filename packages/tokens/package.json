@@ -18,6 +18,6 @@
   "scripts": {
     "build": "bun run scripts/copy-css.ts && tsc --project tsconfig.build.json",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "test": "bun test src/index.test.ts"
+    "test": "bun run build && bun test src/index.test.ts"
   }
 }

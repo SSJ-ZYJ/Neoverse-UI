@@ -1,0 +1,8 @@
+@layer neoverse.tokens {
+  :root {
+    /* Badge defaults resolve through generic semantic roles in both themes. */
+    --neoverse-badge-background: var(--neoverse-color-surface-subtle);
+    --neoverse-badge-border: var(--neoverse-color-border-subtle);
+    --neoverse-badge-foreground: var(--neoverse-color-text-secondary);
+  }
+}

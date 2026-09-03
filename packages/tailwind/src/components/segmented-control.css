@@ -1,0 +1,106 @@
+@layer components {
+  /* Compact controls share one refractive outer surface and one moving active
+     layer. Individual options stay transparent so the group reads as a single
+     control, matching the product segmented controls. */
+  .ui-segmented-control {
+    position: relative;
+    max-width: 100%;
+    overflow: hidden;
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-control-segmented-border);
+    background: var(--neoverse-control-segmented-background);
+    box-shadow: var(--neoverse-control-segmented-shadow);
+    -webkit-backdrop-filter: var(--neoverse-control-segmented-filter);
+    backdrop-filter: var(--neoverse-control-segmented-filter);
+  }
+
+  .ui-segmented-control__options {
+    position: relative;
+    display: grid;
+    min-width: 0;
+    grid-template-columns: repeat(var(--segment-count), minmax(0, 1fr));
+    align-items: stretch;
+    gap: 0.24rem;
+  }
+
+  .ui-segmented-control__slider {
+    position: absolute;
+    z-index: 0;
+    inset-block: 0;
+    inset-inline-start: 0;
+    width: calc((100% - (var(--segment-count) - 1) * 0.24rem) / var(--segment-count));
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-control-active-border);
+    border-radius: calc(var(--neoverse-radius-control) - 0.18rem);
+    background: var(--neoverse-control-active-background);
+    box-shadow: var(--neoverse-control-active-shadow);
+    pointer-events: none;
+    transform: translateX(calc(var(--segment-index) * (100% + 0.24rem)));
+    transition: transform var(--neoverse-motion-duration-standard)
+      var(--neoverse-motion-easing-emphasized);
+    will-change: transform;
+  }
+
+  .ui-segmented-control .ui-segmented-control__option {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    min-width: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    border-radius: calc(var(--neoverse-radius-control) - 0.18rem);
+    background: transparent;
+    color: var(--neoverse-control-segmented-foreground);
+    cursor: pointer;
+    line-height: 1;
+    white-space: nowrap;
+    transition:
+      background-color var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
+      color var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
+      transform var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
+  }
+
+  .ui-segmented-control .ui-segmented-control__option--active {
+    color: var(--neoverse-control-segmented-active-foreground);
+  }
+
+  @media (hover: hover) {
+    .ui-segmented-control__option:not(.ui-segmented-control__option--active):hover:not(:disabled) {
+      background: var(--neoverse-control-hover-background);
+      color: var(--neoverse-control-segmented-active-foreground);
+    }
+  }
+
+  .ui-segmented-control__option:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  .ui-segmented-control__option:disabled {
+    cursor: not-allowed;
+  }
+
+  .ui-segmented-control[aria-disabled='true'] {
+    opacity: 0.62;
+  }
+
+  .ui-segmented-control__loading {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    color: var(--neoverse-color-text-secondary);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-segmented-control__slider {
+      transition: none;
+    }
+  }
+}
+
+@layer utilities {
+  :root[data-theme='light'] .ui-segmented-control .ui-segmented-control__option:focus-visible,
+  :root.light:not([data-theme]) .ui-segmented-control .ui-segmented-control__option:focus-visible {
+    box-shadow: var(--neoverse-control-segmented-focus-shadow);
+  }
+}

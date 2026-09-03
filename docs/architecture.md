@@ -10,11 +10,28 @@ Published packages are ESM-only and emit only the artifacts their public contrac
 
 ### `@neoverse-ui/tokens`
 
-Owns raw design-token CSS Variables and TypeScript names for colors, geometry, layout, typography, Material effects, and base Motion duration/easing values. It has no workspace dependencies. Its CSS output is consumed by the Tailwind and Motion packages.
+Owns raw design-token CSS Variables and TypeScript names for colors, geometry, layout, typography, Material effects, Motion values, and component contracts. It has no workspace dependencies. Its CSS output is consumed by the Tailwind and Motion packages.
+
+The source layers are intentionally separated:
+
+```text
+src/
+  primitives.css  semantic.css  geometry.css  typography.css
+  material.css    layout.css     motion.css
+  components/
+    shared-control.css  button.css  segmented-control.css
+    badge.css            skeleton.css scrollbar.css
+  themes/
+    light.css            dark.css
+```
+
+`semantic.css` contains only generic, theme-invariant relationships and the semantic contract. Button, SegmentedControl, Badge, Skeleton, and Scrollbar variables are owned by their component files. `themes/light.css` contains the light mapping; `themes/dark.css` is a selector-free canonical declaration body. The token build wraps that body for both explicit dark and system dark, so runtime theme selectors stay compatible without maintaining duplicate dark values. The generated public entry remains `@neoverse-ui/tokens/css`; source component and theme files are not separate package exports.
+
+`cssVariables.components` mirrors the source ownership. The older flat `cssVariables.control` map and top-level `scrollbar`/`skeleton` maps remain compatibility aliases and are not removed or renamed.
 
 ### `@neoverse-ui/tailwind`
 
-Owns the Tailwind v4 CSS-first Foundation. `src/theme.css` imports the complete Motion CSS entry, maps semantic variables through `@theme inline`, and defines the custom Glass Material utilities plus the shared component selectors for button hierarchy, segmented controls, and skeleton surfaces. It contains no workspace-specific source paths. `src/index.css` adds Tailwind, scans workspace sources for the compiled playground stylesheet, and publishes the generated CSS.
+Owns the Tailwind v4 CSS-first Foundation. `src/theme.css` imports the complete Motion CSS entry, maps semantic variables through `@theme inline`, and imports the component selector facade. Button, Badge, SegmentedControl, Skeleton, and Scrollbar implementations live in `src/components/*.css`; `copy-theme.ts` flattens them into the existing `dist/components.css` entry. It contains no workspace-specific source paths. `src/index.css` adds Tailwind, scans workspace sources for the compiled playground stylesheet, and publishes the generated CSS.
 
 ### `@neoverse-ui/motion`
 
@@ -38,9 +55,11 @@ Owns the Vue-driven Design Lab and visual reference surface. Bun.serve serves th
 
 ## Theme modes
 
-Tokens define light values in `:root`, dark values under `.dark`, and dark system-preference values under `@media (prefers-color-scheme: dark)` when `.light` is absent. Consumers set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root element. Root `.light` and `.dark` classes remain compatible when `data-theme` is absent.
+Tokens define light values in `themes/light.css`, while `themes/dark.css` supplies one canonical dark body. The build emits that body under explicit `.dark`/`data-theme="dark"` selectors and under `@media (prefers-color-scheme: dark)` for system mode. Consumers set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root element. Root `.light` and `.dark` classes remain compatible when `data-theme` is absent.
 
 The Tailwind package maps these variables into semantic namespaces such as `bg-surface-raised`, `text-primary`, `border-subtle`, `rounded-control`, `shadow-card`, and `ring-focus`. Generic Tailwind palette and geometric utilities remain fallbacks, but business source is checked for primitive color, radius, and shadow utilities.
+
+The token build order is primitives, semantic contract, Material/Motion/typography/geometry/layout foundations, light theme mapping, component defaults, and canonical dark mapping. Tailwind keeps generic semantic/foundation variables in `@theme inline`; component selectors consume component variables directly so no component-specific utility namespace is added.
 
 ## Surface / Glass Material System
 

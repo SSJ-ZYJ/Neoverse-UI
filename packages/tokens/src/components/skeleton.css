@@ -1,0 +1,19 @@
+@layer neoverse.tokens {
+  :root {
+    /* Skeletons use the same neutral loading material in both themes. */
+    --neoverse-skeleton-fill: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) 18%,
+      var(--neoverse-color-surface-canvas)
+    );
+    --neoverse-skeleton-highlight: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) 14%,
+      transparent
+    );
+    --neoverse-skeleton-edge: inset 0 1px 0
+      color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent);
+    --neoverse-skeleton-shimmer-duration: 1.25s;
+    --neoverse-skeleton-shimmer-easing: var(--neoverse-motion-easing-standard);
+  }
+}

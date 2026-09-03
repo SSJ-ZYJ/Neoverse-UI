@@ -1,0 +1,189 @@
+@layer components {
+  /* Buttons share the project's Glass surface. The variant only changes the
+     density of the neutral plane; the rounded edge is supplied by the shared
+     refraction field instead of a painted outer border. */
+  .ui-button {
+    position: relative;
+    transform: none;
+    transition:
+      color var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
+      background-color var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
+      background-image var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
+      box-shadow var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
+      opacity var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
+  }
+
+  .ui-button.material-glass-subtle {
+    --neoverse-material-filter: var(--neoverse-material-filter-subtle);
+    --neoverse-material-background-fallback: var(--neoverse-color-surface-raised);
+    --neoverse-material-edge-refraction-width: var(
+      --neoverse-material-edge-refraction-width-subtle
+    );
+    --neoverse-material-edge-refraction-softness: var(
+      --neoverse-material-edge-refraction-softness-subtle
+    );
+    --neoverse-material-tint: var(--neoverse-color-surface-raised);
+    --neoverse-material-refraction-gradient: var(--neoverse-control-button-refraction-gradient);
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-material-edge-refraction-opacity-subtle
+    );
+    --neoverse-material-edge-refraction-carrier: var(
+      --neoverse-material-edge-refraction-carrier-subtle
+    );
+    --neoverse-material-edge-filter: var(--neoverse-material-edge-filter-subtle);
+    --neoverse-material-shadow: var(--neoverse-control-button-edge);
+    /* Keep the shared Glass composition valid without adding an extra outer
+       shadow layer. `none, <shadow>` is invalid CSS, so use transparent zero-
+       length layers for the unused ambient slots. */
+    --neoverse-material-edge-highlight: 0 0 0 0 transparent;
+    --neoverse-material-inner-glow: 0 0 0 0 transparent;
+    --neoverse-material-seam-glow: 0 0 0 0 transparent;
+    --neoverse-material-bloom: 0 0 0 0 transparent;
+    border: 0;
+    background-clip: padding-box;
+    box-shadow: var(--neoverse-material-shadow);
+    overflow: visible;
+    isolation: isolate;
+    -webkit-backdrop-filter: var(--neoverse-material-filter-subtle);
+    backdrop-filter: var(--neoverse-material-filter-subtle);
+  }
+
+  /* This is an internal light field, not a second border. Its own radius
+     keeps the press bloom inside the existing button silhouette. */
+  .ui-button.material-glass-subtle::after {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--neoverse-control-button-press-glow);
+    content: '';
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
+  }
+
+  .ui-button > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* The WebGL renderer already paints the soft directional silhouette. Do
+     not stack the CSS fallback shadow on top of it or the edge closes into a
+     rectangular outline. The fallback keeps `--neoverse-material-shadow`
+     below when WebGL is unavailable. */
+  [data-neoverse-glass-renderer='webgl'] .ui-button.material-glass-subtle {
+    --neoverse-material-shadow: 0 0 0 0 transparent;
+  }
+
+  .ui-button--primary.material-glass-subtle {
+    color: var(--neoverse-control-primary-foreground);
+    background: var(--neoverse-control-primary-background);
+    background-clip: padding-box;
+  }
+
+  .ui-button--secondary.material-glass-subtle {
+    color: var(--neoverse-control-secondary-foreground);
+    background: var(--neoverse-control-secondary-background);
+    background-clip: padding-box;
+  }
+
+  .ui-button--ghost.material-glass-subtle {
+    --neoverse-material-edge-refraction-opacity: 0;
+    --neoverse-material-shadow: 0 0 0 0 transparent;
+    color: var(--neoverse-control-ghost-foreground);
+    background-color: transparent;
+    background-image: none;
+    background-clip: padding-box;
+  }
+
+  .ui-button--primary,
+  .ui-button--secondary,
+  .ui-button--ghost {
+    transform: none;
+  }
+
+  .ui-button--primary.material-glass-subtle:hover:not(:disabled) {
+    background: var(--neoverse-control-primary-hover-background);
+    background-clip: padding-box;
+  }
+
+  .ui-button--secondary.material-glass-subtle:hover:not(:disabled) {
+    color: var(--neoverse-control-secondary-hover-foreground);
+    background: var(--neoverse-control-secondary-hover-background);
+    background-clip: padding-box;
+  }
+
+  .ui-button--ghost.material-glass-subtle:hover:not(:disabled) {
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-material-edge-refraction-opacity-subtle
+    );
+    --neoverse-material-shadow: var(--neoverse-control-button-edge);
+    color: var(--neoverse-control-ghost-hover-foreground);
+    background: var(--neoverse-control-button-hover-background);
+    background-clip: padding-box;
+  }
+
+  .ui-button.material-glass-subtle:hover:not(:disabled)::after {
+    opacity: 0.3;
+  }
+
+  .ui-button--primary.material-glass-subtle:active:not(:disabled) {
+    background: var(--neoverse-control-primary-active-background);
+    background-clip: padding-box;
+  }
+
+  .ui-button--secondary.material-glass-subtle:active:not(:disabled) {
+    color: var(--neoverse-control-secondary-active-foreground);
+    background: var(--neoverse-control-button-active-background);
+    background-clip: padding-box;
+  }
+
+  .ui-button--primary:active:not(:disabled),
+  .ui-button--secondary:active:not(:disabled) {
+    transform: none;
+  }
+
+  .ui-button--ghost.material-glass-subtle:active:not(:disabled) {
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-material-edge-refraction-opacity-subtle
+    );
+    --neoverse-material-shadow: var(--neoverse-control-button-edge-active);
+    color: var(--neoverse-control-ghost-active-foreground);
+    background: var(--neoverse-control-button-ghost-active-background);
+    background-clip: padding-box;
+    transform: none;
+  }
+
+  .ui-button.material-glass-subtle:active:not(:disabled)::after {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-button,
+    .ui-button.material-glass-subtle::after {
+      transition: none;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .ui-button.material-glass-subtle {
+      --neoverse-material-edge-refraction-opacity: 0;
+      background-image: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    .ui-button--primary.material-glass-subtle,
+    .ui-button--secondary.material-glass-subtle {
+      background-color: var(--neoverse-color-surface-raised);
+    }
+
+    .ui-button--ghost.material-glass-subtle {
+      background-color: transparent;
+    }
+
+    .ui-button.material-glass-subtle::after {
+      display: none;
+    }
+  }
+}

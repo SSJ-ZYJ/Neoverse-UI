@@ -1,0 +1,49 @@
+@layer neoverse.tokens {
+  :root {
+    /* The resting rail stays neutral; accents appear during interaction. */
+    --neoverse-scrollbar-immersive-size: 0.75rem;
+    --neoverse-scrollbar-immersive-track: color-mix(
+      in srgb,
+      var(--neoverse-color-surface-raised) 24%,
+      transparent
+    );
+    --neoverse-scrollbar-immersive-thumb: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) 46%,
+      transparent
+    );
+    --neoverse-scrollbar-immersive-thumb-hover: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-primary) 62%,
+      var(--neoverse-color-text-secondary) 38%
+    );
+    --neoverse-scrollbar-immersive-thumb-active: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-secondary) 68%,
+      var(--neoverse-color-text-secondary) 32%
+    );
+    --neoverse-scrollbar-immersive-thumb-background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--neoverse-color-edge-light) 46%, transparent),
+      var(--neoverse-scrollbar-immersive-thumb) 48%,
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 34%, transparent)
+    );
+    --neoverse-scrollbar-immersive-thumb-hover-background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--neoverse-color-edge-light) 58%, transparent),
+      var(--neoverse-scrollbar-immersive-thumb-hover) 48%,
+      color-mix(in srgb, var(--neoverse-color-accent-tertiary) 42%, transparent)
+    );
+    --neoverse-scrollbar-immersive-thumb-active-background: linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--neoverse-color-edge-light) 64%, transparent),
+      var(--neoverse-scrollbar-immersive-thumb-active) 48%,
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 48%, transparent)
+    );
+    --neoverse-scrollbar-immersive-thumb-edge:
+      inset 0 1px 1px color-mix(in srgb, var(--neoverse-color-edge-light) 42%, transparent),
+      inset 0 -1px 2px color-mix(in srgb, var(--neoverse-color-text-primary) 18%, transparent);
+    --neoverse-scrollbar-immersive-thumb-glow: 0 0 12px -4px
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 32%, transparent);
+  }
+}

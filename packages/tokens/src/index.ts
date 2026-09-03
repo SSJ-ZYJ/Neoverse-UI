@@ -1,3 +1,80 @@
+const componentCssVariables = {
+  button: {
+    primary: {
+      background: '--neoverse-control-primary-background',
+      foreground: '--neoverse-control-primary-foreground',
+      border: '--neoverse-control-primary-border',
+      shadow: '--neoverse-control-primary-shadow',
+      hoverBackground: '--neoverse-control-primary-hover-background',
+      hoverShadow: '--neoverse-control-primary-hover-shadow',
+      activeBackground: '--neoverse-control-primary-active-background',
+    },
+    secondary: {
+      background: '--neoverse-control-secondary-background',
+      border: '--neoverse-control-secondary-border',
+      hoverBackground: '--neoverse-control-secondary-hover-background',
+      shadow: '--neoverse-control-secondary-shadow',
+      hoverShadow: '--neoverse-control-secondary-hover-shadow',
+      foreground: '--neoverse-control-secondary-foreground',
+      hoverForeground: '--neoverse-control-secondary-hover-foreground',
+      activeForeground: '--neoverse-control-secondary-active-foreground',
+      filter: '--neoverse-control-secondary-filter',
+    },
+    ghost: {
+      foreground: '--neoverse-control-ghost-foreground',
+      hoverForeground: '--neoverse-control-ghost-hover-foreground',
+      activeForeground: '--neoverse-control-ghost-active-foreground',
+    },
+    edge: '--neoverse-control-button-edge',
+    edgeActive: '--neoverse-control-button-edge-active',
+    refractionGradient: '--neoverse-control-button-refraction-gradient',
+    pressGlow: '--neoverse-control-button-press-glow',
+    hoverBackground: '--neoverse-control-button-hover-background',
+    activeBackground: '--neoverse-control-button-active-background',
+    ghostActiveBackground: '--neoverse-control-button-ghost-active-background',
+  },
+  segmentedControl: {
+    background: '--neoverse-control-segmented-background',
+    foreground: '--neoverse-control-segmented-foreground',
+    activeForeground: '--neoverse-control-segmented-active-foreground',
+    border: '--neoverse-control-segmented-border',
+    shadow: '--neoverse-control-segmented-shadow',
+    filter: '--neoverse-control-segmented-filter',
+    focusShadow: '--neoverse-control-segmented-focus-shadow',
+    activeBackground: '--neoverse-control-active-background',
+    activeBorder: '--neoverse-control-active-border',
+    activeHighlight: '--neoverse-control-active-highlight',
+    activeShadow: '--neoverse-control-active-shadow',
+    hoverBackground: '--neoverse-control-hover-background',
+  },
+  badge: {
+    background: '--neoverse-badge-background',
+    border: '--neoverse-badge-border',
+    foreground: '--neoverse-badge-foreground',
+  },
+  skeleton: {
+    fill: '--neoverse-skeleton-fill',
+    highlight: '--neoverse-skeleton-highlight',
+    edge: '--neoverse-skeleton-edge',
+    shimmerDuration: '--neoverse-skeleton-shimmer-duration',
+    shimmerEasing: '--neoverse-skeleton-shimmer-easing',
+  },
+  scrollbar: {
+    immersive: {
+      size: '--neoverse-scrollbar-immersive-size',
+      track: '--neoverse-scrollbar-immersive-track',
+      thumb: '--neoverse-scrollbar-immersive-thumb',
+      thumbHover: '--neoverse-scrollbar-immersive-thumb-hover',
+      thumbActive: '--neoverse-scrollbar-immersive-thumb-active',
+      thumbBackground: '--neoverse-scrollbar-immersive-thumb-background',
+      thumbHoverBackground: '--neoverse-scrollbar-immersive-thumb-hover-background',
+      thumbActiveBackground: '--neoverse-scrollbar-immersive-thumb-active-background',
+      thumbEdge: '--neoverse-scrollbar-immersive-thumb-edge',
+      thumbGlow: '--neoverse-scrollbar-immersive-thumb-glow',
+    },
+  },
+} as const;
+
 export const cssVariables = {
   color: {
     primitive: {
@@ -222,6 +299,7 @@ export const cssVariables = {
     shimmerDuration: '--neoverse-skeleton-shimmer-duration',
     shimmerEasing: '--neoverse-skeleton-shimmer-easing',
   },
+  components: componentCssVariables,
   space: {
     0: '--neoverse-space-0',
     1: '--neoverse-space-1',
@@ -619,6 +697,14 @@ export const layoutBreakpoints = {
 export type CssVariables = typeof cssVariables;
 export type ColorToken = keyof CssVariables['color'];
 export type ColorPrimitiveFamily = keyof CssVariables['color']['primitive'];
+export type ComponentToken = keyof CssVariables['components'];
+export type ButtonToken = keyof CssVariables['components']['button'];
+export type ButtonVariantToken = keyof CssVariables['components']['button']['primary'];
+export type SegmentedControlToken = keyof CssVariables['components']['segmentedControl'];
+export type BadgeToken = keyof CssVariables['components']['badge'];
+export type SkeletonToken = keyof CssVariables['components']['skeleton'];
+export type ScrollbarToken = keyof CssVariables['components']['scrollbar'];
+export type ImmersiveScrollbarToken = keyof CssVariables['components']['scrollbar']['immersive'];
 export type SpaceToken = keyof CssVariables['space'];
 export type FontFamilyToken = keyof CssVariables['font']['family'];
 export type FontSizeToken = keyof CssVariables['font']['size'];

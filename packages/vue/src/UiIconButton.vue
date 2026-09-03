@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
+import { updateButtonPointerGlow } from './button-pointer-glow';
 import {
   buttonBaseClasses,
   buttonVariantClasses,
@@ -10,7 +11,6 @@ import {
 } from './classes';
 import type { ButtonSize, ButtonVariant, IconButtonProps } from './types';
 import UiLoadingIndicator from './UiLoadingIndicator.vue';
-import { updateButtonPointerGlow } from './button-pointer-glow';
 
 defineOptions({ inheritAttrs: false });
 

@@ -78,8 +78,158 @@ test('exposes compact-control and skeleton effect tokens', () => {
   expect(cssVariables.skeleton.edge).toBe('--neoverse-skeleton-edge');
 });
 
-test('keeps skeleton motion at a calmer loading pace', async () => {
+test('exposes component token namespaces while preserving compatibility aliases', () => {
+  const compatibilityMappings = [
+    [cssVariables.components.button.primary.background, cssVariables.control.primaryBackground],
+    [cssVariables.components.button.primary.foreground, cssVariables.control.primaryForeground],
+    [cssVariables.components.button.primary.border, cssVariables.control.primaryBorder],
+    [cssVariables.components.button.primary.shadow, cssVariables.control.primaryShadow],
+    [
+      cssVariables.components.button.primary.hoverBackground,
+      cssVariables.control.primaryHoverBackground,
+    ],
+    [cssVariables.components.button.primary.hoverShadow, cssVariables.control.primaryHoverShadow],
+    [
+      cssVariables.components.button.primary.activeBackground,
+      cssVariables.control.primaryActiveBackground,
+    ],
+    [cssVariables.components.button.secondary.background, cssVariables.control.secondaryBackground],
+    [cssVariables.components.button.secondary.border, cssVariables.control.secondaryBorder],
+    [
+      cssVariables.components.button.secondary.hoverBackground,
+      cssVariables.control.secondaryHoverBackground,
+    ],
+    [cssVariables.components.button.secondary.shadow, cssVariables.control.secondaryShadow],
+    [
+      cssVariables.components.button.secondary.hoverShadow,
+      cssVariables.control.secondaryHoverShadow,
+    ],
+    [cssVariables.components.button.secondary.foreground, cssVariables.control.secondaryForeground],
+    [
+      cssVariables.components.button.secondary.hoverForeground,
+      cssVariables.control.secondaryHoverForeground,
+    ],
+    [
+      cssVariables.components.button.secondary.activeForeground,
+      cssVariables.control.secondaryActiveForeground,
+    ],
+    [cssVariables.components.button.secondary.filter, cssVariables.control.secondaryFilter],
+    [cssVariables.components.button.ghost.foreground, cssVariables.control.ghostForeground],
+    [
+      cssVariables.components.button.ghost.hoverForeground,
+      cssVariables.control.ghostHoverForeground,
+    ],
+    [
+      cssVariables.components.button.ghost.activeForeground,
+      cssVariables.control.ghostActiveForeground,
+    ],
+    [cssVariables.components.button.edge, cssVariables.control.buttonEdge],
+    [cssVariables.components.button.edgeActive, cssVariables.control.buttonEdgeActive],
+    [
+      cssVariables.components.button.refractionGradient,
+      cssVariables.control.buttonRefractionGradient,
+    ],
+    [cssVariables.components.button.pressGlow, cssVariables.control.buttonPressGlow],
+    [cssVariables.components.button.hoverBackground, cssVariables.control.buttonHoverBackground],
+    [cssVariables.components.button.activeBackground, cssVariables.control.buttonActiveBackground],
+    [
+      cssVariables.components.button.ghostActiveBackground,
+      cssVariables.control.buttonGhostActiveBackground,
+    ],
+    [cssVariables.components.segmentedControl.background, cssVariables.control.segmentedBackground],
+    [cssVariables.components.segmentedControl.foreground, cssVariables.control.segmentedForeground],
+    [
+      cssVariables.components.segmentedControl.activeForeground,
+      cssVariables.control.segmentedActiveForeground,
+    ],
+    [cssVariables.components.segmentedControl.border, cssVariables.control.segmentedBorder],
+    [cssVariables.components.segmentedControl.shadow, cssVariables.control.segmentedShadow],
+    [cssVariables.components.segmentedControl.filter, cssVariables.control.segmentedFilter],
+    [
+      cssVariables.components.segmentedControl.focusShadow,
+      cssVariables.control.segmentedFocusShadow,
+    ],
+    [
+      cssVariables.components.segmentedControl.activeBackground,
+      cssVariables.control.activeBackground,
+    ],
+    [cssVariables.components.segmentedControl.activeBorder, cssVariables.control.activeBorder],
+    [
+      cssVariables.components.segmentedControl.activeHighlight,
+      cssVariables.control.activeHighlight,
+    ],
+    [cssVariables.components.segmentedControl.activeShadow, cssVariables.control.activeShadow],
+    [
+      cssVariables.components.segmentedControl.hoverBackground,
+      cssVariables.control.hoverBackground,
+    ],
+    [cssVariables.components.skeleton.fill, cssVariables.skeleton.fill],
+    [cssVariables.components.skeleton.highlight, cssVariables.skeleton.highlight],
+    [cssVariables.components.skeleton.edge, cssVariables.skeleton.edge],
+    [cssVariables.components.skeleton.shimmerDuration, cssVariables.skeleton.shimmerDuration],
+    [cssVariables.components.skeleton.shimmerEasing, cssVariables.skeleton.shimmerEasing],
+    [cssVariables.components.scrollbar.immersive.size, cssVariables.scrollbar.immersive.size],
+    [cssVariables.components.scrollbar.immersive.track, cssVariables.scrollbar.immersive.track],
+    [cssVariables.components.scrollbar.immersive.thumb, cssVariables.scrollbar.immersive.thumb],
+    [
+      cssVariables.components.scrollbar.immersive.thumbHover,
+      cssVariables.scrollbar.immersive.thumbHover,
+    ],
+    [
+      cssVariables.components.scrollbar.immersive.thumbActive,
+      cssVariables.scrollbar.immersive.thumbActive,
+    ],
+    [
+      cssVariables.components.scrollbar.immersive.thumbBackground,
+      cssVariables.scrollbar.immersive.thumbBackground,
+    ],
+    [
+      cssVariables.components.scrollbar.immersive.thumbHoverBackground,
+      cssVariables.scrollbar.immersive.thumbHoverBackground,
+    ],
+    [
+      cssVariables.components.scrollbar.immersive.thumbActiveBackground,
+      cssVariables.scrollbar.immersive.thumbActiveBackground,
+    ],
+    [
+      cssVariables.components.scrollbar.immersive.thumbEdge,
+      cssVariables.scrollbar.immersive.thumbEdge,
+    ],
+    [
+      cssVariables.components.scrollbar.immersive.thumbGlow,
+      cssVariables.scrollbar.immersive.thumbGlow,
+    ],
+  ] as const;
+
+  for (const [componentToken, legacyToken] of compatibilityMappings) {
+    expect(componentToken).toBe(legacyToken);
+  }
+
+  expect(cssVariables.components.badge.background).toBe('--neoverse-badge-background');
+  expect(cssVariables.components.badge.border).toBe('--neoverse-badge-border');
+  expect(cssVariables.components.badge.foreground).toBe('--neoverse-badge-foreground');
+});
+
+test('keeps semantic source generic and assigns component token ownership', async () => {
   const semanticCss = await readTokenCss('semantic.css');
+  expect(semanticCss).not.toMatch(/--neoverse-(?:control|scrollbar|skeleton|badge)-/);
+  expect(semanticCss).not.toMatch(/\[data-theme=|:root\.(?:light|dark)/);
+
+  const ownership = await Promise.all([
+    ['components/button.css', '--neoverse-control-primary-background'],
+    ['components/segmented-control.css', '--neoverse-control-segmented-background'],
+    ['components/badge.css', '--neoverse-badge-background'],
+    ['components/skeleton.css', '--neoverse-skeleton-fill'],
+    ['components/scrollbar.css', '--neoverse-scrollbar-immersive-size'],
+  ] as const);
+
+  for (const [fileName, token] of ownership) {
+    expect(await readTokenCss(fileName)).toContain(`${token}:`);
+  }
+});
+
+test('keeps skeleton motion at a calmer loading pace', async () => {
+  const semanticCss = await readTokenCss('components/skeleton.css');
   const duration = semanticCss
     .match(/--neoverse-skeleton-shimmer-duration:\s*([^;]+)/)?.[1]
     ?.trim();
@@ -88,7 +238,7 @@ test('keeps skeleton motion at a calmer loading pace', async () => {
 });
 
 test('keeps immersive scrollbars theme-aware and quiet at rest', async () => {
-  const semanticCss = await readTokenCss('semantic.css');
+  const semanticCss = await readTokenCss('components/scrollbar.css');
 
   expect(semanticCss).toContain('--neoverse-scrollbar-immersive-size: 0.75rem;');
   expect(semanticCss).toContain('--neoverse-scrollbar-immersive-track: color-mix(');
@@ -100,10 +250,12 @@ test('keeps immersive scrollbars theme-aware and quiet at rest', async () => {
 });
 
 test('keeps the light segmented control edges translucent and blurred', async () => {
-  const [semanticCss, themesCss] = await Promise.all([
-    readTokenCss('semantic.css'),
-    readTokenCss('themes.css'),
+  const [segmentedCss, sharedControlCss, themesCss] = await Promise.all([
+    readTokenCss('components/segmented-control.css'),
+    readTokenCss('components/shared-control.css'),
+    readTokenCss('themes/dark.css'),
   ]);
+  const semanticCss = `${segmentedCss}\n${sharedControlCss}`;
 
   expect(semanticCss).toContain(
     '--neoverse-control-segmented-background: color-mix(\n      in srgb,\n      var(--neoverse-color-accent-primary) 7%',
@@ -152,33 +304,33 @@ test('keeps the light segmented control edges translucent and blurred', async ()
     themesCss.match(
       /--neoverse-control-active-shadow:\s*var\(--neoverse-control-active-highlight\);/g,
     ),
-  ).toHaveLength(2);
+  ).toHaveLength(1);
   expect(
     themesCss.match(
       /--neoverse-control-segmented-shadow:\s*var\(--neoverse-control-secondary-shadow\);/g,
     ),
-  ).toHaveLength(2);
+  ).toHaveLength(1);
   expect(
     themesCss.match(
       /--neoverse-control-segmented-filter:\s*var\(--neoverse-control-secondary-filter\);/g,
     ),
-  ).toHaveLength(2);
+  ).toHaveLength(1);
   expect(
     themesCss.match(
       /--neoverse-control-segmented-background:\s*var\(--neoverse-control-secondary-background\);/g,
     ),
-  ).toHaveLength(2);
+  ).toHaveLength(1);
   expect(
     themesCss.match(/--neoverse-control-active-background:\s*linear-gradient\(/g),
-  ).toHaveLength(2);
-  expect(themesCss.match(/--neoverse-control-active-border:\s*transparent;/g)).toHaveLength(2);
+  ).toHaveLength(1);
+  expect(themesCss.match(/--neoverse-control-active-border:\s*transparent;/g)).toHaveLength(1);
 });
 
 test('keeps dark segmented active surfaces aligned with Neoverse navigation', async () => {
-  const themesCss = await readTokenCss('themes.css');
+  const themesCss = await readTokenCss('themes/dark.css');
   const activeBackgrounds = themesCss.match(/--neoverse-control-active-background:([\s\S]*?);/g);
 
-  expect(activeBackgrounds).toHaveLength(2);
+  expect(activeBackgrounds).toHaveLength(1);
   for (const activeBackground of activeBackgrounds ?? []) {
     expect(activeBackground).toContain('linear-gradient(');
     expect(activeBackground).toContain('var(--neoverse-color-accent-secondary) 13%');
@@ -191,11 +343,11 @@ test('keeps dark segmented active surfaces aligned with Neoverse navigation', as
     themesCss.match(
       /--neoverse-control-segmented-active-foreground:\s*var\(--neoverse-color-accent-secondary\);/g,
     ),
-  ).toHaveLength(2);
+  ).toHaveLength(1);
 
   const activeHighlights = themesCss.match(/--neoverse-control-active-highlight:([\s\S]*?);/g);
 
-  expect(activeHighlights).toHaveLength(2);
+  expect(activeHighlights).toHaveLength(1);
   for (const activeHighlight of activeHighlights ?? []) {
     expect(activeHighlight).not.toContain('var(--neoverse-color-text-primary)');
     expect(activeHighlight).toContain('var(--neoverse-color-edge-light) 62%');
@@ -203,23 +355,23 @@ test('keeps dark segmented active surfaces aligned with Neoverse navigation', as
 });
 
 test('keeps dark elevated cards neutral and softly edged', async () => {
-  const themesCss = await readTokenCss('themes.css');
+  const themesCss = await readTokenCss('themes/dark.css');
   const expectedOverrides = [
     [
       /--neoverse-material-filter-elevated:\s*blur\(14px\) saturate\(112%\) brightness\(102%\) contrast\(102%\);/g,
-      2,
+      1,
     ],
     [
       /--neoverse-material-edge-filter-elevated:\s*blur\(16px\) saturate\(118%\) brightness\(102%\)\s+contrast\(103%\);/g,
-      2,
+      1,
     ],
     [
       /--neoverse-material-tint-elevated:\s*color-mix\(\s*in srgb,\s*var\(--neoverse-color-surface-raised\) 84%,\s*var\(--neoverse-color-text-primary\) 16%\s*\);/g,
-      2,
+      1,
     ],
-    [/--neoverse-material-transparency-elevated:\s*26%;/g, 2],
-    [/--neoverse-material-edge-refraction-opacity-elevated:\s*0\.24;/g, 4],
-    [/--neoverse-material-refraction-gradient-elevated:\s*radial-gradient\(/g, 2],
+    [/--neoverse-material-transparency-elevated:\s*26%;/g, 1],
+    [/--neoverse-material-edge-refraction-opacity-elevated:\s*0\.24;/g, 1],
+    [/--neoverse-material-refraction-gradient-elevated:\s*radial-gradient\(/g, 1],
   ];
 
   for (const [override, count] of expectedOverrides) {
@@ -237,7 +389,7 @@ test('keeps dark elevated cards neutral and softly edged', async () => {
       new RegExp(`--neoverse-material-${token}:([\\s\\S]*?);`, 'g'),
     );
 
-    expect(declarations).toHaveLength(2);
+    expect(declarations).toHaveLength(1);
     for (const declaration of declarations ?? []) {
       expect(declaration).not.toMatch(/accent-(?:primary|secondary|tertiary)/);
     }
@@ -246,27 +398,27 @@ test('keeps dark elevated cards neutral and softly edged', async () => {
 });
 
 test('keeps dark subtle state cards neutral and softly grounded', async () => {
-  const themesCss = await readTokenCss('themes.css');
+  const themesCss = await readTokenCss('themes/dark.css');
   const expectedOverrides: Array<[RegExp, number]> = [
     [
       /--neoverse-material-filter-subtle:\s*blur\(10px\) saturate\(112%\) brightness\(102%\) contrast\(102%\);/g,
-      2,
+      1,
     ],
     [
       /--neoverse-material-edge-filter-subtle:\s*blur\(12px\) saturate\(118%\) brightness\(102%\)\s+contrast\(103%\);/g,
-      2,
+      1,
     ],
     [
       /--neoverse-material-tint-subtle:\s*color-mix\(\s*in srgb,\s*var\(--neoverse-color-surface-raised\) 84%,\s*var\(--neoverse-color-text-primary\) 16%\s*\);/g,
-      2,
+      1,
     ],
-    [/--neoverse-material-transparency-subtle:\s*24%;/g, 2],
-    [/--neoverse-material-edge-refraction-opacity-subtle:\s*0\.3(?:0)?;/g, 2],
+    [/--neoverse-material-transparency-subtle:\s*24%;/g, 1],
+    [/--neoverse-material-edge-refraction-opacity-subtle:\s*0\.3(?:0)?;/g, 1],
     [
       /--neoverse-material-glass-subtle-shadow:\s*0 0\.75rem 2rem -1\.25rem rgb\(0 0 0 \/ 34%\),\s*0 3px 8px -1px rgb\(0 0 0 \/ 12%\);/g,
-      2,
+      1,
     ],
-    [/--neoverse-material-refraction-gradient-subtle:\s*radial-gradient\(/g, 4],
+    [/--neoverse-material-refraction-gradient-subtle:\s*radial-gradient\(/g, 1],
   ];
 
   for (const [override, count] of expectedOverrides) {
@@ -283,7 +435,7 @@ test('keeps dark subtle state cards neutral and softly grounded', async () => {
       new RegExp(`--neoverse-material-${token}:([\\s\\S]*?);`, 'g'),
     );
 
-    expect(declarations).toHaveLength(2);
+    expect(declarations).toHaveLength(1);
     for (const declaration of declarations ?? []) {
       expect(declaration).not.toMatch(/accent-(?:primary|secondary|tertiary)/);
     }
@@ -291,10 +443,10 @@ test('keeps dark subtle state cards neutral and softly grounded', async () => {
 });
 
 test('aligns dark button states with the segmented control color language', async () => {
-  const themesCss = await readTokenCss('themes.css');
+  const themesCss = await readTokenCss('themes/dark.css');
   const primaryBackgrounds = themesCss.match(/--neoverse-control-primary-background:([\s\S]*?);/g);
 
-  expect(primaryBackgrounds).toHaveLength(2);
+  expect(primaryBackgrounds).toHaveLength(1);
   for (const background of primaryBackgrounds ?? []) {
     expect(background).toContain('var(--neoverse-control-active-background)');
     expect(background).toContain('var(--neoverse-control-secondary-background)');
@@ -314,39 +466,39 @@ test('aligns dark button states with the segmented control color language', asyn
           'g',
         ),
       ),
-    ).toHaveLength(2);
+    ).toHaveLength(1);
   }
 
   expect(
     themesCss.match(
       /--neoverse-control-secondary-foreground:\s*var\(--neoverse-control-segmented-foreground\);/g,
     ),
-  ).toHaveLength(2);
+  ).toHaveLength(1);
   expect(
     themesCss.match(
       /--neoverse-control-button-hover-background:\s*var\(--neoverse-control-hover-background\);/g,
     ),
-  ).toHaveLength(2);
+  ).toHaveLength(1);
   expect(
     themesCss.match(
       /--neoverse-control-button-active-background:\s*\n?\s*var\(--neoverse-control-active-background\),/g,
     ),
-  ).toHaveLength(2);
+  ).toHaveLength(1);
   expect(
     themesCss.match(
       /--neoverse-control-button-edge:\s*var\(--neoverse-control-secondary-shadow\);/g,
     ),
-  ).toHaveLength(2);
+  ).toHaveLength(1);
   expect(
     themesCss.match(
       /--neoverse-control-button-edge-active:\s*var\(--neoverse-control-active-shadow\);/g,
     ),
-  ).toHaveLength(2);
+  ).toHaveLength(1);
 
   const refractionGradients = themesCss.match(
     /--neoverse-control-button-refraction-gradient:([\s\S]*?);/g,
   );
-  expect(refractionGradients).toHaveLength(2);
+  expect(refractionGradients).toHaveLength(1);
   for (const gradient of refractionGradients ?? []) {
     expect(gradient).toContain('var(--neoverse-color-accent-secondary)');
     expect(gradient).toContain('var(--neoverse-color-accent-primary)');
@@ -354,11 +506,13 @@ test('aligns dark button states with the segmented control color language', asyn
 });
 
 test('keeps light control buttons grounded by a compact neutral shadow', async () => {
-  const [geometryCss, semanticCss, themesCss] = await Promise.all([
+  const [geometryCss, buttonCss, sharedControlCss, themesCss] = await Promise.all([
     readTokenCss('geometry.css'),
-    readTokenCss('semantic.css'),
-    readTokenCss('themes.css'),
+    readTokenCss('components/button.css'),
+    readTokenCss('components/shared-control.css'),
+    readTokenCss('themes/dark.css'),
   ]);
+  const semanticCss = `${buttonCss}\n${sharedControlCss}`;
   const controlShadow = 'var(--neoverse-shadow-control)';
 
   expect(geometryCss).toContain('--neoverse-shadow-control: 0 2px 6px -1px rgb(14 34 44 / 20%);');
@@ -378,11 +532,15 @@ test('keeps light control buttons grounded by a compact neutral shadow', async (
 
   expect(
     themesCss.match(/--neoverse-shadow-control:\s*var\(--neoverse-shadow-xs\);/g),
-  ).toHaveLength(2);
+  ).toHaveLength(1);
 });
 
 test('aligns light buttons with the pale mint segmented-control surface', async () => {
-  const semanticCss = await readTokenCss('semantic.css');
+  const [buttonCss, sharedControlCss] = await Promise.all([
+    readTokenCss('components/button.css'),
+    readTokenCss('components/shared-control.css'),
+  ]);
+  const semanticCss = `${buttonCss}\n${sharedControlCss}`;
   const declaration = (token: string): string =>
     semanticCss.match(new RegExp(`--neoverse-control-${token}:([\\s\\S]*?);`))?.[1] ?? '';
 
@@ -415,7 +573,11 @@ test('aligns light buttons with the pale mint segmented-control surface', async 
 });
 
 test('keeps button surfaces independent of theme accents', async () => {
-  const semanticCss = await readTokenCss('semantic.css');
+  const [buttonCss, sharedControlCss] = await Promise.all([
+    readTokenCss('components/button.css'),
+    readTokenCss('components/shared-control.css'),
+  ]);
+  const semanticCss = `${buttonCss}\n${sharedControlCss}`;
   const buttonTokens = [
     'primary-background',
     'primary-foreground',
@@ -451,8 +613,8 @@ test('keeps button surfaces independent of theme accents', async () => {
 });
 
 test('positions the button press glow from pointer coordinates', async () => {
-  const semanticCss = await readTokenCss('semantic.css');
-  const themesCss = await readTokenCss('themes.css');
+  const semanticCss = await readTokenCss('components/button.css');
+  const themesCss = await readTokenCss('themes/dark.css');
   const pointerPosition =
     /at var\(--neoverse-button-press-x,\s*50%\) var\(--neoverse-button-press-y,\s*50%\)/;
 
@@ -463,10 +625,10 @@ test('positions the button press glow from pointer coordinates', async () => {
 });
 
 test('keeps dark keyboard focus aligned with the segmented-control accent', async () => {
-  const themesCss = await readTokenCss('themes.css');
+  const themesCss = await readTokenCss('themes/dark.css');
   const focusRings = themesCss.match(/--neoverse-color-focus-ring:\s*([^;]+);/g);
 
-  expect(focusRings).toHaveLength(2);
+  expect(focusRings).toHaveLength(1);
   for (const focusRing of focusRings ?? []) {
     expect(focusRing).toContain('var(--neoverse-color-accent-secondary)');
     expect(focusRing).not.toContain('var(--neoverse-color-accent-tertiary)');
@@ -673,6 +835,54 @@ const readTokenCss = async (fileName: string): Promise<string> => {
   return Bun.file(new URL(`../src/${fileName}`, import.meta.url)).text();
 };
 
+const readBuiltTokenCss = (): Promise<string> =>
+  Bun.file(new URL('../dist/tokens.css', import.meta.url)).text();
+
+const extractCssBlock = (css: string, selector: string): string => {
+  const selectorIndex = css.indexOf(selector);
+  const openingBrace = css.indexOf('{', selectorIndex);
+
+  if (selectorIndex < 0 || openingBrace < 0) {
+    throw new Error(`Unable to find selector block: ${selector}`);
+  }
+
+  let depth = 0;
+  for (let index = openingBrace; index < css.length; index += 1) {
+    if (css[index] === '{') {
+      depth += 1;
+    } else if (css[index] === '}') {
+      depth -= 1;
+      if (depth === 0) {
+        return css.slice(openingBrace + 1, index);
+      }
+    }
+  }
+
+  throw new Error(`Unclosed selector block: ${selector}`);
+};
+
+test('renders one dark source into matching explicit and system wrappers', async () => {
+  const darkSource = await readTokenCss('themes/dark.css');
+  const declarations = [...darkSource.matchAll(/^\s*(--neoverse-[\w-]+):/gm)].map(
+    (match) => match[1],
+  );
+  const builtCss = await readBuiltTokenCss();
+  const systemBody = extractCssBlock(
+    builtCss,
+    ":root[data-theme='system'],\n    :root:not([data-theme], .light, .dark)",
+  );
+  const explicitBody = extractCssBlock(
+    builtCss,
+    ":root.dark:not([data-theme]),\n  :root[data-theme='dark']",
+  );
+
+  expect(declarations.length).toBeGreaterThan(0);
+  expect(new Set(declarations).size).toBe(declarations.length);
+  expect(darkSource).not.toMatch(/:root|\[data-theme=|@media/);
+  expect(builtCss).not.toContain('@neoverse-dark-tokens');
+  expect(systemBody.replace(/\s+/g, ' ').trim()).toBe(explicitBody.replace(/\s+/g, ' ').trim());
+});
+
 test('keeps Glass transparency visible and ordered by depth', async () => {
   const materialCss = await readTokenCss('material.css');
   const transparency = ['subtle', 'elevated', 'immersive'].map((name) => {
@@ -689,7 +899,7 @@ test('keeps Glass transparency visible and ordered by depth', async () => {
 test('keeps light Glass surfaces free of dark hairline borders', async () => {
   const [materialCss, themesCss] = await Promise.all([
     readTokenCss('material.css'),
-    readTokenCss('themes.css'),
+    readTokenCss('themes/dark.css'),
   ]);
   const variants = ['subtle', 'elevated', 'immersive'];
 
@@ -702,16 +912,16 @@ test('keeps light Glass surfaces free of dark hairline borders', async () => {
           'g',
         ),
       ),
-    ).toHaveLength(2);
+    ).toHaveLength(1);
   }
 });
 
 test('keeps Glass edge highlights refractive and softly diffused', async () => {
-  const [materialCss, semanticCss, geometryCss, themesCss] = await Promise.all([
+  const [materialCss, buttonCss, geometryCss, themesCss] = await Promise.all([
     readTokenCss('material.css'),
-    readTokenCss('semantic.css'),
+    readTokenCss('components/button.css'),
     readTokenCss('geometry.css'),
-    readTokenCss('themes.css'),
+    readTokenCss('themes/dark.css'),
   ]);
 
   for (const variant of ['subtle', 'elevated', 'immersive']) {
@@ -731,7 +941,7 @@ test('keeps Glass edge highlights refractive and softly diffused', async () => {
       new RegExp(`--neoverse-material-edge-highlight-${variant}:([\\s\\S]*?);`, 'g'),
     );
 
-    expect(darkDeclarations).toHaveLength(2);
+    expect(darkDeclarations).toHaveLength(1);
     for (const darkDeclaration of darkDeclarations ?? []) {
       expect(darkDeclaration).toContain('inset 0 1px 2px');
       expect(darkDeclaration).toContain('inset 0 -1px 2px');
@@ -749,7 +959,7 @@ test('keeps Glass edge highlights refractive and softly diffused', async () => {
     }
   }
 
-  expect(semanticCss).toMatch(
+  expect(buttonCss).toMatch(
     /--neoverse-control-primary-shadow:\s*var\(\s*--neoverse-control-active-shadow\s*\);/,
   );
   expect(geometryCss).toMatch(
@@ -783,7 +993,7 @@ test('keeps Glass edge highlights refractive and softly diffused', async () => {
 test('keeps dark shadows aligned with the light hierarchy', async () => {
   const [geometryCss, themesCss] = await Promise.all([
     readTokenCss('geometry.css'),
-    readTokenCss('themes.css'),
+    readTokenCss('themes/dark.css'),
   ]);
 
   for (const name of ['xs', 'sm', 'md', 'lg', 'xl']) {
@@ -791,7 +1001,7 @@ test('keeps dark shadows aligned with the light hierarchy', async () => {
     const darkValues = shadowDeclarations(themesCss, name);
 
     expect(lightValue).toBeDefined();
-    expect(darkValues).toHaveLength(2);
+    expect(darkValues).toHaveLength(1);
 
     if (lightValue === undefined) {
       continue;
@@ -809,7 +1019,7 @@ test('keeps inset material distinct between light and dark surfaces', async () =
   const [geometryCss, materialCss, themesCss] = await Promise.all([
     readTokenCss('geometry.css'),
     readTokenCss('material.css'),
-    readTokenCss('themes.css'),
+    readTokenCss('themes/dark.css'),
   ]);
   const lightValue = shadowDeclarations(geometryCss, 'inset')[0];
   const lightEdgeHighlight = materialCss.match(
@@ -822,8 +1032,8 @@ test('keeps inset material distinct between light and dark surfaces', async () =
 
   expect(lightValue).toBeDefined();
   expect(lightEdgeHighlight).toBeDefined();
-  expect(darkValues).toHaveLength(2);
-  expect(darkEdgeHighlights).toHaveLength(2);
+  expect(darkValues).toHaveLength(1);
+  expect(darkEdgeHighlights).toHaveLength(1);
 
   if (lightValue === undefined || lightEdgeHighlight === undefined) {
     return;
@@ -869,7 +1079,7 @@ const shadowReach = ([, offsetX, offsetY, blur, spread]: ShadowLayer): number =>
 test('keeps sm and md shadows visibly separated from xs', async () => {
   const [geometryCss, themesCss] = await Promise.all([
     readTokenCss('geometry.css'),
-    readTokenCss('themes.css'),
+    readTokenCss('themes/dark.css'),
   ]);
 
   const lightValue = shadowDeclarations(geometryCss, 'xs')[0];
@@ -878,7 +1088,7 @@ test('keeps sm and md shadows visibly separated from xs', async () => {
   const darkValues = ['xs', 'sm', 'md'].map((name) => shadowDeclarations(themesCss, name));
   const shadowSets = [
     [lightValue, lightSmValue, lightMdValue],
-    ...[0, 1].map((index) => darkValues.map((values) => values[index])),
+    ...[0].map((index) => darkValues.map((values) => values[index])),
   ];
 
   for (const [xsValue, smValue, mdValue] of shadowSets) {

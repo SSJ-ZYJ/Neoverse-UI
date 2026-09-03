@@ -109,7 +109,7 @@
     );
     /* Keep a layered fallback for surfaces without the masked backdrop path;
        supported Glass utilities replace it with a filtered slice of the
-       actual backdrop. Dark restores its lower-contrast fallback in themes.css. */
+       actual backdrop. Dark restores its lower-contrast fallback in themes/dark.css. */
     --neoverse-material-edge-highlight-subtle:
       inset 0 1px 2px
       color-mix(
@@ -288,7 +288,7 @@
     --neoverse-material-glass-subtle-saturation: var(--neoverse-material-saturation-subtle);
     /* Light Glass gets its silhouette from refraction and shadow; a dark
        hairline fights the pale atmospheric canvas. Dark restores the
-       theme-specific border in themes.css. */
+       theme-specific border in themes/dark.css. */
     --neoverse-material-glass-subtle-border: transparent;
     --neoverse-material-glass-subtle-border-width: var(--neoverse-border-width-thin);
     --neoverse-material-glass-subtle-edge-highlight: var(--neoverse-material-edge-highlight-subtle);

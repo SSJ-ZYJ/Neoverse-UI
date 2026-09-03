@@ -1,0 +1,43 @@
+@layer components {
+  /* Badges carry status through a quiet tint and colored hairline. The status
+     color is informative; the surface remains part of the shared material. */
+  .ui-badge {
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-badge-border);
+    background: var(--neoverse-badge-background);
+    box-shadow:
+      var(--neoverse-material-edge-highlight-subtle), var(--neoverse-material-inner-glow-subtle),
+      var(--neoverse-material-bloom-subtle);
+    color: var(--neoverse-badge-foreground);
+    white-space: nowrap;
+  }
+
+  .ui-badge--info,
+  .ui-badge--success,
+  .ui-badge--warning,
+  .ui-badge--danger {
+    background: color-mix(in srgb, var(--ui-badge-status) 10%, transparent);
+    border-color: color-mix(
+      in srgb,
+      var(--ui-badge-status) 30%,
+      var(--neoverse-color-border-subtle)
+    );
+    color: var(--ui-badge-status);
+  }
+
+  .ui-badge--info {
+    --ui-badge-status: var(--neoverse-color-status-info);
+  }
+
+  .ui-badge--success {
+    --ui-badge-status: var(--neoverse-color-status-success);
+  }
+
+  .ui-badge--warning {
+    --ui-badge-status: var(--neoverse-color-status-warning);
+  }
+
+  .ui-badge--danger {
+    --ui-badge-status: var(--neoverse-color-status-danger);
+  }
+}

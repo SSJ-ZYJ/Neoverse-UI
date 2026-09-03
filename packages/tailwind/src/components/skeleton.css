@@ -1,0 +1,81 @@
+@layer components {
+  /* Skeleton surfaces use a neutral base, a directional sheen, and a subtle
+     top edge. The component variant classes only control geometry. */
+  .ui-skeleton,
+  .skeleton-surface {
+    position: relative;
+    display: block;
+    width: 100%;
+    min-height: 0.86rem;
+    overflow: hidden;
+    background: var(--neoverse-skeleton-fill);
+    box-shadow: var(--neoverse-skeleton-edge);
+  }
+
+  .ui-skeleton--text {
+    min-height: 0.86rem;
+  }
+
+  .ui-skeleton--title {
+    min-height: 1.15rem;
+    border-radius: var(--neoverse-radius-xs);
+  }
+
+  .ui-skeleton--avatar,
+  .ui-skeleton--circle {
+    min-height: 0;
+  }
+
+  .ui-skeleton--rect {
+    border-radius: var(--ui-skeleton-radius, var(--neoverse-radius-xs));
+  }
+
+  .ui-skeleton--shimmer::after,
+  .skeleton-surface::after {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      100deg,
+      transparent 24%,
+      var(--neoverse-skeleton-highlight) 50%,
+      transparent 76%
+    );
+    content: '';
+    pointer-events: none;
+    transform: translateX(-100%);
+    animation: ui-skeleton-shimmer var(--neoverse-skeleton-shimmer-duration)
+      var(--neoverse-skeleton-shimmer-easing) infinite;
+  }
+
+  .ui-skeleton--pulse,
+  .skeleton-surface--pulse {
+    animation: ui-skeleton-pulse var(--neoverse-skeleton-shimmer-duration)
+      var(--neoverse-motion-easing-standard) infinite;
+  }
+
+  .ui-skeleton--static::after,
+  .skeleton-surface--static::after {
+    display: none;
+  }
+
+  @keyframes ui-skeleton-shimmer {
+    to {
+      transform: translateX(100%);
+    }
+  }
+
+  @keyframes ui-skeleton-pulse {
+    50% {
+      opacity: 0.58;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-skeleton--shimmer::after,
+    .skeleton-surface::after,
+    .ui-skeleton--pulse,
+    .skeleton-surface--pulse {
+      animation: none;
+    }
+  }
+}

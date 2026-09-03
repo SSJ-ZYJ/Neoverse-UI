@@ -1,0 +1,50 @@
+@layer neoverse.tokens {
+  :root {
+    /* Shared neutral surface values used by Button and SegmentedControl. */
+    --neoverse-control-secondary-border: var(--neoverse-color-border-default);
+    --neoverse-control-secondary-background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 20%, transparent),
+        color-mix(in srgb, var(--neoverse-color-text-primary) 5%, transparent) 100%
+      ),
+      color-mix(in srgb, var(--neoverse-color-surface-raised) 20%, transparent);
+    --neoverse-control-secondary-hover-background:
+      linear-gradient(
+        180deg,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 32%, transparent),
+        color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent) 100%
+      ),
+      color-mix(in srgb, var(--neoverse-color-surface-raised) 30%, transparent);
+    --neoverse-control-secondary-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 28%, transparent),
+      inset 0 -1px 2px color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent),
+      var(--neoverse-shadow-control);
+    --neoverse-control-secondary-hover-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 42%, transparent),
+      inset 0 -1px 2px color-mix(in srgb, var(--neoverse-color-text-primary) 10%, transparent),
+      var(--neoverse-shadow-control);
+    --neoverse-control-secondary-filter: var(--neoverse-material-filter-subtle);
+
+    /* Active and hover fields are shared by buttons and segmented controls. */
+    --neoverse-control-active-background: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 13%, transparent),
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 7%, transparent)
+    );
+    --neoverse-control-active-border: transparent;
+    --neoverse-control-active-highlight:
+      inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 14%, transparent),
+      inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 10%, transparent),
+      inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 9%, transparent),
+      inset -1px 0 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 8%, transparent);
+    --neoverse-control-active-shadow:
+      var(--neoverse-control-active-highlight),
+      0 2px 7px -2px color-mix(in srgb, var(--neoverse-color-accent-secondary) 24%, transparent);
+    --neoverse-control-hover-background: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-primary) 22%,
+      transparent
+    );
+  }
+}

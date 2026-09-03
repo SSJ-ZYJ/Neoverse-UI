@@ -58,6 +58,27 @@ The compiled workspace stylesheet is available from `@neoverse-ui/tailwind` or `
 
 Vue and React integrations use this same theme entry. They do not maintain separate Tailwind foundations.
 
+## Token source layout
+
+`@neoverse-ui/tokens` keeps the source contract layered and framework-agnostic:
+
+```text
+packages/tokens/src/
+  primitives.css       palette primitives
+  semantic.css         theme-invariant semantic relationships and contract
+  geometry.css         radius, border, shadow, and focus geometry
+  typography.css       font and type-role tokens
+  material.css         Surface and Glass composition scales
+  layout.css           containers, gutters, and layers
+  motion.css           duration, easing, and spatial values
+  components/          Button, SegmentedControl, Badge, Skeleton, Scrollbar
+  themes/              light mapping and one canonical dark mapping
+```
+
+Semantic CSS only owns reusable design roles. Component-specific variables remain in `components/`; `themes/light.css` and `themes/dark.css` map those roles to palette, geometry, Material, and component values. The Dark source is maintained once, and the token build emits its explicit-dark and system-dark activation wrappers. The public CSS entry remains `@neoverse-ui/tokens/css`.
+
+The TypeScript API exposes the organized `cssVariables.components` namespace. Existing `cssVariables.control`, `cssVariables.scrollbar`, and `cssVariables.skeleton` names remain compatibility aliases and continue to resolve to the same CSS Variable names.
+
 ## Surface / Glass Material System
 
 Surface materials use ordinary Tailwind composition:
@@ -101,7 +122,7 @@ Use them with normal transition utilities. Micro, state, and spatial transition 
 
 The default mode follows the system color preference. Set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root element. Root `.light` and `.dark` classes remain supported when `data-theme` is absent.
 
-Semantic variables can be overridden by a consumer on a root theme selector. Primitive color, geometric radius, and geometric shadow utilities remain Tailwind fallbacks, but business source should use the semantic contract; `bun run lint` includes the primitive utility check.
+Semantic variables can be overridden by a consumer on a root theme selector. Primitive color, geometric radius, and geometric shadow utilities remain Tailwind fallbacks, but business source should use the semantic contract; `bun run lint` includes the primitive utility check. Token CSS is built in dependency order: primitives and semantic contract, foundation layers, light mapping, component defaults, then the canonical dark mapping.
 
 ## Changesets
 
