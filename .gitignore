@@ -1,8 +1,11 @@
 node_modules/
 dist/
 *.tsbuildinfo
+test-results/
+playwright-report/
 .env
 .env.*
 !.env.example
 .DS_Store
 Thumbs.db
+.omp/
