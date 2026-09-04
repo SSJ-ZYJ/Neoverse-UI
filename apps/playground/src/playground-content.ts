@@ -427,6 +427,37 @@ export const moduleCopy = {
       selected: localized('Selected: {value}', '已选择：{value}'),
     },
   },
+  density: {
+    label: localized('Control Density', '控件密度'),
+    description: localized(
+      'The same compact controls gain a transparent hit area for coarse pointers without changing their painted geometry.',
+      '同一组紧凑控件在粗指针下增加透明命中区域，同时保持视觉几何不变。',
+    ),
+    profiles: {
+      desktop: {
+        label: localized('Desktop / fine pointer', '桌面 / 精细指针'),
+        hint: localized(
+          'Compact visual size with keyboard and focus-visible support.',
+          '保持紧凑视觉尺寸，同时支持键盘与 focus-visible。',
+        ),
+      },
+      touch: {
+        label: localized('Touch / coarse pointer', '触控 / 粗指针'),
+        hint: localized(
+          'The hit area expands invisibly; the painted control stays the same size.',
+          '命中区域透明扩展，控件的视觉尺寸保持不变。',
+        ),
+      },
+    },
+    controls: {
+      button: localized('Action', '操作'),
+      iconButton: localized('Add', '添加'),
+      segment: localized('View', '视图'),
+      overview: localized('Overview', '总览'),
+      details: localized('Details', '详情'),
+      activity: localized('Activity', '活动'),
+    },
+  },
   skeleton: {
     label: localized('Skeleton', '骨架屏'),
     description: localized(

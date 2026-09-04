@@ -112,7 +112,7 @@ const tokenRows = [
           </div>
 
           <div
-            class="scrollbar-immersive max-h-72 overflow-y-auto rounded-control bg-surface-canvas p-2"
+            class="scrollbar-immersive max-h-72 overflow-y-auto rounded-control bg-accent-soft p-2"
             :aria-label="localize(copy.preview.viewportLabel, props.locale)"
           >
             <ol class="grid divide-y divide-subtle">

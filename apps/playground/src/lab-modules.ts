@@ -5,6 +5,7 @@ import ButtonModule from './modules/ButtonModule.vue';
 import CardModule from './modules/CardModule.vue';
 import ColorsModule from './modules/ColorsModule.vue';
 import CompositionModule from './modules/CompositionModule.vue';
+import DensityModule from './modules/DensityModule.vue';
 import GlassModule from './modules/GlassModule.vue';
 import IconButtonModule from './modules/IconButtonModule.vue';
 import MotionModule from './modules/MotionModule.vue';
@@ -118,6 +119,13 @@ export const labModules = [
     component: SegmentedControlModule,
   },
   {
+    id: 'density',
+    groupId: 'components',
+    label: moduleCopy.density.label,
+    description: moduleCopy.density.description,
+    component: DensityModule,
+  },
+  {
     id: 'skeleton',
     groupId: 'components',
     label: moduleCopy.skeleton.label,
@@ -178,6 +186,7 @@ export const moduleGroups = [
       'badge',
       'card',
       'segmented-control',
+      'density',
       'skeleton',
       'scrollbar',
       'composition',

@@ -83,6 +83,7 @@ onBeforeUnmount(() => {
 <template>
   <main
     ref="boardElement"
+    data-design-lab-region="module"
     class="mx-auto flex max-w-container-xl flex-col gap-grid px-gutter-inline py-3"
   >
     <LabSection

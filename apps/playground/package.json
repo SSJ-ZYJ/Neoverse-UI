@@ -8,7 +8,8 @@
     "dev:client": "vite build --watch",
     "build:client": "vite build",
     "build": "bun run build:client && bun build ./src/index.ts --outdir ./dist --target bun --sourcemap",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "test": "bun run --filter @neoverse-ui/tokens build && bun run --filter @neoverse-ui/motion build && bun test src/lab-data.test.ts"
   },
   "dependencies": {
     "@neoverse-ui/motion": "workspace:*",
