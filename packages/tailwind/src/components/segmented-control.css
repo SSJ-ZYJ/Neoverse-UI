@@ -12,6 +12,7 @@
     box-shadow: var(--neoverse-control-segmented-shadow);
     -webkit-backdrop-filter: var(--neoverse-control-segmented-filter);
     backdrop-filter: var(--neoverse-control-segmented-filter);
+    touch-action: manipulation;
   }
 
   .ui-segmented-control__options {
@@ -82,6 +83,29 @@
 
   .ui-segmented-control[aria-disabled='true'] {
     opacity: 0.62;
+  }
+
+  @media (pointer: coarse) {
+    .ui-segmented-control {
+      overflow: visible;
+    }
+
+    .ui-segmented-control .ui-segmented-control__option {
+      --neoverse-control-hit-area: var(--neoverse-control-touch-hit-area);
+    }
+
+    .ui-segmented-control .ui-segmented-control__option::before {
+      position: absolute;
+      z-index: 0;
+      inset: calc(var(--neoverse-control-hit-area) * -1);
+      border-radius: inherit;
+      content: '';
+      pointer-events: auto;
+    }
+
+    .ui-segmented-control .ui-segmented-control__option:disabled::before {
+      pointer-events: none;
+    }
   }
 
   .ui-segmented-control__loading {

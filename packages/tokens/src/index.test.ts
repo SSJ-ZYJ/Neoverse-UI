@@ -10,7 +10,6 @@ test('exposes semantic color variables under the Neoverse namespace', () => {
   expect(cssVariables.color.action.primaryHover).toBe('--neoverse-color-action-primary-hover');
   expect(cssVariables.color.status.danger).toBe('--neoverse-color-status-danger');
 });
-
 test('exposes compact-control and skeleton effect tokens', () => {
   expect(cssVariables.control.primaryBackground).toBe('--neoverse-control-primary-background');
   expect(cssVariables.control.primaryForeground).toBe('--neoverse-control-primary-foreground');
@@ -630,9 +629,13 @@ test('keeps button edges restrained and stable beside segmented controls', async
     expect(declaration(sharedControlCss, token)).not.toContain('var(--neoverse-color-edge-light)');
   }
 
-  expect(ghostDefault).toContain('--neoverse-material-shadow: 0 0 0 0 transparent;');
-  expect(ghostDefault).toContain('border-color: transparent;');
-  expect(ghostDefault).toContain('--neoverse-material-edge-refraction-opacity: 0;');
+  expect(ghostDefault).toContain(
+    '--neoverse-material-shadow: var(--neoverse-control-button-edge);',
+  );
+  expect(ghostDefault).toContain('border-color: var(--neoverse-color-border-strong);');
+  expect(ghostDefault).toContain(
+    '--neoverse-material-edge-refraction-opacity: var(\n      --neoverse-material-edge-refraction-opacity-subtle\n    );',
+  );
   expect(ghostDefault).toContain('background: var(--neoverse-control-ghost-background);');
   expect(ghostHover).not.toContain('--neoverse-material-edge-refraction-opacity:');
   expect(ghostHover).not.toContain('--neoverse-material-shadow:');
@@ -656,7 +659,7 @@ test('keeps secondary and ghost button surfaces visually distinct', async () => 
   expect(declaration(sharedControlCss, 'button-border').trim()).toBe(
     'var(--neoverse-color-border-default)',
   );
-  expect(secondaryBackground).toContain('var(--neoverse-color-surface-raised)');
+  expect(secondaryBackground).toContain('var(--neoverse-color-surface-glass)');
   expect(secondaryBackground).not.toContain('var(--neoverse-color-surface-canvas)');
   expect(ghostBackground.trim()).toBe('transparent');
   expect(secondaryBackground).not.toBe(ghostBackground);

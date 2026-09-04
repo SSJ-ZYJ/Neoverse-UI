@@ -10,13 +10,13 @@ const sourceFiles = [
   'typography.css',
   'geometry.css',
   'layout.css',
-  'themes/light.css',
   'components/shared-control.css',
   'components/button.css',
   'components/segmented-control.css',
   'components/badge.css',
   'components/skeleton.css',
   'components/scrollbar.css',
+  'themes/light.css',
 ] as const;
 const darkSource = new URL('themes/dark.css', sourceDirectory);
 const outputDirectory = new URL('dist/', packageDirectory);

@@ -50,6 +50,27 @@
     --neoverse-color-ambient-ice: rgb(56 189 248 / 18%);
     --neoverse-color-ambient-mint: rgb(52 211 153 / 10%);
     --neoverse-color-ambient-violet: rgb(124 110 230 / 9%);
+
+    /* Keep light controls grounded without the heavy dark drop used by the
+       previous shared fallback. The colored edge and press glow carry the
+       visual feedback; this layer only supplies a quiet separation from the
+       atmospheric canvas. */
+    --neoverse-shadow-control: 0 1px 4px -1px rgb(14 34 44 / 12%);
+
+    /* Light button presses use the same directional accent field as dark
+       controls. A pale interactive border is too close to the surface and
+       makes the press state disappear. */
+    --neoverse-control-button-press-glow:
+      radial-gradient(
+        90% 140% at var(--neoverse-button-press-x, 50%) var(--neoverse-button-press-y, 50%),
+        color-mix(in srgb, var(--neoverse-color-accent-secondary) 36%, transparent),
+        transparent 68%
+      ),
+      radial-gradient(
+        75% 100% at var(--neoverse-button-press-x, 50%) var(--neoverse-button-press-y, 50%),
+        color-mix(in srgb, var(--neoverse-color-accent-primary) 14%, transparent),
+        transparent 72%
+      );
   }
 
   :root.light:not([data-theme]),

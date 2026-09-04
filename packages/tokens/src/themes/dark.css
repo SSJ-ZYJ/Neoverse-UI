@@ -143,9 +143,9 @@
     );
   --neoverse-control-button-hover-background: var(--neoverse-control-hover-background);
   --neoverse-control-button-active-background:
-    var(--neoverse-control-active-background), var(--neoverse-control-secondary-background);
+    var(--neoverse-control-active-background), transparent;
   --neoverse-control-button-ghost-active-background:
-    var(--neoverse-control-active-background), var(--neoverse-control-secondary-background);
+    var(--neoverse-control-active-background), transparent;
 
   /* Material dark mapping. */
   --neoverse-material-edge-highlight-subtle:

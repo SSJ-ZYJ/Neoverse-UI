@@ -1,32 +1,30 @@
 @layer neoverse.tokens {
   :root {
-    /* Filled controls and segmented controls share a cool, translucent edge
-       in both themes. Ghost intentionally opts out of this edge instead of
-       gaining a new outline only when hovered. */
+    /* Controls keep compact visual geometry. Coarse pointers get a
+       transparent hit-area expansion in the component layer instead of a
+       larger painted control. */
+    --neoverse-control-hit-area: 0px;
+    --neoverse-control-touch-hit-area: 8px;
+
+    /* Filled controls and segmented controls share a cool, translucent glass
+       plane in both themes. Ghost keeps the plane transparent but retains a
+       low-contrast edge so it does not disappear on pale surfaces. */
     --neoverse-control-secondary-border: var(--neoverse-color-border-default);
     --neoverse-control-button-border: var(--neoverse-color-border-default);
     --neoverse-control-secondary-background:
       linear-gradient(
         145deg,
-        color-mix(
-          in srgb,
-          var(--neoverse-color-border-interactive) 10%,
-          var(--neoverse-color-surface-raised)
-        ),
-        var(--neoverse-color-surface-raised) 100%
+        color-mix(in srgb, var(--neoverse-color-border-interactive) 10%, transparent),
+        transparent 100%
       ),
-      var(--neoverse-color-surface-raised);
+      color-mix(in srgb, var(--neoverse-color-surface-glass) 72%, transparent);
     --neoverse-control-secondary-hover-background:
       linear-gradient(
         145deg,
-        color-mix(
-          in srgb,
-          var(--neoverse-color-border-interactive) 16%,
-          var(--neoverse-color-surface-raised)
-        ),
-        var(--neoverse-color-surface-raised) 100%
+        color-mix(in srgb, var(--neoverse-color-border-interactive) 16%, transparent),
+        transparent 100%
       ),
-      var(--neoverse-color-surface-raised);
+      color-mix(in srgb, var(--neoverse-color-surface-glass) 72%, transparent);
     --neoverse-control-secondary-shadow:
       inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-border-interactive) 26%, transparent),
       inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-border-interactive) 20%, transparent),

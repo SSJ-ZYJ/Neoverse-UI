@@ -13,7 +13,7 @@
 
     /* The CSS fallback edge and pointer-positioned press field. Filled
        buttons reuse the neutral control edge beside segmented controls;
-       Ghost opts out of the edge in the Tailwind component layer. */
+       Ghost reuses that edge without adding a filled plane. */
     --neoverse-control-button-edge: var(--neoverse-control-secondary-shadow);
     --neoverse-control-button-edge-active: var(--neoverse-control-active-shadow);
     --neoverse-control-button-edge-carrier: color-mix(
@@ -54,12 +54,15 @@
         transparent 72%
       );
     --neoverse-control-button-hover-background: var(--neoverse-control-active-background);
+    /* Pressed buttons use an accent field over the surrounding surface. Do
+       not reintroduce the neutral glass plane here: on vivid toolbars it
+       reads as a black block instead of a translucent press response. */
     --neoverse-control-button-active-background:
-      var(--neoverse-control-active-background), var(--neoverse-control-secondary-hover-background);
+      var(--neoverse-control-active-background), transparent;
     --neoverse-control-button-ghost-active-background:
-      var(--neoverse-control-active-background), var(--neoverse-control-secondary-background);
-    /* Ghost keeps the surrounding surface visible. The component layer
-       removes the shared filled-button edge while retaining the same geometry. */
+      var(--neoverse-control-active-background), transparent;
+    /* Ghost keeps the surrounding surface visible while the component layer
+       supplies a quieter outlined boundary. */
     --neoverse-control-ghost-background: transparent;
 
     /* Button-only foreground and filter states. */

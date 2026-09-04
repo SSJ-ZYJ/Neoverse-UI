@@ -271,8 +271,10 @@ try {
     '--neoverse-material-edge-highlight: 0 0 0 0 transparent;',
     '.ui-button.material-glass-subtle:hover:not(:disabled)::after',
     'background: var(--neoverse-control-ghost-background);',
-    'border-color: transparent;',
-    '--neoverse-material-edge-refraction-opacity: 0;',
+    'border-color: var(--neoverse-color-border-strong);',
+    '--neoverse-material-edge-refraction-opacity: var(',
+    '.ui-button > .ui-button__edge-field',
+    'position: absolute;',
   ];
   const missingButtonFragments = expectedButtonFragments.filter(
     (fragment) => !buttonCss.includes(fragment),
@@ -298,7 +300,6 @@ try {
     (fragment) => !ghostActiveCss.includes(fragment),
   );
   const forbiddenButtonFragments = [
-    '::before',
     'inset: 1px;',
     'var(--neoverse-control-primary-shadow)',
     'var(--neoverse-control-primary-hover-shadow)',

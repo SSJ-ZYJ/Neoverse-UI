@@ -2,9 +2,11 @@
   /* Filled buttons share the project's Glass surface. The variant only
      changes the density of the plane; one tokenized cool border and the
      shared refraction field keep the rounded edge consistent instead of
-     painting white rings. Ghost keeps the same geometry without that edge. */
+     painting white rings. Ghost keeps the surrounding surface visible while
+     retaining a quiet boundary. */
   .ui-button {
     position: relative;
+    touch-action: manipulation;
     transform: none;
     transition:
       color var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
@@ -69,12 +71,52 @@
     z-index: 1;
   }
 
-  /* The WebGL renderer already paints the soft directional silhouette. Do
-     not stack the CSS fallback shadow on top of it or the edge closes into a
-     rectangular outline. The fallback keeps `--neoverse-material-shadow`
-     below when WebGL is unavailable. */
-  [data-neoverse-glass-renderer='webgl'] .ui-button.material-glass-subtle {
+  /* Buttons use their own edge field so the coarse-pointer hit target can
+     occupy ::before without competing with the generic Glass pseudo-element. */
+  .ui-button > .ui-button__edge-field {
+    position: absolute;
+    z-index: 0;
+    inset: var(--neoverse-material-edge-refraction-width);
+    border-radius: inherit;
+    background-color: transparent;
+    background-image: var(--neoverse-material-refraction-gradient);
+    content: '';
+    opacity: var(--neoverse-material-edge-refraction-opacity);
+    pointer-events: none;
+    filter: var(--neoverse-material-edge-refraction-softness);
+    mix-blend-mode: normal;
+    -webkit-backdrop-filter: var(--neoverse-material-edge-filter);
+    backdrop-filter: var(--neoverse-material-edge-filter);
+  }
+
+  /* A button is not a Glass Edge Pass surface by default. Keep this narrow
+     compatibility rule for a consumer that explicitly opts a custom button
+     into the renderer. */
+  [data-neoverse-glass-renderer='webgl']
+  .ui-button.material-glass-subtle[data-neoverse-glass-edge-pass-active='webgl'] {
     --neoverse-material-shadow: 0 0 0 0 transparent;
+  }
+
+  @media (pointer: coarse) {
+    /* The pseudo-element is transparent and participates only in hit testing;
+       the painted control keeps its compact desktop geometry. */
+    .ui-button.material-glass-subtle {
+      --neoverse-control-hit-area: var(--neoverse-control-touch-hit-area);
+      overflow: visible;
+    }
+
+    .ui-button::before {
+      position: absolute;
+      z-index: 0;
+      inset: calc(var(--neoverse-control-hit-area) * -1);
+      border-radius: inherit;
+      content: '';
+      pointer-events: auto;
+    }
+
+    .ui-button:disabled::before {
+      pointer-events: none;
+    }
   }
 
   .ui-button--primary.material-glass-subtle {
@@ -90,11 +132,14 @@
   }
 
   .ui-button--ghost.material-glass-subtle {
-    /* Ghost is intentionally borderless: preserve the box geometry while
-       leaving the surrounding surface and the Secondary hierarchy visible. */
-    --neoverse-material-edge-refraction-opacity: 0;
-    --neoverse-material-shadow: 0 0 0 0 transparent;
-    border-color: transparent;
+    /* Ghost stays unfilled, but it still needs a readable material boundary
+       on pale cards. Reuse the directional edge instead of adding a second
+       opaque surface or a closed bright ring. */
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-material-edge-refraction-opacity-subtle
+    );
+    --neoverse-material-shadow: var(--neoverse-control-button-edge);
+    border-color: var(--neoverse-color-border-strong);
     color: var(--neoverse-control-ghost-foreground);
     background: var(--neoverse-control-ghost-background);
     background-clip: padding-box;
@@ -183,5 +228,18 @@
     .ui-button.material-glass-subtle::after {
       display: none;
     }
+
+    .ui-button > .ui-button__edge-field {
+      display: none;
+    }
+  }
+}
+
+@layer utilities {
+  /* This sits beside the generic transition utility. Its more specific
+     selector makes the pressed surface switch immediately without relying on
+     !important or changing normal hover motion. */
+  .ui-button.material-glass-subtle:active:not(:disabled) {
+    transition: none;
   }
 }

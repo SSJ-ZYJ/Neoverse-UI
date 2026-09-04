@@ -58,6 +58,7 @@ const classes = computed(() => [
     :class="[classes, attrs.class]"
     @pointerdown="updateButtonPointerGlow"
   >
+    <span class="ui-button__edge-field" aria-hidden="true" />
     <span
       v-if="props.loading || $slots.leading"
       class="relative inline-flex shrink-0 items-center justify-center"
