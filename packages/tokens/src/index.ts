@@ -344,6 +344,9 @@ export const cssVariables = {
   font: {
     family: {
       sans: '--neoverse-font-family-sans',
+      code: '--neoverse-font-family-code',
+      codeDefault: '--neoverse-font-family-code-default',
+      codeMaple: '--neoverse-font-family-code-maple',
       mono: '--neoverse-font-family-mono',
     },
     size: {

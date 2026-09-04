@@ -42,8 +42,8 @@
     "packages/motion": {
       "name": "@neoverse-ui/motion",
       "version": "0.1.0",
-      "dependencies": {
-        "@neoverse-ui/tokens": "workspace:*",
+      "peerDependencies": {
+        "@neoverse-ui/tokens": "^0.1.0",
       },
     },
     "packages/react": {
@@ -53,13 +53,13 @@
     "packages/tailwind": {
       "name": "@neoverse-ui/tailwind",
       "version": "0.1.0",
-      "dependencies": {
-        "@neoverse-ui/motion": "workspace:*",
-        "@neoverse-ui/tokens": "workspace:*",
-      },
       "devDependencies": {
         "@tailwindcss/cli": "4.3.3",
         "tailwindcss": "4.3.3",
+      },
+      "peerDependencies": {
+        "@neoverse-ui/motion": "^0.1.0",
+        "@neoverse-ui/tokens": "^0.1.0",
       },
     },
     "packages/tokens": {

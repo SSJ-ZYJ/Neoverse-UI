@@ -114,8 +114,15 @@
     --neoverse-space-31: 7.75rem;
     --neoverse-space-32: 8rem;
     --neoverse-font-family-sans:
-      'Inter Variable', Inter, 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', ui-sans-serif,
-      system-ui, sans-serif;
+      'Inter Variable', Inter, 'Noto Sans SC Variable', 'Noto Sans SC', 'PingFang SC',
+      'Microsoft YaHei', ui-sans-serif, system-ui, sans-serif;
+    --neoverse-font-family-code-default:
+      'Fira Code Variable', 'Fira Code', ui-monospace, sfmono-regular, menlo, monaco, consolas,
+      'Liberation Mono', 'Courier New', monospace;
+    --neoverse-font-family-code-maple:
+      'Maple Mono', ui-monospace, sfmono-regular, menlo, monaco, consolas, 'Liberation Mono',
+      'Courier New', monospace;
+    --neoverse-font-family-code: var(--neoverse-font-family-code-default);
     --neoverse-font-family-mono:
       ui-monospace, sfmono-regular, menlo, monaco, consolas, 'Liberation Mono', 'Courier New',
       monospace;

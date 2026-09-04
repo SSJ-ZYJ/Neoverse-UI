@@ -7,7 +7,6 @@ const componentsDirectory = new URL('src/components/', packageDirectory);
 const outputDirectory = new URL('dist/', packageDirectory);
 const output = new URL('theme.css', outputDirectory);
 const componentsOutput = new URL('components.css', outputDirectory);
-
 await mkdir(outputDirectory, { recursive: true });
 const componentFacade = await Bun.file(componentsSource).text();
 const componentFiles = [

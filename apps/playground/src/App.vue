@@ -486,7 +486,7 @@ onBeforeUnmount(() => {
         <div v-for="group in sectionsByGroup" :key="group.id" class="mt-5 first:mt-1">
           <h2
             v-if="group.modules.length > 1"
-            class="px-3 text-2xs font-semibold uppercase tracking-wide text-muted"
+            class="px-3 text-caption font-semibold uppercase tracking-wide text-muted"
           >
             {{ localize(group.label, locale) }}
           </h2>
@@ -593,7 +593,7 @@ onBeforeUnmount(() => {
                 id="overview-title"
                 ref="overviewHeading"
                 tabindex="-1"
-                class="text-3xl font-heading tracking-heading outline-none md:text-4xl"
+                class="text-heading font-heading tracking-heading outline-none"
               >
                 {{ localize(appCopy.overview.title, locale) }}
               </h2>

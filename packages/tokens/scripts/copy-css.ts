@@ -3,8 +3,8 @@ import { mkdir } from 'node:fs/promises';
 const packageDirectory = new URL('../', import.meta.url);
 const sourceDirectory = new URL('src/', packageDirectory);
 const sourceFiles = [
+  'fonts.css',
   'primitives.css',
-  'semantic.css',
   'material.css',
   'motion.css',
   'typography.css',

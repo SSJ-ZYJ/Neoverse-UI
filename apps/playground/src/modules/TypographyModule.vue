@@ -17,12 +17,12 @@ const props = defineProps<LabModuleProps>();
         <h3 class="text-label font-label text-primary">
           {{ localize(token.label, props.locale) }}
         </h3>
-        <code class="text-xs text-secondary">{{ token.className }}</code>
+        <code class="text-code text-secondary">{{ token.className }}</code>
       </div>
       <p :class="token.className">
         {{ localize(moduleCopy.typography.sample, props.locale) }}
       </p>
-      <code class="text-xs text-muted">{{ token.variables.join(' · ') }}</code>
+      <code class="text-code text-muted">{{ token.variables.join(' · ') }}</code>
     </article>
   </div>
 </template>

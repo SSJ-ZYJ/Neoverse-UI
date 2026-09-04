@@ -109,14 +109,14 @@ onMounted(() => {
       <span class="block truncate text-label font-label text-primary">
         {{ localize(props.label, props.locale) }}
       </span>
-      <code class="block truncate text-xs text-secondary">{{ props.variable }}</code>
-      <code v-if="props.className" class="block truncate text-xs text-muted">
+      <code class="block truncate text-code text-secondary">{{ props.variable }}</code>
+      <code v-if="props.className" class="block truncate text-code text-muted">
         {{ props.className }}
       </code>
     </span>
     <code
       v-if="props.preview === 'color' && resolvedColor.length > 0"
-      class="ml-auto shrink-0 text-xs text-secondary"
+      class="ml-auto shrink-0 text-code text-secondary"
     >
       {{ resolvedColor }}
     </code>

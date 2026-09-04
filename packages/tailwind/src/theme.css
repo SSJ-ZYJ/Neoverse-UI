@@ -99,7 +99,10 @@
   --font-body: var(--neoverse-font-family-sans);
   --font-label: var(--neoverse-font-family-sans);
   --font-caption: var(--neoverse-font-family-sans);
-  --font-code: var(--neoverse-font-family-mono);
+  --font-code: var(--neoverse-font-family-code);
+  --font-code-default: var(--neoverse-font-family-code-default);
+  --font-code-maple: var(--neoverse-font-family-code-maple);
+  --default-mono-font-family: var(--neoverse-font-family-code);
 
   --text-2xs: var(--neoverse-font-size-2xs);
   --text-xs: var(--neoverse-font-size-xs);
@@ -113,14 +116,18 @@
 
   --text-display: var(--neoverse-typography-display-size);
   --text-display--line-height: var(--neoverse-typography-display-line-height);
+  --text-display--font-weight: var(--neoverse-typography-display-weight);
   --text-heading: var(--neoverse-typography-heading-size);
   --text-heading--line-height: var(--neoverse-typography-heading-line-height);
+  --text-heading--font-weight: var(--neoverse-typography-heading-weight);
   --text-subtitle: var(--neoverse-typography-subtitle-size);
   --text-subtitle--line-height: var(--neoverse-typography-subtitle-line-height);
+  --text-subtitle--font-weight: var(--neoverse-typography-subtitle-weight);
   --text-body: var(--neoverse-typography-body-size);
   --text-body--line-height: var(--neoverse-typography-body-line-height);
   --text-label: var(--neoverse-typography-label-size);
   --text-label--line-height: var(--neoverse-typography-label-line-height);
+  --text-label--font-weight: var(--neoverse-typography-label-weight);
   --text-caption: var(--neoverse-typography-caption-size);
   --text-caption--line-height: var(--neoverse-typography-caption-line-height);
   --text-code: var(--neoverse-typography-code-size);

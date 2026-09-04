@@ -19,9 +19,9 @@
     "dev": "bun run build:theme && tailwindcss -i ./src/index.css -o ./dist/index.css --watch",
     "test": "bun run --filter @neoverse-ui/tokens build && bun run --filter @neoverse-ui/motion build && bun run build:theme && tailwindcss -i ./src/contract.css -o ./dist/contract.css --minify && bun ./scripts/assert-contract.ts"
   },
-  "dependencies": {
-    "@neoverse-ui/motion": "workspace:*",
-    "@neoverse-ui/tokens": "workspace:*"
+  "peerDependencies": {
+    "@neoverse-ui/motion": "^0.1.0",
+    "@neoverse-ui/tokens": "^0.1.0"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.3",
