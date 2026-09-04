@@ -1,6 +1,6 @@
 # Neoverse UI
 
-A lightweight Bun monorepo for shared design tokens, Tailwind CSS, motion primitives, and future Vue and React adapters.
+A lightweight Bun monorepo for the Neoverse design tokens, Tailwind foundation, Material system, motion aliases, Vue components, and Design Lab.
 
 ## Requirements
 
@@ -8,21 +8,35 @@ A lightweight Bun monorepo for shared design tokens, Tailwind CSS, motion primit
 - TypeScript
 - Tailwind CSS 4
 
-Bun is the only package manager, workspace manager, and script runner for this repository.
+Bun is the package manager, workspace manager, and script runner for this repository.
 
-## Workspace layout
+## Current workspace
+
+| Package / app | Maturity | Current responsibility |
+| --- | --- | --- |
+| `@neoverse-ui/tokens` | Stable | CSS Variables and TypeScript token-name maps |
+| `@neoverse-ui/tailwind` | Stable | Tailwind v4 semantic theme and component CSS |
+| `@neoverse-ui/motion` | Stable | Framework-agnostic motion aliases and reduced-motion CSS |
+| `@neoverse-ui/glass-runtime` | Experimental | Shared WebGL Glass edge renderer with CSS fallback |
+| `@neoverse-ui/vue` | Consumer Validation | Vue 3 SFC components |
+| `@neoverse-ui/react` | Planned | Reserved React integration boundary; no components yet |
+| `apps/playground` | Consumer Validation | Vue-driven Design Lab and visual reference surface |
+
+The current Vue component set is `UiButton`, `UiIconButton`, `UiSegmentedControl`, `UiCard`, `UiGlassSurface`, `UiBadge`, and `UiSkeleton`. React has no runtime implementation yet. Vue and the future React adapter share Tokens, Tailwind, Material, Motion, and API semantics; they do not share framework component code.
+
+## Architecture at a glance
 
 ```text
-apps/playground       Bun + TypeScript integration playground
-packages/tokens       CSS Variable design tokens and token-name types
-packages/tailwind     Tailwind semantic theme and compiled stylesheet
-packages/motion       Framework-agnostic motion primitives
-packages/vue          Reserved Vue integration boundary
-packages/react        Reserved React integration boundary
-docs                  Architecture and development notes
+Tokens (CSS Variables + names)
+  -> Tailwind semantic foundation + Motion CSS
+  -> Vue components / future React adapter
+  -> Design Lab and consumer validation
+
+Glass Runtime -> one shared WebGL Edge Pass per Document
+             -> CSS remains the material baseline and fallback
 ```
 
-The Vue and React packages intentionally contain no component implementation yet.
+See [docs/architecture.md](docs/architecture.md) for package boundaries and runtime rules.
 
 ## Commands
 
@@ -32,97 +46,73 @@ bun run dev
 bun run build
 bun run lint
 bun run typecheck
-bun run format
+bun run test
 bun run check
+bun run format
+bun run test:visual
+bun run test:visual:update
 ```
 
-`bun run dev` starts the playground server (with browser auto-reload), a `vite --watch` build for the client bundle, and a source watcher that rebuilds the tokens/motion/tailwind stylesheets on change. The playground is served at `http://localhost:3000` by default; edits to `packages/tokens/src`, `packages/tailwind/src`, `packages/motion/src` or playground/vue sources are reflected live without restarting.
+`bun run dev` starts the playground server at `http://localhost:3000`, a Vite client watcher, and source rebuilds for the generated token, motion, and Tailwind stylesheets. `bun run check` is the full pre-commit gate: it auto-fixes Biome lint/format/imports, runs the style and Tailwind-usage lints, typechecks every workspace, and runs all unit and contract tests. Visual regression is opt-in via `test:visual` because it rebuilds the workspace and drives a browser; use `test:visual:update` only when a reviewed visual change is intentional.
 
-## Tailwind Foundation
+## Tokens and Tailwind Foundation
 
-`@neoverse-ui/tokens` owns the raw CSS Variables. `@neoverse-ui/tailwind` maps them into the shared Tailwind v4 semantic theme:
+`@neoverse-ui/tokens` owns the framework-agnostic CSS Variables. Its source layers cover primitives, semantic roles, geometry, typography, layout, Material, Motion, component contracts, and light/dark theme mappings. The organized TypeScript API is exposed through `cssVariables.components`; the older `cssVariables.control`, `cssVariables.scrollbar`, and `cssVariables.skeleton` names remain compatibility aliases.
+
+`@neoverse-ui/tailwind` maps those values into semantic Tailwind utilities such as:
 
 ```text
 bg-surface-raised  text-primary  border-subtle
 rounded-control    shadow-card   ring-focus
 ```
 
-The compiled workspace stylesheet is available from `@neoverse-ui/tailwind` or `@neoverse-ui/tailwind/index.css`. An application that compiles its own Tailwind CSS should import the reusable theme and declare its own source paths:
+Consumers that compile their own Tailwind CSS should import the shared theme and their own source paths:
 
 ```css
 @import 'tailwindcss';
 @import '@neoverse-ui/tailwind/theme.css';
 
-@source "./src";
+@source './src';
 ```
 
-Vue and React integrations use this same theme entry. They do not maintain separate Tailwind foundations.
+The component selector facade is part of the shared Tailwind layer. It includes the Button, IconButton, SegmentedControl, Badge, Skeleton, Scrollbar, and Glass material contracts; it does not create project-specific mobile or docs components.
 
-## Token source layout
+## Material and Glass
 
-`@neoverse-ui/tokens` keeps the source contract layered and framework-agnostic:
+Normal surfaces use semantic Tailwind composition. Glass uses `material-glass-subtle`, `material-glass-elevated`, and `material-glass-immersive` with an opaque CSS fallback, tokenized tint, backdrop filter, and directional edge field.
 
-```text
-packages/tokens/src/
-  primitives.css       palette primitives
-  semantic.css         theme-invariant semantic relationships and contract
-  geometry.css         radius, border, shadow, and focus geometry
-  typography.css       font and type-role tokens
-  material.css         Surface and Glass composition scales
-  layout.css           containers, gutters, and layers
-  motion.css           duration, easing, and spatial values
-  components/          Button, SegmentedControl, Badge, Skeleton, Scrollbar
-  themes/              light mapping and one canonical dark mapping
+The three Glass variants keep the CSS material baseline and are discovered automatically by a mounted renderer. There is no per-surface `edgePass` flag: the renderer paints the shared directional WebGL edge for every eligible top-level Glass surface in the document.
+
+Mount the runtime once per Document when the enhancement is wanted:
+
+```ts
+import { createGlassRenderer } from '@neoverse-ui/glass-runtime';
+
+const renderer = createGlassRenderer();
+renderer.mount();
 ```
 
-Semantic CSS only owns reusable design roles. Component-specific variables remain in `components/`; `themes/light.css` and `themes/dark.css` map those roles to palette, geometry, Material, and component values. The Dark source is maintained once, and the token build emits its explicit-dark and system-dark activation wrappers. The public CSS entry remains `@neoverse-ui/tokens/css`.
+The runtime prefers WebGL2, falls back to WebGL1, and then leaves the CSS path authoritative when WebGL is unavailable. It also handles context loss/restore, `prefers-reduced-transparency`, a DPR cap of 2, and invisible/off-screen surfaces.
 
-The TypeScript API exposes the organized `cssVariables.components` namespace. Existing `cssVariables.control`, `cssVariables.scrollbar`, and `cssVariables.skeleton` names remain compatibility aliases and continue to resolve to the same CSS Variable names.
+For diagnostics, inspect `data-neoverse-glass-renderer` on the Document root and `data-neoverse-glass-renderer-canvas` on the shared canvas.
 
-## Surface / Glass Material System
+## Controls and touch density
 
-Surface materials use ordinary Tailwind composition:
+Button, IconButton, SegmentedControl, and toolbar controls keep their compact painted geometry. Under `pointer: coarse`, the shared component CSS adds a transparent 8px hit-area expansion using pseudo-elements; it does not introduce mobile-only component APIs. Desktop and touch use the same Vue components. Native keyboard behavior, `focus-visible`, and disabled states remain part of the core component contract.
 
-```text
-Surface Solid    bg-surface-canvas border-subtle
-Surface Subtle   bg-surface-subtle border-subtle
-Surface Elevated bg-surface-raised border-default shadow-raised
-```
+The Design Lab `density` module shows fine-pointer and coarse-pointer profiles side by side. The Playwright mobile project also checks that the visual height stays compact while the transparent hit area is present.
 
-Complex Glass materials use the three shared utilities:
+## Motion and themes
 
-```text
-material-glass-subtle
-material-glass-elevated
-material-glass-immersive
-```
+`@neoverse-ui/motion` exposes `duration-fast`, `duration-standard`, `duration-expressive`, `ease-standard`, and `ease-emphasized`, plus CSS Variable aliases for micro, state, and spatial transitions. Its reduced-motion rules remove spatial travel and collapse durations to a minimal value.
 
-Their Background, Tint, Transparency, Blur, Saturation, Edge Filter, Edge Highlight, Inner Glow, Seam Glow, Bloom, Shadow, and Refraction values come from `@neoverse-ui/tokens`. Supported browsers render one continuous backdrop-sampled plane plus a narrow directional inset refraction field; the field follows the ambient tint without becoming a uniform painted ring or fixed white border. The host border stays transparent; a blurred shadow fallback remains available when backdrop filtering is unsupported or reduced. Glass nested under another Glass material is downgraded to an opaque Surface.
+Set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root element. The Design Lab keeps separate light and dark visual baselines. The root `.light` and `.dark` classes remain supported when `data-theme` is absent.
 
-The optional `@neoverse-ui/glass-runtime` package adds a shared, static WebGL edge pass. Call `createGlassRenderer().mount()` once per Document (an iframe owns its own Document) after the app mounts. It discovers the three `material-glass-*` utilities and also understands the existing Aurora Glass surface names `glass-card` and `glass-surface`, while accepting both the package's `--neoverse-*` tokens and the established `--aurora-*` / `--glass-*` aliases. CSS `backdrop-filter` remains responsible for real DOM background sampling; WebGL only draws the rounded edge thickness, top-left highlight, and lower/right chromatic ambient catches. WebGL2 is preferred with WebGL1 fallback. When WebGL is unavailable, the context is lost, or `prefers-reduced-transparency: reduce` is active, the canvas and activation marker are removed and the CSS refraction field remains the fallback.
+## Design Lab and visual regression
 
-## Motion Foundation
+The playground serves the real Vue components and built Tailwind CSS. Visual tests use the stable `/frame` route and `[data-design-lab-region="module"]` region, covering Typography, Surface, Glass, Button, IconButton, Card, SegmentedControl, and Control Density in both themes at 1280px desktop and 390px touch viewport sizes. Animations are disabled and assets are awaited before each screenshot.
 
-`@neoverse-ui/motion` provides the shared CSS entry and framework-agnostic TypeScript names. Import the CSS in Tailwind, Vue, and React consumers:
-
-```css
-@import '@neoverse-ui/motion/css';
-```
-
-Canonical Tailwind utilities are token-backed:
-
-```text
-duration-fast       duration-standard       duration-expressive
-ease-standard       ease-emphasized
-```
-
-Use them with normal transition utilities. Micro, state, and spatial transition aliases are available as CSS Variables; the package does not provide a runtime animation API or business keyframes. `prefers-reduced-motion: reduce` reduces durations to `1ms`, uses `step-end`, and removes the spatial distance token.
-
-## Theme model
-
-The default mode follows the system color preference. Set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root element. Root `.light` and `.dark` classes remain supported when `data-theme` is absent.
-
-Semantic variables can be overridden by a consumer on a root theme selector. Primitive color, geometric radius, and geometric shadow utilities remain Tailwind fallbacks, but business source should use the semantic contract; `bun run lint` includes the primitive utility check. Token CSS is built in dependency order: primitives and semantic contract, foundation layers, light mapping, component defaults, then the canonical dark mapping.
+Baselines live under `tests/visual/snapshots/`. A screenshot change should correspond to an intentional token, Material, or component change and be reviewed with the generated diff.
 
 ## Changesets
 
@@ -132,4 +122,4 @@ Create a release note with:
 bun run changeset
 ```
 
-The public packages use independent versions. The playground and the not-yet-implemented Vue and React boundaries are excluded from releases.
+The public packages use independent versions. The playground and the planned React boundary are excluded from releases.
