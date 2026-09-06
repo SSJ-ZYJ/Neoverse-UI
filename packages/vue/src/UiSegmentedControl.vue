@@ -225,6 +225,7 @@ function optionClasses(option: SegmentOption): string[] {
 <template>
   <div
     v-bind="forwardedAttrs"
+    :aria-label="props.ariaLabel"
     :class="[classes, attrs.class]"
     :style="[attrs.style, segmentStyle]"
     role="radiogroup"
@@ -242,6 +243,7 @@ function optionClasses(option: SegmentOption): string[] {
         type="button"
         role="radio"
         :aria-checked="isSelected(option)"
+        :aria-label="option.ariaLabel"
         :tabindex="index === rovingIndex ? 0 : -1"
         :disabled="props.disabled || props.loading || option.disabled"
         :class="optionClasses(option)"

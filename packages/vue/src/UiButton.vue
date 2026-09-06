@@ -4,6 +4,7 @@ import { updateButtonPointerGlow } from './button-pointer-glow';
 import {
   buttonBaseClasses,
   buttonSizeClasses,
+  buttonStretchSizeClasses,
   buttonVariantClasses,
   controlFocusClasses,
   controlTransitionClasses,
@@ -20,6 +21,7 @@ const props = withDefaults(defineProps<ButtonProps>(), {
   type: 'button',
   disabled: false,
   loading: false,
+  stretch: false,
 });
 
 const attrs = useAttrs();
@@ -45,7 +47,8 @@ const classes = computed(() => [
   controlFocusClasses,
   disabledControlClasses,
   buttonVariantClasses[props.variant as ButtonVariant] ?? buttonVariantClasses.primary,
-  buttonSizeClasses[props.size as ButtonSize] ?? buttonSizeClasses.md,
+  (props.stretch ? buttonStretchSizeClasses : buttonSizeClasses)[props.size as ButtonSize] ??
+    buttonSizeClasses.md,
 ]);
 </script>
 

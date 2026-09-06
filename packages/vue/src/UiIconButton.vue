@@ -8,6 +8,7 @@ import {
   controlTransitionClasses,
   disabledControlClasses,
   iconButtonSizeClasses,
+  iconButtonStretchSizeClasses,
 } from './classes';
 import type { ButtonSize, ButtonVariant, IconButtonProps } from './types';
 import UiLoadingIndicator from './UiLoadingIndicator.vue';
@@ -20,6 +21,7 @@ const props = withDefaults(defineProps<IconButtonProps>(), {
   type: 'button',
   disabled: false,
   loading: false,
+  stretch: false,
 });
 
 const attrs = useAttrs();
@@ -46,7 +48,9 @@ const classes = computed(() => [
   controlFocusClasses,
   disabledControlClasses,
   buttonVariantClasses[props.variant as ButtonVariant] ?? buttonVariantClasses.primary,
-  iconButtonSizeClasses[props.size as ButtonSize] ?? iconButtonSizeClasses.md,
+  (props.stretch ? iconButtonStretchSizeClasses : iconButtonSizeClasses)[
+    props.size as ButtonSize
+  ] ?? iconButtonSizeClasses.md,
 ]);
 </script>
 

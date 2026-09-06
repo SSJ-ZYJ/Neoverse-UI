@@ -69,6 +69,9 @@
     "packages/vue": {
       "name": "@neoverse-ui/vue",
       "version": "0.1.0",
+      "dependencies": {
+        "@neoverse-ui/tailwind": "workspace:*",
+      },
       "devDependencies": {
         "@vitejs/plugin-vue": "^6.0.8",
         "@vue/test-utils": "^2.5.0",

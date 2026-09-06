@@ -9,16 +9,20 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./index.css": "./dist/index.css"
   },
   "sideEffects": false,
   "scripts": {
-    "build": "vue-tsc --project tsconfig.build.json --emitDeclarationOnly && vite build",
+    "build": "rm -rf dist tsconfig.build.tsbuildinfo && vue-tsc --project tsconfig.build.json --emitDeclarationOnly && vite build && bun ./scripts/copy-css.ts",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run --environment happy-dom"
   },
   "peerDependencies": {
     "vue": ">=3.4.0 <4.0.0"
+  },
+  "dependencies": {
+    "@neoverse-ui/tailwind": "workspace:*"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.8",

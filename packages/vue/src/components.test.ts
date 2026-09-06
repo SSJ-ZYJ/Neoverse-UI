@@ -1,13 +1,17 @@
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { nextTick } from 'vue';
+import UiAction from './UiAction.vue';
 import UiBadge from './UiBadge.vue';
 import UiButton from './UiButton.vue';
 import UiCard from './UiCard.vue';
+import UiControlSurface from './UiControlSurface.vue';
 import UiGlassSurface from './UiGlassSurface.vue';
 import UiIconButton from './UiIconButton.vue';
+import UiNavigationItem from './UiNavigationItem.vue';
 import UiSegmentedControl from './UiSegmentedControl.vue';
 import UiSkeleton from './UiSkeleton.vue';
+import UiStatusIndicator from './UiStatusIndicator.vue';
 
 const options = [
   { value: 'overview', label: 'Overview' },
@@ -49,6 +53,22 @@ describe('UiButton', () => {
     expect(secondary.classes()).not.toContain('text-action-secondary-foreground');
     expect(ghost.classes()).toContain('ui-button--ghost');
     expect(ghost.classes()).not.toContain('hover:bg-accent-soft');
+  });
+
+  it('fills a fixed-height flex container when stretch is set', () => {
+    const stretched = mount(UiButton, {
+      props: { stretch: true },
+      slots: { default: 'Stretch' },
+    });
+
+    expect(stretched.classes()).toEqual(
+      expect.arrayContaining(['self-stretch', 'px-3', 'text-label']),
+    );
+    expect(stretched.classes()).not.toContain('h-8');
+
+    const sized = mount(UiButton, { slots: { default: 'Sized' } });
+    expect(sized.classes()).toContain('h-8');
+    expect(sized.classes()).not.toContain('self-stretch');
   });
 
   it('uses semantic classes and blocks native activation while loading', async () => {
@@ -129,6 +149,102 @@ describe('UiButton', () => {
   });
 });
 
+describe('UiAction', () => {
+  it('renders destination semantics with comfortable action geometry', () => {
+    const wrapper = mount(UiAction, {
+      props: { href: '/journal', size: 'lg' },
+      slots: { default: 'Read the journal' },
+    });
+    const action = wrapper.get('a');
+
+    expect(action.attributes('href')).toBe('/journal');
+    expect(action.text()).toBe('Read the journal');
+    expect(action.classes()).toEqual(
+      expect.arrayContaining([
+        'ui-action',
+        'ui-action--lg',
+        'ui-button--primary',
+        'material-glass-subtle',
+        'rounded-control-inner',
+      ]),
+    );
+  });
+
+  it('removes navigation and consumer activation while disabled', async () => {
+    const onClick = vi.fn();
+    const wrapper = mount(UiAction, {
+      attrs: { onClick },
+      props: { href: '/journal', disabled: true },
+      slots: { default: 'Unavailable' },
+    });
+    const action = wrapper.get('a');
+
+    expect(action.attributes('href')).toBeUndefined();
+    expect(action.attributes('aria-disabled')).toBe('true');
+    expect(action.attributes('tabindex')).toBe('-1');
+
+    await action.trigger('click');
+    expect(onClick).not.toHaveBeenCalled();
+  });
+});
+
+describe('UiNavigationItem', () => {
+  it('exposes current-page semantics and keeps compact labels accessible', () => {
+    const wrapper = mount(UiNavigationItem, {
+      props: {
+        href: '/projects',
+        label: 'Projects',
+        active: true,
+        compact: true,
+      },
+      slots: { icon: '<svg data-icon="projects" />' },
+    });
+    const action = wrapper.get('a');
+
+    expect(action.attributes('href')).toBe('/projects');
+    expect(action.attributes('aria-current')).toBe('page');
+    expect(action.text()).toContain('Projects');
+    expect(action.get('.ui-navigation-item__label').classes()).toContain('sr-only');
+    expect(action.get('.ui-navigation-item__indicator').attributes('aria-hidden')).toBe('true');
+  });
+});
+
+describe('UiControlSurface', () => {
+  it('forwards container semantics and adds separation only for trailing controls', () => {
+    const grouped = mount(UiControlSurface, {
+      attrs: { 'aria-label': 'Primary navigation' },
+      props: { as: 'nav' },
+      slots: { default: '<a href="/">Home</a>', trailing: '<button>English</button>' },
+    });
+
+    expect(grouped.element.tagName).toBe('NAV');
+    expect(grouped.attributes('aria-label')).toBe('Primary navigation');
+    expect(grouped.find('.ui-control-surface__divider').exists()).toBe(true);
+
+    const ungrouped = mount(UiControlSurface);
+    expect(ungrouped.find('.ui-control-surface__divider').exists()).toBe(false);
+  });
+});
+
+describe('UiStatusIndicator', () => {
+  it('keeps announcements caller-owned and hides its decorative status dot', () => {
+    const passive = mount(UiStatusIndicator, {
+      props: { status: 'success', pulse: true },
+      slots: { default: 'Online' },
+    });
+
+    expect(passive.attributes('role')).toBeUndefined();
+    expect(passive.text()).toBe('Online');
+    expect(passive.get('.ui-status-indicator__dot').attributes('aria-hidden')).toBe('true');
+
+    const live = mount(UiStatusIndicator, {
+      attrs: { role: 'status' },
+      slots: { default: 'Sync complete' },
+    });
+    expect(live.attributes('role')).toBe('status');
+  });
+});
+
 describe('UiIconButton', () => {
   it('requires and forwards its accessible label', async () => {
     const wrapper = mount(UiIconButton, {
@@ -174,6 +290,20 @@ describe('UiIconButton', () => {
 
     expect(button.element.style.getPropertyValue('--neoverse-button-press-x')).toBe('25%');
     expect(button.element.style.getPropertyValue('--neoverse-button-press-y')).toBe('25%');
+  });
+
+  it('fills a fixed-height flex container when stretch is set', () => {
+    const stretched = mount(UiIconButton, {
+      props: { label: 'Add', stretch: true },
+      slots: { default: 'icon' },
+    });
+
+    expect(stretched.classes()).toEqual(expect.arrayContaining(['w-8', 'self-stretch']));
+    expect(stretched.classes()).not.toContain('size-8');
+
+    const sized = mount(UiIconButton, { props: { label: 'Add' }, slots: { default: 'icon' } });
+    expect(sized.classes()).toContain('size-8');
+    expect(sized.classes()).not.toContain('self-stretch');
   });
 });
 
@@ -314,6 +444,26 @@ describe('UiSegmentedControl', () => {
 
     await buttons[0]?.trigger('click');
     expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+  });
+
+  it('labels the group and individual options through ariaLabel props', () => {
+    const labeled = mount(UiSegmentedControl, {
+      attrs: { 'aria-label': 'Attrs label' },
+      props: { options, ariaLabel: 'View' },
+    });
+    expect(labeled.attributes('aria-label')).toBe('View');
+
+    const optionLabeled = mount(UiSegmentedControl, {
+      props: {
+        options: [
+          { value: 'a', label: 'A', ariaLabel: 'Show A' },
+          { value: 'b', label: 'B' },
+        ],
+      },
+    });
+    const optionButtons = optionLabeled.findAll('button');
+    expect(optionButtons[0]?.attributes('aria-label')).toBe('Show A');
+    expect(optionButtons[1]?.attributes('aria-label')).toBeUndefined();
   });
 
   it('falls back for an invalid uncontrolled default but not an invalid controlled value', () => {

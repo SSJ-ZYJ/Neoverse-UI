@@ -20,11 +20,30 @@ export const buttonSizeClasses = {
   md: 'h-8 px-3 text-label',
   lg: 'h-9 px-4 text-label',
 } as const;
+export const actionSizeClasses = {
+  sm: 'ui-action--sm',
+  md: 'ui-action--md',
+  lg: 'ui-action--lg',
+} as const;
+
+export const actionStretchClasses = 'grow self-stretch';
 
 export const iconButtonSizeClasses = {
   sm: 'size-7',
   md: 'size-8',
   lg: 'size-9',
+} as const;
+
+export const buttonStretchSizeClasses = {
+  sm: 'grow self-stretch px-3 text-caption',
+  md: 'grow self-stretch px-3 text-label',
+  lg: 'grow self-stretch px-4 text-label',
+} as const;
+
+export const iconButtonStretchSizeClasses = {
+  sm: 'w-7 grow self-stretch',
+  md: 'w-8 grow self-stretch',
+  lg: 'w-9 grow self-stretch',
 } as const;
 
 export const loadingIndicatorClasses = 'size-4 motion-safe:animate-spin motion-reduce:animate-none';
