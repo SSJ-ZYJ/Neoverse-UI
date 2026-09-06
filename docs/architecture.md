@@ -37,8 +37,9 @@ packages/tokens/src/
   primitives.css  semantic.css  geometry.css  typography.css
   material.css    layout.css    motion.css
   components/
-    shared-control.css  button.css  segmented-control.css
-    badge.css            skeleton.css scrollbar.css
+    shared-control.css  button.css       action.css
+    navigation-item.css control-surface.css status-indicator.css
+    segmented-control.css badge.css     skeleton.css scrollbar.css
   themes/
     light.css            dark.css
 ```
@@ -51,6 +52,16 @@ packages/tokens/src/
 
 The foundation provides semantic utilities such as `bg-surface-raised`, `text-primary`, `border-subtle`, `rounded-control`, `shadow-card`, and `ring-focus`. Business source is checked for accidental primitive color, radius, and shadow utilities.
 
+### Package entries
+
+| Entry | Contents |
+| --- | --- |
+| `.` / `./index.css` | Compiled zero-config consumer bundle: Tailwind utilities over the Vue/React `src` trees + the theme |
+| `./theme.css` | Semantic theme + Material utilities (source of the compiled bundle) |
+| `./components.css` | Component selector facade flattened from `src/components/*.css` |
+
+The playground-only compiled bundle is emitted as `dist/playground.css` and is not exported; the package does not own application source paths — the compiled entry exists only so consumers without their own Tailwind build still receive a complete utility set.
+
 ## Vue components
 
 `@neoverse-ui/vue` contains the current Vue 3 SFC components:
@@ -58,14 +69,18 @@ The foundation provides semantic utilities such as `bg-surface-raised`, `text-pr
 ```text
 UiButton
 UiIconButton
+UiAction
+UiNavigationItem
 UiSegmentedControl
+UiControlSurface
 UiCard
 UiGlassSurface
 UiBadge
+UiStatusIndicator
 UiSkeleton
 ```
 
-They compose shared Tailwind classes, expose semantic props and slots, and preserve native button/keyboard behavior. `UiGlassSurface` accepts a Glass `variant`; the mounted runtime automatically discovers each eligible top-level Glass surface while CSS remains the baseline and fallback. React remains Planned and has no implementation to document beyond its reserved package boundary.
+They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. `UiControlSurface` owns one Glass chrome boundary and optional trailing separation, while `UiStatusIndicator` leaves live-region announcements to the caller. `UiGlassSurface` accepts a Glass `variant`; the mounted runtime automatically discovers each eligible top-level Glass surface while CSS remains the baseline and fallback. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities. React remains Planned, but must preserve these public semantics rather than share Vue source.
 
 ## Material / Glass policy
 

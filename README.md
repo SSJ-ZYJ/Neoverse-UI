@@ -22,7 +22,7 @@ Bun is the package manager, workspace manager, and script runner for this reposi
 | `@neoverse-ui/react` | Planned | Reserved React integration boundary; no components yet |
 | `apps/playground` | Consumer Validation | Vue-driven Design Lab and visual reference surface |
 
-The current Vue component set is `UiButton`, `UiIconButton`, `UiSegmentedControl`, `UiCard`, `UiGlassSurface`, `UiBadge`, and `UiSkeleton`. React has no runtime implementation yet. Vue and the future React adapter share Tokens, Tailwind, Material, Motion, and API semantics; they do not share framework component code.
+The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiCard`, `UiGlassSurface`, `UiBadge`, `UiStatusIndicator`, and `UiSkeleton`. React has no runtime implementation yet. Vue and the future React adapter share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
 
 ## Architecture at a glance
 
@@ -75,7 +75,33 @@ Consumers that compile their own Tailwind CSS should import the shared theme and
 @source './src';
 ```
 
-The component selector facade is part of the shared Tailwind layer. It includes the Button, IconButton, SegmentedControl, Badge, Skeleton, Scrollbar, and Glass material contracts; it does not create project-specific mobile or docs components.
+The component selector facade is part of the shared Tailwind layer. It includes the Button, IconButton, Action, NavigationItem, SegmentedControl, ControlSurface, Badge, StatusIndicator, Skeleton, Scrollbar, and Glass material contracts; it does not create project-specific mobile, dock, or docs components.
+
+### Package entries
+
+`@neoverse-ui/tailwind` exposes:
+
+| Entry | Contents |
+| --- | --- |
+| `.` / `./index.css` | Zero-config compiled consumer bundle (Tailwind utilities + theme, scanned over the Vue/React component sources) |
+| `./theme.css` | Semantic theme + Material utilities (needs a Tailwind build that also scans the component sources) |
+| `./components.css` | Component selector CSS (Button, Action, NavigationItem, SegmentedControl, ControlSurface, Badge, StatusIndicator, Skeleton, Scrollbar, Glass contracts) |
+
+`dist/playground.css` exists only for this repository's Design Lab and is not part of the Consumer API.
+
+Consumers running their own Tailwind 4 build should import the theme and scan the component sources:
+
+```css
+@import 'tailwindcss';
+@import '@neoverse-ui/tokens/css';
+@import '@neoverse-ui/tailwind/theme.css';
+
+@source '../../../node_modules/@neoverse-ui/vue/dist';
+```
+
+The explicit `@source` into `node_modules` replaces the vendor-junction workaround. Consumers without a Tailwind build can import `@neoverse-ui/vue/index.css`, which forwards to `@neoverse-ui/tailwind/components.css`.
+
+Until the packages publish to a registry, Bun `file:` dependencies plus the vendor junction and the `overrides` block in the Neoverse `package.json` remain dev-time limitations that disappear on publish.
 
 ## Material and Glass
 
