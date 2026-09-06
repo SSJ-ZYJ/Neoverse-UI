@@ -8,7 +8,7 @@ type RenderOptions = {
 
 const port = Number.parseInt(process.env.PORT ?? '3000', 10);
 const liveReload = process.env.LIVE_RELOAD === '1';
-const stylesheetPath = new URL('../../../packages/tailwind/dist/index.css', import.meta.url);
+const stylesheetPath = new URL('../../../packages/tailwind/dist/playground.css', import.meta.url);
 const clientBundlePath = new URL('../dist/assets/playground.js', import.meta.url);
 const materialBackgroundLightPath = new URL(
   '../dist/assets/material-background-light.png',

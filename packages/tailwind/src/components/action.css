@@ -1,0 +1,73 @@
+@layer components {
+  .ui-action {
+    min-width: 0;
+    gap: var(--neoverse-action-gap);
+    font-weight: var(--neoverse-typography-label-weight);
+    line-height: 1;
+    text-decoration: none;
+  }
+
+  .ui-action--sm {
+    --ui-action-icon-size: var(--neoverse-action-icon-size-sm);
+    min-height: var(--neoverse-action-height-sm);
+    padding-inline: var(--neoverse-action-padding-inline-sm);
+    font-size: var(--neoverse-action-font-size-sm);
+  }
+
+  .ui-action--md {
+    --ui-action-icon-size: var(--neoverse-action-icon-size-md);
+    min-height: var(--neoverse-action-height-md);
+    padding-inline: var(--neoverse-action-padding-inline-md);
+    font-size: var(--neoverse-action-font-size-md);
+  }
+
+  .ui-action--lg {
+    --ui-action-icon-size: var(--neoverse-action-icon-size-lg);
+    min-height: var(--neoverse-action-height-lg);
+    padding-inline: var(--neoverse-action-padding-inline-lg);
+    font-size: var(--neoverse-action-font-size-lg);
+  }
+
+  .ui-action__leading,
+  .ui-action__trailing {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+  }
+
+  :is(.ui-action__leading, .ui-action__trailing) > svg {
+    width: var(--ui-action-icon-size);
+    height: var(--ui-action-icon-size);
+  }
+
+  .ui-action[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .ui-action[aria-disabled='true']::before {
+    pointer-events: none;
+  }
+
+  .ui-action[aria-disabled='true']::after {
+    opacity: 0;
+  }
+
+  .ui-action[aria-disabled='true'].ui-button--primary.material-glass-subtle:is(:hover, :active) {
+    background: var(--neoverse-control-primary-background);
+    box-shadow: var(--neoverse-control-button-edge);
+  }
+
+  .ui-action[aria-disabled='true'].ui-button--secondary.material-glass-subtle:is(:hover, :active) {
+    color: var(--neoverse-control-secondary-foreground);
+    background: var(--neoverse-control-secondary-background);
+    box-shadow: var(--neoverse-control-button-edge);
+  }
+
+  .ui-action[aria-disabled='true'].ui-button--ghost.material-glass-subtle:is(:hover, :active) {
+    color: var(--neoverse-control-ghost-foreground);
+    background: var(--neoverse-control-ghost-background);
+    box-shadow: var(--neoverse-control-button-edge);
+  }
+}

@@ -8,15 +8,16 @@
   "exports": {
     ".": "./dist/index.css",
     "./index.css": "./dist/index.css",
-    "./theme.css": "./dist/theme.css"
+    "./theme.css": "./dist/theme.css",
+    "./components.css": "./dist/components.css"
   },
   "sideEffects": [
     "**/*.css"
   ],
   "scripts": {
-    "build": "bun run build:theme && tailwindcss -i ./src/index.css -o ./dist/index.css --minify",
+    "build": "rm -rf dist && bun run build:theme && tailwindcss -i ./src/consumer.css -o ./dist/index.css --minify && tailwindcss -i ./src/index.css -o ./dist/playground.css --minify",
     "build:theme": "bun ./scripts/copy-theme.ts",
-    "dev": "bun run build:theme && tailwindcss -i ./src/index.css -o ./dist/index.css --watch",
+    "dev": "bun run build:theme && tailwindcss -i ./src/index.css -o ./dist/playground.css --watch",
     "test": "bun run --filter @neoverse-ui/tokens build && bun run --filter @neoverse-ui/motion build && bun run build:theme && tailwindcss -i ./src/contract.css -o ./dist/contract.css --minify && bun ./scripts/assert-contract.ts"
   },
   "peerDependencies": {

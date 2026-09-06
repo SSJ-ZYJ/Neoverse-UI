@@ -97,7 +97,13 @@ try {
     '.ui-button--primary',
     '.ui-button--secondary',
     '.ui-button--ghost',
+    '.ui-action',
+    '.ui-navigation-item',
+    '.ui-control-surface',
+    '.ui-status-indicator',
     '.ui-badge',
+    '.self-stretch',
+    '.w-7',
     '.ui-badge--info',
     '.scrollbar-immersive',
     '.material-glass-subtle',
@@ -199,6 +205,14 @@ try {
     '--neoverse-scrollbar-immersive-thumb-edge',
     '--neoverse-scrollbar-immersive-thumb-glow',
     '--neoverse-skeleton-fill',
+    '--neoverse-action-height-md',
+    '--neoverse-action-icon-size-md',
+    '--neoverse-navigation-item-active-background',
+    '--neoverse-navigation-item-indicator-color',
+    '--neoverse-control-surface-padding',
+    '--neoverse-control-surface-item-gap',
+    '--neoverse-status-indicator-dot-size-sm',
+    '--neoverse-status-indicator-pulse-scale',
   ];
   const missingValues = expectedValues.filter((value) => !css.includes(value));
   const expectedFragments = [

@@ -33,7 +33,8 @@ const buildMotionCss = (): Promise<void> => run(motionDirectory, 'bun', ['script
 const buildGlassRuntime = (): Promise<void> => run(glassRuntimeDirectory, 'bun', ['run', 'build']);
 const buildTailwind = async (): Promise<void> => {
   await run(tailwindDirectory, 'bun', ['scripts/copy-theme.ts']);
-  await run(tailwindDirectory, tailwindCli, ['-i', 'src/index.css', '-o', 'dist/index.css']);
+  await run(tailwindDirectory, tailwindCli, ['-i', 'src/index.css', '-o', 'dist/playground.css']);
+  await run(tailwindDirectory, tailwindCli, ['-i', 'src/consumer.css', '-o', 'dist/index.css']);
 };
 
 let timer: ReturnType<typeof setTimeout> | undefined;

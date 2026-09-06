@@ -1,0 +1,82 @@
+@layer components {
+  .ui-navigation-item {
+    position: relative;
+    gap: var(--neoverse-navigation-item-gap);
+  }
+
+  .ui-navigation-item.ui-action--sm {
+    min-height: var(--neoverse-navigation-item-height-sm);
+    padding-inline: var(--neoverse-navigation-item-padding-inline-sm);
+  }
+
+  .ui-navigation-item.ui-action--md {
+    min-height: var(--neoverse-navigation-item-height-md);
+    padding-inline: var(--neoverse-navigation-item-padding-inline-md);
+  }
+
+  .ui-navigation-item.ui-action--lg {
+    min-height: var(--neoverse-navigation-item-height-lg);
+    padding-inline: var(--neoverse-navigation-item-padding-inline-lg);
+  }
+
+  .ui-navigation-item.ui-navigation-item--compact {
+    gap: 0;
+    padding-inline: var(--neoverse-navigation-item-compact-padding-inline);
+  }
+
+  .ui-navigation-item--compact.ui-action--sm {
+    width: var(--neoverse-navigation-item-height-sm);
+  }
+
+  .ui-navigation-item--compact.ui-action--md {
+    width: var(--neoverse-navigation-item-height-md);
+  }
+
+  .ui-navigation-item--compact.ui-action--lg {
+    width: var(--neoverse-navigation-item-height-lg);
+  }
+
+  .ui-navigation-item.ui-navigation-item--active.material-glass-subtle {
+    color: var(--neoverse-navigation-item-active-foreground);
+    background: var(--neoverse-navigation-item-active-background);
+    box-shadow: var(--neoverse-navigation-item-active-shadow);
+  }
+
+  .ui-navigation-item__label {
+    overflow: hidden;
+    flex: 0 1 auto;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ui-navigation-item__indicator {
+    position: absolute;
+    z-index: 2;
+    bottom: var(--neoverse-navigation-item-indicator-inset);
+    left: 50%;
+    width: var(--neoverse-navigation-item-indicator-width);
+    height: var(--neoverse-navigation-item-indicator-height);
+    border-radius: var(--neoverse-radius-pill);
+    background: var(--neoverse-navigation-item-indicator-color);
+    opacity: 0;
+    transform: translateX(-50%) scaleX(0.55);
+    transition:
+      opacity var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
+      transform var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-emphasized);
+  }
+
+  .ui-navigation-item--compact .ui-navigation-item__indicator {
+    width: var(--neoverse-navigation-item-compact-indicator-width);
+  }
+
+  .ui-navigation-item--active .ui-navigation-item__indicator {
+    opacity: 1;
+    transform: translateX(-50%) scaleX(1);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-navigation-item__indicator {
+      transition: none;
+    }
+  }
+}

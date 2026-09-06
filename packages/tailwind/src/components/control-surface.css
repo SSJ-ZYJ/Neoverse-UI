@@ -1,0 +1,36 @@
+@layer components {
+  .ui-control-surface {
+    min-width: 0;
+    gap: var(--neoverse-control-surface-gap);
+    padding: var(--neoverse-control-surface-padding);
+  }
+
+  .ui-control-surface__group {
+    display: inline-flex;
+    min-width: 0;
+    gap: var(--neoverse-control-surface-item-gap);
+    align-items: center;
+  }
+
+  .ui-control-surface__group--primary {
+    flex: 1 1 auto;
+  }
+
+  .ui-control-surface__group--trailing {
+    flex: 0 0 auto;
+  }
+
+  .ui-control-surface__divider {
+    width: var(--neoverse-border-width-thin);
+    height: var(--neoverse-control-surface-divider-height);
+    flex: 0 0 auto;
+    align-self: center;
+    background: var(--neoverse-control-surface-divider-color);
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .ui-control-surface {
+      background-color: var(--neoverse-color-surface-raised);
+    }
+  }
+}

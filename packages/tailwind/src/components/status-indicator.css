@@ -1,0 +1,112 @@
+@layer components {
+  .ui-status-indicator {
+    --ui-status-indicator-color: var(--neoverse-color-text-muted);
+    color: var(--neoverse-color-text-secondary);
+    line-height: var(--neoverse-line-height-snug);
+  }
+
+  .ui-status-indicator--sm {
+    gap: var(--neoverse-status-indicator-gap-sm);
+    font-size: var(--neoverse-font-size-sm);
+  }
+
+  .ui-status-indicator--md {
+    gap: var(--neoverse-status-indicator-gap-md);
+    font-size: var(--neoverse-font-size-md);
+  }
+
+  .ui-status-indicator--neutral {
+    --ui-status-indicator-color: var(--neoverse-color-text-muted);
+  }
+
+  .ui-status-indicator--info {
+    --ui-status-indicator-color: var(--neoverse-color-status-info);
+  }
+
+  .ui-status-indicator--success {
+    --ui-status-indicator-color: var(--neoverse-color-status-success);
+  }
+
+  .ui-status-indicator--warning {
+    --ui-status-indicator-color: var(--neoverse-color-status-warning);
+  }
+
+  .ui-status-indicator--danger {
+    --ui-status-indicator-color: var(--neoverse-color-status-danger);
+  }
+
+  .ui-status-indicator__dot {
+    position: relative;
+    width: var(--ui-status-indicator-dot-size);
+    height: var(--ui-status-indicator-dot-size);
+    flex: 0 0 auto;
+    border-radius: var(--neoverse-radius-pill);
+    background: var(--ui-status-indicator-color);
+    box-shadow: 0 0 calc(var(--ui-status-indicator-dot-size) * 1.2)
+      color-mix(
+        in srgb,
+        var(--ui-status-indicator-color) var(--neoverse-status-indicator-glow-opacity),
+        transparent
+      );
+  }
+
+  .ui-status-indicator--sm .ui-status-indicator__dot {
+    --ui-status-indicator-dot-size: var(--neoverse-status-indicator-dot-size-sm);
+  }
+
+  .ui-status-indicator--md .ui-status-indicator__dot {
+    --ui-status-indicator-dot-size: var(--neoverse-status-indicator-dot-size-md);
+  }
+
+  .ui-status-indicator--pulse .ui-status-indicator__dot::after {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    background: color-mix(
+      in srgb,
+      var(--ui-status-indicator-color) var(--neoverse-status-indicator-pulse-opacity),
+      transparent
+    );
+    box-shadow: 0 0 calc(var(--ui-status-indicator-dot-size) * 1.3)
+      color-mix(
+        in srgb,
+        var(--ui-status-indicator-color) var(--neoverse-status-indicator-glow-opacity),
+        transparent
+      );
+    content: '';
+    opacity: 0.9;
+    pointer-events: none;
+    transform: translate(-50%, -50%) scale(1);
+    animation: ui-status-indicator-pulse calc(var(--neoverse-motion-duration-expressive) * 2)
+      var(--neoverse-motion-easing-emphasized) infinite;
+  }
+
+  @keyframes ui-status-indicator-pulse {
+    45% {
+      opacity: 0.38;
+    }
+
+    100% {
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(var(--neoverse-status-indicator-pulse-scale));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-status-indicator--pulse .ui-status-indicator__dot::after {
+      display: none;
+      animation: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ui-status-indicator__dot {
+      border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) currentColor;
+      background: currentColor;
+      box-shadow: none;
+    }
+  }
+}
