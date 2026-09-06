@@ -468,6 +468,7 @@ class GlassRendererImpl implements GlassRenderer {
   private locations: ProgramLocations | undefined;
   private buffer: WebGLBuffer | undefined;
   private resizeObserver: ResizeObserver | undefined;
+  private readonly observedGlassElements = new Set<HTMLElement>();
   private mutationObserver: MutationObserver | undefined;
   private transparencyQuery: MediaQueryList | undefined;
   private animationFrame: number | undefined;
@@ -653,9 +654,9 @@ class GlassRendererImpl implements GlassRenderer {
       getWindow(this.ownerDocument)?.cancelAnimationFrame(this.animationFrame);
       this.animationFrame = undefined;
     }
-
     this.resizeObserver?.disconnect();
     this.resizeObserver = undefined;
+    this.observedGlassElements.clear();
     this.mutationObserver?.disconnect();
     this.mutationObserver = undefined;
 
@@ -906,9 +907,14 @@ class GlassRendererImpl implements GlassRenderer {
     }
 
     if (this.resizeObserver !== undefined) {
-      this.resizeObserver.disconnect();
+      // ResizeObserver fires an initial callback for every observe() call. Re-observing
+      // unchanged elements on each render would therefore schedule another render and
+      // loop forever, so only subscribe to elements that are not observed yet.
       for (const element of currentElements) {
-        this.resizeObserver.observe(element);
+        if (!this.observedGlassElements.has(element)) {
+          this.observedGlassElements.add(element);
+          this.resizeObserver.observe(element);
+        }
       }
     }
 
