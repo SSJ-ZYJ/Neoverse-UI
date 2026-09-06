@@ -1,16 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 const themes = ['light', 'dark'] as const;
-const modules = [
-  'typography',
-  'surface',
-  'glass',
-  'button',
-  'icon-button',
-  'card',
-  'segmented-control',
-  'density',
-] as const;
+const modules = ['typography', 'surface', 'glass', 'controls', 'card', 'consumer-parity'] as const;
 
 const freezeMotion = `
   *, *::before, *::after {
@@ -56,16 +47,57 @@ for (const theme of themes) {
   }
 }
 
+test('consumer parity exposes destination and current-page semantics', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
+    waitUntil: 'domcontentloaded',
+  });
+  await page.evaluate(waitForStableAssets);
+
+  const heroActions = page.locator('[data-consumer-parity="hero-actions"] a');
+  await expect(heroActions).toHaveCount(6);
+  await expect(heroActions).toHaveText([
+    'Website',
+    'Blog',
+    'Linux.Do',
+    'RedNote',
+    'Email',
+    'GitHub',
+  ]);
+
+  const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
+  await expect(navigation).toBeVisible();
+  await expect(navigation.getByRole('link', { name: 'Home' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await navigation.getByRole('link', { name: 'Projects' }).click();
+  await expect(navigation.getByRole('link', { name: 'Projects' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await expect(navigation.getByRole('link', { name: 'Home' })).not.toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+  await expect(page.getByRole('radiogroup', { name: 'Language' })).toBeVisible();
+
+  const pulseAnimation = await page
+    .locator('.ui-status-indicator--pulse .ui-status-indicator__dot')
+    .evaluate((element) => getComputedStyle(element, '::after').animationName);
+  expect(pulseAnimation).toBe('none');
+});
+
 for (const theme of themes) {
   test(`button press glow / ${theme}`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto(`/frame?theme=${theme}&lang=en#button`, {
+    await page.goto(`/frame?theme=${theme}&lang=en#controls`, {
       waitUntil: 'domcontentloaded',
     });
     await page.addStyleTag({ content: freezeMotion });
     await page.evaluate(waitForStableAssets);
 
-    const button = page.locator('.ui-button--primary').first();
+    const button = page.locator('#controls-button .ui-button--primary').first();
     await expect(button).toBeVisible();
     const box = await button.boundingBox();
     expect(box).not.toBeNull();
@@ -198,27 +230,29 @@ for (const theme of themes) {
 for (const theme of themes) {
   test(`icon button icons stay geometrically centered / ${theme}`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto(`/frame?theme=${theme}&lang=zh#icon-button`, {
+    await page.goto(`/frame?theme=${theme}&lang=zh#controls`, {
       waitUntil: 'domcontentloaded',
     });
     await page.addStyleTag({ content: freezeMotion });
     await page.evaluate(waitForStableAssets);
 
-    const centers = await page.locator('#icon-button .ui-button svg').evaluateAll((icons) =>
-      icons.map((icon) => {
-        const button = icon.closest('button');
-        if (button === null) {
-          return null;
-        }
+    const centers = await page
+      .locator('#controls-icon-button .ui-button svg')
+      .evaluateAll((icons) =>
+        icons.map((icon) => {
+          const button = icon.closest('button');
+          if (button === null) {
+            return null;
+          }
 
-        const buttonRect = button.getBoundingClientRect();
-        const iconRect = icon.getBoundingClientRect();
-        return {
-          x: iconRect.left + iconRect.width / 2 - (buttonRect.left + buttonRect.width / 2),
-          y: iconRect.top + iconRect.height / 2 - (buttonRect.top + buttonRect.height / 2),
-        };
-      }),
-    );
+          const buttonRect = button.getBoundingClientRect();
+          const iconRect = icon.getBoundingClientRect();
+          return {
+            x: iconRect.left + iconRect.width / 2 - (buttonRect.left + buttonRect.width / 2),
+            y: iconRect.top + iconRect.height / 2 - (buttonRect.top + buttonRect.height / 2),
+          };
+        }),
+      );
 
     expect(centers.length).toBeGreaterThan(0);
     for (const center of centers) {
@@ -383,7 +417,7 @@ test.describe('wide WebGL Glass edge', () => {
 });
 
 test('button press surface is transparent on the first frame / dark', async ({ page }) => {
-  await page.goto('/frame?theme=dark&lang=en#icon-button', {
+  await page.goto('/frame?theme=dark&lang=en#controls', {
     waitUntil: 'domcontentloaded',
   });
   await page.evaluate(waitForStableAssets);
@@ -426,11 +460,12 @@ test('touch density keeps the compact control geometry and adds a transparent hi
   );
 
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/frame?theme=light&lang=en#density', { waitUntil: 'domcontentloaded' });
+  await page.goto('/frame?theme=light&lang=en#controls', { waitUntil: 'domcontentloaded' });
   await page.addStyleTag({ content: freezeMotion });
   await page.evaluate(waitForStableAssets);
 
   const touchControls = page.locator('[data-pointer-profile="touch"] [data-density-controls]');
+  await touchControls.scrollIntoViewIfNeeded();
   const buttonContract = await touchControls
     .locator('.ui-button')
     .first()
