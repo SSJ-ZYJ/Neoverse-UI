@@ -1,0 +1,11 @@
+@layer neoverse.tokens {
+  :root {
+    --neoverse-status-indicator-gap-sm: 0.42rem;
+    --neoverse-status-indicator-gap-md: 0.5rem;
+    --neoverse-status-indicator-dot-size-sm: 0.42rem;
+    --neoverse-status-indicator-dot-size-md: 0.5rem;
+    --neoverse-status-indicator-glow-opacity: 42%;
+    --neoverse-status-indicator-pulse-opacity: 88%;
+    --neoverse-status-indicator-pulse-scale: 2.14;
+  }
+}

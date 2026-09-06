@@ -298,6 +298,11 @@
     --neoverse-material-glass-subtle-tint: var(--neoverse-material-tint-subtle);
     --neoverse-material-glass-subtle-inner-glow: var(--neoverse-material-inner-glow-subtle);
     --neoverse-material-glass-subtle-seam-glow: var(--neoverse-material-seam-glow-subtle);
+    --neoverse-material-glass-subtle-hover-transparency: var(
+      --neoverse-material-glass-subtle-transparency
+    );
+    --neoverse-material-glass-subtle-hover-border: var(--neoverse-material-glass-subtle-border);
+    --neoverse-material-glass-subtle-hover-shadow: var(--neoverse-material-glass-subtle-shadow);
     --neoverse-material-glass-subtle-bloom: var(--neoverse-material-bloom-subtle);
     --neoverse-material-glass-subtle-edge-refraction-width: var(
       --neoverse-material-edge-refraction-width-subtle
@@ -347,6 +352,11 @@
     --neoverse-material-glass-elevated-refraction-gradient: var(
       --neoverse-material-refraction-gradient-elevated
     );
+    --neoverse-material-glass-elevated-hover-transparency: var(
+      --neoverse-material-glass-elevated-transparency
+    );
+    --neoverse-material-glass-elevated-hover-border: var(--neoverse-material-glass-elevated-border);
+    --neoverse-material-glass-elevated-hover-shadow: var(--neoverse-material-glass-elevated-shadow);
 
     --neoverse-material-glass-immersive-background: var(--neoverse-color-surface-glass);
     --neoverse-material-glass-immersive-background-fallback: var(--neoverse-color-surface-raised);
@@ -375,6 +385,15 @@
     );
     --neoverse-material-glass-immersive-edge-refraction-opacity: var(
       --neoverse-material-edge-refraction-opacity-immersive
+    );
+    --neoverse-material-glass-immersive-hover-transparency: var(
+      --neoverse-material-glass-immersive-transparency
+    );
+    --neoverse-material-glass-immersive-hover-border: var(
+      --neoverse-material-glass-immersive-border
+    );
+    --neoverse-material-glass-immersive-hover-shadow: var(
+      --neoverse-material-glass-immersive-shadow
     );
     --neoverse-material-glass-immersive-edge-refraction-carrier: var(
       --neoverse-material-edge-refraction-carrier-immersive

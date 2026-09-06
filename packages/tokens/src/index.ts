@@ -36,6 +36,72 @@ const componentCssVariables = {
     activeBackground: '--neoverse-control-button-active-background',
     ghostActiveBackground: '--neoverse-control-button-ghost-active-background',
   },
+  action: {
+    gap: '--neoverse-action-gap',
+    height: {
+      sm: '--neoverse-action-height-sm',
+      md: '--neoverse-action-height-md',
+      lg: '--neoverse-action-height-lg',
+    },
+    paddingInline: {
+      sm: '--neoverse-action-padding-inline-sm',
+      md: '--neoverse-action-padding-inline-md',
+      lg: '--neoverse-action-padding-inline-lg',
+    },
+    fontSize: {
+      sm: '--neoverse-action-font-size-sm',
+      md: '--neoverse-action-font-size-md',
+      lg: '--neoverse-action-font-size-lg',
+    },
+    iconSize: {
+      sm: '--neoverse-action-icon-size-sm',
+      md: '--neoverse-action-icon-size-md',
+      lg: '--neoverse-action-icon-size-lg',
+    },
+  },
+  navigationItem: {
+    activeBackground: '--neoverse-navigation-item-active-background',
+    activeForeground: '--neoverse-navigation-item-active-foreground',
+    activeShadow: '--neoverse-navigation-item-active-shadow',
+    gap: '--neoverse-navigation-item-gap',
+    height: {
+      sm: '--neoverse-navigation-item-height-sm',
+      md: '--neoverse-navigation-item-height-md',
+      lg: '--neoverse-navigation-item-height-lg',
+    },
+    paddingInline: {
+      sm: '--neoverse-navigation-item-padding-inline-sm',
+      md: '--neoverse-navigation-item-padding-inline-md',
+      lg: '--neoverse-navigation-item-padding-inline-lg',
+    },
+    compactPaddingInline: '--neoverse-navigation-item-compact-padding-inline',
+    compactIndicatorWidth: '--neoverse-navigation-item-compact-indicator-width',
+    indicatorColor: '--neoverse-navigation-item-indicator-color',
+    indicatorWidth: '--neoverse-navigation-item-indicator-width',
+    indicatorHeight: '--neoverse-navigation-item-indicator-height',
+    indicatorInset: '--neoverse-navigation-item-indicator-inset',
+  },
+  controlSurface: {
+    gap: '--neoverse-control-surface-gap',
+    itemGap: '--neoverse-control-surface-item-gap',
+    padding: '--neoverse-control-surface-padding',
+    dividerHeight: '--neoverse-control-surface-divider-height',
+    dividerColor: '--neoverse-control-surface-divider-color',
+  },
+  statusIndicator: {
+    gap: {
+      sm: '--neoverse-status-indicator-gap-sm',
+      md: '--neoverse-status-indicator-gap-md',
+    },
+    dotSize: {
+      sm: '--neoverse-status-indicator-dot-size-sm',
+      md: '--neoverse-status-indicator-dot-size-md',
+    },
+    glowOpacity: '--neoverse-status-indicator-glow-opacity',
+    pulseOpacity: '--neoverse-status-indicator-pulse-opacity',
+    pulseScale: '--neoverse-status-indicator-pulse-scale',
+  },
+
   segmentedControl: {
     background: '--neoverse-control-segmented-background',
     foreground: '--neoverse-control-segmented-foreground',
@@ -610,6 +676,9 @@ export const cssVariables = {
         seamGlow: '--neoverse-material-glass-subtle-seam-glow',
         bloom: '--neoverse-material-glass-subtle-bloom',
         shadow: '--neoverse-material-glass-subtle-shadow',
+        hoverTransparency: '--neoverse-material-glass-subtle-hover-transparency',
+        hoverBorder: '--neoverse-material-glass-subtle-hover-border',
+        hoverShadow: '--neoverse-material-glass-subtle-hover-shadow',
         refractionGradient: '--neoverse-material-glass-subtle-refraction-gradient',
       },
       elevated: {
@@ -632,6 +701,9 @@ export const cssVariables = {
         seamGlow: '--neoverse-material-glass-elevated-seam-glow',
         bloom: '--neoverse-material-glass-elevated-bloom',
         shadow: '--neoverse-material-glass-elevated-shadow',
+        hoverTransparency: '--neoverse-material-glass-elevated-hover-transparency',
+        hoverBorder: '--neoverse-material-glass-elevated-hover-border',
+        hoverShadow: '--neoverse-material-glass-elevated-hover-shadow',
         refractionGradient: '--neoverse-material-glass-elevated-refraction-gradient',
       },
       immersive: {
@@ -654,6 +726,9 @@ export const cssVariables = {
         seamGlow: '--neoverse-material-glass-immersive-seam-glow',
         bloom: '--neoverse-material-glass-immersive-bloom',
         shadow: '--neoverse-material-glass-immersive-shadow',
+        hoverTransparency: '--neoverse-material-glass-immersive-hover-transparency',
+        hoverBorder: '--neoverse-material-glass-immersive-hover-border',
+        hoverShadow: '--neoverse-material-glass-immersive-hover-shadow',
         refractionGradient: '--neoverse-material-glass-immersive-refraction-gradient',
       },
     },
@@ -709,6 +784,10 @@ export type ColorPrimitiveFamily = keyof CssVariables['color']['primitive'];
 export type ComponentToken = keyof CssVariables['components'];
 export type ButtonToken = keyof CssVariables['components']['button'];
 export type ButtonVariantToken = keyof CssVariables['components']['button']['primary'];
+export type ActionToken = keyof CssVariables['components']['action'];
+export type NavigationItemToken = keyof CssVariables['components']['navigationItem'];
+export type ControlSurfaceToken = keyof CssVariables['components']['controlSurface'];
+export type StatusIndicatorToken = keyof CssVariables['components']['statusIndicator'];
 export type SegmentedControlToken = keyof CssVariables['components']['segmentedControl'];
 export type BadgeToken = keyof CssVariables['components']['badge'];
 export type SkeletonToken = keyof CssVariables['components']['skeleton'];

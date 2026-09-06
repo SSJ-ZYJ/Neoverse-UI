@@ -215,6 +215,20 @@ test('exposes component token namespaces while preserving compatibility aliases'
   expect(cssVariables.components.badge.foreground).toBe('--neoverse-badge-foreground');
 });
 
+test('exposes consumer-validated action and navigation component tokens', () => {
+  expect(cssVariables.components.action.height.lg).toBe('--neoverse-action-height-lg');
+  expect(cssVariables.components.action.iconSize.md).toBe('--neoverse-action-icon-size-md');
+  expect(cssVariables.components.navigationItem.indicatorColor).toBe(
+    '--neoverse-navigation-item-indicator-color',
+  );
+  expect(cssVariables.components.controlSurface.itemGap).toBe(
+    '--neoverse-control-surface-item-gap',
+  );
+  expect(cssVariables.components.statusIndicator.dotSize.md).toBe(
+    '--neoverse-status-indicator-dot-size-md',
+  );
+});
+
 test('keeps semantic source generic and assigns component token ownership', async () => {
   const semanticCss = await readTokenCss('semantic.css');
   expect(semanticCss).not.toMatch(/--neoverse-(?:control|scrollbar|skeleton|badge)-/);
@@ -222,6 +236,10 @@ test('keeps semantic source generic and assigns component token ownership', asyn
 
   const ownership = await Promise.all([
     ['components/button.css', '--neoverse-control-primary-background'],
+    ['components/action.css', '--neoverse-action-height-md'],
+    ['components/navigation-item.css', '--neoverse-navigation-item-active-background'],
+    ['components/control-surface.css', '--neoverse-control-surface-padding'],
+    ['components/status-indicator.css', '--neoverse-status-indicator-dot-size-sm'],
     ['components/segmented-control.css', '--neoverse-control-segmented-background'],
     ['components/badge.css', '--neoverse-badge-background'],
     ['components/skeleton.css', '--neoverse-skeleton-fill'],
@@ -367,20 +385,17 @@ test('keeps dark elevated cards neutral and softly edged', async () => {
   const themesCss = await readTokenCss('themes/dark.css');
   const expectedOverrides = [
     [
-      /--neoverse-material-filter-elevated:\s*blur\(14px\) saturate\(112%\) brightness\(102%\) contrast\(102%\);/g,
+      /--neoverse-material-filter-elevated:\s*blur\(28px\) saturate\(145%\) brightness\(106%\) contrast\(103%\);/g,
       1,
     ],
     [
       /--neoverse-material-edge-filter-elevated:\s*blur\(16px\) saturate\(118%\) brightness\(102%\)\s+contrast\(103%\);/g,
       1,
     ],
-    [
-      /--neoverse-material-tint-elevated:\s*color-mix\(\s*in srgb,\s*var\(--neoverse-color-surface-raised\) 84%,\s*var\(--neoverse-color-text-primary\) 16%\s*\);/g,
-      1,
-    ],
-    [/--neoverse-material-transparency-elevated:\s*26%;/g, 1],
+    [/--neoverse-material-tint-elevated:\s*var\(--neoverse-color-surface-glass\);/g, 1],
+    [/--neoverse-material-transparency-elevated:\s*44%;/g, 1],
     [/--neoverse-material-edge-refraction-opacity-elevated:\s*0\.24;/g, 1],
-    [/--neoverse-material-refraction-gradient-elevated:\s*radial-gradient\(/g, 1],
+    [/--neoverse-material-refraction-gradient-elevated:\s*linear-gradient\(\s*125deg,/g, 1],
   ];
 
   for (const [override, count] of expectedOverrides) {
@@ -787,6 +802,9 @@ test('exposes shared Surface and Glass material contracts', () => {
     'seamGlow',
     'bloom',
     'shadow',
+    'hoverTransparency',
+    'hoverBorder',
+    'hoverShadow',
     'refractionGradient',
   ];
   const surfaceRoles = [
@@ -996,13 +1014,14 @@ test('keeps light Glass surfaces free of dark hairline borders', async () => {
     readTokenCss('themes/dark.css'),
   ]);
   const variants = ['subtle', 'elevated', 'immersive'];
-
   for (const variant of variants) {
     expect(materialCss).toContain(`--neoverse-material-glass-${variant}-border: transparent;`);
     expect(
       themesCss.match(
         new RegExp(
-          `--neoverse-material-glass-${variant}-border:\\s*var\\(--neoverse-color-border-(?:subtle|default)\\);`,
+          variant === 'elevated'
+            ? `--neoverse-material-glass-${variant}-border:\\s*color-mix\\(\\s*in srgb,\\s*var\\(--neoverse-color-border-subtle\\) 72%,\\s*transparent\\s*\\);`
+            : `--neoverse-material-glass-${variant}-border:\\s*var\\(--neoverse-color-border-(?:subtle|default)\\);`,
           'g',
         ),
       ),
@@ -1037,18 +1056,28 @@ test('keeps Glass edge highlights refractive and softly diffused', async () => {
 
     expect(darkDeclarations).toHaveLength(1);
     for (const darkDeclaration of darkDeclarations ?? []) {
-      expect(darkDeclaration).toContain('inset 0 1px 2px');
-      expect(darkDeclaration).toContain('inset 0 -1px 2px');
-      expect(darkDeclaration).toContain('inset 1px 0 2px');
-      expect(darkDeclaration).toContain('inset -1px 0 2px');
-      if (variant === 'elevated' || variant === 'subtle') {
+      if (variant === 'elevated') {
+        expect(darkDeclaration).toContain('inset 0 1px 0');
+        expect(darkDeclaration).toContain('inset 0 -1px 2px');
+        expect(darkDeclaration).toContain('inset 1px 0 2px');
+        expect(darkDeclaration).toContain('inset -1px 0 2px');
         expect(darkDeclaration).not.toMatch(
           /var\(--neoverse-color-accent-(?:primary|secondary|tertiary)\)/,
         );
       } else {
-        expect(darkDeclaration).toContain('var(--neoverse-color-accent-primary)');
-        expect(darkDeclaration).toContain('var(--neoverse-color-accent-secondary)');
-        expect(darkDeclaration).toContain('var(--neoverse-color-accent-tertiary)');
+        expect(darkDeclaration).toContain('inset 0 1px 2px');
+        expect(darkDeclaration).toContain('inset 0 -1px 2px');
+        expect(darkDeclaration).toContain('inset 1px 0 2px');
+        expect(darkDeclaration).toContain('inset -1px 0 2px');
+        if (variant === 'subtle') {
+          expect(darkDeclaration).not.toMatch(
+            /var\(--neoverse-color-accent-(?:primary|secondary|tertiary)\)/,
+          );
+        } else {
+          expect(darkDeclaration).toContain('var(--neoverse-color-accent-primary)');
+          expect(darkDeclaration).toContain('var(--neoverse-color-accent-secondary)');
+          expect(darkDeclaration).toContain('var(--neoverse-color-accent-tertiary)');
+        }
       }
     }
   }

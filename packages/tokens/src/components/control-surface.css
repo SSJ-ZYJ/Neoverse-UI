@@ -1,0 +1,13 @@
+@layer neoverse.tokens {
+  :root {
+    --neoverse-control-surface-gap: 0.5rem;
+    --neoverse-control-surface-item-gap: 0.25rem;
+    --neoverse-control-surface-padding: 0.55rem;
+    --neoverse-control-surface-divider-height: 1.4rem;
+    --neoverse-control-surface-divider-color: color-mix(
+      in srgb,
+      var(--neoverse-color-border-default) 72%,
+      transparent
+    );
+  }
+}

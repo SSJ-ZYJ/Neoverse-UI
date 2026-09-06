@@ -1,0 +1,19 @@
+@layer neoverse.tokens {
+  :root {
+    /* Destination controls retain the comfortable geometry validated by the
+       Neoverse and Neoverse-Docs hero actions. Command buttons stay compact. */
+    --neoverse-action-gap: 0.5rem;
+    --neoverse-action-height-sm: 1.75rem;
+    --neoverse-action-height-md: 2rem;
+    --neoverse-action-height-lg: 2.25rem;
+    --neoverse-action-padding-inline-sm: 0.5rem;
+    --neoverse-action-padding-inline-md: 0.625rem;
+    --neoverse-action-padding-inline-lg: 0.75rem;
+    --neoverse-action-font-size-sm: var(--neoverse-font-size-2xs);
+    --neoverse-action-font-size-md: var(--neoverse-font-size-sm);
+    --neoverse-action-font-size-lg: var(--neoverse-font-size-sm);
+    --neoverse-action-icon-size-sm: 1rem;
+    --neoverse-action-icon-size-md: 1rem;
+    --neoverse-action-icon-size-lg: 1rem;
+  }
+}

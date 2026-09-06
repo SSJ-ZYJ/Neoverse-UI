@@ -1,0 +1,22 @@
+@layer neoverse.tokens {
+  :root {
+    --neoverse-navigation-item-active-background: var(--neoverse-control-active-background);
+    --neoverse-navigation-item-active-foreground: var(
+      --neoverse-control-segmented-active-foreground
+    );
+    --neoverse-navigation-item-active-shadow: var(--neoverse-control-active-highlight);
+    --neoverse-navigation-item-indicator-color: var(--neoverse-color-accent-secondary);
+    --neoverse-navigation-item-gap: 0.375rem;
+    --neoverse-navigation-item-height-sm: 1.75rem;
+    --neoverse-navigation-item-height-md: 2rem;
+    --neoverse-navigation-item-height-lg: 2.25rem;
+    --neoverse-navigation-item-padding-inline-sm: 0.5rem;
+    --neoverse-navigation-item-padding-inline-md: 0.5rem;
+    --neoverse-navigation-item-padding-inline-lg: 0.625rem;
+    --neoverse-navigation-item-compact-padding-inline: 0;
+    --neoverse-navigation-item-indicator-width: 1.25rem;
+    --neoverse-navigation-item-indicator-height: 0.125rem;
+    --neoverse-navigation-item-compact-indicator-width: 0.75rem;
+    --neoverse-navigation-item-indicator-inset: 0.08rem;
+  }
+}
