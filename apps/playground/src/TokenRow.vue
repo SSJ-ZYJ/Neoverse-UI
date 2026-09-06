@@ -49,7 +49,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="flex min-w-0 items-center gap-3 rounded-control material-glass-subtle p-2">
+  <div
+    class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 rounded-control material-glass-subtle p-2"
+  >
     <span
       v-if="props.preview === 'color'"
       ref="swatchElement"

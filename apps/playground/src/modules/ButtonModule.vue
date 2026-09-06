@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { UiButton } from '@neoverse-ui/vue';
+import { UiButton, UiIconButton } from '@neoverse-ui/vue';
+import LabIcon from '../LabIcon.vue';
 import { localize, moduleCopy } from '../playground-content';
 import StateRow from '../StateRow.vue';
 import type { LabModuleProps } from './types';
@@ -40,5 +41,20 @@ const copy = moduleCopy.button;
     :locale="props.locale"
   >
     <UiButton loading>{{ localize(copy.controls.loading, props.locale) }}</UiButton>
+  </StateRow>
+  <StateRow
+    :label="copy.states.stretch.label"
+    :hint="copy.states.stretch.hint"
+    :locale="props.locale"
+  >
+    <div class="flex h-8 w-full items-stretch gap-2">
+      <UiButton stretch>{{ localize(copy.controls.stretchPrimary, props.locale) }}</UiButton>
+      <UiButton variant="ghost" stretch>
+        {{ localize(copy.controls.stretchSecondary, props.locale) }}
+      </UiButton>
+      <UiIconButton stretch :label="localize(copy.controls.stretchPrimary, props.locale)">
+        <LabIcon name="plus" />
+      </UiIconButton>
+    </div>
   </StateRow>
 </template>

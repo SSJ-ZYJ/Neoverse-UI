@@ -2,6 +2,7 @@ import { expect, test } from 'bun:test';
 
 import { cssVariables } from '@neoverse-ui/tokens';
 import { primitiveRadiusTokens, semanticRadiusTokens } from './lab-data';
+import { labModules } from './lab-modules';
 import { localize, moduleCopy } from './playground-content';
 
 const radiusVariableNames = (tokens: { variable: string }[]) =>
@@ -32,6 +33,15 @@ test('describes the radius aliases with their actual definitions', () => {
   expect(description).toContain('controlInner=control - 0.18rem（9.12px）');
   expect(description).toContain('card=lg（16px）');
   expect(description).toContain('panel=xl（24px）');
+});
+
+test('registers one consolidated controls module and the parity composition', () => {
+  const moduleIds = labModules.map((module) => module.id);
+
+  expect(moduleIds).toEqual(expect.arrayContaining(['controls', 'consumer-parity']));
+  expect(moduleIds).not.toEqual(
+    expect.arrayContaining(['action', 'navigation-item', 'status-indicator', 'control-surface']),
+  );
 });
 
 test('keeps every composition scene localized in both supported locales', () => {

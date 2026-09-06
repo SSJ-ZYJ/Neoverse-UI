@@ -120,6 +120,14 @@ export const groupCopy = {
 } as const;
 
 export const moduleCopy = {
+  controls: {
+    id: 'controls',
+    label: localized('Core Controls', '核心控件'),
+    description: localized(
+      'Interactive controls share one calibration module so the Design Lab stays focused instead of fragmenting every primitive into its own category.',
+      '交互控件集中在一个校准模块中，避免设计实验室将每个基础组件拆成独立分类。',
+    ),
+  },
   colors: {
     label: localized('Colors', '色彩'),
     description: localized(
@@ -307,6 +315,13 @@ export const moduleCopy = {
           '加载状态会保留标签与前置插槽的几何尺寸。',
         ),
       },
+      stretch: {
+        label: localized('Stretch', '撑满'),
+        hint: localized(
+          'Fill a fixed-height flex row instead of using a fixed control height.',
+          '填满固定高度的弹性行，而不使用固定控件高度。',
+        ),
+      },
     },
     controls: {
       default: localized('Default', '默认'),
@@ -317,6 +332,8 @@ export const moduleCopy = {
       focus: localized('Keyboard focus', '键盘焦点'),
       disabled: localized('Disabled', '禁用'),
       loading: localized('Saving', '保存中'),
+      stretchPrimary: localized('Stretch', '撑满'),
+      stretchSecondary: localized('Ghost stretch', '幽灵撑满'),
     },
   },
   iconButton: {
@@ -404,6 +421,7 @@ export const moduleCopy = {
       sizes: localized('Sizes', '尺寸'),
       disabled: localized('Disabled', '禁用'),
       loading: localized('Loading', '加载中'),
+      aria: localized('Accessible names', '无障碍名称'),
     },
     hints: {
       keyboard: localized(
@@ -419,12 +437,18 @@ export const moduleCopy = {
       overview: localized('Overview', '总览'),
       details: localized('Details', '详情'),
       activity: localized('Activity', '活动'),
+      sectionA: localized('A', 'A'),
+      sectionB: localized('B', 'B'),
+      sectionC: localized('C', 'C'),
     },
     controls: {
       small: localized('Small control', '小尺寸控件'),
       disabled: localized('Disabled control', '禁用控件'),
       loading: localized('Loading control', '加载中控件'),
       selected: localized('Selected: {value}', '已选择：{value}'),
+      sectionA: localized('Section A', '区域 A'),
+      sectionB: localized('Section B', '区域 B'),
+      sectionC: localized('Section C', '区域 C'),
     },
   },
   density: {
@@ -508,6 +532,205 @@ export const moduleCopy = {
       hover: localized('Hover thumb', '悬停滑块'),
       active: localized('Active thumb', '按下滑块'),
       edge: localized('Edge and glow', '边缘与辉光'),
+    },
+  },
+  action: {
+    label: localized('Action', '操作链接'),
+    description: localized(
+      'Semantic destination controls keep link behavior, Glass treatment, and comfortable action geometry together.',
+      '语义目标控件将链接行为、玻璃材质与舒适的操作尺寸统一在一起。',
+    ),
+    states: {
+      default: {
+        label: localized('Variants', '变体'),
+        hint: localized(
+          'Real links with leading and trailing icon slots.',
+          '带有前置与后置图标插槽的真实链接。',
+        ),
+      },
+      sizes: {
+        label: localized('Sizes', '尺寸'),
+        hint: localized(
+          'Destination controls stay taller than compact command buttons.',
+          '目标控件比紧凑的命令按钮保留更舒适的高度。',
+        ),
+      },
+      hover: {
+        label: localized('Hover', '悬停'),
+        hint: localized('Move the pointer over the action.', '将指针移到操作链接上。'),
+      },
+      active: {
+        label: localized('Active', '按下'),
+        hint: localized('Press and hold the action.', '按住操作链接。'),
+      },
+      focus: {
+        label: localized('Focus', '焦点'),
+        hint: localized('Tab to the action.', '使用 Tab 键将焦点移到操作链接。'),
+      },
+      disabled: { label: localized('Disabled', '禁用') },
+    },
+    controls: {
+      primary: localized('Visit website', '访问网站'),
+      secondary: localized('Read the journal', '阅读日志'),
+      ghost: localized('Open profile', '打开资料'),
+      small: localized('Small', '小'),
+      medium: localized('Medium', '中'),
+      large: localized('Large', '大'),
+      hover: localized('Hover me', '悬停查看'),
+      active: localized('Press and hold', '按住不放'),
+      focus: localized('Keyboard focus', '键盘焦点'),
+      disabled: localized('Unavailable link', '不可用链接'),
+    },
+  },
+  navigationItem: {
+    label: localized('NavigationItem', '导航项'),
+    description: localized(
+      'Destination semantics, active-page state, icon-label rhythm, and compact accessibility in one item.',
+      '在单个导航项中统一目标语义、当前页状态、图标标签节奏与紧凑模式无障碍。',
+    ),
+    states: {
+      default: {
+        label: localized('Default and active', '默认与当前项'),
+        hint: localized(
+          'The active item exposes aria-current and a stable selection indicator.',
+          '当前项通过 aria-current 和稳定的选中指示器表达状态。',
+        ),
+      },
+      compact: {
+        label: localized('Compact', '紧凑'),
+        hint: localized(
+          'Labels remain available to assistive technology when visually hidden.',
+          '标签在视觉隐藏时仍对辅助技术可用。',
+        ),
+      },
+      hover: {
+        label: localized('Hover', '悬停'),
+        hint: localized('Move the pointer over the destination.', '将指针移到导航目标上。'),
+      },
+      focus: {
+        label: localized('Focus', '焦点'),
+        hint: localized('Tab to the destination.', '使用 Tab 键将焦点移到导航目标。'),
+      },
+      disabled: { label: localized('Disabled', '禁用') },
+    },
+    controls: {
+      home: localized('Home', '主页'),
+      projects: localized('Projects', '项目'),
+      focus: localized('Focus', '专注'),
+      activity: localized('Pulse', '动态'),
+      hover: localized('Hover destination', '悬停目标'),
+      keyboardFocus: localized('Keyboard focus', '键盘焦点'),
+      disabled: localized('Archive', '归档'),
+    },
+  },
+  statusIndicator: {
+    label: localized('StatusIndicator', '状态指示器'),
+    description: localized(
+      'A compact semantic status dot with caller-owned announcement behavior and reduced-motion pulse.',
+      '紧凑的语义状态点，播报行为由调用方负责，并提供减弱动效的脉冲回退。',
+    ),
+    states: {
+      statuses: {
+        label: localized('Semantic statuses', '语义状态'),
+        hint: localized(
+          'Status colors come from shared semantic roles.',
+          '状态颜色来自共享语义角色。',
+        ),
+      },
+      live: {
+        label: localized('Live status', '实时状态'),
+        hint: localized(
+          'Pulse adds a quiet signal; the caller chooses role=status when updates are live.',
+          '脉冲提供克制提示；实时更新时由调用方选择 role=status。',
+        ),
+      },
+      sizes: { label: localized('Sizes', '尺寸') },
+    },
+    controls: {
+      neutral: localized('Idle', '空闲'),
+      info: localized('Syncing', '同步中'),
+      success: localized('Online', '在线'),
+      warning: localized('Degraded', '性能下降'),
+      danger: localized('Offline', '离线'),
+      available: localized('Available for collaboration', '可参与协作'),
+      small: localized('Small status', '小状态'),
+      medium: localized('Medium status', '中状态'),
+    },
+  },
+  controlSurface: {
+    label: localized('ControlSurface', '控件表面'),
+    description: localized(
+      'A single Glass chrome boundary groups related controls and owns optional trailing separation.',
+      '单一玻璃材质边界用于分组相关控件，并负责可选尾部区域的分隔关系。',
+    ),
+    states: {
+      toolbar: {
+        label: localized('Toolbar', '工具栏'),
+        hint: localized(
+          'Interactive semantics stay on the controls; the surface owns grouping geometry.',
+          '交互语义保留在控件上；表面只负责分组几何。',
+        ),
+      },
+      variants: {
+        label: localized('Material variants', '材质变体'),
+        hint: localized(
+          'Choose one material at the composition boundary.',
+          '在组合边界选择一种材质。',
+        ),
+      },
+      trailing: {
+        label: localized('Trailing group', '尾部分组'),
+        hint: localized(
+          'The surface inserts the separator only when trailing content exists.',
+          '仅在存在尾部内容时由表面插入分隔线。',
+        ),
+      },
+    },
+    controls: {
+      toolbar: localized('Workspace tools', '工作区工具'),
+      add: localized('Add item', '添加项目'),
+      confirm: localized('Confirm changes', '确认更改'),
+      publish: localized('Publish', '发布'),
+      view: localized('View controls', '视图控件'),
+      canvas: localized('Canvas', '画布'),
+    },
+  },
+  consumerParity: {
+    label: localized('Consumer Parity', '消费端对照'),
+    description: localized(
+      'Rebuilds the audited Neoverse hero actions and floating navigation from public core components and fake data.',
+      '使用公开核心组件与假数据重建经审计的 Neoverse Hero 操作区与悬浮导航。',
+    ),
+    hero: {
+      label: localized('Hero Actions', 'Hero 操作区'),
+      description: localized(
+        'Six destination links preserve the approved icon-label rhythm and comfortable action height.',
+        '六个目标链接保留已确认的图标标签节奏与舒适操作高度。',
+      ),
+      status: localized('Available for new collaborations', '可参与新的协作'),
+      title: localized(
+        'Building calm systems for ambitious interfaces.',
+        '为有野心的界面构建平静的系统。',
+      ),
+      summary: localized(
+        'Design systems, developer tooling, and thoughtful digital spaces.',
+        '设计系统、开发者工具与经过深思熟虑的数字空间。',
+      ),
+    },
+    navigation: {
+      label: localized('Floating Navigation', '悬浮导航'),
+      description: localized(
+        'Four semantic navigation items share one control surface with an English / 中文 switch.',
+        '四个语义导航项与 English / 中文 切换器共享一个控件表面。',
+      ),
+      ariaLabel: localized('Primary navigation', '主导航'),
+      languageLabel: localized('Language', '语言'),
+      items: {
+        home: localized('Home', '主页'),
+        projects: localized('Projects', '项目'),
+        focus: localized('Focus', '专注'),
+        pulse: localized('Pulse', '动态'),
+      },
     },
   },
   composition: {

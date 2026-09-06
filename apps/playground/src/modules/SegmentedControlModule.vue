@@ -14,6 +14,23 @@ const segmentedOptions = computed<readonly SegmentOption[]>(() => [
   { value: 'details', label: localize(copy.options.details, props.locale), disabled: true },
   { value: 'activity', label: localize(copy.options.activity, props.locale) },
 ]);
+const ariaOptions = computed<readonly SegmentOption[]>(() => [
+  {
+    value: 'a',
+    label: localize(copy.options.sectionA, props.locale),
+    ariaLabel: localize(copy.controls.sectionA, props.locale),
+  },
+  {
+    value: 'b',
+    label: localize(copy.options.sectionB, props.locale),
+    ariaLabel: localize(copy.controls.sectionB, props.locale),
+  },
+  {
+    value: 'c',
+    label: localize(copy.options.sectionC, props.locale),
+    ariaLabel: localize(copy.controls.sectionC, props.locale),
+  },
+]);
 </script>
 
 <template>
@@ -46,6 +63,12 @@ const segmentedOptions = computed<readonly SegmentOption[]>(() => [
       :aria-label="localize(copy.controls.loading, props.locale)"
       loading
       :options="segmentedOptions"
+    />
+  </StateRow>
+  <StateRow :label="copy.states.aria" :locale="props.locale">
+    <UiSegmentedControl
+      :aria-label="localize(copy.aria.view, props.locale)"
+      :options="ariaOptions"
     />
   </StateRow>
 </template>

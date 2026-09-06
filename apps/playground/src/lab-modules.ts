@@ -1,17 +1,15 @@
 import type { Component } from 'vue';
 import BadgeModule from './modules/BadgeModule.vue';
 import BorderModule from './modules/BorderModule.vue';
-import ButtonModule from './modules/ButtonModule.vue';
 import CardModule from './modules/CardModule.vue';
 import ColorsModule from './modules/ColorsModule.vue';
 import CompositionModule from './modules/CompositionModule.vue';
-import DensityModule from './modules/DensityModule.vue';
+import ConsumerParityModule from './modules/ConsumerParityModule.vue';
+import ControlsModule from './modules/ControlsModule.vue';
 import GlassModule from './modules/GlassModule.vue';
-import IconButtonModule from './modules/IconButtonModule.vue';
 import MotionModule from './modules/MotionModule.vue';
 import RadiusModule from './modules/RadiusModule.vue';
 import ScrollbarModule from './modules/ScrollbarModule.vue';
-import SegmentedControlModule from './modules/SegmentedControlModule.vue';
 import ShadowModule from './modules/ShadowModule.vue';
 import SkeletonModule from './modules/SkeletonModule.vue';
 import SpacingModule from './modules/SpacingModule.vue';
@@ -84,18 +82,11 @@ export const labModules = [
     component: MotionModule,
   },
   {
-    id: 'button',
+    id: 'controls',
     groupId: 'components',
-    label: moduleCopy.button.label,
-    description: moduleCopy.button.description,
-    component: ButtonModule,
-  },
-  {
-    id: 'icon-button',
-    groupId: 'components',
-    label: moduleCopy.iconButton.label,
-    description: moduleCopy.iconButton.description,
-    component: IconButtonModule,
+    label: moduleCopy.controls.label,
+    description: moduleCopy.controls.description,
+    component: ControlsModule,
   },
   {
     id: 'badge',
@@ -110,20 +101,6 @@ export const labModules = [
     label: moduleCopy.card.label,
     description: moduleCopy.card.description,
     component: CardModule,
-  },
-  {
-    id: 'segmented-control',
-    groupId: 'components',
-    label: moduleCopy.segmentedControl.label,
-    description: moduleCopy.segmentedControl.description,
-    component: SegmentedControlModule,
-  },
-  {
-    id: 'density',
-    groupId: 'components',
-    label: moduleCopy.density.label,
-    description: moduleCopy.density.description,
-    component: DensityModule,
   },
   {
     id: 'skeleton',
@@ -145,6 +122,13 @@ export const labModules = [
     label: moduleCopy.composition.label,
     description: moduleCopy.composition.description,
     component: CompositionModule,
+  },
+  {
+    id: 'consumer-parity',
+    groupId: 'components',
+    label: moduleCopy.consumerParity.label,
+    description: moduleCopy.consumerParity.description,
+    component: ConsumerParityModule,
   },
 ] as const satisfies readonly {
   id: string;
@@ -181,15 +165,13 @@ export const moduleGroups = [
     label: groupCopy.components.label,
     description: groupCopy.components.description,
     moduleIds: [
-      'button',
-      'icon-button',
+      'controls',
       'badge',
       'card',
-      'segmented-control',
-      'density',
       'skeleton',
       'scrollbar',
       'composition',
+      'consumer-parity',
     ],
   },
 ] as const satisfies readonly {
