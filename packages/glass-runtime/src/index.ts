@@ -103,6 +103,22 @@ const parsePixels = (value: string, fallback: number): number => {
   return parseFirstNumber(match[0], fallback);
 };
 
+const parseColorComponent = (value: string, scale: number): number | undefined => {
+  const normalized = value.trim();
+  if (!/^-?[\d.]+%?$/.test(normalized)) {
+    return undefined;
+  }
+
+  const parsed = Number.parseFloat(normalized);
+  if (!Number.isFinite(parsed)) {
+    return undefined;
+  }
+
+  return Math.min(Math.max(parsed / (normalized.endsWith('%') ? 100 : scale), 0), 1);
+};
+
+// Shader color uniforms carry visible RGB contribution, so preserve CSS alpha
+// by premultiplying it instead of silently treating translucent tokens as white.
 const parseColor = (value: string): Color | undefined => {
   const normalized = value.trim().toLowerCase();
   const hexMatch = /^#([\da-f]{3,8})$/i.exec(normalized);
@@ -119,31 +135,46 @@ const parseColor = (value: string): Color | undefined => {
       return undefined;
     }
 
-    return channels.map((channel) => Number.parseInt(channel, 16) / 255) as Color;
+    const alpha = expanded.length === 8 ? Number.parseInt(expanded.slice(6, 8), 16) / 255 : 1;
+    return channels.map((channel) => (Number.parseInt(channel, 16) / 255) * alpha) as Color;
   }
 
-  const rgbMatch = normalized.match(
-    /^rgba?\(\s*([\d.]+)(%?)\s*[,\s]+([\d.]+)(%?)\s*[,\s]+([\d.]+)(%?)/,
-  );
+  const rgbMatch = /^(?:rgb|rgba)\((.*)\)$/.exec(normalized);
   if (rgbMatch !== null) {
-    const red = Number.parseFloat(rgbMatch[1] ?? '0');
-    const green = Number.parseFloat(rgbMatch[3] ?? '0');
-    const blue = Number.parseFloat(rgbMatch[5] ?? '0');
-    const redScale = rgbMatch[2] === '%' ? 100 : 255;
-    const greenScale = rgbMatch[4] === '%' ? 100 : 255;
-    const blueScale = rgbMatch[6] === '%' ? 100 : 255;
-    return [red / redScale, green / greenScale, blue / blueScale].map((channel) =>
-      Math.min(Math.max(channel, 0), 1),
-    ) as Color;
+    const components = (rgbMatch[1] ?? '')
+      .trim()
+      .replace(/\s*\/\s*/, ',')
+      .split(/[\s,]+/);
+    if (components.length < 3) {
+      return undefined;
+    }
+
+    const channels = components.slice(0, 3).map((component) => parseColorComponent(component, 255));
+    if (channels.some((channel) => channel === undefined)) {
+      return undefined;
+    }
+
+    const alpha = components[3] === undefined ? 1 : (parseColorComponent(components[3], 1) ?? 1);
+    return channels.map((channel) => (channel ?? 0) * alpha) as Color;
   }
 
-  const colorFunctionMatch = normalized.match(/^color\(\s*srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)/);
+  const colorFunctionMatch = /^color\(\s*srgb\s+(.+)\)$/.exec(normalized);
   if (colorFunctionMatch !== null) {
-    return [
-      Number.parseFloat(colorFunctionMatch[1] ?? '0'),
-      Number.parseFloat(colorFunctionMatch[2] ?? '0'),
-      Number.parseFloat(colorFunctionMatch[3] ?? '0'),
-    ].map((channel) => Math.min(Math.max(channel, 0), 1)) as Color;
+    const components = (colorFunctionMatch[1] ?? '')
+      .trim()
+      .replace(/\s*\/\s*/, ',')
+      .split(/[\s,]+/);
+    if (components.length < 3) {
+      return undefined;
+    }
+
+    const channels = components.slice(0, 3).map((component) => parseColorComponent(component, 1));
+    if (channels.some((channel) => channel === undefined)) {
+      return undefined;
+    }
+
+    const alpha = components[3] === undefined ? 1 : (parseColorComponent(components[3], 1) ?? 1);
+    return channels.map((channel) => (channel ?? 0) * alpha) as Color;
   }
 
   return undefined;

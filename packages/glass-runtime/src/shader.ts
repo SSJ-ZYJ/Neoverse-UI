@@ -52,7 +52,7 @@ export const glassFragmentShader = `
   void main() {
     vec2 point = (v_local * u_rect_size) - (u_rect_size * 0.5);
     vec2 halfSize = u_rect_size * 0.5;
-    vec2 pixelSize = u_rect_size / (u_viewport * u_pixel_ratio);
+    vec2 pixelSize = vec2(1.0 / max(u_pixel_ratio, 1.0));
     float antiAlias = max(max(pixelSize.x, pixelSize.y) * 0.75, 0.35);
     vec2 sampleStep = max(pixelSize, vec2(0.35));
     float distance = edgeDistance(point, halfSize, u_radii);

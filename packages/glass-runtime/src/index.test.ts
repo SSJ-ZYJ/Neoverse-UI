@@ -143,6 +143,7 @@ describe('Glass renderer', () => {
 
   beforeEach(() => {
     document.documentElement.removeAttribute(glassRendererAttribute);
+    document.documentElement.style.removeProperty('--neoverse-color-edge-light');
     document.body.innerHTML = '';
     vi.restoreAllMocks();
   });
@@ -236,6 +237,39 @@ describe('Glass renderer', () => {
     ]);
     expect(gl.scissor).toHaveBeenLastCalledWith(20, 40, 100, 60);
     expect(gl.disable).toHaveBeenLastCalledWith(gl.SCISSOR_TEST);
+  });
+
+  it('preserves translucent CSS color tokens in WebGL uniforms', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    document.documentElement.style.setProperty(
+      '--neoverse-color-edge-light',
+      'rgb(255 255 255 / 13%)',
+    );
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-elevated';
+    glass.style.setProperty(
+      '--neoverse-material-edge-refraction-carrier',
+      'rgb(255 255 255 / 6.47%)',
+    );
+    setRect(glass, { width: 100, height: 60 });
+    document.body.append(glass);
+
+    const renderer = createTestRenderer();
+    renderer.mount();
+
+    const edgeLightCall = gl.uniform3f.mock.calls
+      .filter(([location]) => location?.name === 'u_edge_light')
+      .at(-1);
+    const carrierCall = gl.uniform3f.mock.calls
+      .filter(([location]) => location?.name === 'u_carrier')
+      .at(-1);
+    expect(edgeLightCall?.[1]).toBeCloseTo(0.13, 3);
+    expect(edgeLightCall?.[2]).toBeCloseTo(0.13, 3);
+    expect(edgeLightCall?.[3]).toBeCloseTo(0.13, 3);
+    expect(carrierCall?.[1]).toBeCloseTo(0.0647, 3);
+    expect(carrierCall?.[2]).toBeCloseTo(0.0647, 3);
+    expect(carrierCall?.[3]).toBeCloseTo(0.0647, 3);
   });
 
   it('keeps the CSS fallback when no WebGL context is available', () => {
@@ -349,9 +383,7 @@ describe('Glass renderer', () => {
     expect(glassFragmentShader).toContain('float edgeLightCatch');
     expect(glassFragmentShader).toContain('float cornerCatch');
     expect(glassFragmentShader).toContain('uniform float u_pixel_ratio;');
-    expect(glassFragmentShader).toContain(
-      'vec2 pixelSize = u_rect_size / (u_viewport * u_pixel_ratio);',
-    );
+    expect(glassFragmentShader).toContain('vec2 pixelSize = vec2(1.0 / max(u_pixel_ratio, 1.0));');
     expect(glassFragmentShader).toContain(
       'float antiAlias = max(max(pixelSize.x, pixelSize.y) * 0.75, 0.35);',
     );

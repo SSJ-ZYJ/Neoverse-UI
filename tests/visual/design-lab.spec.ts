@@ -88,6 +88,82 @@ test('consumer parity exposes destination and current-page semantics', async ({ 
   expect(pulseAnimation).toBe('none');
 });
 
+test('consumer parity dock moves one active indicator', async ({ page }) => {
+  await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
+    waitUntil: 'domcontentloaded',
+  });
+  await page.evaluate(waitForStableAssets);
+
+  const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
+  const indicator = navigation.locator('.consumer-parity-dock__active-indicator');
+  const typography = await navigation.evaluate((element) => {
+    const link = element.querySelector('.consumer-parity-dock__item');
+    const label = link?.querySelector('.ui-navigation-item__label');
+    if (!link || !label) {
+      throw new Error('Dock typography nodes are missing');
+    }
+
+    const linkStyle = getComputedStyle(link);
+    const labelStyle = getComputedStyle(label);
+    const dockStyle = getComputedStyle(element);
+    return {
+      dockFontFamily: dockStyle.fontFamily,
+      dockFontSize: dockStyle.fontSize,
+      linkFontFamily: linkStyle.fontFamily,
+      linkFontSize: linkStyle.fontSize,
+      labelDisplay: labelStyle.display,
+      labelFlex: labelStyle.flex,
+    };
+  });
+  expect(typography.dockFontSize).toBe('16px');
+  expect(typography.linkFontSize).toBe('12.48px');
+  expect(typography.dockFontFamily).toContain('"Noto Sans SC"');
+  expect(typography.linkFontFamily).toContain('"Noto Sans SC"');
+  expect(typography.linkFontFamily).not.toContain('Noto Sans SC Variable');
+  expect(typography.labelDisplay).toBe('block');
+  expect(typography.labelFlex).toBe('0 0 auto');
+  const edgeMaterial = await navigation.evaluate((element) => ({
+    dock: getComputedStyle(element).getPropertyValue('--neoverse-material-edge-refraction-opacity'),
+    width: getComputedStyle(element).getPropertyValue('--neoverse-material-edge-refraction-width'),
+    softness: getComputedStyle(element).getPropertyValue(
+      '--neoverse-material-edge-refraction-softness',
+    ),
+    button: getComputedStyle(
+      element.querySelector('.consumer-parity-dock__item') as HTMLElement,
+    ).getPropertyValue('--neoverse-material-edge-refraction-opacity'),
+  }));
+  expect(Number(edgeMaterial.dock.trim())).toBe(0.24);
+  expect(edgeMaterial.width.trim()).toBe('1.25px');
+  expect(edgeMaterial.softness.trim()).toBe('blur(4px)');
+  expect(edgeMaterial.button.trim()).toBe('0');
+
+  await expect(indicator).toHaveCount(1);
+  const itemIndicators = navigation.locator('.ui-navigation-item__indicator');
+  await expect(itemIndicators).toHaveCount(4);
+  expect(
+    await itemIndicators.evaluateAll((elements) =>
+      elements.every((element) => getComputedStyle(element).display === 'none'),
+    ),
+  ).toBe(true);
+
+  const initial = await indicator.evaluate((element) => ({
+    left: (element as HTMLElement).style.left,
+    transition: getComputedStyle(element).transition,
+    underlineWidth: getComputedStyle(element, '::after').width,
+  }));
+  expect(initial.left).toBe('0%');
+  expect(initial.transition).toContain('left 0.52s');
+  const expectedUnderlineWidth = (page.viewportSize()?.width ?? 0) <= 520 ? '20px' : '27.1875px';
+  expect(initial.underlineWidth).toBe(expectedUnderlineWidth);
+
+  await navigation.getByRole('link', { name: 'Projects' }).click();
+  await expect(indicator).toHaveAttribute('style', /left:\s*25%/);
+  await expect(navigation.getByRole('link', { name: 'Projects' })).toHaveAttribute(
+    'aria-current',
+    'page',
+  );
+});
+
 for (const theme of themes) {
   test(`button press glow / ${theme}`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -398,20 +474,35 @@ test.describe('wide WebGL Glass edge', () => {
 
         const centerX = Math.floor(canvas.width / 2);
         const centerY = Math.floor(canvas.height / 2);
-        const lines = [
-          Array.from({ length: 9 }, (_, offset) => luminance(centerX, offset)),
-          Array.from({ length: 9 }, (_, offset) => luminance(canvas.width - 1 - offset, centerY)),
-          Array.from({ length: 9 }, (_, offset) => luminance(centerX, canvas.height - 1 - offset)),
-          Array.from({ length: 9 }, (_, offset) => luminance(offset, centerY)),
-        ];
-        const innerRimJumps = lines.flatMap((line) =>
-          line.slice(1, 5).map((value, index) => Math.abs(value - (line[index + 2] ?? value))),
+        // Keep sample distances in CSS pixels and scale the luma jump by the
+        // local interior level; both avoid a DPR-dependent absolute threshold.
+        const horizontalOffsets = Array.from({ length: 9 }, (_, offset) =>
+          Math.min(Math.round(offset * Math.max(devicePixelRatio, 1)), canvas.width - 1),
         );
+        const verticalOffsets = Array.from({ length: 9 }, (_, offset) =>
+          Math.min(Math.round(offset * Math.max(devicePixelRatio, 1)), canvas.height - 1),
+        );
+        const lines = [
+          verticalOffsets.map((offset) => luminance(centerX, offset)),
+          horizontalOffsets.map((offset) => luminance(canvas.width - 1 - offset, centerY)),
+          verticalOffsets.map((offset) => luminance(centerX, canvas.height - 1 - offset)),
+          horizontalOffsets.map((offset) => luminance(offset, centerY)),
+        ];
+        const normalizedInnerRimJumps = lines.flatMap((line) => {
+          const interiorLuma =
+            line.slice(4).reduce((total, value) => total + value, 0) / line.slice(4).length;
+          const lumaScale = Math.max(interiorLuma, 16);
+          return line
+            .slice(1, 5)
+            .map((value, index) => Math.abs(value - (line[index + 2] ?? value)) / lumaScale);
+        });
 
-        return { maxInnerRimLumaJump: Math.max(...innerRimJumps) };
+        return {
+          maxNormalizedInnerRimLumaJump: Math.max(...normalizedInnerRimJumps),
+        };
       }, screenshot.toString('base64'));
 
-      expect(profile.maxInnerRimLumaJump).toBeLessThan(30);
+      expect(profile.maxNormalizedInnerRimLumaJump).toBeLessThan(2);
     });
   }
 });

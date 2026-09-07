@@ -16,6 +16,7 @@ const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.consumerParity;
 const language = ref('en');
 const activeNavigationId = ref('home');
+const hoveredNavigationId = ref<string | null>(null);
 const compactNavigation = ref(false);
 let compactNavigationQuery: MediaQueryList | undefined;
 
@@ -24,7 +25,7 @@ function updateCompactNavigation(query: MediaQueryList | MediaQueryListEvent): v
 }
 
 onMounted(() => {
-  compactNavigationQuery = window.matchMedia('(max-width: 40rem)');
+  compactNavigationQuery = window.matchMedia('(max-width: 520px)');
   updateCompactNavigation(compactNavigationQuery);
   compactNavigationQuery.addEventListener('change', updateCompactNavigation);
 });
@@ -59,11 +60,34 @@ const navigationItems = computed(
       },
     ] as const,
 );
+
+const activeNavigationIndex = computed(() => {
+  const index = navigationItems.value.findIndex((item) => item.id === activeNavigationId.value);
+  return Math.max(index, 0);
+});
+const hoverNavigationIndex = computed(() => {
+  if (hoveredNavigationId.value === null) {
+    return activeNavigationIndex.value;
+  }
+
+  const index = navigationItems.value.findIndex((item) => item.id === hoveredNavigationId.value);
+  return Math.max(index, 0);
+});
+const activeIndicatorStyle = computed(() => ({
+  left: `${activeNavigationIndex.value * 25}%`,
+}));
+const hoverIndicatorStyle = computed(() => ({
+  left: `${hoverNavigationIndex.value * 25}%`,
+}));
 const languageOptions = computed(
   () =>
     [
-      { value: 'en', label: compactNavigation.value ? 'EN' : 'English', ariaLabel: 'English' },
-      { value: 'zh', label: '中文' },
+      { value: 'en', label: 'EN', ariaLabel: props.locale === 'zh' ? '英语' : 'English' },
+      {
+        value: 'zh',
+        label: '中',
+        ariaLabel: props.locale === 'zh' ? '简体中文' : 'Simplified Chinese',
+      },
     ] as const,
 );
 </script>
@@ -134,23 +158,41 @@ const languageOptions = computed(
         >
           <UiControlSurface
             as="nav"
+            class="consumer-parity-dock"
             :aria-label="localize(copy.navigation.ariaLabel, props.locale)"
             data-consumer-parity="floating-navigation"
           >
+            <span
+              class="consumer-parity-dock__active-indicator"
+              aria-hidden="true"
+              :style="activeIndicatorStyle"
+            />
+            <span
+              class="consumer-parity-dock__hover-indicator"
+              :class="{ 'consumer-parity-dock__hover-indicator--visible': hoveredNavigationId !== null }"
+              aria-hidden="true"
+              :style="hoverIndicatorStyle"
+            />
             <UiNavigationItem
               v-for="item in navigationItems"
               :key="item.id"
+              class="consumer-parity-dock__item"
               href="#consumer-parity"
               :label="item.label"
               :active="item.id === activeNavigationId"
               :compact="compactNavigation"
               @click.prevent="activeNavigationId = item.id"
+              @pointerenter="hoveredNavigationId = item.id"
+              @pointerleave="hoveredNavigationId = null"
+              @focus="hoveredNavigationId = item.id"
+              @blur="hoveredNavigationId = null"
             >
               <template #icon><LabIcon :name="item.icon" /></template>
             </UiNavigationItem>
             <template #trailing>
               <UiSegmentedControl
                 v-model="language"
+                class="consumer-parity-dock__language"
                 :aria-label="localize(copy.navigation.languageLabel, props.locale)"
                 :options="languageOptions"
               />

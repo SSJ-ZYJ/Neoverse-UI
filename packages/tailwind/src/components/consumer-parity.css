@@ -1,0 +1,304 @@
+/* Consumer-only dock composition mirrors the public Neoverse surface without
+     changing the shared control geometry. */
+.consumer-parity-dock.material-glass-subtle {
+  box-sizing: border-box;
+  /* Give only the outer silhouette a restrained liquid-glass refraction. */
+  --neoverse-material-edge-refraction-opacity: 0.24;
+  --neoverse-material-edge-refraction-width: 1.25px;
+  --neoverse-material-edge-refraction-softness: blur(4px);
+
+  font-family:
+    'Inter Variable', Inter, 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 24.8px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: auto;
+
+  width: max-content;
+  max-width: calc(100vw - 19.2px);
+  min-height: 0;
+  gap: 8px;
+  padding: 8.8px;
+  isolation: isolate;
+  border: 1px solid rgba(219, 234, 254, 0.08);
+  border-radius: 12px;
+  background:
+    radial-gradient(120% 150% at 7% -45%, rgba(88, 195, 255, 0.03), transparent 52%),
+    radial-gradient(105% 150% at 94% 145%, rgba(61, 214, 166, 0.02), transparent 52%),
+    linear-gradient(
+      115deg,
+      rgba(255, 255, 255, 0.01),
+      rgba(255, 255, 255, 0.004) 48%,
+      transparent 76%
+    ),
+    rgb(152 186 220 / 4%);
+  box-shadow:
+    0 18px 42px -20px rgba(0, 0, 0, 0.48),
+    0 6px 18px -12px rgba(0, 0, 0, 0.58);
+  -webkit-backdrop-filter: blur(12px) saturate(128%) brightness(104%);
+  backdrop-filter: blur(12px) saturate(128%) brightness(104%);
+}
+
+.consumer-parity-dock .ui-control-surface__group--primary {
+  position: relative;
+  display: grid;
+  width: 352px;
+  height: 38.4px;
+  min-width: 0;
+  flex: 0 0 352px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 0;
+}
+
+.consumer-parity-dock .ui-control-surface__group--trailing {
+  display: inline-flex;
+  height: 38.4px;
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0;
+  padding: 3.52px;
+  border: 1px solid rgba(219, 234, 254, 0.09);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.consumer-parity-dock .ui-control-surface__divider {
+  width: 1px;
+  height: 22.4px;
+  flex: 0 0 1px;
+  margin-inline: 1.28px;
+  background: rgba(219, 234, 254, 0.14);
+}
+
+.consumer-parity-dock .consumer-parity-dock__item.ui-button.ui-navigation-item {
+  z-index: 2;
+  flex: 0 1 auto;
+
+  place-self: stretch center;
+  width: calc(100% - 7.2px);
+  height: 100%;
+  min-height: 0;
+  box-sizing: border-box;
+  gap: 8px;
+  padding: 6.4px 11.2px 8px;
+  overflow: visible;
+  isolation: auto;
+  border: 0;
+  border-radius: 9.12px;
+  background: transparent;
+  background-clip: border-box;
+  box-shadow: none;
+  --neoverse-material-edge-refraction-opacity: 0;
+
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  color: var(--neoverse-color-text-muted);
+  font-family: inherit;
+  font-size: 12.48px;
+  font-weight: 650;
+  line-height: 12.48px;
+  transition:
+    color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.consumer-parity-dock
+  .consumer-parity-dock__item.ui-button.ui-navigation-item.ui-navigation-item--active {
+  color: var(--neoverse-color-accent-secondary);
+  background: var(--neoverse-control-active-background);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+.consumer-parity-dock
+  .consumer-parity-dock__item.ui-button.ui-navigation-item:not(.ui-navigation-item--active) {
+  border: 0;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
+}
+
+.consumer-parity-dock .consumer-parity-dock__item > .ui-button__edge-field,
+.consumer-parity-dock .consumer-parity-dock__item::before,
+.consumer-parity-dock .consumer-parity-dock__item::after,
+.consumer-parity-dock .ui-navigation-item__indicator {
+  display: none;
+}
+
+.consumer-parity-dock .consumer-parity-dock__item .ui-action__leading > svg {
+  width: 17.28px;
+  height: 17.28px;
+}
+
+.consumer-parity-dock .consumer-parity-dock__item .ui-action__content {
+  flex: 0 0 auto;
+}
+
+.consumer-parity-dock .consumer-parity-dock__item .ui-navigation-item__label {
+  display: block;
+  flex: 0 0 auto;
+}
+
+.consumer-parity-dock__active-indicator,
+.consumer-parity-dock__hover-indicator {
+  position: absolute;
+  left: 0;
+  pointer-events: none;
+}
+
+.consumer-parity-dock__active-indicator {
+  z-index: 3;
+  bottom: 1.28px;
+  width: 25%;
+  height: 3.2px;
+  transition: left 520ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.consumer-parity-dock__active-indicator::after {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 27.2px;
+  height: 3.2px;
+  border-radius: 999px;
+  background: var(--neoverse-color-accent-secondary);
+  content: '';
+  transform: translateX(-50%);
+}
+
+.consumer-parity-dock__hover-indicator {
+  z-index: 1;
+  top: 0;
+  width: calc(25% - 7.2px);
+  height: 100%;
+  margin-left: 3.6px;
+  border-radius: 9.12px;
+  background: rgba(56, 189, 248, 0.1);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  opacity: 0;
+  transition:
+    left 320ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.consumer-parity-dock__hover-indicator--visible {
+  opacity: 1;
+}
+
+.consumer-parity-dock .consumer-parity-dock__language.ui-segmented-control {
+  display: inline-flex;
+  width: 83.84px;
+  height: 29.6px;
+  align-items: center;
+  gap: 3.84px;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.consumer-parity-dock .consumer-parity-dock__language .ui-segmented-control__options {
+  width: 83.84px;
+  height: 29.6px;
+  gap: 3.84px;
+}
+
+.consumer-parity-dock .consumer-parity-dock__language .ui-segmented-control__slider {
+  width: 40px;
+  height: 29.6px;
+  border: 0;
+  border-radius: 9.12px;
+  background: var(--neoverse-control-active-background);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  transform: translateX(calc(var(--segment-index) * (100% + 3.84px)));
+  transition: transform 480ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.consumer-parity-dock .consumer-parity-dock__language .ui-segmented-control__option {
+  width: 40px;
+  min-width: 40px;
+  height: 29.6px;
+  box-sizing: border-box;
+  padding: 5.12px 9.92px;
+  border: 0;
+  border-radius: 9.12px;
+  background: transparent;
+  color: var(--neoverse-color-text-muted);
+  font-family: inherit;
+  -webkit-font-smoothing: auto;
+  font-size: 11.2px;
+  font-weight: 750;
+  line-height: 11.2px;
+  transition:
+    color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    background 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.consumer-parity-dock .consumer-parity-dock__language .ui-segmented-control__option--active {
+  color: var(--neoverse-color-accent-secondary);
+}
+
+@media (hover: hover) {
+  .consumer-parity-dock
+    .consumer-parity-dock__item.ui-navigation-item:not(.ui-navigation-item--active):hover {
+    color: var(--neoverse-color-text-primary);
+    background: transparent;
+  }
+}
+
+@media (max-width: 520px) {
+  .consumer-parity-dock.material-glass-subtle {
+    gap: 5.12px;
+    padding: 7.2px;
+  }
+
+  .consumer-parity-dock .ui-control-surface__group--primary {
+    width: 179.2px;
+    flex-basis: 179.2px;
+  }
+
+  .consumer-parity-dock .consumer-parity-dock__item.ui-button.ui-navigation-item {
+    width: calc(100% - 4.48px);
+    gap: 0;
+    padding: 6.08px 8px 7.68px;
+  }
+
+  .consumer-parity-dock .consumer-parity-dock__item .ui-navigation-item__label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .consumer-parity-dock__active-indicator::after {
+    width: 20px;
+  }
+
+  .consumer-parity-dock__hover-indicator {
+    width: calc(25% - 4.48px);
+    margin-left: 2.24px;
+  }
+
+  .consumer-parity-dock .ui-control-surface__divider {
+    height: 19.2px;
+  }
+
+  .consumer-parity-dock .ui-control-surface__group--trailing {
+    padding: 2.88px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .consumer-parity-dock__active-indicator,
+  .consumer-parity-dock__hover-indicator,
+  .consumer-parity-dock .consumer-parity-dock__language .ui-segmented-control__slider {
+    transition: none;
+  }
+}
