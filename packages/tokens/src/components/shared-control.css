@@ -18,6 +18,9 @@
         transparent 100%
       ),
       color-mix(in srgb, var(--neoverse-color-surface-glass) 72%, transparent);
+    /* The glass plate lives in background-color; the gradient layers stay in
+       background-image so dark can bake its dense fill under the sheen. */
+    --neoverse-control-secondary-fill: transparent;
     --neoverse-control-secondary-hover-background:
       linear-gradient(
         145deg,
@@ -25,6 +28,7 @@
         transparent 100%
       ),
       color-mix(in srgb, var(--neoverse-color-surface-glass) 72%, transparent);
+    --neoverse-control-secondary-hover-fill: transparent;
     --neoverse-control-secondary-shadow:
       inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-border-interactive) 26%, transparent),
       inset 1px 0 3px color-mix(in srgb, var(--neoverse-color-border-interactive) 20%, transparent),

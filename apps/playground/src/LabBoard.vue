@@ -8,7 +8,7 @@ import { localize } from './playground-content';
 const defaultModule: ModuleId = labModules[0].id;
 const isEmbedded = window.parent !== window;
 const locale = frameLocale;
-const activeModuleId = ref<ModuleId>(moduleFromHash());
+const activeModuleId = ref<ModuleId>(moduleFromHash() ?? defaultModule);
 const activeModule = ref(labModules.find((module) => module.id === activeModuleId.value));
 const boardElement = ref<HTMLElement | null>(null);
 
@@ -21,13 +21,19 @@ function isModuleId(value: unknown): value is ModuleId {
   return typeof value === 'string' && labModules.some((module) => module.id === value);
 }
 
-function moduleFromHash(): ModuleId {
+/* Section anchors inside a module (e.g. #controls-action) must not flip the
+   board to another module; only real module hashes route the frame. */
+function moduleFromHash(): ModuleId | null {
   const value = window.location.hash.slice(1);
-  return isModuleId(value) ? value : defaultModule;
+  return isModuleId(value) ? value : null;
 }
 
 function syncActiveModule(): void {
   const nextModuleId = moduleFromHash();
+  if (nextModuleId === null) {
+    return;
+  }
+
   activeModuleId.value = nextModuleId;
   activeModule.value = labModules.find((module) => module.id === nextModuleId);
 }

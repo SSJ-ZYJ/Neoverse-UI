@@ -195,6 +195,21 @@ describe('Glass renderer', () => {
     renderer.destroy();
   });
 
+  it('leaves CSS-selected surfaces on the library edge field', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-elevated';
+    glass.dataset.neoverseGlassEdgePass = 'css';
+    setRect(glass, {});
+    document.body.append(glass);
+
+    const renderer = createTestRenderer();
+    renderer.mount();
+
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
   it('uses the fixed canvas viewport and clips each edge draw to its surface', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
@@ -461,6 +476,72 @@ describe('Glass renderer', () => {
     expect(glassFragmentShader).toContain(
       'color = mix(neutralEdgeColor, color, chromaticEdgeStrength);',
     );
+  });
+
+  it('tracks moving glass during CSS transitions and stops repainting when they finish', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const page = document.createElement('section');
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    page.append(glass);
+    document.body.append(page);
+    setRect(glass, { left: 20 });
+    let running = true;
+    Object.defineProperty(page, 'getAnimations', {
+      value: () => (running ? [{ playState: 'running' }] : []),
+    });
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    const renderer = createTestRenderer();
+    renderer.mount();
+    page.dispatchEvent(new Event('transitionrun', { bubbles: true }));
+    expect(frames.length).toBe(1);
+    frames.shift()?.(0);
+    setRect(glass, { left: 80 });
+    gl.uniform4f.mockClear();
+    frames.shift()?.(16);
+    expect(gl.uniform4f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_rect' }),
+      80,
+      0,
+      240,
+      120,
+    );
+    running = false;
+    glass.remove();
+    gl.drawArrays.mockClear();
+    gl.clear.mockClear();
+    frames.shift()?.(32);
+    expect(gl.clear).toHaveBeenCalledWith(gl.COLOR_BUFFER_BIT);
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+    expect(frames).toHaveLength(0);
+  });
+
+  it('fades glass edges with the surface and its ancestors, including fully hidden pages', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const page = document.createElement('section');
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-elevated';
+    glass.style.opacity = '0.5';
+    page.style.opacity = '0.5';
+    page.append(glass);
+    document.body.append(page);
+    setRect(glass, {});
+    const renderer = createTestRenderer();
+    renderer.mount();
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_opacity' }),
+      0.125,
+    );
+    page.style.opacity = '0';
+    gl.drawArrays.mockClear();
+    renderer.refresh();
+    expect(gl.drawArrays).not.toHaveBeenCalled();
   });
 
   it('refreshes from the window scroll event through one animation frame', () => {

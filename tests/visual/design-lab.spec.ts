@@ -64,6 +64,20 @@ test('consumer parity exposes destination and current-page semantics', async ({ 
     'Email',
     'GitHub',
   ]);
+  expect(
+    await heroActions.evaluateAll((elements) =>
+      elements.map((element) =>
+        [...element.classList].find((className) => className.startsWith('ui-button--')),
+      ),
+    ),
+  ).toEqual([
+    'ui-button--primary',
+    'ui-button--secondary',
+    'ui-button--secondary',
+    'ui-button--secondary',
+    'ui-button--secondary',
+    'ui-button--secondary',
+  ]);
 
   const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
   await expect(navigation).toBeVisible();
@@ -122,20 +136,28 @@ test('consumer parity dock moves one active indicator', async ({ page }) => {
   expect(typography.linkFontFamily).not.toContain('Noto Sans SC Variable');
   expect(typography.labelDisplay).toBe('block');
   expect(typography.labelFlex).toBe('0 0 auto');
-  const edgeMaterial = await navigation.evaluate((element) => ({
-    dock: getComputedStyle(element).getPropertyValue('--neoverse-material-edge-refraction-opacity'),
-    width: getComputedStyle(element).getPropertyValue('--neoverse-material-edge-refraction-width'),
-    softness: getComputedStyle(element).getPropertyValue(
-      '--neoverse-material-edge-refraction-softness',
-    ),
-    button: getComputedStyle(
-      element.querySelector('.consumer-parity-dock__item') as HTMLElement,
-    ).getPropertyValue('--neoverse-material-edge-refraction-opacity'),
-  }));
+  const edgeMaterial = await navigation.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const edge = getComputedStyle(element, '::before');
+    return {
+      dock: style.getPropertyValue('--neoverse-material-edge-refraction-opacity'),
+      width: style.getPropertyValue('--neoverse-material-edge-refraction-width'),
+      softness: style.getPropertyValue('--neoverse-material-edge-refraction-softness'),
+      button: getComputedStyle(
+        element.querySelector('.consumer-parity-dock__item') as HTMLElement,
+      ).getPropertyValue('--neoverse-material-edge-refraction-opacity'),
+      edgePass: element.getAttribute('data-neoverse-glass-edge-pass'),
+      edgeDisplay: edge.display,
+      edgeFilter: edge.backdropFilter,
+    };
+  });
   expect(Number(edgeMaterial.dock.trim())).toBe(0.24);
   expect(edgeMaterial.width.trim()).toBe('1.25px');
   expect(edgeMaterial.softness.trim()).toBe('blur(4px)');
   expect(edgeMaterial.button.trim()).toBe('0');
+  expect(edgeMaterial.edgePass).toBe('css');
+  expect(edgeMaterial.edgeDisplay).toBe('block');
+  expect(edgeMaterial.edgeFilter).toContain('blur');
 
   await expect(indicator).toHaveCount(1);
   const itemIndicators = navigation.locator('.ui-navigation-item__indicator');
@@ -162,6 +184,48 @@ test('consumer parity dock moves one active indicator', async ({ page }) => {
     'aria-current',
     'page',
   );
+});
+
+test('consumer parity dock keeps parent Glass stable on item hover', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name === 'mobile', 'Pointer hover is desktop-only.');
+  await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
+    waitUntil: 'domcontentloaded',
+  });
+  await page.evaluate(waitForStableAssets);
+
+  const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
+  const item = navigation.getByRole('link', { name: 'Home' });
+  await expect(item).toBeVisible();
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(80);
+  const before = await navigation.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      background: style.backgroundColor,
+      border: style.borderColor,
+      shadow: style.boxShadow,
+      edgeDisplay: getComputedStyle(element, '::before').display,
+    };
+  });
+  const box = await item.boundingBox();
+  expect(box).not.toBeNull();
+  if (box === null) {
+    return;
+  }
+
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.waitForTimeout(260);
+  const after = await navigation.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      background: style.backgroundColor,
+      border: style.borderColor,
+      shadow: style.boxShadow,
+      edgeDisplay: getComputedStyle(element, '::before').display,
+    };
+  });
+
+  expect(after).toEqual(before);
 });
 
 for (const theme of themes) {
@@ -342,7 +406,7 @@ for (const theme of themes) {
 }
 
 for (const theme of themes) {
-  test(`ghost button keeps a visible material boundary / ${theme}`, async ({ page }) => {
+  test(`ghost button keeps a theme-appropriate material boundary / ${theme}`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(`/frame?theme=${theme}&lang=zh#card`, {
       waitUntil: 'domcontentloaded',
@@ -361,7 +425,11 @@ for (const theme of themes) {
       };
     });
 
-    expect(boundary.borderColor).not.toBe('rgba(0, 0, 0, 0)');
+    if (theme === 'dark') {
+      expect(boundary.borderColor).toBe('rgba(0, 0, 0, 0)');
+    } else {
+      expect(boundary.borderColor).not.toBe('rgba(0, 0, 0, 0)');
+    }
     expect(boundary.boxShadow).not.toBe('none');
     expect(boundary.refractionOpacity).toBeGreaterThan(0);
   });
@@ -507,7 +575,7 @@ test.describe('wide WebGL Glass edge', () => {
   }
 });
 
-test('button press surface is transparent on the first frame / dark', async ({ page }) => {
+test('button press keeps the glass plate and reaches full press glow / dark', async ({ page }) => {
   await page.goto('/frame?theme=dark&lang=en#controls', {
     waitUntil: 'domcontentloaded',
   });
@@ -526,20 +594,76 @@ test('button press surface is transparent on the first frame / dark', async ({ p
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.waitForTimeout(250);
   await page.mouse.down();
+  /* The press glow fades in over motion-fast; sample after the transition. */
+  await page.waitForTimeout(450);
   try {
     const press = await button.evaluate((element) => {
       const style = getComputedStyle(element);
+      const alphaMatch = style.backgroundColor.match(/\/\s*([0-9.]+)\)/);
+      const pressStyle = getComputedStyle(element, '::after');
       return {
         active: element.matches(':active'),
         backgroundColor: style.backgroundColor,
+        backgroundAlpha:
+          alphaMatch === null
+            ? style.backgroundColor === 'transparent'
+              ? 0
+              : 1
+            : Number(alphaMatch[1]),
+        pressGlowBackground: pressStyle.backgroundImage,
+        pressGlowOpacity: pressStyle.opacity,
       };
     });
 
     expect(press.active).toBe(true);
-    expect(press.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    /* Dark buttons keep their dense glass plate while pressed; the press
+       feedback is the ::after glow reaching full opacity above it. */
+    expect(press.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(press.backgroundAlpha).toBeLessThan(0.22);
+    expect(press.pressGlowBackground).not.toBe('none');
+    expect(press.pressGlowOpacity).toBe('1');
   } finally {
     await page.mouse.up();
   }
+});
+
+test('dark button variants keep translucent glass surfaces', async ({ page }) => {
+  await page.goto('/frame?theme=dark&lang=en#controls', {
+    waitUntil: 'domcontentloaded',
+  });
+  await page.evaluate(waitForStableAssets);
+
+  const surfaces = await page.locator('#controls-button .ui-button').evaluateAll((elements) =>
+    elements.slice(0, 3).map((element) => {
+      const style = getComputedStyle(element);
+      const slashAlpha = style.backgroundColor.match(/\/\s*([0-9.]+)\)/)?.[1];
+      const rgbaAlpha = style.backgroundColor.match(/,\s*([0-9.]+)\)$/)?.[1];
+      return {
+        variant: [...element.classList].find((className) => className.startsWith('ui-button--')),
+        backgroundAlpha:
+          slashAlpha === undefined
+            ? rgbaAlpha === undefined
+              ? style.backgroundColor === 'transparent'
+                ? 0
+                : 1
+              : Number(rgbaAlpha)
+            : Number(slashAlpha),
+        borderColor: style.borderColor,
+        backdropFilter: style.backdropFilter,
+      };
+    }),
+  );
+
+  expect(surfaces).toHaveLength(3);
+  expect(surfaces.map(({ variant }) => variant)).toEqual([
+    'ui-button--primary',
+    'ui-button--secondary',
+    'ui-button--ghost',
+  ]);
+  expect(surfaces[0]?.backgroundAlpha).toBeLessThan(0.22);
+  expect(surfaces[1]?.backgroundAlpha).toBeLessThan(0.22);
+  expect(surfaces[2]?.borderColor).toBe('rgba(0, 0, 0, 0)');
+  expect(surfaces.every(({ backdropFilter }) => backdropFilter.includes('blur(14px)'))).toBe(true);
 });
 
 test('touch density keeps the compact control geometry and adds a transparent hit area', async ({

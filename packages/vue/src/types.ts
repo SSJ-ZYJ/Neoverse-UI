@@ -52,9 +52,10 @@ export interface BadgeProps {
   size?: BadgeSize;
 }
 
-export type GlassSurfaceVariant = 'subtle' | 'elevated' | 'immersive';
+export type GlassSurfaceVariant = 'subtle' | 'elevated' | 'card' | 'immersive';
 
 export interface GlassSurfaceProps {
+  as?: string | Component;
   variant?: GlassSurfaceVariant;
 }
 export interface ControlSurfaceProps {
@@ -99,4 +100,11 @@ export interface SkeletonProps {
   width?: string | number;
   height?: string | number;
   radius?: string;
+}
+
+export interface ScrollbarProps {
+  autoHideMs?: number;
+  minThumbRatio?: number;
+  refreshKey?: string | number;
+  hideNative?: boolean;
 }

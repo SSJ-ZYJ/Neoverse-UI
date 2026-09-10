@@ -1,6 +1,12 @@
 @layer neoverse.tokens {
   :root {
+    /* The active plate mirrors the shared button material: an accent sheen in
+       background-image over a plate in background-color. Light keeps the plate
+       transparent so the quiet accent tint stays; dark bakes the same dense
+       glass fill as regular buttons and carries the navigation identity in the
+       foreground color and the selected indicator bar. */
     --neoverse-navigation-item-active-background: var(--neoverse-control-active-background);
+    --neoverse-navigation-item-active-fill: transparent;
     --neoverse-navigation-item-active-foreground: var(
       --neoverse-control-segmented-active-foreground
     );

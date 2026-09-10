@@ -23,12 +23,12 @@ export type {
   GlassSurfaceVariant,
   IconButtonProps,
   NavigationItemProps,
+  ScrollbarProps,
   SegmentedControlProps,
   SegmentedControlSize,
   SegmentOption,
   SkeletonEffect,
   SkeletonProps,
-  SkeletonVariant,
   StatusIndicatorProps,
   StatusIndicatorSize,
   StatusIndicatorStatus,
@@ -41,6 +41,7 @@ export { default as UiControlSurface } from './UiControlSurface.vue';
 export { default as UiGlassSurface } from './UiGlassSurface.vue';
 export { default as UiIconButton } from './UiIconButton.vue';
 export { default as UiNavigationItem } from './UiNavigationItem.vue';
+export { default as UiScrollbar } from './UiScrollbar.vue';
 export { default as UiSegmentedControl } from './UiSegmentedControl.vue';
 export { default as UiSkeleton } from './UiSkeleton.vue';
 export { default as UiStatusIndicator } from './UiStatusIndicator.vue';

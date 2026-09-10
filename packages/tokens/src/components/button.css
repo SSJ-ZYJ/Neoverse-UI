@@ -16,6 +16,10 @@
        Ghost reuses that edge without adding a filled plane. */
     --neoverse-control-button-edge: var(--neoverse-control-secondary-shadow);
     --neoverse-control-button-edge-active: var(--neoverse-control-active-shadow);
+    --neoverse-control-button-edge-hover: var(--neoverse-control-button-edge);
+    /* Buttons need a stronger backdrop sample than segmented controls so the
+       frosted plate remains visible at compact control sizes. */
+    --neoverse-control-button-filter: var(--neoverse-control-secondary-filter);
     --neoverse-control-button-edge-carrier: color-mix(
       in srgb,
       var(--neoverse-color-border-interactive) 28%,
@@ -53,6 +57,11 @@
         color-mix(in srgb, var(--neoverse-color-border-interactive) 14%, transparent),
         transparent 72%
       );
+    /* Keep the refraction field theme-owned and restrained. Dark and light
+       can tune its opacity independently without painting a geometric border. */
+    --neoverse-control-button-edge-refraction-opacity: var(
+      --neoverse-material-edge-refraction-opacity-subtle
+    );
     --neoverse-control-button-hover-background: var(--neoverse-control-active-background);
     /* Pressed buttons use an accent field over the surrounding surface. Do
        not reintroduce the neutral glass plane here: on vivid toolbars it
@@ -61,8 +70,9 @@
       var(--neoverse-control-active-background), transparent;
     --neoverse-control-button-ghost-active-background:
       var(--neoverse-control-active-background), transparent;
-    /* Ghost keeps the surrounding surface visible while the component layer
-       supplies a quieter outlined boundary. */
+    /* Ghost keeps the surrounding surface visible while each theme decides
+       whether its quiet boundary should be visible. */
+    --neoverse-control-ghost-border: var(--neoverse-color-border-strong);
     --neoverse-control-ghost-background: transparent;
 
     /* Button-only foreground and filter states. */

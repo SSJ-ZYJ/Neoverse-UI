@@ -50,6 +50,11 @@
       var(--neoverse-color-surface-glass) 88%,
       var(--neoverse-color-accent-primary) 12%
     );
+    --neoverse-material-tint-card: color-mix(
+      in srgb,
+      var(--neoverse-color-surface-glass) 88%,
+      var(--neoverse-color-accent-primary) 12%
+    );
     --neoverse-material-tint-immersive: color-mix(
       in srgb,
       var(--neoverse-color-surface-glass) 82%,
@@ -352,6 +357,53 @@
     --neoverse-material-glass-elevated-refraction-gradient: var(
       --neoverse-material-refraction-gradient-elevated
     );
+
+    /* Glass Card sits between elevated and immersive: the product card
+       material. A hairline border and directional neutral sheen replace the
+       purely environmental edge of elevated, while the sampling stays calmer
+       than immersive. Dark restores theme-specific values in themes/dark.css. */
+    --neoverse-material-glass-card-background: var(--neoverse-color-surface-glass);
+    --neoverse-material-glass-card-background-fallback: var(--neoverse-color-surface-raised);
+    --neoverse-material-glass-card-transparency: var(--neoverse-material-transparency-elevated);
+    --neoverse-material-glass-card-blur: var(--neoverse-material-blur-lg);
+    --neoverse-material-glass-card-saturation: var(--neoverse-material-saturation-elevated);
+    --neoverse-material-glass-card-border: var(--neoverse-color-border-subtle);
+    --neoverse-material-glass-card-border-width: var(--neoverse-border-width-thin);
+    --neoverse-material-glass-card-edge-highlight: var(--neoverse-material-edge-highlight-subtle);
+    --neoverse-material-glass-card-shadow: var(--neoverse-shadow-card);
+    --neoverse-material-glass-card-filter: blur(var(--neoverse-material-blur-lg))
+      saturate(var(--neoverse-material-saturation-elevated)) brightness(106%) contrast(103%);
+    --neoverse-material-glass-card-edge-filter: var(--neoverse-material-edge-filter-subtle);
+    --neoverse-material-glass-card-tint: var(--neoverse-material-tint-card);
+    --neoverse-material-glass-card-inner-glow: var(--neoverse-material-inner-glow-subtle);
+    --neoverse-material-glass-card-seam-glow: var(--neoverse-material-seam-glow-subtle);
+    --neoverse-material-glass-card-bloom: var(--neoverse-material-bloom-elevated);
+    --neoverse-material-glass-card-edge-refraction-width: var(
+      --neoverse-material-edge-refraction-width-subtle
+    );
+    --neoverse-material-glass-card-edge-refraction-softness: var(
+      --neoverse-material-edge-refraction-softness-subtle
+    );
+    --neoverse-material-glass-card-edge-refraction-opacity: var(
+      --neoverse-material-edge-refraction-opacity-subtle
+    );
+    --neoverse-material-glass-card-edge-refraction-carrier: var(
+      --neoverse-material-edge-refraction-carrier-subtle
+    );
+    --neoverse-material-glass-card-refraction-gradient:
+      linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--neoverse-color-text-secondary) 9%, transparent),
+        transparent 30%,
+        transparent 68%,
+        color-mix(in srgb, var(--neoverse-color-text-muted) 5%, transparent)
+      ),
+      var(--neoverse-material-refraction-gradient-subtle);
+    --neoverse-material-glass-card-hover-transparency: var(
+      --neoverse-material-glass-card-transparency
+    );
+    --neoverse-material-glass-card-hover-border: var(--neoverse-material-glass-card-border);
+    --neoverse-material-glass-card-hover-shadow: var(--neoverse-material-glass-card-shadow);
     --neoverse-material-glass-elevated-hover-transparency: var(
       --neoverse-material-glass-elevated-transparency
     );

@@ -323,9 +323,11 @@ function handleLocationChange(): void {
   } else if (isModuleId(hash)) {
     currentModuleId.value = hash;
     persistState({ module: hash });
-  } else {
+  } else if (currentModuleId.value === null) {
+    /* Unknown hashes (deep links, third-party anchors) fall back to overview
+       only when no module is open; otherwise the hash is an in-page anchor
+       (e.g. #controls-action) and the open module must stay mounted. */
     replaceLocation(null);
-    currentModuleId.value = null;
   }
 
   frameHeight.value = 0;

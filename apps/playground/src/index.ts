@@ -10,6 +10,7 @@ const port = Number.parseInt(process.env.PORT ?? '3000', 10);
 const liveReload = process.env.LIVE_RELOAD === '1';
 const stylesheetPath = new URL('../../../packages/tailwind/dist/playground.css', import.meta.url);
 const clientBundlePath = new URL('../dist/assets/playground.js', import.meta.url);
+const scopedCssPath = new URL('../dist/assets/main.css', import.meta.url);
 const materialBackgroundLightPath = new URL(
   '../dist/assets/material-background-light.png',
   import.meta.url,
@@ -58,6 +59,7 @@ const renderDocument = ({ theme, locale }: RenderOptions): string => {
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${title}</title>
+    <link rel="stylesheet" href="/scoped.css" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body class="min-h-screen bg-surface-canvas font-sans text-primary antialiased">
@@ -108,6 +110,27 @@ const server = Bun.serve({
       }
 
       return new Response(stylesheet, {
+        headers: {
+          'cache-control': 'no-cache',
+          'content-type': 'text/css; charset=utf-8',
+        },
+      });
+    }
+
+    /* Vite compiles per-component <style> blocks into this separate asset;
+       it only exists when the client bundle carries scoped component css. */
+    if (url.pathname === '/scoped.css') {
+      const scopedCss = Bun.file(scopedCssPath);
+      if (!(await scopedCss.exists())) {
+        return new Response('', {
+          headers: {
+            'cache-control': 'no-cache',
+            'content-type': 'text/css; charset=utf-8',
+          },
+        });
+      }
+
+      return new Response(scopedCss, {
         headers: {
           'cache-control': 'no-cache',
           'content-type': 'text/css; charset=utf-8',

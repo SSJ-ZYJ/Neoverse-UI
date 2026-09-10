@@ -6,16 +6,25 @@ const glassClassNames = [
   'material-glass-subtle',
   'material-glass-elevated',
   'material-glass-immersive',
+  'material-glass-card',
 ] as const;
 const glassAliasNames = ['glass-card', 'glass-surface'] as const;
 const glassSelector = [...glassClassNames, ...glassAliasNames]
   .map((className) => `.${className}`)
   .join(', ');
+const cssEdgePassSelector = '[data-neoverse-glass-edge-pass="css"]';
 const reducedTransparencyQuery = '(prefers-reduced-transparency: reduce)';
 const maxDefaultDevicePixelRatio = 2;
 const quadPositions = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
-
-type GlassVariant = 'subtle' | 'elevated' | 'immersive';
+const motionEvents = [
+  'transitionrun',
+  'transitionend',
+  'transitioncancel',
+  'animationstart',
+  'animationend',
+  'animationcancel',
+] as const;
+type GlassVariant = 'subtle' | 'elevated' | 'immersive' | 'card';
 type Color = [number, number, number];
 type Radii = [number, number, number, number];
 
@@ -426,6 +435,16 @@ const readStyle = (
     return undefined;
   }
 
+  // The shared canvas is outside the surface's DOM subtree, so it must
+  // explicitly reproduce opacity applied to the surface and its ancestors.
+  let surfaceOpacity = Math.min(Math.max(parseFirstNumber(style.opacity, 1), 0), 1);
+  for (let ancestor = element.parentElement; ancestor !== null; ancestor = ancestor.parentElement) {
+    const ancestorStyle = view.getComputedStyle(ancestor);
+    if (ancestorStyle.display === 'none') return undefined;
+    surfaceOpacity *= Math.min(Math.max(parseFirstNumber(ancestorStyle.opacity, 1), 0), 1);
+  }
+  if (surfaceOpacity === 0) return undefined;
+
   const variant = getVariant(element) ?? 'subtle';
   const defaults = getDefaultEdgeValues(variant);
   const edgeWidth = Math.max(
@@ -482,7 +501,7 @@ const readStyle = (
     radii: getRadii(style),
     edgeWidth,
     softness,
-    opacity,
+    opacity: opacity * surfaceOpacity,
     carrier: carrierColor,
   };
 };
@@ -503,6 +522,19 @@ class GlassRendererImpl implements GlassRenderer {
   private mutationObserver: MutationObserver | undefined;
   private transparencyQuery: MediaQueryList | undefined;
   private animationFrame: number | undefined;
+  private readonly animatedElements = new Set<Element>();
+  private readonly handleMotion = (event: Event): void => {
+    const target = event.target as Element | null;
+    if (
+      !this.active ||
+      typeof target?.matches !== 'function' ||
+      (!target.closest(glassSelector) && !target.querySelector(glassSelector))
+    ) {
+      return;
+    }
+    this.animatedElements.add(target);
+    this.scheduleRefresh();
+  };
   private previousRendererAttribute: string | null = null;
   private readonly handleResize = (): void => this.scheduleRefresh();
   private readonly handleScroll = (): void => this.scheduleRefresh();
@@ -546,6 +578,9 @@ class GlassRendererImpl implements GlassRenderer {
     this.transparencyQuery = view?.matchMedia?.(reducedTransparencyQuery);
     this.transparencyQuery?.addEventListener('change', this.handleTransparencyChange);
     this.ownerDocument.addEventListener('scroll', this.handleScroll, true);
+    for (const event of motionEvents) {
+      this.ownerDocument.addEventListener(event, this.handleMotion, true);
+    }
     view?.addEventListener('scroll', this.handleScroll, { passive: true });
     view?.addEventListener('resize', this.handleResize);
     this.activate();
@@ -566,6 +601,9 @@ class GlassRendererImpl implements GlassRenderer {
     this.transparencyQuery?.removeEventListener('change', this.handleTransparencyChange);
     this.transparencyQuery = undefined;
     this.ownerDocument?.removeEventListener('scroll', this.handleScroll, true);
+    for (const event of motionEvents) {
+      this.ownerDocument?.removeEventListener(event, this.handleMotion, true);
+    }
     getWindow(this.ownerDocument)?.removeEventListener('scroll', this.handleScroll);
     getWindow(this.ownerDocument)?.removeEventListener('resize', this.handleResize);
     this.deactivate();
@@ -685,6 +723,7 @@ class GlassRendererImpl implements GlassRenderer {
       getWindow(this.ownerDocument)?.cancelAnimationFrame(this.animationFrame);
       this.animationFrame = undefined;
     }
+    this.animatedElements.clear();
     this.resizeObserver?.disconnect();
     this.resizeObserver = undefined;
     this.observedGlassElements.clear();
@@ -786,6 +825,19 @@ class GlassRendererImpl implements GlassRenderer {
     this.animationFrame = view.requestAnimationFrame(() => {
       this.animationFrame = undefined;
       this.refresh();
+      // CSS transforms/opacity do not emit DOM mutations or resize events.
+      // Repaint while affected surfaces move, then clear their final frame.
+      for (const element of this.animatedElements) {
+        if (
+          !element.isConnected ||
+          !element
+            .getAnimations?.()
+            .some((animation) => animation.playState === 'running' || animation.pending)
+        ) {
+          this.animatedElements.delete(element);
+        }
+      }
+      if (this.animatedElements.size > 0) this.scheduleRefresh();
     });
   }
 
@@ -925,6 +977,9 @@ class GlassRendererImpl implements GlassRenderer {
     const currentElements: HTMLElement[] = [];
 
     for (const element of elements) {
+      if (element.matches(cssEdgePassSelector)) {
+        continue;
+      }
       if (hasGlassAncestor(element)) {
         continue;
       }

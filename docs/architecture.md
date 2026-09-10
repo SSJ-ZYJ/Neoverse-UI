@@ -78,13 +78,16 @@ UiGlassSurface
 UiBadge
 UiStatusIndicator
 UiSkeleton
+UiScrollbar
 ```
 
-They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. `UiControlSurface` owns one Glass chrome boundary and optional trailing separation, while `UiStatusIndicator` leaves live-region announcements to the caller. `UiGlassSurface` accepts a Glass `variant`; the mounted runtime automatically discovers each eligible top-level Glass surface while CSS remains the baseline and fallback. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities. React remains Planned, but must preserve these public semantics rather than share Vue source.
+They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. `UiControlSurface` owns one Glass chrome boundary and optional trailing separation, while `UiStatusIndicator` leaves live-region announcements to the caller. `UiGlassSurface` accepts a Glass `variant`, supports a polymorphic `as` tag for semantic consumers, and lets the mounted runtime automatically discover each eligible top-level Glass surface while CSS remains the baseline and fallback. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities. React r…
+
+`UiScrollbar` owns the document-level immersive scrollbar runtime: geometry measurement, auto-hide, thumb dragging, track jumps, route/layout refreshes, and native-scrollbar visibility through the `hideNative` prop. Consumers may pass a `refreshKey` when a route transition changes the scrollable document.
 
 ## Material / Glass policy
 
-Material values are token-owned. Ordinary Surface Solid, Subtle, and Elevated use Tailwind composition. Glass uses `material-glass-subtle`, `material-glass-elevated`, and `material-glass-immersive`, with CSS as the complete baseline: opaque fallback, tint, backdrop sampling, saturation, directional refraction field, shadow, and reduced-transparency behavior.
+Material values are token-owned. Ordinary Surface Solid, Subtle, and Elevated use Tailwind composition. Glass uses `material-glass-subtle`, `material-glass-elevated`, `material-glass-card`, and `material-glass-immersive`, with CSS as the complete baseline: opaque fallback, tint, backdrop sampling, saturation, directional refraction field, shadow, and reduced-transparency behavior.
 
 `@neoverse-ui/glass-runtime` is an optional shared renderer, not a prerequisite for any base component. Its policy is:
 
@@ -92,11 +95,17 @@ Material values are token-owned. Ordinary Surface Solid, Subtle, and Elevated us
 | --- | --- | --- |
 | Subtle | CSS baseline | automatically discovered when the renderer is mounted |
 | Elevated | CSS baseline | automatically discovered when the renderer is mounted |
+| Card | CSS baseline | automatically discovered when the renderer is mounted |
 | Immersive | CSS baseline | automatically discovered when the renderer is mounted |
 
 `createGlassRenderer()` creates at most one non-interactive Canvas per Document, prefers WebGL2, falls back to WebGL1, and keeps CSS active if neither context works. It renders top-level eligible surfaces that are visible, non-zero, on-screen, and not hidden by computed style. Device Pixel Ratio is capped by `maxDevicePixelRatio` (default 2).
 
 The renderer listens for DOM, resize, scroll, and theme changes. `webglcontextlost` immediately removes the renderer marker and hides the Canvas so CSS takes over; `webglcontextrestored` rebuilds the shared pass. `prefers-reduced-transparency` keeps the renderer on CSS. The root `data-neoverse-glass-renderer` attribute and the Canvas `data-neoverse-glass-renderer-canvas` attribute expose the active state for development diagnostics.
+
+Compositions that need the complete CSS Glass edge while the shared renderer
+paints other surfaces may set `data-neoverse-glass-edge-pass="css"`. The
+renderer skips that surface, preserving the library's backdrop-filtered
+directional edge field without double-painting it with the Canvas pass.
 
 ## Motion
 

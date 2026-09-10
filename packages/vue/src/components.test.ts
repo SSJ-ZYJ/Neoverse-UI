@@ -9,6 +9,7 @@ import UiControlSurface from './UiControlSurface.vue';
 import UiGlassSurface from './UiGlassSurface.vue';
 import UiIconButton from './UiIconButton.vue';
 import UiNavigationItem from './UiNavigationItem.vue';
+import UiScrollbar from './UiScrollbar.vue';
 import UiSegmentedControl from './UiSegmentedControl.vue';
 import UiSkeleton from './UiSkeleton.vue';
 import UiStatusIndicator from './UiStatusIndicator.vue';
@@ -322,6 +323,18 @@ describe('display components', () => {
       expect.arrayContaining(['material-glass-immersive', 'rounded-card', 'p-4']),
     );
 
+    const glassCard = mount(UiGlassSurface, { props: { variant: 'card' } });
+    expect(glassCard.classes()).toEqual(
+      expect.arrayContaining(['material-glass-card', 'rounded-card', 'p-4']),
+    );
+    const semanticGlassCard = mount(UiGlassSurface, {
+      attrs: { 'aria-label': 'Project card' },
+      props: { as: 'article', variant: 'card' },
+    });
+    expect(semanticGlassCard.element.tagName).toBe('ARTICLE');
+    expect(semanticGlassCard.attributes('aria-label')).toBe('Project card');
+    expect(semanticGlassCard.classes()).toContain('material-glass-card');
+
     const card = mount(UiCard, { attrs: { class: 'max-w-container-sm' } });
     expect(card.classes()).toEqual(
       expect.arrayContaining(['ui-card', 'rounded-card', 'p-4', 'max-w-container-sm']),
@@ -369,6 +382,63 @@ describe('display components', () => {
   });
 });
 
+describe('UiScrollbar', () => {
+  it('tracks document geometry and owns native scrollbar visibility', async () => {
+    const root = document.documentElement;
+    Object.defineProperty(root, 'scrollHeight', { configurable: true, value: 1600 });
+    Object.defineProperty(root, 'clientHeight', { configurable: true, value: 800 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
+
+    const wrapper = mount(UiScrollbar, {
+      attachTo: document.body,
+      props: { autoHideMs: 0 },
+    });
+    await nextTick();
+
+    expect(wrapper.classes()).toContain('ui-scrollbar');
+    expect(wrapper.attributes('data-visible')).toBe('true');
+    expect(wrapper.get('.ui-scrollbar__thumb').attributes('style')).toContain('height: 50%');
+    expect(root.classList).toContain('ui-scrollbar-target');
+
+    wrapper.unmount();
+    expect(root.classList).not.toContain('ui-scrollbar-target');
+  });
+
+  it('maps thumb dragging and track jumps to document scrolling', async () => {
+    const root = document.documentElement;
+    Object.defineProperty(root, 'scrollHeight', { configurable: true, value: 1600 });
+    Object.defineProperty(root, 'clientHeight', { configurable: true, value: 800 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined);
+
+    const wrapper = mount(UiScrollbar, {
+      attachTo: document.body,
+      props: { autoHideMs: 0 },
+    });
+    await nextTick();
+
+    const track = wrapper.get('.ui-scrollbar');
+    const thumb = wrapper.get('.ui-scrollbar__thumb');
+    vi.spyOn(track.element, 'getBoundingClientRect').mockReturnValue({
+      top: 0,
+      height: 800,
+    } as DOMRect);
+    vi.spyOn(thumb.element, 'getBoundingClientRect').mockReturnValue({
+      top: 0,
+      height: 400,
+    } as DOMRect);
+
+    await thumb.trigger('pointerdown', { button: 0, clientY: 20, pointerId: 1 });
+    expect(wrapper.classes()).toContain('ui-scrollbar--dragging');
+
+    await thumb.trigger('pointermove', { clientY: 400, pointerId: 1 });
+    await thumb.trigger('pointerup', { pointerId: 1 });
+    expect(wrapper.classes()).not.toContain('ui-scrollbar--dragging');
+
+    await track.trigger('pointerdown', { button: 0, clientY: 700, pointerId: 2 });
+    expect(scrollTo).toHaveBeenCalled();
+  });
+});
 describe('UiSegmentedControl', () => {
   it('falls back to the compact size for unsupported values', () => {
     const wrapper = mount(UiSegmentedControl, {

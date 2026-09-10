@@ -10,7 +10,7 @@ const props = defineProps<LabModuleProps>();
 
 <template>
   <MaterialBackdrop>
-    <div class="grid gap-grid md:grid-cols-3">
+    <div class="grid gap-grid md:grid-cols-2 xl:grid-cols-4">
       <UiGlassSurface v-for="variant in glassVariants" :key="variant" :variant="variant">
         <div class="grid gap-2">
           <h3 class="text-label font-label text-primary">

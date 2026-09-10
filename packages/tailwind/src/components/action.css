@@ -55,13 +55,15 @@
   }
 
   .ui-action[aria-disabled='true'].ui-button--primary.material-glass-subtle:is(:hover, :active) {
-    background: var(--neoverse-control-primary-background);
+    background-image: var(--neoverse-control-primary-background);
+    background-color: var(--neoverse-control-secondary-fill);
     box-shadow: var(--neoverse-control-button-edge);
   }
 
   .ui-action[aria-disabled='true'].ui-button--secondary.material-glass-subtle:is(:hover, :active) {
     color: var(--neoverse-control-secondary-foreground);
-    background: var(--neoverse-control-secondary-background);
+    background-image: var(--neoverse-control-secondary-background);
+    background-color: var(--neoverse-control-secondary-fill);
     box-shadow: var(--neoverse-control-button-edge);
   }
 

@@ -17,7 +17,7 @@
   }
 
   .ui-button.material-glass-subtle {
-    --neoverse-material-filter: var(--neoverse-material-filter-subtle);
+    --neoverse-material-filter: var(--neoverse-control-button-filter);
     --neoverse-material-background-fallback: var(--neoverse-color-surface-raised);
     --neoverse-material-edge-refraction-width: var(
       --neoverse-material-edge-refraction-width-subtle
@@ -28,7 +28,7 @@
     --neoverse-material-tint: var(--neoverse-color-surface-raised);
     --neoverse-material-refraction-gradient: var(--neoverse-control-button-refraction-gradient);
     --neoverse-material-edge-refraction-opacity: var(
-      --neoverse-material-edge-refraction-opacity-subtle
+      --neoverse-control-button-edge-refraction-opacity
     );
     --neoverse-material-edge-refraction-carrier: var(--neoverse-control-button-edge-carrier);
     --neoverse-material-edge-filter: var(--neoverse-material-edge-filter-subtle);
@@ -48,8 +48,8 @@
        radius so pointer highlights cannot square off or escape the silhouette. */
     overflow: hidden;
     isolation: isolate;
-    -webkit-backdrop-filter: var(--neoverse-material-filter-subtle);
-    backdrop-filter: var(--neoverse-material-filter-subtle);
+    -webkit-backdrop-filter: var(--neoverse-control-button-filter);
+    backdrop-filter: var(--neoverse-control-button-filter);
   }
 
   /* This is an internal light field, not a second border. Its own radius
@@ -121,25 +121,26 @@
 
   .ui-button--primary.material-glass-subtle {
     color: var(--neoverse-control-primary-foreground);
-    background: var(--neoverse-control-primary-background);
+    background-image: var(--neoverse-control-primary-background);
+    background-color: var(--neoverse-control-secondary-fill);
     background-clip: padding-box;
   }
 
   .ui-button--secondary.material-glass-subtle {
     color: var(--neoverse-control-secondary-foreground);
-    background: var(--neoverse-control-secondary-background);
+    background-image: var(--neoverse-control-secondary-background);
+    background-color: var(--neoverse-control-secondary-fill);
     background-clip: padding-box;
   }
 
   .ui-button--ghost.material-glass-subtle {
-    /* Ghost stays unfilled, but it still needs a readable material boundary
-       on pale cards. Reuse the directional edge instead of adding a second
-       opaque surface or a closed bright ring. */
+    /* Ghost stays unfilled, but its theme-owned boundary can disappear on
+       dark glass without painting a second geometric ring. */
     --neoverse-material-edge-refraction-opacity: var(
       --neoverse-material-edge-refraction-opacity-subtle
     );
     --neoverse-material-shadow: var(--neoverse-control-button-edge);
-    border-color: var(--neoverse-color-border-strong);
+    border-color: var(--neoverse-control-ghost-border);
     color: var(--neoverse-control-ghost-foreground);
     background: var(--neoverse-control-ghost-background);
     background-clip: padding-box;
@@ -152,13 +153,18 @@
   }
 
   .ui-button--primary.material-glass-subtle:hover:not(:disabled) {
-    background: var(--neoverse-control-primary-hover-background);
+    --neoverse-material-shadow: var(--neoverse-control-button-edge-hover);
+    color: var(--neoverse-control-secondary-hover-foreground);
+    background-image: var(--neoverse-control-primary-hover-background);
+    background-color: var(--neoverse-control-secondary-hover-fill);
     background-clip: padding-box;
   }
 
   .ui-button--secondary.material-glass-subtle:hover:not(:disabled) {
+    --neoverse-material-shadow: var(--neoverse-control-button-edge-hover);
     color: var(--neoverse-control-secondary-hover-foreground);
-    background: var(--neoverse-control-secondary-hover-background);
+    background-image: var(--neoverse-control-secondary-hover-background);
+    background-color: var(--neoverse-control-secondary-hover-fill);
     background-clip: padding-box;
   }
 
@@ -174,14 +180,16 @@
 
   .ui-button--primary.material-glass-subtle:active:not(:disabled) {
     --neoverse-material-shadow: var(--neoverse-control-button-edge-active);
-    background: var(--neoverse-control-primary-active-background);
+    background-image: var(--neoverse-control-primary-active-background);
+    background-color: var(--neoverse-control-secondary-fill);
     background-clip: padding-box;
   }
 
   .ui-button--secondary.material-glass-subtle:active:not(:disabled) {
     --neoverse-material-shadow: var(--neoverse-control-button-edge-active);
     color: var(--neoverse-control-secondary-active-foreground);
-    background: var(--neoverse-control-button-active-background);
+    background-image: var(--neoverse-control-button-active-background);
+    background-color: var(--neoverse-control-secondary-fill);
     background-clip: padding-box;
   }
 

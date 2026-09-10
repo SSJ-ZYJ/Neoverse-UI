@@ -38,7 +38,9 @@
 
   .ui-navigation-item.ui-navigation-item--active.material-glass-subtle {
     color: var(--neoverse-navigation-item-active-foreground);
-    background: var(--neoverse-navigation-item-active-background);
+    background-image: var(--neoverse-navigation-item-active-background);
+    background-color: var(--neoverse-navigation-item-active-fill);
+    background-clip: padding-box;
     box-shadow: var(--neoverse-navigation-item-active-shadow);
   }
 

@@ -16,14 +16,14 @@ const copy = moduleCopy.navigationItem;
     :locale="props.locale"
   >
     <UiNavigationItem
-      href="#navigation-item"
+      href="#controls-navigation-item"
       :label="localize(copy.controls.home, props.locale)"
       active
     >
       <template #icon><LabIcon name="home" /></template>
     </UiNavigationItem>
     <UiNavigationItem
-      href="#navigation-item"
+      href="#controls-navigation-item"
       :label="localize(copy.controls.projects, props.locale)"
     >
       <template #icon><LabIcon name="folder" /></template>
@@ -36,14 +36,14 @@ const copy = moduleCopy.navigationItem;
     :locale="props.locale"
   >
     <UiNavigationItem
-      href="#navigation-item"
+      href="#controls-navigation-item"
       :label="localize(copy.controls.focus, props.locale)"
       compact
     >
       <template #icon><LabIcon name="target" /></template>
     </UiNavigationItem>
     <UiNavigationItem
-      href="#navigation-item"
+      href="#controls-navigation-item"
       :label="localize(copy.controls.activity, props.locale)"
       compact
       active
@@ -53,14 +53,17 @@ const copy = moduleCopy.navigationItem;
   </StateRow>
 
   <StateRow :label="copy.states.hover.label" :hint="copy.states.hover.hint" :locale="props.locale">
-    <UiNavigationItem href="#navigation-item" :label="localize(copy.controls.hover, props.locale)">
+    <UiNavigationItem
+      href="#controls-navigation-item"
+      :label="localize(copy.controls.hover, props.locale)"
+    >
       <template #icon><LabIcon name="target" /></template>
     </UiNavigationItem>
   </StateRow>
 
   <StateRow :label="copy.states.focus.label" :hint="copy.states.focus.hint" :locale="props.locale">
     <UiNavigationItem
-      href="#navigation-item"
+      href="#controls-navigation-item"
       :label="localize(copy.controls.keyboardFocus, props.locale)"
     >
       <template #icon><LabIcon name="activity" /></template>
@@ -69,7 +72,7 @@ const copy = moduleCopy.navigationItem;
 
   <StateRow :label="copy.states.disabled.label" :locale="props.locale">
     <UiNavigationItem
-      href="#navigation-item"
+      href="#controls-navigation-item"
       :label="localize(copy.controls.disabled, props.locale)"
       disabled
     >

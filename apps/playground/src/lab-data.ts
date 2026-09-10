@@ -388,10 +388,11 @@ export const surfaceSamples = [
   },
 ];
 
-export const glassVariants = ['subtle', 'elevated', 'immersive'] as const;
+export const glassVariants = ['subtle', 'elevated', 'card', 'immersive'] as const;
 export const glassVariantLabels: Record<(typeof glassVariants)[number], LocalizedText> = {
   subtle: tokenCopy.glassVariants.subtle,
   elevated: tokenCopy.glassVariants.elevated,
+  card: tokenCopy.glassVariants.card,
   immersive: tokenCopy.glassVariants.immersive,
 };
 export const motionBaseGroups = [

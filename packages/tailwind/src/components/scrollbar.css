@@ -75,4 +75,81 @@
       box-shadow: none;
     }
   }
+
+  .ui-scrollbar-target {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ui-scrollbar-target::-webkit-scrollbar {
+    display: none;
+    width: 0;
+    height: 0;
+  }
+
+  .ui-scrollbar {
+    --ui-scrollbar-inset: 0.72rem;
+    position: fixed;
+    z-index: var(--neoverse-layout-layer-toast);
+    top: max(var(--ui-scrollbar-inset), env(safe-area-inset-top));
+    right: max(0.35rem, env(safe-area-inset-right));
+    bottom: max(var(--ui-scrollbar-inset), env(safe-area-inset-bottom));
+    width: var(--neoverse-scrollbar-immersive-size);
+    border-radius: var(--neoverse-radius-pill);
+    cursor: pointer;
+    user-select: none;
+    transition:
+      opacity var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
+      background var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
+  }
+
+  .ui-scrollbar:hover,
+  .ui-scrollbar--dragging {
+    background: var(--neoverse-scrollbar-immersive-track);
+  }
+
+  .ui-scrollbar__thumb {
+    position: absolute;
+    left: 50%;
+    width: 0.3rem;
+    border-radius: var(--neoverse-radius-pill);
+    background: var(--neoverse-scrollbar-immersive-thumb-background);
+    box-shadow:
+      var(--neoverse-scrollbar-immersive-thumb-edge), var(--neoverse-scrollbar-immersive-thumb-glow);
+    cursor: grab;
+    touch-action: none;
+    transform: translateX(-50%);
+    transition:
+      width var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
+      background var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
+      box-shadow var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
+  }
+
+  .ui-scrollbar:hover .ui-scrollbar__thumb,
+  .ui-scrollbar--dragging .ui-scrollbar__thumb {
+    width: 0.42rem;
+    background: var(--neoverse-scrollbar-immersive-thumb-hover-background);
+    box-shadow:
+      var(--neoverse-scrollbar-immersive-thumb-edge),
+      0 0 1rem -0.35rem color-mix(in srgb, var(--neoverse-color-accent-primary) 60%, transparent);
+  }
+
+  .ui-scrollbar--dragging .ui-scrollbar__thumb {
+    background: var(--neoverse-scrollbar-immersive-thumb-active-background);
+    cursor: grabbing;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-scrollbar,
+    .ui-scrollbar__thumb {
+      transition: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ui-scrollbar__thumb {
+      background: ButtonText;
+      box-shadow: none;
+    }
+  }
 }

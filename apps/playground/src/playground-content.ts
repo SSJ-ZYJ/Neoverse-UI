@@ -406,6 +406,11 @@ export const moduleCopy = {
       'This card opts into a standard raised Surface; a Glass material remains an explicit UiGlassSurface choice.',
       '此卡片显式使用标准抬升 Surface；Glass 材质仍由 UiGlassSurface 明确选择。',
     ),
+    glassCard: localized('Glass card', '玻璃卡片'),
+    glassCardBody: localized(
+      'The card material tier: a neutral sheen over a translucent glass plane with a hairline border, inset edge highlight, and deep backdrop blur. Use via UiGlassSurface variant="card".',
+      'Card 材质档：半透明玻璃面上的中性光晕、发丝描边、内缘高光与深度背景模糊。通过 UiGlassSurface variant="card" 使用。',
+    ),
   },
   segmentedControl: {
     label: localized('SegmentedControl', '分段控件'),
@@ -935,6 +940,7 @@ export const tokenCopy = {
   glassVariants: {
     subtle: localized('Subtle', '弱化'),
     elevated: localized('Elevated', '抬升'),
+    card: localized('Card', '卡片'),
     immersive: localized('Immersive', '沉浸'),
   },
   motion: {

@@ -1,7 +1,9 @@
 @layer neoverse.tokens {
   :root {
-    /* Light segmented controls use a quiet sky-blue well and mint capsule. */
-    --neoverse-control-segmented-background: color-mix(
+    /* The well is split into an image layer and a color layer so themes can
+       pick a gradient or a flat tint without invalidating the other slot. */
+    --neoverse-control-segmented-background-image: none;
+    --neoverse-control-segmented-background-color: color-mix(
       in srgb,
       var(--neoverse-color-accent-primary) 7%,
       transparent

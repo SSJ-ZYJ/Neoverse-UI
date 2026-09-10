@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { UiBadge, UiButton, UiCard } from '@neoverse-ui/vue';
+import { UiBadge, UiButton, UiCard, UiGlassSurface } from '@neoverse-ui/vue';
 import LabIcon from '../LabIcon.vue';
+import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, moduleCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
 
@@ -9,32 +10,44 @@ const copy = moduleCopy.card;
 </script>
 
 <template>
-  <div class="grid gap-grid md:grid-cols-2">
-    <UiCard class="bg-surface-raised shadow-card">
-      <div class="grid gap-3">
-        <div class="flex items-center justify-between gap-3">
-          <div class="flex items-center gap-2">
-            <LabIcon name="spark" />
-            <h3 class="text-label font-label text-primary">
-              {{ localize(copy.reference, props.locale) }}
-            </h3>
+  <MaterialBackdrop>
+    <div class="grid gap-grid md:grid-cols-2">
+      <UiCard class="bg-surface-raised shadow-card">
+        <div class="grid gap-3">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+              <LabIcon name="spark" />
+              <h3 class="text-label font-label text-primary">
+                {{ localize(copy.reference, props.locale) }}
+              </h3>
+            </div>
+            <UiBadge variant="success">{{ localize(copy.ready, props.locale) }}</UiBadge>
           </div>
-          <UiBadge variant="success">{{ localize(copy.ready, props.locale) }}</UiBadge>
+          <p class="text-body text-secondary">{{ localize(copy.body, props.locale) }}</p>
+          <UiButton variant="ghost" class="justify-self-start">
+            {{ localize(copy.continue, props.locale) }}
+            <template #trailing><LabIcon name="arrow-right" /></template>
+          </UiButton>
         </div>
-        <p class="text-body text-secondary">{{ localize(copy.body, props.locale) }}</p>
-        <UiButton variant="ghost" class="justify-self-start">
-          {{ localize(copy.continue, props.locale) }}
-          <template #trailing><LabIcon name="arrow-right" /></template>
-        </UiButton>
-      </div>
-    </UiCard>
-    <UiCard class="max-w-container-md bg-surface-subtle shadow-raised">
-      <div class="grid gap-2">
-        <h3 class="text-label font-label text-primary">
-          {{ localize(copy.externalClass, props.locale) }}
-        </h3>
-        <p class="text-caption text-secondary">{{ localize(copy.externalBody, props.locale) }}</p>
-      </div>
-    </UiCard>
-  </div>
+      </UiCard>
+      <UiCard class="max-w-container-md bg-surface-subtle shadow-raised">
+        <div class="grid gap-2">
+          <h3 class="text-label font-label text-primary">
+            {{ localize(copy.externalClass, props.locale) }}
+          </h3>
+          <p class="text-caption text-secondary">{{ localize(copy.externalBody, props.locale) }}</p>
+        </div>
+      </UiCard>
+      <UiGlassSurface variant="card" class="max-w-container-md">
+        <div class="grid gap-2">
+          <h3 class="text-label font-label text-primary">
+            {{ localize(copy.glassCard, props.locale) }}
+          </h3>
+          <p class="text-caption text-secondary">
+            {{ localize(copy.glassCardBody, props.locale) }}
+          </p>
+        </div>
+      </UiGlassSurface>
+    </div>
+  </MaterialBackdrop>
 </template>

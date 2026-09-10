@@ -130,7 +130,7 @@ const languageOptions = computed(
               v-for="action in heroActions"
               :key="action.label"
               href="#consumer-parity"
-              :variant="action.primary ? 'primary' : 'ghost'"
+              :variant="action.primary ? 'primary' : 'secondary'"
               size="md"
             >
               <template #leading><LabIcon :name="action.icon" /></template>
@@ -158,7 +158,9 @@ const languageOptions = computed(
         >
           <UiControlSurface
             as="nav"
+            variant="elevated"
             class="consumer-parity-dock"
+            data-neoverse-glass-edge-pass="css"
             :aria-label="localize(copy.navigation.ariaLabel, props.locale)"
             data-consumer-parity="floating-navigation"
           >

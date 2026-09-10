@@ -14,6 +14,7 @@ const slots = useSlots();
 const materialClasses: Record<GlassSurfaceVariant, string> = {
   subtle: 'material-glass-subtle',
   elevated: 'material-glass-elevated',
+  card: 'material-glass-card',
   immersive: 'material-glass-immersive',
 };
 const classes = computed(() => [
