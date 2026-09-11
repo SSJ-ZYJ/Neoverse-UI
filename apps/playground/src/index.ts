@@ -1,3 +1,4 @@
+import { createServer as createNetServer } from 'node:net';
 import { appCopy, formatLocalized, isLocale, type Locale, localize } from './playground-content';
 import type { FrameTheme } from './playground-types';
 
@@ -6,7 +7,7 @@ type RenderOptions = {
   locale: Locale;
 };
 
-const port = Number.parseInt(process.env.PORT ?? '3000', 10);
+const requestedPort = Number.parseInt(process.env.PORT ?? '3000', 10);
 const liveReload = process.env.LIVE_RELOAD === '1';
 const stylesheetPath = new URL('../../../packages/tailwind/dist/playground.css', import.meta.url);
 const clientBundlePath = new URL('../dist/assets/playground.js', import.meta.url);
@@ -22,6 +23,60 @@ const materialBackgroundDarkPath = new URL(
 
 const isFrameTheme = (value: string | null): value is FrameTheme =>
   value === 'light' || value === 'dark';
+
+const isPortUnavailableError = (error: unknown): boolean =>
+  typeof error === 'object' &&
+  error !== null &&
+  'code' in error &&
+  (error.code === 'EADDRINUSE' || error.code === 'EACCES');
+
+const canListenOnPort = (candidatePort: number): Promise<boolean> =>
+  new Promise((resolvePromise, rejectPromise) => {
+    const probe = createNetServer();
+    probe.once('error', (error: unknown) => {
+      if (isPortUnavailableError(error)) {
+        resolvePromise(false);
+        return;
+      }
+
+      rejectPromise(error);
+    });
+    probe.listen({ host: '0.0.0.0', port: candidatePort }, () => {
+      probe.close((error) => {
+        if (error !== undefined) {
+          rejectPromise(error);
+          return;
+        }
+
+        resolvePromise(true);
+      });
+    });
+  });
+
+const findAvailablePort = async (startPort: number): Promise<number> => {
+  if (!Number.isInteger(startPort) || startPort < 0 || startPort > 65_535) {
+    throw new Error('[dev] PORT must be an integer between 0 and 65535.');
+  }
+
+  if (startPort === 0) {
+    return 0;
+  }
+
+  for (let candidatePort = startPort; candidatePort <= 65_535; candidatePort += 1) {
+    if (await canListenOnPort(candidatePort)) {
+      if (candidatePort !== startPort) {
+        console.warn(
+          `[dev] Port ${startPort} is unavailable; using port ${candidatePort} instead.`,
+        );
+      }
+      return candidatePort;
+    }
+  }
+
+  throw new Error(`[dev] No available port found from ${startPort} to 65535.`);
+};
+
+const port = await findAvailablePort(requestedPort);
 
 // Dev-only: reload the page when either served asset changes on disk.
 const liveReloadScript = liveReload
