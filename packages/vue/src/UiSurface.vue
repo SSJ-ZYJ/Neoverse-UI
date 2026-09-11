@@ -1,16 +1,17 @@
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
 import { getSurfaceClass } from './surface';
-import type { CardProps } from './types';
+import type { SurfaceProps, SurfacePreset } from './types';
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(defineProps<CardProps>(), {
+const props = withDefaults(defineProps<SurfaceProps>(), {
   as: 'div',
   surface: 'none',
 });
 const attrs = useAttrs();
-const classes = computed(() => ['ui-card rounded-card p-4', getSurfaceClass(props.surface)]);
+
+const classes = computed(() => getSurfaceClass(props.surface as SurfacePreset));
 const forwardedAttrs = computed(() => {
   const { class: _class, style: _style, ...rest } = attrs;
   return rest;

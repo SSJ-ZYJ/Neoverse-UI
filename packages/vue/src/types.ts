@@ -4,6 +4,23 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 export type ButtonType = 'button' | 'submit' | 'reset';
 
+export type SurfacePreset =
+  | 'none'
+  | 'solid'
+  | 'subtle'
+  | 'elevated'
+  | 'glass-subtle'
+  | 'glass-elevated'
+  | 'glass-card'
+  | 'glass-immersive';
+
+export type ControlSurfacePreset = Extract<SurfacePreset, 'none' | 'glass-subtle'>;
+
+export interface SurfaceProps {
+  as?: string | Component;
+  surface?: SurfacePreset;
+}
+
 export interface ButtonProps {
   variant?: ButtonVariant;
   size?: ButtonSize;
@@ -11,6 +28,7 @@ export interface ButtonProps {
   disabled?: boolean;
   loading?: boolean;
   stretch?: boolean;
+  surface?: ControlSurfacePreset;
 }
 export type ActionSize = 'sm' | 'md' | 'lg';
 
@@ -21,6 +39,7 @@ export interface ActionProps {
   size?: ActionSize;
   disabled?: boolean;
   stretch?: boolean;
+  surface?: ControlSurfacePreset;
 }
 
 export interface NavigationItemProps {
@@ -32,6 +51,7 @@ export interface NavigationItemProps {
   compact?: boolean;
   disabled?: boolean;
   stretch?: boolean;
+  surface?: ControlSurfacePreset;
 }
 
 export interface IconButtonProps {
@@ -42,6 +62,7 @@ export interface IconButtonProps {
   disabled?: boolean;
   loading?: boolean;
   stretch?: boolean;
+  surface?: ControlSurfacePreset;
 }
 
 export type BadgeVariant = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
@@ -61,6 +82,12 @@ export interface GlassSurfaceProps {
 export interface ControlSurfaceProps {
   as?: string | Component;
   variant?: GlassSurfaceVariant;
+  surface?: SurfacePreset;
+}
+
+export interface CardProps {
+  as?: string | Component;
+  surface?: SurfacePreset;
 }
 
 export type StatusIndicatorStatus = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
@@ -89,6 +116,7 @@ export interface SegmentedControlProps {
   disabled?: boolean;
   loading?: boolean;
   ariaLabel?: string;
+  surface?: ControlSurfacePreset;
 }
 
 export type SkeletonVariant = 'text' | 'title' | 'avatar' | 'circle' | 'rect';

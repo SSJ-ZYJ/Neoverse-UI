@@ -73,6 +73,7 @@ UiAction
 UiNavigationItem
 UiSegmentedControl
 UiControlSurface
+UiSurface
 UiCard
 UiGlassSurface
 UiBadge
@@ -81,7 +82,9 @@ UiSkeleton
 UiScrollbar
 ```
 
-They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. `UiControlSurface` owns one Glass chrome boundary and optional trailing separation, while `UiStatusIndicator` leaves live-region announcements to the caller. `UiGlassSurface` accepts a Glass `variant`, supports a polymorphic `as` tag for semantic consumers, and lets the mounted runtime automatically discover each eligible top-level Glass surface while CSS remains the baseline and fallback. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities. React r…
+They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. Components that own a visual plane consume the shared `surface` contract instead of hard-coding Glass as an intrinsic component trait. `UiButton`, `UiAction`, `UiIconButton`, and `UiSegmentedControl` keep `glass-subtle` as their compatibility default, while `UiNavigationItem` defaults to `none` so grouped navigation inherits the parent chrome rather than creating nested Glass. `UiSegmentedControl` keeps its active slider and keyboard interaction independent from the outer Surface, so `surface="none"` can be used inside a composition that already owns the chrome. `UiSurface` is the generic polymorphic material primitive. `UiControlSurface` owns one grouped-control chrome boundary and optional trailing separation, while `UiStatusIndicator` leaves live-region announcements to the caller. `UiGlassSurface` remains a compatibility wrapper that maps its historical Glass `variant` onto the shared Surface contract. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities. React r…
+
+Display-only semantic primitives do not gain a `surface` prop merely for API symmetry. `UiBadge` owns status/semantic color, `UiStatusIndicator` owns presence language, `UiSkeleton` owns loading geometry/effect, and `UiScrollbar` owns document-scroll runtime. Consumers should wrap those primitives in `UiSurface`, `UiCard`, or `UiControlSurface` when a material plane is needed instead of making every primitive a Glass surface.
 
 `UiScrollbar` owns the document-level immersive scrollbar runtime: geometry measurement, auto-hide, thumb dragging, track jumps, route/layout refreshes, and native-scrollbar visibility through the `hideNative` prop. Consumers may pass a `refreshKey` when a route transition changes the scrollable document.
 

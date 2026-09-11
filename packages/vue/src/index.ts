@@ -1,4 +1,5 @@
 export { updateButtonPointerGlow } from './button-pointer-glow';
+export { getSurfaceClass, glassVariantToSurface, isGlassSurface, surfaceClasses } from './surface';
 export {
   actionSizeClasses,
   actionStretchClasses,
@@ -18,6 +19,8 @@ export type {
   ButtonSize,
   ButtonType,
   ButtonVariant,
+  CardProps,
+  ControlSurfacePreset,
   ControlSurfaceProps,
   GlassSurfaceProps,
   GlassSurfaceVariant,
@@ -32,6 +35,8 @@ export type {
   StatusIndicatorProps,
   StatusIndicatorSize,
   StatusIndicatorStatus,
+  SurfacePreset,
+  SurfaceProps,
 } from './types';
 export { default as UiAction } from './UiAction.vue';
 export { default as UiBadge } from './UiBadge.vue';
@@ -45,3 +50,4 @@ export { default as UiScrollbar } from './UiScrollbar.vue';
 export { default as UiSegmentedControl } from './UiSegmentedControl.vue';
 export { default as UiSkeleton } from './UiSkeleton.vue';
 export { default as UiStatusIndicator } from './UiStatusIndicator.vue';
+export { default as UiSurface } from './UiSurface.vue';

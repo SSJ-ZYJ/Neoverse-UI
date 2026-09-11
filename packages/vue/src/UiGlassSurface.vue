@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
-import type { GlassSurfaceProps, GlassSurfaceVariant } from './types';
+import { getSurfaceClass, glassVariantToSurface } from './surface';
+import type { GlassSurfaceProps } from './types';
 
 defineOptions({ inheritAttrs: false });
 
@@ -9,18 +10,8 @@ const props = withDefaults(defineProps<GlassSurfaceProps>(), {
   variant: 'subtle',
 });
 const attrs = useAttrs();
-
-const materialClasses: Record<GlassSurfaceVariant, string> = {
-  subtle: 'material-glass-subtle',
-  elevated: 'material-glass-elevated',
-  card: 'material-glass-card',
-  immersive: 'material-glass-immersive',
-};
-
-const classes = computed(() => [
-  materialClasses[props.variant as GlassSurfaceVariant] ?? materialClasses.subtle,
-  'rounded-card p-4',
-]);
+const surface = computed(() => glassVariantToSurface(props.variant));
+const classes = computed(() => [getSurfaceClass(surface.value), 'rounded-card p-4']);
 const forwardedAttrs = computed(() => {
   const { class: _class, style: _style, ...rest } = attrs;
   return rest;
@@ -33,6 +24,7 @@ const forwardedAttrs = computed(() => {
     v-bind="forwardedAttrs"
     :class="[classes, attrs.class]"
     :style="attrs.style"
+    :data-surface="surface"
   >
     <slot />
   </component>

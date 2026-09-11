@@ -54,20 +54,20 @@
     opacity: 0;
   }
 
-  .ui-action[aria-disabled='true'].ui-button--primary.material-glass-subtle:is(:hover, :active) {
+  .ui-action[aria-disabled='true'].ui-button--primary:is(:hover, :active) {
     background-image: var(--neoverse-control-primary-background);
     background-color: var(--neoverse-control-secondary-fill);
     box-shadow: var(--neoverse-control-button-edge);
   }
 
-  .ui-action[aria-disabled='true'].ui-button--secondary.material-glass-subtle:is(:hover, :active) {
+  .ui-action[aria-disabled='true'].ui-button--secondary:is(:hover, :active) {
     color: var(--neoverse-control-secondary-foreground);
     background-image: var(--neoverse-control-secondary-background);
     background-color: var(--neoverse-control-secondary-fill);
     box-shadow: var(--neoverse-control-button-edge);
   }
 
-  .ui-action[aria-disabled='true'].ui-button--ghost.material-glass-subtle:is(:hover, :active) {
+  .ui-action[aria-disabled='true'].ui-button--ghost:is(:hover, :active) {
     color: var(--neoverse-control-ghost-foreground);
     background: var(--neoverse-control-ghost-background);
     box-shadow: var(--neoverse-control-button-edge);

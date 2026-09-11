@@ -13,6 +13,7 @@ import UiScrollbar from './UiScrollbar.vue';
 import UiSegmentedControl from './UiSegmentedControl.vue';
 import UiSkeleton from './UiSkeleton.vue';
 import UiStatusIndicator from './UiStatusIndicator.vue';
+import UiSurface from './UiSurface.vue';
 
 const options = [
   { value: 'overview', label: 'Overview' },
@@ -35,6 +36,18 @@ describe('UiButton', () => {
     expect(wrapper.classes()).toEqual(
       expect.arrayContaining(['ui-button', 'material-glass-subtle', 'rounded-control-inner']),
     );
+    expect(wrapper.attributes('data-surface')).toBe('glass-subtle');
+  });
+
+  it('can remove its material surface without losing button semantics', () => {
+    const wrapper = mount(UiButton, {
+      props: { variant: 'ghost', surface: 'none' },
+      slots: { default: 'Bare action' },
+    });
+
+    expect(wrapper.classes()).toContain('ui-button--ghost');
+    expect(wrapper.classes()).not.toContain('material-glass-subtle');
+    expect(wrapper.attributes('data-surface')).toBe('none');
   });
 
   it('uses the shared material hierarchy for visual variants', () => {
@@ -207,6 +220,18 @@ describe('UiNavigationItem', () => {
     expect(action.text()).toContain('Projects');
     expect(action.get('.ui-navigation-item__label').classes()).toContain('sr-only');
     expect(action.get('.ui-navigation-item__indicator').attributes('aria-hidden')).toBe('true');
+    expect(action.attributes('data-surface')).toBe('none');
+    expect(action.classes().some((className) => className.startsWith('material-glass-'))).toBe(false);
+  });
+
+  it('can explicitly opt into a control Glass surface outside grouped navigation', () => {
+    const wrapper = mount(UiNavigationItem, {
+      props: { href: '/projects', label: 'Projects', surface: 'glass-subtle' },
+    });
+    const action = wrapper.get('a');
+
+    expect(action.classes()).toContain('material-glass-subtle');
+    expect(action.attributes('data-surface')).toBe('glass-subtle');
   });
 });
 
@@ -220,10 +245,18 @@ describe('UiControlSurface', () => {
 
     expect(grouped.element.tagName).toBe('NAV');
     expect(grouped.attributes('aria-label')).toBe('Primary navigation');
+    expect(grouped.attributes('data-surface')).toBe('glass-subtle');
     expect(grouped.find('.ui-control-surface__divider').exists()).toBe(true);
 
     const ungrouped = mount(UiControlSurface);
     expect(ungrouped.find('.ui-control-surface__divider').exists()).toBe(false);
+
+    const solid = mount(UiControlSurface, { props: { surface: 'elevated' } });
+    expect(solid.classes()).toEqual(
+      expect.arrayContaining(['bg-surface-raised', 'border-default', 'shadow-raised']),
+    );
+    expect(solid.classes()).not.toContain('material-glass-subtle');
+    expect(solid.attributes('data-surface')).toBe('elevated');
   });
 });
 
@@ -343,12 +376,21 @@ describe('display components', () => {
     expect(card.classes().some((className) => className.startsWith('material-glass-'))).toBe(false);
 
     const standardSurfaceCard = mount(UiCard, {
-      attrs: { class: 'border border-default bg-surface-raised shadow-card' },
+      props: { surface: 'elevated' },
     });
     expect(standardSurfaceCard.classes()).toEqual(
-      expect.arrayContaining(['border-default', 'bg-surface-raised', 'shadow-card']),
+      expect.arrayContaining(['border-default', 'bg-surface-raised', 'shadow-raised']),
     );
     expect(standardSurfaceCard.classes()).not.toContain('material-glass-elevated');
+
+    const surface = mount(UiSurface, {
+      props: { as: 'section', surface: 'glass-card' },
+      attrs: { 'aria-label': 'Shared surface' },
+    });
+    expect(surface.element.tagName).toBe('SECTION');
+    expect(surface.attributes('aria-label')).toBe('Shared surface');
+    expect(surface.attributes('data-surface')).toBe('glass-card');
+    expect(surface.classes()).toContain('material-glass-card');
 
     const skeleton = mount(UiSkeleton, { props: { variant: 'circle' } });
     expect(skeleton.attributes('aria-hidden')).toBe('true');
@@ -440,6 +482,17 @@ describe('UiScrollbar', () => {
   });
 });
 describe('UiSegmentedControl', () => {
+  it('uses the shared Glass surface by default and can opt out of outer chrome', () => {
+    const glass = mount(UiSegmentedControl, { props: { options } });
+    expect(glass.classes()).toContain('material-glass-subtle');
+    expect(glass.attributes('data-surface')).toBe('glass-subtle');
+
+    const bare = mount(UiSegmentedControl, { props: { options, surface: 'none' } });
+    expect(bare.classes()).not.toContain('material-glass-subtle');
+    expect(bare.attributes('data-surface')).toBe('none');
+    expect(bare.find('.ui-segmented-control__slider').exists()).toBe(true);
+  });
+
   it('falls back to the compact size for unsupported values', () => {
     const wrapper = mount(UiSegmentedControl, {
       props: { options, size: 'md' as never },

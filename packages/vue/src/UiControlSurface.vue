@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, useAttrs, useSlots } from 'vue';
-import type { ControlSurfaceProps, GlassSurfaceVariant } from './types';
+import { getSurfaceClass, glassVariantToSurface } from './surface';
+import type { ControlSurfaceProps } from './types';
 
 defineOptions({ inheritAttrs: false });
 
@@ -11,15 +12,10 @@ const props = withDefaults(defineProps<ControlSurfaceProps>(), {
 
 const attrs = useAttrs();
 const slots = useSlots();
-const materialClasses: Record<GlassSurfaceVariant, string> = {
-  subtle: 'material-glass-subtle',
-  elevated: 'material-glass-elevated',
-  card: 'material-glass-card',
-  immersive: 'material-glass-immersive',
-};
+const surface = computed(() => props.surface ?? glassVariantToSurface(props.variant));
 const classes = computed(() => [
   'ui-control-surface inline-flex max-w-full items-stretch rounded-control',
-  materialClasses[props.variant as GlassSurfaceVariant] ?? materialClasses.subtle,
+  getSurfaceClass(surface.value),
 ]);
 const forwardedAttrs = computed(() => {
   const { class: _class, style: _style, ...rest } = attrs;
@@ -33,6 +29,7 @@ const forwardedAttrs = computed(() => {
     v-bind="forwardedAttrs"
     :class="[classes, attrs.class]"
     :style="attrs.style"
+    :data-surface="surface"
   >
     <div class="ui-control-surface__group ui-control-surface__group--primary">
       <slot />

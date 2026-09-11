@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
 import { updateButtonPointerGlow } from './button-pointer-glow';
+import { getSurfaceClass } from './surface';
 import {
   buttonBaseClasses,
   buttonSizeClasses,
@@ -22,6 +23,7 @@ const props = withDefaults(defineProps<ButtonProps>(), {
   disabled: false,
   loading: false,
   stretch: false,
+  surface: 'glass-subtle',
 });
 
 const attrs = useAttrs();
@@ -46,6 +48,7 @@ const classes = computed(() => [
   controlTransitionClasses,
   controlFocusClasses,
   disabledControlClasses,
+  getSurfaceClass(props.surface),
   buttonVariantClasses[props.variant as ButtonVariant] ?? buttonVariantClasses.primary,
   (props.stretch ? buttonStretchSizeClasses : buttonSizeClasses)[props.size as ButtonSize] ??
     buttonSizeClasses.md,
@@ -58,6 +61,7 @@ const classes = computed(() => [
     :type="props.type"
     :disabled="props.disabled || props.loading"
     :aria-busy="ariaBusy"
+    :data-surface="props.surface"
     :class="[classes, attrs.class]"
     @pointerdown="updateButtonPointerGlow"
   >

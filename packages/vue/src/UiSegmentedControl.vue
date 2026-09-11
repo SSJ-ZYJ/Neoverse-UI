@@ -2,6 +2,7 @@
 import type { ComponentPublicInstance } from 'vue';
 import { computed, nextTick, ref, useAttrs, watch } from 'vue';
 import { controlFocusClasses, segmentedTransitionClasses } from './classes';
+import { getSurfaceClass } from './surface';
 import type { SegmentedControlProps, SegmentedControlSize, SegmentOption } from './types';
 import UiLoadingIndicator from './UiLoadingIndicator.vue';
 
@@ -11,6 +12,7 @@ const props = withDefaults(defineProps<SegmentedControlProps>(), {
   size: 'sm',
   disabled: false,
   loading: false,
+  surface: 'glass-subtle',
 });
 
 const emit = defineEmits<(event: 'update:modelValue', value: string) => void>();
@@ -69,6 +71,7 @@ const rovingIndex = computed(() => {
 
 const classes = computed(() => [
   'ui-segmented-control inline-flex items-center gap-1 rounded-control p-1',
+  getSurfaceClass(props.surface),
 ]);
 const forwardedAttrs = computed(() => {
   const { class: _class, ...rest } = attrs;
@@ -226,6 +229,7 @@ function optionClasses(option: SegmentOption): string[] {
   <div
     v-bind="forwardedAttrs"
     :aria-label="props.ariaLabel"
+    :data-surface="props.surface"
     :class="[classes, attrs.class]"
     :style="[attrs.style, segmentStyle]"
     role="radiogroup"

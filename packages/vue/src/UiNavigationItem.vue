@@ -12,6 +12,7 @@ const props = withDefaults(defineProps<NavigationItemProps>(), {
   compact: false,
   disabled: false,
   stretch: false,
+  surface: 'none',
 });
 
 const attrs = useAttrs();
@@ -33,6 +34,7 @@ const ariaCurrent = computed(() => attrs['aria-current'] ?? (props.active ? 'pag
     :size="props.size"
     :disabled="props.disabled"
     :stretch="props.stretch"
+    :surface="props.surface"
     :aria-current="ariaCurrent"
     :class="[
       'ui-navigation-item',

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
 import { updateButtonPointerGlow } from './button-pointer-glow';
+import { getSurfaceClass } from './surface';
 import {
   actionSizeClasses,
   actionStretchClasses,
@@ -18,6 +19,7 @@ const props = withDefaults(defineProps<ActionProps>(), {
   size: 'md',
   disabled: false,
   stretch: false,
+  surface: 'glass-subtle',
 });
 
 const attrs = useAttrs();
@@ -35,9 +37,10 @@ const targetProps = computed(() =>
   props.disabled || props.href === undefined ? {} : { href: props.href },
 );
 const classes = computed(() => [
-  'ui-button ui-action material-glass-subtle inline-flex shrink-0 cursor-pointer select-none items-center justify-center rounded-control-inner font-label',
+  'ui-button ui-action inline-flex shrink-0 cursor-pointer select-none items-center justify-center rounded-control-inner font-label',
   controlTransitionClasses,
   controlFocusClasses,
+  getSurfaceClass(props.surface),
   buttonVariantClasses[props.variant as ButtonVariant] ?? buttonVariantClasses.primary,
   actionSizeClasses[props.size as ActionSize] ?? actionSizeClasses.md,
   props.stretch ? actionStretchClasses : '',
@@ -66,6 +69,7 @@ function handlePointerdown(event: PointerEvent): void {
     v-bind="{ ...forwardedAttrs, ...targetProps }"
     :aria-disabled="props.disabled || undefined"
     :tabindex="props.disabled ? -1 : (attrs.tabindex as number | string | undefined)"
+    :data-surface="props.surface"
     :class="[classes, attrs.class]"
     :style="attrs.style"
     @click.capture="handleDisabledClick"

@@ -36,7 +36,7 @@
     width: var(--neoverse-navigation-item-height-lg);
   }
 
-  .ui-navigation-item.ui-navigation-item--active.material-glass-subtle {
+  .ui-navigation-item.ui-navigation-item--active {
     color: var(--neoverse-navigation-item-active-foreground);
     background-image: var(--neoverse-navigation-item-active-background);
     background-color: var(--neoverse-navigation-item-active-fill);

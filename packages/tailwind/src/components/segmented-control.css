@@ -6,13 +6,33 @@
     position: relative;
     max-width: 100%;
     overflow: hidden;
+    touch-action: manipulation;
+  }
+
+  /* Surface ownership is explicit. Keep the existing segmented-control recipe
+     as the Glass compatibility default while allowing grouped consumers to
+     opt out of outer chrome with surface="none". */
+  .ui-segmented-control.material-glass-subtle {
+    --neoverse-material-edge-refraction-opacity: 0;
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
       var(--neoverse-control-segmented-border);
     background-image: var(--neoverse-control-segmented-background-image);
     background-color: var(--neoverse-control-segmented-background-color);
+    box-shadow: var(--neoverse-control-segmented-shadow);
     -webkit-backdrop-filter: var(--neoverse-control-segmented-filter);
     backdrop-filter: var(--neoverse-control-segmented-filter);
-    touch-action: manipulation;
+  }
+
+  .ui-segmented-control.material-glass-subtle::before {
+    display: none;
+  }
+
+  .ui-segmented-control[data-surface='none'] {
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 
   .ui-segmented-control__options {
@@ -68,6 +88,13 @@
   }
 
   @media (hover: hover) {
+    .ui-segmented-control.material-glass-subtle:hover {
+      border-color: var(--neoverse-control-segmented-border);
+      background-image: var(--neoverse-control-segmented-background-image);
+      background-color: var(--neoverse-control-segmented-background-color);
+      box-shadow: var(--neoverse-control-segmented-shadow);
+    }
+
     .ui-segmented-control__option:not(.ui-segmented-control__option--active):hover:not(:disabled) {
       background: var(--neoverse-control-hover-background);
       color: var(--neoverse-control-segmented-active-foreground);

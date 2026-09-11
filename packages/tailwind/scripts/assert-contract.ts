@@ -132,7 +132,6 @@ try {
     '.text-foreground',
     '.border-border',
     '.shadow-sm',
-    '.consumer-parity-dock',
   ];
   const emittedForbiddenSelectors = forbiddenSelectors.filter((selector) => css.includes(selector));
   const expectedValues = [
@@ -271,8 +270,8 @@ try {
     '@media (forced-colors:active)',
     '.ui-button{',
     '.ui-button.material-glass-subtle{',
-    '.ui-button--primary.material-glass-subtle{',
-    '.ui-button--secondary.material-glass-subtle{',
+    '.ui-button--primary{',
+    '.ui-button--secondary{',
     '.ui-button--ghost.material-glass-subtle{',
     'background-image:var(--neoverse-control-primary-background)',
     'background-color:var(--neoverse-control-secondary-fill)',
@@ -320,7 +319,7 @@ try {
   );
   const ghostActiveCss =
     buttonCss.match(
-      /\.ui-button--ghost\.material-glass-subtle:active:not\(:disabled\) \{([\s\S]*?)\n {2}\}/,
+      /\.ui-button--ghost:active:not\(:disabled\) \{([\s\S]*?)\n {2}\}/,
     )?.[1] ?? '';
   const expectedGhostActiveFragments = [
     'background: var(--neoverse-control-button-ghost-active-background);',
