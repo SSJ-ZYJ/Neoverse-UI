@@ -13,6 +13,8 @@
     );
     --neoverse-skeleton-edge: inset 0 1px 0
       color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent);
+    --neoverse-skeleton-text-min-height: var(--neoverse-font-size-md);
+    --neoverse-skeleton-title-min-height: 1.15rem;
     --neoverse-skeleton-shimmer-duration: 1.25s;
     --neoverse-skeleton-shimmer-easing: var(--neoverse-motion-easing-standard);
   }

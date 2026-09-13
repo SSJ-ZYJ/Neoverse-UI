@@ -2,22 +2,99 @@
   .ui-control-surface {
     min-width: 0;
     gap: var(--neoverse-control-surface-gap);
-    padding: var(--neoverse-control-surface-padding);
+    padding-block: var(--neoverse-control-surface-padding-block);
+    padding-inline: var(--neoverse-control-surface-padding-inline);
+  }
+
+  .ui-surface-chrome {
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-control-chrome-border);
+    background: var(--neoverse-control-chrome-background);
+    box-shadow: var(--neoverse-control-chrome-shadow);
+    -webkit-backdrop-filter: var(--neoverse-control-chrome-filter);
+    backdrop-filter: var(--neoverse-control-chrome-filter);
   }
 
   .ui-control-surface__group {
+    position: relative;
     display: inline-flex;
+    box-sizing: border-box;
     min-width: 0;
     gap: var(--neoverse-control-surface-item-gap);
     align-items: center;
+  }
+
+  .ui-surface-chrome .ui-control-surface__group {
+    height: var(--neoverse-control-surface-group-height);
+  }
+
+  .ui-control-surface--shared-indicator[data-neoverse-navigation-indicator-ready='true']
+    .ui-navigation-item__indicator {
+    visibility: hidden;
+    transform: translateX(-50%);
+    transition: none;
+  }
+
+  .ui-control-surface__indicator {
+    position: absolute;
+    z-index: 3;
+    width: var(--neoverse-navigation-item-indicator-width);
+    height: var(--neoverse-navigation-item-indicator-height);
+    border-radius: var(--neoverse-radius-pill);
+    background: var(--neoverse-navigation-item-indicator-color);
+    pointer-events: none;
+  }
+
+  .ui-control-surface__indicator[data-ready='true'] {
+    transition:
+      left var(--neoverse-motion-duration-expressive) var(--neoverse-motion-easing-emphasized),
+      top var(--neoverse-motion-duration-expressive) var(--neoverse-motion-easing-emphasized),
+      width var(--neoverse-motion-duration-expressive) var(--neoverse-motion-easing-emphasized);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-control-surface__indicator[data-ready='true'] {
+      transition: none;
+    }
   }
 
   .ui-control-surface__group--primary {
     flex: 1 1 auto;
   }
 
+  /* A grouped navigation inherits the surface's content-height token so its
+     md items can track the same rhythm as the trailing segmented options.
+     Keep this relationship here instead of making a consumer reach into
+     either component's internal size selector. */
+  .ui-control-surface__group--primary:has(.ui-navigation-item) {
+    --neoverse-navigation-item-height-md: var(--neoverse-control-surface-navigation-height);
+  }
+
+  .ui-control-surface__group--primary:has(.ui-navigation-item--compact) {
+    --neoverse-control-surface-item-gap: var(--neoverse-navigation-item-compact-gap);
+  }
+
   .ui-control-surface__group--trailing {
     flex: 0 0 auto;
+  }
+
+  .ui-control-surface__group--trailing:has(.ui-segmented-control) {
+    --neoverse-control-segmented-option-height-sm: var(--neoverse-control-surface-segmented-height);
+    --neoverse-control-segmented-option-min-width: var(
+      --neoverse-control-segmented-embedded-option-min-width
+    );
+    --neoverse-control-segmented-option-padding-inline-sm: var(
+      --neoverse-control-segmented-embedded-option-padding-inline-sm
+    );
+  }
+
+  .ui-surface-chrome .ui-control-surface__group--trailing {
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-control-chrome-trailing-border);
+    border-radius: var(--neoverse-radius-control);
+    padding-block: var(--neoverse-control-chrome-trailing-padding);
+    padding-inline: var(--neoverse-control-chrome-trailing-padding-inline);
+    background: var(--neoverse-control-chrome-trailing-background);
   }
 
   .ui-control-surface__divider {
@@ -25,12 +102,19 @@
     height: var(--neoverse-control-surface-divider-height);
     flex: 0 0 auto;
     align-self: center;
+    margin-inline: var(--neoverse-control-surface-divider-gap);
     background: var(--neoverse-control-surface-divider-color);
   }
 
   @media (prefers-reduced-transparency: reduce) {
-    .ui-control-surface {
+    .ui-control-surface:not(.ui-surface-chrome) {
       background-color: var(--neoverse-color-surface-raised);
+    }
+
+    .ui-surface-chrome {
+      background: var(--neoverse-color-surface-raised);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
     }
   }
 }

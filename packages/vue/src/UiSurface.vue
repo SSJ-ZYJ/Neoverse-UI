@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
 import { getSurfaceClass } from './surface';
-import type { SurfaceProps, SurfacePreset } from './types';
+import type { SurfacePreset, SurfaceProps } from './types';
 
 defineOptions({ inheritAttrs: false });
 

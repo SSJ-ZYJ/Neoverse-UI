@@ -22,7 +22,7 @@ Bun is the package manager, workspace manager, and script runner for this reposi
 | `@neoverse-ui/react` | Planned | Reserved React integration boundary; no components yet |
 | `apps/playground` | Consumer Validation | Vue-driven Design Lab and visual reference surface |
 
-The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiCard`, `UiGlassSurface`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, and `UiScrollbar`. React has no runtime implementation yet. Vue and the future React adapter share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
+The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiSurface`, `UiCard`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, and `UiScrollbar`. `UiSurface` is the canonical material primitive; `UiGlassSurface` remains exported only as a compatibility wrapper for the historical Glass `variant` API. React has no runtime implementation yet. Vue and the future React adapter share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
 
 ## Architecture at a glance
 

@@ -1,7 +1,16 @@
 @layer neoverse.tokens {
   :root {
     /* The resting rail stays neutral; accents appear during interaction. */
-    --neoverse-scrollbar-immersive-size: 0.75rem;
+    --neoverse-scrollbar-immersive-size: var(--neoverse-space-3);
+    --neoverse-scrollbar-immersive-track-border-width: var(--neoverse-space-1);
+    --neoverse-scrollbar-immersive-thumb-min-length: var(--neoverse-space-11);
+    --neoverse-scrollbar-immersive-thumb-border-width: 0.2rem;
+    --neoverse-scrollbar-overlay-inset-block: 0.72rem;
+    --neoverse-scrollbar-overlay-inset-inline: 0.35rem;
+    --neoverse-scrollbar-overlay-thumb-width: 0.3rem;
+    --neoverse-scrollbar-overlay-thumb-width-hover: 0.42rem;
+    --neoverse-scrollbar-overlay-thumb-hover-shadow: 0 0 var(--neoverse-space-4) -0.35rem
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 60%, transparent);
     --neoverse-scrollbar-immersive-track: color-mix(
       in srgb,
       var(--neoverse-color-surface-raised) 24%,

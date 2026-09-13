@@ -1,0 +1,9 @@
+:root {
+  /* Playground shell density scales from the compact 1280px baseline to
+     a roomier 1920px desktop baseline without changing Core component tokens. */
+  --neoverse-playground-shell-root-size-min: 16px;
+  --neoverse-playground-shell-root-size-fluid: calc(6px + 0.9375vw);
+  --neoverse-playground-shell-root-size-max: 24px;
+  --neoverse-playground-consumer-dock-viewport-clearance: 1.2rem;
+  --neoverse-playground-consumer-dock-compact-breakpoint: 32.5rem;
+}

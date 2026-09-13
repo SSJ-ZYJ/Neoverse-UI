@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" fill="none">
+  <title>Neoverse UI icon</title>
+  <defs>
+    <linearGradient id="n" x1="274" y1="248" x2="744" y2="778" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#DDFBFF"/>
+      <stop offset="0.28" stop-color="#8BE7FF"/>
+      <stop offset="0.66" stop-color="#79F5D0"/>
+      <stop offset="1" stop-color="#4AB8FF"/>
+    </linearGradient>
+    <linearGradient id="orbit" x1="170" y1="324" x2="850" y2="706" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8BE7FF" stop-opacity="0.15"/>
+      <stop offset="0.48" stop-color="#79F5D0" stop-opacity="0.82"/>
+      <stop offset="1" stop-color="#4AB8FF" stop-opacity="0.18"/>
+    </linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="28"/>
+    </filter>
+    <filter id="softGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="12"/>
+    </filter>
+  </defs>
+
+  <g opacity="0.8" filter="url(#glow)">
+    <path d="M330 760V264L694 760V264" stroke="#6FEADB" stroke-opacity="0.26" stroke-width="150" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <g transform="rotate(-11 512 512)">
+    <path d="M167 535C191 336 339 212 524 213C704 214 833 321 855 470" stroke="url(#orbit)" stroke-width="22" stroke-linecap="round"/>
+    <path d="M857 525C829 709 688 812 508 811C331 810 204 711 174 568" stroke="url(#orbit)" stroke-width="14" stroke-linecap="round" opacity="0.7"/>
+  </g>
+
+  <path d="M330 760V264L694 760V264" stroke="url(#n)" stroke-width="94" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M330 742V286L684 754" stroke="white" stroke-opacity="0.38" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" filter="url(#softGlow)"/>
+  <path d="M330 742V286L684 754" stroke="white" stroke-opacity="0.5" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <circle cx="824" cy="327" r="24" fill="#DDFBFF" fill-opacity="0.88"/>
+  <circle cx="824" cy="327" r="47" fill="#79F5D0" fill-opacity="0.16" filter="url(#softGlow)"/>
+  <rect x="180" y="676" width="28" height="28" rx="9" fill="#8BE7FF" fill-opacity="0.72" transform="rotate(18 180 676)"/>
+  <rect x="790" y="656" width="19" height="19" rx="6" fill="#79F5D0" fill-opacity="0.72" transform="rotate(-16 790 656)"/>
+</svg>

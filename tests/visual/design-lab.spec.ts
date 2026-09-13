@@ -1,7 +1,14 @@
 import { expect, test } from '@playwright/test';
 
 const themes = ['light', 'dark'] as const;
-const modules = ['typography', 'surface', 'glass', 'controls', 'card', 'consumer-parity'] as const;
+const modules = [
+  'typography',
+  'materials',
+  'controls',
+  'status-feedback',
+  'card',
+  'consumer-parity',
+] as const;
 
 const freezeMotion = `
   *, *::before, *::after {
@@ -102,14 +109,13 @@ test('consumer parity exposes destination and current-page semantics', async ({ 
   expect(pulseAnimation).toBe('none');
 });
 
-test('consumer parity dock moves one active indicator', async ({ page }) => {
+test('consumer parity dock adapts navigation items to content', async ({ page }) => {
   await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
     waitUntil: 'domcontentloaded',
   });
   await page.evaluate(waitForStableAssets);
 
   const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
-  const indicator = navigation.locator('.consumer-parity-dock__active-indicator');
   const typography = await navigation.evaluate((element) => {
     const link = element.querySelector('.consumer-parity-dock__item');
     const label = link?.querySelector('.ui-navigation-item__label');
@@ -125,64 +131,500 @@ test('consumer parity dock moves one active indicator', async ({ page }) => {
       dockFontSize: dockStyle.fontSize,
       linkFontFamily: linkStyle.fontFamily,
       linkFontSize: linkStyle.fontSize,
+      rootFontSize: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
       labelDisplay: labelStyle.display,
       labelFlex: labelStyle.flex,
     };
   });
-  expect(typography.dockFontSize).toBe('16px');
-  expect(typography.linkFontSize).toBe('12.48px');
-  expect(typography.dockFontFamily).toContain('"Noto Sans SC"');
-  expect(typography.linkFontFamily).toContain('"Noto Sans SC"');
-  expect(typography.linkFontFamily).not.toContain('Noto Sans SC Variable');
-  expect(typography.labelDisplay).toBe('block');
-  expect(typography.labelFlex).toBe('0 0 auto');
+  expect(Number.parseFloat(typography.dockFontSize)).toBeCloseTo(typography.rootFontSize, 1);
+  expect(Number.parseFloat(typography.linkFontSize)).toBeCloseTo(typography.rootFontSize * 0.7, 1);
+  expect(typography.dockFontFamily).toContain('"Noto Sans SC Variable"');
+  expect(typography.linkFontFamily).toContain('"Noto Sans SC Variable"');
+  expect(typography.labelDisplay).toBe(
+    (page.viewportSize()?.width ?? 0) <= 520 ? 'block' : 'inline',
+  );
+  expect(typography.labelFlex).toBe('0 1 auto');
   const edgeMaterial = await navigation.evaluate((element) => {
     const style = getComputedStyle(element);
-    const edge = getComputedStyle(element, '::before');
+    const button = element.querySelector('.consumer-parity-dock__item') as HTMLElement | null;
+    const activeButton = element.querySelector(
+      '.consumer-parity-dock__item.ui-navigation-item--active',
+    ) as HTMLElement | null;
+    const activeIndicator = activeButton?.querySelector(
+      '.ui-navigation-item__indicator',
+    ) as HTMLElement | null;
+    const activeIcon = activeButton?.querySelector(
+      '.ui-action__leading > svg',
+    ) as HTMLElement | null;
+    const language = element.querySelector('.consumer-parity-dock__language') as HTMLElement | null;
+    const languageSlider = language?.querySelector(
+      '.ui-segmented-control__slider',
+    ) as HTMLElement | null;
+    const trailing = language?.parentElement as HTMLElement | null;
+    if (
+      !button ||
+      !activeButton ||
+      !activeIndicator ||
+      !activeIcon ||
+      !language ||
+      !languageSlider ||
+      !trailing
+    ) {
+      throw new Error('Dock surface nodes are missing');
+    }
+    const activeButtonStyle = getComputedStyle(activeButton);
+    const activeLabel = activeButton.querySelector(
+      '.ui-navigation-item__label',
+    ) as HTMLElement | null;
+    if (!activeLabel) {
+      throw new Error('Active navigation label is missing');
+    }
+    const languageStyle = getComputedStyle(language);
+    const languageSliderStyle = getComputedStyle(languageSlider);
+    const languageOption = language.querySelector(
+      '.ui-segmented-control__option',
+    ) as HTMLElement | null;
+    if (!languageOption) {
+      throw new Error('Dock language option is missing');
+    }
+    const languageOptions = [
+      ...language.querySelectorAll<HTMLElement>('.ui-segmented-control__option'),
+    ];
+    if (languageOptions.length === 0) {
+      throw new Error('Dock language options are missing');
+    }
+    const languageOptionStyle = getComputedStyle(languageOption);
+    const trailingStyle = getComputedStyle(trailing);
+    const primary = element.querySelector(
+      '.ui-control-surface__group--primary',
+    ) as HTMLElement | null;
+    const divider = element.querySelector('.ui-control-surface__divider') as HTMLElement | null;
+    const pulse = [...element.querySelectorAll<HTMLElement>('.consumer-parity-dock__item')].at(-1);
+    const heroActions = element
+      .closest<HTMLElement>('[data-design-lab-region="module"]')
+      ?.querySelector<HTMLElement>('[data-consumer-parity="hero-actions"]');
+    if (!primary || !divider || !pulse || !heroActions) {
+      throw new Error('Dock primary group is missing');
+    }
+    const itemRects = [...element.querySelectorAll<HTMLElement>('.consumer-parity-dock__item')].map(
+      (item) => {
+        const rect = item.getBoundingClientRect();
+        return {
+          left: rect.left,
+          right: rect.right,
+          width: rect.width,
+          height: rect.height,
+        };
+      },
+    );
+    const heroActionAspectRatios = [...heroActions.querySelectorAll<HTMLElement>('.ui-action')].map(
+      (action) => {
+        const rect = action.getBoundingClientRect();
+        return rect.width / rect.height;
+      },
+    );
+    const itemGaps = itemRects
+      .slice(1)
+      .map((item, index) => item.left - (itemRects[index]?.right ?? item.left));
+    const primaryRect = primary.getBoundingClientRect();
+    const activeButtonRect = activeButton.getBoundingClientRect();
+    const activeIndicatorRect = activeIndicator.getBoundingClientRect();
+    const activeIconRect = activeIcon.getBoundingClientRect();
+    const trailingRect = trailing.getBoundingClientRect();
+    const dividerRect = divider.getBoundingClientRect();
+    const pulseRect = pulse.getBoundingClientRect();
+    const languageRect = language.getBoundingClientRect();
+    const sliderRect = languageSlider.getBoundingClientRect();
+    const languageOptionRect = languageOption.getBoundingClientRect();
+    const optionTextRange = document.createRange();
+    optionTextRange.selectNodeContents(languageOption);
+    const optionTextRect = optionTextRange.getBoundingClientRect();
+    const languageOptionGeometry = languageOptions.map((option) => {
+      const optionRect = option.getBoundingClientRect();
+      const textRange = document.createRange();
+      textRange.selectNodeContents(option);
+      const textRect = textRange.getBoundingClientRect();
+      const optionStyle = getComputedStyle(option);
+      return {
+        width: optionRect.width,
+        contentPlusPaddingWidth: textRect.width + Number.parseFloat(optionStyle.paddingInline) * 2,
+      };
+    });
+    const languageOptionWidth = Math.max(...languageOptionGeometry.map(({ width }) => width));
+    const languageOptionContentWidth = Math.max(
+      ...languageOptionGeometry.map(({ contentPlusPaddingWidth }) => contentPlusPaddingWidth),
+    );
+    const activeLabelRange = document.createRange();
+    activeLabelRange.selectNodeContents(activeLabel);
+    const activeLabelRect = activeLabelRange.getBoundingClientRect();
+    const rootFontSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const resolveLength = (variable: string) => {
+      const probe = document.createElement('span');
+      probe.style.position = 'absolute';
+      probe.style.inlineSize = '0';
+      probe.style.blockSize = `var(${variable})`;
+      element.append(probe);
+      const value = Number.parseFloat(getComputedStyle(probe).blockSize);
+      probe.remove();
+      return value;
+    };
+    const sliderWithinLanguage =
+      sliderRect.left >= languageRect.left &&
+      sliderRect.right <= languageRect.right &&
+      sliderRect.top >= languageRect.top &&
+      sliderRect.bottom <= languageRect.bottom;
     return {
-      dock: style.getPropertyValue('--neoverse-material-edge-refraction-opacity'),
-      width: style.getPropertyValue('--neoverse-material-edge-refraction-width'),
-      softness: style.getPropertyValue('--neoverse-material-edge-refraction-softness'),
-      button: getComputedStyle(
-        element.querySelector('.consumer-parity-dock__item') as HTMLElement,
-      ).getPropertyValue('--neoverse-material-edge-refraction-opacity'),
-      edgePass: element.getAttribute('data-neoverse-glass-edge-pass'),
-      edgeDisplay: edge.display,
-      edgeFilter: edge.backdropFilter,
+      surface: element.getAttribute('data-surface'),
+      chromeClass: element.classList.contains('ui-surface-chrome'),
+      dockBackground: style.background,
+      dockFilter: style.backdropFilter,
+      dockBorder: style.borderColor,
+      buttonSurface: button.getAttribute('data-surface'),
+      buttonHasMaterialClass: [...button.classList].some((className) =>
+        className.startsWith('material-'),
+      ),
+      languageSurface: language.getAttribute('data-surface'),
+      languageHasMaterialClass: [...language.classList].some((className) =>
+        className.startsWith('material-'),
+      ),
+      languageBorderStyle: languageStyle.borderStyle,
+      languageBackground: languageStyle.backgroundColor,
+      languagePaddingInline: languageStyle.paddingInline,
+      languagePaddingBlock: languageStyle.paddingBlock,
+      languageOverflow: languageStyle.overflow,
+      trailingBorder: trailingStyle.borderColor,
+      trailingBackground: trailingStyle.backgroundColor,
+      trailingRadius: Number.parseFloat(trailingStyle.borderTopLeftRadius),
+      compactHeightToken: style.getPropertyValue('--neoverse-control-compact-height').trim(),
+      controlHeightToken: style
+        .getPropertyValue('--neoverse-control-surface-control-height')
+        .trim(),
+      navigationHeightToken: style
+        .getPropertyValue('--neoverse-control-surface-navigation-height')
+        .trim(),
+      segmentedHeightToken: style
+        .getPropertyValue('--neoverse-control-surface-segmented-height')
+        .trim(),
+      groupHeightToken: style.getPropertyValue('--neoverse-control-surface-group-height').trim(),
+      surfacePaddingToken: style.getPropertyValue('--neoverse-control-surface-padding').trim(),
+      surfacePaddingBlockToken: style
+        .getPropertyValue('--neoverse-control-surface-padding-block')
+        .trim(),
+      surfacePaddingInlineToken: style
+        .getPropertyValue('--neoverse-control-surface-padding-inline')
+        .trim(),
+      dividerGapToken: style.getPropertyValue('--neoverse-control-surface-divider-gap').trim(),
+      compactHeight: resolveLength('--neoverse-control-compact-height'),
+      actionHeight: resolveLength('--neoverse-action-height-sm'),
+      controlHeight: resolveLength('--neoverse-control-surface-control-height'),
+      navigationSurfaceHeight: resolveLength('--neoverse-control-surface-navigation-height'),
+      segmentedSurfaceHeight: resolveLength('--neoverse-control-surface-segmented-height'),
+      groupHeight: resolveLength('--neoverse-control-surface-group-height'),
+      surfacePadding: resolveLength('--neoverse-control-surface-padding'),
+      surfacePaddingBlock: resolveLength('--neoverse-control-surface-padding-block'),
+      surfacePaddingInline: resolveLength('--neoverse-control-surface-padding-inline'),
+      surfaceItemGap: resolveLength('--neoverse-control-surface-item-gap'),
+      dividerGap: resolveLength('--neoverse-control-surface-divider-gap'),
+      navigationGap: Number.parseFloat(activeButtonStyle.gap),
+      navigationGapToken: resolveLength('--neoverse-navigation-item-gap'),
+      primaryGap: Number.parseFloat(getComputedStyle(primary).columnGap),
+      compactNavigationGapToken: resolveLength('--neoverse-navigation-item-compact-gap'),
+      trailingPaddingInline: Number.parseFloat(trailingStyle.paddingInline),
+      trailingPaddingBlock: Number.parseFloat(trailingStyle.paddingBlock),
+      trailingPaddingInlineToken: resolveLength(
+        '--neoverse-control-chrome-trailing-padding-inline',
+      ),
+      trailingBorderInline: Number.parseFloat(trailingStyle.borderLeftWidth),
+      trailingContentInsetInline:
+        languageRect.left - trailingRect.left - Number.parseFloat(trailingStyle.borderLeftWidth),
+      trailingOuterGap: element.getBoundingClientRect().right - trailingRect.right,
+      primaryWidth: primaryRect.width,
+      itemRects,
+      itemGaps,
+      maxNavigationAspectRatio: Math.max(...itemRects.map(({ width, height }) => width / height)),
+      maxHeroActionAspectRatio: Math.max(...heroActionAspectRatios),
+      activeButtonRect: {
+        left: activeButtonRect.left,
+        right: activeButtonRect.right,
+        top: activeButtonRect.top,
+        bottom: activeButtonRect.bottom,
+      },
+      activeIndicatorRect: {
+        left: activeIndicatorRect.left,
+        right: activeIndicatorRect.right,
+        top: activeIndicatorRect.top,
+        bottom: activeIndicatorRect.bottom,
+        width: activeIndicatorRect.width,
+        height: activeIndicatorRect.height,
+      },
+      iconIndicatorGap: activeIndicatorRect.top - activeIconRect.bottom,
+      activeIndicatorColor: getComputedStyle(activeIndicator).backgroundColor,
+      activeIndicatorOpacity: getComputedStyle(activeIndicator).opacity,
+      primaryHeight: primaryRect.height,
+      trailingHeight: trailingRect.height,
+      primaryCenterY: primaryRect.top + primaryRect.height / 2,
+      trailingCenterY: trailingRect.top + trailingRect.height / 2,
+      itemInsetBlockStart: activeButtonRect.top - element.getBoundingClientRect().top,
+      itemInsetBlockEnd: element.getBoundingClientRect().bottom - activeButtonRect.bottom,
+      itemInsetInlineStart: activeButtonRect.left - element.getBoundingClientRect().left,
+      sliderRadius: Number.parseFloat(languageSliderStyle.borderTopLeftRadius),
+      rootFontSize,
+      sliderHeight: Number.parseFloat(languageSliderStyle.height),
+      optionHeight: Number.parseFloat(languageOptionStyle.height),
+      languageOptionWidth,
+      languageOptionContentWidth,
+      navigationHeight: activeButtonRect.height,
+      navigationBoxSizing: activeButtonStyle.boxSizing,
+      navigationPaddingBlock: Number.parseFloat(activeButtonStyle.paddingBlock),
+      optionPaddingBlock: Number.parseFloat(languageOptionStyle.paddingBlock),
+      optionPaddingInline: Number.parseFloat(languageOptionStyle.paddingInline),
+      optionFontSize: Number.parseFloat(languageOptionStyle.fontSize),
+      optionFontWeight: languageOptionStyle.fontWeight,
+      optionLineHeight: languageOptionStyle.lineHeight,
+      optionTextCenterDelta:
+        optionTextRect.top +
+        optionTextRect.height / 2 -
+        (languageOptionRect.top + languageOptionRect.height / 2),
+      navigationTextCenterDelta:
+        activeLabelRect.top +
+        activeLabelRect.height / 2 -
+        (activeButtonRect.top + activeButtonRect.height / 2),
+      sliderInsetInline: sliderRect.left - trailingRect.left,
+      sliderInsetBlock: sliderRect.top - trailingRect.top,
+      dividerGapBefore: dividerRect.left - pulseRect.right,
+      dividerGapAfter: trailingRect.left - dividerRect.right,
+      rootHeight: element.getBoundingClientRect().height,
+      rootPaddingBlock: Number.parseFloat(style.paddingBlock),
+      sliderWithinLanguage,
+      sliderWithinOption:
+        sliderRect.left >= languageOptionRect.left &&
+        sliderRect.right <= languageOptionRect.right &&
+        sliderRect.top >= languageOptionRect.top &&
+        sliderRect.bottom <= languageOptionRect.bottom,
+      optionContentFits:
+        optionTextRect.left >= languageOptionRect.left &&
+        optionTextRect.right <= languageOptionRect.right &&
+        optionTextRect.top >= languageOptionRect.top &&
+        optionTextRect.bottom <= languageOptionRect.bottom,
+      activeBackground: activeButtonStyle.backgroundColor,
+      activeBackgroundImage: activeButtonStyle.backgroundImage,
+      hoverMode: element.getAttribute('data-neoverse-surface-hover'),
     };
   });
-  expect(Number(edgeMaterial.dock.trim())).toBe(0.24);
-  expect(edgeMaterial.width.trim()).toBe('1.25px');
-  expect(edgeMaterial.softness.trim()).toBe('blur(4px)');
-  expect(edgeMaterial.button.trim()).toBe('0');
-  expect(edgeMaterial.edgePass).toBe('css');
-  expect(edgeMaterial.edgeDisplay).toBe('block');
-  expect(edgeMaterial.edgeFilter).toContain('blur');
-
-  await expect(indicator).toHaveCount(1);
-  const itemIndicators = navigation.locator('.ui-navigation-item__indicator');
-  await expect(itemIndicators).toHaveCount(4);
+  expect(edgeMaterial.surface).toBe('chrome');
+  expect(edgeMaterial.chromeClass).toBe(true);
+  expect(edgeMaterial.dockBackground).toContain('rgba(152, 186, 220, 0.04)');
+  expect(edgeMaterial.dockFilter).toContain('blur(12px)');
+  expect(edgeMaterial.dockBorder).toBe('rgba(219, 234, 254, 0.08)');
+  expect(edgeMaterial.buttonSurface).toBe('none');
+  expect(edgeMaterial.buttonHasMaterialClass).toBe(false);
+  expect(edgeMaterial.languageSurface).toBe('none');
+  expect(edgeMaterial.languageHasMaterialClass).toBe(false);
+  expect(edgeMaterial.languageBorderStyle).toBe('none');
+  expect(edgeMaterial.languageBackground).toBe('rgba(0, 0, 0, 0)');
+  expect(edgeMaterial.languagePaddingInline).toBe('0px');
+  expect(edgeMaterial.languagePaddingBlock).toBe('0px');
+  expect(edgeMaterial.languageOverflow).toBe('visible');
+  expect(edgeMaterial.trailingBorder).toBe('rgba(219, 234, 254, 0.09)');
+  expect(edgeMaterial.trailingBackground).toBe('rgba(255, 255, 255, 0.03)');
+  expect(edgeMaterial.itemRects).toHaveLength(4);
+  expect(edgeMaterial.itemRects.every(({ width }) => width > 0)).toBe(true);
+  expect(edgeMaterial.groupHeightToken).toMatch(/rem$/);
+  expect(edgeMaterial.surfacePaddingToken).toMatch(/rem$/);
+  expect(edgeMaterial.surfacePaddingBlockToken).toMatch(/rem$/);
+  expect(edgeMaterial.surfacePaddingInlineToken).toMatch(/rem$/);
+  expect(edgeMaterial.navigationHeightToken).toMatch(/rem$/);
+  expect(edgeMaterial.segmentedHeightToken).toMatch(/rem$/);
+  expect(edgeMaterial.dividerGapToken).toMatch(/rem$/);
+  expect(edgeMaterial.actionHeight).toBeGreaterThan(edgeMaterial.compactHeight);
+  expect(edgeMaterial.controlHeight).toBeCloseTo(edgeMaterial.compactHeight, 2);
+  expect(edgeMaterial.navigationSurfaceHeight).toBeCloseTo(edgeMaterial.actionHeight, 2);
+  expect(edgeMaterial.segmentedSurfaceHeight).toBeCloseTo(edgeMaterial.compactHeight, 2);
+  expect(edgeMaterial.navigationHeight).toBeCloseTo(edgeMaterial.navigationSurfaceHeight, 2);
+  expect(edgeMaterial.optionHeight).toBeCloseTo(edgeMaterial.segmentedSurfaceHeight, 2);
+  expect(edgeMaterial.sliderHeight).toBeCloseTo(edgeMaterial.segmentedSurfaceHeight, 2);
+  expect(edgeMaterial.optionHeight).toBeLessThan(edgeMaterial.navigationHeight);
+  expect(edgeMaterial.iconIndicatorGap / edgeMaterial.navigationHeight).toBeGreaterThanOrEqual(
+    0.13,
+  );
+  if ((page.viewportSize()?.width ?? 0) <= 520) {
+    expect(edgeMaterial.languageOptionWidth).toBeCloseTo(
+      edgeMaterial.languageOptionContentWidth,
+      2,
+    );
+    expect(edgeMaterial.iconIndicatorGap).toBeGreaterThanOrEqual(
+      edgeMaterial.activeIndicatorRect.height - 0.1,
+    );
+  }
+  expect(edgeMaterial.navigationBoxSizing).toBe('border-box');
+  if ((page.viewportSize()?.width ?? 0) > 520) {
+    expect(edgeMaterial.navigationGap).toBeCloseTo(edgeMaterial.navigationGapToken, 2);
+    expect(edgeMaterial.navigationGap).toBeGreaterThan(0);
+    expect(edgeMaterial.primaryGap).toBeCloseTo(edgeMaterial.surfaceItemGap, 2);
+    expect(edgeMaterial.primaryGap).toBeGreaterThan(0);
+    expect(edgeMaterial.maxNavigationAspectRatio).toBeLessThanOrEqual(
+      edgeMaterial.maxHeroActionAspectRatio * 1.08,
+    );
+  } else {
+    expect(edgeMaterial.navigationGap).toBe(0);
+    expect(edgeMaterial.primaryGap).toBeCloseTo(edgeMaterial.compactNavigationGapToken, 2);
+    expect(edgeMaterial.primaryGap).toBeGreaterThan(0);
+  }
+  expect(edgeMaterial.trailingPaddingInline).toBeCloseTo(
+    edgeMaterial.trailingPaddingInlineToken,
+    2,
+  );
+  expect(edgeMaterial.trailingContentInsetInline).toBeCloseTo(
+    edgeMaterial.trailingPaddingInline,
+    2,
+  );
+  expect(edgeMaterial.trailingPaddingInline).toBeGreaterThan(edgeMaterial.trailingPaddingBlock);
+  expect(edgeMaterial.primaryWidth).toBeCloseTo(
+    edgeMaterial.itemRects.reduce((total, { width }) => total + width, 0) +
+      edgeMaterial.itemGaps.reduce((total, gap) => total + gap, 0),
+    1,
+  );
   expect(
-    await itemIndicators.evaluateAll((elements) =>
-      elements.every((element) => getComputedStyle(element).display === 'none'),
+    edgeMaterial.itemGaps.every((gap) =>
+      (page.viewportSize()?.width ?? 0) > 520
+        ? Math.abs(gap - edgeMaterial.primaryGap) < 0.1
+        : Math.abs(gap - edgeMaterial.primaryGap) < 0.1,
     ),
   ).toBe(true);
+  if ((page.viewportSize()?.width ?? 0) > 520) {
+    expect(
+      new Set(edgeMaterial.itemRects.map(({ width }) => Math.round(width * 100))).size,
+    ).toBeGreaterThan(1);
+  }
+  expect(edgeMaterial.activeIndicatorColor).not.toBe('rgba(0, 0, 0, 0)');
+  expect(edgeMaterial.activeIndicatorOpacity).toBe('1');
+  expect(edgeMaterial.activeIndicatorRect.width).toBeGreaterThan(0);
+  expect(edgeMaterial.activeIndicatorRect.height).toBeGreaterThan(0);
+  expect(edgeMaterial.activeIndicatorRect.left).toBeGreaterThanOrEqual(
+    edgeMaterial.activeButtonRect.left - 0.1,
+  );
+  expect(edgeMaterial.activeIndicatorRect.right).toBeLessThanOrEqual(
+    edgeMaterial.activeButtonRect.right + 0.1,
+  );
+  expect(Math.abs(edgeMaterial.primaryHeight - edgeMaterial.trailingHeight)).toBeLessThan(0.25);
+  expect(Math.abs(edgeMaterial.primaryCenterY - edgeMaterial.trailingCenterY)).toBeLessThan(0.25);
+  expect(edgeMaterial.dividerGapBefore).toBeCloseTo(edgeMaterial.dividerGapAfter, 2);
+  expect(edgeMaterial.dividerGapBefore).toBeCloseTo(edgeMaterial.dividerGap, 2);
+  expect(edgeMaterial.rootHeight).toBeCloseTo(
+    edgeMaterial.groupHeight + edgeMaterial.surfacePaddingBlock * 2 + 2,
+    1,
+  );
+  expect(edgeMaterial.rootPaddingBlock).toBeCloseTo(edgeMaterial.surfacePaddingBlock, 2);
+  expect(edgeMaterial.surfacePaddingBlock).toBeCloseTo(edgeMaterial.surfacePadding, 2);
+  expect(edgeMaterial.surfacePaddingInline).toBeGreaterThan(edgeMaterial.surfacePaddingBlock);
+  expect(edgeMaterial.trailingOuterGap).toBeGreaterThanOrEqual(edgeMaterial.surfacePaddingInline);
+  expect(edgeMaterial.itemInsetBlockStart).toBeCloseTo(edgeMaterial.itemInsetBlockEnd, 2);
+  expect(edgeMaterial.itemInsetInlineStart).toBeGreaterThan(edgeMaterial.itemInsetBlockStart);
+  expect(edgeMaterial.sliderWithinLanguage).toBe(true);
+  expect(edgeMaterial.sliderWithinOption).toBe(true);
+  expect(edgeMaterial.optionContentFits).toBe(true);
+  expect(edgeMaterial.primaryHeight).toBeCloseTo(edgeMaterial.groupHeight, 2);
+  expect(edgeMaterial.trailingHeight).toBeCloseTo(edgeMaterial.groupHeight, 2);
+  expect(edgeMaterial.optionPaddingBlock).toBeCloseTo(edgeMaterial.rootFontSize * 0.2, 1);
+  expect(edgeMaterial.optionPaddingInline).toBeCloseTo(edgeMaterial.rootFontSize * 0.375, 1);
+  expect(edgeMaterial.optionFontSize).toBeCloseTo(edgeMaterial.rootFontSize * 0.7, 1);
+  expect(edgeMaterial.optionFontWeight).toBe('750');
+  expect(edgeMaterial.optionLineHeight).toBe('normal');
+  expect(edgeMaterial.optionTextCenterDelta).toBeCloseTo(0, 2);
+  if ((page.viewportSize()?.width ?? 0) > 520) {
+    expect(edgeMaterial.navigationTextCenterDelta).toBeCloseTo(0, 2);
+  }
+  expect(edgeMaterial.sliderRadius).toBeLessThan(edgeMaterial.trailingRadius);
+  expect(edgeMaterial.activeBackground).toBe('rgba(0, 0, 0, 0)');
+  expect(edgeMaterial.activeBackgroundImage).not.toBe('none');
+  expect(edgeMaterial.hoverMode).toBe('static');
 
-  const initial = await indicator.evaluate((element) => ({
-    left: (element as HTMLElement).style.left,
-    transition: getComputedStyle(element).transition,
-    underlineWidth: getComputedStyle(element, '::after').width,
-  }));
-  expect(initial.left).toBe('0%');
-  expect(initial.transition).toContain('left 0.52s');
-  const expectedUnderlineWidth = (page.viewportSize()?.width ?? 0) <= 520 ? '20px' : '27.1875px';
-  expect(initial.underlineWidth).toBe(expectedUnderlineWidth);
+  const itemIndicators = navigation.locator('.ui-navigation-item__indicator');
+  await expect(itemIndicators).toHaveCount(4);
+  const initialItem = navigation.getByRole('link', { name: 'Home' });
+  const initialItemBox = await initialItem.boundingBox();
+  const initialIndicatorBox = await navigation
+    .locator('.ui-control-surface__indicator')
+    .boundingBox();
+  if (!initialItemBox || !initialIndicatorBox) {
+    throw new Error('Initial active navigation geometry is missing');
+  }
+  expect(initialIndicatorBox.x).toBeGreaterThanOrEqual(initialItemBox.x - 0.1);
+  expect(initialIndicatorBox.x + initialIndicatorBox.width).toBeLessThanOrEqual(
+    initialItemBox.x + initialItemBox.width + 0.1,
+  );
 
-  await navigation.getByRole('link', { name: 'Projects' }).click();
-  await expect(indicator).toHaveAttribute('style', /left:\s*25%/);
-  await expect(navigation.getByRole('link', { name: 'Projects' })).toHaveAttribute(
-    'aria-current',
-    'page',
+  const projectsItem = navigation.getByRole('link', { name: 'Projects' });
+  await projectsItem.click();
+  await expect(projectsItem).toHaveAttribute('aria-current', 'page');
+  await expect(
+    navigation.locator(
+      '.consumer-parity-dock__item.ui-navigation-item--active .ui-navigation-item__indicator',
+    ),
+  ).toHaveCount(1);
+});
+
+test('dock indicator travels between unequal items and respects reduced motion', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/frame?theme=dark&lang=en#consumer-parity', { waitUntil: 'domcontentloaded' });
+  await page.evaluate(waitForStableAssets);
+  const dock = page.locator('.consumer-parity-dock');
+  await expect(dock.locator('.ui-control-surface__indicator')).toHaveAttribute(
+    'data-ready',
+    'true',
+  );
+  for (const label of ['Pulse', 'Projects', 'Home']) {
+    const result = await dock.evaluate(async (element, label) => {
+      const bar = element.querySelector<HTMLElement>('.ui-control-surface__indicator');
+      const target = [...element.querySelectorAll<HTMLElement>('.ui-navigation-item')].find(
+        (item) => item.textContent?.trim() === label,
+      );
+      if (!bar || !target) throw new Error('Navigation geometry missing');
+      const start = bar.getBoundingClientRect().x;
+      target.click();
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+      const motion = bar
+        .getAnimations()
+        .find(
+          (animation) =>
+            animation instanceof CSSTransition && animation.transitionProperty === 'left',
+        );
+      if (!motion) throw new Error('No horizontal indicator transition');
+      motion.pause();
+      motion.currentTime = Number(motion.effect?.getTiming().duration) / 2;
+      const middle = bar.getBoundingClientRect().x;
+      for (const animation of bar.getAnimations()) animation.finish();
+      const end = bar.getBoundingClientRect();
+      const button = target.getBoundingClientRect();
+      const option = element
+        .querySelector('.ui-segmented-control__option')
+        ?.getBoundingClientRect();
+      if (!option) throw new Error('Language option missing');
+      return {
+        start,
+        middle,
+        end: end.x,
+        centered: Math.abs(end.x + end.width / 2 - button.x - button.width / 2),
+        centerDifference: Math.abs(
+          button.top + button.height / 2 - (option.top + option.height / 2),
+        ),
+        optionHeight: option.height,
+        navigationHeight: button.height,
+      };
+    }, label);
+    expect(result.middle).toBeGreaterThan(Math.min(result.start, result.end));
+    expect(result.middle).toBeLessThan(Math.max(result.start, result.end));
+    expect(result.centered).toBeLessThan(0.1);
+    expect(result.centerDifference).toBeLessThan(0.1);
+    expect(result.optionHeight).toBeLessThan(result.navigationHeight);
+  }
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(dock.locator('.ui-control-surface__indicator')).toHaveCSS(
+    'transition-duration',
+    '0s',
   );
 });
 
@@ -497,7 +939,7 @@ test.describe('wide WebGL Glass edge', () => {
   for (const theme of themes) {
     test(`keeps the explicit WebGL edge diffuse / ${theme}`, async ({ page }) => {
       await page.emulateMedia({ reducedMotion: 'no-preference' });
-      await page.goto(`/frame?theme=${theme}&lang=zh#glass`, {
+      await page.goto(`/frame?theme=${theme}&lang=zh#materials`, {
         waitUntil: 'domcontentloaded',
       });
       await page.addStyleTag({ content: freezeMotion });
@@ -509,7 +951,7 @@ test.describe('wide WebGL Glass edge', () => {
         'The diffuse WebGL contract is only applicable when WebGL is available.',
       );
 
-      const surface = page.locator('#glass .material-glass-elevated');
+      const surface = page.locator('#materials .material-glass-elevated');
       await expect(surface).toBeVisible();
       await surface.scrollIntoViewIfNeeded();
       await page.waitForTimeout(120);
@@ -604,6 +1046,8 @@ test('button press keeps the glass plate and reaches full press glow / dark', as
       return {
         active: element.matches(':active'),
         backgroundColor: style.backgroundColor,
+        backgroundImage: style.backgroundImage,
+        backdropFilter: style.backdropFilter,
         backgroundAlpha:
           alphaMatch === null
             ? style.backgroundColor === 'transparent'
@@ -616,10 +1060,11 @@ test('button press keeps the glass plate and reaches full press glow / dark', as
     });
 
     expect(press.active).toBe(true);
-    /* Dark buttons keep their dense glass plate while pressed; the press
-       feedback is the ::after glow reaching full opacity above it. */
-    expect(press.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
-    expect(press.backgroundAlpha).toBeLessThan(0.22);
+    /* The deployed dark button is an aurora image over a transparent sampled
+       backdrop. Press feedback stays in the dedicated ::after glow. */
+    expect(press.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    expect(press.backgroundImage).not.toBe('none');
+    expect(press.backdropFilter).toContain('blur(36px)');
     expect(press.pressGlowBackground).not.toBe('none');
     expect(press.pressGlowOpacity).toBe('1');
   } finally {
@@ -627,7 +1072,7 @@ test('button press keeps the glass plate and reaches full press glow / dark', as
   }
 });
 
-test('dark button variants keep translucent glass surfaces', async ({ page }) => {
+test('dark button variants mirror the deployed translucent aurora recipe', async ({ page }) => {
   await page.goto('/frame?theme=dark&lang=en#controls', {
     waitUntil: 'domcontentloaded',
   });
@@ -649,6 +1094,7 @@ test('dark button variants keep translucent glass surfaces', async ({ page }) =>
               : Number(rgbaAlpha)
             : Number(slashAlpha),
         borderColor: style.borderColor,
+        backgroundImage: style.backgroundImage,
         backdropFilter: style.backdropFilter,
       };
     }),
@@ -660,10 +1106,12 @@ test('dark button variants keep translucent glass surfaces', async ({ page }) =>
     'ui-button--secondary',
     'ui-button--ghost',
   ]);
-  expect(surfaces[0]?.backgroundAlpha).toBeLessThan(0.22);
-  expect(surfaces[1]?.backgroundAlpha).toBeLessThan(0.22);
+  expect(surfaces[0]?.backgroundAlpha).toBe(0);
+  expect(surfaces[1]?.backgroundAlpha).toBe(0);
+  expect(surfaces[0]?.backgroundImage).not.toBe('none');
+  expect(surfaces[1]?.backgroundImage).not.toBe('none');
   expect(surfaces[2]?.borderColor).toBe('rgba(0, 0, 0, 0)');
-  expect(surfaces.every(({ backdropFilter }) => backdropFilter.includes('blur(14px)'))).toBe(true);
+  expect(surfaces.every(({ backdropFilter }) => backdropFilter.includes('blur(36px)'))).toBe(true);
 });
 
 test('touch density keeps the compact control geometry and adds a transparent hit area', async ({

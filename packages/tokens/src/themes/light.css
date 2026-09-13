@@ -57,6 +57,22 @@
        atmospheric canvas. */
     --neoverse-shadow-control: 0 1px 4px -1px rgb(14 34 44 / 12%);
 
+    /* Light buttons stay airy and pale instead of inheriting the dark navy
+       CTA plate. Theme ownership is explicit so the same UiButton/UiAction
+       API adapts its material without Consumer overrides. */
+    --neoverse-control-button-filled-background: var(--neoverse-control-secondary-background);
+    --neoverse-control-button-filled-fill: var(--neoverse-control-secondary-fill);
+    --neoverse-control-button-filled-hover-background: var(
+      --neoverse-control-secondary-hover-background
+    );
+    --neoverse-control-button-filled-hover-fill: var(--neoverse-control-secondary-hover-fill);
+    --neoverse-control-button-filled-shadow: var(--neoverse-control-secondary-shadow);
+    --neoverse-control-button-filled-hover-shadow: var(--neoverse-control-secondary-hover-shadow);
+    --neoverse-control-button-border: var(--neoverse-color-border-default);
+    --neoverse-control-button-edge-refraction-opacity: var(
+      --neoverse-material-edge-refraction-opacity-subtle
+    );
+
     /* Light button presses use the same directional accent field as dark
        controls. A pale interactive border is too close to the surface and
        makes the press state disappear. */

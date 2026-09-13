@@ -16,16 +16,23 @@ const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.consumerParity;
 const language = ref('en');
 const activeNavigationId = ref('home');
-const hoveredNavigationId = ref<string | null>(null);
 const compactNavigation = ref(false);
 let compactNavigationQuery: MediaQueryList | undefined;
+const compactBreakpointToken = '--neoverse-playground-consumer-dock-compact-breakpoint';
 
 function updateCompactNavigation(query: MediaQueryList | MediaQueryListEvent): void {
   compactNavigation.value = query.matches;
 }
 
 onMounted(() => {
-  compactNavigationQuery = window.matchMedia('(max-width: 520px)');
+  const compactBreakpoint = getComputedStyle(document.documentElement)
+    .getPropertyValue(compactBreakpointToken)
+    .trim();
+  if (compactBreakpoint.length === 0) {
+    throw new Error(`Missing playground token: ${compactBreakpointToken}`);
+  }
+
+  compactNavigationQuery = window.matchMedia(`(max-width: ${compactBreakpoint})`);
   updateCompactNavigation(compactNavigationQuery);
   compactNavigationQuery.addEventListener('change', updateCompactNavigation);
 });
@@ -61,24 +68,6 @@ const navigationItems = computed(
     ] as const,
 );
 
-const activeNavigationIndex = computed(() => {
-  const index = navigationItems.value.findIndex((item) => item.id === activeNavigationId.value);
-  return Math.max(index, 0);
-});
-const hoverNavigationIndex = computed(() => {
-  if (hoveredNavigationId.value === null) {
-    return activeNavigationIndex.value;
-  }
-
-  const index = navigationItems.value.findIndex((item) => item.id === hoveredNavigationId.value);
-  return Math.max(index, 0);
-});
-const activeIndicatorStyle = computed(() => ({
-  left: `${activeNavigationIndex.value * 25}%`,
-}));
-const hoverIndicatorStyle = computed(() => ({
-  left: `${hoverNavigationIndex.value * 25}%`,
-}));
 const languageOptions = computed(
   () =>
     [
@@ -158,23 +147,16 @@ const languageOptions = computed(
         >
           <UiControlSurface
             as="nav"
-            variant="elevated"
-            class="consumer-parity-dock"
-            data-neoverse-glass-edge-pass="css"
+            surface="chrome"
+            hover-mode="static"
+            navigation-indicator
+            :class="[
+              'consumer-parity-dock',
+              compactNavigation ? 'consumer-parity-dock--compact' : '',
+            ]"
             :aria-label="localize(copy.navigation.ariaLabel, props.locale)"
             data-consumer-parity="floating-navigation"
           >
-            <span
-              class="consumer-parity-dock__active-indicator"
-              aria-hidden="true"
-              :style="activeIndicatorStyle"
-            />
-            <span
-              class="consumer-parity-dock__hover-indicator"
-              :class="{ 'consumer-parity-dock__hover-indicator--visible': hoveredNavigationId !== null }"
-              aria-hidden="true"
-              :style="hoverIndicatorStyle"
-            />
             <UiNavigationItem
               v-for="item in navigationItems"
               :key="item.id"
@@ -184,16 +166,13 @@ const languageOptions = computed(
               :active="item.id === activeNavigationId"
               :compact="compactNavigation"
               @click.prevent="activeNavigationId = item.id"
-              @pointerenter="hoveredNavigationId = item.id"
-              @pointerleave="hoveredNavigationId = null"
-              @focus="hoveredNavigationId = item.id"
-              @blur="hoveredNavigationId = null"
             >
               <template #icon><LabIcon :name="item.icon" /></template>
             </UiNavigationItem>
             <template #trailing>
               <UiSegmentedControl
                 v-model="language"
+                surface="none"
                 class="consumer-parity-dock__language"
                 :aria-label="localize(copy.navigation.languageLabel, props.locale)"
                 :options="languageOptions"

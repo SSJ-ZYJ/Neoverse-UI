@@ -221,7 +221,29 @@ describe('UiNavigationItem', () => {
     expect(action.get('.ui-navigation-item__label').classes()).toContain('sr-only');
     expect(action.get('.ui-navigation-item__indicator').attributes('aria-hidden')).toBe('true');
     expect(action.attributes('data-surface')).toBe('none');
-    expect(action.classes().some((className) => className.startsWith('material-glass-'))).toBe(false);
+    expect(action.classes().some((className) => className.startsWith('material-glass-'))).toBe(
+      false,
+    );
+  });
+
+  it('marks stretched compact items so grouped layouts can fill their track', () => {
+    const wrapper = mount(UiNavigationItem, {
+      props: { label: 'Projects', compact: true, stretch: true },
+    });
+
+    expect(wrapper.get('a').classes()).toEqual(
+      expect.arrayContaining(['ui-navigation-item--compact', 'ui-navigation-item--stretch']),
+    );
+  });
+
+  it('supports a start-edge indicator for vertical navigation', () => {
+    const wrapper = mount(UiNavigationItem, {
+      props: { label: 'Projects', active: true, indicatorPlacement: 'start' },
+    });
+
+    expect(wrapper.get('a').classes()).toEqual(
+      expect.arrayContaining(['ui-navigation-item--active', 'ui-navigation-item--indicator-start']),
+    );
   });
 
   it('can explicitly opt into a control Glass surface outside grouped navigation', () => {
@@ -257,6 +279,33 @@ describe('UiControlSurface', () => {
     );
     expect(solid.classes()).not.toContain('material-glass-subtle');
     expect(solid.attributes('data-surface')).toBe('elevated');
+  });
+
+  it('maps stable hover and local edge policies to internal material attributes', () => {
+    const surface = mount(UiControlSurface, {
+      props: {
+        surface: 'glass-elevated',
+        hoverMode: 'static',
+        edgeMode: 'local',
+      },
+    });
+
+    expect(surface.attributes('data-neoverse-surface-hover')).toBe('static');
+    expect(surface.attributes('data-neoverse-glass-edge-pass')).toBe('css');
+
+    const automatic = mount(UiControlSurface);
+    expect(automatic.attributes('data-neoverse-surface-hover')).toBeUndefined();
+    expect(automatic.attributes('data-neoverse-glass-edge-pass')).toBeUndefined();
+  });
+
+  it('keeps the shared navigation indicator opt-in', () => {
+    const surface = mount(UiControlSurface, {
+      props: { navigationIndicator: true },
+      slots: { default: '<a href="/">Home</a>' },
+    });
+
+    expect(surface.classes()).toContain('ui-control-surface--shared-indicator');
+    expect(surface.find('.ui-control-surface__indicator').exists()).toBe(false);
   });
 });
 
@@ -499,7 +548,8 @@ describe('UiSegmentedControl', () => {
     });
     const firstButton = wrapper.find('button');
 
-    expect(firstButton.classes()).toEqual(expect.arrayContaining(['h-7', 'px-2', 'text-caption']));
+    expect(firstButton.classes()).toContain('ui-segmented-control__option');
+    expect(firstButton.classes()).not.toContain('text-caption');
     expect(firstButton.classes()).not.toEqual(expect.arrayContaining(['h-9']));
   });
 
@@ -513,7 +563,9 @@ describe('UiSegmentedControl', () => {
 
     expect(wrapper.attributes('role')).toBe('radiogroup');
     expect(wrapper.attributes('aria-orientation')).toBe('horizontal');
-    expect(wrapper.classes()).toEqual(expect.arrayContaining(['gap-1', 'rounded-control']));
+    expect(wrapper.classes()).toEqual(
+      expect.arrayContaining(['ui-segmented-control', 'inline-flex']),
+    );
     expect(wrapper.classes()).not.toEqual(expect.arrayContaining(['border-subtle']));
     expect(buttons[0]?.classes()).toEqual(
       expect.arrayContaining([

@@ -1,20 +1,15 @@
 import { ref } from 'vue';
 import { isLocale, type Locale } from './playground-content';
-import type { FrameTheme } from './playground-types';
+import { syncResolvedThemeFromDocument } from './theme-state';
 
-/* The shell keeps frame content alive across theme and language switches by
-   mutating this document's `data-theme`/`lang` attributes; App.vue observes
-   those attributes and re-reads them into these refs, so frame components
-   stay reactive without reloading the iframe. */
-export const frameTheme = ref<FrameTheme>(
-  document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light',
-);
-
+/* The isolated frame keeps content alive across theme and language switches by
+   observing this document's attributes. Theme resolution itself is shared
+   with the main Playground shell. */
 const queryLocale = new URLSearchParams(window.location.search).get('lang');
 export const frameLocale = ref<Locale>(isLocale(queryLocale) ? queryLocale : 'en');
 
 export function applyFrameContextFromDocument(): void {
-  frameTheme.value = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light';
+  syncResolvedThemeFromDocument();
   const language = document.documentElement.lang.toLowerCase();
   frameLocale.value = language.startsWith('zh') ? 'zh' : 'en';
 }

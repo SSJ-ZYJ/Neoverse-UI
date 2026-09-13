@@ -6,18 +6,18 @@
     position: relative;
     display: block;
     width: 100%;
-    min-height: 0.86rem;
+    min-height: var(--neoverse-skeleton-text-min-height);
     overflow: hidden;
     background: var(--neoverse-skeleton-fill);
     box-shadow: var(--neoverse-skeleton-edge);
   }
 
   .ui-skeleton--text {
-    min-height: 0.86rem;
+    min-height: var(--neoverse-skeleton-text-min-height);
   }
 
   .ui-skeleton--title {
-    min-height: 1.15rem;
+    min-height: var(--neoverse-skeleton-title-min-height);
     border-radius: var(--neoverse-radius-xs);
   }
 

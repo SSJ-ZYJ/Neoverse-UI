@@ -1,0 +1,15 @@
+html[data-playground-view='shell'] {
+  font-size: clamp(
+    var(--neoverse-playground-shell-root-size-min),
+    var(--neoverse-playground-shell-root-size-fluid),
+    var(--neoverse-playground-shell-root-size-max)
+  );
+}
+[data-design-lab-workspace] {
+  scrollbar-gutter: stable;
+}
+
+.playground-navigation-item--flat-active {
+  --neoverse-navigation-item-active-background: none;
+  --neoverse-navigation-item-active-shadow: var(--neoverse-shadow-none);
+}

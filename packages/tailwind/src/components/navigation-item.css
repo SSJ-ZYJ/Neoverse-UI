@@ -1,22 +1,33 @@
 @layer components {
   .ui-navigation-item {
     position: relative;
+    box-sizing: border-box;
     gap: var(--neoverse-navigation-item-gap);
+    line-height: var(--neoverse-control-compact-line-height);
   }
 
   .ui-navigation-item.ui-action--sm {
+    height: var(--neoverse-navigation-item-height-sm);
     min-height: var(--neoverse-navigation-item-height-sm);
+    padding-block: var(--neoverse-navigation-item-padding-block-sm);
     padding-inline: var(--neoverse-navigation-item-padding-inline-sm);
+    font-size: var(--neoverse-navigation-item-font-size-sm);
   }
 
   .ui-navigation-item.ui-action--md {
+    height: var(--neoverse-navigation-item-height-md);
     min-height: var(--neoverse-navigation-item-height-md);
+    padding-block: var(--neoverse-navigation-item-padding-block-md);
     padding-inline: var(--neoverse-navigation-item-padding-inline-md);
+    font-size: var(--neoverse-navigation-item-font-size-md);
   }
 
   .ui-navigation-item.ui-action--lg {
+    height: var(--neoverse-navigation-item-height-lg);
     min-height: var(--neoverse-navigation-item-height-lg);
+    padding-block: var(--neoverse-navigation-item-padding-block-lg);
     padding-inline: var(--neoverse-navigation-item-padding-inline-lg);
+    font-size: var(--neoverse-navigation-item-font-size-lg);
   }
 
   .ui-navigation-item.ui-navigation-item--compact {
@@ -34,6 +45,15 @@
 
   .ui-navigation-item--compact.ui-action--lg {
     width: var(--neoverse-navigation-item-height-lg);
+  }
+
+  /* A grouped compact navigation can stretch to its grid track while keeping
+     the same compact label semantics. Standalone compact items retain their
+     square tokenized width. */
+  .ui-navigation-item.ui-navigation-item--compact.ui-navigation-item--stretch.ui-action--sm,
+  .ui-navigation-item.ui-navigation-item--compact.ui-navigation-item--stretch.ui-action--md,
+  .ui-navigation-item.ui-navigation-item--compact.ui-navigation-item--stretch.ui-action--lg {
+    width: auto;
   }
 
   .ui-navigation-item.ui-navigation-item--active {
@@ -68,12 +88,27 @@
   }
 
   .ui-navigation-item--compact .ui-navigation-item__indicator {
+    bottom: var(--neoverse-navigation-item-compact-indicator-inset);
     width: var(--neoverse-navigation-item-compact-indicator-width);
   }
 
   .ui-navigation-item--active .ui-navigation-item__indicator {
     opacity: 1;
     transform: translateX(-50%) scaleX(1);
+  }
+
+  .ui-navigation-item--indicator-start .ui-navigation-item__indicator {
+    top: var(--neoverse-navigation-item-start-indicator-inset);
+    bottom: var(--neoverse-navigation-item-start-indicator-inset);
+    left: 0;
+    width: var(--neoverse-navigation-item-start-indicator-width);
+    height: auto;
+    background: var(--neoverse-navigation-item-start-indicator-color);
+    transform: scaleY(0.55);
+  }
+
+  .ui-navigation-item--indicator-start.ui-navigation-item--active .ui-navigation-item__indicator {
+    transform: scaleY(1);
   }
 
   @media (prefers-reduced-motion: reduce) {

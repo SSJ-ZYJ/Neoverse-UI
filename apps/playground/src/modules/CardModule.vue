@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiBadge, UiButton, UiCard, UiGlassSurface } from '@neoverse-ui/vue';
+import { UiBadge, UiButton, UiCard } from '@neoverse-ui/vue';
 import LabIcon from '../LabIcon.vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, moduleCopy } from '../playground-content';
@@ -38,7 +38,7 @@ const copy = moduleCopy.card;
           <p class="text-caption text-secondary">{{ localize(copy.externalBody, props.locale) }}</p>
         </div>
       </UiCard>
-      <UiGlassSurface variant="card" class="max-w-container-md">
+      <UiCard surface="glass-card" class="max-w-container-md">
         <div class="grid gap-2">
           <h3 class="text-label font-label text-primary">
             {{ localize(copy.glassCard, props.locale) }}
@@ -47,7 +47,7 @@ const copy = moduleCopy.card;
             {{ localize(copy.glassCardBody, props.locale) }}
           </p>
         </div>
-      </UiGlassSurface>
+      </UiCard>
     </div>
   </MaterialBackdrop>
 </template>

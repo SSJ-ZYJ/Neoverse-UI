@@ -1,24 +1,21 @@
 import { createGlassRenderer } from '@neoverse-ui/glass-runtime';
 import { createApp } from 'vue';
 import App from './App.vue';
+import brandIconUrl from './assets/neoverse-ui-icon.svg';
+import './styles/playground-tokens.css';
+import './styles/consumer-parity.css';
+import './styles/shell.css';
 
-// Every playground token is rem-based, so raising the root font size on wide
-// viewports mirrors a 125% browser zoom at 100% zoom. The threshold matches
-// Tailwind's 64rem large breakpoint in CSS px; a real 125% zoom shrinks the
-// CSS viewport below it, so the two never compound.
-const LARGE_VIEWPORT_MIN_WIDTH = 1280;
-const LARGE_ROOT_FONT_SIZE = '20px';
+document.documentElement.dataset.playgroundView =
+  window.location.pathname === '/frame' ? 'frame' : 'shell';
 
-function applyViewportScale(): void {
-  const referenceWindow = window.parent !== window ? window.parent : window;
-  const isLargeViewport = referenceWindow.innerWidth >= LARGE_VIEWPORT_MIN_WIDTH;
-  document.documentElement.style.fontSize = isLargeViewport ? LARGE_ROOT_FONT_SIZE : '';
-}
-
-applyViewportScale();
-window.addEventListener('resize', applyViewportScale);
-if (window.parent !== window) {
-  window.parent.addEventListener('resize', applyViewportScale);
+const favicon =
+  document.querySelector<HTMLLinkElement>('link[rel~="icon"]') ?? document.createElement('link');
+favicon.rel = 'icon';
+favicon.type = 'image/svg+xml';
+favicon.href = brandIconUrl;
+if (!favicon.isConnected) {
+  document.head.append(favicon);
 }
 
 createApp(App).mount('#app');

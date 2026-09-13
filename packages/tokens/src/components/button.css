@@ -1,22 +1,36 @@
 @layer neoverse.tokens {
   :root {
+    /* Filled-button plate is intentionally separate from the shared
+       secondary-control plane. Segmented controls and navigation may share
+       geometry, but buttons need a theme-specific base material: light uses
+       the airy control glass while dark uses a denser navy plate. */
+    --neoverse-control-button-filled-background: var(--neoverse-control-secondary-background);
+    --neoverse-control-button-filled-fill: var(--neoverse-control-secondary-fill);
+    --neoverse-control-button-filled-hover-background: var(
+      --neoverse-control-secondary-hover-background
+    );
+    --neoverse-control-button-filled-hover-fill: var(--neoverse-control-secondary-hover-fill);
+    --neoverse-control-button-filled-shadow: var(--neoverse-control-secondary-shadow);
+    --neoverse-control-button-filled-hover-shadow: var(--neoverse-control-secondary-hover-shadow);
+
     /* Primary button state surfaces. */
     --neoverse-control-primary-background:
-      var(--neoverse-control-active-background), var(--neoverse-control-secondary-background);
+      var(--neoverse-control-active-background), var(--neoverse-control-button-filled-background);
     --neoverse-control-primary-foreground: var(--neoverse-control-segmented-active-foreground);
     --neoverse-control-primary-border: var(--neoverse-control-button-border);
     --neoverse-control-primary-shadow: var(--neoverse-control-active-shadow);
     --neoverse-control-primary-hover-background:
-      var(--neoverse-control-active-background), var(--neoverse-control-secondary-hover-background);
+      var(--neoverse-control-active-background),
+      var(--neoverse-control-button-filled-hover-background);
     --neoverse-control-primary-hover-shadow: var(--neoverse-control-active-shadow);
     --neoverse-control-primary-active-background: var(--neoverse-control-button-active-background);
 
     /* The CSS fallback edge and pointer-positioned press field. Filled
        buttons reuse the neutral control edge beside segmented controls;
        Ghost reuses that edge without adding a filled plane. */
-    --neoverse-control-button-edge: var(--neoverse-control-secondary-shadow);
+    --neoverse-control-button-edge: var(--neoverse-control-button-filled-shadow);
     --neoverse-control-button-edge-active: var(--neoverse-control-active-shadow);
-    --neoverse-control-button-edge-hover: var(--neoverse-control-button-edge);
+    --neoverse-control-button-edge-hover: var(--neoverse-control-button-filled-hover-shadow);
     /* Buttons need a stronger backdrop sample than segmented controls so the
        frosted plate remains visible at compact control sizes. */
     --neoverse-control-button-filter: var(--neoverse-control-secondary-filter);

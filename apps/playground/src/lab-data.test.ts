@@ -2,7 +2,7 @@ import { expect, test } from 'bun:test';
 
 import { cssVariables } from '@neoverse-ui/tokens';
 import { primitiveRadiusTokens, semanticRadiusTokens } from './lab-data';
-import { labModules } from './lab-modules';
+import { labModules, moduleGroups } from './lab-modules';
 import { localize, moduleCopy } from './playground-content';
 
 const radiusVariableNames = (tokens: { variable: string }[]) =>
@@ -42,6 +42,31 @@ test('registers one consolidated controls module and the parity composition', ()
   expect(moduleIds).not.toEqual(
     expect.arrayContaining(['action', 'navigation-item', 'status-indicator', 'control-surface']),
   );
+});
+
+test('keeps the top-level lab information architecture compact and purpose-driven', () => {
+  expect(labModules.map((module) => module.id)).toEqual([
+    'colors',
+    'typography',
+    'layout-shape',
+    'motion',
+    'materials',
+    'shadow',
+    'controls',
+    'status-feedback',
+    'card',
+    'scrollbar',
+    'composition',
+    'consumer-parity',
+  ]);
+
+  expect(moduleGroups.map((group) => [group.id, [...group.moduleIds]])).toEqual([
+    ['foundations', ['colors', 'typography', 'layout-shape', 'motion']],
+    ['materials', ['materials', 'shadow']],
+    ['components', ['controls', 'status-feedback', 'card', 'scrollbar']],
+    ['patterns', ['composition']],
+    ['validation', ['consumer-parity']],
+  ]);
 });
 
 test('keeps every composition scene localized in both supported locales', () => {

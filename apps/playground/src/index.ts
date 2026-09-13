@@ -1,4 +1,5 @@
 import { createServer as createNetServer } from 'node:net';
+import { readAssetMtime } from './asset-state';
 import { appCopy, formatLocalized, isLocale, type Locale, localize } from './playground-content';
 import type { FrameTheme } from './playground-types';
 
@@ -78,7 +79,7 @@ const findAvailablePort = async (startPort: number): Promise<number> => {
 
 const port = await findAvailablePort(requestedPort);
 
-// Dev-only: reload the page when either served asset changes on disk.
+// Dev-only: reload the page when any served asset changes on disk.
 const liveReloadScript = liveReload
   ? `<script>
   (() => {
@@ -87,7 +88,7 @@ const liveReloadScript = liveReload
       fetch('/__live', { cache: 'no-store' })
         .then((response) => response.json())
         .then((next) => {
-          const key = String(next.css) + ':' + String(next.js);
+          const key = [next.css, next.scopedCss, next.js].map(String).join(':');
           if (version !== null && version !== key) {
             location.reload();
           }
@@ -196,13 +197,38 @@ const server = Bun.serve({
     if (liveReload && url.pathname === '/__live') {
       const stylesheet = Bun.file(stylesheetPath);
       const clientBundle = Bun.file(clientBundlePath);
-      const [cssStat, jsStat] = await Promise.all([stylesheet.stat(), clientBundle.stat()]);
-      return new Response(JSON.stringify({ css: cssStat.mtimeMs, js: jsStat.mtimeMs }), {
-        headers: {
-          'cache-control': 'no-store',
-          'content-type': 'application/json; charset=utf-8',
+      const scopedCss = Bun.file(scopedCssPath);
+      const [cssMtime, jsMtime, scopedCssMtime] = await Promise.all([
+        readAssetMtime(stylesheet),
+        readAssetMtime(clientBundle),
+        readAssetMtime(scopedCss),
+      ]);
+
+      // Vite watch can briefly have no complete JS/CSS bundle while a new
+      // generation is being written. Skip this poll instead of turning that
+      // expected transition into a server error or a reload to a 503 page.
+      if (cssMtime === null || jsMtime === null) {
+        return new Response(null, {
+          status: 204,
+          headers: {
+            'cache-control': 'no-store',
+          },
+        });
+      }
+
+      return new Response(
+        JSON.stringify({
+          css: cssMtime,
+          js: jsMtime,
+          scopedCss: scopedCssMtime ?? 0,
+        }),
+        {
+          headers: {
+            'cache-control': 'no-store',
+            'content-type': 'application/json; charset=utf-8',
+          },
         },
-      });
+      );
     }
 
     if (url.pathname === '/assets/playground.js') {

@@ -1,4 +1,5 @@
 import { rm } from 'node:fs/promises';
+import { fileURLToPath } from 'node:url';
 
 const output = new URL('../dist/contract.css', import.meta.url);
 const buttonSource = new URL('../src/components/button.css', import.meta.url);
@@ -12,6 +13,22 @@ try {
     Bun.file(badgeSource).text(),
     Bun.file(componentsOutput).text(),
   ]);
+  const componentSourceDirectory = fileURLToPath(new URL('../src/components/', import.meta.url));
+  const componentSourceFiles = [
+    ...new Bun.Glob('*.css').scanSync({ cwd: componentSourceDirectory }),
+  ];
+  const componentSources = await Promise.all(
+    componentSourceFiles.map(async (file) => ({
+      file,
+      css: await Bun.file(`${componentSourceDirectory}/${file}`).text(),
+    })),
+  );
+  const hardcodedGeometryLiterals = componentSources.flatMap(({ file, css: sourceCss }) => {
+    const withoutComments = sourceCss.replace(/\/\*[\s\S]*?\*\//g, '');
+    return [...withoutComments.matchAll(/\b\d+(?:\.\d+)?(?:rem|px)\b/g)].map(
+      (match) => `${file}:${match[0]}`,
+    );
+  });
   const expectedSelectors = [
     '.bg-surface-canvas',
     '.bg-surface-subtle',
@@ -127,12 +144,7 @@ try {
     '.ease-emphasized',
   ];
   const missingSelectors = expectedSelectors.filter((selector) => !css.includes(selector));
-  const forbiddenSelectors = [
-    '.bg-background',
-    '.text-foreground',
-    '.border-border',
-    '.shadow-sm',
-  ];
+  const forbiddenSelectors = ['.bg-background', '.text-foreground', '.border-border', '.shadow-sm'];
   const emittedForbiddenSelectors = forbiddenSelectors.filter((selector) => css.includes(selector));
   const expectedValues = [
     '--neoverse-color-surface-canvas',
@@ -198,6 +210,10 @@ try {
     '--neoverse-control-segmented-background-color',
     '--neoverse-control-segmented-foreground',
     '--neoverse-control-segmented-active-foreground',
+    '--neoverse-control-segmented-inset',
+    '--neoverse-control-segmented-embedded-inset',
+    '--neoverse-control-segmented-gap',
+    '--neoverse-control-segmented-option-radius',
     '--neoverse-control-segmented-border',
     '--neoverse-control-segmented-shadow',
     '--neoverse-control-segmented-filter',
@@ -207,6 +223,7 @@ try {
     '--neoverse-badge-border',
     '--neoverse-badge-foreground',
     '--neoverse-scrollbar-immersive-size',
+    '--neoverse-scrollbar-overlay-thumb-width',
     '--neoverse-scrollbar-immersive-track',
     '--neoverse-scrollbar-immersive-thumb',
     '--neoverse-scrollbar-immersive-thumb-hover',
@@ -217,12 +234,16 @@ try {
     '--neoverse-scrollbar-immersive-thumb-edge',
     '--neoverse-scrollbar-immersive-thumb-glow',
     '--neoverse-skeleton-fill',
+    '--neoverse-skeleton-text-min-height',
+    '--neoverse-skeleton-title-min-height',
     '--neoverse-action-height-md',
     '--neoverse-action-icon-size-md',
     '--neoverse-navigation-item-active-background',
+    '--neoverse-navigation-item-padding-block-md',
     '--neoverse-navigation-item-indicator-color',
     '--neoverse-control-surface-padding',
     '--neoverse-control-surface-item-gap',
+    '--neoverse-control-surface-divider-gap',
     '--neoverse-status-indicator-dot-size-sm',
     '--neoverse-status-indicator-pulse-scale',
   ];
@@ -237,6 +258,7 @@ try {
     'data-neoverse-glass-renderer=webgl',
     '[data-neoverse-glass-renderer=webgl]',
     'data-neoverse-glass-edge-pass=css',
+    'data-neoverse-surface-hover=static',
     '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card):not(:focus-visible){box-shadow:var(--neoverse-material-shadow)',
     '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card):not(:focus-visible){box-shadow:var(--neoverse-material-shadow);-webkit-backdrop-filter:var(--neoverse-material-filter);backdrop-filter:var(--neoverse-material-filter);background-clip:padding-box',
     '[data-neoverse-glass-renderer=webgl] :is(.glass-card,.glass-surface){box-shadow:var(--neoverse-material-shadow,var(--glass-shadow,none));border-color:#0000',
@@ -318,9 +340,7 @@ try {
     (fragment) => !badgeCss.includes(fragment),
   );
   const ghostActiveCss =
-    buttonCss.match(
-      /\.ui-button--ghost:active:not\(:disabled\) \{([\s\S]*?)\n {2}\}/,
-    )?.[1] ?? '';
+    buttonCss.match(/\.ui-button--ghost:active:not\(:disabled\) \{([\s\S]*?)\n {2}\}/)?.[1] ?? '';
   const expectedGhostActiveFragments = [
     'background: var(--neoverse-control-button-ghost-active-background);',
     'transform: none;',
@@ -351,6 +371,7 @@ try {
     missingGhostActiveFragments.length > 0 ||
     emittedForbiddenButtonFragments.length > 0 ||
     missingBadgeFragments.length > 0 ||
+    hardcodedGeometryLiterals.length > 0 ||
     flattenedComponentsCss.includes('@import')
   ) {
     const details = [
@@ -374,6 +395,9 @@ try {
         : '',
       missingBadgeFragments.length > 0
         ? `Missing badge token fragments: ${missingBadgeFragments.join(', ')}`
+        : '',
+      hardcodedGeometryLiterals.length > 0
+        ? `Hard-coded rem/px geometry in component CSS: ${hardcodedGeometryLiterals.join(', ')}`
         : '',
       flattenedComponentsCss.includes('@import')
         ? 'Compiled component CSS still contains source imports'

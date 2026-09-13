@@ -1,19 +1,15 @@
 import type { Component } from 'vue';
-import BadgeModule from './modules/BadgeModule.vue';
-import BorderModule from './modules/BorderModule.vue';
 import CardModule from './modules/CardModule.vue';
 import ColorsModule from './modules/ColorsModule.vue';
 import CompositionModule from './modules/CompositionModule.vue';
 import ConsumerParityModule from './modules/ConsumerParityModule.vue';
 import ControlsModule from './modules/ControlsModule.vue';
-import GlassModule from './modules/GlassModule.vue';
+import LayoutShapeModule from './modules/LayoutShapeModule.vue';
+import MaterialsModule from './modules/MaterialsModule.vue';
 import MotionModule from './modules/MotionModule.vue';
-import RadiusModule from './modules/RadiusModule.vue';
 import ScrollbarModule from './modules/ScrollbarModule.vue';
 import ShadowModule from './modules/ShadowModule.vue';
-import SkeletonModule from './modules/SkeletonModule.vue';
-import SpacingModule from './modules/SpacingModule.vue';
-import SurfaceModule from './modules/SurfaceModule.vue';
+import StatusFeedbackModule from './modules/StatusFeedbackModule.vue';
 import TypographyModule from './modules/TypographyModule.vue';
 import { groupCopy, moduleCopy } from './playground-content';
 
@@ -33,53 +29,32 @@ export const labModules = [
     component: TypographyModule,
   },
   {
-    id: 'spacing',
+    id: 'layout-shape',
     groupId: 'foundations',
-    label: moduleCopy.spacing.label,
-    description: moduleCopy.spacing.description,
-    component: SpacingModule,
-  },
-  {
-    id: 'radius',
-    groupId: 'foundations',
-    label: moduleCopy.radius.label,
-    description: moduleCopy.radius.description,
-    component: RadiusModule,
-  },
-  {
-    id: 'border',
-    groupId: 'foundations',
-    label: moduleCopy.border.label,
-    description: moduleCopy.border.description,
-    component: BorderModule,
-  },
-  {
-    id: 'shadow',
-    groupId: 'foundations',
-    label: moduleCopy.shadow.label,
-    description: moduleCopy.shadow.description,
-    component: ShadowModule,
-  },
-  {
-    id: 'surface',
-    groupId: 'surfaces',
-    label: moduleCopy.surface.label,
-    description: moduleCopy.surface.description,
-    component: SurfaceModule,
-  },
-  {
-    id: 'glass',
-    groupId: 'surfaces',
-    label: moduleCopy.glass.label,
-    description: moduleCopy.glass.description,
-    component: GlassModule,
+    label: moduleCopy.layoutShape.label,
+    description: moduleCopy.layoutShape.description,
+    component: LayoutShapeModule,
   },
   {
     id: 'motion',
-    groupId: 'motion',
+    groupId: 'foundations',
     label: moduleCopy.motion.label,
     description: moduleCopy.motion.description,
     component: MotionModule,
+  },
+  {
+    id: 'materials',
+    groupId: 'materials',
+    label: moduleCopy.materials.label,
+    description: moduleCopy.materials.description,
+    component: MaterialsModule,
+  },
+  {
+    id: 'shadow',
+    groupId: 'materials',
+    label: moduleCopy.shadow.label,
+    description: moduleCopy.shadow.description,
+    component: ShadowModule,
   },
   {
     id: 'controls',
@@ -89,11 +64,11 @@ export const labModules = [
     component: ControlsModule,
   },
   {
-    id: 'badge',
+    id: 'status-feedback',
     groupId: 'components',
-    label: moduleCopy.badge.label,
-    description: moduleCopy.badge.description,
-    component: BadgeModule,
+    label: moduleCopy.statusFeedback.label,
+    description: moduleCopy.statusFeedback.description,
+    component: StatusFeedbackModule,
   },
   {
     id: 'card',
@@ -101,13 +76,6 @@ export const labModules = [
     label: moduleCopy.card.label,
     description: moduleCopy.card.description,
     component: CardModule,
-  },
-  {
-    id: 'skeleton',
-    groupId: 'components',
-    label: moduleCopy.skeleton.label,
-    description: moduleCopy.skeleton.description,
-    component: SkeletonModule,
   },
   {
     id: 'scrollbar',
@@ -118,14 +86,14 @@ export const labModules = [
   },
   {
     id: 'composition',
-    groupId: 'components',
+    groupId: 'patterns',
     label: moduleCopy.composition.label,
     description: moduleCopy.composition.description,
     component: CompositionModule,
   },
   {
     id: 'consumer-parity',
-    groupId: 'components',
+    groupId: 'validation',
     label: moduleCopy.consumerParity.label,
     description: moduleCopy.consumerParity.description,
     component: ConsumerParityModule,
@@ -146,33 +114,31 @@ export const moduleGroups = [
     id: 'foundations',
     label: groupCopy.foundations.label,
     description: groupCopy.foundations.description,
-    moduleIds: ['colors', 'typography', 'spacing', 'radius', 'border', 'shadow'],
+    moduleIds: ['colors', 'typography', 'layout-shape', 'motion'],
   },
   {
-    id: 'surfaces',
-    label: groupCopy.surfaces.label,
-    description: groupCopy.surfaces.description,
-    moduleIds: ['surface', 'glass'],
-  },
-  {
-    id: 'motion',
-    label: groupCopy.motion.label,
-    description: groupCopy.motion.description,
-    moduleIds: ['motion'],
+    id: 'materials',
+    label: groupCopy.materials.label,
+    description: groupCopy.materials.description,
+    moduleIds: ['materials', 'shadow'],
   },
   {
     id: 'components',
     label: groupCopy.components.label,
     description: groupCopy.components.description,
-    moduleIds: [
-      'controls',
-      'badge',
-      'card',
-      'skeleton',
-      'scrollbar',
-      'composition',
-      'consumer-parity',
-    ],
+    moduleIds: ['controls', 'status-feedback', 'card', 'scrollbar'],
+  },
+  {
+    id: 'patterns',
+    label: groupCopy.patterns.label,
+    description: groupCopy.patterns.description,
+    moduleIds: ['composition'],
+  },
+  {
+    id: 'validation',
+    label: groupCopy.validation.label,
+    description: groupCopy.validation.description,
+    moduleIds: ['consumer-parity'],
   },
 ] as const satisfies readonly {
   id: string;

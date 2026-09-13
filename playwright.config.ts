@@ -29,7 +29,7 @@ export default defineConfig({
       use: {
         ...devices['Desktop Chrome'],
         baseURL: 'http://127.0.0.1:3000',
-        viewport: { width: 1280, height: 900 },
+        viewport: { width: 1920, height: 1080 },
         deviceScaleFactor: 1,
         hasTouch: false,
         isMobile: false,

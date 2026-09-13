@@ -10,3 +10,4 @@ playwright-report/
 Thumbs.db
 .omp/
 .workbuddy/
+*.log

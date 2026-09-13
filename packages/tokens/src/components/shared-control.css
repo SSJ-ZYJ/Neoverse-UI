@@ -6,9 +6,17 @@
     --neoverse-control-hit-area: 0px;
     --neoverse-control-touch-hit-area: 8px;
 
-    /* Filled controls and segmented controls share a cool, translucent glass
-       plane in both themes. Ghost keeps the plane transparent but retains a
-       low-contrast edge so it does not disappear on pale surfaces. */
+    /* Compact command and segmented controls keep a tight painted height.
+       Grouped destination navigation can opt into a roomier height through the
+       ControlSurface relationship without inflating embedded segmented options. */
+    --neoverse-control-compact-height: var(--neoverse-space-6);
+    --neoverse-control-compact-radius: var(--neoverse-radius-control-inner);
+    --neoverse-control-compact-line-height: normal;
+
+    /* Shared secondary controls and segmented controls use this translucent
+       plane. Filled buttons alias it in light mode but may provide their own
+       theme-specific plate (dark uses a denser navy recipe). Ghost keeps the
+       plane transparent with a quiet semantic boundary. */
     --neoverse-control-secondary-border: var(--neoverse-color-border-default);
     --neoverse-control-button-border: var(--neoverse-color-border-default);
     --neoverse-control-secondary-background:

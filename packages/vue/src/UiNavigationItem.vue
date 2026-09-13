@@ -13,6 +13,7 @@ const props = withDefaults(defineProps<NavigationItemProps>(), {
   disabled: false,
   stretch: false,
   surface: 'none',
+  indicatorPlacement: 'bottom',
 });
 
 const attrs = useAttrs();
@@ -41,6 +42,8 @@ const ariaCurrent = computed(() => attrs['aria-current'] ?? (props.active ? 'pag
       {
         'ui-navigation-item--active': props.active,
         'ui-navigation-item--compact': props.compact,
+        'ui-navigation-item--stretch': props.stretch,
+        'ui-navigation-item--indicator-start': props.indicatorPlacement === 'start',
       },
       attrs.class,
     ]"

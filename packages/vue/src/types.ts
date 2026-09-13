@@ -9,6 +9,7 @@ export type SurfacePreset =
   | 'solid'
   | 'subtle'
   | 'elevated'
+  | 'chrome'
   | 'glass-subtle'
   | 'glass-elevated'
   | 'glass-card'
@@ -42,6 +43,8 @@ export interface ActionProps {
   surface?: ControlSurfacePreset;
 }
 
+export type NavigationIndicatorPlacement = 'bottom' | 'start';
+
 export interface NavigationItemProps {
   as?: string | Component;
   href?: string;
@@ -52,6 +55,7 @@ export interface NavigationItemProps {
   disabled?: boolean;
   stretch?: boolean;
   surface?: ControlSurfacePreset;
+  indicatorPlacement?: NavigationIndicatorPlacement;
 }
 
 export interface IconButtonProps {
@@ -74,15 +78,21 @@ export interface BadgeProps {
 }
 
 export type GlassSurfaceVariant = 'subtle' | 'elevated' | 'card' | 'immersive';
+export type SurfaceHoverMode = 'auto' | 'static';
+export type SurfaceEdgeMode = 'auto' | 'local';
 
 export interface GlassSurfaceProps {
   as?: string | Component;
   variant?: GlassSurfaceVariant;
 }
 export interface ControlSurfaceProps {
+  /** Move one indicator between content-sized navigation items. */
+  navigationIndicator?: boolean;
   as?: string | Component;
   variant?: GlassSurfaceVariant;
   surface?: SurfacePreset;
+  hoverMode?: SurfaceHoverMode;
+  edgeMode?: SurfaceEdgeMode;
 }
 
 export interface CardProps {

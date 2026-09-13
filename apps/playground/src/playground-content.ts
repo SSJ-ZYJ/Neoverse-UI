@@ -92,29 +92,36 @@ export const groupCopy = {
   foundations: {
     label: localized('Foundations', '基础'),
     description: localized(
-      'Core tokens for color, type, rhythm, geometry, borders, and depth.',
-      '覆盖色彩、字体、节奏、几何、边框与深度的核心设计令牌。',
+      'Core tokens for color, type, layout geometry, and motion.',
+      '覆盖色彩、字体、布局几何与动效的基础设计令牌。',
     ),
   },
-  surfaces: {
-    label: localized('Surfaces', '表面材质'),
+  materials: {
+    label: localized('Materials', '材质与层级'),
     description: localized(
-      'Opaque and translucent materials that establish layer hierarchy.',
-      '建立层级关系的不透明与半透明材质。',
-    ),
-  },
-  motion: {
-    label: localized('Motion', '动效'),
-    description: localized(
-      'Durations, easings, and transitions for responsive interface movement.',
-      '用于构建响应式界面动效的时长、缓动与过渡。',
+      'Surface materials and elevation rules that establish visual hierarchy.',
+      '用于建立视觉层级的表面材质与阴影规则。',
     ),
   },
   components: {
     label: localized('Components', '组件'),
     description: localized(
-      'Core Vue components rendered across interactive and loading states.',
-      '覆盖交互与加载状态的核心 Vue 组件。',
+      'Interactive, status, content, and scrolling primitives for product UI.',
+      '产品界面使用的交互、状态、内容与滚动基础组件。',
+    ),
+  },
+  patterns: {
+    label: localized('Patterns', '组合模式'),
+    description: localized(
+      'Reusable interface compositions that show components working together.',
+      '展示多个组件如何协同工作的可复用界面组合。',
+    ),
+  },
+  validation: {
+    label: localized('Validation', '产品校验'),
+    description: localized(
+      'Consumer-facing parity fixtures used to validate the system against real products.',
+      '用于将设计系统与真实消费端产品进行一致性校验的场景。',
     ),
   },
 } as const;
@@ -126,6 +133,27 @@ export const moduleCopy = {
     description: localized(
       'Interactive controls share one calibration module so the Design Lab stays focused instead of fragmenting every primitive into its own category.',
       '交互控件集中在一个校准模块中，避免设计实验室将每个基础组件拆成独立分类。',
+    ),
+  },
+  layoutShape: {
+    label: localized('Layout & Shape', '布局与几何'),
+    description: localized(
+      'Spacing, radius, and border tokens are calibrated together because they jointly define component geometry.',
+      '将间距、圆角与边框集中校准，因为它们共同决定组件的几何结构。',
+    ),
+  },
+  materials: {
+    label: localized('Surfaces & Glass', '表面与玻璃'),
+    description: localized(
+      'Opaque surfaces and glass materials are compared in one place to make layer hierarchy easier to judge.',
+      '将不透明表面与玻璃材质集中展示，便于直接比较不同层级关系。',
+    ),
+  },
+  statusFeedback: {
+    label: localized('Status & Feedback', '状态与反馈'),
+    description: localized(
+      'Badges, status indicators, and loading skeletons share one module for non-primary interaction feedback.',
+      '徽章、状态指示器与加载骨架集中展示，用于校准非主要交互反馈。',
     ),
   },
   colors: {
@@ -224,10 +252,10 @@ export const moduleCopy = {
     },
   },
   shadow: {
-    label: localized('Shadow', '阴影'),
+    label: localized('Elevation', '层级阴影'),
     description: localized(
-      'Primitive depth tokens and semantic aliases, previewed on theme surfaces.',
-      '在主题表面上呈现基础深度令牌与语义别名。',
+      'Shadow tokens are calibrated as elevation roles rather than isolated decoration.',
+      '将阴影令牌作为层级关系进行校准，而不是作为孤立的装饰效果。',
     ),
     primitive: {
       label: localized('Primitive shadows', '基础阴影'),
@@ -254,8 +282,8 @@ export const moduleCopy = {
   glass: {
     label: localized('Glass', '玻璃材质'),
     description: localized(
-      'Each sample uses one real UiGlassSurface material utility; nested Glass is intentionally absent.',
-      '每个示例都使用真实的 UiGlassSurface 材质工具类；刻意不展示嵌套 Glass。',
+      'Each sample uses the canonical UiSurface API with an explicit glass-* Surface; nested Glass is intentionally absent.',
+      '每个示例都通过 canonical UiSurface API 显式选择 glass-* Surface；刻意不展示嵌套 Glass。',
     ),
     sampleDescription: localized(
       'Token-backed transparency, border, blur, saturation, and refraction.',
@@ -391,8 +419,8 @@ export const moduleCopy = {
   card: {
     label: localized('Card', '卡片'),
     description: localized(
-      'UiCard groups content without choosing a material; the usage boundary selects a semantic Surface.',
-      'UiCard 只负责内容分组，不选择材质；使用位置负责选择语义 Surface。',
+      'UiCard owns standard card geometry and selects material explicitly through surface; use UiSurface for generic non-card material planes.',
+      'UiCard 负责标准卡片几何，并通过 surface 显式选择材质；通用非卡片材质容器使用 UiSurface。',
     ),
     reference: localized('Reference card', '参考卡片'),
     ready: localized('Ready', '就绪'),
@@ -403,13 +431,13 @@ export const moduleCopy = {
     continue: localized('Continue', '继续'),
     externalClass: localized('External class', '外部类名'),
     externalBody: localized(
-      'This card opts into a standard raised Surface; a Glass material remains an explicit UiGlassSurface choice.',
-      '此卡片显式使用标准抬升 Surface；Glass 材质仍由 UiGlassSurface 明确选择。',
+      'This card uses ordinary raised styling while keeping standard card geometry. Use UiSurface when a material plane is not semantically a card.',
+      '此卡片使用普通抬升样式，同时保留标准卡片几何；当材质平面并非语义上的卡片时，再使用 UiSurface。',
     ),
     glassCard: localized('Glass card', '玻璃卡片'),
     glassCardBody: localized(
-      'The card material tier: a neutral sheen over a translucent glass plane with a hairline border, inset edge highlight, and deep backdrop blur. Use via UiGlassSurface variant="card".',
-      'Card 材质档：半透明玻璃面上的中性光晕、发丝描边、内缘高光与深度背景模糊。通过 UiGlassSurface variant="card" 使用。',
+      'The card material tier: a neutral sheen over a translucent glass plane with a hairline border, inset edge highlight, and deep backdrop blur. Standard cards use UiCard surface="glass-card".',
+      'Card 材质档：半透明玻璃面上的中性光晕、发丝描边、内缘高光与深度背景模糊。标准卡片使用 UiCard surface="glass-card"。',
     ),
   },
   segmentedControl: {
@@ -701,10 +729,10 @@ export const moduleCopy = {
     },
   },
   consumerParity: {
-    label: localized('Consumer Parity', '消费端对照'),
+    label: localized('Product Parity', '产品一致性校验'),
     description: localized(
-      'Rebuilds the audited Neoverse hero actions and floating navigation from public core components and fake data.',
-      '使用公开核心组件与假数据重建经审计的 Neoverse Hero 操作区与悬浮导航。',
+      'Validates the public component API against audited Neoverse product patterns using controlled fake data.',
+      '使用可控假数据，将公开组件 API 与经审计的 Neoverse 产品模式进行一致性校验。',
     ),
     hero: {
       label: localized('Hero Actions', 'Hero 操作区'),

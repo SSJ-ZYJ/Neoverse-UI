@@ -17,7 +17,7 @@
 
   .scrollbar-immersive::-webkit-scrollbar-track,
   .scrollbar-immersive *::-webkit-scrollbar-track {
-    border: 0.25rem solid transparent;
+    border: var(--neoverse-scrollbar-immersive-track-border-width) solid transparent;
     border-radius: var(--neoverse-radius-pill);
     background: var(--neoverse-scrollbar-immersive-track);
     background-clip: padding-box;
@@ -25,8 +25,8 @@
 
   .scrollbar-immersive::-webkit-scrollbar-thumb,
   .scrollbar-immersive *::-webkit-scrollbar-thumb {
-    min-height: 2.75rem;
-    border: 0.2rem solid transparent;
+    min-height: var(--neoverse-scrollbar-immersive-thumb-min-length);
+    border: var(--neoverse-scrollbar-immersive-thumb-border-width) solid transparent;
     border-radius: var(--neoverse-radius-pill);
     background: var(--neoverse-scrollbar-immersive-thumb-background);
     background-clip: padding-box;
@@ -88,11 +88,11 @@
   }
 
   .ui-scrollbar {
-    --ui-scrollbar-inset: 0.72rem;
+    --ui-scrollbar-inset: var(--neoverse-scrollbar-overlay-inset-block);
     position: fixed;
     z-index: var(--neoverse-layout-layer-toast);
     top: max(var(--ui-scrollbar-inset), env(safe-area-inset-top));
-    right: max(0.35rem, env(safe-area-inset-right));
+    right: max(var(--neoverse-scrollbar-overlay-inset-inline), env(safe-area-inset-right));
     bottom: max(var(--ui-scrollbar-inset), env(safe-area-inset-bottom));
     width: var(--neoverse-scrollbar-immersive-size);
     border-radius: var(--neoverse-radius-pill);
@@ -111,7 +111,7 @@
   .ui-scrollbar__thumb {
     position: absolute;
     left: 50%;
-    width: 0.3rem;
+    width: var(--neoverse-scrollbar-overlay-thumb-width);
     border-radius: var(--neoverse-radius-pill);
     background: var(--neoverse-scrollbar-immersive-thumb-background);
     box-shadow:
@@ -127,11 +127,11 @@
 
   .ui-scrollbar:hover .ui-scrollbar__thumb,
   .ui-scrollbar--dragging .ui-scrollbar__thumb {
-    width: 0.42rem;
+    width: var(--neoverse-scrollbar-overlay-thumb-width-hover);
     background: var(--neoverse-scrollbar-immersive-thumb-hover-background);
     box-shadow:
       var(--neoverse-scrollbar-immersive-thumb-edge),
-      0 0 1rem -0.35rem color-mix(in srgb, var(--neoverse-color-accent-primary) 60%, transparent);
+      var(--neoverse-scrollbar-overlay-thumb-hover-shadow);
   }
 
   .ui-scrollbar--dragging .ui-scrollbar__thumb {

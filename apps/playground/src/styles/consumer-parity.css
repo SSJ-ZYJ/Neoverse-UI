@@ -1,0 +1,34 @@
+/* Consumer parity dock mirrors the production composition. Material and control semantics come
+   from Neoverse-UI; this file owns only dock layout and scene-level token values. */
+.consumer-parity-dock {
+  box-sizing: border-box;
+  width: max-content;
+  max-width: calc(100vw - var(--neoverse-playground-consumer-dock-viewport-clearance));
+  min-height: 0;
+  isolation: isolate;
+  border-radius: var(--neoverse-radius-control);
+
+  /* Keep the outer primary/trailing groups tight around the divider. The
+     navigation items retain ControlSurface's shared item gap so hover and
+     active plates stay visually separate. */
+  --neoverse-control-surface-gap: var(--neoverse-space-0);
+  --neoverse-control-surface-divider-gap: var(--neoverse-space-2);
+}
+
+.consumer-parity-dock .ui-control-surface__group--primary {
+  display: flex;
+  width: max-content;
+  min-width: 0;
+  flex: 0 0 auto;
+  align-items: center;
+}
+
+.consumer-parity-dock__item {
+  flex: 0 0 auto;
+}
+
+.consumer-parity-dock--compact {
+  --neoverse-control-segmented-embedded-option-min-width: var(
+    --neoverse-control-segmented-option-min-width-compact
+  );
+}

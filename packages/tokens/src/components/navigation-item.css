@@ -13,16 +13,34 @@
     --neoverse-navigation-item-active-shadow: var(--neoverse-control-active-highlight);
     --neoverse-navigation-item-indicator-color: var(--neoverse-color-accent-secondary);
     --neoverse-navigation-item-gap: 0.375rem;
-    --neoverse-navigation-item-height-sm: 1.75rem;
-    --neoverse-navigation-item-height-md: 2rem;
-    --neoverse-navigation-item-height-lg: 2.25rem;
-    --neoverse-navigation-item-padding-inline-sm: 0.5rem;
-    --neoverse-navigation-item-padding-inline-md: 0.5rem;
+    --neoverse-navigation-item-compact-gap: var(--neoverse-space-1);
+    --neoverse-navigation-item-height-sm: 1.5rem;
+    --neoverse-navigation-item-height-md: var(--neoverse-control-surface-control-height);
+    --neoverse-navigation-item-height-lg: 2rem;
+    /* Navigation labels are denser than destination actions. Keeping their
+       type scale component-owned prevents grouped docks from inheriting the
+       larger action-md label used by standalone CTAs. */
+    --neoverse-navigation-item-font-size-sm: var(--neoverse-font-size-2xs);
+    --neoverse-navigation-item-font-size-md: var(--neoverse-font-size-2xs);
+    --neoverse-navigation-item-font-size-lg: var(--neoverse-font-size-xs);
+    --neoverse-navigation-item-padding-block-sm: var(--neoverse-space-1);
+    --neoverse-navigation-item-padding-block-md: var(--neoverse-space-1);
+    --neoverse-navigation-item-padding-block-lg: var(--neoverse-space-1);
+    --neoverse-navigation-item-padding-inline-sm: var(--neoverse-space-2);
+    --neoverse-navigation-item-padding-inline-md: var(--neoverse-space-2);
     --neoverse-navigation-item-padding-inline-lg: 0.625rem;
     --neoverse-navigation-item-compact-padding-inline: 0;
-    --neoverse-navigation-item-indicator-width: 1.25rem;
+    --neoverse-navigation-item-indicator-width: var(--neoverse-space-5);
     --neoverse-navigation-item-indicator-height: 0.125rem;
-    --neoverse-navigation-item-compact-indicator-width: 0.75rem;
-    --neoverse-navigation-item-indicator-inset: 0.08rem;
+    --neoverse-navigation-item-compact-indicator-width: var(--neoverse-space-3);
+    /* Keep the bottom indicator visually detached from centered icon/label
+       content instead of letting it creep upward as the control scales. */
+    --neoverse-navigation-item-indicator-inset: var(--neoverse-space-0);
+    --neoverse-navigation-item-compact-indicator-inset: var(--neoverse-space-0);
+    --neoverse-navigation-item-start-indicator-inset: var(--neoverse-space-2);
+    --neoverse-navigation-item-start-indicator-width: var(
+      --neoverse-navigation-item-indicator-height
+    );
+    --neoverse-navigation-item-start-indicator-color: var(--neoverse-color-accent-primary);
   }
 }

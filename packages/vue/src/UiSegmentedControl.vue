@@ -3,7 +3,7 @@ import type { ComponentPublicInstance } from 'vue';
 import { computed, nextTick, ref, useAttrs, watch } from 'vue';
 import { controlFocusClasses, segmentedTransitionClasses } from './classes';
 import { getSurfaceClass } from './surface';
-import type { SegmentedControlProps, SegmentedControlSize, SegmentOption } from './types';
+import type { SegmentedControlProps, SegmentOption } from './types';
 import UiLoadingIndicator from './UiLoadingIndicator.vue';
 
 defineOptions({ inheritAttrs: false });
@@ -37,10 +37,6 @@ const internalValue = ref<string | undefined>(initialValue(props.options, props.
 const focusedIndex = ref<number | null>(null);
 const optionRefs = ref<Array<HTMLButtonElement | null>>([]);
 
-const optionSizeClasses: Record<SegmentedControlSize, string> = {
-  sm: 'h-7 px-2 text-caption',
-};
-
 const selectedOptionClasses = 'ui-segmented-control__option--active';
 const unselectedOptionClasses = '';
 const disabledOptionClasses = 'disabled:text-disabled disabled:cursor-not-allowed';
@@ -70,7 +66,7 @@ const rovingIndex = computed(() => {
 });
 
 const classes = computed(() => [
-  'ui-segmented-control inline-flex items-center gap-1 rounded-control p-1',
+  'ui-segmented-control inline-flex items-center',
   getSurfaceClass(props.surface),
 ]);
 const forwardedAttrs = computed(() => {
@@ -214,11 +210,9 @@ function setOptionRef(element: Element | ComponentPublicInstance | null, index: 
 
 function optionClasses(option: SegmentOption): string[] {
   return [
-    'ui-segmented-control__option rounded-control-inner',
+    'ui-segmented-control__option',
     segmentedTransitionClasses,
     controlFocusClasses,
-    'font-label',
-    optionSizeClasses[props.size as SegmentedControlSize] ?? optionSizeClasses.sm,
     isSelected(option) ? selectedOptionClasses : unselectedOptionClasses,
     disabledOptionClasses,
   ];
@@ -260,7 +254,7 @@ function optionClasses(option: SegmentOption): string[] {
     </span>
     <span
       v-if="props.loading"
-      class="ui-segmented-control__loading ml-1 inline-flex size-4 items-center justify-center"
+      class="ui-segmented-control__loading inline-flex items-center justify-center"
       aria-hidden="true"
     >
       <UiLoadingIndicator />

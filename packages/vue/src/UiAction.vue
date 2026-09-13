@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
 import { updateButtonPointerGlow } from './button-pointer-glow';
-import { getSurfaceClass } from './surface';
 import {
   actionSizeClasses,
   actionStretchClasses,
@@ -9,6 +8,7 @@ import {
   controlFocusClasses,
   controlTransitionClasses,
 } from './classes';
+import { getSurfaceClass } from './surface';
 import type { ActionProps, ActionSize, ButtonVariant } from './types';
 
 defineOptions({ inheritAttrs: false });

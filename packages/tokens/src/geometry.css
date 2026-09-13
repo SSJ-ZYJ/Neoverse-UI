@@ -8,8 +8,16 @@
     --neoverse-radius-xl: 24px;
     --neoverse-radius-2xl: 32px;
     --neoverse-radius-pill: 9999px;
+    /* Compact-control inset and inner-radius offset are separate contracts.
+       The deployed Neoverse controls intentionally use a softer inner corner
+       than a mathematically concentric subtraction would produce. */
+    --neoverse-control-inset: 0.22rem;
+    --neoverse-radius-control-inner-offset: 0.18rem;
     --neoverse-radius-control: var(--neoverse-radius-md);
-    --neoverse-radius-control-inner: calc(var(--neoverse-radius-control) - 0.18rem);
+    --neoverse-radius-control-inner: calc(
+      var(--neoverse-radius-control) -
+      var(--neoverse-radius-control-inner-offset)
+    );
     --neoverse-radius-card: var(--neoverse-radius-lg);
     --neoverse-radius-panel: var(--neoverse-radius-xl);
     --neoverse-border-width-none: 0px;

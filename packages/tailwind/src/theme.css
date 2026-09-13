@@ -470,7 +470,7 @@
           .material-glass-elevated,
           .material-glass-immersive,
           .material-glass-card
-        ):not(.ui-button):hover {
+        ):not(.ui-button):not([data-neoverse-surface-hover='static']):hover {
         background-color: color-mix(
           in srgb,
           var(--neoverse-material-tint)
@@ -563,7 +563,7 @@
         .material-glass-elevated,
         .material-glass-immersive,
         .material-glass-card
-      ):not(.ui-button):hover {
+      ):not(.ui-button):not([data-neoverse-surface-hover='static']):hover {
       box-shadow:
         var(--neoverse-material-edge-highlight), var(--neoverse-material-inner-glow),
         var(--neoverse-material-seam-glow), var(--neoverse-material-bloom),
@@ -608,7 +608,7 @@
         .material-glass-elevated,
         .material-glass-immersive,
         .material-glass-card
-      ):not(.ui-button):not(:focus-visible):hover {
+      ):not(.ui-button):not([data-neoverse-surface-hover='static']):not(:focus-visible):hover {
       background-clip: padding-box;
       box-shadow:
         var(--neoverse-material-bloom),

@@ -5,6 +5,9 @@
   .ui-segmented-control {
     position: relative;
     max-width: 100%;
+    gap: var(--neoverse-control-segmented-loading-gap);
+    border-radius: var(--neoverse-radius-control);
+    padding: var(--neoverse-control-segmented-inset);
     overflow: hidden;
     touch-action: manipulation;
   }
@@ -29,6 +32,8 @@
 
   .ui-segmented-control[data-surface='none'] {
     border: 0;
+    padding: var(--neoverse-control-segmented-embedded-inset);
+    overflow: visible;
     background: transparent;
     box-shadow: none;
     -webkit-backdrop-filter: none;
@@ -41,7 +46,7 @@
     min-width: 0;
     grid-template-columns: repeat(var(--segment-count), minmax(0, 1fr));
     align-items: stretch;
-    gap: 0.24rem;
+    gap: var(--neoverse-control-segmented-gap);
   }
 
   .ui-segmented-control__slider {
@@ -49,15 +54,20 @@
     z-index: 0;
     inset-block: 0;
     inset-inline-start: 0;
-    width: calc((100% - (var(--segment-count) - 1) * 0.24rem) / var(--segment-count));
+    width: calc(
+      (100% - (var(--segment-count) - 1) * var(--neoverse-control-segmented-gap)) /
+      var(--segment-count)
+    );
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
       var(--neoverse-control-active-border);
-    border-radius: calc(var(--neoverse-radius-control) - 0.18rem);
+    border-radius: var(--neoverse-control-segmented-option-radius);
     background-image: var(--neoverse-control-active-background);
-    background-color: var(--neoverse-control-secondary-fill);
+    background-color: var(--neoverse-control-segmented-active-fill);
     box-shadow: var(--neoverse-control-active-shadow);
     pointer-events: none;
-    transform: translateX(calc(var(--segment-index) * (100% + 0.24rem)));
+    transform: translateX(
+      calc(var(--segment-index) * (100% + var(--neoverse-control-segmented-gap)))
+    );
     transition: transform var(--neoverse-motion-duration-standard)
       var(--neoverse-motion-easing-emphasized);
     will-change: transform;
@@ -67,15 +77,21 @@
     position: relative;
     z-index: 1;
     display: inline-flex;
-    min-width: 2.5rem;
+    box-sizing: border-box;
+    min-width: var(--neoverse-control-segmented-option-min-width);
+    height: var(--neoverse-control-segmented-option-height-sm);
     align-items: center;
     justify-content: center;
     border: 0;
-    border-radius: calc(var(--neoverse-radius-control) - 0.18rem);
+    border-radius: var(--neoverse-control-segmented-option-radius);
+    padding-block: var(--neoverse-control-segmented-option-padding-block-sm);
+    padding-inline: var(--neoverse-control-segmented-option-padding-inline-sm);
     background: transparent;
     color: var(--neoverse-control-segmented-foreground);
     cursor: pointer;
-    line-height: 1;
+    font-size: var(--neoverse-control-segmented-option-font-size-sm);
+    font-weight: var(--neoverse-control-segmented-option-font-weight);
+    line-height: var(--neoverse-control-compact-line-height);
     white-space: nowrap;
     transition:
       background-color var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
@@ -139,6 +155,8 @@
   .ui-segmented-control__loading {
     position: relative;
     z-index: 1;
+    width: var(--neoverse-control-segmented-loading-size);
+    height: var(--neoverse-control-segmented-loading-size);
     flex: 0 0 auto;
     color: var(--neoverse-color-text-secondary);
   }
@@ -151,6 +169,15 @@
 }
 
 @layer utilities {
+  @media (pointer: coarse) {
+    /* The shared Glass plane clips by default. Touch options own a transparent
+       expanded target, so the default surfaced control must let that target
+       extend beyond the painted shell. */
+    .ui-segmented-control.material-glass-subtle[data-surface='glass-subtle'] {
+      overflow: visible;
+    }
+  }
+
   :root[data-theme='light'] .ui-segmented-control .ui-segmented-control__option:focus-visible,
   :root.light:not([data-theme]) .ui-segmented-control .ui-segmented-control__option:focus-visible {
     box-shadow: var(--neoverse-control-segmented-focus-shadow);

@@ -25,7 +25,12 @@ const copy = moduleCopy.skeleton;
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.rect, props.locale) }}
       </h3>
-      <UiSkeleton variant="rect" width="100%" height="6rem" radius="0.75rem" />
+      <UiSkeleton
+        variant="rect"
+        width="100%"
+        height="var(--neoverse-space-24)"
+        radius="var(--neoverse-radius-md)"
+      />
     </article>
     <article class="grid gap-3 rounded-control material-glass-subtle p-4">
       <h3 class="text-label font-label text-primary">

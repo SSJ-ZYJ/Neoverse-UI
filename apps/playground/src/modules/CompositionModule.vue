@@ -4,13 +4,13 @@ import {
   UiBadge,
   UiButton,
   UiCard,
-  UiGlassSurface,
   UiIconButton,
+  UiNavigationItem,
   UiSegmentedControl,
+  UiSurface,
 } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
 import LabIcon from '../LabIcon.vue';
-import { focusClasses } from '../lab-data';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, moduleCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
@@ -109,7 +109,7 @@ const navigationItems = computed(() => [
           </p>
         </header>
 
-        <UiGlassSurface variant="subtle">
+        <UiSurface surface="glass-subtle" class="rounded-card p-4">
           <div class="grid gap-3">
             <div class="flex flex-wrap items-start justify-between gap-3">
               <div class="min-w-0">
@@ -144,7 +144,7 @@ const navigationItems = computed(() => [
               </UiButton>
             </div>
           </div>
-        </UiGlassSurface>
+        </UiSurface>
       </section>
 
       <section
@@ -235,8 +235,9 @@ const navigationItems = computed(() => [
           </p>
         </header>
 
-        <UiGlassSurface
-          variant="immersive"
+        <UiSurface
+          surface="glass-immersive"
+          class="rounded-card p-4"
           role="toolbar"
           :aria-label="localize(copy.scenes.floatingToolbar.modesLabel, props.locale)"
         >
@@ -292,7 +293,7 @@ const navigationItems = computed(() => [
               </UiButton>
             </div>
           </div>
-        </UiGlassSurface>
+        </UiSurface>
       </section>
 
       <section
@@ -312,7 +313,7 @@ const navigationItems = computed(() => [
           </p>
         </header>
 
-        <UiGlassSurface variant="elevated">
+        <UiSurface surface="glass-elevated" class="rounded-card p-4">
           <div class="grid gap-4">
             <div class="flex flex-wrap items-start justify-between gap-3">
               <div class="min-w-0 max-w-container-lg">
@@ -349,7 +350,7 @@ const navigationItems = computed(() => [
               <span>{{ localize(copy.scenes.docsArticleHeader.author, props.locale) }}</span>
             </div>
           </div>
-        </UiGlassSurface>
+        </UiSurface>
       </section>
 
       <section
@@ -382,19 +383,20 @@ const navigationItems = computed(() => [
 
           <ul class="grid gap-1">
             <li v-for="item in navigationItems" :key="item.id">
-              <a
+              <UiNavigationItem
                 href="#composition"
-                :aria-current="item.selected ? 'page' : undefined"
+                :label="item.label"
+                size="lg"
+                stretch
+                indicator-placement="start"
+                :active="item.selected"
                 :class="[
-                  'flex items-center rounded-control px-3 py-2 text-caption transition-colors duration-fast ease-standard',
-                  focusClasses,
+                  'playground-navigation-item--flat-active h-auto min-h-0 w-full justify-start rounded-control px-3 py-2 text-caption',
                   item.selected
                     ? 'bg-accent-soft font-semibold text-accent-primary'
                     : 'text-secondary hover:bg-accent-soft hover:text-primary',
                 ]"
-              >
-                {{ item.label }}
-              </a>
+              />
             </li>
           </ul>
         </nav>
@@ -417,8 +419,9 @@ const navigationItems = computed(() => [
           </p>
         </header>
 
-        <UiGlassSurface
-          variant="subtle"
+        <UiSurface
+          surface="glass-subtle"
+          class="rounded-card p-4"
           role="toolbar"
           :aria-label="localize(copy.scenes.docsToolbar.modesLabel, props.locale)"
         >
@@ -451,7 +454,7 @@ const navigationItems = computed(() => [
               </UiIconButton>
             </div>
           </div>
-        </UiGlassSurface>
+        </UiSurface>
       </section>
 
       <section

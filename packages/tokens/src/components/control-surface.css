@@ -1,13 +1,36 @@
 @layer neoverse.tokens {
   :root {
-    --neoverse-control-surface-gap: 0.5rem;
-    --neoverse-control-surface-item-gap: 0.25rem;
-    --neoverse-control-surface-padding: 0.55rem;
-    --neoverse-control-surface-divider-height: 1.4rem;
+    --neoverse-control-surface-gap: var(--neoverse-space-2);
+    --neoverse-control-surface-item-gap: var(--neoverse-space-1);
+    --neoverse-control-surface-group-height: 1.875rem;
+    --neoverse-control-surface-control-height: var(--neoverse-control-compact-height);
+    /* Grouped navigation keeps destination-sized rhythm while embedded
+       segmented controls stay compact. The surface owns this relationship so
+       consumers do not need to force both control families to one height. */
+    --neoverse-control-surface-navigation-height: var(--neoverse-action-height-sm);
+    --neoverse-control-surface-segmented-height: var(--neoverse-control-compact-height);
+    --neoverse-control-surface-padding: var(--neoverse-space-1);
+    --neoverse-control-surface-padding-block: var(--neoverse-control-surface-padding);
+    --neoverse-control-surface-padding-inline: var(--neoverse-space-2);
+    --neoverse-control-surface-divider-height: 1rem;
+    --neoverse-control-surface-divider-gap: var(--neoverse-space-0);
     --neoverse-control-surface-divider-color: color-mix(
       in srgb,
       var(--neoverse-color-border-default) 72%,
       transparent
     );
+    --neoverse-control-chrome-border: rgb(15 23 42 / 12%);
+    --neoverse-control-chrome-background:
+      radial-gradient(120% 150% at 7% -45%, rgb(88 195 255 / 5%), transparent 52%),
+      radial-gradient(105% 150% at 94% 145%, rgb(61 214 166 / 4%), transparent 52%),
+      linear-gradient(115deg, rgb(255 255 255 / 26%), rgb(255 255 255 / 12%) 48%, transparent 76%),
+      rgb(244 250 255 / 36%);
+    --neoverse-control-chrome-shadow:
+      0 18px 42px -20px rgb(14 34 44 / 20%), 0 6px 18px -12px rgb(14 34 44 / 14%);
+    --neoverse-control-chrome-filter: blur(12px) saturate(128%) brightness(104%);
+    --neoverse-control-chrome-trailing-border: rgb(15 23 42 / 12%);
+    --neoverse-control-chrome-trailing-background: rgb(255 255 255 / 22%);
+    --neoverse-control-chrome-trailing-padding: 0.125rem;
+    --neoverse-control-chrome-trailing-padding-inline: var(--neoverse-space-1);
   }
 }

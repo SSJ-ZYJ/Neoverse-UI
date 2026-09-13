@@ -2,13 +2,12 @@
 import { computed } from 'vue';
 import materialBackgroundDark from './assets/material-background-dark.png';
 import materialBackgroundLight from './assets/material-background-light.png';
-import { frameTheme } from './frame-state';
+import { resolvedTheme } from './theme-state';
 
-/* The frame document's data-theme attribute drives frameTheme reactively, so
-   the backdrop swaps with in-place theme switches instead of waiting for a
-   reload. */
+/* The shared resolved theme covers both the main Playground shell and the
+   isolated /frame surface, including system-theme changes. */
 const materialBackground = computed(() =>
-  frameTheme.value === 'dark' ? materialBackgroundDark : materialBackgroundLight,
+  resolvedTheme.value === 'dark' ? materialBackgroundDark : materialBackgroundLight,
 );
 
 const backgroundStyle = computed(() => ({

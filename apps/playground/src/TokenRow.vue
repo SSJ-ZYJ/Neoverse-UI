@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { onMounted, ref } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import type { Locale, LocalizedText } from './playground-content';
 import { localize } from './playground-content';
+import { resolvedTheme } from './theme-state';
 
 type TokenPreview = 'color' | 'space' | 'radius' | 'border' | 'border-style' | 'shadow';
 
@@ -14,7 +15,9 @@ interface TokenRowProps {
 }
 
 const props = defineProps<TokenRowProps>();
-const isDarkTheme = document.documentElement.dataset.theme === 'dark';
+/* Resolved from the shared reactive theme so previews follow theme switches
+   (including "system" mode, where data-theme is absent). */
+const isDarkTheme = computed(() => resolvedTheme.value === 'dark');
 const swatchElement = ref<HTMLElement | null>(null);
 const resolvedColor = ref('');
 
@@ -39,18 +42,26 @@ function formatResolvedColor(value: string): string {
   return `rgba(${match[1]}, ${match[2]}, ${match[3]}, ${roundedAlpha})`;
 }
 
-onMounted(() => {
+function updateResolvedColor(): void {
   if (props.preview !== 'color' || swatchElement.value === null) {
     return;
   }
 
   resolvedColor.value = formatResolvedColor(getComputedStyle(swatchElement.value).backgroundColor);
+}
+
+onMounted(updateResolvedColor);
+
+/* Theme switches rewrite the token variables behind the inline var() styles;
+   re-read the computed color once the document has settled. */
+watch(resolvedTheme, () => {
+  void nextTick(updateResolvedColor);
 });
 </script>
 
 <template>
   <div
-    class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 rounded-control material-glass-subtle p-2"
+    class="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1 border-b border-subtle px-1 py-2 last:border-b-0"
   >
     <span
       v-if="props.preview === 'color'"

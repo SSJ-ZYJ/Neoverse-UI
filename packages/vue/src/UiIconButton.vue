@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
 import { updateButtonPointerGlow } from './button-pointer-glow';
-import { getSurfaceClass } from './surface';
 import {
   buttonBaseClasses,
   buttonVariantClasses,
@@ -11,6 +10,7 @@ import {
   iconButtonSizeClasses,
   iconButtonStretchSizeClasses,
 } from './classes';
+import { getSurfaceClass } from './surface';
 import type { ButtonSize, ButtonVariant, IconButtonProps } from './types';
 import UiLoadingIndicator from './UiLoadingIndicator.vue';
 

@@ -126,14 +126,14 @@
   .ui-button--primary {
     color: var(--neoverse-control-primary-foreground);
     background-image: var(--neoverse-control-primary-background);
-    background-color: var(--neoverse-control-secondary-fill);
+    background-color: var(--neoverse-control-button-filled-fill);
     background-clip: padding-box;
   }
 
   .ui-button--secondary {
     color: var(--neoverse-control-secondary-foreground);
-    background-image: var(--neoverse-control-secondary-background);
-    background-color: var(--neoverse-control-secondary-fill);
+    background-image: var(--neoverse-control-button-filled-background);
+    background-color: var(--neoverse-control-button-filled-fill);
     background-clip: padding-box;
   }
 
@@ -163,15 +163,15 @@
     --neoverse-material-shadow: var(--neoverse-control-button-edge-hover);
     color: var(--neoverse-control-secondary-hover-foreground);
     background-image: var(--neoverse-control-primary-hover-background);
-    background-color: var(--neoverse-control-secondary-hover-fill);
+    background-color: var(--neoverse-control-button-filled-hover-fill);
     background-clip: padding-box;
   }
 
   .ui-button--secondary:hover:not(:disabled) {
     --neoverse-material-shadow: var(--neoverse-control-button-edge-hover);
     color: var(--neoverse-control-secondary-hover-foreground);
-    background-image: var(--neoverse-control-secondary-hover-background);
-    background-color: var(--neoverse-control-secondary-hover-fill);
+    background-image: var(--neoverse-control-button-filled-hover-background);
+    background-color: var(--neoverse-control-button-filled-hover-fill);
     background-clip: padding-box;
   }
 
@@ -188,7 +188,7 @@
   .ui-button--primary:active:not(:disabled) {
     --neoverse-material-shadow: var(--neoverse-control-button-edge-active);
     background-image: var(--neoverse-control-primary-active-background);
-    background-color: var(--neoverse-control-secondary-fill);
+    background-color: var(--neoverse-control-button-filled-fill);
     background-clip: padding-box;
   }
 
@@ -196,7 +196,7 @@
     --neoverse-material-shadow: var(--neoverse-control-button-edge-active);
     color: var(--neoverse-control-secondary-active-foreground);
     background-image: var(--neoverse-control-button-active-background);
-    background-color: var(--neoverse-control-secondary-fill);
+    background-color: var(--neoverse-control-button-filled-fill);
     background-clip: padding-box;
   }
 

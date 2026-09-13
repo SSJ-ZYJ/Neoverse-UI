@@ -1,13 +1,13 @@
 <script setup lang="ts">
-import { UiButton, UiIconButton, UiSegmentedControl } from '@neoverse-ui/vue';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { applyFrameContextFromDocument } from './frame-state';
+import { UiButton, UiIconButton, UiNavigationItem, UiSegmentedControl } from '@neoverse-ui/vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import brandIconUrl from './assets/neoverse-ui-icon.svg';
 import LabBoard from './LabBoard.vue';
 import LabIcon from './LabIcon.vue';
-import { focusClasses } from './lab-data';
 import { labModules, type ModuleId, moduleGroups } from './lab-modules';
 import { appCopy, formatLocalized, isLocale, type Locale, localize } from './playground-content';
 import type { FrameTheme, ThemeMode } from './playground-types';
+import { applyThemeMode, observeSystemTheme } from './theme-state';
 
 const isFrame = window.location.pathname === '/frame';
 const preferencesStorageKey = 'neoverse-design-lab.preferences';
@@ -30,6 +30,25 @@ function isThemeMode(value: unknown): value is ThemeMode {
 
 function isModuleId(value: unknown): value is ModuleId {
   return typeof value === 'string' && labModules.some((module) => module.id === value);
+}
+
+const legacyModuleRedirects: Readonly<Record<string, ModuleId>> = {
+  spacing: 'layout-shape',
+  radius: 'layout-shape',
+  border: 'layout-shape',
+  surface: 'materials',
+  glass: 'materials',
+  badge: 'status-feedback',
+  skeleton: 'status-feedback',
+  'status-indicator': 'status-feedback',
+};
+
+function resolveModuleId(value: string): ModuleId | null {
+  if (isModuleId(value)) {
+    return value;
+  }
+
+  return legacyModuleRedirects[value] ?? null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -105,8 +124,12 @@ function initialModule(): ModuleId | null {
     return null;
   }
 
-  if (isModuleId(hash)) {
-    return hash;
+  const moduleId = resolveModuleId(hash);
+  if (moduleId !== null) {
+    if (moduleId !== hash) {
+      replaceLocation(moduleId);
+    }
+    return moduleId;
   }
 
   replaceLocation(null);
@@ -137,65 +160,12 @@ const selectedGroup = computed(() => {
   return sectionsByGroup.find((group) => group.id === module.groupId) ?? null;
 });
 
-function detectSystemTheme(): FrameTheme {
-  return typeof window.matchMedia === 'function' &&
-    window.matchMedia('(prefers-color-scheme: dark)').matches
-    ? 'dark'
-    : 'light';
-}
-
-const systemFrameTheme = ref<FrameTheme>(detectSystemTheme());
-const resolvedFrameTheme = computed<FrameTheme>(() =>
-  themeMode.value === 'dark' || (themeMode.value === 'system' && systemFrameTheme.value === 'dark')
-    ? 'dark'
-    : 'light',
-);
-/* The iframe rebuilds only when the module changes; the URL bakes in the
-   theme/lang current at that moment. Later theme or language switches are
-   written straight into the live frame document (data-theme/lang plus the
-   reactive frame context), so they neither reload the frame nor reset the
-   reader's scroll position. */
-const frameModuleKey = computed(() => selectedModule.value?.id ?? '');
-const frameSrc = ref('');
-function bakeFrameSrc(): void {
-  const module = selectedModule.value;
-  if (module === null) {
-    frameSrc.value = '';
-    return;
-  }
-
-  const url = new URL('/frame', window.location.origin);
-  url.searchParams.set('theme', resolvedFrameTheme.value);
-  url.searchParams.set('lang', locale.value);
-  url.hash = module.id;
-  frameSrc.value = `${url.pathname}${url.search}${url.hash}`;
-}
-watch(frameModuleKey, () => {
-  bakeFrameSrc();
-  frameHeight.value = 0;
-});
-watch(resolvedFrameTheme, (theme) => {
-  const frameDocument = frameElement.value?.contentDocument;
-  if (frameDocument !== undefined && frameDocument !== null) {
-    frameDocument.documentElement.dataset.theme = theme;
-  }
-});
-watch(locale, (value) => {
-  const frameDocument = frameElement.value?.contentDocument;
-  if (frameDocument !== undefined && frameDocument !== null) {
-    frameDocument.documentElement.lang = value === 'zh' ? 'zh-CN' : 'en';
-  }
-});
-
-const frameElement = ref<HTMLIFrameElement | null>(null);
 const shellElement = ref<HTMLElement | null>(null);
-const frameHeight = ref(0);
 const workspaceElement = ref<HTMLElement | null>(null);
-let systemMediaQuery: MediaQueryList | undefined;
-let frameAttributeObserver: MutationObserver | undefined;
 const overviewHeading = ref<HTMLElement | null>(null);
 const moduleHeading = ref<HTMLElement | null>(null);
 const isNavOpen = ref(false);
+let stopSystemThemeObservation: (() => void) | undefined;
 const themeOptions = computed(
   () =>
     [
@@ -212,28 +182,8 @@ const languageOptions = computed(
     ] as const,
 );
 
-type HeightMessage = {
-  type: 'neoverse-design-lab-height';
-  theme: FrameTheme;
-  height: number;
-};
-
-function isHeightMessage(value: unknown): value is HeightMessage {
-  return (
-    isRecord(value) &&
-    value.type === 'neoverse-design-lab-height' &&
-    isFrameTheme(value.theme) &&
-    typeof value.height === 'number' &&
-    Number.isFinite(value.height)
-  );
-}
-
 function applyTheme(value: ThemeMode): void {
-  if (value === 'system') {
-    document.documentElement.removeAttribute('data-theme');
-  } else {
-    document.documentElement.dataset.theme = value;
-  }
+  applyThemeMode(value);
 }
 
 function replaceQueryParameter(name: string, value: string): void {
@@ -300,7 +250,6 @@ function selectModule(moduleId: ModuleId): void {
     window.history.pushState(null, '', locationHref(moduleId));
   }
 
-  frameHeight.value = 0;
   isNavOpen.value = false;
   focusCurrentView();
 }
@@ -320,17 +269,24 @@ function handleLocationChange(): void {
   const hash = readHash();
   if (hash.length === 0) {
     currentModuleId.value = null;
-  } else if (isModuleId(hash)) {
-    currentModuleId.value = hash;
-    persistState({ module: hash });
-  } else if (currentModuleId.value === null) {
-    /* Unknown hashes (deep links, third-party anchors) fall back to overview
-       only when no module is open; otherwise the hash is an in-page anchor
-       (e.g. #controls-action) and the open module must stay mounted. */
-    replaceLocation(null);
+  } else {
+    const moduleId = resolveModuleId(hash);
+    if (moduleId !== null) {
+      currentModuleId.value = moduleId;
+      persistState({ module: moduleId });
+      if (moduleId !== hash) {
+        replaceLocation(moduleId);
+      }
+    } else if (currentModuleId.value !== null) {
+      // Direct-rendered modules own their in-page anchors. Do not reset scroll
+      // or move focus when an anchor such as #controls-action is activated.
+      isNavOpen.value = false;
+      return;
+    } else {
+      replaceLocation(null);
+    }
   }
 
-  frameHeight.value = 0;
   isNavOpen.value = false;
   focusCurrentView();
 }
@@ -339,47 +295,24 @@ function closeNav(): void {
   isNavOpen.value = false;
 }
 
-function handleSystemThemeChange(event: MediaQueryListEvent): void {
-  systemFrameTheme.value = event.matches ? 'dark' : 'light';
-}
-
-function handleFrameLoad(): void {
-  frameHeight.value = 0;
-  resetScrollPositions();
-}
-
-function frameHeightStyle(): string {
-  return frameHeight.value > 0 ? `${frameHeight.value}px` : 'calc(100vh - 12rem)';
-}
-
-function handleMessage(event: MessageEvent<unknown>): void {
-  if (event.origin !== window.location.origin || !isHeightMessage(event.data)) {
+/* Modified clicks (Cmd/Ctrl/Shift + click, middle click) keep the browser's
+   open-in-new-tab behavior for the hash deep links. */
+function handleNavClick(event: MouseEvent, moduleId: ModuleId | null): void {
+  if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
     return;
   }
 
-  if (
-    frameElement.value?.contentWindow !== event.source ||
-    event.data.theme !== resolvedFrameTheme.value
-  ) {
-    return;
-  }
-
-  /* Only the first height for a freshly mounted frame should snap the view
-     back to the top. Later reports arrive whenever the browser zoom or the
-     window size reflows the iframe, and resetting there would throw away the
-     reader's place in the content and make zoom look anchored to the nav. */
-  const isInitialHeight = frameHeight.value === 0;
-  frameHeight.value = Math.max(1, Math.ceil(event.data.height));
-
-  if (isInitialHeight) {
-    window.requestAnimationFrame(resetScrollPositions);
+  event.preventDefault();
+  if (moduleId === null) {
+    showOverview();
+  } else {
+    selectModule(moduleId);
   }
 }
 
 if (!isFrame) {
   applyTheme(themeMode.value);
   document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en';
-  bakeFrameSrc();
 }
 
 onMounted(() => {
@@ -387,22 +320,9 @@ onMounted(() => {
     return;
   }
 
-  window.addEventListener('message', handleMessage);
+  stopSystemThemeObservation = observeSystemTheme();
   window.addEventListener('popstate', handleLocationChange);
   window.addEventListener('hashchange', handleLocationChange);
-
-  // LabBoard mirrors data-theme/lang mutations into its reactive context;
-  // this keeps the frame's rendering in step with in-place re-skins.
-  frameAttributeObserver = new MutationObserver(applyFrameContextFromDocument);
-  frameAttributeObserver.observe(document.documentElement, {
-    attributes: true,
-    attributeFilter: ['data-theme', 'lang'],
-  });
-
-  if (typeof window.matchMedia === 'function') {
-    systemMediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    systemMediaQuery.addEventListener('change', handleSystemThemeChange);
-  }
 });
 
 onBeforeUnmount(() => {
@@ -410,11 +330,9 @@ onBeforeUnmount(() => {
     return;
   }
 
-  window.removeEventListener('message', handleMessage);
+  stopSystemThemeObservation?.();
   window.removeEventListener('popstate', handleLocationChange);
   window.removeEventListener('hashchange', handleLocationChange);
-  frameAttributeObserver?.disconnect();
-  systemMediaQuery?.removeEventListener('change', handleSystemThemeChange);
 });
 </script>
 
@@ -424,7 +342,7 @@ onBeforeUnmount(() => {
   <main
     v-else
     ref="shellElement"
-    class="mx-auto flex h-screen w-full max-w-container-2xl flex-col overflow-hidden lg:flex-row"
+    class="flex h-screen w-full flex-col overflow-hidden lg:flex-row"
     @keydown.esc="closeNav"
   >
     <button
@@ -444,13 +362,22 @@ onBeforeUnmount(() => {
       :aria-label="localize(appCopy.navigation.label, locale)"
     >
       <div class="flex items-start justify-between gap-3">
-        <div>
-          <p class="text-label font-label text-accent-primary">
-            {{ localize(appCopy.brand, locale) }}
-          </p>
-          <h1 class="mt-1 text-subtitle font-heading tracking-heading text-primary">
-            {{ localize(appCopy.designLab, locale) }}
-          </h1>
+        <div class="flex min-w-0 items-center gap-3">
+          <img
+            data-playground-brand-icon
+            :src="brandIconUrl"
+            alt=""
+            aria-hidden="true"
+            class="size-8 shrink-0 object-contain"
+          >
+          <div class="min-w-0">
+            <p class="text-label font-label text-accent-primary">
+              {{ localize(appCopy.brand, locale) }}
+            </p>
+            <h1 class="mt-1 text-subtitle font-heading tracking-heading text-primary">
+              {{ localize(appCopy.designLab, locale) }}
+            </h1>
+          </div>
         </div>
         <UiIconButton
           class="lg:hidden"
@@ -470,57 +397,55 @@ onBeforeUnmount(() => {
         class="scrollbar-immersive mt-5 min-h-0 flex-1 overflow-y-auto"
         :aria-label="localize(appCopy.navigation.modulesLabel, locale)"
       >
-        <a
+        <UiNavigationItem
           :href="locationHref(null)"
-          :aria-current="isOverview ? 'page' : undefined"
+          :label="localize(appCopy.navigation.overview, locale)"
+          size="lg"
+          stretch
+          indicator-placement="start"
+          :active="isOverview"
           :class="[
-            'flex min-h-8 items-center rounded-control px-3 py-1 text-caption transition-colors duration-fast ease-standard',
-            focusClasses,
+            'playground-navigation-item--flat-active w-full justify-start rounded-control px-3 text-caption',
             isOverview
               ? 'bg-accent-soft font-semibold text-accent-primary'
               : 'text-secondary hover:bg-accent-soft hover:text-primary',
           ]"
-          @click.prevent="showOverview"
-        >
-          {{ localize(appCopy.navigation.overview, locale) }}
-        </a>
+          @click="handleNavClick($event, null)"
+        />
 
         <div v-for="group in sectionsByGroup" :key="group.id" class="mt-5 first:mt-1">
-          <h2
-            v-if="group.modules.length > 1"
-            class="px-3 text-caption font-semibold uppercase tracking-wide text-muted"
-          >
+          <h2 class="px-3 text-caption font-semibold uppercase tracking-wide text-muted">
             {{ localize(group.label, locale) }}
           </h2>
           <div class="mt-1 grid gap-0.5">
-            <a
+            <UiNavigationItem
               v-for="module in group.modules"
               :key="module.id"
               :href="`#${module.id}`"
-              :aria-current="currentModuleId === module.id ? 'page' : undefined"
+              :label="localize(module.label, locale)"
+              size="lg"
+              stretch
+              indicator-placement="start"
+              :active="currentModuleId === module.id"
               :class="[
-                'relative flex min-h-8 items-center rounded-control px-3 py-1 text-caption transition-colors duration-fast ease-standard',
-                focusClasses,
+                'playground-navigation-item--flat-active w-full justify-start rounded-control px-3 text-caption',
                 currentModuleId === module.id
                   ? 'bg-accent-soft font-semibold text-accent-primary'
                   : 'text-secondary hover:bg-accent-soft hover:text-primary',
               ]"
-              @click.prevent="selectModule(module.id)"
-            >
-              <span
-                v-if="currentModuleId === module.id"
-                class="absolute inset-y-2 left-0 w-0.5 rounded-full bg-accent-primary"
-                aria-hidden="true"
-              />
-              {{ localize(module.label, locale) }}
-            </a>
+              @click="handleNavClick($event, module.id)"
+            />
           </div>
         </div>
       </nav>
     </aside>
 
     <div class="flex min-h-0 min-w-0 flex-1 flex-col">
-      <div ref="workspaceElement" class="scrollbar-immersive min-h-0 flex-1 overflow-y-auto">
+      <div
+        ref="workspaceElement"
+        data-design-lab-workspace
+        class="scrollbar-immersive min-h-0 flex-1 overflow-y-auto"
+      >
         <div
           class="mx-auto flex w-full max-w-container-xl flex-col gap-grid px-gutter-inline pb-gutter-block pt-3"
         >
@@ -567,15 +492,11 @@ onBeforeUnmount(() => {
                   :model-value="locale"
                   @update:model-value="setLocale"
                 />
-                <UiButton
-                  v-if="!isOverview"
-                  variant="ghost"
-                  size="sm"
-                  class="hidden sm:inline-flex"
-                  @click="showOverview"
-                >
-                  {{ localize(appCopy.module.backToOverview, locale) }}
-                </UiButton>
+                <span v-if="!isOverview" data-back-to-overview class="hidden md:inline-flex">
+                  <UiButton variant="ghost" size="sm" @click="showOverview">
+                    {{ localize(appCopy.module.backToOverview, locale) }}
+                  </UiButton>
+                </span>
               </div>
             </div>
             <p
@@ -604,7 +525,7 @@ onBeforeUnmount(() => {
               </p>
             </header>
 
-            <div class="grid gap-grid sm:grid-cols-2 xl:grid-cols-4">
+            <div class="grid gap-grid sm:grid-cols-2 xl:grid-cols-3">
               <article
                 v-for="group in sectionsByGroup"
                 :key="group.id"
@@ -632,11 +553,7 @@ onBeforeUnmount(() => {
                     <span>{{ localize(module.label, locale) }}</span>
                   </li>
                 </ul>
-                <UiButton
-                  variant="secondary"
-                  :key="frameModuleKey"
-                  @click="selectModule(group.moduleIds[0])"
-                >
+                <UiButton variant="secondary" @click="selectModule(group.moduleIds[0])">
                   {{ formatLocalized(appCopy.overview.openGroup, locale, {
                       group: localize(group.label, locale),
                     }) }}
@@ -646,25 +563,9 @@ onBeforeUnmount(() => {
           </section>
 
           <section v-else aria-labelledby="module-title" class="grid gap-grid">
-            <iframe
-              ref="frameElement"
-              :key="frameModuleKey"
-              :src="frameSrc"
-              :title="
-                selectedModule
-                  ? formatLocalized(appCopy.module.frameTitle, locale, {
-                      label: localize(selectedModule.label, locale),
-                      theme: localize(
-                        appCopy.module.themeNames[resolvedFrameTheme],
-                        locale,
-                      ),
-                    })
-                  : ''
-              "
-              class="block w-full rounded-card border-0"
-              :style="{ height: frameHeightStyle() }"
-              @load="handleFrameLoad"
-            />
+            <div v-if="selectedModule" data-design-lab-region="module" class="grid gap-grid">
+              <component :is="selectedModule.component" :key="selectedModule.id" :locale="locale" />
+            </div>
           </section>
         </div>
       </div>

@@ -18,6 +18,26 @@
       var(--neoverse-color-neutral-600) 70%,
       var(--neoverse-color-accent-secondary) 30%
     );
+    --neoverse-control-segmented-active-fill: transparent;
+    /* Geometry mirrors the deployed Neoverse segmented control. Embedded
+       controls do not add a second inset; their parent chrome owns spacing. */
+    --neoverse-control-segmented-inset: 0.18rem;
+    --neoverse-control-segmented-embedded-inset: var(--neoverse-space-0);
+    --neoverse-control-segmented-gap: 0.2rem;
+    --neoverse-control-segmented-option-min-width: 2.5rem;
+    /* Embedded segmented controls use a tighter geometry than standalone
+       controls while keeping those defaults untouched. */
+    --neoverse-control-segmented-embedded-option-min-width: var(--neoverse-space-8);
+    --neoverse-control-segmented-option-min-width-compact: max-content;
+    --neoverse-control-segmented-option-height-sm: var(--neoverse-control-surface-control-height);
+    --neoverse-control-segmented-option-padding-block-sm: 0.2rem;
+    --neoverse-control-segmented-option-padding-inline-sm: 0.5rem;
+    --neoverse-control-segmented-embedded-option-padding-inline-sm: 0.375rem;
+    --neoverse-control-segmented-option-font-size-sm: var(--neoverse-font-size-2xs);
+    --neoverse-control-segmented-option-font-weight: var(--neoverse-font-weight-bold);
+    --neoverse-control-segmented-option-radius: var(--neoverse-control-compact-radius);
+    --neoverse-control-segmented-loading-gap: var(--neoverse-space-1);
+    --neoverse-control-segmented-loading-size: var(--neoverse-space-4);
     --neoverse-control-segmented-border: var(--neoverse-control-button-border);
     --neoverse-control-segmented-shadow: var(--neoverse-control-secondary-shadow);
     --neoverse-control-segmented-filter: blur(6px) saturate(112%) brightness(102%);

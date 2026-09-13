@@ -1,5 +1,4 @@
 export { updateButtonPointerGlow } from './button-pointer-glow';
-export { getSurfaceClass, glassVariantToSurface, isGlassSurface, surfaceClasses } from './surface';
 export {
   actionSizeClasses,
   actionStretchClasses,
@@ -9,6 +8,7 @@ export {
   iconButtonSizeClasses,
   iconButtonStretchSizeClasses,
 } from './classes';
+export { getSurfaceClass, glassVariantToSurface, isGlassSurface, surfaceClasses } from './surface';
 export type {
   ActionProps,
   ActionSize,
@@ -25,6 +25,7 @@ export type {
   GlassSurfaceProps,
   GlassSurfaceVariant,
   IconButtonProps,
+  NavigationIndicatorPlacement,
   NavigationItemProps,
   ScrollbarProps,
   SegmentedControlProps,
@@ -35,6 +36,8 @@ export type {
   StatusIndicatorProps,
   StatusIndicatorSize,
   StatusIndicatorStatus,
+  SurfaceEdgeMode,
+  SurfaceHoverMode,
   SurfacePreset,
   SurfaceProps,
 } from './types';
