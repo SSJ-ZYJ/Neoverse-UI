@@ -113,6 +113,9 @@
     --neoverse-space-30: 7.5rem;
     --neoverse-space-31: 7.75rem;
     --neoverse-space-32: 8rem;
+    --neoverse-icon-size-sm: 0.875rem;
+    --neoverse-icon-size-md: var(--neoverse-space-4);
+    --neoverse-icon-size-lg: var(--neoverse-space-5);
     --neoverse-font-family-sans:
       'Inter Variable', Inter, 'Noto Sans SC Variable', 'Noto Sans SC', 'PingFang SC',
       'Microsoft YaHei', ui-sans-serif, system-ui, sans-serif;

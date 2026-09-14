@@ -9,6 +9,7 @@ export type SurfacePreset =
   | 'solid'
   | 'subtle'
   | 'elevated'
+  | 'inset'
   | 'chrome'
   | 'glass-subtle'
   | 'glass-elevated'
@@ -61,6 +62,8 @@ export interface NavigationItemProps {
 }
 
 export interface IconButtonProps {
+  as?: string | Component;
+  href?: string;
   label: string;
   variant?: ButtonVariant;
   size?: ButtonSize;
@@ -107,11 +110,25 @@ export interface CardProps {
 
 export type StatusIndicatorStatus = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 export type StatusIndicatorSize = 'sm' | 'md';
+export type NoticeVariant = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+
+export interface NoticeProps {
+  as?: string | Component;
+  variant?: NoticeVariant;
+}
+
+export type TooltipSurfaceVariant = 'neutral' | 'accent';
+
+export interface TooltipSurfaceProps {
+  as?: string | Component;
+  variant?: TooltipSurfaceVariant;
+}
 
 export interface StatusIndicatorProps {
   status?: StatusIndicatorStatus;
   size?: StatusIndicatorSize;
   pulse?: boolean;
+  loading?: boolean;
 }
 
 export interface SegmentOption {

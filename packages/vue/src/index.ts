@@ -29,6 +29,8 @@ export type {
   IconButtonProps,
   NavigationIndicatorPlacement,
   NavigationItemProps,
+  NoticeProps,
+  NoticeVariant,
   ScrollbarProps,
   SegmentedControlProps,
   SegmentedControlSize,
@@ -42,6 +44,8 @@ export type {
   SurfaceHoverMode,
   SurfacePreset,
   SurfaceProps,
+  TooltipSurfaceProps,
+  TooltipSurfaceVariant,
 } from './types';
 export { default as UiAction } from './UiAction.vue';
 export { default as UiBadge } from './UiBadge.vue';
@@ -51,8 +55,10 @@ export { default as UiControlSurface } from './UiControlSurface.vue';
 export { default as UiGlassSurface } from './UiGlassSurface.vue';
 export { default as UiIconButton } from './UiIconButton.vue';
 export { default as UiNavigationItem } from './UiNavigationItem.vue';
+export { default as UiNotice } from './UiNotice.vue';
 export { default as UiScrollbar } from './UiScrollbar.vue';
 export { default as UiSegmentedControl } from './UiSegmentedControl.vue';
 export { default as UiSkeleton } from './UiSkeleton.vue';
 export { default as UiStatusIndicator } from './UiStatusIndicator.vue';
 export { default as UiSurface } from './UiSurface.vue';
+export { default as UiTooltipSurface } from './UiTooltipSurface.vue';

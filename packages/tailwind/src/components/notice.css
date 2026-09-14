@@ -1,0 +1,42 @@
+@layer components {
+  .ui-notice {
+    --ui-notice-tone: var(--neoverse-color-text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--neoverse-space-4);
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      color-mix(in srgb, var(--ui-notice-tone) 28%, var(--neoverse-color-border-subtle));
+    border-radius: var(--neoverse-radius-control);
+    padding: var(--neoverse-space-3) var(--neoverse-space-4);
+    color: var(--neoverse-color-text-secondary);
+    background: color-mix(in srgb, var(--ui-notice-tone) 7%, var(--neoverse-color-surface-subtle));
+    font-size: var(--neoverse-font-size-md);
+  }
+
+  .ui-notice--info {
+    --ui-notice-tone: var(--neoverse-color-status-info);
+  }
+
+  .ui-notice--success {
+    --ui-notice-tone: var(--neoverse-color-status-success);
+  }
+
+  .ui-notice--warning {
+    --ui-notice-tone: var(--neoverse-color-status-warning);
+  }
+
+  .ui-notice--danger {
+    --ui-notice-tone: var(--neoverse-color-status-danger);
+  }
+
+  .ui-notice__content {
+    min-width: 0;
+  }
+
+  .ui-notice__action {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+  }
+}

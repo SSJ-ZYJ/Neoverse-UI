@@ -58,6 +58,15 @@
     --ui-status-indicator-dot-size: var(--neoverse-status-indicator-dot-size-md);
   }
 
+  .ui-status-indicator--loading .ui-status-indicator__dot {
+    background: var(--neoverse-skeleton-fill);
+    box-shadow: var(--neoverse-skeleton-edge);
+  }
+
+  .ui-status-indicator--loading .ui-status-indicator__dot::after {
+    display: none;
+  }
+
   .ui-status-indicator--pulse .ui-status-indicator__dot::after {
     position: absolute;
     top: 50%;

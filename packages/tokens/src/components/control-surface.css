@@ -26,7 +26,7 @@
     --neoverse-control-surface-divider-gap: var(--neoverse-space-0);
     /* Scale the complete composition as one unit so every existing proportion remains intact. */
     --neoverse-control-surface-scale-md: 1;
-    --neoverse-control-surface-scale-lg: 1.4;
+    --neoverse-control-surface-scale-lg: 1.3;
     /* Large grouped controls need optical type compensation: geometry grows
        more than labels so the shell gains presence without oversized text. */
     --neoverse-control-surface-scale-lg-type-factor: 0.9;

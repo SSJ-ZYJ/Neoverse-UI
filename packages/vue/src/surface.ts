@@ -5,6 +5,7 @@ export const surfaceClasses: Record<SurfacePreset, string> = {
   solid: 'bg-surface-canvas border border-subtle',
   subtle: 'bg-surface-subtle border border-subtle',
   elevated: 'bg-surface-raised border border-default shadow-raised',
+  inset: 'ui-surface-inset',
   chrome: 'ui-surface-chrome',
   'glass-subtle': 'material-glass-subtle',
   'glass-elevated': 'material-glass-elevated',

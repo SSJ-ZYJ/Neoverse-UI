@@ -1,0 +1,44 @@
+@layer components {
+  .ui-tooltip-surface {
+    --ui-tooltip-tone: var(--neoverse-color-text-secondary);
+    --ui-tooltip-arrow-left: 50%;
+    position: relative;
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      color-mix(in srgb, var(--ui-tooltip-tone) 34%, var(--neoverse-color-border-subtle));
+    border-radius: var(--neoverse-radius-control);
+    padding: var(--neoverse-space-2) var(--neoverse-space-3);
+    color: var(--neoverse-color-text-primary);
+    background: color-mix(
+      in srgb,
+      var(--neoverse-color-surface-raised) 92%,
+      var(--ui-tooltip-tone)
+    );
+    box-shadow: var(--neoverse-shadow-overlay);
+    font-size: var(--neoverse-font-size-xs);
+    font-weight: var(--neoverse-font-weight-semibold);
+    line-height: 1.35;
+  }
+
+  .ui-tooltip-surface--accent {
+    --ui-tooltip-tone: var(--neoverse-color-accent-primary);
+  }
+
+  .ui-tooltip-surface::after {
+    position: absolute;
+    bottom: calc(var(--neoverse-space-1) * -1.15);
+    left: var(--ui-tooltip-arrow-left);
+    width: var(--neoverse-space-2);
+    height: var(--neoverse-space-2);
+    border-right: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      color-mix(in srgb, var(--ui-tooltip-tone) 34%, var(--neoverse-color-border-subtle));
+    border-bottom: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      color-mix(in srgb, var(--ui-tooltip-tone) 34%, var(--neoverse-color-border-subtle));
+    background: color-mix(
+      in srgb,
+      var(--neoverse-color-surface-raised) 92%,
+      var(--ui-tooltip-tone)
+    );
+    content: '';
+    transform: translateX(-50%) rotate(45deg);
+  }
+}

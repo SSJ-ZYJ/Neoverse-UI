@@ -286,6 +286,40 @@
       --neoverse-material-refraction-gradient-none
     );
 
+    /* Recessed/inset surfaces share one semantic material contract. Consumers may
+       layer a local tone over these primitives without redefining the material. */
+    --neoverse-surface-inset-highlight: color-mix(
+      in srgb,
+      var(--neoverse-color-edge-light) 52%,
+      transparent
+    );
+    --neoverse-surface-inset-refraction: linear-gradient(
+      145deg,
+      color-mix(in srgb, var(--neoverse-color-edge-light) 7%, transparent),
+      transparent 42%,
+      color-mix(in srgb, var(--neoverse-color-accent-soft) 12%, transparent)
+    );
+    --neoverse-surface-inset-dense-fill: color-mix(
+      in srgb,
+      var(--neoverse-color-surface-raised) 72%,
+      transparent
+    );
+    --neoverse-surface-inset-fill: color-mix(
+      in srgb,
+      var(--neoverse-color-surface-glass) 18%,
+      transparent
+    );
+    --neoverse-surface-inset-sheen: linear-gradient(
+      125deg,
+      color-mix(in srgb, var(--neoverse-color-edge-light) 10%, transparent),
+      transparent 30%,
+      transparent 68%,
+      color-mix(in srgb, var(--neoverse-color-accent-soft) 10%, transparent)
+    );
+    --neoverse-surface-inset-active-highlight: inset 0 var(--neoverse-border-width-thin) 0
+      color-mix(in srgb, var(--neoverse-color-edge-light) 16%, transparent);
+    --neoverse-surface-inset-filter: var(--neoverse-material-filter-subtle);
+
     --neoverse-material-glass-subtle-background: var(--neoverse-color-surface-subtle);
     --neoverse-material-glass-subtle-background-fallback: var(--neoverse-color-surface-raised);
     --neoverse-material-glass-subtle-transparency: var(--neoverse-material-transparency-subtle);

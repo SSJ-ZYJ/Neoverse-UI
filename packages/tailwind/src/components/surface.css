@@ -1,0 +1,10 @@
+@layer components {
+  .ui-surface-inset {
+    background: var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-fill);
+    box-shadow:
+      inset 0 0 0 var(--neoverse-border-width-thin) var(--neoverse-color-border-subtle),
+      inset 0 var(--neoverse-border-width-thin) 0 var(--neoverse-surface-inset-highlight);
+    -webkit-backdrop-filter: var(--neoverse-surface-inset-filter);
+    backdrop-filter: var(--neoverse-surface-inset-filter);
+  }
+}

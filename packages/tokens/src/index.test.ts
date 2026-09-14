@@ -282,6 +282,7 @@ test('exposes component token namespaces while preserving compatibility aliases'
 });
 
 test('exposes consumer-validated action and navigation component tokens', () => {
+  expect(cssVariables.iconSize.sm).toBe('--neoverse-icon-size-sm');
   expect(cssVariables.components.action.height.lg).toBe('--neoverse-action-height-lg');
   expect(cssVariables.components.action.iconSize.md).toBe('--neoverse-action-icon-size-md');
   expect(cssVariables.components.navigationItem.indicatorColor).toBe(
@@ -298,6 +299,9 @@ test('exposes consumer-validated action and navigation component tokens', () => 
   );
   expect(cssVariables.components.navigationItem.fontSize.md).toBe(
     '--neoverse-navigation-item-font-size-md',
+  );
+  expect(cssVariables.components.navigationItem.iconSize).toBe(
+    '--neoverse-navigation-item-icon-size',
   );
   expect(cssVariables.components.controlSurface.itemGap).toBe(
     '--neoverse-control-surface-item-gap',

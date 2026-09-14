@@ -6,13 +6,17 @@ const props = withDefaults(defineProps<StatusIndicatorProps>(), {
   status: 'neutral',
   size: 'sm',
   pulse: false,
+  loading: false,
 });
 
 const classes = computed(() => [
   'ui-status-indicator inline-flex items-center font-label',
   `ui-status-indicator--${props.status as StatusIndicatorStatus}`,
   `ui-status-indicator--${props.size as StatusIndicatorSize}`,
-  { 'ui-status-indicator--pulse': props.pulse },
+  {
+    'ui-status-indicator--pulse': props.pulse && !props.loading,
+    'ui-status-indicator--loading': props.loading,
+  },
 ]);
 </script>
 

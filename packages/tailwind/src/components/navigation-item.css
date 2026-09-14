@@ -2,6 +2,7 @@
   .ui-navigation-item {
     position: relative;
     box-sizing: border-box;
+    --ui-action-icon-size: var(--neoverse-navigation-item-icon-size);
     gap: var(--neoverse-navigation-item-gap);
     line-height: var(--neoverse-control-compact-line-height);
   }

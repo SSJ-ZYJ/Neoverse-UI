@@ -88,6 +88,7 @@ const componentCssVariables = {
       md: '--neoverse-navigation-item-font-size-md',
       lg: '--neoverse-navigation-item-font-size-lg',
     },
+    iconSize: '--neoverse-navigation-item-icon-size',
     paddingBlock: {
       sm: '--neoverse-navigation-item-padding-block-sm',
       md: '--neoverse-navigation-item-padding-block-md',
@@ -480,6 +481,11 @@ export const cssVariables = {
     shimmerEasing: '--neoverse-skeleton-shimmer-easing',
   },
   components: componentCssVariables,
+  iconSize: {
+    sm: '--neoverse-icon-size-sm',
+    md: '--neoverse-icon-size-md',
+    lg: '--neoverse-icon-size-lg',
+  },
   space: {
     0: '--neoverse-space-0',
     1: '--neoverse-space-1',
@@ -726,6 +732,15 @@ export const cssVariables = {
       },
     },
     surface: {
+      inset: {
+        highlight: '--neoverse-surface-inset-highlight',
+        refraction: '--neoverse-surface-inset-refraction',
+        denseFill: '--neoverse-surface-inset-dense-fill',
+        fill: '--neoverse-surface-inset-fill',
+        sheen: '--neoverse-surface-inset-sheen',
+        activeHighlight: '--neoverse-surface-inset-active-highlight',
+        filter: '--neoverse-surface-inset-filter',
+      },
       solid: {
         background: '--neoverse-material-surface-solid-background',
         backgroundFallback: '--neoverse-material-surface-solid-background-fallback',

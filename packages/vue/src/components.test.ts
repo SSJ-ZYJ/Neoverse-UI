@@ -9,11 +9,13 @@ import UiControlSurface from './UiControlSurface.vue';
 import UiGlassSurface from './UiGlassSurface.vue';
 import UiIconButton from './UiIconButton.vue';
 import UiNavigationItem from './UiNavigationItem.vue';
+import UiNotice from './UiNotice.vue';
 import UiScrollbar from './UiScrollbar.vue';
 import UiSegmentedControl from './UiSegmentedControl.vue';
 import UiSkeleton from './UiSkeleton.vue';
 import UiStatusIndicator from './UiStatusIndicator.vue';
 import UiSurface from './UiSurface.vue';
+import UiTooltipSurface from './UiTooltipSurface.vue';
 
 const options = [
   { value: 'overview', label: 'Overview' },
@@ -345,6 +347,16 @@ describe('UiStatusIndicator', () => {
     });
     expect(live.attributes('role')).toBe('status');
   });
+
+  it('uses the shared skeleton material while loading and suppresses pulse', () => {
+    const wrapper = mount(UiStatusIndicator, {
+      props: { status: 'success', pulse: true, loading: true },
+      slots: { default: 'Loading status' },
+    });
+
+    expect(wrapper.classes()).toContain('ui-status-indicator--loading');
+    expect(wrapper.classes()).not.toContain('ui-status-indicator--pulse');
+  });
 });
 
 describe('UiIconButton', () => {
@@ -400,12 +412,37 @@ describe('UiIconButton', () => {
       slots: { default: 'icon' },
     });
 
-    expect(stretched.classes()).toEqual(expect.arrayContaining(['w-8', 'self-stretch']));
-    expect(stretched.classes()).not.toContain('size-8');
+    expect(stretched.get('button').classes()).toEqual(
+      expect.arrayContaining(['w-8', 'self-stretch']),
+    );
+    expect(stretched.get('button').classes()).not.toContain('size-8');
 
     const sized = mount(UiIconButton, { props: { label: 'Add' }, slots: { default: 'icon' } });
-    expect(sized.classes()).toContain('size-8');
-    expect(sized.classes()).not.toContain('self-stretch');
+    expect(sized.get('button').classes()).toContain('size-8');
+    expect(sized.get('button').classes()).not.toContain('self-stretch');
+  });
+
+  it('supports icon-only navigation without consumer geometry overrides', async () => {
+    const wrapper = mount(UiIconButton, {
+      props: {
+        as: 'a',
+        href: 'https://example.com/source',
+        label: 'View source',
+        size: 'sm',
+      },
+      attrs: { target: '_blank' },
+      slots: { default: 'icon' },
+    });
+
+    const link = wrapper.get('a');
+    expect(link.attributes('href')).toBe('https://example.com/source');
+    expect(link.attributes('aria-label')).toBe('View source');
+    expect(link.classes()).toContain('size-7');
+
+    await wrapper.setProps({ disabled: true });
+    expect(link.attributes('href')).toBeUndefined();
+    expect(link.attributes('aria-disabled')).toBe('true');
+    expect(link.attributes('tabindex')).toBe('-1');
   });
 });
 
@@ -459,6 +496,25 @@ describe('display components', () => {
     expect(surface.attributes('aria-label')).toBe('Shared surface');
     expect(surface.attributes('data-surface')).toBe('glass-card');
     expect(surface.classes()).toContain('material-glass-card');
+
+    const insetSurface = mount(UiSurface, { props: { surface: 'inset' } });
+    expect(insetSurface.attributes('data-surface')).toBe('inset');
+    expect(insetSurface.classes()).toContain('ui-surface-inset');
+
+    const notice = mount(UiNotice, {
+      props: { variant: 'warning' },
+      slots: { default: 'Unavailable', action: '<button>Retry</button>' },
+    });
+    expect(notice.classes()).toEqual(expect.arrayContaining(['ui-notice', 'ui-notice--warning']));
+    expect(notice.find('.ui-notice__action').exists()).toBe(true);
+
+    const tooltip = mount(UiTooltipSurface, {
+      props: { variant: 'accent' },
+      slots: { default: '12 contributions' },
+    });
+    expect(tooltip.classes()).toEqual(
+      expect.arrayContaining(['ui-tooltip-surface', 'ui-tooltip-surface--accent']),
+    );
 
     const skeleton = mount(UiSkeleton, { props: { variant: 'circle' } });
     expect(skeleton.attributes('aria-hidden')).toBe('true');

@@ -23,6 +23,9 @@
     --neoverse-navigation-item-font-size-sm: var(--neoverse-font-size-2xs);
     --neoverse-navigation-item-font-size-md: var(--neoverse-font-size-2xs);
     --neoverse-navigation-item-font-size-lg: var(--neoverse-font-size-xs);
+    /* Navigation icons stay optically quieter than standalone action icons.
+       The component owns this size so consumers never need to resize SVGs. */
+    --neoverse-navigation-item-icon-size: var(--neoverse-icon-size-sm);
     --neoverse-navigation-item-padding-block-sm: var(--neoverse-space-1);
     --neoverse-navigation-item-padding-block-md: var(--neoverse-space-1);
     --neoverse-navigation-item-padding-block-lg: var(--neoverse-space-1);
