@@ -941,13 +941,14 @@ test('keeps grouped controls on a compact, shared geometry contract', async () =
   expect(controlSurfaceCss).toContain(
     '--neoverse-control-surface-padding-inline: var(--neoverse-space-2);',
   );
+  expect(controlSurfaceCss).toContain('--neoverse-control-surface-navigation-edge-inset: calc(');
   expect(controlSurfaceCss).toContain('--neoverse-control-surface-divider-height: 1rem;');
   expect(controlSurfaceCss).toContain(
     '--neoverse-control-surface-divider-gap: var(--neoverse-space-0);',
   );
   expect(controlSurfaceCss).toContain('--neoverse-control-chrome-edge-refraction-width: var(');
-  expect(controlSurfaceCss).toContain(
-    '--neoverse-control-chrome-refraction-gradient: var(--neoverse-material-refraction-gradient-subtle);',
+  expect(controlSurfaceCss).toMatch(
+    /--neoverse-control-chrome-refraction-gradient:\s*var\(\s*--neoverse-material-refraction-gradient-subtle\s*\);/,
   );
   expect(controlSurfaceCss).toContain('--neoverse-control-chrome-edge-refraction-opacity: var(');
   expect(controlSurfaceCss).toContain(

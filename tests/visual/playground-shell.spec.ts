@@ -223,6 +223,8 @@ test('floating dock keeps balanced geometry across desktop presentation scales',
           navigationFontRatio: navigationFontSize / rootFontSize,
           minimumItemGapRatio: Math.min(...itemGaps) / rootFontSize,
           indicatorContentGap: indicatorRect.top - iconRect.bottom,
+          leadingOuterGap: activeRect.left - dockRect.left,
+          topOuterGap: activeRect.top - dockRect.top,
           trailingOuterGap: dockRect.right - trailingRect.right,
           optionHeight: optionRect.height,
           trailingInsideDock: trailingRect.right <= dockRect.right + 0.1,
@@ -244,9 +246,13 @@ test('floating dock keeps balanced geometry across desktop presentation scales',
       `indicator breathing room at viewport ${width}`,
     ).toBeGreaterThanOrEqual(0.13);
     expect(
-      metrics.trailingOuterGap / metrics.navigationHeight,
-      `trailing edge breathing room at viewport ${width}`,
-    ).toBeGreaterThanOrEqual(0.24);
+      Math.abs(metrics.leadingOuterGap - metrics.topOuterGap),
+      `leading edge inset balance at viewport ${width}`,
+    ).toBeLessThanOrEqual(0.75);
+    expect(
+      Math.abs(metrics.trailingOuterGap - metrics.topOuterGap),
+      `trailing edge inset balance at viewport ${width}`,
+    ).toBeLessThanOrEqual(0.75);
     expect(
       metrics.optionHeight / metrics.navigationHeight,
       `segmented option density at viewport ${width}`,

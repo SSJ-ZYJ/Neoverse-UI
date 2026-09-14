@@ -57,6 +57,12 @@
     backdrop-filter: var(--neoverse-control-chrome-edge-filter);
   }
 
+  .ui-control-surface:has(.ui-control-surface__group--primary .ui-navigation-item) {
+    --neoverse-control-surface-padding-inline: var(
+      --neoverse-control-surface-navigation-edge-inset
+    );
+  }
+
   .ui-control-surface__group {
     position: relative;
     z-index: 1;
