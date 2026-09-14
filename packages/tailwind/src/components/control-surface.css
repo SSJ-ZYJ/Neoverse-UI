@@ -6,17 +6,60 @@
     padding-inline: var(--neoverse-control-surface-padding-inline);
   }
 
+  .ui-control-surface--scale-md {
+    zoom: var(--neoverse-control-surface-scale-md);
+  }
+
+  .ui-control-surface--scale-lg {
+    --neoverse-navigation-item-font-size-sm: calc(
+      var(--neoverse-font-size-2xs) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    --neoverse-navigation-item-font-size-md: calc(
+      var(--neoverse-font-size-2xs) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    --neoverse-navigation-item-font-size-lg: calc(
+      var(--neoverse-font-size-xs) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    --neoverse-control-segmented-option-font-size-sm: calc(
+      var(--neoverse-font-size-2xs) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    zoom: var(--neoverse-control-surface-scale-lg);
+  }
+
   .ui-surface-chrome {
+    position: relative;
+    isolation: isolate;
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
       var(--neoverse-control-chrome-border);
     background: var(--neoverse-control-chrome-background);
-    box-shadow: var(--neoverse-control-chrome-shadow);
+    box-shadow:
+      var(--neoverse-control-chrome-edge-highlight), var(--neoverse-control-chrome-shadow);
     -webkit-backdrop-filter: var(--neoverse-control-chrome-filter);
     backdrop-filter: var(--neoverse-control-chrome-filter);
   }
 
+  .ui-surface-chrome::before {
+    position: absolute;
+    z-index: 0;
+    inset: var(--neoverse-control-chrome-edge-refraction-width);
+    border-radius: inherit;
+    background-color: transparent;
+    background-image: var(--neoverse-control-chrome-refraction-gradient);
+    content: '';
+    opacity: var(--neoverse-control-chrome-edge-refraction-opacity);
+    pointer-events: none;
+    filter: var(--neoverse-control-chrome-edge-refraction-softness);
+    -webkit-backdrop-filter: var(--neoverse-control-chrome-edge-filter);
+    backdrop-filter: var(--neoverse-control-chrome-edge-filter);
+  }
+
   .ui-control-surface__group {
     position: relative;
+    z-index: 1;
     display: inline-flex;
     box-sizing: border-box;
     min-width: 0;
@@ -98,6 +141,8 @@
   }
 
   .ui-control-surface__divider {
+    position: relative;
+    z-index: 1;
     width: var(--neoverse-border-width-thin);
     height: var(--neoverse-control-surface-divider-height);
     flex: 0 0 auto;
@@ -113,8 +158,13 @@
 
     .ui-surface-chrome {
       background: var(--neoverse-color-surface-raised);
+      box-shadow: var(--neoverse-control-chrome-shadow);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
+    }
+
+    .ui-surface-chrome::before {
+      display: none;
     }
   }
 }

@@ -3,6 +3,8 @@
     /* Destination controls retain the comfortable geometry validated by the
        Neoverse and Neoverse-Docs hero actions. Command buttons stay compact. */
     --neoverse-action-gap: var(--neoverse-space-2);
+    --neoverse-action-scale-md: 1;
+    --neoverse-action-scale-lg: 1.15;
     --neoverse-action-height-sm: var(--neoverse-space-7);
     --neoverse-action-height-md: var(--neoverse-space-8);
     --neoverse-action-height-lg: var(--neoverse-space-9);

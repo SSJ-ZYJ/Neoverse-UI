@@ -2,6 +2,7 @@
 import { computed, useAttrs } from 'vue';
 import { updateButtonPointerGlow } from './button-pointer-glow';
 import {
+  actionScaleClasses,
   actionSizeClasses,
   actionStretchClasses,
   buttonVariantClasses,
@@ -9,7 +10,7 @@ import {
   controlTransitionClasses,
 } from './classes';
 import { getSurfaceClass } from './surface';
-import type { ActionProps, ActionSize, ButtonVariant } from './types';
+import type { ActionProps, ActionScale, ActionSize, ButtonVariant } from './types';
 
 defineOptions({ inheritAttrs: false });
 
@@ -17,6 +18,7 @@ const props = withDefaults(defineProps<ActionProps>(), {
   as: 'a',
   variant: 'primary',
   size: 'md',
+  scale: 'md',
   disabled: false,
   stretch: false,
   surface: 'glass-subtle',
@@ -43,6 +45,7 @@ const classes = computed(() => [
   getSurfaceClass(props.surface),
   buttonVariantClasses[props.variant as ButtonVariant] ?? buttonVariantClasses.primary,
   actionSizeClasses[props.size as ActionSize] ?? actionSizeClasses.md,
+  actionScaleClasses[props.scale as ActionScale] ?? actionScaleClasses.md,
   props.stretch ? actionStretchClasses : '',
 ]);
 

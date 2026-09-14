@@ -10,10 +10,12 @@ const props = withDefaults(defineProps<ControlSurfaceProps>(), {
   variant: 'subtle',
   hoverMode: 'auto',
   edgeMode: 'auto',
+  scale: 'md',
 });
 
 const attrs = useAttrs();
 const slots = useSlots();
+const surfaceRoot = ref<HTMLElement>();
 const primary = ref<HTMLElement>();
 const indicatorStyle = ref<Record<string, string>>();
 const indicatorReady = ref(false);
@@ -33,11 +35,15 @@ function measureIndicator() {
   }
   const group = primary.value.getBoundingClientRect();
   const rect = marker.getBoundingClientRect();
+  const zoomValue = surfaceRoot.value
+    ? Number.parseFloat(getComputedStyle(surfaceRoot.value).getPropertyValue('zoom'))
+    : 1;
+  const zoom = Number.isFinite(zoomValue) && zoomValue > 0 ? zoomValue : 1;
   indicatorStyle.value = {
-    left: `${rect.left - group.left}px`,
-    top: `${rect.top - group.top}px`,
-    width: `${rect.width}px`,
-    height: `${rect.height}px`,
+    left: `${(rect.left - group.left) / zoom}px`,
+    top: `${(rect.top - group.top) / zoom}px`,
+    width: `${rect.width / zoom}px`,
+    height: `${rect.height / zoom}px`,
   };
   if (!indicatorReady.value) {
     void nextTick(() => {
@@ -95,6 +101,7 @@ const surface = computed(() => props.surface ?? glassVariantToSurface(props.vari
 const classes = computed(() => [
   'ui-control-surface inline-flex max-w-full items-stretch rounded-control',
   getSurfaceClass(surface.value),
+  `ui-control-surface--scale-${props.scale}`,
 ]);
 const forwardedAttrs = computed(() => {
   const { class: _class, style: _style, ...rest } = attrs;
@@ -104,6 +111,7 @@ const forwardedAttrs = computed(() => {
 
 <template>
   <component
+    ref="surfaceRoot"
     :is="props.as"
     v-bind="forwardedAttrs"
     :class="[classes, { 'ui-control-surface--shared-indicator': props.navigationIndicator }, attrs.class]"

@@ -26,6 +26,11 @@ export const actionSizeClasses = {
   lg: 'ui-action--lg',
 } as const;
 
+export const actionScaleClasses = {
+  md: 'ui-action--scale-md',
+  lg: 'ui-action--scale-lg',
+} as const;
+
 export const actionStretchClasses = 'grow self-stretch';
 
 export const iconButtonSizeClasses = {

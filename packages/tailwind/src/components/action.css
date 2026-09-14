@@ -7,6 +7,14 @@
     text-decoration: none;
   }
 
+  .ui-action--scale-md {
+    zoom: var(--neoverse-action-scale-md);
+  }
+
+  .ui-action--scale-lg {
+    zoom: var(--neoverse-action-scale-lg);
+  }
+
   .ui-action--sm {
     --ui-action-icon-size: var(--neoverse-action-icon-size-sm);
     min-height: var(--neoverse-action-height-sm);

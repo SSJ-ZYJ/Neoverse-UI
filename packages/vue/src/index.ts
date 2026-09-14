@@ -11,6 +11,7 @@ export {
 export { getSurfaceClass, glassVariantToSurface, isGlassSurface, surfaceClasses } from './surface';
 export type {
   ActionProps,
+  ActionScale,
   ActionSize,
   BadgeProps,
   BadgeSize,
@@ -22,6 +23,7 @@ export type {
   CardProps,
   ControlSurfacePreset,
   ControlSurfaceProps,
+  ControlSurfaceScale,
   GlassSurfaceProps,
   GlassSurfaceVariant,
   IconButtonProps,

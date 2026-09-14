@@ -64,6 +64,20 @@
     box-shadow: var(--neoverse-navigation-item-active-shadow);
   }
 
+  /* Active navigation already owns its visual state. Hover must not stack the
+     generic Ghost hover field on top of the selected destination. */
+  .ui-navigation-item.ui-navigation-item--active.ui-button--ghost:hover:not(:disabled) {
+    color: var(--neoverse-navigation-item-active-foreground);
+    background-image: var(--neoverse-navigation-item-active-background);
+    background-color: var(--neoverse-navigation-item-active-fill);
+    background-clip: padding-box;
+    box-shadow: var(--neoverse-navigation-item-active-shadow);
+  }
+
+  .ui-navigation-item.ui-navigation-item--active.material-glass-subtle:hover:not(:disabled)::after {
+    opacity: 0;
+  }
+
   .ui-navigation-item__label {
     overflow: hidden;
     flex: 0 1 auto;

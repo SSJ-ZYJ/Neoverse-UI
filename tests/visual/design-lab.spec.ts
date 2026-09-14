@@ -109,6 +109,63 @@ test('consumer parity exposes destination and current-page semantics', async ({ 
   expect(pulseAnimation).toBe('none');
 });
 
+test('active navigation hover does not stack another visual state', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
+    waitUntil: 'domcontentloaded',
+  });
+  await page.addStyleTag({ content: freezeMotion });
+  await page.evaluate(waitForStableAssets);
+
+  const activeItem = page
+    .getByRole('navigation', { name: 'Primary navigation' })
+    .getByRole('link', {
+      name: 'Home',
+    });
+  const readVisualState = () =>
+    activeItem.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        color: style.color,
+        backgroundColor: style.backgroundColor,
+        backgroundImage: style.backgroundImage,
+        boxShadow: style.boxShadow,
+      };
+    });
+
+  const beforeHover = await readVisualState();
+  await activeItem.hover();
+  const duringHover = await readVisualState();
+
+  expect(duringHover).toEqual(beforeHover);
+});
+
+test('chrome edge refraction is removed when reduced transparency is requested', async ({
+  page,
+}) => {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setEmulatedMedia', {
+    features: [{ name: 'prefers-reduced-transparency', value: 'reduce' }],
+  });
+  await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
+    waitUntil: 'domcontentloaded',
+  });
+  await page.evaluate(waitForStableAssets);
+
+  const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
+  const reducedState = await navigation.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const edgeStyle = getComputedStyle(element, '::before');
+    return {
+      backdropFilter: style.backdropFilter,
+      edgeDisplay: edgeStyle.display,
+    };
+  });
+
+  expect(reducedState.backdropFilter).toBe('none');
+  expect(reducedState.edgeDisplay).toBe('none');
+});
+
 test('consumer parity dock adapts navigation items to content', async ({ page }) => {
   await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
     waitUntil: 'domcontentloaded',
@@ -146,6 +203,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(typography.labelFlex).toBe('0 1 auto');
   const edgeMaterial = await navigation.evaluate((element) => {
     const style = getComputedStyle(element);
+    const chromeEdgeStyle = getComputedStyle(element, '::before');
     const button = element.querySelector('.consumer-parity-dock__item') as HTMLElement | null;
     const activeButton = element.querySelector(
       '.consumer-parity-dock__item.ui-navigation-item--active',
@@ -279,6 +337,11 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       dockBackground: style.background,
       dockFilter: style.backdropFilter,
       dockBorder: style.borderColor,
+      dockEdgeBackgroundImage: chromeEdgeStyle.backgroundImage,
+      dockEdgeOpacity: chromeEdgeStyle.opacity,
+      dockEdgeFilter: chromeEdgeStyle.filter,
+      dockEdgeBackdropFilter: chromeEdgeStyle.backdropFilter,
+      dockEdgeDisplay: chromeEdgeStyle.display,
       buttonSurface: button.getAttribute('data-surface'),
       buttonHasMaterialClass: [...button.classList].some((className) =>
         className.startsWith('material-'),
@@ -416,6 +479,11 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(edgeMaterial.dockBackground).toContain('rgba(152, 186, 220, 0.04)');
   expect(edgeMaterial.dockFilter).toContain('blur(12px)');
   expect(edgeMaterial.dockBorder).toBe('rgba(219, 234, 254, 0.08)');
+  expect(edgeMaterial.dockEdgeBackgroundImage).not.toBe('none');
+  expect(Number.parseFloat(edgeMaterial.dockEdgeOpacity)).toBeGreaterThan(0);
+  expect(edgeMaterial.dockEdgeFilter).not.toBe('none');
+  expect(edgeMaterial.dockEdgeBackdropFilter).not.toBe('none');
+  expect(edgeMaterial.dockEdgeDisplay).not.toBe('none');
   expect(edgeMaterial.buttonSurface).toBe('none');
   expect(edgeMaterial.buttonHasMaterialClass).toBe(false);
   expect(edgeMaterial.languageSurface).toBe('none');

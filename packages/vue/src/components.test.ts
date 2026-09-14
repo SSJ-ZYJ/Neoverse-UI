@@ -184,6 +184,17 @@ describe('UiAction', () => {
     );
   });
 
+  it('can scale a destination action as one visual unit', () => {
+    const action = mount(UiAction, {
+      props: { href: '/journal', size: 'lg', scale: 'lg' },
+      slots: { default: 'Read the journal' },
+    });
+
+    const anchor = action.get('a');
+    expect(anchor.classes()).toContain('ui-action--lg');
+    expect(anchor.classes()).toContain('ui-action--scale-lg');
+  });
+
   it('removes navigation and consumer activation while disabled', async () => {
     const onClick = vi.fn();
     const wrapper = mount(UiAction, {
@@ -296,6 +307,14 @@ describe('UiControlSurface', () => {
     const automatic = mount(UiControlSurface);
     expect(automatic.attributes('data-neoverse-surface-hover')).toBeUndefined();
     expect(automatic.attributes('data-neoverse-glass-edge-pass')).toBeUndefined();
+  });
+
+  it('exposes uniform whole-surface scaling without changing the default', () => {
+    const defaultSurface = mount(UiControlSurface);
+    const largeSurface = mount(UiControlSurface, { props: { scale: 'lg' } });
+
+    expect(defaultSurface.classes()).toContain('ui-control-surface--scale-md');
+    expect(largeSurface.classes()).toContain('ui-control-surface--scale-lg');
   });
 
   it('keeps the shared navigation indicator opt-in', () => {

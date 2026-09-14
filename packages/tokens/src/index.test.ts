@@ -320,6 +320,15 @@ test('exposes consumer-validated action and navigation component tokens', () => 
   expect(cssVariables.components.controlSurface.dividerGap).toBe(
     '--neoverse-control-surface-divider-gap',
   );
+  expect(cssVariables.components.controlSurface.chromeRefractionGradient).toBe(
+    '--neoverse-control-chrome-refraction-gradient',
+  );
+  expect(cssVariables.components.controlSurface.chromeEdgeRefractionOpacity).toBe(
+    '--neoverse-control-chrome-edge-refraction-opacity',
+  );
+  expect(cssVariables.components.controlSurface.chromeEdgeHighlight).toBe(
+    '--neoverse-control-chrome-edge-highlight',
+  );
   expect(cssVariables.components.controlSurface.chromeTrailingPaddingInline).toBe(
     '--neoverse-control-chrome-trailing-padding-inline',
   );
@@ -935,6 +944,14 @@ test('keeps grouped controls on a compact, shared geometry contract', async () =
   expect(controlSurfaceCss).toContain('--neoverse-control-surface-divider-height: 1rem;');
   expect(controlSurfaceCss).toContain(
     '--neoverse-control-surface-divider-gap: var(--neoverse-space-0);',
+  );
+  expect(controlSurfaceCss).toContain('--neoverse-control-chrome-edge-refraction-width: var(');
+  expect(controlSurfaceCss).toContain(
+    '--neoverse-control-chrome-refraction-gradient: var(--neoverse-material-refraction-gradient-subtle);',
+  );
+  expect(controlSurfaceCss).toContain('--neoverse-control-chrome-edge-refraction-opacity: var(');
+  expect(controlSurfaceCss).toContain(
+    '--neoverse-control-chrome-edge-highlight: var(--neoverse-material-edge-highlight-elevated);',
   );
   expect(controlSurfaceCss).toContain('--neoverse-control-chrome-trailing-padding: 0.125rem;');
   expect(controlSurfaceCss).toContain(

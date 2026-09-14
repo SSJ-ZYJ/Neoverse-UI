@@ -32,12 +32,14 @@ export interface ButtonProps {
   surface?: ControlSurfacePreset;
 }
 export type ActionSize = 'sm' | 'md' | 'lg';
+export type ActionScale = 'md' | 'lg';
 
 export interface ActionProps {
   as?: string | Component;
   href?: string;
   variant?: ButtonVariant;
   size?: ActionSize;
+  scale?: ActionScale;
   disabled?: boolean;
   stretch?: boolean;
   surface?: ControlSurfacePreset;
@@ -80,6 +82,7 @@ export interface BadgeProps {
 export type GlassSurfaceVariant = 'subtle' | 'elevated' | 'card' | 'immersive';
 export type SurfaceHoverMode = 'auto' | 'static';
 export type SurfaceEdgeMode = 'auto' | 'local';
+export type ControlSurfaceScale = 'md' | 'lg';
 
 export interface GlassSurfaceProps {
   as?: string | Component;
@@ -93,6 +96,8 @@ export interface ControlSurfaceProps {
   surface?: SurfacePreset;
   hoverMode?: SurfaceHoverMode;
   edgeMode?: SurfaceEdgeMode;
+  /** Uniformly scale the whole grouped control while preserving internal proportions. */
+  scale?: ControlSurfaceScale;
 }
 
 export interface CardProps {

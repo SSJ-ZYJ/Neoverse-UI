@@ -14,6 +14,12 @@
     --neoverse-control-surface-padding-inline: var(--neoverse-space-2);
     --neoverse-control-surface-divider-height: 1rem;
     --neoverse-control-surface-divider-gap: var(--neoverse-space-0);
+    /* Scale the complete composition as one unit so every existing proportion remains intact. */
+    --neoverse-control-surface-scale-md: 1;
+    --neoverse-control-surface-scale-lg: 1.4;
+    /* Large grouped controls need optical type compensation: geometry grows
+       more than labels so the shell gains presence without oversized text. */
+    --neoverse-control-surface-scale-lg-type-factor: 0.9;
     --neoverse-control-surface-divider-color: color-mix(
       in srgb,
       var(--neoverse-color-border-default) 72%,
@@ -28,6 +34,22 @@
     --neoverse-control-chrome-shadow:
       0 18px 42px -20px rgb(14 34 44 / 20%), 0 6px 18px -12px rgb(14 34 44 / 14%);
     --neoverse-control-chrome-filter: blur(12px) saturate(128%) brightness(104%);
+    /* Chrome keeps its quieter fill while reusing the material system's
+       directional edge-refraction contract. */
+    --neoverse-control-chrome-edge-refraction-width: var(
+      --neoverse-material-edge-refraction-width-subtle
+    );
+    --neoverse-control-chrome-edge-refraction-softness: var(
+      --neoverse-material-edge-refraction-softness-subtle
+    );
+    --neoverse-control-chrome-edge-filter: var(--neoverse-material-edge-filter-subtle);
+    --neoverse-control-chrome-refraction-gradient: var(
+      --neoverse-material-refraction-gradient-subtle
+    );
+    --neoverse-control-chrome-edge-refraction-opacity: var(
+      --neoverse-material-edge-refraction-opacity-subtle
+    );
+    --neoverse-control-chrome-edge-highlight: var(--neoverse-material-edge-highlight-elevated);
     --neoverse-control-chrome-trailing-border: rgb(15 23 42 / 12%);
     --neoverse-control-chrome-trailing-background: rgb(255 255 255 / 22%);
     --neoverse-control-chrome-trailing-padding: 0.125rem;
