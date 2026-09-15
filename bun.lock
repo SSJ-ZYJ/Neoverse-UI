@@ -16,7 +16,7 @@
     },
     "apps/playground": {
       "name": "@neoverse-ui/playground",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "dependencies": {
         "@neoverse-ui/glass-runtime": "workspace:*",
         "@neoverse-ui/motion": "workspace:*",
