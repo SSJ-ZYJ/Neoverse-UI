@@ -1,9 +1,22 @@
 {
   "name": "@neoverse-ui/tailwind",
   "version": "0.1.0",
+  "license": "MIT",
+  "description": "Tailwind CSS v4 semantic theme and component styles for Neoverse UI.",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SSJ-ZYJ/Neoverse-UI.git",
+    "directory": "packages/tailwind"
+  },
+  "homepage": "https://github.com/SSJ-ZYJ/Neoverse-UI#readme",
+  "bugs": {
+    "url": "https://github.com/SSJ-ZYJ/Neoverse-UI/issues"
+  },
   "files": [
-    "dist"
+    "dist/index.css",
+    "dist/theme.css",
+    "dist/components.css"
   ],
   "exports": {
     ".": "./dist/index.css",
@@ -20,12 +33,16 @@
     "dev": "bun run build:theme && tailwindcss -i ./src/index.css -o ./dist/playground.css --watch",
     "test": "bun run --filter @neoverse-ui/tokens build && bun run --filter @neoverse-ui/motion build && bun run build:theme && tailwindcss -i ./src/contract.css -o ./dist/contract.css --minify && bun ./scripts/assert-contract.ts"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@neoverse-ui/motion": "^0.1.0",
     "@neoverse-ui/tokens": "^0.1.0"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.3",
     "tailwindcss": "4.3.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

@@ -1,7 +1,18 @@
 {
   "name": "@neoverse-ui/glass-runtime",
   "version": "0.1.0",
+  "license": "MIT",
+  "description": "Shared WebGL glass-edge enhancement runtime for Neoverse UI.",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SSJ-ZYJ/Neoverse-UI.git",
+    "directory": "packages/glass-runtime"
+  },
+  "homepage": "https://github.com/SSJ-ZYJ/Neoverse-UI#readme",
+  "bugs": {
+    "url": "https://github.com/SSJ-ZYJ/Neoverse-UI/issues"
+  },
   "files": [
     "dist"
   ],
@@ -20,5 +31,9 @@
   "devDependencies": {
     "happy-dom": "^20.11.10",
     "vitest": "^4.1.11"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

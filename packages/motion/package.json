@@ -1,7 +1,18 @@
 {
   "name": "@neoverse-ui/motion",
   "version": "0.1.0",
+  "license": "MIT",
+  "description": "Framework-agnostic motion tokens and reduced-motion CSS for Neoverse UI.",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SSJ-ZYJ/Neoverse-UI.git",
+    "directory": "packages/motion"
+  },
+  "homepage": "https://github.com/SSJ-ZYJ/Neoverse-UI#readme",
+  "bugs": {
+    "url": "https://github.com/SSJ-ZYJ/Neoverse-UI/issues"
+  },
   "files": [
     "dist"
   ],
@@ -21,7 +32,11 @@
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "test": "bun run --filter @neoverse-ui/tokens build && bun run build:css && bun ./scripts/assert-css.ts && bun test src/index.test.ts"
   },
-  "peerDependencies": {
+  "dependencies": {
     "@neoverse-ui/tokens": "^0.1.0"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

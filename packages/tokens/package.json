@@ -1,7 +1,18 @@
 {
   "name": "@neoverse-ui/tokens",
   "version": "0.1.0",
+  "license": "MIT",
+  "description": "Design tokens, CSS variables, and token-name maps for Neoverse UI.",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SSJ-ZYJ/Neoverse-UI.git",
+    "directory": "packages/tokens"
+  },
+  "homepage": "https://github.com/SSJ-ZYJ/Neoverse-UI#readme",
+  "bugs": {
+    "url": "https://github.com/SSJ-ZYJ/Neoverse-UI/issues"
+  },
   "files": [
     "dist"
   ],
@@ -16,8 +27,12 @@
     "**/*.css"
   ],
   "scripts": {
-    "build": "bun run scripts/copy-css.ts && tsc --project tsconfig.build.json",
+    "build": "rm -rf dist tsconfig.build.tsbuildinfo && bun run scripts/copy-css.ts && tsc --project tsconfig.build.json",
     "typecheck": "tsc --project tsconfig.json --noEmit",
     "test": "bun run build && bun test src/index.test.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }

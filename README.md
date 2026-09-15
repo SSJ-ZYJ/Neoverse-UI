@@ -22,7 +22,7 @@ Bun is the package manager, workspace manager, and script runner for this reposi
 | `@neoverse-ui/react` | Planned | Reserved React integration boundary; no components yet |
 | `apps/playground` | Consumer Validation | Vue-driven Design Lab and visual reference surface |
 
-The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiSurface`, `UiCard`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, and `UiScrollbar`. `UiSurface` is the canonical material primitive; `UiGlassSurface` remains exported only as a compatibility wrapper for the historical Glass `variant` API. React has no runtime implementation yet. Vue and the future React adapter share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
+The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiSurface`, `UiCard`, `UiBadge`, `UiStatusIndicator`, `UiLoadingIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, and `UiTooltipSurface`. `UiSurface` is the canonical material primitive; `UiGlassSurface` remains exported only as a compatibility wrapper for the historical Glass `variant` API. React has no runtime implementation yet. Vue and the future React adapter share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
 
 ## Architecture at a glance
 
@@ -37,6 +37,18 @@ Glass Runtime -> one shared WebGL Edge Pass per Document
 ```
 
 See [docs/architecture.md](docs/architecture.md) for package boundaries and runtime rules.
+
+## Installation
+
+Vue consumers normally start with the component package:
+
+```sh
+bun add @neoverse-ui/vue
+```
+
+The package dependency graph installs the shared Tailwind, Motion, and Tokens layers. Lower-level packages can also be installed directly when a consumer only needs a specific layer.
+
+Packages are versioned with Changesets. Release preparation, first-publish bootstrap, and npm Trusted Publishing are documented in [docs/releasing.md](docs/releasing.md).
 
 ## Commands
 
