@@ -293,8 +293,8 @@ export const moduleCopy = {
   motion: {
     label: localized('Motion', '动效'),
     description: localized(
-      'Base motion values and semantic transition aliases, shown with their CSS variables.',
-      '展示基础动效值与语义过渡别名，并列出对应 CSS 变量。',
+      'Reusable motion recipes, semantic transition aliases, and reduced-motion behavior with live replayable previews.',
+      '展示可复用动效 Recipe、语义过渡别名与 reduced-motion 行为，并提供可重复触发的实时预览。',
     ),
     primitive: {
       label: localized('Base motion values', '基础动效值'),
@@ -302,6 +302,15 @@ export const moduleCopy = {
         'Base values define fast, standard, and expressive durations plus linear, standard, and emphasized easings.',
         '基础值定义 fast、standard、expressive 时长，以及 linear、standard、emphasized 缓动。',
       ),
+    },
+    recipes: {
+      label: localized('Motion recipes', '动效 Recipe'),
+      description: localized(
+        'Recipes are framework-agnostic CSS classes. Replay remounts only the preview target so each animation can be inspected repeatedly.',
+        'Recipe 是与框架无关的 CSS 类。点击重播只会重新挂载预览目标，便于反复检查每段动画。',
+      ),
+      replay: localized('Replay', '重播'),
+      classLabel: localized('Class', '类名'),
     },
     aliases: {
       label: localized('Semantic transitions', '语义过渡'),

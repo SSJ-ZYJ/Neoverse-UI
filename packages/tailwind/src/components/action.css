@@ -1,10 +1,36 @@
 @layer components {
   .ui-action {
+    display: inline-flex;
     min-width: 0;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
     gap: var(--neoverse-action-gap);
+    border-radius: var(--neoverse-radius-control-inner);
+    cursor: pointer;
+    user-select: none;
+    font-family: var(--neoverse-font-family-sans);
     font-weight: var(--neoverse-typography-label-weight);
     line-height: 1;
     text-decoration: none;
+  }
+
+  .ui-action:focus-visible {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: var(--neoverse-focus-ring-offset);
+  }
+
+  .ui-action__content {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    gap: var(--neoverse-action-gap);
+  }
+
+  .ui-action--stretch {
+    flex-grow: 1;
+    align-self: stretch;
   }
 
   .ui-action--scale-md {

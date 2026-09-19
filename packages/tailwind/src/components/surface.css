@@ -1,4 +1,23 @@
 @layer components {
+  .ui-surface-solid {
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-color-border-subtle);
+    background: var(--neoverse-color-surface-canvas);
+  }
+
+  .ui-surface-subtle {
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-color-border-subtle);
+    background: var(--neoverse-color-surface-subtle);
+  }
+
+  .ui-surface-elevated {
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-color-border-default);
+    background: var(--neoverse-color-surface-raised);
+    box-shadow: var(--neoverse-shadow-raised);
+  }
+
   .ui-surface-inset {
     background: var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-fill);
     box-shadow:
@@ -6,5 +25,39 @@
       inset 0 var(--neoverse-border-width-thin) 0 var(--neoverse-surface-inset-highlight);
     -webkit-backdrop-filter: var(--neoverse-surface-inset-filter);
     backdrop-filter: var(--neoverse-surface-inset-filter);
+  }
+
+  .ui-surface-interactive {
+    transition:
+      transform var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-emphasized),
+      background-color var(--neoverse-motion-duration-standard)
+      var(--neoverse-motion-easing-standard),
+      border-color var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-standard),
+      box-shadow var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-standard);
+  }
+
+  .ui-surface-interactive:focus-visible {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: var(--neoverse-focus-ring-offset);
+  }
+
+  @media (hover: hover) {
+    .ui-surface-interactive:hover {
+      transform: translateY(calc(var(--neoverse-border-width-thin) * -1));
+    }
+
+    .ui-surface-interactive:active {
+      transform: translateY(0) scale(0.99);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-surface-interactive {
+      transition: none;
+    }
+
+    .ui-surface-interactive:is(:hover, :active) {
+      transform: none;
+    }
   }
 }

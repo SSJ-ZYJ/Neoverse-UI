@@ -1,4 +1,9 @@
-import { motionDurations, motionEasings, motionTransitions } from '@neoverse-ui/motion';
+import {
+  motionDurations,
+  motionEasings,
+  motionRecipes,
+  motionTransitions,
+} from '@neoverse-ui/motion';
 import { cssVariables } from '@neoverse-ui/tokens';
 import { type LocalizedText, localized, tokenCopy } from './playground-content';
 
@@ -402,27 +407,34 @@ export const motionBaseGroups = [
 
 export const motionSamples = [
   {
-    label: tokenCopy.motion.micro,
-    className: 'transition-colors duration-fast ease-standard hover:bg-surface-raised',
-    duration: motionDurations.fast,
-    easing: motionEasings.standard,
-    transition: motionTransitions.micro,
+    id: 'fade',
+    label: localized('Fade in', '渐显'),
+    className: motionRecipes.fade.className,
+    duration: motionDurations[motionRecipes.fade.duration],
+    easing: motionEasings[motionRecipes.fade.easing],
   },
   {
-    label: tokenCopy.motion.state,
-    className: 'transition-opacity duration-standard ease-standard hover:opacity-80',
-    duration: motionDurations.standard,
-    easing: motionEasings.standard,
-    transition: motionTransitions.state,
+    id: 'rise',
+    label: localized('Rise in', '上浮进入'),
+    className: motionRecipes.rise.className,
+    duration: motionDurations[motionRecipes.rise.duration],
+    easing: motionEasings[motionRecipes.rise.easing],
   },
   {
-    label: tokenCopy.motion.spatial,
-    className: 'transition-transform duration-expressive ease-emphasized hover:translate-x-1',
-    duration: motionDurations.expressive,
-    easing: motionEasings.emphasized,
-    transition: motionTransitions.spatial,
+    id: 'scale',
+    label: localized('Scale in', '缩放进入'),
+    className: motionRecipes.scale.className,
+    duration: motionDurations[motionRecipes.scale.duration],
+    easing: motionEasings[motionRecipes.scale.easing],
   },
-];
+  {
+    id: 'emphasis',
+    label: localized('Emphasis', '强调反馈'),
+    className: motionRecipes.emphasis.className,
+    duration: motionDurations[motionRecipes.emphasis.duration],
+    easing: motionEasings[motionRecipes.emphasis.easing],
+  },
+] as const;
 
 export const motionVariableGroups = [
   { label: tokenCopy.motion.micro, values: motionTransitions.micro },

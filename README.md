@@ -16,13 +16,14 @@ Bun is the package manager, workspace manager, and script runner for this reposi
 | --- | --- | --- |
 | `@neoverse-ui/tokens` | Stable | CSS Variables and TypeScript token-name maps |
 | `@neoverse-ui/tailwind` | Stable | Tailwind v4 semantic theme and component CSS |
-| `@neoverse-ui/motion` | Stable | Framework-agnostic motion aliases and reduced-motion CSS |
+| `@neoverse-ui/motion` | Stable | Framework-agnostic motion aliases, replayable recipes, and reduced-motion CSS |
+| `@neoverse-ui/giscus-theme` | Consumer Validation | Standalone light/dark themes for the cross-origin Giscus widget |
 | `@neoverse-ui/glass-runtime` | Experimental | Shared WebGL Glass edge renderer with CSS fallback |
 | `@neoverse-ui/vue` | Consumer Validation | Vue 3 SFC components |
-| `@neoverse-ui/react` | Planned | Reserved React integration boundary; no components yet |
+| `@neoverse-ui/react` | Consumer Validation | React adapters for shared actions and surfaces |
 | `apps/playground` | Consumer Validation | Vue-driven Design Lab and visual reference surface |
 
-The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiSurface`, `UiCard`, `UiBadge`, `UiStatusIndicator`, `UiLoadingIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, and `UiTooltipSurface`. `UiSurface` is the canonical material primitive; `UiGlassSurface` remains exported only as a compatibility wrapper for the historical Glass `variant` API. React has no runtime implementation yet. Vue and the future React adapter share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
+The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiSurface`, `UiCard`, `UiBadge`, `UiStatusIndicator`, `UiLoadingIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, and `UiTooltipSurface`. `UiSurface` is the canonical material primitive; `UiGlassSurface` remains exported only as a compatibility wrapper for the historical Glass `variant` API. The React adapter currently exposes `UiAction`, `UiSurface`, and `uiActionClassName` for React/Next consumers. Vue and React share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
 
 ## Architecture at a glance
 
@@ -142,7 +143,7 @@ The Design Lab `density` module shows fine-pointer and coarse-pointer profiles s
 
 ## Motion and themes
 
-`@neoverse-ui/motion` exposes `duration-fast`, `duration-standard`, `duration-expressive`, `ease-standard`, and `ease-emphasized`, plus CSS Variable aliases for micro, state, and spatial transitions. Its reduced-motion rules remove spatial travel and collapse durations to a minimal value.
+`@neoverse-ui/motion` exposes `duration-fast`, `duration-standard`, `duration-expressive`, `ease-standard`, and `ease-emphasized`, CSS Variable aliases for micro/state/spatial transitions, and reusable `fade`, `rise`, `scale`, and `emphasis` animation recipes. The Design Lab can replay every recipe directly. Reduced-motion rules remove spatial travel and disable non-essential recipe animation.
 
 Set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root element. The Design Lab keeps separate light and dark visual baselines. The root `.light` and `.dark` classes remain supported when `data-theme` is absent.
 

@@ -28,6 +28,37 @@ export const motionTransitions = {
   },
 } as const;
 
+export const motionRecipes = {
+  fade: {
+    className: 'neoverse-motion-fade-in',
+    duration: 'standard',
+    easing: 'standard',
+  },
+  rise: {
+    className: 'neoverse-motion-rise-in',
+    duration: 'standard',
+    easing: 'emphasized',
+  },
+  scale: {
+    className: 'neoverse-motion-scale-in',
+    duration: 'expressive',
+    easing: 'emphasized',
+  },
+  emphasis: {
+    className: 'neoverse-motion-emphasis',
+    duration: 'expressive',
+    easing: 'emphasized',
+  },
+} as const satisfies Record<
+  string,
+  {
+    className: string;
+    duration: keyof typeof motionDurations;
+    easing: keyof typeof motionEasings;
+  }
+>;
+
 export type MotionDuration = keyof typeof motionDurations;
 export type MotionEasing = keyof typeof motionEasings;
 export type MotionTransition = keyof typeof motionTransitions;
+export type MotionRecipe = keyof typeof motionRecipes;

@@ -1,0 +1,34 @@
+{
+  "name": "@neoverse-ui/giscus-theme",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Standalone Neoverse UI themes for the cross-origin Giscus widget.",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SSJ-ZYJ/Neoverse-UI.git",
+    "directory": "packages/giscus-theme"
+  },
+  "homepage": "https://github.com/SSJ-ZYJ/Neoverse-UI#readme",
+  "bugs": {
+    "url": "https://github.com/SSJ-ZYJ/Neoverse-UI/issues"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    "./light.css": "./dist/giscus-light.css",
+    "./dark.css": "./dist/giscus-dark.css"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "bun ./scripts/copy-css.ts",
+    "test": "bun run build && bun ./scripts/assert-css.ts"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
+}

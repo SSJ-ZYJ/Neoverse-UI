@@ -287,9 +287,7 @@ describe('UiControlSurface', () => {
     expect(ungrouped.find('.ui-control-surface__divider').exists()).toBe(false);
 
     const solid = mount(UiControlSurface, { props: { surface: 'elevated' } });
-    expect(solid.classes()).toEqual(
-      expect.arrayContaining(['bg-surface-raised', 'border-default', 'shadow-raised']),
-    );
+    expect(solid.classes()).toContain('ui-surface-elevated');
     expect(solid.classes()).not.toContain('material-glass-subtle');
     expect(solid.attributes('data-surface')).toBe('elevated');
   });
@@ -483,9 +481,7 @@ describe('display components', () => {
     const standardSurfaceCard = mount(UiCard, {
       props: { surface: 'elevated' },
     });
-    expect(standardSurfaceCard.classes()).toEqual(
-      expect.arrayContaining(['border-default', 'bg-surface-raised', 'shadow-raised']),
-    );
+    expect(standardSurfaceCard.classes()).toContain('ui-surface-elevated');
     expect(standardSurfaceCard.classes()).not.toContain('material-glass-elevated');
 
     const surface = mount(UiSurface, {

@@ -2,9 +2,9 @@ import type { GlassSurfaceVariant, SurfacePreset } from './types';
 
 export const surfaceClasses: Record<SurfacePreset, string> = {
   none: '',
-  solid: 'bg-surface-canvas border border-subtle',
-  subtle: 'bg-surface-subtle border border-subtle',
-  elevated: 'bg-surface-raised border border-default shadow-raised',
+  solid: 'ui-surface-solid',
+  subtle: 'ui-surface-subtle',
+  elevated: 'ui-surface-elevated',
   inset: 'ui-surface-inset',
   chrome: 'ui-surface-chrome',
   'glass-subtle': 'material-glass-subtle',

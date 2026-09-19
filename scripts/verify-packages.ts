@@ -5,7 +5,15 @@ import { basename, join, relative } from 'node:path';
 
 const repositoryRoot = join(import.meta.dir, '..');
 const npmRegistry = 'https://registry.npmjs.org/';
-const packageDirs = ['tokens', 'motion', 'glass-runtime', 'tailwind', 'vue'] as const;
+const packageDirs = [
+  'tokens',
+  'motion',
+  'giscus-theme',
+  'glass-runtime',
+  'tailwind',
+  'vue',
+  'react',
+] as const;
 
 type PackageJson = {
   name?: string;
@@ -168,7 +176,7 @@ try {
   const localTarballsDir = join(consumerDir, 'packages');
   await mkdir(localTarballsDir, { recursive: true });
 
-  const dependencies: Record<string, string> = { vue: '^3.5.0' };
+  const dependencies: Record<string, string> = { react: '^19.2.0', vue: '^3.5.0' };
   const overrides: Record<string, string> = {};
   for (const [name, tarball] of packedPackages) {
     const destination = join(localTarballsDir, basename(tarball));
@@ -198,11 +206,12 @@ try {
     join(consumerDir, 'smoke.ts'),
     `import { existsSync } from 'node:fs';\n` +
       `import { fileURLToPath } from 'node:url';\n` +
+      `import { UiAction as ReactUiAction } from '@neoverse-ui/react';\n` +
       `import { UiButton, UiNotice, UiTooltipSurface } from '@neoverse-ui/vue';\n` +
       `import { cssVariables } from '@neoverse-ui/tokens';\n` +
       `import { createGlassRenderer } from '@neoverse-ui/glass-runtime';\n` +
-      `if (!UiButton || !UiNotice || !UiTooltipSurface || !cssVariables || !createGlassRenderer) throw new Error('public JS exports are incomplete');\n` +
-      `for (const specifier of ['@neoverse-ui/tokens/css', '@neoverse-ui/motion/css', '@neoverse-ui/tailwind/index.css', '@neoverse-ui/tailwind/theme.css', '@neoverse-ui/tailwind/components.css', '@neoverse-ui/vue/index.css']) {\n` +
+      `if (!ReactUiAction || !UiButton || !UiNotice || !UiTooltipSurface || !cssVariables || !createGlassRenderer) throw new Error('public JS exports are incomplete');\n` +
+      `for (const specifier of ['@neoverse-ui/tokens/css', '@neoverse-ui/motion/css', '@neoverse-ui/giscus-theme/light.css', '@neoverse-ui/giscus-theme/dark.css', '@neoverse-ui/tailwind/index.css', '@neoverse-ui/tailwind/theme.css', '@neoverse-ui/tailwind/components.css', '@neoverse-ui/vue/index.css', '@neoverse-ui/react/index.css']) {\n` +
       `  const resolved = import.meta.resolve(specifier);\n` +
       `  if (!existsSync(fileURLToPath(resolved))) throw new Error(\`missing CSS export: \${specifier}\`);\n` +
       `}\n`,

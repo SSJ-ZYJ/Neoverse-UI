@@ -31,6 +31,10 @@
         "vue-tsc": "^3.3.11",
       },
     },
+    "packages/giscus-theme": {
+      "name": "@neoverse-ui/giscus-theme",
+      "version": "0.1.0",
+    },
     "packages/glass-runtime": {
       "name": "@neoverse-ui/glass-runtime",
       "version": "0.1.0",
@@ -43,19 +47,29 @@
       "name": "@neoverse-ui/motion",
       "version": "0.1.0",
       "dependencies": {
-        "@neoverse-ui/tokens": "workspace:^",
+        "@neoverse-ui/tokens": "^0.1.0",
       },
     },
     "packages/react": {
       "name": "@neoverse-ui/react",
       "version": "0.1.0",
+      "dependencies": {
+        "@neoverse-ui/tailwind": "^0.1.0",
+      },
+      "devDependencies": {
+        "@types/react": "^19.2.18",
+        "react": "^19.2.8",
+      },
+      "peerDependencies": {
+        "react": ">=19.0.0 <20.0.0",
+      },
     },
     "packages/tailwind": {
       "name": "@neoverse-ui/tailwind",
       "version": "0.1.0",
       "dependencies": {
-        "@neoverse-ui/motion": "workspace:^",
-        "@neoverse-ui/tokens": "workspace:^",
+        "@neoverse-ui/motion": "^0.1.0",
+        "@neoverse-ui/tokens": "^0.1.0",
       },
       "devDependencies": {
         "@tailwindcss/cli": "4.3.3",
@@ -185,6 +199,8 @@
 
     "@manypkg/tools": ["@manypkg/tools@2.1.2", "https://registry.npmmirror.com/@manypkg/tools/-/tools-2.1.2.tgz", { "dependencies": { "jju": "^1.4.0", "tinyglobby": "^0.2.13", "yaml": "^2.9.0" } }, "sha512-6QEf6yqFbETdwGITKq57aYoPfX/3K8XFNwsAlx0C1M7o8cb79sv1M3w+tWuWvIcSbNqrLF7OD7YpZMVVz335hQ=="],
 
+    "@neoverse-ui/giscus-theme": ["@neoverse-ui/giscus-theme@workspace:packages/giscus-theme"],
+
     "@neoverse-ui/glass-runtime": ["@neoverse-ui/glass-runtime@workspace:packages/glass-runtime"],
 
     "@neoverse-ui/motion": ["@neoverse-ui/motion@workspace:packages/motion"],
@@ -312,6 +328,8 @@
     "@types/estree": ["@types/estree@1.0.9", "https://registry.npmmirror.com/@types/estree/-/estree-1.0.9.tgz", {}, "sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg=="],
 
     "@types/node": ["@types/node@22.20.1", "https://registry.npmmirror.com/@types/node/-/node-22.20.1.tgz", { "dependencies": { "undici-types": "~6.21.0" } }, "sha512-EANqOCF9QFyra+4pfxUcX9STKJpCLjMbObVzljIJomAWSnuSIEAvyzEU53GaajbXJEgdh0iEcPL+DGvpUd4k1Q=="],
+
+    "@types/react": ["@types/react@19.3.0", "https://registry.npmmirror.com/@types/react/-/react-19.3.0.tgz", { "dependencies": { "csstype": "^3.2.2" } }, "sha512-N0rFCuH9YoxG9/m61l9MfpJKfmLOVU0em7ipIz6TRgSSkvReLB9vL85GB+yr8Bs5leqpvg96JSwF4ZS1s4viQg=="],
 
     "@types/whatwg-mimetype": ["@types/whatwg-mimetype@3.0.2", "https://registry.npmmirror.com/@types/whatwg-mimetype/-/whatwg-mimetype-3.0.2.tgz", {}, "sha512-c2AKvDT8ToxLIOUlN51gTiHXflsfIFisS4pO7pDPoKouJCESkhZnEy623gwP9laCy5lnLDAw1vAzu2vM2YLOrA=="],
 
@@ -646,6 +664,8 @@
     "qified": ["qified@0.10.1", "https://registry.npmmirror.com/qified/-/qified-0.10.1.tgz", { "dependencies": { "hookified": "^2.1.1" } }, "sha512-+Owyggi9IxT1ePKGafcI87ubSmxol6smwJ+RAHDQlx9+9cPwFWDiKFFCPuWhr9ignlGpZ9vDQLw67N4dcTVFEA=="],
 
     "queue-microtask": ["queue-microtask@1.2.3", "https://registry.npmmirror.com/queue-microtask/-/queue-microtask-1.2.3.tgz", {}, "sha512-NuaNSa6flKT5JaSYQzJok04JzTL1CA6aGhv5rfLW3PgqA+M2ChpZQnAC8h8i4ZFkBS8X5RqkDBHA7r4hej3K9A=="],
+
+    "react": ["react@19.3.0", "https://registry.npmmirror.com/react/-/react-19.3.0.tgz", {}, "sha512-E8LUcbtBWt20bbl2YoHfx4ZDBdxVTfOKtCZn9cDSJ4l6/nuoApcpIBcj47t2wZoVX8g2ZHuMHbiShgCR1T5Sog=="],
 
     "require-from-string": ["require-from-string@2.0.2", "https://registry.npmmirror.com/require-from-string/-/require-from-string-2.0.2.tgz", {}, "sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw=="],
 

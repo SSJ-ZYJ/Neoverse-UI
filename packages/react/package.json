@@ -1,8 +1,48 @@
 {
   "name": "@neoverse-ui/react",
   "version": "0.1.0",
-  "private": true,
   "license": "MIT",
+  "description": "React adapters for the Neoverse UI design system.",
   "type": "module",
-  "description": "Reserved integration boundary for future React adapters."
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SSJ-ZYJ/Neoverse-UI.git",
+    "directory": "packages/react"
+  },
+  "homepage": "https://github.com/SSJ-ZYJ/Neoverse-UI#readme",
+  "bugs": {
+    "url": "https://github.com/SSJ-ZYJ/Neoverse-UI/issues"
+  },
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./index.css": "./dist/index.css"
+  },
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "rm -rf dist tsconfig.build.tsbuildinfo && tsc --project tsconfig.build.json && bun ./scripts/copy-css.ts",
+    "typecheck": "tsc --project tsconfig.json --noEmit",
+    "test": "bun test src/index.test.ts"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0 <20.0.0"
+  },
+  "dependencies": {
+    "@neoverse-ui/tailwind": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.2.18",
+    "react": "^19.2.8"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  }
 }
