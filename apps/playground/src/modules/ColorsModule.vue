@@ -8,7 +8,7 @@ const props = defineProps<LabModuleProps>();
 </script>
 
 <template>
-  <div class="grid gap-grid">
+  <div id="foundation-colors" class="scroll-mt-24 grid gap-grid">
     <section class="grid gap-4" aria-labelledby="colors-primitive-title">
       <header class="grid gap-1">
         <h2 id="colors-primitive-title" class="text-subtitle font-heading tracking-heading">

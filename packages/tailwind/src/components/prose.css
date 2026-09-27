@@ -1,0 +1,253 @@
+@layer components {
+  .neoverse-prose {
+    min-width: 0;
+    color: var(--neoverse-color-text-secondary);
+    font-family: var(--neoverse-typography-body-font-family);
+    font-size: var(--neoverse-typography-body-md-size);
+    font-weight: var(--neoverse-typography-body-md-weight);
+    line-height: var(--neoverse-typography-body-md-line-height);
+    overflow-wrap: anywhere;
+  }
+
+  .neoverse-prose > :first-child {
+    margin-block-start: 0;
+  }
+
+  .neoverse-prose > :last-child {
+    margin-block-end: 0;
+  }
+
+  .neoverse-prose :where(h1, h2, h3, h4, h5, h6) {
+    color: var(--neoverse-color-text-primary);
+    font-family: var(--neoverse-typography-title-font-family);
+    text-wrap: balance;
+    scroll-margin-top: calc(var(--neoverse-layout-header-min-height) + var(--neoverse-space-4));
+  }
+
+  .neoverse-prose h1 {
+    margin-block: 0 var(--neoverse-space-6);
+    font-size: var(--neoverse-typography-title-lg-size);
+    font-weight: var(--neoverse-typography-title-lg-weight);
+    line-height: var(--neoverse-typography-title-lg-line-height);
+    letter-spacing: var(--neoverse-typography-title-lg-letter-spacing);
+  }
+
+  .neoverse-prose h2 {
+    margin-block: var(--neoverse-space-10) var(--neoverse-space-4);
+    font-size: var(--neoverse-typography-title-md-size);
+    font-weight: var(--neoverse-typography-title-md-weight);
+    line-height: var(--neoverse-typography-title-md-line-height);
+    letter-spacing: var(--neoverse-typography-title-md-letter-spacing);
+  }
+
+  .neoverse-prose h3 {
+    margin-block: var(--neoverse-space-8) var(--neoverse-space-3);
+    font-size: var(--neoverse-typography-title-sm-size);
+    font-weight: var(--neoverse-typography-title-sm-weight);
+    line-height: var(--neoverse-typography-title-sm-line-height);
+    letter-spacing: var(--neoverse-typography-title-sm-letter-spacing);
+  }
+
+  .neoverse-prose :where(h4, h5, h6) {
+    margin-block: var(--neoverse-space-6) var(--neoverse-space-2);
+    font-size: var(--neoverse-typography-body-lg-size);
+    font-weight: var(--neoverse-font-weight-semibold);
+    line-height: var(--neoverse-typography-body-lg-line-height);
+  }
+
+  .neoverse-prose :where(p, ul, ol, blockquote, pre, table, figure, details) {
+    margin-block: var(--neoverse-space-5);
+  }
+
+  .neoverse-prose :where(p, li, dd) {
+    text-wrap: pretty;
+  }
+
+  .neoverse-prose a {
+    color: var(--neoverse-color-accent-primary);
+    text-decoration-line: underline;
+    text-decoration-color: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-primary) 52%,
+      transparent
+    );
+    text-decoration-thickness: var(--neoverse-border-width-thin);
+    text-underline-offset: var(--neoverse-space-1);
+    transition:
+      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      text-decoration-color var(--neoverse-motion-state-duration)
+      var(--neoverse-motion-state-easing);
+  }
+
+  .neoverse-prose a:focus-visible {
+    border-radius: var(--neoverse-radius-xs);
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: var(--neoverse-focus-ring-offset);
+  }
+
+  .neoverse-prose :where(strong, b) {
+    color: var(--neoverse-color-text-primary);
+    font-weight: var(--neoverse-font-weight-semibold);
+  }
+
+  .neoverse-prose :where(ul, ol) {
+    padding-inline-start: var(--neoverse-space-6);
+  }
+
+  .neoverse-prose li + li {
+    margin-block-start: var(--neoverse-space-2);
+  }
+
+  .neoverse-prose li::marker {
+    color: var(--neoverse-color-text-muted);
+  }
+
+  .neoverse-prose blockquote {
+    border-inline-start: var(--neoverse-border-width-strong) var(--neoverse-border-style-solid)
+      var(--neoverse-color-accent-primary);
+    border-radius: var(--neoverse-radius-control);
+    padding: var(--neoverse-space-4);
+    color: var(--neoverse-color-text-secondary);
+    background: var(--neoverse-color-surface-subtle);
+  }
+
+  .neoverse-prose :not(pre) > code {
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-color-border-subtle);
+    border-radius: var(--neoverse-radius-xs);
+    padding: var(--neoverse-space-1) var(--neoverse-space-2);
+    color: var(--neoverse-color-text-primary);
+    background: var(--neoverse-color-surface-subtle);
+    font-family: var(--neoverse-typography-code-font-family);
+    font-size: var(--neoverse-font-size-sm);
+    line-height: var(--neoverse-line-height-snug);
+  }
+
+  .neoverse-prose pre {
+    max-width: 100%;
+    overflow: auto;
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-color-border-subtle);
+    border-radius: var(--neoverse-radius-control);
+    padding: var(--neoverse-space-4);
+    color: var(--neoverse-color-text-primary);
+    background: var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-fill);
+    box-shadow: var(--neoverse-shadow-inset);
+    font-family: var(--neoverse-typography-code-font-family);
+    font-size: var(--neoverse-font-size-sm);
+    line-height: var(--neoverse-line-height-normal);
+    scrollbar-color: var(--neoverse-scrollbar-thumb) transparent;
+    scrollbar-width: thin;
+  }
+
+  .neoverse-prose pre code {
+    border: 0;
+    padding: 0;
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    white-space: pre;
+  }
+
+  .neoverse-prose table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--neoverse-color-text-secondary);
+    font-size: var(--neoverse-typography-body-sm-size);
+    line-height: var(--neoverse-typography-body-sm-line-height);
+  }
+
+  .neoverse-prose :where(th, td) {
+    border-block-end: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-color-border-subtle);
+    padding: var(--neoverse-space-3) var(--neoverse-space-4);
+    text-align: start;
+    vertical-align: top;
+    overflow-wrap: anywhere;
+  }
+
+  .neoverse-prose th {
+    color: var(--neoverse-color-text-primary);
+    background: var(--neoverse-color-surface-subtle);
+    font-weight: var(--neoverse-font-weight-semibold);
+  }
+
+  .neoverse-prose tbody tr:last-child td {
+    border-block-end: 0;
+  }
+
+  .neoverse-prose :where(img, video) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-inline: auto;
+    border-radius: var(--neoverse-radius-card);
+    background: var(--neoverse-color-surface-subtle);
+  }
+
+  .neoverse-prose figure {
+    margin-inline: 0;
+  }
+
+  .neoverse-prose figcaption {
+    margin-block-start: var(--neoverse-space-2);
+    color: var(--neoverse-color-text-muted);
+    font-size: var(--neoverse-typography-caption-size);
+    line-height: var(--neoverse-typography-caption-line-height);
+    text-align: center;
+  }
+
+  .neoverse-prose hr {
+    margin-block: var(--neoverse-space-8);
+    border: 0;
+    border-block-start: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-color-border-subtle);
+  }
+
+  .neoverse-prose details {
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-color-border-subtle);
+    border-radius: var(--neoverse-radius-control);
+    padding: var(--neoverse-space-4);
+    background: var(--neoverse-color-surface-subtle);
+  }
+
+  .neoverse-prose summary {
+    cursor: pointer;
+    color: var(--neoverse-color-text-primary);
+    font-weight: var(--neoverse-font-weight-semibold);
+  }
+
+  .neoverse-prose :where(kbd, mark) {
+    border-radius: var(--neoverse-radius-xs);
+    padding-inline: var(--neoverse-space-1);
+  }
+
+  .neoverse-prose kbd {
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-color-border-default);
+    color: var(--neoverse-color-text-primary);
+    background: var(--neoverse-color-surface-raised);
+    box-shadow: var(--neoverse-shadow-control);
+    font-family: var(--neoverse-typography-code-font-family);
+    font-size: var(--neoverse-font-size-sm);
+  }
+
+  .neoverse-prose mark {
+    color: var(--neoverse-color-text-primary);
+    background: var(--neoverse-color-accent-soft);
+  }
+
+  @media (hover: hover) {
+    .neoverse-prose a:hover {
+      color: var(--neoverse-color-text-primary);
+      text-decoration-color: var(--neoverse-color-accent-primary);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .neoverse-prose a {
+      transition: none;
+    }
+  }
+}

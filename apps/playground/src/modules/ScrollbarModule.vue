@@ -1,10 +1,22 @@
 <script setup lang="ts">
 import { cssVariables } from '@neoverse-ui/tokens';
+import { UiScrollbar, UiSurface } from '@neoverse-ui/vue';
 import { localize, localized, moduleCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.scrollbar;
+const fixtureCopy = {
+  label: localized('UiScrollbar document overlay', 'UiScrollbar 文档级浮层'),
+  description: localized(
+    'This is the real UiScrollbar component. In the isolated /frame fixture it binds to document scrolling; the component intentionally does not accept a container target.',
+    '这里渲染的是真实 UiScrollbar 组件。在独立 /frame 场景中它绑定文档滚动；组件刻意不提供容器 target API。',
+  ),
+  hint: localized(
+    'Scroll the isolated frame to reveal and validate the overlay thumb.',
+    '滚动独立 Frame，即可显示并校验浮层滑块。',
+  ),
+} as const;
 
 const previewItems = [
   {
@@ -87,6 +99,7 @@ const tokenRows = [
 
 <template>
   <div class="grid gap-grid">
+    <UiScrollbar data-ui-scrollbar-fixture :refresh-key="props.locale" />
     <section class="grid gap-3" aria-labelledby="scrollbar-preview-title">
       <header class="grid gap-1">
         <h2 id="scrollbar-preview-title" class="text-subtitle font-heading tracking-heading">
@@ -161,6 +174,43 @@ const tokenRows = [
           </dl>
         </article>
       </div>
+    </section>
+
+    <section
+      id="scrollbar-component"
+      class="scroll-mt-24 grid gap-3"
+      aria-labelledby="scrollbar-component-title"
+    >
+      <header class="grid gap-1">
+        <h2 id="scrollbar-component-title" class="text-subtitle font-heading tracking-heading">
+          {{ localize(fixtureCopy.label, props.locale) }}
+        </h2>
+        <p class="max-w-container-lg text-caption text-secondary">
+          {{ localize(fixtureCopy.description, props.locale) }}
+        </p>
+      </header>
+      <UiSurface surface="subtle" class="grid gap-3 rounded-card p-4">
+        <p class="text-body text-secondary">
+          {{ localize(fixtureCopy.hint, props.locale) }}
+        </p>
+        <ol class="grid gap-2">
+          <li
+            v-for="item in previewItems"
+            :key="`fixture-${item.number}`"
+            class="flex items-center gap-3 rounded-control bg-surface-raised px-3 py-3"
+          >
+            <span class="shrink-0 text-code text-accent-primary">{{ item.number }}</span>
+            <div class="min-w-0">
+              <p class="text-label font-label text-primary">
+                {{ localize(item.label, props.locale) }}
+              </p>
+              <p class="text-caption text-secondary">
+                {{ localize(item.detail, props.locale) }}
+              </p>
+            </div>
+          </li>
+        </ol>
+      </UiSurface>
     </section>
   </div>
 </template>

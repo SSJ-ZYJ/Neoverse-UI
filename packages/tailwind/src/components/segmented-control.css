@@ -68,8 +68,8 @@
     transform: translateX(
       calc(var(--segment-index) * (100% + var(--neoverse-control-segmented-gap)))
     );
-    transition: transform var(--neoverse-motion-duration-standard)
-      var(--neoverse-motion-easing-emphasized);
+    transition: transform var(--neoverse-motion-spatial-duration)
+      var(--neoverse-motion-spatial-easing);
     will-change: transform;
   }
 
@@ -94,9 +94,10 @@
     line-height: var(--neoverse-control-compact-line-height);
     white-space: nowrap;
     transition:
-      background-color var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
-      color var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
-      transform var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
+      background-color var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing),
+      color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      transform var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
   }
 
   .ui-segmented-control .ui-segmented-control__option--active {

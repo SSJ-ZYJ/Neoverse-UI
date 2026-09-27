@@ -9,11 +9,13 @@
     touch-action: manipulation;
     transform: none;
     transition:
-      color var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
-      background-color var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
-      background-image var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
-      box-shadow var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
-      opacity var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
+      color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      background-color var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing),
+      background-image var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing),
+      box-shadow var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      opacity var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
   }
 
   .ui-button.material-glass-subtle {
@@ -63,7 +65,8 @@
     content: '';
     opacity: 0;
     pointer-events: none;
-    transition: opacity var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
+    transition: opacity var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing);
   }
 
   .ui-button > * {
@@ -256,5 +259,104 @@
      !important or changing normal hover motion. */
   .ui-button.material-glass-subtle:active:not(:disabled) {
     transition: none;
+  }
+}
+
+/* Complete native button geometry, independent of consumer utility scanning.
+   原生按钮的完整几何与状态契约，不依赖消费端扫描包内工具类。 */
+@layer components {
+  .ui-button-control {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    gap: var(--neoverse-space-2);
+    border-radius: var(--neoverse-radius-control-inner);
+    padding-inline: var(--neoverse-space-3);
+    font-family: var(--neoverse-font-family-sans);
+    font-size: var(--neoverse-typography-label-size);
+    font-weight: var(--neoverse-typography-label-weight);
+    line-height: var(--neoverse-typography-label-line-height);
+    cursor: pointer;
+    user-select: none;
+  }
+  .ui-button-control--sm {
+    height: var(--neoverse-space-7);
+    font-size: var(--neoverse-typography-caption-size);
+    line-height: var(--neoverse-typography-caption-line-height);
+  }
+  .ui-button-control--md {
+    height: var(--neoverse-space-8);
+  }
+  .ui-button-control--lg {
+    height: var(--neoverse-space-9);
+    padding-inline: var(--neoverse-space-4);
+  }
+  .ui-button-control--stretch {
+    height: auto;
+    flex-grow: 1;
+    align-self: stretch;
+  }
+  .ui-button-icon-control {
+    padding-inline: 0;
+  }
+  .ui-button-icon-control--sm {
+    width: var(--neoverse-space-7);
+  }
+  .ui-button-icon-control--md {
+    width: var(--neoverse-space-8);
+  }
+  .ui-button-icon-control--lg {
+    width: var(--neoverse-space-9);
+  }
+  .ui-button-icon-control--stretch {
+    height: auto;
+    flex-grow: 1;
+    align-self: stretch;
+  }
+  .ui-button-icon-control__content {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+  }
+  .ui-button-control:focus-visible {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: var(--neoverse-focus-ring-offset);
+  }
+  .ui-button-control:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  .ui-button-control__content {
+    min-width: 0;
+    display: inline-flex;
+    align-items: center;
+  }
+  .ui-button-control__leading,
+  .ui-button-control__trailing {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    min-width: var(--neoverse-space-4);
+    min-height: var(--neoverse-space-4);
+  }
+  .ui-button-control__spinner {
+    position: absolute;
+    width: var(--neoverse-space-4);
+    height: var(--neoverse-space-4);
+    animation: ui-button-spin 1s linear infinite;
+  }
+  @keyframes ui-button-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .ui-button-control__spinner {
+      animation: none;
+    }
   }
 }

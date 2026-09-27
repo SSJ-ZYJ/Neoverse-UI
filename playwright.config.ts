@@ -1,5 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const playgroundPort = 3100;
+const playgroundBaseUrl = `http://127.0.0.1:${playgroundPort}`;
+
 export default defineConfig({
   testDir: './tests/visual',
   timeout: 30_000,
@@ -18,9 +21,12 @@ export default defineConfig({
     },
   },
   webServer: {
-    command: 'bun run --filter @neoverse-ui/playground dev',
-    url: 'http://127.0.0.1:3000',
-    reuseExistingServer: !process.env.CI,
+    command: 'bun apps/playground/src/index.ts',
+    url: `${playgroundBaseUrl}/__playground-health`,
+    env: {
+      PORT: String(playgroundPort),
+    },
+    reuseExistingServer: true,
     timeout: 120_000,
   },
   projects: [
@@ -28,7 +34,7 @@ export default defineConfig({
       name: 'desktop',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:3000',
+        baseURL: playgroundBaseUrl,
         viewport: { width: 1920, height: 1080 },
         deviceScaleFactor: 1,
         hasTouch: false,
@@ -40,7 +46,7 @@ export default defineConfig({
       name: 'mobile',
       use: {
         ...devices['Desktop Chrome'],
-        baseURL: 'http://127.0.0.1:3000',
+        baseURL: playgroundBaseUrl,
         viewport: { width: 390, height: 844 },
         deviceScaleFactor: 1,
         hasTouch: true,

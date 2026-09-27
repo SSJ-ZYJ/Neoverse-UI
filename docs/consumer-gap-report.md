@@ -32,3 +32,22 @@ Hero 内容与入场序列、BottomDock 固定定位/路由列表/跨项滑动�
 ## 历史复现证据（已修复）
 
 早期接入阶段，Consumer 运行态中的 Hero Action 曾出现 `display: block`、`border-radius: 0px`、`gap: normal`、高度 36px，而接入前 wrapper 明确定义 `inline-flex`、control-inner radius、0.5rem gap、44px large height。根因是 Consumer 手工拼装 DS 的 variant/size class，遗漏 `UiButton` 内部 base/focus/transition contract。该回归促成了 `UiAction` / `UiNavigationItem` 的完整组件契约；当前 Consumer 已不再使用“导出 class 零件 + 本地 wrapper”的方式。
+
+
+## Doc 正文适配
+
+React 新增 `UiButton`，补齐原生按钮 ref、属性、disabled/loading 和完整 CSS 几何契约；Doc 复制按钮消费共享控件，Fumadocs 继续负责复制状态与 Tabs 行为。正文代码、表格、引用、提示和折叠容器采用轻量阅读表面，提示语义色复用共享状态 Token。正文导航卡片复用 Surface，布局与路由留在 Doc。
+
+MDX 注册、Shiki、长代码降级、内容标题和正文排版仍属于产品层，不新增面向 Fumadocs 的 Core 组件。Playground 的正文组合用于展示共享基础的阅读场景，不承担 Doc MDX 渲染器验证。
+## 后续迁移队列
+
+本轮顺序按共享适配器、Doc 控件消费、产品层边界收尾；各阶段独立验证。当前正文与交互控件候选均已实施。
+
+| 阶段 | 迁移项 | 边界与保留项 | 验收 | 状态 |
+| --- | --- | --- | --- | --- |
+| 1 | React UiNotice 对齐 Vue；Doc Fumadocs Callout / CalloutContainer 映射到共享状态表面 | MDX 标题、图标、自定义属性和类型别名仍由 Doc adapter 兼容 | SSR 验证 warn/error 映射、标题、图标及属性 | 已完成 |
+| 2 | React UiIconButton 对齐 Vue；迁移 Doc 返回顶部、阅读返回关闭和 Mermaid 六个工具按钮 | Mermaid role=toolbar、pressed/disabled 状态、分组及 Doc 自有尺寸保持不变 | 原生 button/link disabled 与 loading 单测；Doc 阅读回归检查 | 已完成 |
+| 3 | Doc 分类搜索和阅读返回主操作接入 React UiButton | URL query、Search context、history restore 和内容排列留在 Doc | React 属性/事件/禁用测试；Doc 类型检查与构建 | 已完成 |
+| 4 | React 补齐 UiCard surface adapter | DocCard 保持产品层；其站内转场、外链目标、内容布局继续由 Doc 管理，并继续复用 UiSurface | React 通用原生/路由根节点与 Surface 测试 | 已完成 |
+
+Fumadocs 侧栏、TOC、搜索弹层和结果列表继续由框架适配及搜索功能层承担；任务列表等带业务状态的按钮也继续由对应产品功能拥有。Doc 的代码渲染、表格、引用、折叠、导航卡片和文章内容不批量迁移或改写。React/Vue 中其他目前未被 Doc 使用的组件差异，仅在出现具体消费场景时再列计划。

@@ -286,6 +286,7 @@
     contrast(109%);
   --neoverse-material-transparency-subtle: 24%;
   --neoverse-material-transparency-elevated: 44%;
+  --neoverse-material-transparency-card: 56%;
   --neoverse-material-edge-refraction-softness-subtle: blur(3px);
   --neoverse-material-edge-refraction-softness-elevated: blur(4px);
   --neoverse-material-edge-refraction-softness-immersive: blur(5px);

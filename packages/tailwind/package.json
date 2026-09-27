@@ -16,13 +16,15 @@
   "files": [
     "dist/index.css",
     "dist/theme.css",
-    "dist/components.css"
+    "dist/components.css",
+    "dist/prose.css"
   ],
   "exports": {
     ".": "./dist/index.css",
     "./index.css": "./dist/index.css",
     "./theme.css": "./dist/theme.css",
-    "./components.css": "./dist/components.css"
+    "./components.css": "./dist/components.css",
+    "./prose.css": "./dist/prose.css"
   },
   "sideEffects": [
     "**/*.css"

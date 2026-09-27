@@ -98,8 +98,8 @@
     opacity: 0;
     transform: translateX(-50%) scaleX(0.55);
     transition:
-      opacity var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
-      transform var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-emphasized);
+      opacity var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      transform var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
   }
 
   .ui-navigation-item--compact .ui-navigation-item__indicator {

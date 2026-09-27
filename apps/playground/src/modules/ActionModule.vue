@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { UiAction } from '@neoverse-ui/vue';
 import LabIcon from '../LabIcon.vue';
-import { localize, moduleCopy } from '../playground-content';
+import { localize, localized, moduleCopy } from '../playground-content';
 import StateRow from '../StateRow.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.action;
+const contractCopy = {
+  label: localized('Composition contract', '组合契约'),
+  hint: localized(
+    'Scale, stretch, and surface ownership can change independently without changing link semantics.',
+    'Scale、stretch 与 Surface 归属可以独立变化，不影响链接语义。',
+  ),
+} as const;
 </script>
 
 <template>
@@ -60,5 +67,13 @@ const copy = moduleCopy.action;
     <UiAction href="#controls-action" disabled
       >{{ localize(copy.controls.disabled, props.locale) }}</UiAction
     >
+  </StateRow>
+
+  <StateRow :label="contractCopy.label" :hint="contractCopy.hint" :locale="props.locale">
+    <div class="grid w-full gap-2 md:grid-cols-3">
+      <UiAction href="#controls-action" surface="none" variant="ghost"> surface="none" </UiAction>
+      <UiAction href="#controls-action" scale="lg" variant="secondary"> scale="lg" </UiAction>
+      <UiAction href="#controls-action" stretch> stretch </UiAction>
+    </div>
   </StateRow>
 </template>

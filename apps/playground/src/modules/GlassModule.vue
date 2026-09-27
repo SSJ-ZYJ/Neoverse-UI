@@ -21,6 +21,7 @@ const glassSurfaces = {
         v-for="variant in glassVariants"
         :key="variant"
         :surface="glassSurfaces[variant]"
+        :data-glass-variant="variant"
         class="rounded-card p-4"
       >
         <div class="grid gap-2">

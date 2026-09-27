@@ -5,20 +5,10 @@ const tokenCss = await Bun.file(tokenOutput).text();
 
 const motionFragments = [
   "@import '@neoverse-ui/tokens/css';",
-  '--neoverse-motion-micro-duration: var(--neoverse-motion-duration-fast)',
+  '--neoverse-motion-feedback-duration: var(--neoverse-motion-duration-fast)',
+  '--neoverse-motion-feedback-easing: var(--neoverse-motion-easing-standard)',
   '--neoverse-motion-state-duration: var(--neoverse-motion-duration-standard)',
   '--neoverse-motion-spatial-duration: var(--neoverse-motion-duration-expressive)',
-  '--neoverse-motion-micro-property:',
-  '--neoverse-motion-state-property:',
-  '--neoverse-motion-spatial-property:',
-  '@keyframes neoverse-motion-fade-in',
-  '@keyframes neoverse-motion-rise-in',
-  '@keyframes neoverse-motion-scale-in',
-  '@keyframes neoverse-motion-emphasis',
-  '.neoverse-motion-fade-in',
-  '.neoverse-motion-rise-in',
-  '.neoverse-motion-scale-in',
-  '.neoverse-motion-emphasis',
   '@media (prefers-reduced-motion: reduce)',
   '--neoverse-motion-duration-fast: 1ms',
   '--neoverse-motion-duration-standard: 1ms',
@@ -28,9 +18,9 @@ const motionFragments = [
   '--neoverse-motion-spatial-distance: 0px',
 ];
 const tokenFragments = [
-  '--neoverse-motion-duration-fast: 180ms',
-  '--neoverse-motion-duration-standard: 360ms',
-  '--neoverse-motion-duration-expressive: 760ms',
+  '--neoverse-motion-duration-fast: 140ms',
+  '--neoverse-motion-duration-standard: 240ms',
+  '--neoverse-motion-duration-expressive: 420ms',
   '--neoverse-motion-easing-standard: cubic-bezier(0.22, 1, 0.36, 1)',
   '--neoverse-motion-easing-emphasized: cubic-bezier(0.16, 1, 0.3, 1)',
 ];

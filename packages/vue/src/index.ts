@@ -16,6 +16,8 @@ export type {
   BadgeProps,
   BadgeSize,
   BadgeVariant,
+  BreadcrumbItem,
+  BreadcrumbProps,
   ButtonProps,
   ButtonSize,
   ButtonType,
@@ -49,6 +51,7 @@ export type {
 } from './types';
 export { default as UiAction } from './UiAction.vue';
 export { default as UiBadge } from './UiBadge.vue';
+export { default as UiBreadcrumb } from './UiBreadcrumb.vue';
 export { default as UiButton } from './UiButton.vue';
 export { default as UiCard } from './UiCard.vue';
 export { default as UiControlSurface } from './UiControlSurface.vue';

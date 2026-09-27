@@ -9,7 +9,7 @@ const props = defineProps<LabModuleProps>();
 </script>
 
 <template>
-  <div class="grid gap-grid">
+  <div id="foundation-layout-shape" class="scroll-mt-24 grid gap-grid">
     <section class="grid gap-3" aria-labelledby="layout-shape-spacing-title">
       <header class="grid gap-1">
         <h3 id="layout-shape-spacing-title" class="text-subtitle font-heading tracking-heading">

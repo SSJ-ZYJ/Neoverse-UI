@@ -29,11 +29,10 @@
 
   .ui-surface-interactive {
     transition:
-      transform var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-emphasized),
-      background-color var(--neoverse-motion-duration-standard)
-      var(--neoverse-motion-easing-standard),
-      border-color var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-standard),
-      box-shadow var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-standard);
+      transform var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      background-color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      border-color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      box-shadow var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
   }
 
   .ui-surface-interactive:focus-visible {

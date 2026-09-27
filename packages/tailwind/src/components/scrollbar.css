@@ -99,8 +99,8 @@
     cursor: pointer;
     user-select: none;
     transition:
-      opacity var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
-      background var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
+      opacity var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      background var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
   }
 
   .ui-scrollbar:hover,
@@ -120,9 +120,9 @@
     touch-action: none;
     transform: translateX(-50%);
     transition:
-      width var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
-      background var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
-      box-shadow var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
+      width var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      background var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      box-shadow var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
   }
 
   .ui-scrollbar:hover .ui-scrollbar__thumb,

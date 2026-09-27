@@ -1,0 +1,80 @@
+@layer components {
+  .ui-breadcrumb {
+    min-width: 0;
+    overflow: hidden;
+    color: var(--neoverse-breadcrumb-link-foreground);
+    font-size: var(--neoverse-breadcrumb-font-size);
+    font-weight: var(--neoverse-breadcrumb-font-weight);
+    line-height: var(--neoverse-breadcrumb-line-height);
+  }
+
+  .ui-breadcrumb__list {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--neoverse-breadcrumb-gap);
+    padding: 0;
+    margin: 0;
+    list-style: none;
+  }
+
+  .ui-breadcrumb__item {
+    display: flex;
+    min-width: 0;
+    flex: 0 1 auto;
+    align-items: center;
+    gap: var(--neoverse-breadcrumb-item-gap);
+  }
+
+  .ui-breadcrumb__item:last-child {
+    flex: 1 1 auto;
+  }
+
+  .ui-breadcrumb__separator {
+    flex: 0 0 auto;
+    color: var(--neoverse-breadcrumb-separator-foreground);
+    font-size: var(--neoverse-breadcrumb-separator-size);
+    user-select: none;
+  }
+
+  .ui-breadcrumb__link,
+  .ui-breadcrumb__label,
+  .ui-breadcrumb__current {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ui-breadcrumb__label {
+    color: var(--neoverse-breadcrumb-link-foreground);
+  }
+
+  .ui-breadcrumb__link {
+    color: var(--neoverse-breadcrumb-link-foreground);
+    text-decoration: none;
+    transition:
+      color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      outline-color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
+  }
+
+  .ui-breadcrumb__link:hover {
+    color: var(--neoverse-breadcrumb-link-hover-foreground);
+  }
+
+  .ui-breadcrumb__link:focus-visible {
+    border-radius: var(--neoverse-breadcrumb-focus-radius);
+    outline: var(--neoverse-breadcrumb-focus-width) solid var(--neoverse-breadcrumb-focus-color);
+    outline-offset: var(--neoverse-breadcrumb-focus-offset);
+  }
+
+  .ui-breadcrumb__current {
+    color: var(--neoverse-breadcrumb-current-foreground);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-breadcrumb__link {
+      transition: none;
+    }
+  }
+}

@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { UiIconButton } from '@neoverse-ui/vue';
 import LabIcon from '../LabIcon.vue';
-import { localize, moduleCopy } from '../playground-content';
+import { localize, localized, moduleCopy } from '../playground-content';
 import StateRow from '../StateRow.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.iconButton;
+const surfaceCopy = {
+  label: localized('Surface ownership', 'Surface 归属'),
+  hint: localized(
+    'Icon buttons can opt out of their own material when placed inside shared chrome.',
+    '图标按钮位于共享 Chrome 中时，可以关闭自身材质。',
+  ),
+} as const;
 </script>
 
 <template>
@@ -48,6 +55,15 @@ const copy = moduleCopy.iconButton;
   <StateRow :label="copy.states.loading.label" :locale="props.locale">
     <UiIconButton :label="localize(copy.controls.loading, props.locale)" loading>
       <LabIcon name="spark" />
+    </UiIconButton>
+  </StateRow>
+  <StateRow :label="surfaceCopy.label" :hint="surfaceCopy.hint" :locale="props.locale">
+    <UiIconButton
+      surface="none"
+      variant="ghost"
+      :label="localize(copy.controls.openDetails, props.locale)"
+    >
+      <LabIcon name="arrow-right" />
     </UiIconButton>
   </StateRow>
 </template>

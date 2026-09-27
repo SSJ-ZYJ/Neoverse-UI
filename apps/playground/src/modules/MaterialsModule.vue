@@ -9,7 +9,11 @@ const props = defineProps<LabModuleProps>();
 
 <template>
   <div class="grid gap-grid">
-    <section class="grid gap-3" aria-labelledby="materials-surface-title">
+    <section
+      id="materials-surface"
+      class="scroll-mt-24 grid gap-3"
+      aria-labelledby="materials-surface-title"
+    >
       <header class="grid gap-1">
         <h3 id="materials-surface-title" class="text-subtitle font-heading tracking-heading">
           {{ localize(moduleCopy.surface.label, props.locale) }}
@@ -21,7 +25,11 @@ const props = defineProps<LabModuleProps>();
       <SurfaceModule :locale="props.locale" />
     </section>
 
-    <section class="grid gap-3" aria-labelledby="materials-glass-title">
+    <section
+      id="materials-glass"
+      class="scroll-mt-24 grid gap-3"
+      aria-labelledby="materials-glass-title"
+    >
       <header class="grid gap-1">
         <h3 id="materials-glass-title" class="text-subtitle font-heading tracking-heading">
           {{ localize(moduleCopy.glass.label, props.locale) }}

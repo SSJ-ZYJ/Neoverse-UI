@@ -1,0 +1,18 @@
+@layer neoverse.tokens {
+  :root {
+    --neoverse-breadcrumb-gap: var(--neoverse-space-1);
+    --neoverse-breadcrumb-item-gap: var(--neoverse-space-1);
+    --neoverse-breadcrumb-font-size: var(--neoverse-typography-label-sm-size);
+    --neoverse-breadcrumb-line-height: var(--neoverse-typography-label-sm-line-height);
+    --neoverse-breadcrumb-font-weight: var(--neoverse-typography-label-sm-weight);
+    --neoverse-breadcrumb-link-foreground: var(--neoverse-color-text-secondary);
+    --neoverse-breadcrumb-link-hover-foreground: var(--neoverse-color-text-primary);
+    --neoverse-breadcrumb-current-foreground: var(--neoverse-color-text-primary);
+    --neoverse-breadcrumb-separator-foreground: var(--neoverse-color-text-muted);
+    --neoverse-breadcrumb-separator-size: var(--neoverse-typography-label-sm-size);
+    --neoverse-breadcrumb-focus-color: var(--neoverse-color-focus-ring);
+    --neoverse-breadcrumb-focus-width: var(--neoverse-focus-ring-width);
+    --neoverse-breadcrumb-focus-offset: var(--neoverse-focus-ring-offset);
+    --neoverse-breadcrumb-focus-radius: var(--neoverse-radius-control-inner);
+  }
+}

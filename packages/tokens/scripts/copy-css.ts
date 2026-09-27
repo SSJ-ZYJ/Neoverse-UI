@@ -14,6 +14,7 @@ const sourceFiles = [
   'components/button.css',
   'components/action.css',
   'components/navigation-item.css',
+  'components/breadcrumb.css',
   'components/control-surface.css',
   'components/status-indicator.css',
   'components/segmented-control.css',

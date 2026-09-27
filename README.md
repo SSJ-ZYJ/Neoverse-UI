@@ -16,7 +16,7 @@ Bun is the package manager, workspace manager, and script runner for this reposi
 | --- | --- | --- |
 | `@neoverse-ui/tokens` | Stable | CSS Variables and TypeScript token-name maps |
 | `@neoverse-ui/tailwind` | Stable | Tailwind v4 semantic theme and component CSS |
-| `@neoverse-ui/motion` | Stable | Framework-agnostic motion aliases, replayable recipes, and reduced-motion CSS |
+| `@neoverse-ui/motion` | Stable | Framework-agnostic motion scale, semantic roles, and reduced-motion CSS |
 | `@neoverse-ui/giscus-theme` | Consumer Validation | Standalone light/dark themes for the cross-origin Giscus widget |
 | `@neoverse-ui/glass-runtime` | Experimental | Shared WebGL Glass edge renderer with CSS fallback |
 | `@neoverse-ui/vue` | Consumer Validation | Vue 3 SFC components |
@@ -143,7 +143,7 @@ The Design Lab `density` module shows fine-pointer and coarse-pointer profiles s
 
 ## Motion and themes
 
-`@neoverse-ui/motion` exposes `duration-fast`, `duration-standard`, `duration-expressive`, `ease-standard`, and `ease-emphasized`, CSS Variable aliases for micro/state/spatial transitions, and reusable `fade`, `rise`, `scale`, and `emphasis` animation recipes. The Design Lab can replay every recipe directly. Reduced-motion rules remove spatial travel and disable non-essential recipe animation.
+`@neoverse-ui/motion` exposes the shared duration/easing scale and three semantic roles used by real components: `feedback`, `state`, and `spatial`. The old standalone entrance/emphasis recipe classes were removed because no consumer used them. Shared Button, Surface, Navigation, SegmentedControl, Scrollbar, and ControlSurface CSS consumes the role variables directly. Reduced-motion collapses durations and removes spatial distance while preserving state correctness.
 
 Set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root element. The Design Lab keeps separate light and dark visual baselines. The root `.light` and `.dark` classes remain supported when `data-theme` is absent.
 

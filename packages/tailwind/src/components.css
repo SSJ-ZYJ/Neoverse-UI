@@ -1,6 +1,7 @@
 @import './components/button.css';
 @import './components/action.css';
 @import './components/navigation-item.css';
+@import './components/breadcrumb.css';
 @import './components/control-surface.css';
 @import './components/surface.css';
 @import './components/status-indicator.css';
@@ -10,3 +11,4 @@
 @import './components/segmented-control.css';
 @import './components/skeleton.css';
 @import './components/scrollbar.css';
+@import './components/prose.css';

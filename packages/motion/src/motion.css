@@ -2,87 +2,12 @@
 
 @layer neoverse-motion {
   :root {
-    --neoverse-motion-micro-duration: var(--neoverse-motion-duration-fast);
-    --neoverse-motion-micro-easing: var(--neoverse-motion-easing-standard);
-    --neoverse-motion-micro-property: color, background-color, border-color, opacity, transform;
-
+    --neoverse-motion-feedback-duration: var(--neoverse-motion-duration-fast);
+    --neoverse-motion-feedback-easing: var(--neoverse-motion-easing-standard);
     --neoverse-motion-state-duration: var(--neoverse-motion-duration-standard);
     --neoverse-motion-state-easing: var(--neoverse-motion-easing-standard);
-    --neoverse-motion-state-property: opacity, visibility, color, background-color, border-color;
-
     --neoverse-motion-spatial-duration: var(--neoverse-motion-duration-expressive);
     --neoverse-motion-spatial-easing: var(--neoverse-motion-easing-emphasized);
-    --neoverse-motion-spatial-property: transform, opacity;
-
-    --neoverse-motion-enter-scale-from: 0.94;
-    --neoverse-motion-emphasis-scale: 1.035;
-  }
-
-  @keyframes neoverse-motion-fade-in {
-    from {
-      opacity: 0;
-    }
-
-    to {
-      opacity: 1;
-    }
-  }
-
-  @keyframes neoverse-motion-rise-in {
-    from {
-      opacity: 0;
-      transform: translateY(var(--neoverse-motion-spatial-distance));
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes neoverse-motion-scale-in {
-    from {
-      opacity: 0;
-      transform: scale(var(--neoverse-motion-enter-scale-from));
-    }
-
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  @keyframes neoverse-motion-emphasis {
-    0%,
-    100% {
-      transform: scale(1);
-    }
-
-    45% {
-      transform: scale(var(--neoverse-motion-emphasis-scale));
-    }
-  }
-
-  .neoverse-motion-fade-in {
-    animation: neoverse-motion-fade-in var(--neoverse-motion-duration-standard)
-      var(--neoverse-motion-easing-standard) both;
-  }
-
-  .neoverse-motion-rise-in {
-    animation: neoverse-motion-rise-in var(--neoverse-motion-duration-standard)
-      var(--neoverse-motion-easing-emphasized) both;
-  }
-
-  .neoverse-motion-scale-in {
-    transform-origin: center;
-    animation: neoverse-motion-scale-in var(--neoverse-motion-duration-expressive)
-      var(--neoverse-motion-easing-emphasized) both;
-  }
-
-  .neoverse-motion-emphasis {
-    transform-origin: center;
-    animation: neoverse-motion-emphasis var(--neoverse-motion-duration-expressive)
-      var(--neoverse-motion-easing-emphasized) both;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -90,16 +15,15 @@
       --neoverse-motion-duration-fast: 1ms;
       --neoverse-motion-duration-standard: 1ms;
       --neoverse-motion-duration-expressive: 1ms;
+      --neoverse-motion-feedback-duration: 1ms;
+      --neoverse-motion-state-duration: 1ms;
+      --neoverse-motion-spatial-duration: 1ms;
       --neoverse-motion-easing-standard: step-end;
       --neoverse-motion-easing-emphasized: step-end;
+      --neoverse-motion-feedback-easing: step-end;
+      --neoverse-motion-state-easing: step-end;
+      --neoverse-motion-spatial-easing: step-end;
       --neoverse-motion-spatial-distance: 0px;
-    }
-
-    .neoverse-motion-fade-in,
-    .neoverse-motion-rise-in,
-    .neoverse-motion-scale-in,
-    .neoverse-motion-emphasis {
-      animation: none;
     }
   }
 }

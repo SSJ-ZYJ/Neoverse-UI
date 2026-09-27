@@ -1,9 +1,4 @@
-import {
-  motionDurations,
-  motionEasings,
-  motionRecipes,
-  motionTransitions,
-} from '@neoverse-ui/motion';
+import { motionDurations, motionEasings, motionRoles } from '@neoverse-ui/motion';
 import { cssVariables } from '@neoverse-ui/tokens';
 import { type LocalizedText, localized, tokenCopy } from './playground-content';
 
@@ -282,7 +277,97 @@ export const semanticColorGroups: TokenGroup<ColorToken>[] = [
 
 const typography = cssVariables.typography;
 
+const typographyScaleToken = (
+  label: LocalizedText,
+  className: string,
+  family: string,
+  scale: Record<string, string>,
+): TypographyToken => ({
+  label,
+  className,
+  variables: [family, ...Object.values(scale)],
+});
+
 export const typographyTokens: TypographyToken[] = [
+  typographyScaleToken(
+    localized('Display Large', '展示 大'),
+    'text-display-lg font-display leading-display-lg tracking-display-lg',
+    typography.family.display,
+    typography.scale.display.lg,
+  ),
+  typographyScaleToken(
+    localized('Display Medium', '展示 中'),
+    'text-display-md font-display leading-display-md tracking-display-md',
+    typography.family.display,
+    typography.scale.display.md,
+  ),
+  typographyScaleToken(
+    localized('Title Large', '标题 大'),
+    'text-title-lg font-title leading-title-lg tracking-title-lg',
+    typography.family.title,
+    typography.scale.title.lg,
+  ),
+  typographyScaleToken(
+    localized('Title Medium', '标题 中'),
+    'text-title-md font-title leading-title-md tracking-title-md',
+    typography.family.title,
+    typography.scale.title.md,
+  ),
+  typographyScaleToken(
+    localized('Title Small', '标题 小'),
+    'text-title-sm font-title leading-title-sm tracking-title-sm',
+    typography.family.title,
+    typography.scale.title.sm,
+  ),
+  typographyScaleToken(
+    localized('Body Large', '正文 大'),
+    'text-body-lg font-body leading-body-lg tracking-body-lg',
+    typography.family.body,
+    typography.scale.body.lg,
+  ),
+  typographyScaleToken(
+    localized('Body Medium', '正文 中'),
+    'text-body-md font-body leading-body-md tracking-body-md',
+    typography.family.body,
+    typography.scale.body.md,
+  ),
+  typographyScaleToken(
+    localized('Body Small', '正文 小'),
+    'text-body-sm font-body leading-body-sm tracking-body-sm',
+    typography.family.body,
+    typography.scale.body.sm,
+  ),
+  typographyScaleToken(
+    localized('Label Large', '标签 大'),
+    'text-label-lg font-label leading-label-lg tracking-label-lg',
+    typography.family.label,
+    typography.scale.label.lg,
+  ),
+  typographyScaleToken(
+    localized('Label Medium', '标签 中'),
+    'text-label-md font-label leading-label-md tracking-label-md',
+    typography.family.label,
+    typography.scale.label.md,
+  ),
+  typographyScaleToken(
+    localized('Label Small', '标签 小'),
+    'text-label-sm font-label leading-label-sm tracking-label-sm',
+    typography.family.label,
+    typography.scale.label.sm,
+  ),
+  {
+    label: tokenCopy.typography.caption,
+    className: 'text-caption font-caption leading-caption tracking-caption',
+    variables: Object.values(typography.caption),
+  },
+  {
+    label: tokenCopy.typography.code,
+    className: 'text-code font-code leading-code tracking-code',
+    variables: Object.values(typography.code),
+  },
+];
+
+export const typographyCompatibilityTokens: TypographyToken[] = [
   {
     label: tokenCopy.typography.display,
     className: 'text-display font-display leading-display tracking-display',
@@ -308,16 +393,6 @@ export const typographyTokens: TypographyToken[] = [
     className: 'text-label font-label leading-label tracking-label',
     variables: Object.values(typography.label),
   },
-  {
-    label: tokenCopy.typography.caption,
-    className: 'text-caption font-caption leading-caption tracking-caption',
-    variables: Object.values(typography.caption),
-  },
-  {
-    label: tokenCopy.typography.code,
-    className: 'text-code font-code leading-code tracking-code',
-    variables: Object.values(typography.code),
-  },
 ];
 
 export const primitiveSpacingTokens: NamedToken[] = Object.entries(cssVariables.space).map(
@@ -339,6 +414,54 @@ export const semanticSpacingTokens = [
     label: tokenCopy.spacing.gridGap,
     className: 'gap-grid',
     variable: cssVariables.layout.gridGap,
+  },
+];
+
+export const layoutRoleTokens = [
+  {
+    label: localized('Page max width', '页面最大宽度'),
+    className: 'max-w-page',
+    variable: cssVariables.layout.page.maxWidth,
+  },
+  {
+    label: localized('Content max width', '内容最大宽度'),
+    className: 'max-w-content',
+    variable: cssVariables.layout.contentMaxWidth,
+  },
+  {
+    label: localized('Reading width', '阅读宽度'),
+    className: 'max-w-reading',
+    variable: cssVariables.layout.reading.width,
+  },
+  {
+    label: localized('Wide reading width', '宽阅读宽度'),
+    className: 'max-w-reading-wide',
+    variable: cssVariables.layout.reading.wideWidth,
+  },
+  {
+    label: localized('Page inline padding', '页面横向留白'),
+    className: 'px-page-inline',
+    variable: cssVariables.layout.page.paddingInline,
+  },
+  {
+    label: localized('Page block padding', '页面纵向留白'),
+    className: 'py-page-block',
+    variable: cssVariables.layout.page.paddingBlock,
+  },
+  {
+    label: localized('Sidebar width', '侧栏宽度'),
+    className: 'w-sidebar',
+    variable: cssVariables.layout.sidebar.width,
+  },
+  {
+    label: localized('Sidebar drawer width', '侧栏抽屉宽度'),
+    className: 'w-sidebar-drawer',
+    variable: cssVariables.layout.sidebar.drawerWidth,
+  },
+  {
+    label: localized('Header minimum height', '顶栏最小高度'),
+    className: 'min-h-header',
+    variable: cssVariables.layout.headerMinHeight,
   },
 ];
 
@@ -405,41 +528,10 @@ export const motionBaseGroups = [
   { label: tokenCopy.motion.easings, values: motionEasings },
 ] as const;
 
-export const motionSamples = [
-  {
-    id: 'fade',
-    label: localized('Fade in', '渐显'),
-    className: motionRecipes.fade.className,
-    duration: motionDurations[motionRecipes.fade.duration],
-    easing: motionEasings[motionRecipes.fade.easing],
-  },
-  {
-    id: 'rise',
-    label: localized('Rise in', '上浮进入'),
-    className: motionRecipes.rise.className,
-    duration: motionDurations[motionRecipes.rise.duration],
-    easing: motionEasings[motionRecipes.rise.easing],
-  },
-  {
-    id: 'scale',
-    label: localized('Scale in', '缩放进入'),
-    className: motionRecipes.scale.className,
-    duration: motionDurations[motionRecipes.scale.duration],
-    easing: motionEasings[motionRecipes.scale.easing],
-  },
-  {
-    id: 'emphasis',
-    label: localized('Emphasis', '强调反馈'),
-    className: motionRecipes.emphasis.className,
-    duration: motionDurations[motionRecipes.emphasis.duration],
-    easing: motionEasings[motionRecipes.emphasis.easing],
-  },
-] as const;
-
 export const motionVariableGroups = [
-  { label: tokenCopy.motion.micro, values: motionTransitions.micro },
-  { label: tokenCopy.motion.state, values: motionTransitions.state },
-  { label: tokenCopy.motion.spatial, values: motionTransitions.spatial },
+  { label: tokenCopy.motion.feedback, values: motionRoles.feedback },
+  { label: tokenCopy.motion.state, values: motionRoles.state },
+  { label: tokenCopy.motion.spatial, values: motionRoles.spatial },
 ];
 
 export const focusClasses =

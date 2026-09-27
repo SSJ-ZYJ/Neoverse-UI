@@ -303,6 +303,10 @@ test('exposes consumer-validated action and navigation component tokens', () => 
   expect(cssVariables.components.navigationItem.iconSize).toBe(
     '--neoverse-navigation-item-icon-size',
   );
+  expect(cssVariables.components.breadcrumb.currentForeground).toBe(
+    '--neoverse-breadcrumb-current-foreground',
+  );
+  expect(cssVariables.components.breadcrumb.focusRadius).toBe('--neoverse-breadcrumb-focus-radius');
   expect(cssVariables.components.controlSurface.itemGap).toBe(
     '--neoverse-control-surface-item-gap',
   );
@@ -350,6 +354,7 @@ test('keeps semantic source generic and assigns component token ownership', asyn
     ['components/button.css', '--neoverse-control-primary-background'],
     ['components/action.css', '--neoverse-action-height-md'],
     ['components/navigation-item.css', '--neoverse-navigation-item-active-background'],
+    ['components/breadcrumb.css', '--neoverse-breadcrumb-link-foreground'],
     ['components/control-surface.css', '--neoverse-control-surface-padding'],
     ['components/status-indicator.css', '--neoverse-status-indicator-dot-size-sm'],
     ['components/segmented-control.css', '--neoverse-control-segmented-background-color'],
@@ -505,6 +510,7 @@ test('keeps dark elevated cards neutral and softly edged', async () => {
     ],
     [/--neoverse-material-tint-elevated:\s*var\(--neoverse-color-surface-glass\);/g, 1],
     [/--neoverse-material-transparency-elevated:\s*44%;/g, 1],
+    [/--neoverse-material-transparency-card:\s*56%;/g, 1],
     [/--neoverse-material-edge-refraction-opacity-elevated:\s*0\.24;/g, 1],
     [/--neoverse-material-refraction-gradient-elevated:\s*linear-gradient\(\s*125deg,/g, 1],
   ];
@@ -888,7 +894,59 @@ test('exposes the shared geometry and typography contracts', () => {
   expect(cssVariables.radius['2xl']).toBe('--neoverse-radius-2xl');
   expect(cssVariables.shadow.inset).toBe('--neoverse-shadow-inset');
   expect(cssVariables.font.family.mono).toBe('--neoverse-font-family-mono');
+  expect(cssVariables.typography.display.fontFamily).toBe(
+    '--neoverse-typography-display-font-family',
+  );
+  expect(cssVariables.typography.body.fontFamily).toBe('--neoverse-typography-body-font-family');
+  expect(cssVariables.typography.code.fontFamily).toBe('--neoverse-typography-code-font-family');
   expect(cssVariables.typography.body.lineHeight).toBe('--neoverse-typography-body-line-height');
+});
+
+test('keeps semantic typography families overrideable by role', async () => {
+  const typographyCss = await readTokenCss('typography.css');
+
+  for (const role of ['display', 'title', 'body', 'label', 'caption']) {
+    expect(typographyCss).toContain(
+      `--neoverse-typography-${role}-font-family: var(--neoverse-font-family-sans);`,
+    );
+  }
+  expect(typographyCss).toContain(
+    '--neoverse-typography-code-font-family: var(--neoverse-font-family-code);',
+  );
+  expect(typographyCss).toContain(
+    '--neoverse-typography-heading-font-family: var(--neoverse-typography-display-font-family);',
+  );
+  expect(typographyCss).toContain(
+    '--neoverse-typography-subtitle-font-family: var(--neoverse-typography-title-font-family);',
+  );
+});
+
+test('exposes the semantic type scale while preserving compatibility aliases', async () => {
+  const typographyCss = await readTokenCss('typography.css');
+
+  expect(cssVariables.typography.family.title).toBe('--neoverse-typography-title-font-family');
+  expect(cssVariables.typography.scale.display.lg.size).toBe(
+    '--neoverse-typography-display-lg-size',
+  );
+  expect(cssVariables.typography.scale.title.md.size).toBe('--neoverse-typography-title-md-size');
+  expect(cssVariables.typography.scale.body.sm.size).toBe('--neoverse-typography-body-sm-size');
+  expect(cssVariables.typography.scale.label.lg.size).toBe('--neoverse-typography-label-lg-size');
+
+  expect(typographyCss).toContain(
+    '--neoverse-typography-display-size: var(--neoverse-typography-display-lg-size);',
+  );
+  expect(typographyCss).toContain(
+    '--neoverse-typography-heading-size: var(--neoverse-typography-display-md-size);',
+  );
+  expect(typographyCss).toContain(
+    '--neoverse-typography-subtitle-size: var(--neoverse-typography-title-lg-size);',
+  );
+  expect(typographyCss).toContain(
+    '--neoverse-typography-body-size: var(--neoverse-typography-body-md-size);',
+  );
+  expect(typographyCss).toContain(
+    '--neoverse-typography-label-size: var(--neoverse-typography-label-md-size);',
+  );
 });
 
 test('exposes semantic geometry and focus aliases', () => {
@@ -1103,6 +1161,47 @@ test('exposes Motion duration, easing, and spatial tokens', () => {
   });
   expect(cssVariables.motion.easing.standard).toBe('--neoverse-motion-easing-standard');
   expect(cssVariables.motion.spatialDistance).toBe('--neoverse-motion-spatial-distance');
+});
+
+test('exposes the optional presentation root-size layout token', async () => {
+  const layoutCss = await readTokenCss('layout.css');
+
+  expect(cssVariables.layout.presentationRootSize).toBe('--neoverse-layout-presentation-root-size');
+  expect(layoutCss).toContain('--neoverse-layout-presentation-root-size: clamp(');
+  expect(layoutCss).toContain('calc(0.75rem + 0.3125vw)');
+});
+
+test('exposes semantic page layout roles above the primitive container scale', async () => {
+  const layoutCss = await readTokenCss('layout.css');
+
+  expect(cssVariables.layout.page).toEqual({
+    maxWidth: '--neoverse-layout-page-max-width',
+    paddingInline: '--neoverse-layout-page-padding-inline',
+    paddingBlock: '--neoverse-layout-page-padding-block',
+  });
+  expect(cssVariables.layout.contentMaxWidth).toBe('--neoverse-layout-content-max-width');
+  expect(cssVariables.layout.reading).toEqual({
+    width: '--neoverse-layout-reading-width',
+    wideWidth: '--neoverse-layout-reading-wide-width',
+  });
+  expect(cssVariables.layout.sidebar).toEqual({
+    width: '--neoverse-layout-sidebar-width',
+    drawerWidth: '--neoverse-layout-sidebar-drawer-width',
+  });
+  expect(cssVariables.layout.headerMinHeight).toBe('--neoverse-layout-header-min-height');
+
+  expect(layoutCss).toContain(
+    '--neoverse-layout-page-max-width: var(--neoverse-layout-container-2xl);',
+  );
+  expect(layoutCss).toContain(
+    '--neoverse-layout-content-max-width: var(--neoverse-layout-container-xl);',
+  );
+  expect(layoutCss).toContain(
+    '--neoverse-layout-reading-width: var(--neoverse-layout-container-md);',
+  );
+  expect(layoutCss).toContain(
+    '--neoverse-layout-reading-wide-width: var(--neoverse-layout-container-lg);',
+  );
 });
 
 test('keeps layout breakpoints available as numeric adapter constants', () => {

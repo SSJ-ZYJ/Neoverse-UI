@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => ({
     // Compile the workspace source so the Vite watcher does not depend on a
     // previously generated packages/vue/dist entrypoint.
     alias: {
+      '@neoverse-ui/react': fileURLToPath(
+        new URL('../../packages/react/src/index.tsx', import.meta.url),
+      ),
       '@neoverse-ui/vue': fileURLToPath(
         new URL('../../packages/vue/src/index.ts', import.meta.url),
       ),
@@ -19,9 +22,13 @@ export default defineConfig(({ mode }) => ({
     // the next build. Production builds still start from a clean asset directory.
     emptyOutDir: mode !== 'development',
     rollupOptions: {
-      input: fileURLToPath(new URL('./src/main.ts', import.meta.url)),
+      input: {
+        playground: fileURLToPath(new URL('./src/main.ts', import.meta.url)),
+        'react-fixture': fileURLToPath(new URL('./src/react-fixture.tsx', import.meta.url)),
+      },
       output: {
-        entryFileNames: 'playground.js',
+        entryFileNames: '[name].js',
+        chunkFileNames: 'chunks/[name]-[hash].js',
         assetFileNames: '[name][extname]',
       },
     },

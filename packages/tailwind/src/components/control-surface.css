@@ -96,9 +96,9 @@
 
   .ui-control-surface__indicator[data-ready='true'] {
     transition:
-      left var(--neoverse-motion-duration-expressive) var(--neoverse-motion-easing-emphasized),
-      top var(--neoverse-motion-duration-expressive) var(--neoverse-motion-easing-emphasized),
-      width var(--neoverse-motion-duration-expressive) var(--neoverse-motion-easing-emphasized);
+      left var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
+      top var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
+      width var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
   }
 
   @media (prefers-reduced-motion: reduce) {

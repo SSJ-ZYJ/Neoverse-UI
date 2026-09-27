@@ -5,9 +5,21 @@
     --neoverse-layout-container-lg: 64rem;
     --neoverse-layout-container-xl: 80rem;
     --neoverse-layout-container-2xl: 88rem;
+
+    --neoverse-layout-page-max-width: var(--neoverse-layout-container-2xl);
+    --neoverse-layout-content-max-width: var(--neoverse-layout-container-xl);
+    --neoverse-layout-reading-width: var(--neoverse-layout-container-md);
+    --neoverse-layout-reading-wide-width: var(--neoverse-layout-container-lg);
+    --neoverse-layout-sidebar-width: 13rem;
+    --neoverse-layout-sidebar-drawer-width: 18rem;
+    --neoverse-layout-header-min-height: 3.5rem;
+
     --neoverse-layout-gutter-inline: clamp(1rem, 4vw, 4rem);
     --neoverse-layout-gutter-block: clamp(1.25rem, 3.5vh, 3rem);
+    --neoverse-layout-page-padding-inline: var(--neoverse-layout-gutter-inline);
+    --neoverse-layout-page-padding-block: var(--neoverse-layout-gutter-block);
     --neoverse-layout-grid-gap: var(--neoverse-space-4);
+    --neoverse-layout-presentation-root-size: clamp(1rem, calc(0.75rem + 0.3125vw), 1.25rem);
     --neoverse-layout-layer-base: 0;
     --neoverse-layout-layer-raised: 10;
     --neoverse-layout-layer-sticky: 20;

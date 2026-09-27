@@ -59,6 +59,7 @@ The foundation provides semantic utilities such as `bg-surface-raised`, `text-pr
 | `.` / `./index.css` | Compiled zero-config consumer bundle: Tailwind utilities over the Vue/React `src` trees + the theme |
 | `./theme.css` | Semantic theme + Material utilities (source of the compiled bundle) |
 | `./components.css` | Component selector facade flattened from `src/components/*.css` |
+| `./prose.css` | Standalone `.neoverse-prose` content semantics; reading width remains a separate layout role |
 
 The playground-only compiled bundle is emitted as `dist/playground.css` and is not exported; the package does not own application source paths — the compiled entry exists only so consumers without their own Tailwind build still receive a complete utility set.
 
@@ -112,7 +113,7 @@ directional edge field without double-painting it with the Canvas pass.
 
 ## Motion
 
-`@neoverse-ui/motion` is framework-agnostic. It owns the CSS entry and TypeScript names for duration, easing, transition-property, and spatial values. It does not own DOM animation or framework runtime code. Reduced motion removes spatial distance and collapses durations so component transitions remain predictable.
+`@neoverse-ui/motion` is framework-agnostic. It owns the base duration/easing scale plus `feedback`, `state`, and `spatial` semantic roles. Shared component CSS consumes those roles directly; the package does not ship generic entrance-animation recipes or framework runtime animation code. Reduced motion removes spatial distance and collapses durations so component state remains predictable.
 
 ## Density and touch strategy
 

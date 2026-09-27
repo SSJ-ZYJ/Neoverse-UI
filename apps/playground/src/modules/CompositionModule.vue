@@ -13,6 +13,7 @@ import { computed, ref } from 'vue';
 import LabIcon from '../LabIcon.vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, moduleCopy } from '../playground-content';
+import ReadingComposition from './ReadingComposition.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
@@ -164,7 +165,7 @@ const navigationItems = computed(() => [
           </p>
         </header>
 
-        <UiCard class="grid gap-3 bg-surface-raised shadow-card">
+        <UiCard class="grid gap-3">
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="min-w-0">
               <p class="text-caption text-accent-primary">
@@ -512,6 +513,7 @@ const navigationItems = computed(() => [
           </div>
         </article>
       </section>
+      <ReadingComposition :locale="props.locale" />
     </div>
   </MaterialBackdrop>
 </template>

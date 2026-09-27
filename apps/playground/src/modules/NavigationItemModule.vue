@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { UiNavigationItem } from '@neoverse-ui/vue';
 import LabIcon from '../LabIcon.vue';
-import { localize, moduleCopy } from '../playground-content';
+import { localize, localized, moduleCopy } from '../playground-content';
 import StateRow from '../StateRow.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.navigationItem;
+const contractCopy = {
+  label: localized('Layout contract', '布局契约'),
+  hint: localized(
+    'Stretch, start indicators, and parent-owned surfaces are independent navigation concerns.',
+    '撑满布局、起始指示器与父级 Surface 归属是相互独立的导航能力。',
+  ),
+} as const;
 </script>
 
 <template>
@@ -78,5 +85,29 @@ const copy = moduleCopy.navigationItem;
     >
       <template #icon><LabIcon name="folder" /></template>
     </UiNavigationItem>
+  </StateRow>
+
+  <StateRow :label="contractCopy.label" :hint="contractCopy.hint" :locale="props.locale">
+    <div class="grid w-full gap-2 md:grid-cols-2">
+      <UiNavigationItem
+        href="#controls-navigation-item"
+        :label="localize(copy.controls.home, props.locale)"
+        active
+        stretch
+        surface="none"
+        indicator-placement="start"
+      >
+        <template #icon><LabIcon name="home" /></template>
+      </UiNavigationItem>
+      <UiNavigationItem
+        href="#controls-navigation-item"
+        :label="localize(copy.controls.projects, props.locale)"
+        stretch
+        surface="none"
+        indicator-placement="start"
+      >
+        <template #icon><LabIcon name="folder" /></template>
+      </UiNavigationItem>
+    </div>
   </StateRow>
 </template>

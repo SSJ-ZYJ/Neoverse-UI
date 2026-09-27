@@ -1,8 +1,9 @@
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { nextTick } from 'vue';
+import { h, nextTick } from 'vue';
 import UiAction from './UiAction.vue';
 import UiBadge from './UiBadge.vue';
+import UiBreadcrumb from './UiBreadcrumb.vue';
 import UiButton from './UiButton.vue';
 import UiCard from './UiCard.vue';
 import UiControlSurface from './UiControlSurface.vue';
@@ -270,6 +271,74 @@ describe('UiNavigationItem', () => {
   });
 });
 
+describe('UiBreadcrumb', () => {
+  const breadcrumbItems = [
+    { label: 'Home', href: '/' },
+    { label: 'Docs', href: '/docs' },
+    { label: 'Navigation' },
+  ] as const;
+
+  it('renders native breadcrumb semantics and marks only the resolved current item', () => {
+    const wrapper = mount(UiBreadcrumb, {
+      props: {
+        items: breadcrumbItems,
+        ariaLabel: 'Documentation breadcrumb',
+      },
+    });
+
+    const nav = wrapper.get('nav');
+    expect(nav.attributes('aria-label')).toBe('Documentation breadcrumb');
+    expect(wrapper.findAll('ol > li')).toHaveLength(3);
+    expect(wrapper.findAll('.ui-breadcrumb__separator')).toHaveLength(2);
+    expect(
+      wrapper
+        .findAll('.ui-breadcrumb__separator')
+        .every((node) => node.attributes('aria-hidden') === 'true'),
+    ).toBe(true);
+    expect(wrapper.findAll('a').map((node) => node.attributes('href'))).toEqual(['/', '/docs']);
+
+    const current = wrapper.get('[aria-current="page"]');
+    expect(current.text()).toBe('Navigation');
+    expect(current.classes()).toContain('ui-breadcrumb__current');
+  });
+
+  it('uses an explicit current item instead of creating a second current destination', () => {
+    const wrapper = mount(UiBreadcrumb, {
+      props: {
+        items: [
+          { label: 'Home', href: '/' },
+          { label: 'Docs', current: true },
+          { label: 'Navigation', href: '/docs/navigation' },
+        ],
+      },
+    });
+
+    const current = wrapper.findAll('[aria-current="page"]');
+    expect(current).toHaveLength(1);
+    expect(current[0]?.text()).toBe('Docs');
+    expect(wrapper.get('a[href="/docs/navigation"]').text()).toBe('Navigation');
+  });
+
+  it('exposes scoped item and separator slots for router-aware consumers', () => {
+    const wrapper = mount(UiBreadcrumb, {
+      props: { items: breadcrumbItems },
+      slots: {
+        item: ({ item, current }: { item: { label: string }; current: boolean }) =>
+          h(
+            'span',
+            { 'data-custom-item': item.label, 'data-current': String(current) },
+            item.label,
+          ),
+        separator: ({ index }: { index: number }) => h('span', { 'data-separator': index }, '/'),
+      },
+    });
+
+    expect(wrapper.findAll('[data-custom-item]')).toHaveLength(3);
+    expect(wrapper.find('[data-custom-item="Navigation"]').attributes('data-current')).toBe('true');
+    expect(wrapper.findAll('[data-separator]')).toHaveLength(2);
+  });
+});
+
 describe('UiControlSurface', () => {
   it('forwards container semantics and adds separation only for trailing controls', () => {
     const grouped = mount(UiControlSurface, {
@@ -473,10 +542,21 @@ describe('display components', () => {
 
     const card = mount(UiCard, { attrs: { class: 'max-w-container-sm' } });
     expect(card.classes()).toEqual(
-      expect.arrayContaining(['ui-card', 'rounded-card', 'p-4', 'max-w-container-sm']),
+      expect.arrayContaining([
+        'ui-card',
+        'rounded-card',
+        'p-4',
+        'material-glass-card',
+        'max-w-container-sm',
+      ]),
     );
-    expect(card.classes()).not.toContain('material-glass-elevated');
-    expect(card.classes().some((className) => className.startsWith('material-glass-'))).toBe(false);
+    expect(card.attributes('data-surface')).toBe('glass-card');
+
+    const bareCard = mount(UiCard, { props: { surface: 'none' } });
+    expect(bareCard.attributes('data-surface')).toBe('none');
+    expect(bareCard.classes().some((className) => className.startsWith('material-glass-'))).toBe(
+      false,
+    );
 
     const standardSurfaceCard = mount(UiCard, {
       props: { surface: 'elevated' },

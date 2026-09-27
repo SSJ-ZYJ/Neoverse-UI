@@ -12,7 +12,8 @@ const requestedPort = Number.parseInt(process.env.PORT ?? '3000', 10);
 const liveReload = process.env.LIVE_RELOAD === '1';
 const stylesheetPath = new URL('../../../packages/tailwind/dist/playground.css', import.meta.url);
 const clientBundlePath = new URL('../dist/assets/playground.js', import.meta.url);
-const scopedCssPath = new URL('../dist/assets/main.css', import.meta.url);
+const reactFixtureBundlePath = new URL('../dist/assets/react-fixture.js', import.meta.url);
+const scopedCssPath = new URL('../dist/assets/playground.css', import.meta.url);
 const materialBackgroundLightPath = new URL(
   '../dist/assets/material-background-light.png',
   import.meta.url,
@@ -126,6 +127,23 @@ const renderDocument = ({ theme, locale }: RenderOptions): string => {
 </html>`;
 };
 
+const renderReactFixtureDocument = (locale: Locale): string =>
+  [
+    '<!doctype html>',
+    `<html lang="${locale === 'zh' ? 'zh-CN' : 'en'}" data-theme="system">`,
+    '<head>',
+    '<meta charset="UTF-8" />',
+    '<meta name="viewport" content="width=device-width, initial-scale=1" />',
+    '<title>Neoverse UI React Fixture</title>',
+    '<link rel="stylesheet" href="/styles.css" />',
+    '</head>',
+    '<body class="min-h-screen bg-surface-canvas font-sans text-primary antialiased">',
+    '<div id="react-root"></div>',
+    '<script type="module" src="/assets/react-fixture.js"></script>',
+    '</body>',
+    '</html>',
+  ].join('');
+
 const missingAssetResponse = (asset: string, locale: Locale): Response =>
   new Response(formatLocalized(appCopy.server.assetsUnavailable, locale, { asset }), {
     status: 503,
@@ -152,12 +170,36 @@ const ensureDesignLabAssets = async (locale: Locale): Promise<Response | undefin
   return undefined;
 };
 
+const ensureReactFixtureAssets = async (locale: Locale): Promise<Response | undefined> => {
+  const stylesheet = Bun.file(stylesheetPath);
+  const reactFixtureBundle = Bun.file(reactFixtureBundlePath);
+  if (!(await stylesheet.exists()) || !(await reactFixtureBundle.exists())) {
+    return missingAssetResponse('React fixture assets', locale);
+  }
+  return undefined;
+};
+
+const assetContentType = (pathname: string): string => {
+  if (pathname.endsWith('.js')) return 'text/javascript; charset=utf-8';
+  if (pathname.endsWith('.css')) return 'text/css; charset=utf-8';
+  if (pathname.endsWith('.svg')) return 'image/svg+xml';
+  if (pathname.endsWith('.png')) return 'image/png';
+  return 'application/octet-stream';
+};
+
 const server = Bun.serve({
   port,
   async fetch(request) {
     const url = new URL(request.url);
     const queryLocale = url.searchParams.get('lang');
     const locale: Locale = isLocale(queryLocale) ? queryLocale : 'en';
+
+    if (url.pathname === '/__playground-health') {
+      return Response.json(
+        { service: 'neoverse-ui-playground', status: 'ok' },
+        { headers: { 'cache-control': 'no-store' } },
+      );
+    }
 
     if (url.pathname === '/styles.css') {
       const stylesheet = Bun.file(stylesheetPath);
@@ -231,16 +273,24 @@ const server = Bun.serve({
       );
     }
 
-    if (url.pathname === '/assets/playground.js') {
-      const clientBundle = Bun.file(clientBundlePath);
-      if (!(await clientBundle.exists())) {
-        return missingAssetResponse('/assets/playground.js', locale);
+    if (url.pathname.startsWith('/assets/')) {
+      const relativePath = url.pathname.slice('/assets/'.length);
+      if (
+        relativePath.length === 0 ||
+        relativePath.includes('..') ||
+        !/^[A-Za-z0-9._/-]+$/.test(relativePath)
+      ) {
+        return new Response(localize(appCopy.server.notFound, locale), { status: 404 });
+      }
+      const asset = Bun.file(new URL(`../dist/assets/${relativePath}`, import.meta.url));
+      if (!(await asset.exists())) {
+        return missingAssetResponse(url.pathname, locale);
       }
 
-      return new Response(clientBundle, {
+      return new Response(asset, {
         headers: {
           'cache-control': 'no-cache',
-          'content-type': 'text/javascript; charset=utf-8',
+          'content-type': assetContentType(relativePath),
         },
       });
     }
@@ -283,6 +333,19 @@ const server = Bun.serve({
       }
 
       return new Response(renderDocument({ theme, locale }), {
+        headers: {
+          'content-type': 'text/html; charset=utf-8',
+        },
+      });
+    }
+
+    if (url.pathname === '/react-fixture') {
+      const assetError = await ensureReactFixtureAssets(locale);
+      if (assetError !== undefined) {
+        return assetError;
+      }
+
+      return new Response(renderReactFixtureDocument(locale), {
         headers: {
           'content-type': 'text/html; charset=utf-8',
         },

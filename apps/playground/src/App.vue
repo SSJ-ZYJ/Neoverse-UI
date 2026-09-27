@@ -1,11 +1,34 @@
 <script setup lang="ts">
-import { UiButton, UiIconButton, UiNavigationItem, UiSegmentedControl } from '@neoverse-ui/vue';
+import {
+  UiButton,
+  UiIconButton,
+  UiNavigationItem,
+  UiSegmentedControl,
+  UiSurface,
+} from '@neoverse-ui/vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import brandIconUrl from './assets/neoverse-ui-icon.svg';
 import LabBoard from './LabBoard.vue';
 import LabIcon from './LabIcon.vue';
-import { labModules, type ModuleId, moduleGroups } from './lab-modules';
-import { appCopy, formatLocalized, isLocale, type Locale, localize } from './playground-content';
+import {
+  isModuleId,
+  labModules,
+  labSpecimens,
+  type ModuleId,
+  moduleGroups,
+  resolveLabHash,
+  type SpecimenId,
+  type SpecimenKind,
+  specimenKinds,
+} from './lab-modules';
+import {
+  appCopy,
+  formatLocalized,
+  isLocale,
+  type Locale,
+  localize,
+  localized,
+} from './playground-content';
 import type { FrameTheme, ThemeMode } from './playground-types';
 import { applyThemeMode, observeSystemTheme } from './theme-state';
 
@@ -26,29 +49,6 @@ function isFrameTheme(value: unknown): value is FrameTheme {
 
 function isThemeMode(value: unknown): value is ThemeMode {
   return value === 'system' || isFrameTheme(value);
-}
-
-function isModuleId(value: unknown): value is ModuleId {
-  return typeof value === 'string' && labModules.some((module) => module.id === value);
-}
-
-const legacyModuleRedirects: Readonly<Record<string, ModuleId>> = {
-  spacing: 'layout-shape',
-  radius: 'layout-shape',
-  border: 'layout-shape',
-  surface: 'materials',
-  glass: 'materials',
-  badge: 'status-feedback',
-  skeleton: 'status-feedback',
-  'status-indicator': 'status-feedback',
-};
-
-function resolveModuleId(value: string): ModuleId | null {
-  if (isModuleId(value)) {
-    return value;
-  }
-
-  return legacyModuleRedirects[value] ?? null;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -89,14 +89,14 @@ function readHash(): string {
   }
 }
 
-function locationHref(moduleId: ModuleId | null): string {
+function locationHref(hash: string | null): string {
   const url = new URL(window.location.href);
-  url.hash = moduleId ?? '';
+  url.hash = hash ?? '';
   return `${url.pathname}${url.search}${url.hash}`;
 }
 
-function replaceLocation(moduleId: ModuleId | null): void {
-  window.history.replaceState(null, '', locationHref(moduleId));
+function replaceLocation(hash: string | null): void {
+  window.history.replaceState(null, '', locationHref(hash));
 }
 
 function detectBrowserLocale(): Locale {
@@ -114,29 +114,34 @@ const locale = ref<Locale>(
   isLocale(queryLocale) ? queryLocale : (savedState.locale ?? detectBrowserLocale()),
 );
 
-function initialModule(): ModuleId | null {
+function initialRoute(): { moduleId: ModuleId | null; specimenId: SpecimenId | null } {
   const hash = readHash();
   if (hash.length === 0) {
     /* A fresh visit (no hash) always opens the overview; only an explicit
        #module hash reopens a module. Persisted module ids are still written
        for deep-link sharing but are deliberately not restored on reload. */
     replaceLocation(null);
-    return null;
+    return { moduleId: null, specimenId: null };
   }
 
-  const moduleId = resolveModuleId(hash);
-  if (moduleId !== null) {
-    if (moduleId !== hash) {
-      replaceLocation(moduleId);
+  const resolved = resolveLabHash(hash);
+  if (resolved !== null) {
+    if (resolved.canonicalHash !== hash) {
+      replaceLocation(resolved.canonicalHash);
     }
-    return moduleId;
+    return {
+      moduleId: resolved.moduleId,
+      specimenId: resolved.specimenId ?? null,
+    };
   }
 
   replaceLocation(null);
-  return null;
+  return { moduleId: null, specimenId: null };
 }
 
-const currentModuleId = ref<ModuleId | null>(isFrame ? null : initialModule());
+const initial = isFrame ? { moduleId: null, specimenId: null } : initialRoute();
+const currentModuleId = ref<ModuleId | null>(initial.moduleId);
+const pendingSpecimenId = ref<SpecimenId | null>(initial.specimenId);
 const isOverview = computed(() => currentModuleId.value === null);
 const sectionsByGroup = moduleGroups.map((group) => ({
   ...group,
@@ -159,13 +164,71 @@ const selectedGroup = computed(() => {
 
   return sectionsByGroup.find((group) => group.id === module.groupId) ?? null;
 });
+const catalogueQuery = ref('');
+const catalogueKind = ref<'all' | SpecimenKind>('all');
+const catalogueCopy = {
+  title: localized('Component & pattern catalogue', '组件与组合目录'),
+  description: localized(
+    'Search by component API, specimen name, or capability tag, then jump directly to a focused fixture.',
+    '按组件 API、示例名称或能力标签检索，并直接定位到对应校验场景。',
+  ),
+  searchLabel: localized('Search specimens', '搜索示例'),
+  searchPlaceholder: localized(
+    'Search UiButton, glass, reading…',
+    '搜索 UiButton、glass、reading…',
+  ),
+  filterLabel: localized('Specimen kind', '示例类型'),
+  summary: localized(
+    '{modules} modules · {specimens} specimens',
+    '{modules} 个模块 · {specimens} 个示例',
+  ),
+  noResults: localized('No specimens match the current filter.', '当前筛选条件下没有匹配的示例。'),
+  kinds: {
+    all: localized('All', '全部'),
+    component: localized('Components', '组件'),
+    composition: localized('Compositions', '组合'),
+    foundation: localized('Foundations', '基础'),
+    compatibility: localized('Compatibility', '兼容'),
+  },
+} as const;
+const catalogueKinds = ['all', ...specimenKinds] as const;
+const filteredSpecimens = computed(() => {
+  const query = catalogueQuery.value.trim().toLowerCase();
+  return labSpecimens.filter((specimen) => {
+    if (catalogueKind.value !== 'all' && specimen.kind !== catalogueKind.value) {
+      return false;
+    }
+    if (query.length === 0) {
+      return true;
+    }
+    const searchable = [
+      localize(specimen.label, locale.value),
+      specimen.label.en,
+      specimen.label.zh,
+      ...specimen.apiNames,
+      ...specimen.tags,
+    ]
+      .join(' ')
+      .toLowerCase();
+    return searchable.includes(query);
+  });
+});
+const moduleLabelById = (moduleId: ModuleId): string =>
+  localize(
+    labModules.find((module) => module.id === moduleId)?.label ?? localized(moduleId, moduleId),
+    locale.value,
+  );
 
 const shellElement = ref<HTMLElement | null>(null);
 const workspaceElement = ref<HTMLElement | null>(null);
 const overviewHeading = ref<HTMLElement | null>(null);
 const moduleHeading = ref<HTMLElement | null>(null);
+const navElement = ref<HTMLElement | null>(null);
 const isNavOpen = ref(false);
+const isDesktopLayout = ref(window.matchMedia('(min-width: 1024px)').matches);
 let stopSystemThemeObservation: (() => void) | undefined;
+let desktopLayoutQuery: MediaQueryList | undefined;
+let desktopLayoutListener: ((event: MediaQueryListEvent) => void) | undefined;
 const themeOptions = computed(
   () =>
     [
@@ -232,7 +295,27 @@ function resetScrollPositions(): void {
   workspaceElement.value?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
 }
 
-function focusCurrentView(): void {
+function focusSpecimen(specimenId: SpecimenId): void {
+  void nextTick(() => {
+    window.requestAnimationFrame(() => {
+      const target = document.getElementById(specimenId);
+      if (target === null) {
+        return;
+      }
+      target.scrollIntoView({ block: 'start', inline: 'nearest', behavior: 'auto' });
+      if (!target.hasAttribute('tabindex')) {
+        target.setAttribute('tabindex', '-1');
+      }
+      target.focus({ preventScroll: true });
+    });
+  });
+}
+
+function focusCurrentView(specimenId: SpecimenId | null = null): void {
+  if (specimenId !== null) {
+    focusSpecimen(specimenId);
+    return;
+  }
   void nextTick(() => {
     resetScrollPositions();
     const heading = isOverview.value ? overviewHeading.value : moduleHeading.value;
@@ -245,6 +328,7 @@ function focusCurrentView(): void {
 function selectModule(moduleId: ModuleId): void {
   const changed = currentModuleId.value !== moduleId;
   currentModuleId.value = moduleId;
+  pendingSpecimenId.value = null;
   persistState({ module: moduleId });
   if (changed) {
     window.history.pushState(null, '', locationHref(moduleId));
@@ -257,6 +341,7 @@ function selectModule(moduleId: ModuleId): void {
 function showOverview(): void {
   const changed = currentModuleId.value !== null;
   currentModuleId.value = null;
+  pendingSpecimenId.value = null;
   if (changed) {
     window.history.pushState(null, '', locationHref(null));
   }
@@ -269,13 +354,15 @@ function handleLocationChange(): void {
   const hash = readHash();
   if (hash.length === 0) {
     currentModuleId.value = null;
+    pendingSpecimenId.value = null;
   } else {
-    const moduleId = resolveModuleId(hash);
-    if (moduleId !== null) {
-      currentModuleId.value = moduleId;
-      persistState({ module: moduleId });
-      if (moduleId !== hash) {
-        replaceLocation(moduleId);
+    const resolved = resolveLabHash(hash);
+    if (resolved !== null) {
+      currentModuleId.value = resolved.moduleId;
+      pendingSpecimenId.value = resolved.specimenId ?? null;
+      persistState({ module: resolved.moduleId });
+      if (resolved.canonicalHash !== hash) {
+        replaceLocation(resolved.canonicalHash);
       }
     } else if (currentModuleId.value !== null) {
       // Direct-rendered modules own their in-page anchors. Do not reset scroll
@@ -288,11 +375,32 @@ function handleLocationChange(): void {
   }
 
   isNavOpen.value = false;
-  focusCurrentView();
+  focusCurrentView(pendingSpecimenId.value);
 }
 
-function closeNav(): void {
+function openNav(): void {
+  isNavOpen.value = true;
+  void nextTick(() => {
+    navElement.value
+      ?.querySelector<HTMLElement>('button, a[href], [tabindex]:not([tabindex="-1"])')
+      ?.focus();
+  });
+}
+
+function closeNav(restoreFocus = true): void {
+  const wasOpen = isNavOpen.value;
   isNavOpen.value = false;
+  if (wasOpen && restoreFocus) {
+    void nextTick(() =>
+      shellElement.value?.querySelector<HTMLElement>('[data-playground-nav-trigger]')?.focus(),
+    );
+  }
+}
+
+function handleEscape(): void {
+  if (isNavOpen.value && !isDesktopLayout.value) {
+    closeNav(true);
+  }
 }
 
 /* Modified clicks (Cmd/Ctrl/Shift + click, middle click) keep the browser's
@@ -320,9 +428,22 @@ onMounted(() => {
     return;
   }
 
+  desktopLayoutQuery = window.matchMedia('(min-width: 1024px)');
+  const syncDesktopLayout = (event: MediaQueryListEvent | MediaQueryList): void => {
+    isDesktopLayout.value = event.matches;
+    if (event.matches) {
+      isNavOpen.value = false;
+    }
+  };
+  syncDesktopLayout(desktopLayoutQuery);
+  desktopLayoutListener = (event) => syncDesktopLayout(event);
+  desktopLayoutQuery.addEventListener('change', desktopLayoutListener);
   stopSystemThemeObservation = observeSystemTheme();
   window.addEventListener('popstate', handleLocationChange);
   window.addEventListener('hashchange', handleLocationChange);
+  if (pendingSpecimenId.value !== null) {
+    focusCurrentView(pendingSpecimenId.value);
+  }
 });
 
 onBeforeUnmount(() => {
@@ -331,6 +452,9 @@ onBeforeUnmount(() => {
   }
 
   stopSystemThemeObservation?.();
+  if (desktopLayoutListener !== undefined) {
+    desktopLayoutQuery?.removeEventListener('change', desktopLayoutListener);
+  }
   window.removeEventListener('popstate', handleLocationChange);
   window.removeEventListener('hashchange', handleLocationChange);
 });
@@ -343,23 +467,27 @@ onBeforeUnmount(() => {
     v-else
     ref="shellElement"
     class="flex h-screen w-full flex-col overflow-hidden lg:flex-row"
-    @keydown.esc="closeNav"
+    @keydown.esc.stop="handleEscape"
   >
     <button
       v-if="isNavOpen"
       type="button"
       class="fixed inset-0 z-layer-overlay bg-scrim lg:hidden"
       :aria-label="localize(appCopy.navigation.close, locale)"
-      @click="closeNav"
+      @click="closeNav(true)"
     />
 
     <aside
+      ref="navElement"
       id="design-lab-navigation"
+      data-playground-navigation
       :class="[
-        'fixed inset-y-0 left-0 z-layer-modal flex w-72 shrink-0 flex-col border-r border-subtle material-glass-elevated p-4 shadow-modal transition-transform duration-standard ease-standard lg:relative lg:h-screen lg:w-52 lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-layer-modal flex w-sidebar-drawer shrink-0 flex-col border-r border-subtle material-glass-elevated p-4 shadow-modal transition-transform duration-standard ease-standard lg:relative lg:h-screen lg:w-sidebar lg:translate-x-0',
         isNavOpen ? 'translate-x-0' : '-translate-x-full',
       ]"
       :aria-label="localize(appCopy.navigation.label, locale)"
+      :aria-hidden="!isDesktopLayout && !isNavOpen ? 'true' : undefined"
+      :inert="!isDesktopLayout && !isNavOpen"
     >
       <div class="flex items-start justify-between gap-3">
         <div class="flex min-w-0 items-center gap-3">
@@ -384,7 +512,7 @@ onBeforeUnmount(() => {
           variant="ghost"
           size="sm"
           :label="localize(appCopy.navigation.close, locale)"
-          @click="closeNav"
+          @click="closeNav(true)"
         >
           <LabIcon name="close" />
         </UiIconButton>
@@ -447,21 +575,23 @@ onBeforeUnmount(() => {
         class="scrollbar-immersive min-h-0 flex-1 overflow-y-auto"
       >
         <div
-          class="mx-auto flex w-full max-w-container-xl flex-col gap-grid px-gutter-inline pb-gutter-block pt-3"
+          data-playground-page
+          class="mx-auto flex w-full max-w-page flex-col gap-grid px-page-inline pb-page-block pt-3"
         >
           <header
-            class="sticky top-0 z-layer-sticky -mx-gutter-inline material-glass-subtle px-gutter-inline pt-2 pb-2"
+            class="sticky top-0 z-layer-sticky -mx-page-inline min-h-header material-glass-subtle px-page-inline pt-2 pb-2"
           >
             <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
               <div class="flex min-w-0 flex-1 items-center gap-x-3">
                 <UiIconButton
+                  data-playground-nav-trigger
                   class="shrink-0 lg:hidden"
                   variant="ghost"
                   size="sm"
                   :label="localize(appCopy.navigation.open, locale)"
                   :aria-expanded="isNavOpen"
                   aria-controls="design-lab-navigation"
-                  @click="isNavOpen = true"
+                  @click="openNav"
                 >
                   <LabIcon name="menu" />
                 </UiIconButton>
@@ -501,65 +631,155 @@ onBeforeUnmount(() => {
             </div>
             <p
               v-if="!isOverview"
-              class="mt-1 line-clamp-1 max-w-container-lg text-caption text-secondary lg:line-clamp-none"
+              class="mt-1 line-clamp-1 max-w-reading-wide text-caption text-secondary lg:line-clamp-none"
             >
               {{ selectedModule ? localize(selectedModule.description, locale) : '' }}
             </p>
           </header>
 
           <section v-if="isOverview" aria-labelledby="overview-title" class="grid gap-grid">
-            <header class="grid gap-3">
-              <p class="text-label font-label text-accent-primary">
-                {{ localize(appCopy.overview.eyebrow, locale) }}
+            <UiSurface surface="glass-subtle" class="grid gap-4 rounded-card p-5 md:p-6">
+              <header class="grid gap-3">
+                <p class="text-label font-label text-accent-primary">
+                  {{ localize(appCopy.overview.eyebrow, locale) }}
+                </p>
+                <h2
+                  id="overview-title"
+                  ref="overviewHeading"
+                  tabindex="-1"
+                  class="text-heading font-heading tracking-heading outline-none"
+                >
+                  {{ localize(appCopy.overview.title, locale) }}
+                </h2>
+                <p class="max-w-reading text-body text-secondary">
+                  {{ localize(appCopy.overview.description, locale) }}
+                </p>
+              </header>
+              <p class="text-caption text-muted">
+                {{ formatLocalized(catalogueCopy.summary, locale, {
+                    modules: labModules.length,
+                    specimens: labSpecimens.length,
+                  }) }}
               </p>
-              <h2
-                id="overview-title"
-                ref="overviewHeading"
-                tabindex="-1"
-                class="text-heading font-heading tracking-heading outline-none"
-              >
-                {{ localize(appCopy.overview.title, locale) }}
-              </h2>
-              <p class="max-w-container-md text-body text-secondary">
-                {{ localize(appCopy.overview.description, locale) }}
-              </p>
-            </header>
+            </UiSurface>
 
-            <div class="grid gap-grid sm:grid-cols-2 xl:grid-cols-3">
-              <article
+            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+              <UiSurface
                 v-for="group in sectionsByGroup"
                 :key="group.id"
-                class="grid content-start gap-3 rounded-card bg-surface-raised p-4 shadow-card"
+                surface="subtle"
+                class="grid content-between gap-3 rounded-card p-4"
               >
-                <div>
-                  <h3 class="text-subtitle font-heading tracking-heading">
+                <div class="grid gap-1">
+                  <h3 class="text-label font-label text-primary">
                     {{ localize(group.label, locale) }}
                   </h3>
-                  <p class="mt-1 text-caption text-secondary">
+                  <p class="text-caption text-secondary">
                     {{ formatLocalized(appCopy.overview.moduleCount, locale, {
                         count: group.modules.length,
                       }) }}
                   </p>
                 </div>
-                <p class="text-body text-secondary">
-                  {{ localize(group.description, locale) }}
-                </p>
-                <ul class="grid gap-1 text-caption text-secondary">
-                  <li v-for="module in group.modules" :key="module.id" class="flex gap-2">
-                    <span
-                      class="mt-2 size-1.5 shrink-0 rounded-full bg-accent-primary"
-                      aria-hidden="true"
-                    />
-                    <span>{{ localize(module.label, locale) }}</span>
-                  </li>
-                </ul>
-                <UiButton variant="secondary" @click="selectModule(group.moduleIds[0])">
+                <UiButton
+                  size="sm"
+                  variant="ghost"
+                  surface="none"
+                  stretch
+                  @click="selectModule(group.moduleIds[0])"
+                >
                   {{ formatLocalized(appCopy.overview.openGroup, locale, {
                       group: localize(group.label, locale),
                     }) }}
                 </UiButton>
-              </article>
+              </UiSurface>
             </div>
+
+            <UiSurface surface="elevated" class="grid gap-4 rounded-card p-4 md:p-5">
+              <header class="grid gap-1">
+                <h3 class="text-subtitle font-heading tracking-heading text-primary">
+                  {{ localize(catalogueCopy.title, locale) }}
+                </h3>
+                <p class="max-w-reading-wide text-body text-secondary">
+                  {{ localize(catalogueCopy.description, locale) }}
+                </p>
+              </header>
+
+              <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
+                <label class="grid gap-1">
+                  <span class="text-caption font-label text-secondary">
+                    {{ localize(catalogueCopy.searchLabel, locale) }}
+                  </span>
+                  <input
+                    v-model="catalogueQuery"
+                    data-specimen-search
+                    type="search"
+                    class="w-full rounded-control border border-subtle bg-surface-subtle px-3 py-2 text-body text-primary placeholder:text-muted"
+                    :placeholder="localize(catalogueCopy.searchPlaceholder, locale)"
+                  >
+                </label>
+                <fieldset class="flex flex-wrap gap-1 border-0 p-0">
+                  <legend class="sr-only">
+                    {{ localize(catalogueCopy.filterLabel, locale) }}
+                  </legend>
+                  <UiButton
+                    v-for="kind in catalogueKinds"
+                    :key="kind"
+                    size="sm"
+                    surface="none"
+                    :variant="catalogueKind === kind ? 'secondary' : 'ghost'"
+                    :aria-pressed="catalogueKind === kind"
+                    @click="catalogueKind = kind"
+                  >
+                    {{ localize(catalogueCopy.kinds[kind], locale) }}
+                  </UiButton>
+                </fieldset>
+              </div>
+
+              <div data-specimen-catalogue class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                <UiSurface
+                  v-for="specimen in filteredSpecimens"
+                  :key="specimen.id"
+                  as="a"
+                  :href="`#${specimen.id}`"
+                  surface="subtle"
+                  class="group grid min-w-0 gap-3 rounded-card p-4 transition duration-fast ease-standard hover:-translate-y-0.5 hover:shadow-raised"
+                >
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                      <h4 class="truncate text-label font-label text-primary">
+                        {{ localize(specimen.label, locale) }}
+                      </h4>
+                      <p class="mt-1 text-caption text-muted">
+                        {{ moduleLabelById(specimen.moduleId) }}
+                      </p>
+                    </div>
+                    <span
+                      class="shrink-0 rounded-pill bg-accent-soft px-2 py-1 text-caption text-accent-primary"
+                    >
+                      {{ localize(catalogueCopy.kinds[specimen.kind], locale) }}
+                    </span>
+                  </div>
+                  <div v-if="specimen.apiNames.length > 0" class="flex flex-wrap gap-1">
+                    <code
+                      v-for="apiName in specimen.apiNames"
+                      :key="apiName"
+                      class="rounded-control bg-surface-inset px-2 py-1 text-code text-secondary"
+                    >
+                      {{ apiName }}
+                    </code>
+                  </div>
+                  <p class="text-caption text-secondary">
+                    {{ specimen.tags.join(' · ') }}
+                  </p>
+                </UiSurface>
+                <p
+                  v-if="filteredSpecimens.length === 0"
+                  class="sm:col-span-2 xl:col-span-3 text-body text-secondary"
+                >
+                  {{ localize(catalogueCopy.noResults, locale) }}
+                </p>
+              </div>
+            </UiSurface>
           </section>
 
           <section v-else aria-labelledby="module-title" class="grid gap-grid">

@@ -1,12 +1,19 @@
 <script setup lang="ts">
 import { UiButton, UiIconButton } from '@neoverse-ui/vue';
 import LabIcon from '../LabIcon.vue';
-import { localize, moduleCopy } from '../playground-content';
+import { localize, localized, moduleCopy } from '../playground-content';
 import StateRow from '../StateRow.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.button;
+const surfaceCopy = {
+  label: localized('Surface ownership', 'Surface 归属'),
+  hint: localized(
+    'surface="none" removes the control plate when a parent composition already owns the material.',
+    '当父级组合已经负责材质时，surface="none" 会移除控件自身的表面。',
+  ),
+} as const;
 </script>
 
 <template>
@@ -56,5 +63,14 @@ const copy = moduleCopy.button;
         <LabIcon name="plus" />
       </UiIconButton>
     </div>
+  </StateRow>
+  <StateRow :label="surfaceCopy.label" :hint="surfaceCopy.hint" :locale="props.locale">
+    <UiButton surface="none">{{ localize(copy.controls.default, props.locale) }}</UiButton>
+    <UiButton surface="none" variant="secondary">
+      {{ localize(copy.controls.secondary, props.locale) }}
+    </UiButton>
+    <UiButton surface="none" variant="ghost">
+      {{ localize(copy.controls.ghost, props.locale) }}
+    </UiButton>
   </StateRow>
 </template>

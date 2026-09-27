@@ -4,7 +4,7 @@ import type { Locale, LocalizedText } from './playground-content';
 import { localize } from './playground-content';
 import { resolvedTheme } from './theme-state';
 
-type TokenPreview = 'color' | 'space' | 'radius' | 'border' | 'border-style' | 'shadow';
+type TokenPreview = 'color' | 'space' | 'layout' | 'radius' | 'border' | 'border-style' | 'shadow';
 
 interface TokenRowProps {
   label: LocalizedText;
@@ -74,6 +74,14 @@ watch(resolvedTheme, () => {
       class="h-2 shrink-0 bg-accent-primary"
       :style="{ width: `var(${props.variable})` }"
     />
+    <span
+      v-else-if="props.preview === 'layout'"
+      class="grid h-9 w-14 shrink-0 grid-cols-[0.3fr_1fr] gap-1 rounded-control border border-default bg-surface-subtle p-1"
+      aria-hidden="true"
+    >
+      <span class="rounded-control bg-accent-soft" />
+      <span class="rounded-control bg-surface-raised" />
+    </span>
     <span
       v-else-if="props.preview === 'radius'"
       class="h-9 w-14 shrink-0 border border-default bg-surface-raised"

@@ -69,7 +69,12 @@ const rootPackage = JSON.parse(
   await readFile(join(repositoryRoot, 'package.json'), 'utf8'),
 ) as PackageJson;
 assert(rootPackage.license, 'The root package.json must declare the chosen SPDX license.');
-const rootLicenseText = await readFile(join(repositoryRoot, rootLicense), 'utf8');
+// Git can check out identical license text with different platform line endings.
+// Git 可将同一许可证文本以不同平台换行符检出。
+const rootLicenseText = (await readFile(join(repositoryRoot, rootLicense), 'utf8')).replace(
+  /\r\n/g,
+  '\n',
+);
 
 const tempRoot = await mkdtemp(join(tmpdir(), 'neoverse-ui-release-'));
 const packDir = join(tempRoot, 'packs');
@@ -102,7 +107,8 @@ try {
     );
     assert(packageLicense, `${sourcePackage.name}: package LICENSE file is required`);
     assert(
-      (await readFile(join(packageDir, packageLicense), 'utf8')) === rootLicenseText,
+      (await readFile(join(packageDir, packageLicense), 'utf8')).replace(/\r\n/g, '\n') ===
+        rootLicenseText,
       `${sourcePackage.name}: package LICENSE must match the root LICENSE`,
     );
     assert(sourcePackage.repository, `${sourcePackage.name}: repository metadata is required`);

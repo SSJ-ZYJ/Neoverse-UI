@@ -24,7 +24,7 @@ const props = withDefaults(defineProps<LabSectionProps>(), {
       <h2 :id="`${props.id}-title`" class="text-subtitle font-heading tracking-heading">
         {{ props.title }}
       </h2>
-      <p class="max-w-container-md text-caption text-secondary">
+      <p class="max-w-reading text-caption text-secondary">
         {{ props.description }}
       </p>
     </header>

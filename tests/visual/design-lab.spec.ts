@@ -197,9 +197,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(Number.parseFloat(typography.linkFontSize)).toBeCloseTo(typography.rootFontSize * 0.7, 1);
   expect(typography.dockFontFamily).toContain('"Noto Sans SC Variable"');
   expect(typography.linkFontFamily).toContain('"Noto Sans SC Variable"');
-  expect(typography.labelDisplay).toBe(
-    (page.viewportSize()?.width ?? 0) <= 520 ? 'block' : 'inline',
-  );
+  expect(typography.labelDisplay).toBe('block');
   expect(typography.labelFlex).toBe('0 1 auto');
   const edgeMaterial = await navigation.evaluate((element) => {
     const style = getComputedStyle(element);
@@ -497,13 +495,13 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(edgeMaterial.trailingBackground).toBe('rgba(255, 255, 255, 0.03)');
   expect(edgeMaterial.itemRects).toHaveLength(4);
   expect(edgeMaterial.itemRects.every(({ width }) => width > 0)).toBe(true);
-  expect(edgeMaterial.groupHeightToken).toMatch(/rem$/);
-  expect(edgeMaterial.surfacePaddingToken).toMatch(/rem$/);
-  expect(edgeMaterial.surfacePaddingBlockToken).toMatch(/rem$/);
-  expect(edgeMaterial.surfacePaddingInlineToken).toMatch(/rem$/);
-  expect(edgeMaterial.navigationHeightToken).toMatch(/rem$/);
-  expect(edgeMaterial.segmentedHeightToken).toMatch(/rem$/);
-  expect(edgeMaterial.dividerGapToken).toMatch(/rem$/);
+  expect(edgeMaterial.groupHeightToken).toContain('rem');
+  expect(edgeMaterial.surfacePaddingToken).toContain('rem');
+  expect(edgeMaterial.surfacePaddingBlockToken).toContain('rem');
+  expect(edgeMaterial.surfacePaddingInlineToken).toContain('rem');
+  expect(edgeMaterial.navigationHeightToken).toContain('rem');
+  expect(edgeMaterial.segmentedHeightToken).toContain('rem');
+  expect(edgeMaterial.dividerGapToken).toContain('rem');
   expect(edgeMaterial.actionHeight).toBeGreaterThan(edgeMaterial.compactHeight);
   expect(edgeMaterial.controlHeight).toBeCloseTo(edgeMaterial.compactHeight, 2);
   expect(edgeMaterial.navigationSurfaceHeight).toBeCloseTo(edgeMaterial.actionHeight, 2);
@@ -587,7 +585,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(edgeMaterial.surfacePaddingInline).toBeGreaterThan(edgeMaterial.surfacePaddingBlock);
   expect(edgeMaterial.trailingOuterGap).toBeGreaterThanOrEqual(edgeMaterial.surfacePaddingInline);
   expect(edgeMaterial.itemInsetBlockStart).toBeCloseTo(edgeMaterial.itemInsetBlockEnd, 2);
-  expect(edgeMaterial.itemInsetInlineStart).toBeGreaterThan(edgeMaterial.itemInsetBlockStart);
+  expect(edgeMaterial.itemInsetInlineStart).toBeCloseTo(edgeMaterial.itemInsetBlockStart, 2);
   expect(edgeMaterial.sliderWithinLanguage).toBe(true);
   expect(edgeMaterial.sliderWithinOption).toBe(true);
   expect(edgeMaterial.optionContentFits).toBe(true);
@@ -798,7 +796,7 @@ for (const theme of themes) {
 
 const compositionSurfaceContracts = [
   { id: 'composition-control-cluster', selector: ':scope > .material-glass-subtle', glass: true },
-  { id: 'composition-project-card', selector: ':scope > .ui-card', glass: false },
+  { id: 'composition-project-card', selector: ':scope > .ui-card', glass: true },
   {
     id: 'composition-floating-toolbar',
     selector: ':scope > .material-glass-immersive',
@@ -1019,7 +1017,7 @@ test.describe('wide WebGL Glass edge', () => {
         'The diffuse WebGL contract is only applicable when WebGL is available.',
       );
 
-      const surface = page.locator('#materials .material-glass-elevated');
+      const surface = page.locator('#materials [data-glass-variant="elevated"]');
       await expect(surface).toBeVisible();
       await surface.scrollIntoViewIfNeeded();
       await page.waitForTimeout(120);

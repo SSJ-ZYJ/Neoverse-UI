@@ -2,7 +2,7 @@
 import type { SegmentOption } from '@neoverse-ui/vue';
 import { UiSegmentedControl } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
-import { formatLocalized, localize, moduleCopy } from '../playground-content';
+import { formatLocalized, localize, localized, moduleCopy } from '../playground-content';
 import StateRow from '../StateRow.vue';
 import type { LabModuleProps } from './types';
 
@@ -31,6 +31,13 @@ const ariaOptions = computed<readonly SegmentOption[]>(() => [
     ariaLabel: localize(copy.controls.sectionC, props.locale),
   },
 ]);
+const surfaceCopy = {
+  label: localized('Surface ownership', 'Surface 归属'),
+  hint: localized(
+    'surface="none" lets a grouped parent own the chrome without duplicating material layers.',
+    'surface="none" 允许分组父级负责 Chrome，避免重复叠加材质层。',
+  ),
+} as const;
 </script>
 
 <template>
@@ -67,6 +74,13 @@ const ariaOptions = computed<readonly SegmentOption[]>(() => [
   </StateRow>
   <StateRow :label="copy.states.aria" :locale="props.locale">
     <UiSegmentedControl
+      :aria-label="localize(copy.aria.view, props.locale)"
+      :options="ariaOptions"
+    />
+  </StateRow>
+  <StateRow :label="surfaceCopy.label" :hint="surfaceCopy.hint" :locale="props.locale">
+    <UiSegmentedControl
+      surface="none"
       :aria-label="localize(copy.aria.view, props.locale)"
       :options="ariaOptions"
     />

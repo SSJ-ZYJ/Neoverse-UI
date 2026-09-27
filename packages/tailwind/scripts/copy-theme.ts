@@ -7,6 +7,8 @@ const componentsDirectory = new URL('src/components/', packageDirectory);
 const outputDirectory = new URL('dist/', packageDirectory);
 const output = new URL('theme.css', outputDirectory);
 const componentsOutput = new URL('components.css', outputDirectory);
+const proseSource = new URL('src/components/prose.css', packageDirectory);
+const proseOutput = new URL('prose.css', outputDirectory);
 await mkdir(outputDirectory, { recursive: true });
 const componentFacade = await Bun.file(componentsSource).text();
 const componentFiles = [
@@ -26,4 +28,5 @@ const componentCss = (
 await Promise.all([
   Bun.write(output, await Bun.file(source).text()),
   Bun.write(componentsOutput, `${componentCss}\n`),
+  Bun.write(proseOutput, await Bun.file(proseSource).text()),
 ]);

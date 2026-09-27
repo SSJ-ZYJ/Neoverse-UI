@@ -5,13 +5,15 @@ const output = new URL('../dist/contract.css', import.meta.url);
 const buttonSource = new URL('../src/components/button.css', import.meta.url);
 const badgeSource = new URL('../src/components/badge.css', import.meta.url);
 const componentsOutput = new URL('../dist/components.css', import.meta.url);
+const proseOutput = new URL('../dist/prose.css', import.meta.url);
 
 try {
-  const [css, buttonCss, badgeCss, flattenedComponentsCss] = await Promise.all([
+  const [css, buttonCss, badgeCss, flattenedComponentsCss, proseCss] = await Promise.all([
     Bun.file(output).text(),
     Bun.file(buttonSource).text(),
     Bun.file(badgeSource).text(),
     Bun.file(componentsOutput).text(),
+    Bun.file(proseOutput).text(),
   ]);
   const componentSourceDirectory = fileURLToPath(new URL('../src/components/', import.meta.url));
   const componentSourceFiles = [
@@ -30,6 +32,18 @@ try {
     );
   });
   const expectedSelectors = [
+    '.ui-button-control',
+    '.ui-button-control--sm',
+    '.ui-button-control--md',
+    '.ui-button-control--lg',
+    '.ui-button-control--stretch',
+    '.ui-button-icon-control',
+    '.ui-button-icon-control--sm',
+    '.ui-button-icon-control--md',
+    '.ui-button-icon-control--lg',
+    '.ui-button-icon-control--stretch',
+    '.ui-button-icon-control__content',
+    '.ui-button-control__spinner',
     '.bg-surface-canvas',
     '.bg-surface-subtle',
     '.bg-surface-raised',
@@ -74,16 +88,56 @@ try {
     '.text-label',
     '.text-caption',
     '.text-code',
+    '.text-display-lg',
+    '.text-display-md',
+    '.text-title-lg',
+    '.text-title-md',
+    '.text-title-sm',
+    '.text-body-lg',
+    '.text-body-md',
+    '.text-body-sm',
+    '.text-label-lg',
+    '.text-label-md',
+    '.text-label-sm',
     '.font-display',
+    '.font-title',
     '.font-heading',
     '.font-body',
     '.leading-display',
     '.leading-body',
+    '.leading-display-lg',
+    '.leading-display-md',
+    '.leading-title-lg',
+    '.leading-title-md',
+    '.leading-title-sm',
+    '.leading-body-lg',
+    '.leading-body-md',
+    '.leading-body-sm',
+    '.leading-label-lg',
+    '.leading-label-md',
+    '.leading-label-sm',
     '.tracking-display',
     '.tracking-body',
+    '.tracking-display-lg',
+    '.tracking-display-md',
+    '.tracking-title-lg',
+    '.tracking-title-md',
+    '.tracking-title-sm',
+    '.tracking-body-lg',
+    '.tracking-body-md',
+    '.tracking-body-sm',
+    '.tracking-label-lg',
+    '.tracking-label-md',
+    '.tracking-label-sm',
     '.p-4',
     '.px-gutter-inline',
     '.py-gutter-block',
+    '.px-page-inline',
+    '.py-page-block',
+    '.pb-page-block',
+    '.w-sidebar',
+    '.w-sidebar-drawer',
+    '.min-h-header',
     '.gap-grid',
     '.rounded-control',
     '.rounded-card',
@@ -100,6 +154,10 @@ try {
     '.max-w-container-lg',
     '.max-w-container-xl',
     '.max-w-container-2xl',
+    '.max-w-page',
+    '.max-w-content',
+    '.max-w-reading',
+    '.max-w-reading-wide',
     '.z-layer-base',
     '.z-layer-raised',
     '.z-layer-sticky',
@@ -116,6 +174,7 @@ try {
     '.ui-button--ghost',
     '.ui-action',
     '.ui-navigation-item',
+    '.ui-breadcrumb',
     '.ui-control-surface',
     '.ui-status-indicator',
     '.ui-badge',
@@ -142,6 +201,7 @@ try {
     '.ease-linear',
     '.ease-standard',
     '.ease-emphasized',
+    '.neoverse-prose',
   ];
   const missingSelectors = expectedSelectors.filter((selector) => !css.includes(selector));
   const forbiddenSelectors = ['.bg-background', '.text-foreground', '.border-border', '.shadow-sm'];
@@ -149,6 +209,7 @@ try {
   const expectedValues = [
     '--neoverse-color-surface-canvas',
     '--neoverse-color-text-primary',
+    '--neoverse-breadcrumb-current-foreground',
     '--neoverse-color-edge-light',
     '--neoverse-shadow-card',
     '--neoverse-radius-control',
@@ -170,6 +231,7 @@ try {
     '--neoverse-material-glass-card-background',
     '--neoverse-material-transparency-subtle:30%',
     '--neoverse-material-transparency-elevated:20%',
+    '--neoverse-material-transparency-card:52%',
     '--neoverse-material-transparency-immersive:12%',
     '--neoverse-material-glass-elevated-background:var(--neoverse-color-surface-glass)',
     '--neoverse-motion-duration-fast',
@@ -177,7 +239,12 @@ try {
     '--neoverse-motion-duration-expressive',
     '--neoverse-motion-easing-standard',
     '--neoverse-motion-easing-emphasized',
-    '--neoverse-motion-micro-property',
+    '--neoverse-motion-feedback-duration',
+    '--neoverse-motion-feedback-easing',
+    '--neoverse-motion-state-duration',
+    '--neoverse-motion-state-easing',
+    '--neoverse-motion-spatial-duration',
+    '--neoverse-motion-spatial-easing',
     '--neoverse-motion-duration-fast:1ms',
     '--neoverse-motion-spatial-distance:0px',
     '--neoverse-control-active-background',
@@ -372,7 +439,9 @@ try {
     emittedForbiddenButtonFragments.length > 0 ||
     missingBadgeFragments.length > 0 ||
     hardcodedGeometryLiterals.length > 0 ||
-    flattenedComponentsCss.includes('@import')
+    flattenedComponentsCss.includes('@import') ||
+    !proseCss.includes('.neoverse-prose') ||
+    proseCss.includes('@import')
   ) {
     const details = [
       missingSelectors.length > 0 ? `Missing selectors: ${missingSelectors.join(', ')}` : '',
@@ -402,6 +471,10 @@ try {
       flattenedComponentsCss.includes('@import')
         ? 'Compiled component CSS still contains source imports'
         : '',
+      !proseCss.includes('.neoverse-prose')
+        ? 'Public prose CSS entry is missing .neoverse-prose'
+        : '',
+      proseCss.includes('@import') ? 'Public prose CSS entry still contains source imports' : '',
     ].filter(Boolean);
     throw new Error(['Tailwind semantic contract failed:', ...details].join('\n'));
   }

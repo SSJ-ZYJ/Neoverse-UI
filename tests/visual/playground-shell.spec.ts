@@ -29,7 +29,7 @@ test('desktop playground uses the 1920x1080 100% baseline and fills the viewport
   });
 });
 
-test('playground presentation scales fluidly with desktop viewport width', async ({ page }) => {
+test('playground presentation density scales with desktop viewport width', async ({ page }) => {
   await page.goto('/#controls', { waitUntil: 'domcontentloaded' });
 
   const readRootFontSize = async (width: number): Promise<number> => {
@@ -40,10 +40,76 @@ test('playground presentation scales fluidly with desktop viewport width', async
     );
   };
 
-  expect(await readRootFontSize(1280)).toBeCloseTo(18, 1);
-  expect(await readRootFontSize(1600)).toBeCloseTo(21, 1);
-  expect(await readRootFontSize(1920)).toBeCloseTo(24, 1);
-  expect(await readRootFontSize(2560)).toBeCloseTo(24, 1);
+  const expectedRootSizes = new Map([
+    [1280, 16],
+    [1600, 17],
+    [1920, 18],
+    [2560, 20],
+  ]);
+
+  for (const [width, expected] of expectedRootSizes) {
+    expect(await readRootFontSize(width), `viewport ${width}`).toBeCloseTo(expected, 1);
+  }
+});
+
+test('playground shell consumes semantic page and sidebar layout roles', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/?lang=en#motion', { waitUntil: 'domcontentloaded' });
+
+  const desktopMetrics = await page.evaluate(() => {
+    const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const navigation = document.querySelector<HTMLElement>('[data-playground-navigation]');
+    const pageRegion = document.querySelector<HTMLElement>('[data-playground-page]');
+    const header = pageRegion?.querySelector<HTMLElement>('header');
+
+    if (navigation === null || pageRegion === null || header === undefined || header === null) {
+      throw new Error('Semantic Playground layout regions are missing');
+    }
+
+    return {
+      rootSize,
+      navigationWidth: navigation.getBoundingClientRect().width,
+      pageWidth: pageRegion.getBoundingClientRect().width,
+      pageMaxWidth: Number.parseFloat(getComputedStyle(pageRegion).maxWidth),
+      headerMinHeight: Number.parseFloat(getComputedStyle(header).minHeight),
+    };
+  });
+
+  expect(desktopMetrics.rootSize).toBeCloseTo(18, 1);
+  expect(desktopMetrics.navigationWidth).toBeCloseTo(desktopMetrics.rootSize * 13, 1);
+  expect(desktopMetrics.pageMaxWidth).toBeCloseTo(desktopMetrics.rootSize * 88, 1);
+  expect(desktopMetrics.pageWidth).toBeCloseTo(desktopMetrics.pageMaxWidth, 1);
+  expect(desktopMetrics.headerMinHeight).toBeCloseTo(desktopMetrics.rootSize * 3.5, 1);
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.reload({ waitUntil: 'domcontentloaded' });
+
+  const mobileMetrics = await page.evaluate(() => {
+    const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const navigation = document.querySelector<HTMLElement>('[data-playground-navigation]');
+    if (navigation === null) {
+      throw new Error('Playground navigation is missing');
+    }
+
+    return {
+      rootSize,
+      navigationWidth: navigation.getBoundingClientRect().width,
+    };
+  });
+
+  expect(mobileMetrics.rootSize).toBeCloseTo(16, 1);
+  expect(mobileMetrics.navigationWidth).toBeCloseTo(mobileMetrics.rootSize * 18, 1);
+});
+
+test('isolated frame keeps the canonical 16px component baseline', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/frame?theme=dark&lang=en#controls', { waitUntil: 'domcontentloaded' });
+
+  expect(
+    await page.evaluate(() =>
+      Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
+    ),
+  ).toBeCloseTo(16, 1);
 });
 
 test('playground visibly applies the Neoverse UI brand icon and favicon', async ({ page }) => {
@@ -79,6 +145,211 @@ test('legacy top-level module links resolve to their consolidated destination', 
   await expect(page.locator('#module-title')).toBeVisible();
 });
 
+test('fresh specimen deep links resolve their owner module and keep the specimen hash', async ({
+  page,
+}) => {
+  for (const specimenId of [
+    'foundation-typography',
+    'controls-action',
+    'status-feedback-notice',
+    'composition-reading',
+  ] as const) {
+    await page.goto(`/#${specimenId}`, { waitUntil: 'domcontentloaded' });
+    const specimen = page.locator(`#${specimenId}`);
+    await expect(page.locator('[data-design-lab-region="module"]')).toBeVisible();
+    await expect(specimen).toBeVisible();
+    await expect(page).toHaveURL(new RegExp(`#${specimenId}$`));
+    await expect
+      .poll(() => specimen.evaluate((element) => document.activeElement === element))
+      .toBe(true);
+  }
+});
+
+test('every catalogue specimen deep link renders a real focusable fixture', async ({ page }) => {
+  await page.goto('/?lang=en', { waitUntil: 'domcontentloaded' });
+
+  const specimenHashes = await page
+    .locator('[data-specimen-catalogue] a[href^="#"]')
+    .evaluateAll((links) =>
+      links
+        .map((link) => link.getAttribute('href'))
+        .filter((href): href is string => href !== null),
+    );
+
+  expect(specimenHashes.length).toBeGreaterThan(0);
+  expect(new Set(specimenHashes).size).toBe(specimenHashes.length);
+
+  for (const hash of specimenHashes) {
+    const specimenId = hash.slice(1);
+    await page.goto(`/?lang=en${hash}`, { waitUntil: 'domcontentloaded' });
+
+    const specimen = page.locator(`#${specimenId}`);
+    await expect(specimen, specimenId).toBeVisible();
+    await expect(page, specimenId).toHaveURL(new RegExp(`#${specimenId}$`));
+    await expect
+      .poll(() => specimen.evaluate((element) => document.activeElement === element), {
+        message: `${specimenId} should receive focus after deep-link resolution`,
+      })
+      .toBe(true);
+  }
+});
+
+test('composition keeps scrolling inside the workspace without creating root-page blank space', async ({
+  page,
+}) => {
+  await page.goto('/?lang=en#composition', { waitUntil: 'domcontentloaded' });
+
+  const metrics = await page.evaluate(() => {
+    const workspace = document.querySelector<HTMLElement>('[data-design-lab-workspace]');
+    if (workspace === null) {
+      throw new Error('Playground workspace is missing');
+    }
+    return {
+      viewportHeight: window.innerHeight,
+      documentHeight: document.documentElement.scrollHeight,
+      bodyHeight: document.body.scrollHeight,
+      workspaceClientHeight: workspace.clientHeight,
+      workspaceScrollHeight: workspace.scrollHeight,
+    };
+  });
+
+  expect(metrics.workspaceScrollHeight).toBeGreaterThan(metrics.workspaceClientHeight);
+  expect(metrics.documentHeight).toBe(metrics.viewportHeight);
+  expect(metrics.bodyHeight).toBe(metrics.viewportHeight);
+
+  await page.evaluate(() => window.scrollTo({ top: 10_000, behavior: 'auto' }));
+  expect(await page.evaluate(() => window.scrollY)).toBe(0);
+});
+
+test('playground demo actions stay inside the playground instead of navigating to GitHub', async ({
+  page,
+}) => {
+  await page.goto('/?lang=en#composition-reading', { waitUntil: 'domcontentloaded' });
+
+  const readingAction = page.locator('[data-reading-surface-link]');
+  await expect(readingAction).toHaveAttribute('href', '#materials-surface');
+  await readingAction.click();
+  await expect(page).toHaveURL(/#materials-surface$/);
+  await expect(page.locator('#materials-surface')).toBeVisible();
+
+  await page.goto('/react-fixture?lang=en', { waitUntil: 'domcontentloaded' });
+  const reactAction = page.locator('[data-react-adapter="UiAction"]');
+  await expect(reactAction).toHaveAttribute('href', '#react-runtime-fixture');
+  await reactAction.click();
+  await expect(page).toHaveURL(/\/react-fixture\?lang=en#react-runtime-fixture$/);
+
+  expect(await page.locator('a[href^="https://github.com/"]').count()).toBe(0);
+});
+
+test('reading composition consumes the prose foundation with an independent reading width role', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/?lang=en#composition-reading', { waitUntil: 'domcontentloaded' });
+
+  const metrics = await page.locator('[data-reading-prose]').evaluate((element) => {
+    const prose = element as HTMLElement;
+    const blockquote = prose.querySelector<HTMLElement>('blockquote');
+    const inlineCode = prose.querySelector<HTMLElement>('p code');
+    const tableCell = prose.querySelector<HTMLElement>('tbody td');
+    const details = prose.querySelector<HTMLElement>('details');
+
+    if (blockquote === null || inlineCode === null || tableCell === null || details === null) {
+      throw new Error('Reading composition is missing prose semantic fixtures');
+    }
+
+    const proseStyle = getComputedStyle(prose);
+    const blockquoteStyle = getComputedStyle(blockquote);
+    const inlineCodeStyle = getComputedStyle(inlineCode);
+    const tableCellStyle = getComputedStyle(tableCell);
+    const detailsStyle = getComputedStyle(details);
+
+    return {
+      hasProseClass: prose.classList.contains('neoverse-prose'),
+      hasReadingRole: prose.classList.contains('max-w-reading'),
+      maxWidth: proseStyle.maxWidth,
+      blockquoteBackground: blockquoteStyle.backgroundColor,
+      blockquoteBorderWidth: blockquoteStyle.borderInlineStartWidth,
+      codeFontFamily: inlineCodeStyle.fontFamily,
+      bodyFontFamily: proseStyle.fontFamily,
+      tableCellPaddingInline: tableCellStyle.paddingInline,
+      detailsBorderStyle: detailsStyle.borderStyle,
+    };
+  });
+
+  expect(metrics.hasProseClass).toBe(true);
+  expect(metrics.hasReadingRole).toBe(true);
+  expect(metrics.maxWidth).not.toBe('none');
+  expect(metrics.blockquoteBackground).not.toBe('rgba(0, 0, 0, 0)');
+  expect(metrics.blockquoteBorderWidth).not.toBe('0px');
+  expect(metrics.codeFontFamily).not.toBe(metrics.bodyFontFamily);
+  expect(metrics.tableCellPaddingInline).not.toBe('0px');
+  expect(metrics.detailsBorderStyle).not.toBe('none');
+});
+
+test('prose and reading fixtures keep mobile overflow inside their content regions', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/?lang=en#foundation-prose', { waitUntil: 'domcontentloaded' });
+
+  const foundationMetrics = await page.locator('[data-foundation-prose]').evaluate((element) => ({
+    proseWidth: (element as HTMLElement).getBoundingClientRect().width,
+    viewportWidth: document.documentElement.clientWidth,
+    rootScrollWidth: document.documentElement.scrollWidth,
+  }));
+
+  expect(foundationMetrics.proseWidth).toBeLessThanOrEqual(foundationMetrics.viewportWidth);
+  expect(foundationMetrics.rootScrollWidth).toBe(foundationMetrics.viewportWidth);
+
+  await page.goto('/?lang=en#composition-reading', { waitUntil: 'domcontentloaded' });
+  const readingMetrics = await page.evaluate(() => {
+    const pre = document.querySelector<HTMLElement>('#reading-panel pre');
+    const tableScroll = document.querySelector<HTMLElement>('[data-reading-table-scroll]');
+    if (pre === null || tableScroll === null) {
+      throw new Error('Reading overflow fixtures are missing');
+    }
+
+    return {
+      viewportWidth: document.documentElement.clientWidth,
+      rootScrollWidth: document.documentElement.scrollWidth,
+      preClientWidth: pre.clientWidth,
+      preScrollWidth: pre.scrollWidth,
+      tableWidth: tableScroll.getBoundingClientRect().width,
+    };
+  });
+
+  expect(readingMetrics.rootScrollWidth).toBe(readingMetrics.viewportWidth);
+  expect(readingMetrics.preScrollWidth).toBeGreaterThan(readingMetrics.preClientWidth);
+  expect(readingMetrics.tableWidth).toBeLessThanOrEqual(readingMetrics.viewportWidth);
+});
+
+test('overview catalogue searches public component API names', async ({ page }) => {
+  await page.goto('/?lang=en', { waitUntil: 'domcontentloaded' });
+  await page.locator('[data-specimen-search]').fill('UiTooltipSurface');
+
+  const result = page.locator('[data-specimen-catalogue] a[href="#status-feedback-tooltip"]');
+  await expect(result).toBeVisible();
+  await expect(page.locator('[data-specimen-catalogue] a')).toHaveCount(1);
+});
+
+test('default cards keep a visible material fill in light and dark themes', async ({ page }) => {
+  for (const theme of ['light', 'dark'] as const) {
+    await page.goto(`/?theme=${theme}&lang=en#card`, { waitUntil: 'domcontentloaded' });
+
+    const card = page.locator('[data-card-default]');
+    await expect(card).toHaveAttribute('data-surface', 'glass-card');
+    const backgroundColor = await card.evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
+    );
+    expect(backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(backgroundColor).not.toBe('transparent');
+
+    const optOut = page.locator('[data-card-transparent-optout]');
+    await expect(optOut).toHaveAttribute('data-surface', 'none');
+  }
+});
+
 test('in-page module anchors do not reset the workspace scroll position', async ({ page }) => {
   await page.goto('/#controls', { waitUntil: 'domcontentloaded' });
 
@@ -105,6 +376,28 @@ test('mobile playground header stays within the viewport', async ({ page }) => {
   expect(overflow.document).toBeLessThanOrEqual(0);
   expect(overflow.body).toBeLessThanOrEqual(0);
   await expect(page.locator('[data-back-to-overview]')).toBeHidden();
+});
+
+test('closed mobile navigation is inert and restores focus to its trigger', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/?lang=en', { waitUntil: 'domcontentloaded' });
+
+  const navigation = page.locator('#design-lab-navigation');
+  const trigger = page.locator('[data-playground-nav-trigger]');
+  await expect(trigger).toBeVisible();
+  expect(await navigation.evaluate((element) => (element as HTMLElement).inert)).toBe(true);
+
+  await trigger.click();
+  expect(await navigation.evaluate((element) => (element as HTMLElement).inert)).toBe(false);
+  expect(await navigation.evaluate((element) => element.contains(document.activeElement))).toBe(
+    true,
+  );
+
+  await page.keyboard.press('Escape');
+  expect(await navigation.evaluate((element) => (element as HTMLElement).inert)).toBe(true);
+  await expect
+    .poll(() => trigger.evaluate((element) => document.activeElement === element))
+    .toBe(true);
 });
 
 test('mobile color palettes keep horizontal density inside their own scroll regions', async ({
@@ -178,6 +471,91 @@ test('color swatches expose full token names without truncation', async ({ page 
   await expect(
     page.getByText('--neoverse-color-accent-secondary-foreground').first(),
   ).toBeVisible();
+});
+
+test('isolated scrollbar fixture renders the real UiScrollbar overlay', async ({ page }) => {
+  await page.goto('/frame?theme=light&lang=en#scrollbar-component', {
+    waitUntil: 'domcontentloaded',
+  });
+
+  const scrollbar = page.locator('[data-ui-scrollbar-fixture]');
+  await expect(scrollbar).toHaveCount(1);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeGreaterThan(
+    await page.evaluate(() => window.innerHeight),
+  );
+
+  await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight }));
+  await expect.poll(() => scrollbar.getAttribute('data-visible')).toBe('true');
+});
+
+test('React runtime fixture renders and updates the public adapter set', async ({ page }) => {
+  await page.goto('/react-fixture?lang=en', { waitUntil: 'domcontentloaded' });
+
+  const adapters = page.locator('[data-react-adapter]');
+  await expect(adapters).toHaveCount(6);
+  for (const adapter of [
+    'UiSurface',
+    'UiAction',
+    'UiButton',
+    'UiIconButton',
+    'UiNotice',
+    'UiCard',
+  ]) {
+    await expect(page.locator(`[data-react-adapter="${adapter}"]`)).toBeVisible();
+  }
+
+  const button = page.locator('[data-react-adapter="UiButton"]');
+  await expect(button).toContainText('Count 0');
+  await button.click();
+  await expect(button).toContainText('Count 1');
+  await expect(button).toHaveClass(/ui-button/);
+});
+
+test('semantic motion roles drive live feedback, state, and spatial transitions', async ({
+  page,
+}) => {
+  await page.goto('/?lang=en#motion', { waitUntil: 'domcontentloaded' });
+
+  const feedback = page.locator('[data-motion-semantic="feedback"]');
+  const state = page.locator('[data-motion-semantic="state"]');
+  const spatial = page.locator('[data-motion-semantic="spatial"]');
+  const before = await Promise.all(
+    [feedback, state, spatial].map((locator) =>
+      locator.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          translate: style.translate,
+          opacity: style.opacity,
+          backgroundColor: style.backgroundColor,
+          duration: style.transitionDuration,
+        };
+      }),
+    ),
+  );
+
+  await page.locator('[data-motion-semantic-toggle]').click();
+  await page.waitForTimeout(450);
+
+  const after = await Promise.all(
+    [feedback, state, spatial].map((locator) =>
+      locator.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          translate: style.translate,
+          opacity: style.opacity,
+          backgroundColor: style.backgroundColor,
+          duration: style.transitionDuration,
+        };
+      }),
+    ),
+  );
+
+  expect(before[0]?.duration).not.toBe('0s');
+  expect(before[1]?.duration).not.toBe('0s');
+  expect(before[2]?.duration).not.toBe('0s');
+  expect(after[0]?.opacity).not.toBe(before[0]?.opacity);
+  expect(after[1]?.backgroundColor).not.toBe(before[1]?.backgroundColor);
+  expect(after[2]?.opacity).not.toBe(before[2]?.opacity);
 });
 
 test('floating dock keeps balanced geometry across desktop presentation scales', async ({

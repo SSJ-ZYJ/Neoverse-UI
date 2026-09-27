@@ -208,6 +208,13 @@ export const moduleCopy = {
         '布局别名对应：px-gutter-inline=响应式、py-gutter-block=响应式、gap-grid=space-4。',
       ),
     },
+    roles: {
+      label: localized('Page layout roles', '页面布局角色'),
+      description: localized(
+        'Semantic page, content, reading, sidebar, and header roles sit above the primitive container and spacing scales.',
+        '页面、内容、阅读区、侧栏与顶栏等语义角色建立在基础容器与间距刻度之上。',
+      ),
+    },
   },
   radius: {
     label: localized('Radius', '圆角'),
@@ -293,8 +300,8 @@ export const moduleCopy = {
   motion: {
     label: localized('Motion', '动效'),
     description: localized(
-      'Reusable motion recipes, semantic transition aliases, and reduced-motion behavior with live replayable previews.',
-      '展示可复用动效 Recipe、语义过渡别名与 reduced-motion 行为，并提供可重复触发的实时预览。',
+      'Semantic motion roles used by real components, with reduced-motion behavior and live state previews.',
+      '展示真实组件使用的语义动效角色、reduced-motion 行为与实时状态预览。',
     ),
     primitive: {
       label: localized('Base motion values', '基础动效值'),
@@ -303,20 +310,11 @@ export const moduleCopy = {
         '基础值定义 fast、standard、expressive 时长，以及 linear、standard、emphasized 缓动。',
       ),
     },
-    recipes: {
-      label: localized('Motion recipes', '动效 Recipe'),
-      description: localized(
-        'Recipes are framework-agnostic CSS classes. Replay remounts only the preview target so each animation can be inspected repeatedly.',
-        'Recipe 是与框架无关的 CSS 类。点击重播只会重新挂载预览目标，便于反复检查每段动画。',
-      ),
-      replay: localized('Replay', '重播'),
-      classLabel: localized('Class', '类名'),
-    },
     aliases: {
-      label: localized('Semantic transitions', '语义过渡'),
+      label: localized('Semantic roles', '语义角色'),
       description: localized(
-        'Transition aliases reuse base values: micro=fast+standard, state=standard+standard, spatial=expressive+emphasized.',
-        '过渡别名复用基础值：micro=fast+standard、state=standard+standard、spatial=expressive+emphasized。',
+        'Shared components consume three roles directly: feedback for immediate response, state for visual state changes, and spatial for movement.',
+        '共享组件直接消费三类角色：feedback 负责即时反馈，state 负责视觉状态变化，spatial 负责空间移动。',
       ),
     },
     cssVariables: localized('{label} CSS variables', '{label} CSS 变量'),
@@ -428,25 +426,25 @@ export const moduleCopy = {
   card: {
     label: localized('Card', '卡片'),
     description: localized(
-      'UiCard owns standard card geometry and selects material explicitly through surface; use UiSurface for generic non-card material planes.',
-      'UiCard 负责标准卡片几何，并通过 surface 显式选择材质；通用非卡片材质容器使用 UiSurface。',
+      'UiCard owns standard card geometry and uses glass-card by default; transparent cards require an explicit surface="none" opt-out.',
+      'UiCard 负责标准卡片几何，并默认使用 glass-card；透明卡片必须显式设置 surface="none" 才会启用。',
     ),
     reference: localized('Reference card', '参考卡片'),
     ready: localized('Ready', '就绪'),
     body: localized(
-      'Card keeps grouping and geometry predictable. Tonal surfaces carry hierarchy without a hard outline; Glass remains explicit at the composition boundary.',
-      'Card 让分组与几何关系保持可预测；层次由色面承担而不是硬描边，Glass 仍在组合边界显式声明。',
+      'The default card is a grounded glass-card surface so content never floats on a fully transparent plane.',
+      '默认卡片使用有底色的 glass-card 表面，避免内容直接漂浮在完全透明的平面上。',
     ),
     continue: localized('Continue', '继续'),
-    externalClass: localized('External class', '外部类名'),
+    externalClass: localized('Elevated card', '抬升卡片'),
     externalBody: localized(
-      'This card uses ordinary raised styling while keeping standard card geometry. Use UiSurface when a material plane is not semantically a card.',
-      '此卡片使用普通抬升样式，同时保留标准卡片几何；当材质平面并非语义上的卡片时，再使用 UiSurface。',
+      'An elevated opaque surface remains available when blur or transparency is not appropriate.',
+      '当模糊或半透明材质不合适时，可以显式选择 elevated 不透明表面。',
     ),
-    glassCard: localized('Glass card', '玻璃卡片'),
+    glassCard: localized('Explicit transparent opt-out', '显式透明退出'),
     glassCardBody: localized(
-      'The card material tier: a neutral sheen over a translucent glass plane with a hairline border, inset edge highlight, and deep backdrop blur. Standard cards use UiCard surface="glass-card".',
-      'Card 材质档：半透明玻璃面上的中性光晕、发丝描边、内缘高光与深度背景模糊。标准卡片使用 UiCard surface="glass-card"。',
+      'surface="none" is reserved for compositions that deliberately let a parent surface own the material.',
+      'surface="none" 只用于明确由父级 Surface 接管材质的组合场景。',
     ),
   },
   segmentedControl: {
@@ -983,7 +981,7 @@ export const tokenCopy = {
   motion: {
     durations: localized('Durations', '时长'),
     easings: localized('Easings', '缓动'),
-    micro: localized('Micro', '微动效'),
+    feedback: localized('Feedback', '反馈'),
     state: localized('State', '状态'),
     spatial: localized('Spatial', '空间'),
   },

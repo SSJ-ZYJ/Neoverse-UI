@@ -61,6 +61,19 @@ export interface NavigationItemProps {
   indicatorPlacement?: NavigationIndicatorPlacement;
 }
 
+export interface BreadcrumbItem {
+  id?: string;
+  label: string;
+  href?: string;
+  current?: boolean;
+}
+
+export interface BreadcrumbProps {
+  items: readonly BreadcrumbItem[];
+  ariaLabel?: string;
+  separator?: string;
+}
+
 export interface IconButtonProps {
   as?: string | Component;
   href?: string;

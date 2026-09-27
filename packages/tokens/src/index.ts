@@ -107,6 +107,22 @@ const componentCssVariables = {
     indicatorInset: '--neoverse-navigation-item-indicator-inset',
     compactIndicatorInset: '--neoverse-navigation-item-compact-indicator-inset',
   },
+  breadcrumb: {
+    gap: '--neoverse-breadcrumb-gap',
+    itemGap: '--neoverse-breadcrumb-item-gap',
+    fontSize: '--neoverse-breadcrumb-font-size',
+    lineHeight: '--neoverse-breadcrumb-line-height',
+    fontWeight: '--neoverse-breadcrumb-font-weight',
+    linkForeground: '--neoverse-breadcrumb-link-foreground',
+    linkHoverForeground: '--neoverse-breadcrumb-link-hover-foreground',
+    currentForeground: '--neoverse-breadcrumb-current-foreground',
+    separatorForeground: '--neoverse-breadcrumb-separator-foreground',
+    separatorSize: '--neoverse-breadcrumb-separator-size',
+    focusColor: '--neoverse-breadcrumb-focus-color',
+    focusWidth: '--neoverse-breadcrumb-focus-width',
+    focusOffset: '--neoverse-breadcrumb-focus-offset',
+    focusRadius: '--neoverse-breadcrumb-focus-radius',
+  },
   controlSurface: {
     gap: '--neoverse-control-surface-gap',
     itemGap: '--neoverse-control-surface-item-gap',
@@ -561,43 +577,134 @@ export const cssVariables = {
     },
   },
   typography: {
+    family: {
+      display: '--neoverse-typography-display-font-family',
+      title: '--neoverse-typography-title-font-family',
+      body: '--neoverse-typography-body-font-family',
+      label: '--neoverse-typography-label-font-family',
+      caption: '--neoverse-typography-caption-font-family',
+      code: '--neoverse-typography-code-font-family',
+    },
+    scale: {
+      display: {
+        lg: {
+          size: '--neoverse-typography-display-lg-size',
+          lineHeight: '--neoverse-typography-display-lg-line-height',
+          weight: '--neoverse-typography-display-lg-weight',
+          letterSpacing: '--neoverse-typography-display-lg-letter-spacing',
+        },
+        md: {
+          size: '--neoverse-typography-display-md-size',
+          lineHeight: '--neoverse-typography-display-md-line-height',
+          weight: '--neoverse-typography-display-md-weight',
+          letterSpacing: '--neoverse-typography-display-md-letter-spacing',
+        },
+      },
+      title: {
+        lg: {
+          size: '--neoverse-typography-title-lg-size',
+          lineHeight: '--neoverse-typography-title-lg-line-height',
+          weight: '--neoverse-typography-title-lg-weight',
+          letterSpacing: '--neoverse-typography-title-lg-letter-spacing',
+        },
+        md: {
+          size: '--neoverse-typography-title-md-size',
+          lineHeight: '--neoverse-typography-title-md-line-height',
+          weight: '--neoverse-typography-title-md-weight',
+          letterSpacing: '--neoverse-typography-title-md-letter-spacing',
+        },
+        sm: {
+          size: '--neoverse-typography-title-sm-size',
+          lineHeight: '--neoverse-typography-title-sm-line-height',
+          weight: '--neoverse-typography-title-sm-weight',
+          letterSpacing: '--neoverse-typography-title-sm-letter-spacing',
+        },
+      },
+      body: {
+        lg: {
+          size: '--neoverse-typography-body-lg-size',
+          lineHeight: '--neoverse-typography-body-lg-line-height',
+          weight: '--neoverse-typography-body-lg-weight',
+          letterSpacing: '--neoverse-typography-body-lg-letter-spacing',
+        },
+        md: {
+          size: '--neoverse-typography-body-md-size',
+          lineHeight: '--neoverse-typography-body-md-line-height',
+          weight: '--neoverse-typography-body-md-weight',
+          letterSpacing: '--neoverse-typography-body-md-letter-spacing',
+        },
+        sm: {
+          size: '--neoverse-typography-body-sm-size',
+          lineHeight: '--neoverse-typography-body-sm-line-height',
+          weight: '--neoverse-typography-body-sm-weight',
+          letterSpacing: '--neoverse-typography-body-sm-letter-spacing',
+        },
+      },
+      label: {
+        lg: {
+          size: '--neoverse-typography-label-lg-size',
+          lineHeight: '--neoverse-typography-label-lg-line-height',
+          weight: '--neoverse-typography-label-lg-weight',
+          letterSpacing: '--neoverse-typography-label-lg-letter-spacing',
+        },
+        md: {
+          size: '--neoverse-typography-label-md-size',
+          lineHeight: '--neoverse-typography-label-md-line-height',
+          weight: '--neoverse-typography-label-md-weight',
+          letterSpacing: '--neoverse-typography-label-md-letter-spacing',
+        },
+        sm: {
+          size: '--neoverse-typography-label-sm-size',
+          lineHeight: '--neoverse-typography-label-sm-line-height',
+          weight: '--neoverse-typography-label-sm-weight',
+          letterSpacing: '--neoverse-typography-label-sm-letter-spacing',
+        },
+      },
+    },
     display: {
+      fontFamily: '--neoverse-typography-display-font-family',
       size: '--neoverse-typography-display-size',
       lineHeight: '--neoverse-typography-display-line-height',
       weight: '--neoverse-typography-display-weight',
       letterSpacing: '--neoverse-typography-display-letter-spacing',
     },
     heading: {
+      fontFamily: '--neoverse-typography-heading-font-family',
       size: '--neoverse-typography-heading-size',
       lineHeight: '--neoverse-typography-heading-line-height',
       weight: '--neoverse-typography-heading-weight',
       letterSpacing: '--neoverse-typography-heading-letter-spacing',
     },
     subtitle: {
+      fontFamily: '--neoverse-typography-subtitle-font-family',
       size: '--neoverse-typography-subtitle-size',
       lineHeight: '--neoverse-typography-subtitle-line-height',
       weight: '--neoverse-typography-subtitle-weight',
       letterSpacing: '--neoverse-typography-subtitle-letter-spacing',
     },
     body: {
+      fontFamily: '--neoverse-typography-body-font-family',
       size: '--neoverse-typography-body-size',
       lineHeight: '--neoverse-typography-body-line-height',
       weight: '--neoverse-typography-body-weight',
       letterSpacing: '--neoverse-typography-body-letter-spacing',
     },
     label: {
+      fontFamily: '--neoverse-typography-label-font-family',
       size: '--neoverse-typography-label-size',
       lineHeight: '--neoverse-typography-label-line-height',
       weight: '--neoverse-typography-label-weight',
       letterSpacing: '--neoverse-typography-label-letter-spacing',
     },
     caption: {
+      fontFamily: '--neoverse-typography-caption-font-family',
       size: '--neoverse-typography-caption-size',
       lineHeight: '--neoverse-typography-caption-line-height',
       weight: '--neoverse-typography-caption-weight',
       letterSpacing: '--neoverse-typography-caption-letter-spacing',
     },
     code: {
+      fontFamily: '--neoverse-typography-code-font-family',
       size: '--neoverse-typography-code-size',
       lineHeight: '--neoverse-typography-code-line-height',
       weight: '--neoverse-typography-code-weight',
@@ -654,6 +761,7 @@ export const cssVariables = {
         opaque: '--neoverse-material-transparency-opaque',
         subtle: '--neoverse-material-transparency-subtle',
         elevated: '--neoverse-material-transparency-elevated',
+        card: '--neoverse-material-transparency-card',
         immersive: '--neoverse-material-transparency-immersive',
       },
       blur: {
@@ -906,7 +1014,23 @@ export const cssVariables = {
       inline: '--neoverse-layout-gutter-inline',
       block: '--neoverse-layout-gutter-block',
     },
+    page: {
+      maxWidth: '--neoverse-layout-page-max-width',
+      paddingInline: '--neoverse-layout-page-padding-inline',
+      paddingBlock: '--neoverse-layout-page-padding-block',
+    },
+    contentMaxWidth: '--neoverse-layout-content-max-width',
+    reading: {
+      width: '--neoverse-layout-reading-width',
+      wideWidth: '--neoverse-layout-reading-wide-width',
+    },
+    sidebar: {
+      width: '--neoverse-layout-sidebar-width',
+      drawerWidth: '--neoverse-layout-sidebar-drawer-width',
+    },
+    headerMinHeight: '--neoverse-layout-header-min-height',
     gridGap: '--neoverse-layout-grid-gap',
+    presentationRootSize: '--neoverse-layout-presentation-root-size',
     layer: {
       base: '--neoverse-layout-layer-base',
       raised: '--neoverse-layout-layer-raised',
@@ -934,6 +1058,7 @@ export type ButtonToken = keyof CssVariables['components']['button'];
 export type ButtonVariantToken = keyof CssVariables['components']['button']['primary'];
 export type ActionToken = keyof CssVariables['components']['action'];
 export type NavigationItemToken = keyof CssVariables['components']['navigationItem'];
+export type BreadcrumbToken = keyof CssVariables['components']['breadcrumb'];
 export type ControlSurfaceToken = keyof CssVariables['components']['controlSurface'];
 export type StatusIndicatorToken = keyof CssVariables['components']['statusIndicator'];
 export type SegmentedControlToken = keyof CssVariables['components']['segmentedControl'];

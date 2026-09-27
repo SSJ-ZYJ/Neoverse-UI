@@ -2,6 +2,7 @@
 import { UiNavigationItem } from '@neoverse-ui/vue';
 import { localize, moduleCopy } from '../playground-content';
 import ActionModule from './ActionModule.vue';
+import BreadcrumbModule from './BreadcrumbModule.vue';
 import ButtonModule from './ButtonModule.vue';
 import ControlSurfaceModule from './ControlSurfaceModule.vue';
 import DensityModule from './DensityModule.vue';
@@ -16,6 +17,7 @@ const sections = [
   { id: 'controls-button', label: moduleCopy.button.label },
   { id: 'controls-icon-button', label: moduleCopy.iconButton.label },
   { id: 'controls-action', label: moduleCopy.action.label },
+  { id: 'controls-breadcrumb', label: { en: 'Breadcrumb', zh: '面包屑导航' } },
   { id: 'controls-navigation-item', label: moduleCopy.navigationItem.label },
   { id: 'controls-segmented-control', label: moduleCopy.segmentedControl.label },
   { id: 'controls-surface', label: moduleCopy.controlSurface.label },
@@ -85,6 +87,24 @@ const sections = [
         </p>
       </header>
       <ActionModule :locale="props.locale" />
+    </section>
+
+    <section
+      id="controls-breadcrumb"
+      class="scroll-mt-24 grid gap-2"
+      :aria-labelledby="`${copy.id}-breadcrumb-title`"
+    >
+      <header class="grid gap-1">
+        <h3 :id="`${copy.id}-breadcrumb-title`" class="text-subtitle font-heading tracking-heading">
+          {{ props.locale === 'zh' ? '面包屑导航' : 'Breadcrumb' }}
+        </h3>
+        <p class="text-caption text-secondary">
+          {{ props.locale === 'zh'
+              ? '路径层级、当前页语义与局部溢出的共享导航组件。'
+              : 'Shared route hierarchy with current-page semantics and local overflow handling.' }}
+        </p>
+      </header>
+      <BreadcrumbModule :locale="props.locale" />
     </section>
 
     <section

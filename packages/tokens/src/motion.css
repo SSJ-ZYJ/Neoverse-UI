@@ -1,8 +1,8 @@
 @layer neoverse.tokens {
   :root {
-    --neoverse-motion-duration-fast: 180ms;
-    --neoverse-motion-duration-standard: 360ms;
-    --neoverse-motion-duration-expressive: 760ms;
+    --neoverse-motion-duration-fast: 140ms;
+    --neoverse-motion-duration-standard: 240ms;
+    --neoverse-motion-duration-expressive: 420ms;
 
     --neoverse-motion-easing-linear: linear;
     --neoverse-motion-easing-standard: cubic-bezier(0.22, 1, 0.36, 1);
