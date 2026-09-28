@@ -2,7 +2,7 @@
 
 React adapters for Neoverse UI.
 
-The package exposes token-backed React adapters for `UiButton`, `UiIconButton`, `UiAction`, `UiCard`, `UiNotice`, and `UiSurface`, plus the `uiActionClassName` helper for consumers that need to style an existing routing component through `asChild` composition.
+The package exposes token-backed React adapters for `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiCard`, `UiNotice`, and `UiSurface`, plus the `uiActionClassName` helper for consumers that need to style an existing routing component through `asChild` composition.
 
 ```tsx
 import { UiAction } from '@neoverse-ui/react';

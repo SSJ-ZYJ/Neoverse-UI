@@ -13,7 +13,7 @@ The repository is a Bun workspace. Public-package dependencies use explicit SemV
 | `@neoverse-ui/motion` | Stable | CSS motion aliases and reduced-motion policy |
 | `@neoverse-ui/glass-runtime` | Experimental | Optional static WebGL Glass Edge Pass |
 | `@neoverse-ui/vue` | Consumer Validation | Vue 3 SFC integration |
-| `@neoverse-ui/react` | Planned | Empty React integration boundary |
+| `@neoverse-ui/react` | Consumer Validation | React 19 adapters for consumer-validated shared components |
 | `apps/playground` | Consumer Validation | Design Lab, frame route, and visual baselines |
 
 The dependency direction is:
@@ -22,7 +22,8 @@ The dependency direction is:
 tokens -> tailwind
 tokens -> motion
 tailwind + motion -> vue
-tokens + tailwind + motion + vue -> playground
+tailwind -> react
+tokens + tailwind + motion + vue + react -> playground
 glass-runtime -> playground (optional enhancement)
 ```
 
@@ -38,8 +39,9 @@ packages/tokens/src/
   material.css    layout.css    motion.css
   components/
     shared-control.css  button.css       action.css
-    navigation-item.css control-surface.css status-indicator.css
-    segmented-control.css badge.css     skeleton.css scrollbar.css
+    breadcrumb.css      navigation-item.css control-surface.css
+    status-indicator.css segmented-control.css badge.css
+    skeleton.css        scrollbar.css
   themes/
     light.css            dark.css
 ```
@@ -59,7 +61,7 @@ The foundation provides semantic utilities such as `bg-surface-raised`, `text-pr
 | `.` / `./index.css` | Compiled zero-config consumer bundle: Tailwind utilities over the Vue/React `src` trees + the theme |
 | `./theme.css` | Semantic theme + Material utilities (source of the compiled bundle) |
 | `./components.css` | Component selector facade flattened from `src/components/*.css` |
-| `./prose.css` | Standalone `.neoverse-prose` content semantics; reading width remains a separate layout role |
+| `./prose.css` | Standalone `.neoverse-prose` content semantics for headings, lists, definitions, code, quotes, tables, disclosures, and inline reading states; reading width remains a separate layout role |
 
 The playground-only compiled bundle is emitted as `dist/playground.css` and is not exported; the package does not own application source paths — the compiled entry exists only so consumers without their own Tailwind build still receive a complete utility set.
 
@@ -71,6 +73,7 @@ The playground-only compiled bundle is emitted as `dist/playground.css` and is n
 UiButton
 UiIconButton
 UiAction
+UiBreadcrumb
 UiNavigationItem
 UiSegmentedControl
 UiControlSurface
@@ -79,11 +82,29 @@ UiCard
 UiGlassSurface  # compatibility wrapper
 UiBadge
 UiStatusIndicator
+UiNotice
+UiTooltipSurface
 UiSkeleton
 UiScrollbar
 ```
 
-They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. Components that own a visual plane consume the shared `surface` contract instead of hard-coding Glass as an intrinsic component trait. `UiButton`, `UiAction`, `UiIconButton`, and `UiSegmentedControl` keep `glass-subtle` as their compatibility default, while `UiNavigationItem` defaults to `none` so grouped navigation inherits the parent chrome rather than creating nested Glass. `UiSegmentedControl` keeps its active slider and keyboard interaction independent from the outer Surface, so `surface="none"` can be used inside a composition that already owns the chrome. `UiSurface` is the generic polymorphic material primitive. `UiCard` owns standard card geometry (`rounded-card` + base card padding) while consuming the same `surface` contract; standard cards should therefore use `UiCard surface="..."` rather than rebuilding card geometry around `UiSurface`. `UiControlSurface` owns one grouped-control chrome boundary and optional trailing separation. It also owns grouped-surface behavior policy: `hoverMode="static"` keeps parent material stable while descendants hover, and `edgeMode="local"` requests a locally rendered Glass edge without exposing renderer attributes to consumers. `UiStatusIndicator` leaves live-region announcements to the caller. `UiGlassSurface` remains a compatibility wrapper that maps its historical Glass `variant` onto the shared Surface contract. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities. React r…
+They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. Components that own a visual plane consume the shared `surface` contract instead of hard-coding Glass as an intrinsic component trait. `UiButton`, `UiAction`, `UiIconButton`, and `UiSegmentedControl` keep `glass-subtle` as their compatibility default, while `UiNavigationItem` defaults to `none` so grouped navigation inherits the parent chrome rather than creating nested Glass. `UiSegmentedControl` keeps its active slider and keyboard interaction independent from the outer Surface, so `surface="none"` can be used inside a composition that already owns the chrome. `UiSurface` is the generic polymorphic material primitive. `UiCard` owns standard card geometry (`rounded-card` + base card padding) while consuming the same `surface` contract; standard cards should therefore use `UiCard surface="..."` rather than rebuilding card geometry around `UiSurface`. `UiControlSurface` owns one grouped-control chrome boundary and optional trailing separation. It also owns grouped-surface behavior policy: `hoverMode="static"` keeps parent material stable while descendants hover, and `edgeMode="local"` requests a locally rendered Glass edge without exposing renderer attributes to consumers. `UiStatusIndicator` leaves live-region announcements to the caller. `UiGlassSurface` remains a compatibility wrapper that maps its historical Glass `variant` onto the shared Surface contract. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities.
+
+## React components
+
+`@neoverse-ui/react` contains the consumer-validated React 19 adapters:
+
+```text
+UiButton
+UiIconButton
+UiAction
+UiBreadcrumb
+UiSurface
+UiCard
+UiNotice
+```
+
+React adapters share the same Tailwind component selectors, Surface presets, native interaction semantics, and accessibility expectations as Vue. They intentionally cover concrete React consumer needs rather than claiming full framework parity. `UiAction` supports `asChild` routing composition, `UiBreadcrumb` exposes a custom item renderer seam, and native controls preserve refs and platform attributes. Additional adapters are added only when a real consumer requires them.
 
 Display-only semantic primitives do not gain a `surface` prop merely for API symmetry. `UiBadge` owns status/semantic color, `UiStatusIndicator` owns presence language, `UiSkeleton` owns loading geometry/effect, and `UiScrollbar` owns document-scroll runtime. Consumers should wrap those primitives in `UiSurface`, `UiCard`, or `UiControlSurface` when a material plane is needed instead of making every primitive a Glass surface.
 

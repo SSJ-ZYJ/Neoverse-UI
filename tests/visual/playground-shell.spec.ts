@@ -252,9 +252,24 @@ test('reading composition consumes the prose foundation with an independent read
     const blockquote = prose.querySelector<HTMLElement>('blockquote');
     const inlineCode = prose.querySelector<HTMLElement>('p code');
     const tableCell = prose.querySelector<HTMLElement>('tbody td');
+    const tableCaption = prose.querySelector<HTMLElement>('caption');
+    const definitionTerm = prose.querySelector<HTMLElement>('dt');
+    const definitionDescription = prose.querySelector<HTMLElement>('dd');
+    const nestedList = prose.querySelector<HTMLElement>('li ul');
+    const abbreviation = prose.querySelector<HTMLElement>('abbr[title]');
     const details = prose.querySelector<HTMLElement>('details');
 
-    if (blockquote === null || inlineCode === null || tableCell === null || details === null) {
+    if (
+      blockquote === null ||
+      inlineCode === null ||
+      tableCell === null ||
+      tableCaption === null ||
+      definitionTerm === null ||
+      definitionDescription === null ||
+      nestedList === null ||
+      abbreviation === null ||
+      details === null
+    ) {
       throw new Error('Reading composition is missing prose semantic fixtures');
     }
 
@@ -262,6 +277,11 @@ test('reading composition consumes the prose foundation with an independent read
     const blockquoteStyle = getComputedStyle(blockquote);
     const inlineCodeStyle = getComputedStyle(inlineCode);
     const tableCellStyle = getComputedStyle(tableCell);
+    const tableCaptionStyle = getComputedStyle(tableCaption);
+    const definitionTermStyle = getComputedStyle(definitionTerm);
+    const definitionDescriptionStyle = getComputedStyle(definitionDescription);
+    const nestedListStyle = getComputedStyle(nestedList);
+    const abbreviationStyle = getComputedStyle(abbreviation);
     const detailsStyle = getComputedStyle(details);
 
     return {
@@ -273,6 +293,11 @@ test('reading composition consumes the prose foundation with an independent read
       codeFontFamily: inlineCodeStyle.fontFamily,
       bodyFontFamily: proseStyle.fontFamily,
       tableCellPaddingInline: tableCellStyle.paddingInline,
+      tableCaptionColor: tableCaptionStyle.color,
+      definitionTermWeight: definitionTermStyle.fontWeight,
+      definitionDescriptionMargin: definitionDescriptionStyle.marginInlineStart,
+      nestedListMarginBlock: nestedListStyle.marginBlock,
+      abbreviationDecorationStyle: abbreviationStyle.textDecorationStyle,
       detailsBorderStyle: detailsStyle.borderStyle,
     };
   });
@@ -284,7 +309,27 @@ test('reading composition consumes the prose foundation with an independent read
   expect(metrics.blockquoteBorderWidth).not.toBe('0px');
   expect(metrics.codeFontFamily).not.toBe(metrics.bodyFontFamily);
   expect(metrics.tableCellPaddingInline).not.toBe('0px');
+  expect(metrics.tableCaptionColor).not.toBe('rgba(0, 0, 0, 0)');
+  expect(Number.parseInt(metrics.definitionTermWeight, 10)).toBeGreaterThanOrEqual(600);
+  expect(metrics.definitionDescriptionMargin).not.toBe('0px');
+  expect(metrics.nestedListMarginBlock).not.toBe('0px');
+  expect(metrics.abbreviationDecorationStyle).toBe('dotted');
   expect(metrics.detailsBorderStyle).not.toBe('none');
+
+  const summary = page.locator('[data-reading-prose] summary');
+  await summary.focus();
+  const focusedSummary = await summary.evaluate((element) => {
+    const style = getComputedStyle(element as HTMLElement);
+    return { outlineStyle: style.outlineStyle, outlineWidth: style.outlineWidth };
+  });
+  expect(focusedSummary.outlineStyle).not.toBe('none');
+  expect(focusedSummary.outlineWidth).not.toBe('0px');
+
+  await summary.press('Enter');
+  await expect(page.locator('[data-reading-prose] details')).toHaveAttribute('open', '');
+  expect(
+    await summary.evaluate((element) => getComputedStyle(element as HTMLElement).marginBlockEnd),
+  ).not.toBe('0px');
 });
 
 test('prose and reading fixtures keep mobile overflow inside their content regions', async ({
@@ -306,7 +351,8 @@ test('prose and reading fixtures keep mobile overflow inside their content regio
   const readingMetrics = await page.evaluate(() => {
     const pre = document.querySelector<HTMLElement>('#reading-panel pre');
     const tableScroll = document.querySelector<HTMLElement>('[data-reading-table-scroll]');
-    if (pre === null || tableScroll === null) {
+    const longInline = document.querySelector<HTMLElement>('[data-reading-long-inline]');
+    if (pre === null || tableScroll === null || longInline === null) {
       throw new Error('Reading overflow fixtures are missing');
     }
 
@@ -316,12 +362,15 @@ test('prose and reading fixtures keep mobile overflow inside their content regio
       preClientWidth: pre.clientWidth,
       preScrollWidth: pre.scrollWidth,
       tableWidth: tableScroll.getBoundingClientRect().width,
+      inlineClientWidth: longInline.clientWidth,
+      inlineScrollWidth: longInline.scrollWidth,
     };
   });
 
   expect(readingMetrics.rootScrollWidth).toBe(readingMetrics.viewportWidth);
   expect(readingMetrics.preScrollWidth).toBeGreaterThan(readingMetrics.preClientWidth);
   expect(readingMetrics.tableWidth).toBeLessThanOrEqual(readingMetrics.viewportWidth);
+  expect(readingMetrics.inlineScrollWidth).toBeLessThanOrEqual(readingMetrics.inlineClientWidth);
 });
 
 test('overview catalogue searches public component API names', async ({ page }) => {

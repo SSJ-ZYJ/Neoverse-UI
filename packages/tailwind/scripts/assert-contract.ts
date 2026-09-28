@@ -427,6 +427,19 @@ try {
   const emittedForbiddenButtonFragments = forbiddenButtonFragments.filter((fragment) =>
     buttonCss.includes(fragment),
   );
+  const expectedProseFragments = [
+    '.neoverse-prose :where(a, code, dd)',
+    '.neoverse-prose :where(ul, ol) :where(ul, ol)',
+    '.neoverse-prose dt',
+    '.neoverse-prose dd',
+    '.neoverse-prose caption',
+    '.neoverse-prose summary:focus-visible',
+    '.neoverse-prose details[open] summary',
+    '.neoverse-prose abbr[title]',
+  ];
+  const missingProseFragments = expectedProseFragments.filter(
+    (fragment) => !proseCss.includes(fragment),
+  );
 
   if (
     missingSelectors.length > 0 ||
@@ -438,6 +451,7 @@ try {
     missingGhostActiveFragments.length > 0 ||
     emittedForbiddenButtonFragments.length > 0 ||
     missingBadgeFragments.length > 0 ||
+    missingProseFragments.length > 0 ||
     hardcodedGeometryLiterals.length > 0 ||
     flattenedComponentsCss.includes('@import') ||
     !proseCss.includes('.neoverse-prose') ||
@@ -464,6 +478,9 @@ try {
         : '',
       missingBadgeFragments.length > 0
         ? `Missing badge token fragments: ${missingBadgeFragments.join(', ')}`
+        : '',
+      missingProseFragments.length > 0
+        ? `Missing prose semantic fragments: ${missingProseFragments.join(', ')}`
         : '',
       hardcodedGeometryLiterals.length > 0
         ? `Hard-coded rem/px geometry in component CSS: ${hardcodedGeometryLiterals.join(', ')}`

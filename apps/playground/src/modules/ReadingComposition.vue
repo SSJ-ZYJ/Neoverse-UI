@@ -19,6 +19,14 @@ const copy = computed(() =>
         quote: '共享材质负责一致性，内容组件负责阅读语义。',
         details: '实现说明',
         detail: '表格和长代码在各自容器内滚动，不撑宽文章。',
+        abbreviation: '设计系统',
+        abbreviationTitle: 'Design System',
+        terms: [
+          ['阅读语义', '标题、列表、定义、引用和内联内容由正文层统一排版。'],
+          ['产品布局', '文章宽度、路由、目录与业务内容仍由 Consumer 负责。'],
+        ],
+        nested: '嵌套列表保持更紧凑的垂直节奏。',
+        tableCaption: '共享职责与产品职责边界',
         columns: ['组件', '共享职责', '产品职责'],
         rows: [
           ['代码块', '颜色、边框和复制按钮', '高亮、文件标题、长代码降级与语言渲染'],
@@ -46,6 +54,20 @@ const copy = computed(() =>
         details: 'Implementation notes',
         detail:
           'Tables and long code scroll inside their own containers without widening the article.',
+        abbreviation: 'design system',
+        abbreviationTitle: 'Design System',
+        terms: [
+          [
+            'Reading semantics',
+            'Headings, lists, definitions, quotes, and inline content share one prose layer.',
+          ],
+          [
+            'Product layout',
+            'Article width, routing, table of contents, and business content stay with the consumer.',
+          ],
+        ],
+        nested: 'Nested lists keep a tighter vertical rhythm.',
+        tableCaption: 'Shared and product responsibility boundary',
         columns: ['Component', 'Shared responsibility', 'Product responsibility'],
         rows: [
           [
@@ -146,13 +168,33 @@ function onTabKey(event: KeyboardEvent) {
     <UiSurface as="article" surface="subtle" class="rounded-card p-4 md:p-5">
       <div data-reading-prose class="neoverse-prose max-w-reading">
         <h4>{{ copy.content }}</h4>
-        <p>{{ copy.widthRole }} <code>max-w-reading</code></p>
+        <p>
+          {{ copy.widthRole }} <code>max-w-reading</code>
+          <abbr :title="copy.abbreviationTitle">{{ copy.abbreviation }}</abbr>
+        </p>
+        <p data-reading-long-inline>
+          <code
+            >@neoverse-ui/tailwind/prose.css?contract=reading-foundation-and-local-overflow</code
+          >
+        </p>
 
         <blockquote>{{ copy.quote }}</blockquote>
 
         <ul>
-          <li v-for="note in copy.notes" :key="note">{{ note }}</li>
+          <li v-for="(note, index) in copy.notes" :key="note">
+            {{ note }}
+            <ul v-if="index === 1">
+              <li>{{ copy.nested }}</li>
+            </ul>
+          </li>
         </ul>
+
+        <dl data-reading-definitions>
+          <template v-for="term in copy.terms" :key="term[0]">
+            <dt>{{ term[0] }}</dt>
+            <dd>{{ term[1] }}</dd>
+          </template>
+        </dl>
 
         <UiSurface
           as="section"
@@ -163,6 +205,9 @@ function onTabKey(event: KeyboardEvent) {
           :aria-label="copy.content"
         >
           <table>
+            <caption>
+              {{ copy.tableCaption }}
+            </caption>
             <thead>
               <tr>
                 <th v-for="column in copy.columns" :key="column">
