@@ -1168,7 +1168,7 @@ test('exposes the optional presentation root-size layout token', async () => {
 
   expect(cssVariables.layout.presentationRootSize).toBe('--neoverse-layout-presentation-root-size');
   expect(layoutCss).toContain('--neoverse-layout-presentation-root-size: clamp(');
-  expect(layoutCss).toContain('calc(0.75rem + 0.3125vw)');
+  expect(layoutCss).toContain('calc(0.8125rem + 0.3125vw)');
 });
 
 test('exposes semantic page layout roles above the primitive container scale', async () => {

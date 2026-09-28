@@ -1,4 +1,6 @@
 :root {
   --neoverse-playground-consumer-dock-viewport-clearance: 1.2rem;
   --neoverse-playground-consumer-dock-compact-breakpoint: 32.5rem;
+  --neoverse-playground-token-card-min-width: 18rem;
+  --neoverse-playground-specimen-card-min-width: 23.75rem;
 }

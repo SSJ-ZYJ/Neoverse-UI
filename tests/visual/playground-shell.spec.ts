@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { layoutBreakpoints } from '../../packages/tokens/src/index';
 
 test('desktop playground uses the 1920x1080 100% baseline and fills the viewport', async ({
   page,
@@ -41,14 +42,134 @@ test('playground presentation density scales with desktop viewport width', async
   };
 
   const expectedRootSizes = new Map([
-    [1280, 16],
-    [1600, 17],
-    [1920, 18],
+    [1280, 17],
+    [1600, 18],
+    [1920, 19],
     [2560, 20],
   ]);
 
   for (const [width, expected] of expectedRootSizes) {
     expect(await readRootFontSize(width), `viewport ${width}`).toBeCloseTo(expected, 1);
+  }
+});
+
+test('overview desktop presentation uses the expanded semantic scale', async ({
+  page,
+}, testInfo) => {
+  test.skip(
+    testInfo.project.name !== 'desktop',
+    'This assertion defines the desktop Overview scale.',
+  );
+
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/?lang=zh', { waitUntil: 'domcontentloaded' });
+
+  const metrics = await page.evaluate(() => {
+    const rootSize = Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+    const navigationItem = document.querySelector<HTMLElement>(
+      '[data-playground-navigation] .ui-navigation-item',
+    );
+    const hero = document.querySelector<HTMLElement>('[data-overview-hero]');
+    const heroTitle = document.querySelector<HTMLElement>('#overview-title');
+    const heroBody = hero?.querySelector<HTMLElement>('header p:last-child');
+    const groupCard = document.querySelector<HTMLElement>('[data-overview-groups] > *');
+    const search = document.querySelector<HTMLElement>('[data-specimen-search]');
+    const specimenTitle = document.querySelector<HTMLElement>('[data-specimen-catalogue] h4');
+
+    if (
+      navigationItem === null ||
+      hero === null ||
+      heroTitle === null ||
+      heroBody === undefined ||
+      heroBody === null ||
+      groupCard === null ||
+      search === null ||
+      specimenTitle === null
+    ) {
+      throw new Error('Expanded Overview scale fixtures are missing');
+    }
+
+    return {
+      rootSize,
+      navigationFontSize: Number.parseFloat(getComputedStyle(navigationItem).fontSize),
+      heroPaddingInline: Number.parseFloat(getComputedStyle(hero).paddingInlineStart),
+      heroTitleFontSize: Number.parseFloat(getComputedStyle(heroTitle).fontSize),
+      heroBodyFontSize: Number.parseFloat(getComputedStyle(heroBody).fontSize),
+      groupCardHeight: groupCard.getBoundingClientRect().height,
+      searchHeight: search.getBoundingClientRect().height,
+      specimenTitleFontSize: Number.parseFloat(getComputedStyle(specimenTitle).fontSize),
+      documentOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    };
+  });
+
+  expect(metrics.rootSize).toBeCloseTo(19, 1);
+  expect(metrics.navigationFontSize).toBeGreaterThanOrEqual(metrics.rootSize * 0.84);
+  expect(metrics.heroPaddingInline).toBeGreaterThanOrEqual(metrics.rootSize * 1.9);
+  expect(metrics.heroTitleFontSize).toBeGreaterThanOrEqual(metrics.rootSize * 2.9);
+  expect(metrics.heroBodyFontSize).toBeGreaterThanOrEqual(metrics.rootSize * 1.1);
+  expect(metrics.groupCardHeight).toBeGreaterThanOrEqual(metrics.rootSize * 8);
+  expect(metrics.searchHeight).toBeGreaterThanOrEqual(metrics.rootSize * 3.2);
+  expect(metrics.specimenTitleFontSize).toBeGreaterThanOrEqual(metrics.rootSize * 0.84);
+  expect(metrics.documentOverflow).toBeLessThanOrEqual(0);
+});
+
+test('design lab density grids respond to available content width', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'This assertion defines desktop content density.');
+  const scenarios = [
+    {
+      moduleId: 'materials',
+      selector: '.playground-token-grid',
+      expected: new Map([
+        [1280, 2],
+        [1600, 3],
+        [1920, 4],
+      ]),
+    },
+    {
+      moduleId: 'shadow',
+      selector: '.playground-token-grid',
+      expected: new Map([
+        [1280, 2],
+        [1600, 3],
+        [1920, 4],
+      ]),
+    },
+    {
+      moduleId: 'typography',
+      selector: '.playground-specimen-grid',
+      expected: new Map([
+        [1280, 2],
+        [1600, 2],
+        [1920, 3],
+      ]),
+    },
+  ] as const;
+
+  for (const scenario of scenarios) {
+    for (const [width, expectedColumns] of scenario.expected) {
+      await page.setViewportSize({ width, height: 1000 });
+      await page.goto(`/?lang=en#${scenario.moduleId}`, { waitUntil: 'domcontentloaded' });
+
+      const rowCounts = await page.locator(scenario.selector).evaluateAll((grids) =>
+        grids.map((grid) => {
+          const children = [...grid.children].filter((child) => {
+            const rect = child.getBoundingClientRect();
+            return rect.width > 0 && rect.height > 0;
+          });
+          const firstTop = children[0]?.getBoundingClientRect().top;
+          if (firstTop === undefined) return 0;
+          return children.filter(
+            (child) => Math.abs(child.getBoundingClientRect().top - firstTop) <= 1,
+          ).length;
+        }),
+      );
+
+      expect(rowCounts.length, `${scenario.moduleId} grids at ${width}px`).toBeGreaterThan(0);
+      expect(
+        rowCounts.every((count) => count === expectedColumns),
+        `${scenario.moduleId} first-row density at ${width}px`,
+      ).toBe(true);
+    }
   }
 });
 
@@ -75,10 +196,13 @@ test('playground shell consumes semantic page and sidebar layout roles', async (
     };
   });
 
-  expect(desktopMetrics.rootSize).toBeCloseTo(18, 1);
+  expect(desktopMetrics.rootSize).toBeCloseTo(19, 1);
   expect(desktopMetrics.navigationWidth).toBeCloseTo(desktopMetrics.rootSize * 13, 1);
   expect(desktopMetrics.pageMaxWidth).toBeCloseTo(desktopMetrics.rootSize * 88, 1);
-  expect(desktopMetrics.pageWidth).toBeCloseTo(desktopMetrics.pageMaxWidth, 1);
+  expect(desktopMetrics.pageWidth).toBeLessThanOrEqual(desktopMetrics.pageMaxWidth);
+  expect(desktopMetrics.pageMaxWidth - desktopMetrics.pageWidth).toBeLessThanOrEqual(
+    desktopMetrics.rootSize,
+  );
   expect(desktopMetrics.headerMinHeight).toBeCloseTo(desktopMetrics.rootSize * 3.5, 1);
 
   await page.setViewportSize({ width: 390, height: 844 });
@@ -99,6 +223,31 @@ test('playground shell consumes semantic page and sidebar layout roles', async (
 
   expect(mobileMetrics.rootSize).toBeCloseTo(16, 1);
   expect(mobileMetrics.navigationWidth).toBeCloseTo(mobileMetrics.rootSize * 18, 1);
+});
+
+test('playground keeps drawer navigation until the xl shell breakpoint', async ({ page }) => {
+  await page.setViewportSize({ width: layoutBreakpoints.xl - 1, height: 900 });
+  await page.goto('/?lang=en#controls', { waitUntil: 'domcontentloaded' });
+
+  const navigation = page.locator('[data-playground-navigation]');
+  const trigger = page.locator('[data-playground-nav-trigger]');
+  const workspace = page.locator('[data-design-lab-workspace]');
+
+  await expect(trigger).toBeVisible();
+  expect(await navigation.evaluate((element) => (element as HTMLElement).inert)).toBe(true);
+  expect(await navigation.evaluate((element) => getComputedStyle(element).position)).toBe('fixed');
+  expect(
+    await workspace.evaluate((element) => element.getBoundingClientRect().width),
+  ).toBeGreaterThan(layoutBreakpoints.xl - 24);
+
+  await page.setViewportSize({ width: layoutBreakpoints.xl, height: 900 });
+  await page.reload({ waitUntil: 'domcontentloaded' });
+
+  await expect(trigger).toBeHidden();
+  expect(await navigation.evaluate((element) => (element as HTMLElement).inert)).toBe(false);
+  expect(await navigation.evaluate((element) => getComputedStyle(element).position)).toBe(
+    'relative',
+  );
 });
 
 test('isolated frame keeps the canonical 16px component baseline', async ({ page }) => {
@@ -382,6 +531,45 @@ test('overview catalogue searches public component API names', async ({ page }) 
   await expect(page.locator('[data-specimen-catalogue] a')).toHaveCount(1);
 });
 
+test('control specimens expose the complete interactive state matrix', async ({ page }) => {
+  await page.goto('/?lang=en#controls', { waitUntil: 'domcontentloaded' });
+
+  const buttonSection = page.locator('#controls-button');
+  const requiredStates = ['Default', 'Hover', 'Active', 'Focus', 'Disabled', 'Loading'];
+  for (const label of requiredStates) {
+    await expect(
+      buttonSection.locator(`[data-specimen-state-row][data-specimen-label="${label}"]`),
+    ).toBeVisible();
+  }
+
+  const disabledButton = buttonSection
+    .locator('[data-specimen-state-row][data-specimen-label="Disabled"] .ui-button')
+    .first();
+  await expect(disabledButton).toBeDisabled();
+
+  const loadingButton = buttonSection
+    .locator('[data-specimen-state-row][data-specimen-label="Loading"] .ui-button')
+    .first();
+  await expect(loadingButton).toBeDisabled();
+  await expect(loadingButton).toHaveAttribute('aria-busy', 'true');
+
+  const focusButton = buttonSection
+    .locator('[data-specimen-state-row][data-specimen-label="Focus"] .ui-button')
+    .first();
+  await focusButton.focus();
+  const focusStyle = await focusButton.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { outline: style.outlineStyle, shadow: style.boxShadow };
+  });
+  expect(focusStyle.outline !== 'none' || focusStyle.shadow !== 'none').toBe(true);
+
+  const hoverButton = buttonSection
+    .locator('[data-specimen-state-row][data-specimen-label="Hover"] .ui-button')
+    .first();
+  await hoverButton.hover();
+  await expect(hoverButton).toBeVisible();
+});
+
 test('default cards keep a visible material fill in light and dark themes', async ({ page }) => {
   for (const theme of ['light', 'dark'] as const) {
     await page.goto(`/?theme=${theme}&lang=en#card`, { waitUntil: 'domcontentloaded' });
@@ -413,18 +601,43 @@ test('in-page module anchors do not reset the workspace scroll position', async 
   await expect(page).toHaveURL(/#controls-action$/);
 });
 
-test('mobile playground header stays within the viewport', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/?lang=en#controls', { waitUntil: 'domcontentloaded' });
+test('mobile playground header preserves title width and stays within the viewport', async ({
+  page,
+}) => {
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/?lang=en#controls', { waitUntil: 'domcontentloaded' });
 
-  const overflow = await page.evaluate(() => ({
-    document: document.documentElement.scrollWidth - document.documentElement.clientWidth,
-    body: document.body.scrollWidth - document.body.clientWidth,
-  }));
+    const metrics = await page.evaluate(() => {
+      const title = document.querySelector<HTMLElement>('#module-title');
+      const header = document.querySelector<HTMLElement>('[data-playground-page] > header');
+      if (title === null || header === null) {
+        throw new Error('Playground mobile header fixtures are missing');
+      }
 
-  expect(overflow.document).toBeLessThanOrEqual(0);
-  expect(overflow.body).toBeLessThanOrEqual(0);
-  await expect(page.locator('[data-back-to-overview]')).toBeHidden();
+      return {
+        documentOverflow:
+          document.documentElement.scrollWidth - document.documentElement.clientWidth,
+        bodyOverflow: document.body.scrollWidth - document.body.clientWidth,
+        titleClientWidth: title.clientWidth,
+        titleScrollWidth: title.scrollWidth,
+        headerRight: header.getBoundingClientRect().right,
+        viewportWidth: document.documentElement.clientWidth,
+      };
+    });
+
+    expect(metrics.documentOverflow, `document overflow at ${width}px`).toBeLessThanOrEqual(0);
+    expect(metrics.bodyOverflow, `body overflow at ${width}px`).toBeLessThanOrEqual(0);
+    expect(metrics.titleClientWidth, `title width at ${width}px`).toBeGreaterThan(80);
+    expect(
+      metrics.titleScrollWidth - metrics.titleClientWidth,
+      `title truncation at ${width}px`,
+    ).toBeLessThanOrEqual(1);
+    expect(metrics.headerRight, `header edge at ${width}px`).toBeLessThanOrEqual(
+      metrics.viewportWidth,
+    );
+    await expect(page.locator('[data-back-to-overview]')).toBeHidden();
+  }
 });
 
 test('closed mobile navigation is inert and restores focus to its trigger', async ({ page }) => {

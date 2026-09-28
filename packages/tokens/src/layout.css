@@ -19,7 +19,7 @@
     --neoverse-layout-page-padding-inline: var(--neoverse-layout-gutter-inline);
     --neoverse-layout-page-padding-block: var(--neoverse-layout-gutter-block);
     --neoverse-layout-grid-gap: var(--neoverse-space-4);
-    --neoverse-layout-presentation-root-size: clamp(1rem, calc(0.75rem + 0.3125vw), 1.25rem);
+    --neoverse-layout-presentation-root-size: clamp(1rem, calc(0.8125rem + 0.3125vw), 1.25rem);
     --neoverse-layout-layer-base: 0;
     --neoverse-layout-layer-raised: 10;
     --neoverse-layout-layer-sticky: 20;

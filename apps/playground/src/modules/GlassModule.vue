@@ -16,7 +16,7 @@ const glassSurfaces = {
 
 <template>
   <MaterialBackdrop>
-    <div class="grid gap-grid md:grid-cols-2 xl:grid-cols-4">
+    <div class="playground-token-grid">
       <UiSurface
         v-for="variant in glassVariants"
         :key="variant"

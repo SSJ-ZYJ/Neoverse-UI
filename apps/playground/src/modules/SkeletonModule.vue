@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiSkeleton } from '@neoverse-ui/vue';
+import { UiSkeleton, UiSurface } from '@neoverse-ui/vue';
 import { localize, moduleCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
 
@@ -9,19 +9,19 @@ const copy = moduleCopy.skeleton;
 
 <template>
   <div class="grid gap-grid sm:grid-cols-2 lg:grid-cols-3">
-    <article class="grid gap-3 rounded-control material-glass-subtle p-4">
+    <UiSurface as="article" surface="glass-subtle" class="playground-specimen-panel grid gap-3">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.text, props.locale) }}
       </h3>
       <UiSkeleton variant="text" class="w-full" />
-    </article>
-    <article class="grid gap-3 rounded-control material-glass-subtle p-4">
+    </UiSurface>
+    <UiSurface as="article" surface="glass-subtle" class="playground-specimen-panel grid gap-3">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.title, props.locale) }}
       </h3>
       <UiSkeleton variant="title" class="w-4/5" />
-    </article>
-    <article class="grid gap-3 rounded-control material-glass-subtle p-4">
+    </UiSurface>
+    <UiSurface as="article" surface="glass-subtle" class="playground-specimen-panel grid gap-3">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.rect, props.locale) }}
       </h3>
@@ -31,14 +31,14 @@ const copy = moduleCopy.skeleton;
         height="var(--neoverse-space-24)"
         radius="var(--neoverse-radius-md)"
       />
-    </article>
-    <article class="grid gap-3 rounded-control material-glass-subtle p-4">
+    </UiSurface>
+    <UiSurface as="article" surface="glass-subtle" class="playground-specimen-panel grid gap-3">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.circle, props.locale) }}
       </h3>
       <UiSkeleton variant="circle" class="size-16" />
-    </article>
-    <article class="grid gap-3 rounded-control material-glass-subtle p-4">
+    </UiSurface>
+    <UiSurface as="article" surface="glass-subtle" class="playground-specimen-panel grid gap-3">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.avatar, props.locale) }}
       </h3>
@@ -49,9 +49,9 @@ const copy = moduleCopy.skeleton;
           <UiSkeleton variant="text" class="w-full" />
         </div>
       </div>
-    </article>
+    </UiSurface>
   </div>
-  <div class="grid gap-2 rounded-control material-glass-subtle p-4 sm:grid-cols-2">
+  <UiSurface surface="glass-subtle" class="playground-specimen-panel grid gap-2 sm:grid-cols-2">
     <div class="grid gap-2">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.pulse, props.locale) }}
@@ -64,6 +64,6 @@ const copy = moduleCopy.skeleton;
       </h3>
       <UiSkeleton effect="none" class="w-3/5" />
     </div>
-  </div>
-  <p class="text-caption text-secondary">{{ localize(copy.body, props.locale) }}</p>
+  </UiSurface>
+  <p class="text-body-sm text-secondary">{{ localize(copy.body, props.locale) }}</p>
 </template>

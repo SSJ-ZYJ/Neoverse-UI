@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { UiSurface } from '@neoverse-ui/vue';
+import LabSpecimenSection from '../LabSpecimenSection.vue';
 import { typographyCompatibilityTokens, typographyTokens } from '../lab-data';
 import { localize, localized, moduleCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
@@ -42,20 +44,18 @@ const scaleCopy = {
 
 <template>
   <div id="foundation-typography" class="scroll-mt-24 grid gap-grid">
-    <section class="grid gap-3" aria-labelledby="typography-scale-title">
-      <header class="grid gap-1">
-        <h2 id="typography-scale-title" class="text-title-lg font-title text-primary">
-          {{ localize(scaleCopy.title, props.locale) }}
-        </h2>
-        <p class="text-body-sm font-body text-secondary">
-          {{ localize(scaleCopy.description, props.locale) }}
-        </p>
-      </header>
-      <div class="grid gap-3 lg:grid-cols-2">
-        <article
+    <LabSpecimenSection
+      id="typography-scale"
+      :title="localize(scaleCopy.title, props.locale)"
+      :description="localize(scaleCopy.description, props.locale)"
+    >
+      <div class="playground-specimen-grid">
+        <UiSurface
           v-for="token in typographyTokens"
           :key="token.label.en"
-          class="grid gap-3 rounded-control material-glass-subtle p-4"
+          as="article"
+          surface="glass-subtle"
+          class="playground-specimen-panel grid gap-3"
         >
           <div class="flex flex-wrap items-baseline justify-between gap-2">
             <h3 class="text-label-md font-label text-primary">
@@ -67,25 +67,16 @@ const scaleCopy = {
             {{ localize(moduleCopy.typography.sample, props.locale) }}
           </p>
           <code class="text-code text-muted">{{ token.variables.join(' · ') }}</code>
-        </article>
+        </UiSurface>
       </div>
-    </section>
+    </LabSpecimenSection>
 
-    <section
+    <LabSpecimenSection
       id="foundation-prose"
-      class="scroll-mt-24 grid gap-3"
-      aria-labelledby="typography-prose-title"
+      :title="localize(scaleCopy.prose, props.locale)"
+      :description="localize(scaleCopy.proseDescription, props.locale)"
     >
-      <header class="grid gap-1">
-        <h2 id="typography-prose-title" class="text-title-lg font-title text-primary">
-          {{ localize(scaleCopy.prose, props.locale) }}
-        </h2>
-        <p class="text-body-sm font-body text-secondary">
-          {{ localize(scaleCopy.proseDescription, props.locale) }}
-        </p>
-      </header>
-
-      <article class="rounded-card bg-surface-subtle p-4 md:p-5">
+      <UiSurface as="article" surface="subtle" class="playground-specimen-panel">
         <div data-foundation-prose class="neoverse-prose max-w-reading">
           <h3>{{ localize(scaleCopy.prose, props.locale) }}</h3>
           <p>{{ localize(scaleCopy.proseBody, props.locale) }}</p>
@@ -99,23 +90,21 @@ const scaleCopy = {
             <a href="#composition-reading">{{ localize(scaleCopy.proseLink, props.locale) }}</a>
           </p>
         </div>
-      </article>
-    </section>
+      </UiSurface>
+    </LabSpecimenSection>
 
-    <section class="grid gap-3" aria-labelledby="typography-compatibility-title">
-      <header class="grid gap-1">
-        <h2 id="typography-compatibility-title" class="text-title-lg font-title text-primary">
-          {{ localize(scaleCopy.compatibility, props.locale) }}
-        </h2>
-        <p class="text-body-sm font-body text-secondary">
-          {{ localize(scaleCopy.compatibilityDescription, props.locale) }}
-        </p>
-      </header>
-      <div class="grid gap-3 md:grid-cols-2">
-        <article
+    <LabSpecimenSection
+      id="typography-compatibility"
+      :title="localize(scaleCopy.compatibility, props.locale)"
+      :description="localize(scaleCopy.compatibilityDescription, props.locale)"
+    >
+      <div class="playground-specimen-grid">
+        <UiSurface
           v-for="token in typographyCompatibilityTokens"
           :key="token.label.en"
-          class="grid gap-2 rounded-control bg-surface-subtle p-4"
+          as="article"
+          surface="subtle"
+          class="playground-specimen-panel grid gap-2"
         >
           <div class="flex flex-wrap items-baseline justify-between gap-2">
             <h3 class="text-label-md font-label text-primary">
@@ -126,8 +115,8 @@ const scaleCopy = {
           <p :class="token.className">
             {{ localize(moduleCopy.typography.sample, props.locale) }}
           </p>
-        </article>
+        </UiSurface>
       </div>
-    </section>
+    </LabSpecimenSection>
   </div>
 </template>

@@ -21,3 +21,44 @@
   --neoverse-navigation-item-active-background: none;
   --neoverse-navigation-item-active-shadow: var(--neoverse-shadow-none);
 }
+
+.playground-token-grid {
+  display: grid;
+  grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--neoverse-playground-token-card-min-width)), 1fr)
+    );
+  gap: var(--neoverse-layout-grid-gap);
+}
+
+.playground-specimen-grid {
+  display: grid;
+  grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--neoverse-playground-specimen-card-min-width)), 1fr)
+    );
+  gap: var(--neoverse-space-3);
+}
+
+.playground-specimen-section {
+  display: grid;
+  gap: var(--neoverse-space-3);
+}
+
+.playground-specimen-section__header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: var(--neoverse-space-3);
+}
+
+.playground-specimen-row {
+  border-radius: var(--neoverse-radius-card);
+  padding: var(--neoverse-space-3);
+}
+
+.playground-specimen-panel {
+  border-radius: var(--neoverse-radius-card);
+  padding: var(--neoverse-space-4);
+}

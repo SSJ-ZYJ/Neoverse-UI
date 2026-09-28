@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { UiButton } from '@neoverse-ui/vue';
+import { UiButton, UiSurface } from '@neoverse-ui/vue';
 import { ref } from 'vue';
+import LabSpecimenSection from '../LabSpecimenSection.vue';
 import { motionBaseGroups, motionVariableGroups } from '../lab-data';
 import { formatLocalized, localize, localized, moduleCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
@@ -30,16 +31,12 @@ const motionBaseEntries = motionBaseGroups.map((group) => ({
 
 <template>
   <div id="foundation-motion" class="scroll-mt-24 grid gap-grid">
-    <section class="grid gap-3" aria-labelledby="motion-primitive-title">
-      <header class="grid gap-1">
-        <h2 id="motion-primitive-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.motion.primitive.label, props.locale) }}
-        </h2>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.motion.primitive.description, props.locale) }}
-        </p>
-      </header>
-      <div class="grid gap-3 rounded-control material-glass-subtle p-4 md:grid-cols-2">
+    <LabSpecimenSection
+      id="motion-primitive"
+      :title="localize(moduleCopy.motion.primitive.label, props.locale)"
+      :description="localize(moduleCopy.motion.primitive.description, props.locale)"
+    >
+      <UiSurface surface="glass-subtle" class="playground-specimen-panel grid gap-3 md:grid-cols-2">
         <div v-for="group in motionBaseEntries" :key="group.label.en" class="grid gap-1">
           <h3 class="text-label font-label text-primary">
             {{ localize(group.label, props.locale) }}
@@ -48,18 +45,15 @@ const motionBaseEntries = motionBaseGroups.map((group) => ({
             {{ key }}: {{ value }}
           </code>
         </div>
-      </div>
-    </section>
-    <section class="grid gap-3" aria-labelledby="motion-alias-title">
-      <header class="grid gap-1">
-        <h2 id="motion-alias-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.motion.aliases.label, props.locale) }}
-        </h2>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.motion.aliases.description, props.locale) }}
-        </p>
-      </header>
-      <div class="grid gap-3 rounded-control material-glass-subtle p-4 md:grid-cols-3">
+      </UiSurface>
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="motion-alias"
+      :title="localize(moduleCopy.motion.aliases.label, props.locale)"
+      :description="localize(moduleCopy.motion.aliases.description, props.locale)"
+    >
+      <UiSurface surface="glass-subtle" class="playground-specimen-panel grid gap-3 md:grid-cols-3">
         <div v-for="group in motionVariableEntries" :key="group.label.en" class="grid gap-1">
           <h3 class="text-label font-label text-primary">
             {{ formatLocalized(moduleCopy.motion.cssVariables, props.locale, {
@@ -70,18 +64,15 @@ const motionBaseEntries = motionBaseGroups.map((group) => ({
             {{ key }}: {{ value }}
           </code>
         </div>
-      </div>
-    </section>
-    <section class="grid gap-3" aria-labelledby="motion-semantic-live-title">
-      <header class="flex flex-wrap items-end justify-between gap-3">
-        <div class="grid gap-1">
-          <h2 id="motion-semantic-live-title" class="text-subtitle font-heading tracking-heading">
-            {{ localize(semanticCopy.label, props.locale) }}
-          </h2>
-          <p class="max-w-container-lg text-caption text-secondary">
-            {{ localize(semanticCopy.description, props.locale) }}
-          </p>
-        </div>
+      </UiSurface>
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="motion-semantic-live"
+      :title="localize(semanticCopy.label, props.locale)"
+      :description="localize(semanticCopy.description, props.locale)"
+    >
+      <template #action>
         <UiButton
           data-motion-semantic-toggle
           size="sm"
@@ -90,9 +81,10 @@ const motionBaseEntries = motionBaseGroups.map((group) => ({
         >
           {{ localize(semanticCopy.toggle, props.locale) }}
         </UiButton>
-      </header>
+      </template>
+
       <div class="grid gap-3 md:grid-cols-3">
-        <article class="grid gap-3 rounded-card bg-surface-subtle p-4">
+        <UiSurface as="article" surface="subtle" class="playground-specimen-panel grid gap-3">
           <h3 class="text-label font-label text-primary">
             {{ localize(semanticCopy.feedback, props.locale) }}
           </h3>
@@ -110,8 +102,9 @@ const motionBaseEntries = motionBaseGroups.map((group) => ({
           >
             feedback
           </div>
-        </article>
-        <article class="grid gap-3 rounded-card bg-surface-subtle p-4">
+        </UiSurface>
+
+        <UiSurface as="article" surface="subtle" class="playground-specimen-panel grid gap-3">
           <h3 class="text-label font-label text-primary">
             {{ localize(semanticCopy.state, props.locale) }}
           </h3>
@@ -131,8 +124,9 @@ const motionBaseEntries = motionBaseGroups.map((group) => ({
           >
             state
           </div>
-        </article>
-        <article class="grid gap-3 rounded-card bg-surface-subtle p-4">
+        </UiSurface>
+
+        <UiSurface as="article" surface="subtle" class="playground-specimen-panel grid gap-3">
           <h3 class="text-label font-label text-primary">
             {{ localize(semanticCopy.spatial, props.locale) }}
           </h3>
@@ -150,8 +144,8 @@ const motionBaseEntries = motionBaseGroups.map((group) => ({
           >
             spatial
           </div>
-        </article>
+        </UiSurface>
       </div>
-    </section>
+    </LabSpecimenSection>
   </div>
 </template>

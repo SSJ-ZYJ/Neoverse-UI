@@ -31,7 +31,7 @@ const copy = {
       <p class="max-w-container-lg text-caption text-secondary">
         {{ localize(copy.description, props.locale) }}
       </p>
-      <div class="grid gap-grid md:grid-cols-2">
+      <div class="playground-token-grid">
         <UiSurface
           v-for="preset in presets"
           :key="preset"

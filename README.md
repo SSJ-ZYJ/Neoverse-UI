@@ -23,14 +23,14 @@ Bun is the package manager, workspace manager, and script runner for this reposi
 | `@neoverse-ui/react` | Consumer Validation | React adapters for shared actions and surfaces |
 | `apps/playground` | Consumer Validation | Vue-driven Design Lab and visual reference surface |
 
-The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiSurface`, `UiCard`, `UiBadge`, `UiStatusIndicator`, `UiLoadingIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, and `UiTooltipSurface`. `UiSurface` is the canonical material primitive; `UiGlassSurface` remains exported only as a compatibility wrapper for the historical Glass `variant` API. The React adapter currently exposes `UiAction`, `UiSurface`, and `uiActionClassName` for React/Next consumers. Vue and React share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
+The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiSurface`, `UiCard`, `UiBadge`, `UiStatusIndicator`, `UiLoadingIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, and `UiTooltipSurface`. `UiSurface` is the canonical material primitive; `UiGlassSurface` remains exported only as a compatibility wrapper for the historical Glass `variant` API. The consumer-validated React adapter currently exposes `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiSurface`, `UiCard`, and `UiNotice`. Vue and React share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
 
 ## Architecture at a glance
 
 ```text
 Tokens (CSS Variables + names)
   -> Tailwind semantic foundation + Motion CSS
-  -> Vue components / future React adapter
+  -> Vue components / React adapters
   -> Design Lab and consumer validation
 
 Glass Runtime -> one shared WebGL Edge Pass per Document
@@ -149,9 +149,13 @@ Set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the r
 
 ## Design Lab and visual regression
 
-The playground serves the real Vue components and built Tailwind CSS. Visual tests use the stable `/frame` route and `[data-design-lab-region="module"]` region, covering Typography, Surface, Glass, Button, IconButton, Card, SegmentedControl, and Control Density in both themes at 1280px desktop and 390px touch viewport sizes. Animations are disabled and assets are awaited before each screenshot.
+The playground serves the real Vue components and built Tailwind CSS. At 100% browser zoom, the main shell scales its presentation root from 17px at 1280 to 18px at 1600, 19px at 1920, and 20px at 2560; the isolated `/frame` route stays at the canonical 16px component baseline. Persistent sidebar navigation begins at 1280px and becomes a drawer below that breakpoint.
 
-Baselines live under `tests/visual/snapshots/`. A screenshot change should correspond to an intentional token, Material, or component change and be reviewed with the generated diff.
+Playground specimens share `LabSpecimenSection` for subsection hierarchy and use content-width-aware `playground-token-grid` / `playground-specimen-grid` layouts. Shared specimen rows and panels consume `UiSurface` material presets instead of duplicating raw Glass implementation classes. These helpers belong to the Design Lab and are not public package API.
+
+Visual tests use the stable `/frame` route and `[data-design-lab-region="module"]` region, covering representative Foundation, Material, control, feedback, card, and consumer-parity scenarios in both themes. Playwright uses a 1920×1080 desktop viewport at 100% CSS-pixel scaling and a 390px touch viewport; shell regressions additionally exercise 1280 / 1600 / 1920 responsive geometry and the complete control state matrix. Animations are disabled and assets are awaited before each screenshot.
+
+Baselines live under `tests/visual/snapshots/`. A screenshot change should correspond to an intentional token, Material, component, or specimen-composition change and be reviewed with the generated diff.
 
 ## Changesets
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LabSpecimenSection from '../LabSpecimenSection.vue';
 import { localize, moduleCopy } from '../playground-content';
 import GlassModule from './GlassModule.vue';
 import SurfaceModule from './SurfaceModule.vue';
@@ -9,36 +10,20 @@ const props = defineProps<LabModuleProps>();
 
 <template>
   <div class="grid gap-grid">
-    <section
+    <LabSpecimenSection
       id="materials-surface"
-      class="scroll-mt-24 grid gap-3"
-      aria-labelledby="materials-surface-title"
+      :title="localize(moduleCopy.surface.label, props.locale)"
+      :description="localize(moduleCopy.surface.description, props.locale)"
     >
-      <header class="grid gap-1">
-        <h3 id="materials-surface-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.surface.label, props.locale) }}
-        </h3>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.surface.description, props.locale) }}
-        </p>
-      </header>
       <SurfaceModule :locale="props.locale" />
-    </section>
+    </LabSpecimenSection>
 
-    <section
+    <LabSpecimenSection
       id="materials-glass"
-      class="scroll-mt-24 grid gap-3"
-      aria-labelledby="materials-glass-title"
+      :title="localize(moduleCopy.glass.label, props.locale)"
+      :description="localize(moduleCopy.glass.description, props.locale)"
     >
-      <header class="grid gap-1">
-        <h3 id="materials-glass-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.glass.label, props.locale) }}
-        </h3>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.glass.description, props.locale) }}
-        </p>
-      </header>
       <GlassModule :locale="props.locale" />
-    </section>
+    </LabSpecimenSection>
   </div>
 </template>

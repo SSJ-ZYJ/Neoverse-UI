@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UiSurface } from '@neoverse-ui/vue';
 import type { Locale, LocalizedText } from './playground-content';
 import { localize } from './playground-content';
 
@@ -11,8 +12,12 @@ interface StateRowProps {
 const props = defineProps<StateRowProps>();
 </script>
 <template>
-  <article
-    class="grid gap-3 rounded-control border border-subtle bg-surface-subtle p-3 lg:grid-cols-2 lg:items-center"
+  <UiSurface
+    as="article"
+    surface="subtle"
+    class="playground-specimen-row grid gap-3 lg:grid-cols-2 lg:items-center"
+    data-specimen-state-row
+    :data-specimen-label="localize(props.label, props.locale)"
   >
     <div>
       <h3 class="text-label font-label text-primary">{{ localize(props.label, props.locale) }}</h3>
@@ -25,5 +30,5 @@ const props = defineProps<StateRowProps>();
     >
       <slot />
     </div>
-  </article>
+  </UiSurface>
 </template>

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { layoutBreakpoints } from '@neoverse-ui/tokens';
 import {
   UiButton,
   UiIconButton,
@@ -34,6 +35,7 @@ import { applyThemeMode, observeSystemTheme } from './theme-state';
 
 const isFrame = window.location.pathname === '/frame';
 const preferencesStorageKey = 'neoverse-design-lab.preferences';
+const persistentNavigationMediaQuery = `(min-width: ${layoutBreakpoints.xl}px)`;
 
 type SavedState = {
   theme?: ThemeMode;
@@ -225,7 +227,7 @@ const overviewHeading = ref<HTMLElement | null>(null);
 const moduleHeading = ref<HTMLElement | null>(null);
 const navElement = ref<HTMLElement | null>(null);
 const isNavOpen = ref(false);
-const isDesktopLayout = ref(window.matchMedia('(min-width: 1024px)').matches);
+const isDesktopLayout = ref(window.matchMedia(persistentNavigationMediaQuery).matches);
 let stopSystemThemeObservation: (() => void) | undefined;
 let desktopLayoutQuery: MediaQueryList | undefined;
 let desktopLayoutListener: ((event: MediaQueryListEvent) => void) | undefined;
@@ -428,7 +430,7 @@ onMounted(() => {
     return;
   }
 
-  desktopLayoutQuery = window.matchMedia('(min-width: 1024px)');
+  desktopLayoutQuery = window.matchMedia(persistentNavigationMediaQuery);
   const syncDesktopLayout = (event: MediaQueryListEvent | MediaQueryList): void => {
     isDesktopLayout.value = event.matches;
     if (event.matches) {
@@ -466,13 +468,13 @@ onBeforeUnmount(() => {
   <main
     v-else
     ref="shellElement"
-    class="flex h-screen w-full flex-col overflow-hidden lg:flex-row"
+    class="flex h-screen w-full flex-col overflow-hidden xl:flex-row"
     @keydown.esc.stop="handleEscape"
   >
     <button
       v-if="isNavOpen"
       type="button"
-      class="fixed inset-0 z-layer-overlay bg-scrim lg:hidden"
+      class="fixed inset-0 z-layer-overlay bg-scrim xl:hidden"
       :aria-label="localize(appCopy.navigation.close, locale)"
       @click="closeNav(true)"
     />
@@ -482,7 +484,7 @@ onBeforeUnmount(() => {
       id="design-lab-navigation"
       data-playground-navigation
       :class="[
-        'fixed inset-y-0 left-0 z-layer-modal flex w-sidebar-drawer shrink-0 flex-col border-r border-subtle material-glass-elevated p-4 shadow-modal transition-transform duration-standard ease-standard lg:relative lg:h-screen lg:w-sidebar lg:translate-x-0',
+        'fixed inset-y-0 left-0 z-layer-modal flex w-sidebar-drawer shrink-0 flex-col border-r border-subtle material-glass-elevated p-4 shadow-modal transition-transform duration-standard ease-standard xl:relative xl:h-screen xl:w-sidebar xl:translate-x-0',
         isNavOpen ? 'translate-x-0' : '-translate-x-full',
       ]"
       :aria-label="localize(appCopy.navigation.label, locale)"
@@ -496,19 +498,19 @@ onBeforeUnmount(() => {
             :src="brandIconUrl"
             alt=""
             aria-hidden="true"
-            class="size-8 shrink-0 object-contain"
+            class="size-9 shrink-0 object-contain"
           >
           <div class="min-w-0">
-            <p class="text-label font-label text-accent-primary">
+            <p class="text-label-lg font-label text-accent-primary">
               {{ localize(appCopy.brand, locale) }}
             </p>
-            <h1 class="mt-1 text-subtitle font-heading tracking-heading text-primary">
+            <h1 class="mt-1 text-title-lg font-heading tracking-title-lg text-primary">
               {{ localize(appCopy.designLab, locale) }}
             </h1>
           </div>
         </div>
         <UiIconButton
-          class="lg:hidden"
+          class="xl:hidden"
           variant="ghost"
           size="sm"
           :label="localize(appCopy.navigation.close, locale)"
@@ -517,7 +519,7 @@ onBeforeUnmount(() => {
           <LabIcon name="close" />
         </UiIconButton>
       </div>
-      <p class="mt-3 text-caption text-secondary lg:hidden">
+      <p class="mt-3 text-caption text-secondary xl:hidden">
         {{ localize(appCopy.sidebarDescription, locale) }}
       </p>
 
@@ -533,7 +535,7 @@ onBeforeUnmount(() => {
           indicator-placement="start"
           :active="isOverview"
           :class="[
-            'playground-navigation-item--flat-active w-full justify-start rounded-control px-3 text-caption',
+            'playground-navigation-item--flat-active w-full justify-start rounded-control px-3 text-body-sm',
             isOverview
               ? 'bg-accent-soft font-semibold text-accent-primary'
               : 'text-secondary hover:bg-accent-soft hover:text-primary',
@@ -542,7 +544,7 @@ onBeforeUnmount(() => {
         />
 
         <div v-for="group in sectionsByGroup" :key="group.id" class="mt-5 first:mt-1">
-          <h2 class="px-3 text-caption font-semibold uppercase tracking-wide text-muted">
+          <h2 class="px-3 text-label-sm font-semibold uppercase tracking-wide text-muted">
             {{ localize(group.label, locale) }}
           </h2>
           <div class="mt-1 grid gap-0.5">
@@ -556,7 +558,7 @@ onBeforeUnmount(() => {
               indicator-placement="start"
               :active="currentModuleId === module.id"
               :class="[
-                'playground-navigation-item--flat-active w-full justify-start rounded-control px-3 text-caption',
+                'playground-navigation-item--flat-active w-full justify-start rounded-control px-3 text-body-sm',
                 currentModuleId === module.id
                   ? 'bg-accent-soft font-semibold text-accent-primary'
                   : 'text-secondary hover:bg-accent-soft hover:text-primary',
@@ -581,11 +583,13 @@ onBeforeUnmount(() => {
           <header
             class="sticky top-0 z-layer-sticky -mx-page-inline min-h-header material-glass-subtle px-page-inline pt-2 pb-2"
           >
-            <div class="flex flex-wrap items-center justify-between gap-x-4 gap-y-2">
-              <div class="flex min-w-0 flex-1 items-center gap-x-3">
+            <div
+              class="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4"
+            >
+              <div class="flex min-w-0 w-full flex-1 items-center gap-x-3 sm:w-auto">
                 <UiIconButton
                   data-playground-nav-trigger
-                  class="shrink-0 lg:hidden"
+                  class="shrink-0 xl:hidden"
                   variant="ghost"
                   size="sm"
                   :label="localize(appCopy.navigation.open, locale)"
@@ -609,7 +613,9 @@ onBeforeUnmount(() => {
                   {{ selectedModule ? localize(selectedModule.label, locale) : '' }}
                 </h2>
               </div>
-              <div class="flex shrink-0 items-center gap-2">
+              <div
+                class="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:shrink-0"
+              >
                 <UiSegmentedControl
                   :aria-label="localize(appCopy.theme.label, locale)"
                   :options="themeOptions"
@@ -631,16 +637,20 @@ onBeforeUnmount(() => {
             </div>
             <p
               v-if="!isOverview"
-              class="mt-1 line-clamp-1 max-w-reading-wide text-caption text-secondary lg:line-clamp-none"
+              class="mt-1 hidden max-w-reading-wide text-caption text-secondary sm:block sm:line-clamp-1 lg:line-clamp-none"
             >
               {{ selectedModule ? localize(selectedModule.description, locale) : '' }}
             </p>
           </header>
 
           <section v-if="isOverview" aria-labelledby="overview-title" class="grid gap-grid">
-            <UiSurface surface="glass-subtle" class="grid gap-4 rounded-card p-5 md:p-6">
-              <header class="grid gap-3">
-                <p class="text-label font-label text-accent-primary">
+            <UiSurface
+              data-overview-hero
+              surface="glass-subtle"
+              class="grid gap-5 rounded-card p-6 md:p-8"
+            >
+              <header class="grid gap-4">
+                <p class="text-label-lg font-label text-accent-primary">
                   {{ localize(appCopy.overview.eyebrow, locale) }}
                 </p>
                 <h2
@@ -651,11 +661,11 @@ onBeforeUnmount(() => {
                 >
                   {{ localize(appCopy.overview.title, locale) }}
                 </h2>
-                <p class="max-w-reading text-body text-secondary">
+                <p class="max-w-reading-wide text-body-lg text-secondary">
                   {{ localize(appCopy.overview.description, locale) }}
                 </p>
               </header>
-              <p class="text-caption text-muted">
+              <p class="text-body-sm text-muted">
                 {{ formatLocalized(catalogueCopy.summary, locale, {
                     modules: labModules.length,
                     specimens: labSpecimens.length,
@@ -663,25 +673,28 @@ onBeforeUnmount(() => {
               </p>
             </UiSurface>
 
-            <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-5">
+            <div
+              data-overview-groups
+              class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5"
+            >
               <UiSurface
                 v-for="group in sectionsByGroup"
                 :key="group.id"
                 surface="subtle"
-                class="grid content-between gap-3 rounded-card p-4"
+                class="grid min-h-32 content-between gap-4 rounded-card p-5"
               >
                 <div class="grid gap-1">
-                  <h3 class="text-label font-label text-primary">
+                  <h3 class="text-title-sm font-title text-primary">
                     {{ localize(group.label, locale) }}
                   </h3>
-                  <p class="text-caption text-secondary">
+                  <p class="text-body-sm text-secondary">
                     {{ formatLocalized(appCopy.overview.moduleCount, locale, {
                         count: group.modules.length,
                       }) }}
                   </p>
                 </div>
                 <UiButton
-                  size="sm"
+                  size="md"
                   variant="ghost"
                   surface="none"
                   stretch
@@ -694,26 +707,30 @@ onBeforeUnmount(() => {
               </UiSurface>
             </div>
 
-            <UiSurface surface="elevated" class="grid gap-4 rounded-card p-4 md:p-5">
-              <header class="grid gap-1">
-                <h3 class="text-subtitle font-heading tracking-heading text-primary">
+            <UiSurface
+              data-overview-catalogue
+              surface="elevated"
+              class="grid gap-5 rounded-card p-5 md:p-6"
+            >
+              <header class="grid gap-2">
+                <h3 class="text-title-lg font-title tracking-title-lg text-primary">
                   {{ localize(catalogueCopy.title, locale) }}
                 </h3>
-                <p class="max-w-reading-wide text-body text-secondary">
+                <p class="max-w-reading-wide text-body-lg text-secondary">
                   {{ localize(catalogueCopy.description, locale) }}
                 </p>
               </header>
 
               <div class="grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center">
                 <label class="grid gap-1">
-                  <span class="text-caption font-label text-secondary">
+                  <span class="text-label-sm font-label text-secondary">
                     {{ localize(catalogueCopy.searchLabel, locale) }}
                   </span>
                   <input
                     v-model="catalogueQuery"
                     data-specimen-search
                     type="search"
-                    class="w-full rounded-control border border-subtle bg-surface-subtle px-3 py-2 text-body text-primary placeholder:text-muted"
+                    class="w-full rounded-control border border-subtle bg-surface-subtle px-4 py-3 text-body-lg text-primary placeholder:text-muted"
                     :placeholder="localize(catalogueCopy.searchPlaceholder, locale)"
                   >
                 </label>
@@ -724,7 +741,7 @@ onBeforeUnmount(() => {
                   <UiButton
                     v-for="kind in catalogueKinds"
                     :key="kind"
-                    size="sm"
+                    size="md"
                     surface="none"
                     :variant="catalogueKind === kind ? 'secondary' : 'ghost'"
                     :aria-pressed="catalogueKind === kind"
@@ -742,19 +759,19 @@ onBeforeUnmount(() => {
                   as="a"
                   :href="`#${specimen.id}`"
                   surface="subtle"
-                  class="group grid min-w-0 gap-3 rounded-card p-4 transition duration-fast ease-standard hover:-translate-y-0.5 hover:shadow-raised"
+                  class="group grid min-w-0 gap-4 rounded-card p-5 transition duration-fast ease-standard hover:-translate-y-0.5 hover:shadow-raised"
                 >
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
-                      <h4 class="truncate text-label font-label text-primary">
+                      <h4 class="truncate text-label-lg font-label text-primary">
                         {{ localize(specimen.label, locale) }}
                       </h4>
-                      <p class="mt-1 text-caption text-muted">
+                      <p class="mt-1 text-body-sm text-muted">
                         {{ moduleLabelById(specimen.moduleId) }}
                       </p>
                     </div>
                     <span
-                      class="shrink-0 rounded-pill bg-accent-soft px-2 py-1 text-caption text-accent-primary"
+                      class="shrink-0 rounded-pill bg-accent-soft px-2 py-1 text-label-sm text-accent-primary"
                     >
                       {{ localize(catalogueCopy.kinds[specimen.kind], locale) }}
                     </span>
@@ -768,7 +785,7 @@ onBeforeUnmount(() => {
                       {{ apiName }}
                     </code>
                   </div>
-                  <p class="text-caption text-secondary">
+                  <p class="text-body-sm text-secondary">
                     {{ specimen.tags.join(' · ') }}
                   </p>
                 </UiSurface>

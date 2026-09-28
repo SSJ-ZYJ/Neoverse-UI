@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LabSpecimenSection from '../LabSpecimenSection.vue';
 import { layoutRoleTokens, primitiveSpacingTokens, semanticSpacingTokens } from '../lab-data';
 import { localize, moduleCopy } from '../playground-content';
 import TokenRow from '../TokenRow.vue';
@@ -9,16 +10,12 @@ const props = defineProps<LabModuleProps>();
 
 <template>
   <div class="grid gap-grid">
-    <section class="grid gap-3" aria-labelledby="spacing-primitive-title">
-      <header class="grid gap-1">
-        <h2 id="spacing-primitive-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.spacing.primitive.label, props.locale) }}
-        </h2>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.spacing.primitive.description, props.locale) }}
-        </p>
-      </header>
-      <div class="grid gap-grid md:grid-cols-2 lg:grid-cols-3">
+    <LabSpecimenSection
+      id="spacing-primitive"
+      :title="localize(moduleCopy.spacing.primitive.label, props.locale)"
+      :description="localize(moduleCopy.spacing.primitive.description, props.locale)"
+    >
+      <div class="playground-token-grid">
         <TokenRow
           v-for="token in primitiveSpacingTokens"
           :key="token.variable"
@@ -28,17 +25,14 @@ const props = defineProps<LabModuleProps>();
           preview="space"
         />
       </div>
-    </section>
-    <section class="grid gap-3" aria-labelledby="spacing-alias-title">
-      <header class="grid gap-1">
-        <h2 id="spacing-alias-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.spacing.aliases.label, props.locale) }}
-        </h2>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.spacing.aliases.description, props.locale) }}
-        </p>
-      </header>
-      <div class="grid gap-3 md:grid-cols-3">
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="spacing-alias"
+      :title="localize(moduleCopy.spacing.aliases.label, props.locale)"
+      :description="localize(moduleCopy.spacing.aliases.description, props.locale)"
+    >
+      <div class="playground-token-grid">
         <TokenRow
           v-for="token in semanticSpacingTokens"
           :key="token.variable"
@@ -49,17 +43,14 @@ const props = defineProps<LabModuleProps>();
           preview="space"
         />
       </div>
-    </section>
-    <section class="grid gap-3" aria-labelledby="layout-role-title">
-      <header class="grid gap-1">
-        <h2 id="layout-role-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.spacing.roles.label, props.locale) }}
-        </h2>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.spacing.roles.description, props.locale) }}
-        </p>
-      </header>
-      <div class="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="layout-role"
+      :title="localize(moduleCopy.spacing.roles.label, props.locale)"
+      :description="localize(moduleCopy.spacing.roles.description, props.locale)"
+    >
+      <div class="playground-token-grid">
         <TokenRow
           v-for="token in layoutRoleTokens"
           :key="token.variable"
@@ -70,6 +61,6 @@ const props = defineProps<LabModuleProps>();
           preview="layout"
         />
       </div>
-    </section>
+    </LabSpecimenSection>
   </div>
 </template>

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SegmentOption } from '@neoverse-ui/vue';
-import { UiButton, UiIconButton, UiSegmentedControl } from '@neoverse-ui/vue';
+import { UiButton, UiIconButton, UiSegmentedControl, UiSurface } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
 import LabIcon from '../LabIcon.vue';
 import { localize, moduleCopy } from '../playground-content';
@@ -19,10 +19,12 @@ const options = computed<readonly SegmentOption[]>(() => [
 
 <template>
   <div class="grid gap-grid md:grid-cols-2" data-density-comparison>
-    <article
+    <UiSurface
       v-for="profile in profiles"
       :key="profile"
-      class="grid gap-3 rounded-control material-glass-subtle p-4"
+      as="article"
+      surface="glass-subtle"
+      class="playground-specimen-panel grid gap-3"
       :data-pointer-profile="profile"
     >
       <div>
@@ -44,6 +46,6 @@ const options = computed<readonly SegmentOption[]>(() => [
           :options="options"
         />
       </div>
-    </article>
+    </UiSurface>
   </div>
 </template>

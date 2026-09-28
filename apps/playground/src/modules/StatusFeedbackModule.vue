@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { UiButton, UiNotice, UiTooltipSurface } from '@neoverse-ui/vue';
+import { UiButton, UiNotice, UiSurface, UiTooltipSurface } from '@neoverse-ui/vue';
+import LabSpecimenSection from '../LabSpecimenSection.vue';
 import { localize, localized, moduleCopy } from '../playground-content';
 import BadgeModule from './BadgeModule.vue';
 import SkeletonModule from './SkeletonModule.vue';
@@ -50,70 +51,35 @@ const copy = {
 
 <template>
   <div class="grid gap-grid">
-    <section
+    <LabSpecimenSection
       id="status-feedback-badge"
-      class="scroll-mt-24 grid gap-3"
-      aria-labelledby="status-feedback-badge-title"
+      :title="localize(moduleCopy.badge.label, props.locale)"
+      :description="localize(moduleCopy.badge.description, props.locale)"
     >
-      <header class="grid gap-1">
-        <h3 id="status-feedback-badge-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.badge.label, props.locale) }}
-        </h3>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.badge.description, props.locale) }}
-        </p>
-      </header>
       <BadgeModule :locale="props.locale" />
-    </section>
+    </LabSpecimenSection>
 
-    <section
+    <LabSpecimenSection
       id="status-feedback-indicator"
-      class="scroll-mt-24 grid gap-3"
-      aria-labelledby="status-feedback-indicator-title"
+      :title="localize(moduleCopy.statusIndicator.label, props.locale)"
+      :description="localize(moduleCopy.statusIndicator.description, props.locale)"
     >
-      <header class="grid gap-1">
-        <h3
-          id="status-feedback-indicator-title"
-          class="text-subtitle font-heading tracking-heading"
-        >
-          {{ localize(moduleCopy.statusIndicator.label, props.locale) }}
-        </h3>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.statusIndicator.description, props.locale) }}
-        </p>
-      </header>
       <StatusIndicatorModule :locale="props.locale" />
-    </section>
+    </LabSpecimenSection>
 
-    <section
+    <LabSpecimenSection
       id="status-feedback-skeleton"
-      class="scroll-mt-24 grid gap-3"
-      aria-labelledby="status-feedback-skeleton-title"
+      :title="localize(moduleCopy.skeleton.label, props.locale)"
+      :description="localize(moduleCopy.skeleton.description, props.locale)"
     >
-      <header class="grid gap-1">
-        <h3 id="status-feedback-skeleton-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.skeleton.label, props.locale) }}
-        </h3>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.skeleton.description, props.locale) }}
-        </p>
-      </header>
       <SkeletonModule :locale="props.locale" />
-    </section>
+    </LabSpecimenSection>
 
-    <section
+    <LabSpecimenSection
       id="status-feedback-notice"
-      class="scroll-mt-24 grid gap-3"
-      aria-labelledby="status-feedback-notice-title"
+      :title="localize(copy.notice.label, props.locale)"
+      :description="localize(copy.notice.description, props.locale)"
     >
-      <header class="grid gap-1">
-        <h3 id="status-feedback-notice-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(copy.notice.label, props.locale) }}
-        </h3>
-        <p class="text-caption text-secondary">
-          {{ localize(copy.notice.description, props.locale) }}
-        </p>
-      </header>
       <div class="grid gap-2">
         <UiNotice
           v-for="variant in noticeVariants"
@@ -130,29 +96,24 @@ const copy = {
           </template>
         </UiNotice>
       </div>
-    </section>
+    </LabSpecimenSection>
 
-    <section
+    <LabSpecimenSection
       id="status-feedback-tooltip"
-      class="scroll-mt-24 grid gap-3"
-      aria-labelledby="status-feedback-tooltip-title"
+      :title="localize(copy.tooltip.label, props.locale)"
+      :description="localize(copy.tooltip.description, props.locale)"
     >
-      <header class="grid gap-1">
-        <h3 id="status-feedback-tooltip-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(copy.tooltip.label, props.locale) }}
-        </h3>
-        <p class="max-w-container-lg text-caption text-secondary">
-          {{ localize(copy.tooltip.description, props.locale) }}
-        </p>
-      </header>
-      <div class="flex flex-wrap items-center gap-3 rounded-card bg-surface-subtle p-4">
+      <UiSurface
+        surface="subtle"
+        class="playground-specimen-panel flex flex-wrap items-center gap-3"
+      >
         <UiTooltipSurface variant="neutral" role="tooltip">
           {{ localize(copy.tooltip.neutral, props.locale) }}
         </UiTooltipSurface>
         <UiTooltipSurface variant="accent" role="tooltip">
           {{ localize(copy.tooltip.accent, props.locale) }}
         </UiTooltipSurface>
-      </div>
-    </section>
+      </UiSurface>
+    </LabSpecimenSection>
   </div>
 </template>

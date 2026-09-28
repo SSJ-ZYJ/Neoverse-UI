@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LabSpecimenSection from '../LabSpecimenSection.vue';
 import { localize, moduleCopy } from '../playground-content';
 import BorderModule from './BorderModule.vue';
 import RadiusModule from './RadiusModule.vue';
@@ -10,40 +11,28 @@ const props = defineProps<LabModuleProps>();
 
 <template>
   <div id="foundation-layout-shape" class="scroll-mt-24 grid gap-grid">
-    <section class="grid gap-3" aria-labelledby="layout-shape-spacing-title">
-      <header class="grid gap-1">
-        <h3 id="layout-shape-spacing-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.spacing.label, props.locale) }}
-        </h3>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.spacing.description, props.locale) }}
-        </p>
-      </header>
+    <LabSpecimenSection
+      id="layout-shape-spacing"
+      :title="localize(moduleCopy.spacing.label, props.locale)"
+      :description="localize(moduleCopy.spacing.description, props.locale)"
+    >
       <SpacingModule :locale="props.locale" />
-    </section>
+    </LabSpecimenSection>
 
-    <section class="grid gap-3" aria-labelledby="layout-shape-radius-title">
-      <header class="grid gap-1">
-        <h3 id="layout-shape-radius-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.radius.label, props.locale) }}
-        </h3>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.radius.description, props.locale) }}
-        </p>
-      </header>
+    <LabSpecimenSection
+      id="layout-shape-radius"
+      :title="localize(moduleCopy.radius.label, props.locale)"
+      :description="localize(moduleCopy.radius.description, props.locale)"
+    >
       <RadiusModule :locale="props.locale" />
-    </section>
+    </LabSpecimenSection>
 
-    <section class="grid gap-3" aria-labelledby="layout-shape-border-title">
-      <header class="grid gap-1">
-        <h3 id="layout-shape-border-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.border.label, props.locale) }}
-        </h3>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.border.description, props.locale) }}
-        </p>
-      </header>
+    <LabSpecimenSection
+      id="layout-shape-border"
+      :title="localize(moduleCopy.border.label, props.locale)"
+      :description="localize(moduleCopy.border.description, props.locale)"
+    >
       <BorderModule :locale="props.locale" />
-    </section>
+    </LabSpecimenSection>
   </div>
 </template>

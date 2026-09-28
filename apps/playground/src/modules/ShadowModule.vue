@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import LabSpecimenSection from '../LabSpecimenSection.vue';
 import { primitiveShadowTokens, semanticShadowTokens } from '../lab-data';
 import { localize, moduleCopy } from '../playground-content';
 import TokenRow from '../TokenRow.vue';
@@ -8,17 +9,13 @@ const props = defineProps<LabModuleProps>();
 </script>
 
 <template>
-  <div class="grid gap-3">
-    <section class="grid gap-3" aria-labelledby="shadow-primitive-title">
-      <header class="grid gap-1">
-        <h2 id="shadow-primitive-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.shadow.primitive.label, props.locale) }}
-        </h2>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.shadow.primitive.description, props.locale) }}
-        </p>
-      </header>
-      <div class="grid gap-grid md:grid-cols-2 lg:grid-cols-3">
+  <div class="grid gap-grid">
+    <LabSpecimenSection
+      id="shadow-primitive"
+      :title="localize(moduleCopy.shadow.primitive.label, props.locale)"
+      :description="localize(moduleCopy.shadow.primitive.description, props.locale)"
+    >
+      <div class="playground-token-grid">
         <TokenRow
           v-for="token in primitiveShadowTokens"
           :key="token.variable"
@@ -28,17 +25,14 @@ const props = defineProps<LabModuleProps>();
           preview="shadow"
         />
       </div>
-    </section>
-    <section class="grid gap-3" aria-labelledby="shadow-alias-title">
-      <header class="grid gap-1">
-        <h2 id="shadow-alias-title" class="text-subtitle font-heading tracking-heading">
-          {{ localize(moduleCopy.shadow.aliases.label, props.locale) }}
-        </h2>
-        <p class="text-caption text-secondary">
-          {{ localize(moduleCopy.shadow.aliases.description, props.locale) }}
-        </p>
-      </header>
-      <div class="grid gap-grid md:grid-cols-2 lg:grid-cols-3">
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="shadow-alias"
+      :title="localize(moduleCopy.shadow.aliases.label, props.locale)"
+      :description="localize(moduleCopy.shadow.aliases.description, props.locale)"
+    >
+      <div class="playground-token-grid">
         <TokenRow
           v-for="token in semanticShadowTokens"
           :key="token.variable"
@@ -48,6 +42,6 @@ const props = defineProps<LabModuleProps>();
           preview="shadow"
         />
       </div>
-    </section>
+    </LabSpecimenSection>
   </div>
 </template>
