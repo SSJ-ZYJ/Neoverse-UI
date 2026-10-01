@@ -1,0 +1,30 @@
+@layer components {
+  .ui-dock {
+    box-sizing: border-box;
+    width: max-content;
+    max-width: 100%;
+    min-height: 0;
+    isolation: isolate;
+    border-radius: var(--neoverse-radius-control);
+    --neoverse-control-surface-gap: var(--neoverse-space-0);
+    --neoverse-control-surface-divider-gap: var(--neoverse-space-2);
+  }
+
+  .ui-dock > .ui-control-surface__group--primary {
+    display: flex;
+    width: max-content;
+    min-width: 0;
+    flex: 0 0 auto;
+    align-items: center;
+  }
+
+  .ui-dock > .ui-control-surface__group--primary > .ui-navigation-item {
+    flex: 0 0 auto;
+  }
+
+  .ui-dock--compact {
+    --neoverse-control-segmented-embedded-option-min-width: var(
+      --neoverse-control-segmented-option-min-width-compact
+    );
+  }
+}

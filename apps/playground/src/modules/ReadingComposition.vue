@@ -127,7 +127,11 @@ function onTabKey(event: KeyboardEvent) {
       <h3 class="text-title-sm text-primary">{{ copy.title }}</h3>
       <p class="text-body text-secondary">{{ copy.description }}</p>
     </header>
-    <UiSurface surface="subtle" class="relative min-w-0 overflow-hidden rounded-control">
+    <UiSurface
+      surface="glass-elevated"
+      class="relative min-w-0 overflow-hidden rounded-control"
+      data-composition-surface
+    >
       <div role="tablist" :aria-label="copy.code" class="flex gap-2 border-b border-subtle p-2">
         <UiButton
           v-for="(language, index) in ['JavaScript', 'TypeScript']"
@@ -165,7 +169,12 @@ function onTabKey(event: KeyboardEvent) {
         </p>
       </div>
     </UiSurface>
-    <UiSurface as="article" surface="subtle" class="rounded-card p-4 md:p-5">
+    <UiSurface
+      as="article"
+      surface="glass-card"
+      class="rounded-card p-4 md:p-5"
+      data-composition-surface
+    >
       <div data-reading-prose class="neoverse-prose max-w-reading">
         <h4>{{ copy.content }}</h4>
         <p>

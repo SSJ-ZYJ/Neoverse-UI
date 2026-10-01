@@ -35,7 +35,7 @@ const isCurrent = (_item: BreadcrumbItem, index: number): boolean =>
     <ol class="ui-breadcrumb__list">
       <li
         v-for="(item, index) in props.items"
-        :key="item.id ?? item.href ?? item.label"
+        :key="item.id ?? `${item.href ?? item.label}-${index}`"
         class="ui-breadcrumb__item"
       >
         <span v-if="index > 0" class="ui-breadcrumb__separator" aria-hidden="true">

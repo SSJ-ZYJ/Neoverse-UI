@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue';
 import { computed, nextTick, ref, useAttrs, watch } from 'vue';
-import { controlFocusClasses, segmentedTransitionClasses } from './classes';
 import { getSurfaceClass } from './surface';
 import type { SegmentedControlProps, SegmentOption } from './types';
 import UiLoadingIndicator from './UiLoadingIndicator.vue';
@@ -18,6 +17,7 @@ const props = withDefaults(defineProps<SegmentedControlProps>(), {
 const emit = defineEmits<(event: 'update:modelValue', value: string) => void>();
 
 const attrs = useAttrs();
+const ariaLabel = computed(() => props.ariaLabel ?? (attrs['aria-label'] as string | undefined));
 const ariaBusy = computed<'true' | 'false' | undefined>(() => {
   if (props.loading) {
     return 'true';
@@ -39,7 +39,6 @@ const optionRefs = ref<Array<HTMLButtonElement | null>>([]);
 
 const selectedOptionClasses = 'ui-segmented-control__option--active';
 const unselectedOptionClasses = '';
-const disabledOptionClasses = 'disabled:text-disabled disabled:cursor-not-allowed';
 
 const isControlled = computed(() => props.modelValue !== undefined);
 const currentValue = computed(() => (isControlled.value ? props.modelValue : internalValue.value));
@@ -65,12 +64,9 @@ const rovingIndex = computed(() => {
   return selectedIndex >= 0 ? selectedIndex : (enabledIndexes.value[0] ?? -1);
 });
 
-const classes = computed(() => [
-  'ui-segmented-control inline-flex items-center',
-  getSurfaceClass(props.surface),
-]);
+const classes = computed(() => ['ui-segmented-control', getSurfaceClass(props.surface)]);
 const forwardedAttrs = computed(() => {
-  const { class: _class, ...rest } = attrs;
+  const { class: _class, style: _style, 'aria-label': _ariaLabel, ...rest } = attrs;
   return rest;
 });
 
@@ -211,10 +207,7 @@ function setOptionRef(element: Element | ComponentPublicInstance | null, index: 
 function optionClasses(option: SegmentOption): string[] {
   return [
     'ui-segmented-control__option',
-    segmentedTransitionClasses,
-    controlFocusClasses,
     isSelected(option) ? selectedOptionClasses : unselectedOptionClasses,
-    disabledOptionClasses,
   ];
 }
 </script>
@@ -222,13 +215,13 @@ function optionClasses(option: SegmentOption): string[] {
 <template>
   <div
     v-bind="forwardedAttrs"
-    :aria-label="props.ariaLabel"
+    :aria-label="ariaLabel"
     :data-surface="props.surface"
     :class="[classes, attrs.class]"
     :style="[attrs.style, segmentStyle]"
     role="radiogroup"
     aria-orientation="horizontal"
-    :aria-disabled="props.disabled || undefined"
+    :aria-disabled="props.disabled || props.loading || undefined"
     :aria-busy="ariaBusy"
   >
     <span class="ui-segmented-control__options">
@@ -252,11 +245,7 @@ function optionClasses(option: SegmentOption): string[] {
         {{ option.label }}
       </button>
     </span>
-    <span
-      v-if="props.loading"
-      class="ui-segmented-control__loading inline-flex items-center justify-center"
-      aria-hidden="true"
-    >
+    <span v-if="props.loading" class="ui-segmented-control__loading" aria-hidden="true">
       <UiLoadingIndicator />
     </span>
   </div>

@@ -26,6 +26,8 @@ export type {
   ControlSurfacePreset,
   ControlSurfaceProps,
   ControlSurfaceScale,
+  DockProps,
+  GlassNestingMode,
   GlassSurfaceProps,
   GlassSurfaceVariant,
   IconButtonProps,
@@ -44,6 +46,7 @@ export type {
   StatusIndicatorStatus,
   SurfaceEdgeMode,
   SurfaceHoverMode,
+  SurfaceOverflowMode,
   SurfacePreset,
   SurfaceProps,
   TooltipSurfaceProps,
@@ -55,6 +58,7 @@ export { default as UiBreadcrumb } from './UiBreadcrumb.vue';
 export { default as UiButton } from './UiButton.vue';
 export { default as UiCard } from './UiCard.vue';
 export { default as UiControlSurface } from './UiControlSurface.vue';
+export { default as UiDock } from './UiDock.vue';
 export { default as UiGlassSurface } from './UiGlassSurface.vue';
 export { default as UiIconButton } from './UiIconButton.vue';
 export { default as UiNavigationItem } from './UiNavigationItem.vue';

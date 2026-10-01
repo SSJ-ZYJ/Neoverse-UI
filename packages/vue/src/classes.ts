@@ -1,13 +1,10 @@
-export const controlTransitionClasses = 'transition duration-fast ease-standard';
-export const segmentedTransitionClasses = 'transition-colors duration-standard ease-emphasized';
-
-export const controlFocusClasses =
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2';
-
-export const disabledControlClasses = 'disabled:cursor-not-allowed disabled:opacity-60';
-
-export const buttonBaseClasses =
-  'ui-button inline-flex shrink-0 cursor-pointer select-none items-center justify-center gap-2 rounded-control-inner font-label font-medium';
+/*
+ * Component geometry belongs to the component stylesheet.  These class maps
+ * intentionally expose semantic selectors rather than Tailwind utilities so
+ * consumers do not need to scan, preserve, or override our internal size and
+ * state implementation.
+ */
+export const buttonBaseClasses = 'ui-button';
 
 export const buttonVariantClasses = {
   primary: 'ui-button--primary',
@@ -16,9 +13,9 @@ export const buttonVariantClasses = {
 } as const;
 
 export const buttonSizeClasses = {
-  sm: 'h-7 px-3 text-caption',
-  md: 'h-8 px-3 text-label',
-  lg: 'h-9 px-4 text-label',
+  sm: 'ui-button--sm',
+  md: 'ui-button--md',
+  lg: 'ui-button--lg',
 } as const;
 export const actionSizeClasses = {
   sm: 'ui-action--sm',
@@ -31,24 +28,22 @@ export const actionScaleClasses = {
   lg: 'ui-action--scale-lg',
 } as const;
 
-export const actionStretchClasses = 'grow self-stretch';
+export const actionStretchClasses = 'ui-action--stretch';
 
 export const iconButtonSizeClasses = {
-  sm: 'size-7',
-  md: 'size-8',
-  lg: 'size-9',
+  sm: 'ui-icon-button--sm',
+  md: 'ui-icon-button--md',
+  lg: 'ui-icon-button--lg',
 } as const;
 
 export const buttonStretchSizeClasses = {
-  sm: 'grow self-stretch px-3 text-caption',
-  md: 'grow self-stretch px-3 text-label',
-  lg: 'grow self-stretch px-4 text-label',
+  sm: 'ui-button--sm ui-button--stretch',
+  md: 'ui-button--md ui-button--stretch',
+  lg: 'ui-button--lg ui-button--stretch',
 } as const;
 
 export const iconButtonStretchSizeClasses = {
-  sm: 'w-7 grow self-stretch',
-  md: 'w-8 grow self-stretch',
-  lg: 'w-9 grow self-stretch',
+  sm: 'ui-icon-button--sm ui-icon-button--stretch',
+  md: 'ui-icon-button--md ui-icon-button--stretch',
+  lg: 'ui-icon-button--lg ui-icon-button--stretch',
 } as const;
-
-export const loadingIndicatorClasses = 'size-4 motion-safe:animate-spin motion-reduce:animate-none';

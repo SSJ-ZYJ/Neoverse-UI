@@ -505,6 +505,19 @@
       box-shadow var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-emphasized);
   }
 
+  /* Glass surfaces clip by default so their own content respects the rounded
+     silhouette. Layout surfaces that intentionally host floating controls,
+     focus rings, shadows, or translated children can opt into visible
+     overflow without disabling the material plane itself. */
+  :is(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive,
+    .material-glass-card
+  ):not(.ui-button)[data-neoverse-surface-overflow='visible'] {
+    overflow: visible;
+  }
+
   @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) and
     (background-color: color-mix(in srgb, white 50%, transparent)) {
     :is(
@@ -598,9 +611,9 @@
     }
   }
 
-  /* The optional shared WebGL renderer paints this edge field once per
-     document. Keep the CSS field as the default and remove only this
-     duplicate when the renderer has activated successfully. */
+  /* The optional WebGL renderer paints one edge per independent Glass
+     surface on its shared Canvas. Keep the CSS field as fallback and hide
+     only the duplicate while the WebGL renderer owns the surface's edge. */
   [data-neoverse-glass-renderer='webgl']
   :is(
     .material-glass-subtle,
@@ -702,12 +715,30 @@
         .material-glass-elevated,
         .material-glass-immersive,
         .material-glass-card
-      ) {
+      ),
+    :is(
+        .material-glass-subtle,
+        .material-glass-elevated,
+        .material-glass-immersive,
+        .material-glass-card
+      ):not(.ui-button) {
+      /* Match the normal sampled-plane specificity so reduced-transparency
+         fallback wins at rest as well as on non-interactive surfaces. */
       background-color: var(--neoverse-material-background-fallback);
       background-image: none;
       box-shadow:
         var(--neoverse-material-edge-highlight), var(--neoverse-material-inner-glow),
         var(--neoverse-material-shadow);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    /* SegmentedControl owns a component-specific Glass filter in the normal
+       state. Repeat the accessibility fallback at matching specificity so
+       reduced transparency cannot be shadowed by that component contract. */
+    .ui-segmented-control.material-glass-subtle {
+      background-color: var(--neoverse-material-background-fallback);
+      background-image: none;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
@@ -731,7 +762,37 @@
     }
   }
 
+  /* Independent Glass surfaces keep their own material even when a parent
+     happens to be Glass (for example, specimen cards inside a Glass section).
+     Only an explicitly inherited nested grouping opts out of its own plane.
+     Never flatten unmarked cards or surfaces: they must be visible at rest,
+     before hover, and also in reduced-transparency mode. */
   :is(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive,
+    .material-glass-card
+  )
+  :is(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive,
+    .material-glass-card
+  ):not(.ui-button):not(.ui-segmented-control)[data-neoverse-glass-nesting='inherit'] {
+    background-color: var(--neoverse-color-transparent);
+    background-image: none;
+    border: var(--neoverse-border-width-none) var(--neoverse-border-style-solid)
+      var(--neoverse-color-transparent);
+    box-shadow: var(--neoverse-shadow-none);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /* A child that deliberately inherits the parent plane must never acquire
+     a separate material merely because the pointer enters it. The WebGL
+     hover selector otherwise outranks the resting inherit contract. */
+  [data-neoverse-glass-renderer='webgl']
+    :is(
       .material-glass-subtle,
       .material-glass-elevated,
       .material-glass-immersive,
@@ -742,12 +803,10 @@
       .material-glass-elevated,
       .material-glass-immersive,
       .material-glass-card
-    ):not(.ui-button) {
-    background-color: var(--neoverse-color-surface-raised);
-    background-image: none;
-    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      var(--neoverse-color-border-default);
-    box-shadow: var(--neoverse-shadow-raised);
+    ):not(.ui-button):not(.ui-segmented-control)[data-neoverse-glass-nesting='inherit']:hover {
+    background-color: var(--neoverse-color-transparent);
+    border-color: var(--neoverse-color-transparent);
+    box-shadow: var(--neoverse-shadow-none);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
@@ -763,7 +822,7 @@
       .material-glass-elevated,
       .material-glass-immersive,
       .material-glass-card
-    ):not(.ui-button)::before,
+    ):not(.ui-button):not(.ui-segmented-control)[data-neoverse-glass-nesting='inherit']::before,
   :is(
       .material-glass-subtle,
       .material-glass-elevated,
@@ -775,7 +834,7 @@
       .material-glass-elevated,
       .material-glass-immersive,
       .material-glass-card
-    ):not(.ui-button)::after {
+    ):not(.ui-button):not(.ui-segmented-control)[data-neoverse-glass-nesting='inherit']::after {
     display: none;
   }
 }

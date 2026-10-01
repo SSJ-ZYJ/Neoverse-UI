@@ -99,7 +99,7 @@ onBeforeUnmount(() => {
 });
 const surface = computed(() => props.surface ?? glassVariantToSurface(props.variant));
 const classes = computed(() => [
-  'ui-control-surface inline-flex max-w-full items-stretch rounded-control',
+  'ui-control-surface',
   getSurfaceClass(surface.value),
   `ui-control-surface--scale-${props.scale}`,
 ]);

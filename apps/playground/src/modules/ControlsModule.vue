@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiNavigationItem } from '@neoverse-ui/vue';
+import { UiNavigationItem, UiSurface } from '@neoverse-ui/vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
 import { localize, localized, moduleCopy } from '../playground-content';
 import ActionModule from './ActionModule.vue';
@@ -35,8 +35,11 @@ const sections = [
 
 <template>
   <div class="grid gap-grid">
-    <nav
-      class="flex flex-wrap gap-1 rounded-control border border-subtle bg-surface-subtle p-1"
+    <UiSurface
+      as="nav"
+      surface="glass-subtle"
+      content-overflow="visible"
+      class="playground-floating-interaction-surface flex flex-wrap gap-1 rounded-card p-2"
       :aria-label="localize(copy.label, props.locale)"
     >
       <UiNavigationItem
@@ -47,7 +50,7 @@ const sections = [
         size="lg"
         class="h-auto min-h-0 rounded-control px-3 py-1.5 text-body-sm font-regular text-secondary hover:bg-accent-soft hover:text-primary"
       />
-    </nav>
+    </UiSurface>
 
     <LabSpecimenSection
       id="controls-button"

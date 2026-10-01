@@ -38,6 +38,13 @@ const surfaceCopy = {
     'surface="none" 允许分组父级负责 Chrome，避免重复叠加材质层。',
   ),
 } as const;
+const focusCopy = {
+  label: localized('Focus', '焦点'),
+  hint: localized(
+    'Tab to the active option to inspect the keyboard focus ring.',
+    'Tab 到当前选项以查看键盘焦点环。',
+  ),
+} as const;
 </script>
 
 <template>
@@ -55,6 +62,12 @@ const surfaceCopy = {
     <UiSegmentedControl
       :aria-label="localize(copy.controls.small, props.locale)"
       size="sm"
+      :options="segmentedOptions"
+    />
+  </StateRow>
+  <StateRow :label="focusCopy.label" :hint="focusCopy.hint" :locale="props.locale">
+    <UiSegmentedControl
+      :aria-label="localize(copy.aria.view, props.locale)"
       :options="segmentedOptions"
     />
   </StateRow>

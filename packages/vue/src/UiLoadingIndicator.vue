@@ -1,9 +1,5 @@
-<script setup lang="ts">
-import { loadingIndicatorClasses } from './classes';
-</script>
-
 <template>
-  <svg :class="loadingIndicatorClasses" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+  <svg class="ui-loading-indicator" viewBox="0 0 16 16" fill="none" aria-hidden="true">
     <circle
       cx="8"
       cy="8"

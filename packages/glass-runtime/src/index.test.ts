@@ -254,6 +254,41 @@ describe('Glass renderer', () => {
     expect(gl.disable).toHaveBeenLastCalledWith(gl.SCISSOR_TEST);
   });
 
+  it('keeps square corners when CSS does not declare a surface radius', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, { width: 100, height: 60 });
+    document.body.append(glass);
+
+    const renderer = createTestRenderer();
+    renderer.mount();
+
+    const radiiCall = gl.uniform4f.mock.calls
+      .filter(([location]) => location?.name === 'u_radii')
+      .at(-1);
+    expect(radiiCall).toEqual([expect.objectContaining({ name: 'u_radii' }), 0, 0, 0, 0]);
+  });
+
+  it('preserves explicitly rounded CSS corners', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    glass.style.borderRadius = '12px';
+    setRect(glass, { width: 100, height: 60 });
+    document.body.append(glass);
+
+    const renderer = createTestRenderer();
+    renderer.mount();
+
+    const radiiCall = gl.uniform4f.mock.calls
+      .filter(([location]) => location?.name === 'u_radii')
+      .at(-1);
+    expect(radiiCall).toEqual([expect.objectContaining({ name: 'u_radii' }), 12, 12, 12, 12]);
+  });
+
   it('preserves translucent CSS color tokens in WebGL uniforms', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
@@ -297,7 +332,7 @@ describe('Glass renderer', () => {
     renderer.destroy();
   });
 
-  it('deduplicates renderers and ignores nested, hidden, and zero-sized surfaces', () => {
+  it('deduplicates renderers, draws independent nested Glass, and ignores hidden surfaces', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const outer = document.createElement('article');
@@ -306,6 +341,13 @@ describe('Glass renderer', () => {
     const nested = document.createElement('div');
     nested.className = 'material-glass-subtle';
     setRect(nested, { width: 100, height: 80 });
+    const inherited = document.createElement('div');
+    inherited.className = 'material-glass-subtle';
+    inherited.dataset.neoverseGlassNesting = 'inherit';
+    setRect(inherited, { width: 100, height: 80 });
+    const controlGroup = document.createElement('div');
+    controlGroup.className = 'ui-segmented-control material-glass-subtle';
+    setRect(controlGroup, { width: 100, height: 32 });
     const control = document.createElement('button');
     control.className = 'ui-button material-glass-subtle';
     setRect(control, { width: 100, height: 32 });
@@ -319,7 +361,7 @@ describe('Glass renderer', () => {
     const offscreen = document.createElement('div');
     offscreen.className = 'material-glass-subtle';
     setRect(offscreen, { left: window.innerWidth + 10, top: 20, width: 100, height: 80 });
-    outer.append(nested, control, hidden, zero, offscreen);
+    outer.append(nested, inherited, controlGroup, control, hidden, zero, offscreen);
     document.body.append(outer);
 
     const first = createTestRenderer();
@@ -328,7 +370,8 @@ describe('Glass renderer', () => {
     second.mount();
 
     expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
-    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+    // Outer surface, nested independent surface and button have three edges.
+    expect(gl.drawArrays).toHaveBeenCalledTimes(3);
     second.destroy();
     first.destroy();
   });

@@ -735,6 +735,37 @@ export const moduleCopy = {
       canvas: localized('Canvas', '画布'),
     },
   },
+  dock: {
+    label: localized('Dock', 'Dock 导航栏'),
+    description: localized(
+      'A reusable floating navigation shell built from ControlSurface, NavigationItem, and optional trailing controls.',
+      '由 ControlSurface、NavigationItem 与可选尾部控件组成的可复用悬浮导航外壳。',
+    ),
+    states: {
+      standard: {
+        label: localized('Standard', '标准'),
+        hint: localized(
+          'The Dock owns shared chrome, grouping, scale, and trailing separation while destinations stay caller-owned.',
+          'Dock 负责共享外壳、分组、缩放与尾部分隔，具体导航目标仍由调用方提供。',
+        ),
+      },
+      compact: {
+        label: localized('Compact', '紧凑'),
+        hint: localized(
+          'Compact mode keeps the same component contract while allowing icon-only navigation and tighter trailing controls.',
+          '紧凑模式保持同一组件契约，同时允许纯图标导航与更紧凑的尾部控件。',
+        ),
+      },
+    },
+    ariaLabel: localized('Dock navigation', 'Dock 导航'),
+    languageLabel: localized('Language', '语言'),
+    items: {
+      home: localized('Home', '主页'),
+      projects: localized('Projects', '项目'),
+      focus: localized('Focus', '专注'),
+      activity: localized('Activity', '动态'),
+    },
+  },
   consumerParity: {
     label: localized('Product Parity', '产品一致性校验'),
     description: localized(
@@ -779,6 +810,37 @@ export const moduleCopy = {
       'Real interface compositions combine type, surface, material, spacing, and core controls in one calibration view.',
       '真实界面组合在同一个校准视图中结合字体、表面、材质、间距与核心控件。',
     ),
+    previewModes: {
+      standard: {
+        label: localized('Standard Glass mode', '标准 Glass 模式'),
+        description: localized(
+          'Normal product compositions keep translucent, backdrop-filtered Glass surfaces with edge depth and refraction.',
+          '正常产品组合统一使用半透明、带背景模糊与边缘层次的 Glass 表面。',
+        ),
+      },
+      accessibility: {
+        label: localized('Accessibility fallback', '无障碍适配预览'),
+        description: localized(
+          'Reduced-transparency mode keeps the same semantic surfaces but replaces backdrop sampling with an opaque readable fallback.',
+          '降低透明度模式保持相同语义表面，但以不采样背景的高可读性不透明回退替代 Glass 模糊。',
+        ),
+        cardTitle: localized('Readable project summary', '高可读性项目摘要'),
+        cardBody: localized(
+          'The material hierarchy stays intact without blur or refraction when reduced transparency is requested.',
+          '请求降低透明度后，材质层级仍然保留，但不再使用模糊与折射。',
+        ),
+        toolbarTitle: localized('Accessible control surface', '无障碍控件表面'),
+        toolbarBody: localized(
+          'Control semantics, grouping, and focus feedback remain while backdrop sampling is removed.',
+          '控件语义、分组与焦点反馈保持不变，只移除透明背景采样。',
+        ),
+        fallbackBadge: localized('Reduced transparency', '降低透明度'),
+        summary: localized('Summary', '摘要'),
+        details: localized('Details', '详情'),
+        continue: localized('Continue', '继续'),
+        apply: localized('Apply', '应用'),
+      },
+    },
     scenes: {
       controlCluster: {
         label: localized('Neoverse Control Cluster', 'Neoverse 控件集群'),

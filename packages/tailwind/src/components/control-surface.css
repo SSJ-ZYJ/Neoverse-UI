@@ -1,6 +1,10 @@
 @layer components {
   .ui-control-surface {
+    display: inline-flex;
+    max-width: 100%;
+    align-items: stretch;
     min-width: 0;
+    border-radius: var(--neoverse-radius-control);
     gap: var(--neoverse-control-surface-gap);
     padding-block: var(--neoverse-control-surface-padding-block);
     padding-inline: var(--neoverse-control-surface-padding-inline);

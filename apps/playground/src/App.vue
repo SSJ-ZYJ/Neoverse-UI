@@ -468,7 +468,7 @@ onBeforeUnmount(() => {
   <main
     v-else
     ref="shellElement"
-    class="flex h-screen w-full flex-col overflow-hidden xl:flex-row"
+    class="playground-shell flex h-screen w-full flex-col overflow-hidden xl:flex-row"
     @keydown.esc.stop="handleEscape"
   >
     <button
@@ -484,67 +484,87 @@ onBeforeUnmount(() => {
       id="design-lab-navigation"
       data-playground-navigation
       :class="[
-        'fixed inset-y-0 left-0 z-layer-modal flex w-sidebar-drawer shrink-0 flex-col border-r border-subtle material-glass-elevated p-4 shadow-modal transition-transform duration-standard ease-standard xl:relative xl:h-screen xl:w-sidebar xl:translate-x-0',
-        isNavOpen ? 'translate-x-0' : '-translate-x-full',
+        'playground-shell__navigation fixed z-layer-modal flex w-sidebar-drawer shrink-0 flex-col overflow-hidden rounded-panel border border-subtle material-glass-elevated p-4 transition-transform duration-standard ease-standard xl:relative xl:inset-auto xl:h-auto xl:w-sidebar xl:translate-x-0',
+        isDesktopLayout || isNavOpen
+          ? 'playground-shell__navigation--open'
+          : 'playground-shell__navigation--closed',
       ]"
       :aria-label="localize(appCopy.navigation.label, locale)"
       :aria-hidden="!isDesktopLayout && !isNavOpen ? 'true' : undefined"
       :inert="!isDesktopLayout && !isNavOpen"
     >
-      <div class="flex items-start justify-between gap-3">
-        <div class="flex min-w-0 items-center gap-3">
-          <img
-            data-playground-brand-icon
-            :src="brandIconUrl"
-            alt=""
-            aria-hidden="true"
-            class="size-9 shrink-0 object-contain"
-          >
-          <div class="min-w-0">
-            <p class="text-label-lg font-label text-accent-primary">
-              {{ localize(appCopy.brand, locale) }}
-            </p>
-            <h1 class="mt-1 text-title-lg font-heading tracking-title-lg text-primary">
-              {{ localize(appCopy.designLab, locale) }}
-            </h1>
+      <div class="playground-shell__navigation-header">
+        <div class="flex items-start justify-between gap-3">
+          <div class="flex min-w-0 items-center gap-3">
+            <img
+              data-playground-brand-icon
+              :src="brandIconUrl"
+              alt=""
+              aria-hidden="true"
+              class="size-9 shrink-0 object-contain"
+            >
+            <div class="min-w-0">
+              <p class="text-label-lg font-label text-accent-primary">
+                {{ localize(appCopy.brand, locale) }}
+              </p>
+              <h1 class="mt-1 text-title-lg font-heading tracking-title-lg text-primary">
+                {{ localize(appCopy.designLab, locale) }}
+              </h1>
+            </div>
           </div>
+          <UiIconButton
+            class="xl:hidden"
+            variant="ghost"
+            size="sm"
+            :label="localize(appCopy.navigation.close, locale)"
+            @click="closeNav(true)"
+          >
+            <LabIcon name="close" />
+          </UiIconButton>
         </div>
-        <UiIconButton
-          class="xl:hidden"
-          variant="ghost"
-          size="sm"
-          :label="localize(appCopy.navigation.close, locale)"
-          @click="closeNav(true)"
-        >
-          <LabIcon name="close" />
-        </UiIconButton>
+        <p class="mt-3 text-caption text-secondary xl:hidden">
+          {{ localize(appCopy.sidebarDescription, locale) }}
+        </p>
       </div>
-      <p class="mt-3 text-caption text-secondary xl:hidden">
-        {{ localize(appCopy.sidebarDescription, locale) }}
-      </p>
 
       <nav
-        class="scrollbar-immersive mt-5 min-h-0 flex-1 overflow-y-auto"
+        class="playground-shell__navigation-scroll scrollbar-immersive grid min-h-0 flex-1 content-start gap-2 overflow-y-auto pr-1"
         :aria-label="localize(appCopy.navigation.modulesLabel, locale)"
       >
-        <UiNavigationItem
-          :href="locationHref(null)"
-          :label="localize(appCopy.navigation.overview, locale)"
-          size="lg"
-          stretch
-          indicator-placement="start"
-          :active="isOverview"
-          :class="[
-            'playground-navigation-item--flat-active w-full justify-start rounded-control px-3 text-body-sm',
-            isOverview
-              ? 'bg-accent-soft font-semibold text-accent-primary'
-              : 'text-secondary hover:bg-accent-soft hover:text-primary',
-          ]"
-          @click="handleNavClick($event, null)"
-        />
+        <UiSurface
+          surface="glass-subtle"
+          glass-nesting="local"
+          data-neoverse-glass-edge-pass="css"
+          content-overflow="visible"
+          class="playground-navigation-group playground-floating-interaction-surface rounded-card p-1"
+        >
+          <UiNavigationItem
+            :href="locationHref(null)"
+            :label="localize(appCopy.navigation.overview, locale)"
+            size="lg"
+            stretch
+            indicator-placement="start"
+            :active="isOverview"
+            :class="[
+              'playground-navigation-item--flat-active w-full justify-start rounded-control px-3 text-body-sm',
+              isOverview
+                ? 'bg-accent-soft font-semibold text-accent-primary'
+                : 'text-secondary hover:bg-accent-soft hover:text-primary',
+            ]"
+            @click="handleNavClick($event, null)"
+          />
+        </UiSurface>
 
-        <div v-for="group in sectionsByGroup" :key="group.id" class="mt-5 first:mt-1">
-          <h2 class="px-3 text-label-sm font-semibold uppercase tracking-wide text-muted">
+        <UiSurface
+          v-for="group in sectionsByGroup"
+          :key="group.id"
+          surface="glass-subtle"
+          glass-nesting="local"
+          data-neoverse-glass-edge-pass="css"
+          content-overflow="visible"
+          class="playground-navigation-group playground-floating-interaction-surface grid gap-1 rounded-card p-2"
+        >
+          <h2 class="px-2 py-1 text-label-sm font-semibold uppercase tracking-wide text-muted">
             {{ localize(group.label, locale) }}
           </h2>
           <div class="mt-1 grid gap-0.5">
@@ -566,27 +586,39 @@ onBeforeUnmount(() => {
               @click="handleNavClick($event, module.id)"
             />
           </div>
-        </div>
+        </UiSurface>
       </nav>
     </aside>
 
-    <div class="flex min-h-0 min-w-0 flex-1 flex-col">
+    <div class="playground-shell__content flex min-h-0 min-w-0 flex-1 flex-col">
       <div
         ref="workspaceElement"
         data-design-lab-workspace
-        class="scrollbar-immersive min-h-0 flex-1 overflow-y-auto"
+        class="playground-shell__workspace scrollbar-immersive min-h-0 flex-1 overflow-y-auto"
       >
         <div
           data-playground-page
-          class="mx-auto flex w-full max-w-page flex-col gap-grid px-page-inline pb-page-block pt-3"
+          class="playground-shell__page mx-auto flex w-full max-w-page flex-col gap-grid px-page-inline pb-page-block"
         >
-          <header
-            class="sticky top-0 z-layer-sticky -mx-page-inline min-h-header material-glass-subtle px-page-inline pt-2 pb-2"
+          <UiSurface
+            as="header"
+            :surface="isOverview ? 'glass-subtle' : 'glass-elevated'"
+            data-neoverse-surface-hover="static"
+            :data-toolbar-mode="isOverview ? 'overview' : 'module'"
+            :class="[
+              'playground-shell__toolbar sticky top-0 z-layer-sticky rounded-card px-3 py-2 md:px-4',
+              isOverview ? 'xl:w-fit xl:self-end' : 'w-full',
+            ]"
           >
             <div
-              class="grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4"
+              class="playground-shell__toolbar-layout grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4"
             >
-              <div class="flex min-w-0 w-full flex-1 items-center gap-x-3 sm:w-auto">
+              <div
+                :class="[
+                  'playground-shell__toolbar-primary flex min-w-0 w-full flex-1 items-center gap-x-3 sm:w-auto',
+                  isOverview ? 'xl:hidden' : '',
+                ]"
+              >
                 <UiIconButton
                   data-playground-nav-trigger
                   class="shrink-0 xl:hidden"
@@ -614,18 +646,20 @@ onBeforeUnmount(() => {
                 </h2>
               </div>
               <div
-                class="flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:shrink-0"
+                class="playground-shell__toolbar-actions flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:shrink-0"
               >
                 <UiSegmentedControl
                   :aria-label="localize(appCopy.theme.label, locale)"
                   :options="themeOptions"
                   :model-value="themeMode"
+                  surface="glass-subtle"
                   @update:model-value="setTheme"
                 />
                 <UiSegmentedControl
                   :aria-label="localize(appCopy.language.label, locale)"
                   :options="languageOptions"
                   :model-value="locale"
+                  surface="glass-subtle"
                   @update:model-value="setLocale"
                 />
                 <span v-if="!isOverview" data-back-to-overview class="hidden md:inline-flex">
@@ -641,7 +675,7 @@ onBeforeUnmount(() => {
             >
               {{ selectedModule ? localize(selectedModule.description, locale) : '' }}
             </p>
-          </header>
+          </UiSurface>
 
           <section v-if="isOverview" aria-labelledby="overview-title" class="grid gap-grid">
             <UiSurface
@@ -680,8 +714,9 @@ onBeforeUnmount(() => {
               <UiSurface
                 v-for="group in sectionsByGroup"
                 :key="group.id"
-                surface="subtle"
-                class="grid min-h-32 content-between gap-4 rounded-card p-5"
+                surface="glass-subtle"
+                content-overflow="visible"
+                class="playground-floating-interaction-surface grid min-h-32 content-between gap-4 rounded-card p-5"
               >
                 <div class="grid gap-1">
                   <h3 class="text-title-sm font-title text-primary">
@@ -695,8 +730,7 @@ onBeforeUnmount(() => {
                 </div>
                 <UiButton
                   size="md"
-                  variant="ghost"
-                  surface="none"
+                  variant="secondary"
                   stretch
                   @click="selectModule(group.moduleIds[0])"
                 >
@@ -709,8 +743,9 @@ onBeforeUnmount(() => {
 
             <UiSurface
               data-overview-catalogue
-              surface="elevated"
-              class="grid gap-5 rounded-card p-5 md:p-6"
+              surface="glass-elevated"
+              content-overflow="visible"
+              class="playground-floating-interaction-surface grid gap-5 rounded-card p-5 md:p-6"
             >
               <header class="grid gap-2">
                 <h3 class="text-title-lg font-title tracking-title-lg text-primary">
@@ -758,7 +793,8 @@ onBeforeUnmount(() => {
                   :key="specimen.id"
                   as="a"
                   :href="`#${specimen.id}`"
-                  surface="subtle"
+                  surface="glass-subtle"
+                  glass-nesting="local"
                   class="group grid min-w-0 gap-4 rounded-card p-5 transition duration-fast ease-standard hover:-translate-y-0.5 hover:shadow-raised"
                 >
                   <div class="flex items-start justify-between gap-3">

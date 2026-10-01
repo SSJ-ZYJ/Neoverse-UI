@@ -9,6 +9,7 @@ import {
   type HTMLAttributes,
   isValidElement,
   type MouseEventHandler,
+  type PointerEventHandler,
   type ReactElement,
   type ReactNode,
   type Ref,
@@ -18,6 +19,9 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 export type NoticeVariant = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 export type ActionSize = 'sm' | 'md' | 'lg';
 export type ActionScale = 'md' | 'lg';
+export type ControlSurfaceScale = 'md' | 'lg';
+export type SurfaceHoverMode = 'auto' | 'static';
+export type SurfaceEdgeMode = 'auto' | 'local';
 export type ControlSurfacePreset = 'none' | 'glass-subtle';
 export type SurfacePreset =
   | 'none'
@@ -48,6 +52,32 @@ const actionScaleClasses: Record<ActionScale, string> = {
   lg: 'ui-action--scale-lg',
 };
 
+const buttonSizeClasses: Record<ActionSize, string> = {
+  sm: 'ui-button--sm',
+  md: 'ui-button--md',
+  lg: 'ui-button--lg',
+};
+
+const buttonStretchSizeClasses: Record<ActionSize, string> = {
+  sm: 'ui-button--sm ui-button--stretch',
+  md: 'ui-button--md ui-button--stretch',
+  lg: 'ui-button--lg ui-button--stretch',
+};
+
+const iconButtonSizeClasses: Record<ActionSize, string> = {
+  sm: 'ui-icon-button--sm',
+  md: 'ui-icon-button--md',
+  lg: 'ui-icon-button--lg',
+};
+
+const iconButtonStretchSizeClasses: Record<ActionSize, string> = {
+  sm: 'ui-icon-button--sm ui-icon-button--stretch',
+  md: 'ui-icon-button--md ui-icon-button--stretch',
+  lg: 'ui-icon-button--lg ui-icon-button--stretch',
+};
+
+const loadingIndicatorClass = 'ui-loading-indicator';
+
 const surfaceClasses: Record<SurfacePreset, string> = {
   none: '',
   solid: 'ui-surface-solid',
@@ -65,6 +95,24 @@ const actionBaseClasses = 'ui-button ui-action';
 
 const mergeClassNames = (...values: Array<string | false | null | undefined>): string =>
   values.filter(Boolean).join(' ');
+
+const clampPercentage = (value: number): number =>
+  Math.round(Math.min(Math.max(value, 0), 100) * 100) / 100;
+
+function updateButtonPointerGlow(event: Parameters<PointerEventHandler<HTMLElement>>[0]): void {
+  const target = event.currentTarget;
+  const rect = target.getBoundingClientRect();
+  if (rect.width <= 0 || rect.height <= 0) return;
+
+  target.style.setProperty(
+    '--neoverse-button-press-x',
+    `${clampPercentage(((event.clientX - rect.left) / rect.width) * 100)}%`,
+  );
+  target.style.setProperty(
+    '--neoverse-button-press-y',
+    `${clampPercentage(((event.clientY - rect.top) / rect.height) * 100)}%`,
+  );
+}
 
 export interface ActionClassNameOptions {
   variant?: ButtonVariant;
@@ -117,6 +165,9 @@ type SlottableElementProps = {
   children?: ReactNode | undefined;
   href?: string | undefined;
   tabIndex?: number | undefined;
+  type?: ButtonHTMLAttributes<HTMLButtonElement>['type'] | undefined;
+  onClick?: MouseEventHandler<HTMLElement> | undefined;
+  onPointerDown?: PointerEventHandler<HTMLElement> | undefined;
   [key: `data-${string}`]: unknown;
   [key: `aria-${string}`]: unknown;
 };
@@ -136,6 +187,8 @@ export function UiAction({
   trailing,
   children,
   className,
+  onClick,
+  onPointerDown,
   ...rest
 }: UiActionProps) {
   const classes = uiActionClassName({
@@ -154,7 +207,7 @@ export function UiAction({
           {leading}
         </span>
       ) : null}
-      <span className="ui-action__content min-w-0">{content}</span>
+      <span className="ui-action__content">{content}</span>
       {trailing ? (
         <span className="ui-action__trailing" aria-hidden="true">
           {trailing}
@@ -170,13 +223,32 @@ export function UiAction({
     }
 
     const childProps = child.props;
+    const childOnClick = childProps.onClick;
+    const childOnPointerDown = childProps.onPointerDown;
+    const handleChildClick: MouseEventHandler<HTMLElement> = (event) => {
+      if (disabled) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      onClick?.(event);
+      childOnClick?.(event);
+    };
+    const handleChildPointerDown: PointerEventHandler<HTMLElement> = (event) => {
+      if (!disabled) updateButtonPointerGlow(event);
+      onPointerDown?.(event);
+      childOnPointerDown?.(event);
+    };
+
     return cloneElement(child as ReactElement<SlottableElementProps>, {
       ...rest,
       className: mergeClassNames(classes, childProps.className),
-      href: disabled ? undefined : childProps.href,
+      href: disabled ? undefined : (href ?? childProps.href),
       tabIndex: disabled ? -1 : childProps.tabIndex,
       'aria-disabled': disabled || undefined,
       'data-surface': surface,
+      onClick: handleChildClick,
+      onPointerDown: handleChildPointerDown,
       children: renderContent(childProps.children),
     });
   }
@@ -189,6 +261,11 @@ export function UiAction({
         disabled={disabled}
         data-surface={surface}
         className={classes}
+        onClick={onClick}
+        onPointerDown={(event) => {
+          if (!disabled) updateButtonPointerGlow(event);
+          onPointerDown?.(event);
+        }}
       >
         {renderContent(children)}
       </button>
@@ -203,9 +280,82 @@ export function UiAction({
       tabIndex={disabled ? -1 : rest.tabIndex}
       data-surface={surface}
       className={classes}
+      onPointerDown={(event) => {
+        if (!disabled) updateButtonPointerGlow(event);
+        onPointerDown?.(event);
+      }}
+      onClick={(event) => {
+        if (disabled) {
+          event.preventDefault();
+          event.stopPropagation();
+          return;
+        }
+        onClick?.(event);
+      }}
     >
       {renderContent(children)}
     </a>
+  );
+}
+
+export interface UiDockProps extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
+  as?: 'nav' | 'div';
+  surface?: SurfacePreset;
+  scale?: ControlSurfaceScale;
+  compact?: boolean;
+  hoverMode?: SurfaceHoverMode;
+  edgeMode?: SurfaceEdgeMode;
+  trailing?: ReactNode;
+  children: ReactNode;
+}
+
+/** Reusable Dock shell. Product routing, navigation semantics, and trailing controls stay caller-owned. */
+export function UiDock({
+  as = 'nav',
+  surface = 'chrome',
+  scale = 'lg',
+  compact = false,
+  hoverMode = 'static',
+  edgeMode = 'auto',
+  trailing,
+  children,
+  className,
+  ...rest
+}: UiDockProps) {
+  return createElement(
+    as,
+    {
+      ...rest,
+      className: mergeClassNames(
+        'ui-control-surface',
+        surfaceClasses[surface],
+        `ui-control-surface--scale-${scale}`,
+        'ui-dock',
+        compact && 'ui-dock--compact',
+        className,
+      ),
+      'data-surface': surface,
+      'data-neoverse-surface-hover': hoverMode === 'static' ? 'static' : undefined,
+      'data-neoverse-glass-edge-pass': edgeMode === 'local' ? 'css' : undefined,
+    },
+    createElement(
+      'div',
+      { className: 'ui-control-surface__group ui-control-surface__group--primary' },
+      children,
+    ),
+    trailing !== undefined && trailing !== null
+      ? createElement('span', {
+          className: 'ui-control-surface__divider',
+          'aria-hidden': true,
+        })
+      : null,
+    trailing !== undefined && trailing !== null
+      ? createElement(
+          'div',
+          { className: 'ui-control-surface__group ui-control-surface__group--trailing' },
+          trailing,
+        )
+      : null,
   );
 }
 
@@ -265,7 +415,10 @@ export function UiBreadcrumb({
             ));
 
           return (
-            <li className="ui-breadcrumb__item" key={item.id ?? item.href ?? item.label}>
+            <li
+              className="ui-breadcrumb__item"
+              key={item.id ?? `${item.href ?? item.label}-${index}`}
+            >
               {index > 0 ? (
                 <span className="ui-breadcrumb__separator" aria-hidden="true">
                   {separator}
@@ -283,11 +436,15 @@ export function UiBreadcrumb({
 export interface UiSurfaceProps extends HTMLAttributes<HTMLElement> {
   as?: 'div' | 'section' | 'article' | 'aside' | 'nav' | 'header' | 'footer';
   surface?: SurfacePreset;
+  glassNesting?: 'inherit' | 'local';
+  contentOverflow?: 'clip' | 'visible';
 }
 
 export function UiSurface({
   as = 'div',
   surface = 'none',
+  glassNesting = 'local',
+  contentOverflow = 'clip',
   className,
   children,
   ...rest
@@ -298,6 +455,8 @@ export function UiSurface({
       ...rest,
       className: mergeClassNames('ui-surface', surfaceClasses[surface], className),
       'data-surface': surface,
+      'data-neoverse-glass-nesting': glassNesting,
+      'data-neoverse-surface-overflow': contentOverflow,
     },
     children,
   );
@@ -316,7 +475,7 @@ export function UiCard<T extends ElementType = 'div'>(props: UiCardProps<T>) {
 
   return createElement(as ?? 'div', {
     ...rest,
-    className: mergeClassNames('ui-card rounded-card p-4', surfaceClasses[surface], className),
+    className: mergeClassNames('ui-card', surfaceClasses[surface], className),
     'data-surface': surface,
   });
 }
@@ -372,6 +531,7 @@ export function UiButton({
   trailing,
   children,
   className,
+  onPointerDown,
   ...rest
 }: UiButtonProps) {
   return (
@@ -382,40 +542,50 @@ export function UiButton({
       aria-busy={loading ? true : rest['aria-busy']}
       data-surface={surface}
       className={mergeClassNames(
-        'ui-button ui-button-control',
+        'ui-button',
         buttonVariantClasses[variant],
-        `ui-button-control--${size}`,
-        stretch && 'ui-button-control--stretch',
+        stretch ? buttonStretchSizeClasses[size] : buttonSizeClasses[size],
         surfaceClasses[surface],
         className,
       )}
+      onPointerDown={(event) => {
+        updateButtonPointerGlow(event);
+        onPointerDown?.(event);
+      }}
     >
       <span className="ui-button__edge-field" aria-hidden="true" />
-      {(leading || loading) && (
-        <span className="ui-button-control__leading">
-          {leading && <span style={loading ? { visibility: 'hidden' } : undefined}>{leading}</span>}
+      {leading || loading ? (
+        <span className="ui-button__leading">
+          {loading && leading ? (
+            <span className="ui-button__leading-placeholder" aria-hidden="true">
+              {leading}
+            </span>
+          ) : null}
           {loading && (
-            <svg
-              className="ui-button-control__spinner"
-              viewBox="0 0 16 16"
-              fill="none"
-              aria-hidden="true"
-            >
-              <circle
-                cx="8"
-                cy="8"
-                r="6"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeDasharray="28 10"
-              />
-            </svg>
+            <span className="ui-button__spinner" aria-hidden="true">
+              <svg
+                className={loadingIndicatorClass}
+                viewBox="0 0 16 16"
+                fill="none"
+                aria-hidden="true"
+              >
+                <circle
+                  cx="8"
+                  cy="8"
+                  r="6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeDasharray="28 10"
+                />
+              </svg>
+            </span>
           )}
+          {!loading ? leading : null}
         </span>
-      )}
-      <span className="ui-button-control__content">{children}</span>
-      {trailing && <span className="ui-button-control__trailing">{trailing}</span>}
+      ) : null}
+      <span className="ui-button__content">{children}</span>
+      {trailing ? <span className="ui-button__trailing">{trailing}</span> : null}
     </button>
   );
 }
@@ -468,17 +638,15 @@ export function UiIconButton(props: UiIconButtonProps) {
   const href = 'href' in props ? props.href : undefined;
   const isDisabled = disabled || loading;
   const classes = mergeClassNames(
-    'ui-button ui-button-control ui-button-icon-control',
+    'ui-button ui-icon-button',
     buttonVariantClasses[variant],
-    `ui-button-control--${size}`,
-    `ui-button-icon-control--${size}`,
-    stretch && 'ui-button-icon-control--stretch',
+    stretch ? iconButtonStretchSizeClasses[size] : iconButtonSizeClasses[size],
     surfaceClasses[surface],
     className,
   );
   const ariaBusy = loading ? true : rest['aria-busy'];
   const icon = loading ? (
-    <svg className="ui-button-control__spinner" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <svg className={loadingIndicatorClass} viewBox="0 0 16 16" fill="none" aria-hidden="true">
       <circle
         cx="8"
         cy="8"
@@ -495,7 +663,7 @@ export function UiIconButton(props: UiIconButtonProps) {
   const content = (
     <>
       <span className="ui-button__edge-field" aria-hidden="true" />
-      <span className="ui-button-icon-control__content" aria-hidden="true">
+      <span className="ui-icon-button__content" aria-hidden="true">
         {icon}
       </span>
     </>
@@ -526,6 +694,10 @@ export function UiIconButton(props: UiIconButtonProps) {
         tabIndex={isDisabled ? -1 : anchorProps.tabIndex}
         data-surface={surface}
         className={classes}
+        onPointerDown={(event) => {
+          if (!isDisabled) updateButtonPointerGlow(event);
+          anchorProps.onPointerDown?.(event);
+        }}
         onClick={handleClick}
       >
         {content}
@@ -533,12 +705,14 @@ export function UiIconButton(props: UiIconButtonProps) {
     );
   }
 
+  const buttonProps = rest as Omit<
+    ComponentPropsWithRef<'button'>,
+    'aria-label' | 'children' | 'disabled' | 'size' | 'type'
+  >;
+
   return (
     <button
-      {...(rest as Omit<
-        ComponentPropsWithRef<'button'>,
-        'aria-label' | 'children' | 'disabled' | 'size' | 'type'
-      >)}
+      {...buttonProps}
       ref={ref as Ref<HTMLButtonElement>}
       type={type}
       disabled={isDisabled}
@@ -546,6 +720,10 @@ export function UiIconButton(props: UiIconButtonProps) {
       aria-busy={ariaBusy}
       data-surface={surface}
       className={classes}
+      onPointerDown={(event) => {
+        if (!isDisabled) updateButtonPointerGlow(event);
+        buttonProps.onPointerDown?.(event);
+      }}
     >
       {content}
     </button>

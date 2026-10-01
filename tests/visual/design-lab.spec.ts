@@ -54,6 +54,59 @@ for (const theme of themes) {
   }
 }
 
+for (const theme of themes) {
+  test(`ghost button keeps a single quiet edge through its states / ${theme}`, async ({ page }) => {
+    test.skip(test.info().project.name === 'mobile', 'Hover is tested on a fine pointer');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`/frame?theme=${theme}&lang=en#controls`, {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const ghost = page.locator('.ui-button--ghost.material-glass-subtle').first();
+    await expect(ghost).toBeVisible();
+    const readState = () =>
+      ghost.evaluate((element) => {
+        const style = getComputedStyle(element);
+        const edge = element.querySelector('.ui-button__edge-field');
+        if (edge === null) {
+          throw new Error('Ghost button is missing its edge field');
+        }
+        const press = getComputedStyle(element, '::after');
+        return {
+          background: style.backgroundColor,
+          border: style.borderColor,
+          filter: style.backdropFilter,
+          radius: style.borderRadius,
+          edgeDisplay: getComputedStyle(edge).display,
+          pressRadius: press.borderRadius,
+          pressOpacity: press.opacity,
+        };
+      });
+
+    const resting = await readState();
+    expect(resting.background).toBe('rgba(0, 0, 0, 0)');
+    expect(resting.filter).toBe('none');
+    expect(resting.edgeDisplay).toBe('none');
+    expect(resting.pressRadius).toBe(resting.radius);
+    expect(resting.pressOpacity).toBe('0');
+
+    await ghost.hover();
+    const hovered = await readState();
+    expect(hovered.background).not.toBe(resting.background);
+    expect(hovered.border).not.toBe(resting.border);
+    expect(hovered.edgeDisplay).toBe('none');
+    expect(hovered.pressOpacity).toBe('0');
+
+    await page.mouse.down();
+    const pressed = await readState();
+    expect(pressed.border).not.toBe(resting.border);
+    expect(pressed.background).not.toBe(resting.background);
+    expect(pressed.edgeDisplay).toBe('none');
+    expect(pressed.pressOpacity).toBe('0');
+    await page.mouse.up();
+  });
+}
+
 test('consumer parity exposes destination and current-page semantics', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
@@ -137,6 +190,77 @@ test('active navigation hover does not stack another visual state', async ({ pag
   await activeItem.hover();
   const duringHover = await readVisualState();
 
+  expect(duringHover).toEqual(beforeHover);
+});
+
+test('standalone segmented control keeps symmetric glass geometry and stable selected hover', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/frame?theme=dark&lang=en#controls', {
+    waitUntil: 'domcontentloaded',
+  });
+  await page.addStyleTag({ content: freezeMotion });
+  await page.evaluate(waitForStableAssets);
+
+  const control = page
+    .locator('#controls-segmented-control .ui-segmented-control[data-surface="glass-subtle"]')
+    .first();
+  await expect(control).toBeVisible();
+
+  const readSelectedState = () =>
+    control.locator('.ui-segmented-control__option--active').evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        color: style.color,
+        backgroundColor: style.backgroundColor,
+        backgroundImage: style.backgroundImage,
+        boxShadow: style.boxShadow,
+      };
+    });
+
+  const geometry = await control.evaluate((element) => {
+    const options = element.querySelector<HTMLElement>('.ui-segmented-control__options');
+    const slider = element.querySelector<HTMLElement>('.ui-segmented-control__slider');
+    if (options === null || slider === null) {
+      throw new Error('Standalone segmented-control geometry is missing');
+    }
+
+    const rootRect = element.getBoundingClientRect();
+    const optionsRect = options.getBoundingClientRect();
+    const sliderRect = slider.getBoundingClientRect();
+    const style = getComputedStyle(element);
+    const rgbaAlpha = style.backgroundColor.match(/^rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)$/)?.[1];
+    const slashAlpha = style.backgroundColor.match(/\/\s*([\d.]+)\s*\)$/)?.[1];
+
+    return {
+      surface: element.getAttribute('data-surface'),
+      backgroundAlpha: Number.parseFloat(rgbaAlpha ?? slashAlpha ?? '1'),
+      backdropFilter: style.backdropFilter,
+      insetInlineStart: optionsRect.left - rootRect.left,
+      insetInlineEnd: rootRect.right - optionsRect.right,
+      insetBlockStart: optionsRect.top - rootRect.top,
+      insetBlockEnd: rootRect.bottom - optionsRect.bottom,
+      sliderWithinRoot:
+        sliderRect.left >= rootRect.left &&
+        sliderRect.right <= rootRect.right &&
+        sliderRect.top >= rootRect.top &&
+        sliderRect.bottom <= rootRect.bottom,
+    };
+  });
+
+  expect(geometry.surface).toBe('glass-subtle');
+  expect(geometry.backgroundAlpha).toBeGreaterThan(0);
+  expect(geometry.backgroundAlpha).toBeLessThan(1);
+  expect(geometry.backdropFilter).not.toBe('none');
+  expect(geometry.insetInlineStart).toBeCloseTo(geometry.insetInlineEnd, 1);
+  expect(geometry.insetBlockStart).toBeCloseTo(geometry.insetBlockEnd, 1);
+  expect(geometry.insetInlineStart).toBeCloseTo(geometry.insetBlockStart, 1);
+  expect(geometry.sliderWithinRoot).toBe(true);
+
+  const beforeHover = await readSelectedState();
+  await control.locator('.ui-segmented-control__option--active').hover();
+  const duringHover = await readSelectedState();
   expect(duringHover).toEqual(beforeHover);
 });
 
@@ -736,6 +860,54 @@ test('consumer parity dock keeps parent Glass stable on item hover', async ({ pa
   expect(after).toEqual(before);
 });
 
+test('embedded segmented control keeps item resting plates without outer chrome', async ({
+  page,
+}) => {
+  await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
+    waitUntil: 'domcontentloaded',
+  });
+  await page.evaluate(waitForStableAssets);
+
+  const control = page.locator('.consumer-parity-dock__language');
+  await expect(control).toHaveAttribute('data-surface', 'none');
+
+  const outer = await control.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      backgroundImage: style.backgroundImage,
+      boxShadow: style.boxShadow,
+      borderTopWidth: style.borderTopWidth,
+    };
+  });
+  expect(outer.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+  expect(outer.backgroundImage).toBe('none');
+  expect(outer.boxShadow).toBe('none');
+  expect(outer.borderTopWidth).toBe('0px');
+
+  const inactive = control
+    .locator('.ui-segmented-control__option:not(.ui-segmented-control__option--active)')
+    .first();
+  await expect(inactive).toBeVisible();
+  const resting = await inactive.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundColor: style.backgroundColor,
+      backgroundImage: style.backgroundImage,
+      borderColor: style.borderColor,
+      borderStyle: style.borderStyle,
+      boxShadow: style.boxShadow,
+    };
+  });
+
+  expect(
+    resting.backgroundColor !== 'rgba(0, 0, 0, 0)' ||
+      resting.backgroundImage !== 'none' ||
+      (resting.borderStyle !== 'none' && resting.borderColor !== 'rgba(0, 0, 0, 0)') ||
+      resting.boxShadow !== 'none',
+  ).toBe(true);
+});
+
 for (const theme of themes) {
   test(`button press glow / ${theme}`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -807,9 +979,9 @@ const compositionSurfaceContracts = [
     selector: ':scope > .material-glass-elevated',
     glass: true,
   },
-  { id: 'composition-docs-navigation-group', selector: ':scope > nav', glass: false },
+  { id: 'composition-docs-navigation-group', selector: ':scope > nav', glass: true },
   { id: 'composition-docs-toolbar', selector: ':scope > .material-glass-subtle', glass: true },
-  { id: 'composition-docs-content-surface', selector: ':scope > article', glass: false },
+  { id: 'composition-docs-content-surface', selector: ':scope > article', glass: true },
 ] as const;
 
 for (const theme of themes) {
@@ -865,12 +1037,95 @@ for (const theme of themes) {
       if (panel.expectedGlass) {
         expect(panel.refractionOpacity).toBeGreaterThan(0);
         if (panel.renderer === 'webgl') {
+          // Every independent Glass panel, including nested panels, owns one
+          // WebGL edge. The CSS field remains the fallback when WebGL is off.
           expect(panel.beforeDisplay).toBe('none');
           expect(panel.backgroundClip).toBe('padding-box');
         } else {
           expect(panel.beforeDisplay).toBe('block');
         }
       }
+    }
+  });
+}
+
+for (const theme of themes) {
+  test(`standard composition mode keeps every preview surface translucent and blurred / ${theme}`, async ({
+    page,
+  }) => {
+    await page.goto(`/frame?theme=${theme}&lang=zh#composition`, {
+      waitUntil: 'domcontentloaded',
+    });
+    await page.addStyleTag({ content: freezeMotion });
+    await page.evaluate(waitForStableAssets);
+
+    const surfaces = await page
+      .locator('[data-composition-mode="glass"] [data-composition-surface]')
+      .evaluateAll((elements) =>
+        elements.map((element) => {
+          const style = getComputedStyle(element);
+          const rgbaAlpha = style.backgroundColor.match(
+            /^rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)$/,
+          )?.[1];
+          const slashAlpha = style.backgroundColor.match(/\/\s*([\d.]+)\s*\)$/)?.[1];
+          const alpha =
+            style.backgroundColor === 'transparent'
+              ? 0
+              : Number.parseFloat(rgbaAlpha ?? slashAlpha ?? '1');
+          return {
+            surface: element.getAttribute('data-surface'),
+            backdropFilter: style.backdropFilter,
+            alpha,
+          };
+        }),
+      );
+
+    expect(surfaces.length).toBeGreaterThanOrEqual(8);
+    for (const surface of surfaces) {
+      expect(surface.surface).toMatch(/^glass-/);
+      expect(surface.backdropFilter).not.toBe('none');
+      expect(surface.alpha).toBeGreaterThan(0);
+      expect(surface.alpha).toBeLessThan(1);
+    }
+  });
+
+  test(`accessibility composition preview isolates the reduced-transparency fallback / ${theme}`, async ({
+    page,
+  }) => {
+    await page.goto(`/frame?theme=${theme}&lang=zh#composition`, {
+      waitUntil: 'domcontentloaded',
+    });
+    await page.addStyleTag({ content: freezeMotion });
+    await page.evaluate(waitForStableAssets);
+
+    await expect(page.locator('#composition-standard-mode')).toBeVisible();
+    await expect(page.locator('#composition-accessibility-mode')).toBeVisible();
+
+    const surfaces = await page
+      .locator('[data-composition-mode="accessibility"] [data-accessibility-surface]')
+      .evaluateAll((elements) =>
+        elements.map((element) => {
+          const style = getComputedStyle(element);
+          return {
+            surface: element.getAttribute('data-surface'),
+            backdropFilter: style.backdropFilter,
+            backgroundColor: style.backgroundColor,
+            backgroundImage: style.backgroundImage,
+            beforeDisplay: getComputedStyle(element, '::before').display,
+            afterDisplay: getComputedStyle(element, '::after').display,
+          };
+        }),
+      );
+
+    expect(surfaces).toHaveLength(2);
+    for (const surface of surfaces) {
+      expect(surface.surface).toMatch(/^glass-/);
+      expect(surface.backdropFilter).toBe('none');
+      expect(surface.backgroundImage).toBe('none');
+      expect(surface.backgroundColor).not.toBe('transparent');
+      expect(surface.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+      expect(surface.beforeDisplay).toBe('none');
+      expect(surface.afterDisplay).toBe('none');
     }
   });
 }
@@ -924,9 +1179,14 @@ for (const theme of themes) {
 
     const boundary = await page.locator('#card .ui-button--ghost').evaluate((element) => {
       const style = getComputedStyle(element);
+      const edge = element.querySelector('.ui-button__edge-field');
+      if (edge === null) {
+        throw new Error('Ghost button is missing its edge field');
+      }
       return {
         borderColor: style.borderColor,
         boxShadow: style.boxShadow,
+        edgeDisplay: getComputedStyle(edge).display,
         refractionOpacity: Number(
           style.getPropertyValue('--neoverse-material-edge-refraction-opacity'),
         ),
@@ -939,7 +1199,8 @@ for (const theme of themes) {
       expect(boundary.borderColor).not.toBe('rgba(0, 0, 0, 0)');
     }
     expect(boundary.boxShadow).not.toBe('none');
-    expect(boundary.refractionOpacity).toBeGreaterThan(0);
+    expect(boundary.edgeDisplay).toBe('none');
+    expect(boundary.refractionOpacity).toBe(0);
   });
 }
 
@@ -1232,4 +1493,91 @@ test('touch density keeps the compact control geometry and adds a transparent hi
     pointerEvents: 'auto',
     hitTarget: true,
   });
+});
+
+test('reduced motion collapses control transitions and removes loading animation in both themes', async ({
+  page,
+}) => {
+  for (const theme of themes) {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`/frame?theme=${theme}&lang=en#controls`, {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const motion = await page.evaluate(() => {
+      const elements = [
+        ...document.querySelectorAll<HTMLElement>(
+          '#controls-button .ui-button, #controls-segmented-control [role="radio"], #controls-segmented-control .ui-segmented-control__slider',
+        ),
+      ];
+      const loading = document.querySelector<HTMLElement>(
+        '#controls-button [data-specimen-state-row][data-specimen-label="Loading"] .ui-button svg',
+      );
+      const durationsAreReduced = (value: string): boolean =>
+        value.split(',').every((duration) => Number.parseFloat(duration) <= 0.001);
+
+      return {
+        transitionDurations: elements.map(
+          (element) => getComputedStyle(element).transitionDuration,
+        ),
+        allTransitionsReduced: elements.every((element) =>
+          durationsAreReduced(getComputedStyle(element).transitionDuration),
+        ),
+        loadingAnimation: loading === null ? null : getComputedStyle(loading).animationName,
+      };
+    });
+
+    expect(motion.transitionDurations.length, theme).toBeGreaterThan(0);
+    expect(motion.allTransitionsReduced, theme).toBe(true);
+    expect(motion.loadingAnimation, theme).toBe('none');
+  }
+});
+
+test('reduced transparency removes refraction from representative controls in both themes', async ({
+  page,
+}) => {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setEmulatedMedia', {
+    features: [{ name: 'prefers-reduced-transparency', value: 'reduce' }],
+  });
+
+  for (const theme of themes) {
+    await page.goto(`/frame?theme=${theme}&lang=en#controls`, {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const surfaces = await page.evaluate(() => {
+      const elements = [
+        document.querySelector<HTMLElement>('#controls-button .ui-button--primary'),
+        document.querySelector<HTMLElement>(
+          '#controls-segmented-control .ui-segmented-control[data-surface="glass-subtle"]',
+        ),
+      ];
+      if (elements.some((element) => element === null)) {
+        throw new Error('Reduced-transparency control fixtures are missing');
+      }
+
+      return elements.map((element) => {
+        if (element === null) {
+          throw new Error('Reduced-transparency control fixture is missing');
+        }
+        const style = getComputedStyle(element);
+        const buttonEdge = element.querySelector<HTMLElement>('.ui-button__edge-field');
+        const edgeDisplay = buttonEdge
+          ? getComputedStyle(buttonEdge).display
+          : getComputedStyle(element, '::before').display;
+        return {
+          backdropFilter: style.backdropFilter,
+          backgroundImage: style.backgroundImage,
+          edgeDisplay,
+        };
+      });
+    });
+
+    for (const surface of surfaces) {
+      expect(surface.backdropFilter, theme).toBe('none');
+      expect(surface.backgroundImage, theme).toBe('none');
+      expect(surface.edgeDisplay, theme).toBe('none');
+    }
+  }
 });

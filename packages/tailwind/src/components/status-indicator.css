@@ -1,6 +1,9 @@
 @layer components {
   .ui-status-indicator {
     --ui-status-indicator-color: var(--neoverse-color-text-muted);
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--neoverse-typography-label-font-family);
     color: var(--neoverse-color-text-secondary);
     line-height: var(--neoverse-line-height-snug);
   }

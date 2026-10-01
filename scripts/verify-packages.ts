@@ -168,6 +168,32 @@ try {
         !entries.includes('package/dist/playground.css'),
         '@neoverse-ui/tailwind: playground.css must not be published',
       );
+      const consumerCss = await run(
+        ['tar', '-xOf', tarballPath, 'package/dist/index.css'],
+        repositoryRoot,
+      );
+      for (const fragment of ['.sr-only{', '.material-glass-card{', '.ui-button{']) {
+        assert(
+          consumerCss.includes(fragment),
+          `@neoverse-ui/tailwind: compiled consumer bundle is missing ${fragment}`,
+        );
+      }
+    }
+
+    if (sourcePackage.name === '@neoverse-ui/vue' || sourcePackage.name === '@neoverse-ui/react') {
+      const adapterCss = await run(
+        ['tar', '-xOf', tarballPath, 'package/dist/index.css'],
+        repositoryRoot,
+      );
+      assert(
+        adapterCss.includes("@import '@neoverse-ui/tailwind/index.css';"),
+        `${sourcePackage.name}: index.css must forward the compiled Tailwind consumer bundle`,
+      );
+      assert(
+        !adapterCss.includes("@import '@neoverse-ui/tailwind/components.css';") &&
+          !adapterCss.includes("@import '@neoverse-ui/tailwind/theme.css';"),
+        `${sourcePackage.name}: index.css must not expose a source-only or components-only style path`,
+      );
     }
 
     for (const target of exportTargets(packedJson.exports)) {

@@ -12,10 +12,10 @@ const props = withDefaults(defineProps<SkeletonProps>(), {
 const attrs = useAttrs();
 
 const variantClasses: Record<SkeletonVariant, string> = {
-  text: 'ui-skeleton--text rounded-control-inner',
+  text: 'ui-skeleton--text',
   title: 'ui-skeleton--title',
-  avatar: 'ui-skeleton--avatar aspect-square rounded-pill',
-  circle: 'ui-skeleton--circle aspect-square rounded-pill',
+  avatar: 'ui-skeleton--avatar',
+  circle: 'ui-skeleton--circle',
   rect: 'ui-skeleton--rect',
 };
 
@@ -26,7 +26,7 @@ const effectClasses: Record<SkeletonEffect, string> = {
 };
 
 const classes = computed(() => [
-  'ui-skeleton skeleton-surface block',
+  'ui-skeleton skeleton-surface',
   variantClasses[props.variant as SkeletonVariant] ?? variantClasses.text,
   effectClasses[props.effect as SkeletonEffect] ?? effectClasses.shimmer,
 ]);

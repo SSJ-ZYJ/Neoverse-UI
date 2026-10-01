@@ -10,7 +10,7 @@ const props = withDefaults(defineProps<StatusIndicatorProps>(), {
 });
 
 const classes = computed(() => [
-  'ui-status-indicator inline-flex items-center font-label',
+  'ui-status-indicator',
   `ui-status-indicator--${props.status as StatusIndicatorStatus}`,
   `ui-status-indicator--${props.size as StatusIndicatorSize}`,
   {

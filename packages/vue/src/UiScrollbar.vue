@@ -136,7 +136,6 @@ function show() {
 }
 
 function setNativeScrollbarHidden(hidden: boolean) {
-  if (!props.hideNative) return;
   const targets = [document.documentElement, document.body].filter(Boolean);
   for (const target of targets) target.classList.toggle('ui-scrollbar-target', hidden);
 }
@@ -270,10 +269,16 @@ function onKeydown() {
 }
 
 watch(() => props.refreshKey, refreshAfterChange);
+watch(
+  () => props.hideNative,
+  (hideNative) => {
+    setNativeScrollbarHidden(hideNative);
+  },
+);
 
 onMounted(() => {
   scrollElement = resolveScrollElement();
-  setNativeScrollbarHidden(true);
+  setNativeScrollbarHidden(props.hideNative);
   syncLayout();
   show();
 

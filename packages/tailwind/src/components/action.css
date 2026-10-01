@@ -75,6 +75,8 @@
     height: var(--ui-action-icon-size);
   }
 
+  /* Preserve the legacy action selector contract for consumers that use
+     `.ui-action` without the adapter's shared `.ui-button` root. */
   .ui-action[aria-disabled='true'] {
     cursor: not-allowed;
     opacity: 0.6;
@@ -104,6 +106,6 @@
   .ui-action[aria-disabled='true'].ui-button--ghost:is(:hover, :active) {
     color: var(--neoverse-control-ghost-foreground);
     background: var(--neoverse-control-ghost-background);
-    box-shadow: var(--neoverse-control-button-edge);
+    box-shadow: var(--neoverse-control-ghost-shadow);
   }
 }

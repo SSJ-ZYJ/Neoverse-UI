@@ -3,7 +3,6 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import brandIconUrl from './assets/neoverse-ui-icon.svg';
 import './styles/playground-tokens.css';
-import './styles/consumer-parity.css';
 import './styles/shell.css';
 
 document.documentElement.dataset.playgroundView =

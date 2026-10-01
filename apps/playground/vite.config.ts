@@ -6,10 +6,20 @@ export default defineConfig(({ mode }) => ({
   plugins: [vue()],
   resolve: {
     // Compile the workspace source so the Vite watcher does not depend on a
-    // previously generated packages/vue/dist entrypoint.
+    // previously generated package dist entrypoint or leave workspace package
+    // specifiers unresolved in the browser bundle.
     alias: {
+      '@neoverse-ui/glass-runtime': fileURLToPath(
+        new URL('../../packages/glass-runtime/src/index.ts', import.meta.url),
+      ),
+      '@neoverse-ui/motion': fileURLToPath(
+        new URL('../../packages/motion/src/index.ts', import.meta.url),
+      ),
       '@neoverse-ui/react': fileURLToPath(
         new URL('../../packages/react/src/index.tsx', import.meta.url),
+      ),
+      '@neoverse-ui/tokens': fileURLToPath(
+        new URL('../../packages/tokens/src/index.ts', import.meta.url),
       ),
       '@neoverse-ui/vue': fileURLToPath(
         new URL('../../packages/vue/src/index.ts', import.meta.url),

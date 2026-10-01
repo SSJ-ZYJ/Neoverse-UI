@@ -7,6 +7,7 @@ import UiBreadcrumb from './UiBreadcrumb.vue';
 import UiButton from './UiButton.vue';
 import UiCard from './UiCard.vue';
 import UiControlSurface from './UiControlSurface.vue';
+import UiDock from './UiDock.vue';
 import UiGlassSurface from './UiGlassSurface.vue';
 import UiIconButton from './UiIconButton.vue';
 import UiNavigationItem from './UiNavigationItem.vue';
@@ -37,7 +38,7 @@ describe('UiButton', () => {
     });
 
     expect(wrapper.classes()).toEqual(
-      expect.arrayContaining(['ui-button', 'material-glass-subtle', 'rounded-control-inner']),
+      expect.arrayContaining(['ui-button', 'ui-button--md', 'material-glass-subtle']),
     );
     expect(wrapper.attributes('data-surface')).toBe('glass-subtle');
   });
@@ -79,13 +80,13 @@ describe('UiButton', () => {
     });
 
     expect(stretched.classes()).toEqual(
-      expect.arrayContaining(['self-stretch', 'px-3', 'text-label']),
+      expect.arrayContaining(['ui-button--md', 'ui-button--stretch']),
     );
     expect(stretched.classes()).not.toContain('h-8');
 
     const sized = mount(UiButton, { slots: { default: 'Sized' } });
-    expect(sized.classes()).toContain('h-8');
-    expect(sized.classes()).not.toContain('self-stretch');
+    expect(sized.classes()).toContain('ui-button--md');
+    expect(sized.classes()).not.toContain('ui-button--stretch');
   });
 
   it('uses semantic classes and blocks native activation while loading', async () => {
@@ -99,16 +100,9 @@ describe('UiButton', () => {
 
     expect(button.attributes('type')).toBe('button');
     expect(button.classes()).toEqual(
-      expect.arrayContaining([
-        'ui-button--secondary',
-        'focus-visible:ring-focus',
-        'duration-fast',
-        'ease-standard',
-        'font-medium',
-        'h-9',
-        'px-4',
-      ]),
+      expect.arrayContaining(['ui-button--secondary', 'ui-button--lg']),
     );
+    expect(button.classes().some((className) => className.includes(':'))).toBe(false);
 
     await button.trigger('click');
     expect(onClick).toHaveBeenCalledTimes(1);
@@ -119,7 +113,7 @@ describe('UiButton', () => {
     expect(button.find('[aria-hidden="true"]').exists()).toBe(true);
 
     const loadingIndicator = button.get('[aria-hidden="true"] svg');
-    expect(loadingIndicator.classes()).toContain('motion-safe:animate-spin');
+    expect(loadingIndicator.classes()).toContain('ui-loading-indicator');
     expect(loadingIndicator.get('circle').attributes('stroke-linecap')).toBe('round');
 
     onClick.mockClear();
@@ -134,8 +128,8 @@ describe('UiButton', () => {
     });
     const button = wrapper.get('button');
 
-    expect(button.classes()).toContain('disabled:cursor-not-allowed');
-    expect(button.classes()).not.toContain('disabled:pointer-events-none');
+    expect(button.classes()).toContain('ui-button--md');
+    expect(button.classes().some((className) => className.startsWith('disabled:'))).toBe(false);
   });
 
   it('anchors the press glow to the pointer location', async () => {
@@ -182,7 +176,6 @@ describe('UiAction', () => {
         'ui-action--lg',
         'ui-button--primary',
         'material-glass-subtle',
-        'rounded-control-inner',
       ]),
     );
   });
@@ -213,6 +206,22 @@ describe('UiAction', () => {
 
     await action.trigger('click');
     expect(onClick).not.toHaveBeenCalled();
+  });
+
+  it('keeps native button type and disabled semantics when rendered as a button', () => {
+    const enabled = mount(UiAction, {
+      props: { as: 'button', type: 'submit' },
+      slots: { default: 'Submit' },
+    });
+    expect(enabled.get('button').attributes('type')).toBe('submit');
+    expect(enabled.get('button').attributes('disabled')).toBeUndefined();
+    expect(enabled.get('button').attributes('aria-disabled')).toBeUndefined();
+
+    const disabled = mount(UiAction, {
+      props: { as: 'button', disabled: true },
+      slots: { default: 'Unavailable' },
+    });
+    expect(disabled.get('button').element.disabled).toBe(true);
   });
 });
 
@@ -397,6 +406,34 @@ describe('UiControlSurface', () => {
   });
 });
 
+describe('UiDock', () => {
+  it('owns reusable dock composition while keeping product content caller-owned', () => {
+    const wrapper = mount(UiDock, {
+      attrs: { 'aria-label': 'Primary navigation' },
+      props: { compact: true },
+      slots: {
+        default: '<a class="ui-navigation-item" href="/">Home</a>',
+        trailing: '<button>English</button>',
+      },
+    });
+
+    expect(wrapper.element.tagName).toBe('NAV');
+    expect(wrapper.attributes('aria-label')).toBe('Primary navigation');
+    expect(wrapper.attributes('data-surface')).toBe('chrome');
+    expect(wrapper.classes()).toEqual(
+      expect.arrayContaining([
+        'ui-dock',
+        'ui-dock--compact',
+        'ui-control-surface',
+        'ui-control-surface--scale-lg',
+        'ui-surface-chrome',
+      ]),
+    );
+    expect(wrapper.classes()).toContain('ui-control-surface--shared-indicator');
+    expect(wrapper.find('.ui-control-surface__divider').exists()).toBe(true);
+  });
+});
+
 describe('UiStatusIndicator', () => {
   it('keeps announcements caller-owned and hides its decorative status dot', () => {
     const passive = mount(UiStatusIndicator, {
@@ -436,15 +473,16 @@ describe('UiIconButton', () => {
 
     expect(button.attributes('aria-label')).toBe('Open settings');
     expect(button.classes()).toEqual(
-      expect.arrayContaining(['ui-button--ghost', 'size-7', 'focus-visible:ring-2']),
+      expect.arrayContaining(['ui-button--ghost', 'ui-icon-button', 'ui-icon-button--sm']),
     );
+    expect(button.classes().some((className) => className.includes(':'))).toBe(false);
 
     await wrapper.setProps({ loading: true });
     expect(button.element.disabled).toBe(true);
     expect(button.attributes('aria-busy')).toBe('true');
 
     const loadingIndicator = button.get('[aria-hidden="true"] svg');
-    expect(loadingIndicator.classes()).toContain('motion-safe:animate-spin');
+    expect(loadingIndicator.classes()).toContain('ui-loading-indicator');
     expect(loadingIndicator.get('circle').attributes('stroke-linecap')).toBe('round');
   });
 
@@ -480,13 +518,13 @@ describe('UiIconButton', () => {
     });
 
     expect(stretched.get('button').classes()).toEqual(
-      expect.arrayContaining(['w-8', 'self-stretch']),
+      expect.arrayContaining(['ui-icon-button--md', 'ui-icon-button--stretch']),
     );
     expect(stretched.get('button').classes()).not.toContain('size-8');
 
     const sized = mount(UiIconButton, { props: { label: 'Add' }, slots: { default: 'icon' } });
-    expect(sized.get('button').classes()).toContain('size-8');
-    expect(sized.get('button').classes()).not.toContain('self-stretch');
+    expect(sized.get('button').classes()).toContain('ui-icon-button--md');
+    expect(sized.get('button').classes()).not.toContain('ui-icon-button--stretch');
   });
 
   it('supports icon-only navigation without consumer geometry overrides', async () => {
@@ -504,7 +542,7 @@ describe('UiIconButton', () => {
     const link = wrapper.get('a');
     expect(link.attributes('href')).toBe('https://example.com/source');
     expect(link.attributes('aria-label')).toBe('View source');
-    expect(link.classes()).toContain('size-7');
+    expect(link.classes()).toContain('ui-icon-button--sm');
 
     await wrapper.setProps({ disabled: true });
     expect(link.attributes('href')).toBeUndefined();
@@ -525,12 +563,12 @@ describe('display components', () => {
 
     const glass = mount(UiGlassSurface, { props: { variant: 'immersive' } });
     expect(glass.classes()).toEqual(
-      expect.arrayContaining(['material-glass-immersive', 'rounded-card', 'p-4']),
+      expect.arrayContaining(['ui-glass-surface', 'material-glass-immersive']),
     );
 
     const glassCard = mount(UiGlassSurface, { props: { variant: 'card' } });
     expect(glassCard.classes()).toEqual(
-      expect.arrayContaining(['material-glass-card', 'rounded-card', 'p-4']),
+      expect.arrayContaining(['ui-glass-surface', 'material-glass-card']),
     );
     const semanticGlassCard = mount(UiGlassSurface, {
       attrs: { 'aria-label': 'Project card' },
@@ -542,13 +580,7 @@ describe('display components', () => {
 
     const card = mount(UiCard, { attrs: { class: 'max-w-container-sm' } });
     expect(card.classes()).toEqual(
-      expect.arrayContaining([
-        'ui-card',
-        'rounded-card',
-        'p-4',
-        'material-glass-card',
-        'max-w-container-sm',
-      ]),
+      expect.arrayContaining(['ui-card', 'material-glass-card', 'max-w-container-sm']),
     );
     expect(card.attributes('data-surface')).toBe('glass-card');
 
@@ -571,7 +603,20 @@ describe('display components', () => {
     expect(surface.element.tagName).toBe('SECTION');
     expect(surface.attributes('aria-label')).toBe('Shared surface');
     expect(surface.attributes('data-surface')).toBe('glass-card');
+    expect(surface.attributes('data-neoverse-glass-nesting')).toBe('local');
+    expect(surface.attributes('data-neoverse-surface-overflow')).toBe('clip');
     expect(surface.classes()).toContain('material-glass-card');
+
+    const localGlassSurface = mount(UiSurface, {
+      props: { surface: 'glass-subtle', glassNesting: 'local', contentOverflow: 'visible' },
+    });
+    expect(localGlassSurface.attributes('data-neoverse-glass-nesting')).toBe('local');
+    expect(localGlassSurface.attributes('data-neoverse-surface-overflow')).toBe('visible');
+
+    const inheritedGlassSurface = mount(UiSurface, {
+      props: { surface: 'glass-subtle', glassNesting: 'inherit' },
+    });
+    expect(inheritedGlassSurface.attributes('data-neoverse-glass-nesting')).toBe('inherit');
 
     const insetSurface = mount(UiSurface, { props: { surface: 'inset' } });
     expect(insetSurface.attributes('data-surface')).toBe('inset');
@@ -600,7 +645,6 @@ describe('display components', () => {
         'skeleton-surface',
         'ui-skeleton--circle',
         'ui-skeleton--shimmer',
-        'rounded-pill',
       ]),
     );
     expect(skeleton.attributes('data-effect')).toBe('shimmer');
@@ -625,6 +669,21 @@ describe('display components', () => {
 });
 
 describe('UiScrollbar', () => {
+  it('reacts when native scrollbar ownership is toggled', async () => {
+    const root = document.documentElement;
+    const wrapper = mount(UiScrollbar, {
+      attachTo: document.body,
+      props: { hideNative: false },
+    });
+
+    expect(root.classList).not.toContain('ui-scrollbar-target');
+    await wrapper.setProps({ hideNative: true });
+    expect(root.classList).toContain('ui-scrollbar-target');
+    await wrapper.setProps({ hideNative: false });
+    expect(root.classList).not.toContain('ui-scrollbar-target');
+    wrapper.unmount();
+  });
+
   it('tracks document geometry and owns native scrollbar visibility', async () => {
     const root = document.documentElement;
     Object.defineProperty(root, 'scrollHeight', { configurable: true, value: 1600 });
@@ -714,18 +773,15 @@ describe('UiSegmentedControl', () => {
 
     expect(wrapper.attributes('role')).toBe('radiogroup');
     expect(wrapper.attributes('aria-orientation')).toBe('horizontal');
-    expect(wrapper.classes()).toEqual(
-      expect.arrayContaining(['ui-segmented-control', 'inline-flex']),
-    );
+    expect(wrapper.classes()).toEqual(expect.arrayContaining(['ui-segmented-control']));
     expect(wrapper.classes()).not.toEqual(expect.arrayContaining(['border-subtle']));
     expect(buttons[0]?.classes()).toEqual(
       expect.arrayContaining([
         'ui-segmented-control__option',
         'ui-segmented-control__option--active',
-        'duration-standard',
-        'ease-emphasized',
       ]),
     );
+    expect(buttons[0]?.classes().some((className) => className.includes(':'))).toBe(false);
     expect(wrapper.find('.ui-segmented-control__slider').exists()).toBe(true);
     expect(buttons[0]?.attributes('aria-checked')).toBe('true');
     expect(buttons[0]?.attributes('tabindex')).toBe('0');
@@ -765,7 +821,7 @@ describe('UiSegmentedControl', () => {
     expect(buttons.every((button) => button.element.disabled)).toBe(true);
 
     const loadingIndicator = wrapper.get('[aria-hidden="true"] > svg');
-    expect(loadingIndicator.classes()).toContain('motion-safe:animate-spin');
+    expect(loadingIndicator.classes()).toContain('ui-loading-indicator');
     expect(loadingIndicator.get('circle').attributes('stroke-linecap')).toBe('round');
 
     await buttons[0]?.trigger('click');
@@ -790,6 +846,15 @@ describe('UiSegmentedControl', () => {
     const optionButtons = optionLabeled.findAll('button');
     expect(optionButtons[0]?.attributes('aria-label')).toBe('Show A');
     expect(optionButtons[1]?.attributes('aria-label')).toBeUndefined();
+  });
+
+  it('preserves an aria-label supplied through fallthrough attributes', () => {
+    const wrapper = mount(UiSegmentedControl, {
+      attrs: { 'aria-label': 'Fallthrough view' },
+      props: { options },
+    });
+
+    expect(wrapper.attributes('aria-label')).toBe('Fallthrough view');
   });
 
   it('falls back for an invalid uncontrolled default but not an invalid controlled value', () => {

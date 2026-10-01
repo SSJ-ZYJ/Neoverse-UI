@@ -4,6 +4,8 @@
      control, matching the product segmented controls. */
   .ui-segmented-control {
     position: relative;
+    display: inline-flex;
+    align-items: center;
     max-width: 100%;
     gap: var(--neoverse-control-segmented-loading-gap);
     border-radius: var(--neoverse-radius-control);
@@ -82,11 +84,13 @@
     height: var(--neoverse-control-segmented-option-height-sm);
     align-items: center;
     justify-content: center;
-    border: 0;
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) transparent;
     border-radius: var(--neoverse-control-segmented-option-radius);
     padding-block: var(--neoverse-control-segmented-option-padding-block-sm);
     padding-inline: var(--neoverse-control-segmented-option-padding-inline-sm);
-    background: transparent;
+    background-image: none;
+    background-color: transparent;
+    box-shadow: none;
     color: var(--neoverse-control-segmented-foreground);
     cursor: pointer;
     font-size: var(--neoverse-control-segmented-option-font-size-sm);
@@ -96,12 +100,19 @@
     transition:
       background-color var(--neoverse-motion-feedback-duration)
       var(--neoverse-motion-feedback-easing),
+      border-color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      box-shadow var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
       color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
       transform var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
   }
 
   .ui-segmented-control .ui-segmented-control__option--active {
     color: var(--neoverse-control-segmented-active-foreground);
+  }
+
+  .ui-segmented-control .ui-segmented-control__option:focus-visible {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: var(--neoverse-focus-ring-offset);
   }
 
   @media (hover: hover) {
@@ -113,7 +124,7 @@
     }
 
     .ui-segmented-control__option:not(.ui-segmented-control__option--active):hover:not(:disabled) {
-      background: var(--neoverse-control-hover-background);
+      background-color: var(--neoverse-control-hover-background);
       color: var(--neoverse-control-segmented-active-foreground);
     }
   }
@@ -156,6 +167,9 @@
   .ui-segmented-control__loading {
     position: relative;
     z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     width: var(--neoverse-control-segmented-loading-size);
     height: var(--neoverse-control-segmented-loading-size);
     flex: 0 0 auto;

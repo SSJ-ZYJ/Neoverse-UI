@@ -71,7 +71,7 @@ watch(resolvedTheme, () => {
     />
     <span
       v-else-if="props.preview === 'space'"
-      class="h-2 shrink-0 bg-accent-primary"
+      class="h-2 shrink-0 rounded-pill bg-accent-primary"
       :style="{ width: `var(${props.variable})` }"
     />
     <span
@@ -89,7 +89,7 @@ watch(resolvedTheme, () => {
     />
     <span
       v-else-if="props.preview === 'border'"
-      class="h-7 w-12 shrink-0 bg-surface-raised"
+      class="h-7 w-12 shrink-0 rounded-control bg-surface-raised"
       :style="{
         borderColor: `var(--neoverse-color-border-default)`,
         borderStyle: `var(--neoverse-border-style-solid)`,
@@ -98,7 +98,7 @@ watch(resolvedTheme, () => {
     />
     <span
       v-else-if="props.preview === 'border-style'"
-      class="h-7 w-12 shrink-0 bg-surface-raised"
+      class="h-7 w-12 shrink-0 rounded-control bg-surface-raised"
       :style="{
         borderColor: `var(--neoverse-color-border-default)`,
         borderStyle: `var(${props.variable})`,

@@ -21,10 +21,10 @@ const props = withDefaults(defineProps<LabSectionProps>(), {
       v-if="props.showHeader"
       class="mb-4 flex flex-wrap items-baseline justify-between gap-2"
     >
-      <h2 :id="`${props.id}-title`" class="text-subtitle font-heading tracking-heading">
+      <h2 :id="`${props.id}-title`" class="text-title-sm font-title text-primary">
         {{ props.title }}
       </h2>
-      <p class="max-w-reading text-caption text-secondary">
+      <p class="max-w-reading text-body-sm text-secondary">
         {{ props.description }}
       </p>
     </header>

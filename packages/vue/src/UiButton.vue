@@ -6,9 +6,6 @@ import {
   buttonSizeClasses,
   buttonStretchSizeClasses,
   buttonVariantClasses,
-  controlFocusClasses,
-  controlTransitionClasses,
-  disabledControlClasses,
 } from './classes';
 import { getSurfaceClass } from './surface';
 import type { ButtonProps, ButtonSize, ButtonVariant } from './types';
@@ -45,9 +42,6 @@ const ariaBusy = computed<'true' | 'false' | undefined>(() => {
 
 const classes = computed(() => [
   buttonBaseClasses,
-  controlTransitionClasses,
-  controlFocusClasses,
-  disabledControlClasses,
   getSurfaceClass(props.surface),
   buttonVariantClasses[props.variant as ButtonVariant] ?? buttonVariantClasses.primary,
   (props.stretch ? buttonStretchSizeClasses : buttonSizeClasses)[props.size as ButtonSize] ??
@@ -66,29 +60,21 @@ const classes = computed(() => [
     @pointerdown="updateButtonPointerGlow"
   >
     <span class="ui-button__edge-field" aria-hidden="true" />
-    <span
-      v-if="props.loading || $slots.leading"
-      class="relative inline-flex shrink-0 items-center justify-center"
-      :class="{ 'size-4': props.loading && !$slots.leading }"
-    >
+    <span v-if="props.loading || $slots.leading" class="ui-button__leading">
       <template v-if="props.loading">
-        <span
-          v-if="$slots.leading"
-          class="invisible inline-flex items-center justify-center"
-          aria-hidden="true"
-        >
+        <span v-if="$slots.leading" class="ui-button__leading-placeholder" aria-hidden="true">
           <slot name="leading" />
         </span>
-        <span class="absolute inset-0 inline-flex items-center justify-center" aria-hidden="true">
+        <span class="ui-button__spinner" aria-hidden="true">
           <UiLoadingIndicator />
         </span>
       </template>
       <slot v-else name="leading" />
     </span>
-    <span class="min-w-0">
+    <span class="ui-button__content">
       <slot />
     </span>
-    <span v-if="$slots.trailing" class="inline-flex shrink-0 items-center justify-center">
+    <span v-if="$slots.trailing" class="ui-button__trailing">
       <slot name="trailing" />
     </span>
   </button>

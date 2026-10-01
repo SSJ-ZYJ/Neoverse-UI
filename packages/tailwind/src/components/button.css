@@ -6,16 +6,175 @@
      retaining a quiet boundary. */
   .ui-button {
     position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    gap: var(--neoverse-space-2);
+    border-radius: var(--neoverse-radius-control-inner);
+    padding-inline: var(--neoverse-space-3);
+    font-family: var(--neoverse-font-family-sans);
+    font-weight: var(--neoverse-font-weight-medium);
     touch-action: manipulation;
     transform: none;
+    cursor: pointer;
+    user-select: none;
     transition:
       color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      border-color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
       background-color var(--neoverse-motion-feedback-duration)
       var(--neoverse-motion-feedback-easing),
       background-image var(--neoverse-motion-feedback-duration)
       var(--neoverse-motion-feedback-easing),
       box-shadow var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
       opacity var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
+  }
+
+  /* Keep the legacy control root usable for consumers that still compose
+     `.ui-button-control` directly. New adapters use `.ui-button`, but the
+     legacy selector must retain the geometry it owned before the migration. */
+  .ui-button-control {
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    gap: var(--neoverse-space-2);
+    border-radius: var(--neoverse-radius-control-inner);
+    padding-inline: var(--neoverse-space-3);
+    font-family: var(--neoverse-font-family-sans);
+    font-size: var(--neoverse-typography-label-size);
+    font-weight: var(--neoverse-typography-label-weight);
+    line-height: var(--neoverse-typography-label-line-height);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* Native control geometry is a component contract, not a consumer utility
+     contract. The ui-button-control selectors remain aliases for consumers of
+     the first React adapter release. */
+  .ui-button--sm,
+  .ui-button-control--sm {
+    height: var(--neoverse-space-7);
+    min-height: var(--neoverse-space-7);
+    font-size: var(--neoverse-typography-caption-size);
+    line-height: var(--neoverse-typography-caption-line-height);
+  }
+
+  .ui-button--md,
+  .ui-button-control--md {
+    height: var(--neoverse-space-8);
+    min-height: var(--neoverse-space-8);
+    font-size: var(--neoverse-typography-label-size);
+    line-height: var(--neoverse-typography-label-line-height);
+  }
+
+  .ui-button--lg,
+  .ui-button-control--lg {
+    height: var(--neoverse-space-9);
+    min-height: var(--neoverse-space-9);
+    padding-inline: var(--neoverse-space-4);
+    font-size: var(--neoverse-typography-label-size);
+    line-height: var(--neoverse-typography-label-line-height);
+  }
+
+  .ui-button--stretch,
+  .ui-button-control--stretch {
+    height: auto;
+    flex-grow: 1;
+    align-self: stretch;
+  }
+
+  .ui-icon-button,
+  .ui-button-icon-control {
+    padding-inline: 0;
+  }
+
+  .ui-icon-button--sm,
+  .ui-button-icon-control--sm {
+    width: var(--neoverse-space-7);
+    height: var(--neoverse-space-7);
+    min-height: var(--neoverse-space-7);
+  }
+
+  .ui-icon-button--md,
+  .ui-button-icon-control--md {
+    width: var(--neoverse-space-8);
+    height: var(--neoverse-space-8);
+    min-height: var(--neoverse-space-8);
+  }
+
+  .ui-icon-button--lg,
+  .ui-button-icon-control--lg {
+    width: var(--neoverse-space-9);
+    height: var(--neoverse-space-9);
+    min-height: var(--neoverse-space-9);
+  }
+
+  .ui-icon-button--stretch,
+  .ui-button-icon-control--stretch {
+    height: auto;
+    flex-grow: 1;
+    align-self: stretch;
+  }
+
+  .ui-button:focus-visible,
+  .ui-button-control:focus-visible {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: var(--neoverse-focus-ring-offset);
+  }
+
+  .ui-button:disabled,
+  .ui-button[aria-disabled='true'],
+  .ui-button-control:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+
+  .ui-button__content,
+  .ui-button-control__content {
+    display: inline-flex;
+    min-width: 0;
+    align-items: center;
+  }
+
+  .ui-button__leading,
+  .ui-button__trailing,
+  .ui-button-control__leading,
+  .ui-button-control__trailing {
+    position: relative;
+    display: inline-flex;
+    min-width: var(--neoverse-space-4);
+    min-height: var(--neoverse-space-4);
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ui-button__leading-placeholder {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    visibility: hidden;
+  }
+
+  .ui-button__spinner {
+    position: absolute;
+    inset: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ui-icon-button__content,
+  .ui-button-icon-control__content {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ui-button-control__spinner {
+    position: absolute;
   }
 
   .ui-button.material-glass-subtle {
@@ -92,6 +251,9 @@
     backdrop-filter: var(--neoverse-material-edge-filter);
   }
 
+  /* Ghost owns a single semantic border. The inset Glass edge field has a
+     second radius and a tinted backdrop sample, so it must not paint here. */
+  .ui-button--ghost > .ui-button__edge-field,
   .ui-button[data-surface='none'] > .ui-button__edge-field {
     display: none;
   }
@@ -121,7 +283,7 @@
       pointer-events: auto;
     }
 
-    .ui-button:disabled::before {
+    .ui-button:is(:disabled, [aria-disabled='true'])::before {
       pointer-events: none;
     }
   }
@@ -147,13 +309,14 @@
   }
 
   .ui-button--ghost.material-glass-subtle {
-    /* Glass Ghost stays visually quiet while retaining the shared refractive
-       edge. Non-Glass surfaces do not inherit these material variables. */
-    --neoverse-material-edge-refraction-opacity: var(
-      --neoverse-material-edge-refraction-opacity-subtle
-    );
-    --neoverse-material-shadow: var(--neoverse-control-button-edge);
+    /* Ghost has one border at the control radius, without an inset
+       refraction silhouette or its tinted backdrop blur. */
+    --neoverse-material-edge-refraction-opacity: 0;
+    --neoverse-material-shadow: var(--neoverse-control-ghost-shadow);
+    --neoverse-material-filter: none;
     border-color: var(--neoverse-control-ghost-border);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 
   .ui-button--primary,
@@ -178,10 +341,15 @@
     background-clip: padding-box;
   }
 
-  .ui-button--ghost:hover:not(:disabled) {
+  .ui-button--ghost:hover:not(:disabled):not([aria-disabled='true']) {
     color: var(--neoverse-control-ghost-hover-foreground);
-    background: var(--neoverse-control-button-hover-background);
+    background: var(--neoverse-control-ghost-hover-background);
     background-clip: padding-box;
+  }
+
+  .ui-button--ghost.material-glass-subtle:hover:not(:disabled):not([aria-disabled='true']) {
+    --neoverse-material-shadow: var(--neoverse-control-ghost-hover-shadow);
+    border-color: var(--neoverse-control-ghost-hover-border);
   }
 
   .ui-button.material-glass-subtle:hover:not(:disabled)::after {
@@ -208,15 +376,58 @@
     transform: none;
   }
 
-  .ui-button--ghost:active:not(:disabled) {
+  .ui-button--ghost:active:not(:disabled):not([aria-disabled='true']) {
     color: var(--neoverse-control-ghost-active-foreground);
-    background: var(--neoverse-control-button-ghost-active-background);
+    background: var(--neoverse-control-ghost-active-background);
     background-clip: padding-box;
     transform: none;
   }
 
+  .ui-button--ghost.material-glass-subtle:active:not(:disabled):not([aria-disabled='true']) {
+    --neoverse-material-shadow: var(--neoverse-control-ghost-hover-shadow);
+    border-color: var(--neoverse-control-ghost-active-border);
+  }
+
   .ui-button.material-glass-subtle:active:not(:disabled)::after {
     opacity: 1;
+  }
+
+  /* Unlike filled buttons, ghost uses only its semantic wash and border in
+     every state; never paint the extra glow on top of the same radius. */
+  .ui-button--ghost.material-glass-subtle::after,
+  .ui-button--ghost.material-glass-subtle:is(:hover, :active):not(:disabled)::after {
+    background: none;
+    opacity: 0;
+  }
+
+  /* Links and routed components cannot use the native :disabled pseudo-class.
+     Their aria-disabled state must therefore cancel the same hover/press
+     composition as a disabled button. */
+  .ui-button[aria-disabled='true'].ui-button--primary:is(:hover, :active) {
+    color: var(--neoverse-control-primary-foreground);
+    background-image: var(--neoverse-control-primary-background);
+    background-color: var(--neoverse-control-button-filled-fill);
+    box-shadow: var(--neoverse-control-button-edge);
+  }
+
+  .ui-button[aria-disabled='true'].ui-button--secondary:is(:hover, :active) {
+    color: var(--neoverse-control-secondary-foreground);
+    background-image: var(--neoverse-control-secondary-background);
+    background-color: var(--neoverse-control-secondary-fill);
+    box-shadow: var(--neoverse-control-button-edge);
+  }
+
+  .ui-button[aria-disabled='true'].ui-button--ghost:is(:hover, :active) {
+    --neoverse-material-shadow: var(--neoverse-control-ghost-shadow);
+    --neoverse-material-edge-refraction-opacity: 0;
+    color: var(--neoverse-control-ghost-foreground);
+    border-color: var(--neoverse-control-ghost-border);
+    background: var(--neoverse-control-ghost-background);
+    box-shadow: var(--neoverse-control-ghost-shadow);
+  }
+
+  .ui-button.material-glass-subtle[aria-disabled='true']:is(:hover, :active)::after {
+    opacity: 0;
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -259,104 +470,5 @@
      !important or changing normal hover motion. */
   .ui-button.material-glass-subtle:active:not(:disabled) {
     transition: none;
-  }
-}
-
-/* Complete native button geometry, independent of consumer utility scanning.
-   原生按钮的完整几何与状态契约，不依赖消费端扫描包内工具类。 */
-@layer components {
-  .ui-button-control {
-    display: inline-flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    gap: var(--neoverse-space-2);
-    border-radius: var(--neoverse-radius-control-inner);
-    padding-inline: var(--neoverse-space-3);
-    font-family: var(--neoverse-font-family-sans);
-    font-size: var(--neoverse-typography-label-size);
-    font-weight: var(--neoverse-typography-label-weight);
-    line-height: var(--neoverse-typography-label-line-height);
-    cursor: pointer;
-    user-select: none;
-  }
-  .ui-button-control--sm {
-    height: var(--neoverse-space-7);
-    font-size: var(--neoverse-typography-caption-size);
-    line-height: var(--neoverse-typography-caption-line-height);
-  }
-  .ui-button-control--md {
-    height: var(--neoverse-space-8);
-  }
-  .ui-button-control--lg {
-    height: var(--neoverse-space-9);
-    padding-inline: var(--neoverse-space-4);
-  }
-  .ui-button-control--stretch {
-    height: auto;
-    flex-grow: 1;
-    align-self: stretch;
-  }
-  .ui-button-icon-control {
-    padding-inline: 0;
-  }
-  .ui-button-icon-control--sm {
-    width: var(--neoverse-space-7);
-  }
-  .ui-button-icon-control--md {
-    width: var(--neoverse-space-8);
-  }
-  .ui-button-icon-control--lg {
-    width: var(--neoverse-space-9);
-  }
-  .ui-button-icon-control--stretch {
-    height: auto;
-    flex-grow: 1;
-    align-self: stretch;
-  }
-  .ui-button-icon-control__content {
-    display: inline-flex;
-    flex: 0 0 auto;
-    align-items: center;
-    justify-content: center;
-  }
-  .ui-button-control:focus-visible {
-    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
-    outline-offset: var(--neoverse-focus-ring-offset);
-  }
-  .ui-button-control:disabled {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-  .ui-button-control__content {
-    min-width: 0;
-    display: inline-flex;
-    align-items: center;
-  }
-  .ui-button-control__leading,
-  .ui-button-control__trailing {
-    position: relative;
-    display: inline-flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    min-width: var(--neoverse-space-4);
-    min-height: var(--neoverse-space-4);
-  }
-  .ui-button-control__spinner {
-    position: absolute;
-    width: var(--neoverse-space-4);
-    height: var(--neoverse-space-4);
-    animation: ui-button-spin 1s linear infinite;
-  }
-  @keyframes ui-button-spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .ui-button-control__spinner {
-      animation: none;
-    }
   }
 }

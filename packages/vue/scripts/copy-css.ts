@@ -5,4 +5,4 @@ const distDirectory = resolve(import.meta.dir, '../dist');
 const outputPath = resolve(distDirectory, 'index.css');
 
 await mkdir(distDirectory, { recursive: true });
-await writeFile(outputPath, "@import '@neoverse-ui/tailwind/components.css';\n");
+await writeFile(outputPath, "@import '@neoverse-ui/tailwind/index.css';\n");

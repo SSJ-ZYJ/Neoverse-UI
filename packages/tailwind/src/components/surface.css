@@ -1,4 +1,21 @@
 @layer components {
+  .ui-surface {
+    min-width: 0;
+  }
+
+  /* Any UiSurface that owns visible chrome gets the shared card geometry by
+     default. Consumers can still opt into a tighter semantic radius through
+     the existing radius utilities; surface="none" remains layout-only. */
+  .ui-surface:not([data-surface='none']) {
+    border-radius: var(--neoverse-radius-card);
+  }
+
+  .ui-card,
+  .ui-glass-surface {
+    border-radius: var(--neoverse-radius-card);
+    padding: var(--neoverse-space-4);
+  }
+
   .ui-surface-solid {
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
       var(--neoverse-color-border-subtle);

@@ -83,10 +83,10 @@ test('describes the radius aliases with their actual definitions', () => {
   expect(description).toContain('panel=xl（24px）');
 });
 
-test('registers one consolidated controls module and the parity composition', () => {
+test('registers consolidated controls, the reusable dock, and the parity composition', () => {
   const moduleIds = labModules.map((module) => module.id);
 
-  expect(moduleIds).toEqual(expect.arrayContaining(['controls', 'consumer-parity']));
+  expect(moduleIds).toEqual(expect.arrayContaining(['controls', 'dock', 'consumer-parity']));
   expect(moduleIds).not.toEqual(
     expect.arrayContaining(['action', 'navigation-item', 'status-indicator', 'control-surface']),
   );
@@ -101,6 +101,7 @@ test('keeps the top-level lab information architecture compact and purpose-drive
     'materials',
     'shadow',
     'controls',
+    'dock',
     'status-feedback',
     'card',
     'scrollbar',
@@ -111,7 +112,7 @@ test('keeps the top-level lab information architecture compact and purpose-drive
   expect(moduleGroups.map((group) => [group.id, [...group.moduleIds]])).toEqual([
     ['foundations', ['colors', 'typography', 'layout-shape', 'motion']],
     ['materials', ['materials', 'shadow']],
-    ['components', ['controls', 'status-feedback', 'card', 'scrollbar']],
+    ['components', ['controls', 'dock', 'status-feedback', 'card', 'scrollbar']],
     ['patterns', ['composition']],
     ['validation', ['consumer-parity']],
   ]);

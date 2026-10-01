@@ -5,9 +5,8 @@ import {
   actionScaleClasses,
   actionSizeClasses,
   actionStretchClasses,
+  buttonBaseClasses,
   buttonVariantClasses,
-  controlFocusClasses,
-  controlTransitionClasses,
 } from './classes';
 import { getSurfaceClass } from './surface';
 import type { ActionProps, ActionScale, ActionSize, ButtonVariant } from './types';
@@ -19,6 +18,7 @@ const props = withDefaults(defineProps<ActionProps>(), {
   variant: 'primary',
   size: 'md',
   scale: 'md',
+  type: 'button',
   disabled: false,
   stretch: false,
   surface: 'glass-subtle',
@@ -35,13 +35,19 @@ const forwardedAttrs = computed(() => {
   const { href: _href, to: _to, tabindex: _tabindex, ...disabledRest } = rest;
   return disabledRest;
 });
-const targetProps = computed(() =>
-  props.disabled || props.href === undefined ? {} : { href: props.href },
-);
+const targetProps = computed(() => {
+  if (props.as === 'button') {
+    return {
+      type: props.type,
+      disabled: props.disabled,
+    };
+  }
+
+  return props.disabled || props.href === undefined ? {} : { href: props.href };
+});
 const classes = computed(() => [
-  'ui-button ui-action inline-flex shrink-0 cursor-pointer select-none items-center justify-center rounded-control-inner font-label',
-  controlTransitionClasses,
-  controlFocusClasses,
+  buttonBaseClasses,
+  'ui-action',
   getSurfaceClass(props.surface),
   buttonVariantClasses[props.variant as ButtonVariant] ?? buttonVariantClasses.primary,
   actionSizeClasses[props.size as ActionSize] ?? actionSizeClasses.md,
@@ -70,7 +76,7 @@ function handlePointerdown(event: PointerEvent): void {
   <component
     :is="tag"
     v-bind="{ ...forwardedAttrs, ...targetProps }"
-    :aria-disabled="props.disabled || undefined"
+    :aria-disabled="props.as === 'button' ? undefined : props.disabled || undefined"
     :tabindex="props.disabled ? -1 : (attrs.tabindex as number | string | undefined)"
     :data-surface="props.surface"
     :class="[classes, attrs.class]"
@@ -82,7 +88,7 @@ function handlePointerdown(event: PointerEvent): void {
     <span v-if="$slots.leading" class="ui-action__leading" aria-hidden="true">
       <slot name="leading" />
     </span>
-    <span class="ui-action__content min-w-0"><slot /></span>
+    <span class="ui-action__content"><slot /></span>
     <span v-if="$slots.trailing" class="ui-action__trailing" aria-hidden="true">
       <slot name="trailing" />
     </span>

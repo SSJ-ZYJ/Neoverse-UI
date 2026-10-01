@@ -17,10 +17,14 @@ export type SurfacePreset =
   | 'glass-immersive';
 
 export type ControlSurfacePreset = Extract<SurfacePreset, 'none' | 'glass-subtle'>;
+export type GlassNestingMode = 'inherit' | 'local';
+export type SurfaceOverflowMode = 'clip' | 'visible';
 
 export interface SurfaceProps {
   as?: string | Component;
   surface?: SurfacePreset;
+  glassNesting?: GlassNestingMode;
+  contentOverflow?: SurfaceOverflowMode;
 }
 
 export interface ButtonProps {
@@ -41,6 +45,7 @@ export interface ActionProps {
   variant?: ButtonVariant;
   size?: ActionSize;
   scale?: ActionScale;
+  type?: ButtonType;
   disabled?: boolean;
   stretch?: boolean;
   surface?: ControlSurfacePreset;
@@ -114,6 +119,16 @@ export interface ControlSurfaceProps {
   edgeMode?: SurfaceEdgeMode;
   /** Uniformly scale the whole grouped control while preserving internal proportions. */
   scale?: ControlSurfaceScale;
+}
+
+export interface DockProps {
+  as?: string | Component;
+  surface?: SurfacePreset;
+  hoverMode?: SurfaceHoverMode;
+  edgeMode?: SurfaceEdgeMode;
+  scale?: ControlSurfaceScale;
+  compact?: boolean;
+  navigationIndicator?: boolean;
 }
 
 export interface CardProps {

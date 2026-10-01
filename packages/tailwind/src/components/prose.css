@@ -174,7 +174,8 @@
 
   .neoverse-prose table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
     color: var(--neoverse-color-text-secondary);
     font-size: var(--neoverse-typography-body-sm-size);
     line-height: var(--neoverse-typography-body-sm-line-height);
@@ -193,6 +194,14 @@
     color: var(--neoverse-color-text-primary);
     background: var(--neoverse-color-surface-subtle);
     font-weight: var(--neoverse-font-weight-semibold);
+  }
+
+  .neoverse-prose thead th:first-child {
+    border-start-start-radius: var(--neoverse-radius-card);
+  }
+
+  .neoverse-prose thead th:last-child {
+    border-start-end-radius: var(--neoverse-radius-card);
   }
 
   .neoverse-prose caption {

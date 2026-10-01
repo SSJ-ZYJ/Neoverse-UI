@@ -10,7 +10,7 @@ const props = withDefaults(defineProps<CardProps>(), {
   surface: 'glass-card',
 });
 const attrs = useAttrs();
-const classes = computed(() => ['ui-card rounded-card p-4', getSurfaceClass(props.surface)]);
+const classes = computed(() => ['ui-card', getSurfaceClass(props.surface)]);
 const forwardedAttrs = computed(() => {
   const { class: _class, style: _style, ...rest } = attrs;
   return rest;

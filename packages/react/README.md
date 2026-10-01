@@ -2,7 +2,7 @@
 
 React adapters for Neoverse UI.
 
-The package exposes token-backed React adapters for `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiCard`, `UiNotice`, and `UiSurface`, plus the `uiActionClassName` helper for consumers that need to style an existing routing component through `asChild` composition.
+The package exposes token-backed React adapters for `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiDock`, `UiCard`, `UiNotice`, and `UiSurface`, plus the `uiActionClassName` helper for consumers that need to style an existing routing component through `asChild` composition.
 
 ```tsx
 import { UiAction } from '@neoverse-ui/react';
@@ -12,7 +12,15 @@ import { UiAction } from '@neoverse-ui/react';
 
 For framework routing components, use `asChild` so the router keeps ownership of navigation while Neoverse UI owns control geometry, material, state, and focus styling.
 
+## Dock
 
+`UiDock` is a reusable floating-navigation shell. Pass navigation content through `children` and optional mode/language controls through `trailing`; route data and active state remain consumer-owned.
+
+```tsx
+<UiDock aria-label="Primary navigation" trailing={<LanguageControl />}>
+  {navigationItems}
+</UiDock>
+```
 
 ## Cards
 
@@ -69,4 +77,4 @@ import { UiNotice } from '@neoverse-ui/react';
 
 `UiNotice` mirrors the Vue adapter with `neutral | info | success | warning | danger` variants, a `div | aside | section` root, forwarded native attributes, and an optional action region. It supplies the status surface; content semantics, icon, heading, and action behavior stay with the consumer.
 
-Import `@neoverse-ui/tokens/css`, `@neoverse-ui/tailwind/theme.css`, and `@neoverse-ui/tailwind/components.css` in the consumer CSS entry. Button geometry and state styles ship in the component CSS; no package-source utility scanning is required. Components remain server-compatible, while event handlers belong in the consumer's client boundary.
+Consumers without their own Tailwind build can import `@neoverse-ui/react/index.css`; it forwards to the compiled `@neoverse-ui/tailwind/index.css` consumer bundle, including Tokens, Motion, Material, component selectors, and the utilities required by the adapters. No package-source utility scanning is required. Components remain server-compatible, while event handlers belong in the consumer's client boundary.

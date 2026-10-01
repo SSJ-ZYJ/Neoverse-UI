@@ -23,7 +23,7 @@ Bun is the package manager, workspace manager, and script runner for this reposi
 | `@neoverse-ui/react` | Consumer Validation | React adapters for shared actions and surfaces |
 | `apps/playground` | Consumer Validation | Vue-driven Design Lab and visual reference surface |
 
-The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiSurface`, `UiCard`, `UiBadge`, `UiStatusIndicator`, `UiLoadingIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, and `UiTooltipSurface`. `UiSurface` is the canonical material primitive; `UiGlassSurface` remains exported only as a compatibility wrapper for the historical Glass `variant` API. The consumer-validated React adapter currently exposes `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiSurface`, `UiCard`, and `UiNotice`. Vue and React share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
+The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, and `UiTooltipSurface`. `UiDock` is the reusable floating-navigation shell; routing data, active destination state, and trailing controls remain consumer-owned. `UiSurface` is the canonical material primitive; `UiGlassSurface` remains exported only as a compatibility wrapper for the historical Glass `variant` API. The consumer-validated React adapter currently exposes `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiDock`, `UiSurface`, `UiCard`, and `UiNotice`. Vue and React share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
 
 ## Architecture at a glance
 
@@ -112,15 +112,15 @@ Consumers running their own Tailwind 4 build should import the theme and scan th
 @source '../../../node_modules/@neoverse-ui/vue/dist';
 ```
 
-The explicit `@source` into `node_modules` replaces the vendor-junction workaround. Consumers without a Tailwind build can import `@neoverse-ui/vue/index.css`, which forwards to `@neoverse-ui/tailwind/components.css`.
+The explicit `@source` into `node_modules` replaces the vendor-junction workaround. Consumers without their own Tailwind build can import the framework adapter stylesheet, such as `@neoverse-ui/vue/index.css` or `@neoverse-ui/react/index.css`; both forward to the compiled zero-config `@neoverse-ui/tailwind/index.css` consumer bundle.
 
 Until the packages publish to a registry, Bun `file:` dependencies plus the vendor junction and the `overrides` block in the Neoverse `package.json` remain dev-time limitations that disappear on publish.
 
 ## Material and Glass
 
-Normal surfaces use semantic Tailwind composition. Glass uses `material-glass-subtle`, `material-glass-elevated`, and `material-glass-immersive` with an opaque CSS fallback, tokenized tint, backdrop filter, and directional edge field.
+Normal surfaces use semantic Tailwind composition. Glass uses `material-glass-subtle`, `material-glass-elevated`, `material-glass-card`, and `material-glass-immersive` with an opaque CSS fallback, tokenized tint, backdrop filter, and directional edge field.
 
-The three Glass variants keep the CSS material baseline and are discovered automatically by a mounted renderer. There is no per-surface `edgePass` flag: the renderer paints the shared directional WebGL edge for every eligible top-level Glass surface in the document.
+The four Glass variants keep the CSS material baseline and are discovered automatically by a mounted renderer. There is no per-surface `edgePass` flag: the renderer paints the shared directional WebGL edge for every eligible top-level Glass surface in the document.
 
 Mount the runtime once per Document when the enhancement is wanted:
 

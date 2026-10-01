@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UiSurface } from '@neoverse-ui/vue';
 import { computed } from 'vue';
 
 interface LabSpecimenSectionProps {
@@ -15,9 +16,12 @@ const headingTag = computed(() => `h${props.headingLevel}`);
 </script>
 
 <template>
-  <section
+  <UiSurface
+    as="section"
+    surface="glass-subtle"
+    content-overflow="visible"
     :id="props.id"
-    class="playground-specimen-section scroll-mt-24"
+    class="playground-specimen-section playground-floating-interaction-surface scroll-mt-24 rounded-panel p-4 md:p-5"
     :aria-labelledby="`${props.id}-title`"
   >
     <header class="playground-specimen-section__header">
@@ -25,7 +29,7 @@ const headingTag = computed(() => `h${props.headingLevel}`);
         <component
           :is="headingTag"
           :id="`${props.id}-title`"
-          class="text-title-lg font-title tracking-title-lg text-primary"
+          class="text-title-sm font-title text-primary"
         >
           {{ props.title }}
         </component>
@@ -40,5 +44,5 @@ const headingTag = computed(() => `h${props.headingLevel}`);
     <div class="grid gap-2">
       <slot />
     </div>
-  </section>
+  </UiSurface>
 </template>

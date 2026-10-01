@@ -711,6 +711,8 @@ test('aligns light buttons with the pale mint segmented-control surface', async 
   expect(declaration('secondary-background')).not.toContain(
     'var(--neoverse-control-active-background)',
   );
+  expect(declaration('secondary-background')).not.toContain('var(--neoverse-color-surface-glass)');
+  expect(declaration('secondary-fill')).toContain('var(--neoverse-color-surface-glass)');
   expect(lightCss).toContain(
     '--neoverse-control-button-filled-background: var(--neoverse-control-secondary-background);',
   );
@@ -744,28 +746,27 @@ test('aligns light buttons with the pale mint segmented-control surface', async 
 test('keeps button edges restrained and stable beside segmented controls', async () => {
   const [buttonTokensCss, buttonCss, sharedControlCss, segmentedCss] = await Promise.all([
     readTokenCss('components/button.css'),
-    Bun.file(new URL('../../tailwind/src/components/button.css', import.meta.url)).text(),
+    readCssFile(new URL('../../tailwind/src/components/button.css', import.meta.url)),
     readTokenCss('components/shared-control.css'),
     readTokenCss('components/segmented-control.css'),
   ]);
   const declaration = (source: string, token: string): string =>
     source.match(new RegExp(`--neoverse-control-${token}:([\\s\\S]*?);`))?.[1] ?? '';
-  const ghostGlass =
-    buttonCss.match(/\.ui-button--ghost\.material-glass-subtle \{([\s\S]*?)\n {2}\}/)?.[1] ?? '';
-  const ghostDefault = buttonCss.match(/\.ui-button--ghost \{([\s\S]*?)\n {2}\}/)?.[1] ?? '';
-  const ghostHover =
-    buttonCss.match(/\.ui-button--ghost:hover:not\(:disabled\) \{([\s\S]*?)\n {2}\}/)?.[1] ?? '';
-  const buttonSurface =
-    buttonCss.match(/\.ui-button\.material-glass-subtle \{([\s\S]*?)\n {2}\}/)?.[1] ?? '';
-  const pressLayer =
-    buttonCss.match(/\.ui-button\.material-glass-subtle::after \{([\s\S]*?)\n {2}\}/)?.[1] ?? '';
+  const ghostGlass = extractCssBlock(buttonCss, '.ui-button--ghost.material-glass-subtle');
+  const ghostDefault = extractCssBlock(buttonCss, '.ui-button--ghost');
+  const ghostHover = extractCssBlock(
+    buttonCss,
+    ".ui-button--ghost:hover:not(:disabled):not([aria-disabled='true'])",
+  );
+  const buttonSurface = extractCssBlock(buttonCss, '.ui-button.material-glass-subtle');
+  const pressLayer = extractCssBlock(buttonCss, '.ui-button.material-glass-subtle::after');
 
   expect(buttonCss).toMatch(
     /border:\s*var\(--neoverse-border-width-thin\)\s+var\(--neoverse-border-style-solid\)\s+var\(--neoverse-control-button-border\);/,
   );
-  expect(buttonSurface).toContain('overflow: hidden;');
-  expect(pressLayer).toContain('inset: 0;');
-  expect(pressLayer).toContain('border-radius: inherit;');
+  expect(buttonSurface).toMatch(/overflow:\s*hidden;/);
+  expect(pressLayer).toMatch(/inset:\s*0;/);
+  expect(pressLayer).toMatch(/border-radius:\s*inherit;/);
   expect(declaration(buttonTokensCss, 'button-edge')).not.toContain(
     'var(--neoverse-color-edge-light)',
   );
@@ -784,15 +785,18 @@ test('keeps button edges restrained and stable beside segmented controls', async
     expect(declaration(sharedControlCss, token)).not.toContain('var(--neoverse-color-edge-light)');
   }
 
-  expect(ghostGlass).toContain('--neoverse-material-shadow: var(--neoverse-control-button-edge);');
-  expect(ghostGlass).toContain('border-color: var(--neoverse-control-ghost-border);');
-  expect(ghostGlass).toContain(
-    '--neoverse-material-edge-refraction-opacity: var(\n      --neoverse-material-edge-refraction-opacity-subtle\n    );',
+  expect(ghostGlass).toMatch(
+    /--neoverse-material-shadow:\s*var\(--neoverse-control-ghost-shadow\);/,
   );
-  expect(ghostDefault).toContain('background: var(--neoverse-control-ghost-background);');
-  expect(ghostHover).not.toContain('--neoverse-material-edge-refraction-opacity:');
-  expect(ghostHover).not.toContain('--neoverse-material-shadow:');
-  expect(ghostHover).not.toContain('--neoverse-material-edge-refraction-opacity:');
+  expect(ghostGlass).toMatch(/border-color:\s*var\(--neoverse-control-ghost-border\);/);
+  expect(ghostGlass).toMatch(/--neoverse-material-edge-refraction-opacity:\s*0;/);
+  expect(buttonCss).toMatch(
+    /\.ui-button--ghost\s*>\s*\.ui-button__edge-field,[\s\S]*?display:\s*none;/,
+  );
+  expect(ghostGlass).toMatch(/backdrop-filter:\s*none;/);
+  expect(ghostDefault).toMatch(/background:\s*var\(--neoverse-control-ghost-background\);/);
+  expect(ghostHover).not.toMatch(/--neoverse-material-edge-refraction-opacity:/);
+  expect(ghostHover).not.toMatch(/--neoverse-material-shadow:/);
 
   expect(declaration(segmentedCss, 'segmented-border')).toMatch(
     /var\(\s*--neoverse-control-button-border\s*\)/,
@@ -807,15 +811,16 @@ test('keeps secondary and ghost button surfaces visually distinct', async () => 
   const declaration = (source: string, token: string): string =>
     source.match(new RegExp(`--neoverse-control-${token}:([\\s\\S]*?);`))?.[1] ?? '';
   const secondaryBackground = declaration(sharedControlCss, 'secondary-background');
+  const secondaryFill = declaration(sharedControlCss, 'secondary-fill');
   const ghostBackground = declaration(buttonCss, 'ghost-background');
 
   expect(declaration(sharedControlCss, 'button-border').trim()).toBe(
     'var(--neoverse-color-border-default)',
   );
-  expect(secondaryBackground).toContain('var(--neoverse-color-surface-glass)');
+  expect(secondaryFill).toContain('var(--neoverse-color-surface-glass)');
   expect(secondaryBackground).not.toContain('var(--neoverse-color-surface-canvas)');
   expect(ghostBackground.trim()).toBe('transparent');
-  expect(secondaryBackground).not.toBe(ghostBackground);
+  expect(`${secondaryBackground}\n${secondaryFill}`).not.toBe(ghostBackground);
 });
 
 test('keeps button surfaces independent of theme accents', async () => {
@@ -1114,6 +1119,7 @@ test('exposes shared Surface and Glass material contracts', () => {
   const glassRoles = [
     cssVariables.material.glass.subtle,
     cssVariables.material.glass.elevated,
+    cssVariables.material.glass.card,
     cssVariables.material.glass.immersive,
   ];
 
@@ -1151,6 +1157,25 @@ test('exposes shared Surface and Glass material contracts', () => {
   expect(cssVariables.material.glass.immersive.refractionGradient).toBe(
     '--neoverse-material-glass-immersive-refraction-gradient',
   );
+});
+
+test('keeps inset surface effects owned by the material token layer', async () => {
+  const materialCss = await readTokenCss('material.css');
+  const inset = cssVariables.material.surface.inset;
+
+  expect(Object.keys(inset)).toEqual([
+    'highlight',
+    'refraction',
+    'denseFill',
+    'fill',
+    'sheen',
+    'activeHighlight',
+    'filter',
+  ]);
+
+  for (const token of Object.values(inset)) {
+    expect(materialCss).toContain(`${token}:`);
+  }
 });
 
 test('exposes Motion duration, easing, and spatial tokens', () => {
@@ -1277,22 +1302,30 @@ const shadowDeclarations = (css: string, name: string): string[] =>
     match[1] === undefined ? [] : [match[1].trim()],
   );
 
+const normalizeCss = (css: string): string => css.replace(/\r\n?/g, '\n');
+
+const readCssFile = async (file: URL): Promise<string> => normalizeCss(await Bun.file(file).text());
+
 const readTokenCss = async (fileName: string): Promise<string> => {
   const localFile = Bun.file(new URL(`./${fileName}`, import.meta.url));
 
   if (await localFile.exists()) {
-    return localFile.text();
+    return normalizeCss(await localFile.text());
   }
 
-  return Bun.file(new URL(`../src/${fileName}`, import.meta.url)).text();
+  return normalizeCss(await Bun.file(new URL(`../src/${fileName}`, import.meta.url)).text());
 };
 
 const readBuiltTokenCss = (): Promise<string> =>
-  Bun.file(new URL('../dist/tokens.css', import.meta.url)).text();
+  readCssFile(new URL('../dist/tokens.css', import.meta.url));
+
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 const extractCssBlock = (css: string, selector: string): string => {
-  const selectorIndex = css.indexOf(selector);
-  const openingBrace = css.indexOf('{', selectorIndex);
+  const selectorPattern = selector.trim().split(/\s+/).map(escapeRegExp).join('\\s*');
+  const selectorMatch = new RegExp(`${selectorPattern}\\s*\\{`).exec(css);
+  const selectorIndex = selectorMatch?.index ?? -1;
+  const openingBrace = selectorMatch === null ? -1 : css.indexOf('{', selectorIndex);
 
   if (selectorIndex < 0 || openingBrace < 0) {
     throw new Error(`Unable to find selector block: ${selector}`);

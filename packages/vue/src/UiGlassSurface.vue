@@ -11,7 +11,7 @@ const props = withDefaults(defineProps<GlassSurfaceProps>(), {
 });
 const attrs = useAttrs();
 const surface = computed(() => glassVariantToSurface(props.variant));
-const classes = computed(() => [getSurfaceClass(surface.value), 'rounded-card p-4']);
+const classes = computed(() => ['ui-glass-surface', getSurfaceClass(surface.value)]);
 const forwardedAttrs = computed(() => {
   const { class: _class, style: _style, ...rest } = attrs;
   return rest;

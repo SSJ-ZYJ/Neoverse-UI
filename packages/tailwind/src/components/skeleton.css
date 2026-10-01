@@ -14,6 +14,7 @@
 
   .ui-skeleton--text {
     min-height: var(--neoverse-skeleton-text-min-height);
+    border-radius: var(--neoverse-radius-control-inner);
   }
 
   .ui-skeleton--title {
@@ -24,6 +25,8 @@
   .ui-skeleton--avatar,
   .ui-skeleton--circle {
     min-height: 0;
+    aspect-ratio: 1;
+    border-radius: var(--neoverse-radius-pill);
   }
 
   .ui-skeleton--rect {

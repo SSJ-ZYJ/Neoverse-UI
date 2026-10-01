@@ -4,9 +4,6 @@ import { updateButtonPointerGlow } from './button-pointer-glow';
 import {
   buttonBaseClasses,
   buttonVariantClasses,
-  controlFocusClasses,
-  controlTransitionClasses,
-  disabledControlClasses,
   iconButtonSizeClasses,
   iconButtonStretchSizeClasses,
 } from './classes';
@@ -62,11 +59,7 @@ const ariaBusy = computed<'true' | 'false' | undefined>(() => {
 
 const classes = computed(() => [
   buttonBaseClasses,
-  'p-0',
-  controlTransitionClasses,
-  controlFocusClasses,
-  isButton.value ? disabledControlClasses : '',
-  !isButton.value && isDisabled.value ? 'cursor-not-allowed opacity-60' : '',
+  'ui-icon-button',
   getSurfaceClass(props.surface),
   buttonVariantClasses[props.variant as ButtonVariant] ?? buttonVariantClasses.primary,
   (props.stretch ? iconButtonStretchSizeClasses : iconButtonSizeClasses)[
@@ -99,7 +92,7 @@ function handlePointerdown(event: PointerEvent): void {
     @pointerdown="handlePointerdown"
   >
     <span class="ui-button__edge-field" aria-hidden="true" />
-    <span class="inline-flex shrink-0 items-center justify-center" aria-hidden="true">
+    <span class="ui-icon-button__content" aria-hidden="true">
       <UiLoadingIndicator v-if="props.loading" />
       <slot v-else />
     </span>

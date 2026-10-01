@@ -2,11 +2,14 @@ import { expect, test } from 'bun:test';
 import { Children, createElement, type ReactElement, type ReactNode } from 'react';
 
 import {
+  UiAction,
   UiBreadcrumb,
   UiButton,
   UiCard,
+  UiDock,
   UiIconButton,
   UiNotice,
+  UiSurface,
   uiActionClassName,
 } from './index.js';
 
@@ -30,6 +33,48 @@ test('keeps consumer layout classes additive instead of replacing the contract',
   expect(classes).toContain('docs-specific-layout');
 });
 
+test('surface can explicitly own a nested Glass material plane', () => {
+  const defaultSurface = UiSurface({ surface: 'glass-card' });
+  expect(defaultSurface.props['data-neoverse-glass-nesting']).toBe('local');
+
+  const surface = UiSurface({
+    surface: 'glass-subtle',
+    glassNesting: 'local',
+    contentOverflow: 'visible',
+  });
+
+  expect(surface.props['data-surface']).toBe('glass-subtle');
+  expect(surface.props['data-neoverse-glass-nesting']).toBe('local');
+  expect(surface.props['data-neoverse-surface-overflow']).toBe('visible');
+  expect(surface.props.className).toContain('material-glass-subtle');
+
+  const inheritedSurface = UiSurface({ surface: 'glass-subtle', glassNesting: 'inherit' });
+  expect(inheritedSurface.props['data-neoverse-glass-nesting']).toBe('inherit');
+});
+
+test('dock exposes the shared shell without owning product navigation data', () => {
+  const dock = UiDock({
+    'aria-label': 'Primary navigation',
+    compact: true,
+    children: 'Navigation',
+    trailing: 'Language',
+  });
+
+  expect(dock.type).toBe('nav');
+  expect(dock.props['aria-label']).toBe('Primary navigation');
+  expect(dock.props['data-surface']).toBe('chrome');
+  expect(dock.props['data-neoverse-surface-hover']).toBe('static');
+  expect(dock.props.className).toContain('ui-dock');
+  expect(dock.props.className).toContain('ui-dock--compact');
+  expect(dock.props.className).toContain('ui-control-surface--scale-lg');
+  const children = Children.toArray(
+    (dock.props as unknown as { children: ReactNode }).children,
+  ) as TestElement[];
+  expect(children[0]?.props.className).toContain('ui-control-surface__group--primary');
+  expect(children[1]?.props.className).toBe('ui-control-surface__divider');
+  expect(children[2]?.props.className).toContain('ui-control-surface__group--trailing');
+});
+
 test('native button preserves refs, events, form attributes and explicit busy state', () => {
   const ref = { current: null };
   const onClick = () => undefined;
@@ -48,7 +93,8 @@ test('loading disables native activation without losing the label or submit sema
   expect(element.props.disabled).toBe(true);
   expect(element.props['aria-busy']).toBe(true);
   expect(element.props.type).toBe('submit');
-  expect(element.props.children[2].props.children).toBe('Save');
+  const children = Children.toArray(element.props.children) as TestElement[];
+  expect(children[2]?.props.children).toBe('Save');
   expect(UiButton({ disabled: true }).props.disabled).toBe(true);
 });
 
@@ -105,12 +151,13 @@ test('icon button preserves its native attributes and requires an accessible lab
   expect(button.props.name).toBe('settings');
   expect(button.props.disabled).toBe(false);
   expect(button.props['data-surface']).toBe('none');
-  expect(button.props.className).toContain('ui-button-icon-control--sm');
+  expect(button.props.className).toContain('ui-icon-button--sm');
+  expect(button.props.className).toContain('ui-icon-button');
   expect(button.props.className).toContain('ui-button--ghost');
   const buttonContent = (button.props as unknown as { children: ReactElement }).children;
   const children = (buttonContent.props as unknown as { children: ReactElement[] }).children;
   expect(children[1]?.props).toEqual({
-    className: 'ui-button-icon-control__content',
+    className: 'ui-icon-button__content',
     'aria-hidden': 'true',
     children: 'gear',
   });
@@ -160,6 +207,34 @@ test('icon button loading and disabled links retain correct native activation se
   expect(disabledLink.props.tabIndex).toBe(-1);
   expect(prevented).toBe(true);
   expect(stopped).toBe(true);
+});
+
+test('action uses the shared semantic geometry and blocks disabled link activation', () => {
+  const onClick = () => {
+    throw new Error('disabled actions must not invoke handlers');
+  };
+  const action = UiAction({
+    href: '/docs',
+    size: 'lg',
+    disabled: true,
+    onClick,
+    children: 'Read docs',
+  });
+
+  expect(action.type).toBe('a');
+  expect(action.props.className).toContain('ui-action--lg');
+  expect(action.props.className).not.toContain('px-4');
+  expect(action.props.href).toBeUndefined();
+  expect(action.props['aria-disabled']).toBe(true);
+
+  let prevented = false;
+  action.props.onClick({
+    preventDefault: () => {
+      prevented = true;
+    },
+    stopPropagation: () => undefined,
+  } as unknown as MouseEvent);
+  expect(prevented).toBe(true);
 });
 test('breadcrumb mirrors the native route hierarchy contract and resolves one current item', () => {
   const breadcrumb = UiBreadcrumb({
@@ -233,7 +308,7 @@ test('card keeps consumer root semantics and composes the shared surface', () =>
   expect(article.type).toBe('article');
   expect(article.props.id).toBe('reading-card');
   expect(article.props['data-surface']).toBe('glass-card');
-  expect(article.props.className).toBe('ui-card rounded-card p-4 material-glass-card docs-card');
+  expect(article.props.className).toBe('ui-card material-glass-card docs-card');
 
   const link = UiCard<'a'>({
     as: 'a',

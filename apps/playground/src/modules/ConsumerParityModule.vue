@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   UiAction,
-  UiControlSurface,
+  UiDock,
   UiNavigationItem,
   UiSegmentedControl,
   UiStatusIndicator,
@@ -119,6 +119,7 @@ const languageOptions = computed(
               v-for="action in heroActions"
               :key="action.label"
               href="#consumer-parity"
+              @click.prevent
               :variant="action.primary ? 'primary' : 'secondary'"
               size="md"
             >
@@ -145,15 +146,10 @@ const languageOptions = computed(
         <div
           class="flex min-h-40 min-w-0 items-center justify-center rounded-panel bg-surface-subtle p-2 shadow-card sm:p-4"
         >
-          <UiControlSurface
-            as="nav"
-            surface="chrome"
-            hover-mode="static"
-            navigation-indicator
-            :class="[
-              'consumer-parity-dock',
-              compactNavigation ? 'consumer-parity-dock--compact' : '',
-            ]"
+          <UiDock
+            :compact="compactNavigation"
+            :scale="compactNavigation ? 'md' : 'lg'"
+            class="consumer-parity-dock"
             :aria-label="localize(copy.navigation.ariaLabel, props.locale)"
             data-consumer-parity="floating-navigation"
           >
@@ -178,7 +174,7 @@ const languageOptions = computed(
                 :options="languageOptions"
               />
             </template>
-          </UiControlSurface>
+          </UiDock>
         </div>
       </section>
     </div>

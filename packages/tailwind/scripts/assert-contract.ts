@@ -176,6 +176,7 @@ try {
     '.ui-navigation-item',
     '.ui-breadcrumb',
     '.ui-control-surface',
+    '.ui-dock',
     '.ui-status-indicator',
     '.ui-badge',
     '.self-stretch',
@@ -211,7 +212,10 @@ try {
     '--neoverse-color-text-primary',
     '--neoverse-breadcrumb-current-foreground',
     '--neoverse-color-edge-light',
+    '--neoverse-color-transparent',
+    '--neoverse-border-width-none',
     '--neoverse-shadow-card',
+    '--neoverse-shadow-none',
     '--neoverse-radius-control',
     '--neoverse-layout-container-lg',
     '--neoverse-layout-layer-modal',
@@ -337,8 +341,14 @@ try {
     '@media (prefers-reduced-motion:reduce)',
     '-webkit-backdrop-filter:var(--neoverse-material-filter)',
     '@media (prefers-reduced-transparency:reduce)',
-    'background-color:var(--neoverse-color-surface-raised);border:var(--neoverse-border-width-thin)',
-    ':is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card):not(.ui-button){background-color:var(--neoverse-color-surface-raised)',
+    'background-color:var(--neoverse-material-background-fallback)',
+    ':is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card):not(.ui-button):not(.ui-segmented-control)[data-neoverse-glass-nesting=inherit]{background-color:var(--neoverse-color-transparent)',
+    'border:var(--neoverse-border-width-none) var(--neoverse-border-style-solid) var(--neoverse-color-transparent)',
+    'box-shadow:var(--neoverse-shadow-none)',
+    '-webkit-backdrop-filter:none',
+    'backdrop-filter:none',
+    'background-image:none',
+    '[data-neoverse-surface-overflow=visible]{overflow:visible}',
     'transition-duration:var(--tw-duration)',
     'transition-timing-function:var(--tw-ease)',
     '@keyframes ui-skeleton-shimmer',
@@ -372,6 +382,15 @@ try {
     'backdrop-filter:var(--neoverse-control-button-filter)',
   ];
   const missingFragments = expectedFragments.filter((fragment) => !css.includes(fragment));
+  const forbiddenNestedGlassFragments = [
+    /* Never restore implicit nested flattening: independent Glass components
+       must retain their resting material when placed inside Glass layouts. */
+    ':not([data-neoverse-glass-nesting=local])',
+    ':is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card):not(.ui-button):not(.ui-segmented-control)[data-neoverse-glass-nesting=inherit]{background-color:var(--neoverse-color-surface-raised)',
+  ];
+  const emittedForbiddenNestedGlassFragments = forbiddenNestedGlassFragments.filter((fragment) =>
+    css.includes(fragment),
+  );
   const forbiddenWebglFragments = [
     '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card){box-shadow:var(--neoverse-shadow-none)',
     '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card){box-shadow:var(--neoverse-material-shadow);-webkit-backdrop-filter:none',
@@ -407,9 +426,11 @@ try {
     (fragment) => !badgeCss.includes(fragment),
   );
   const ghostActiveCss =
-    buttonCss.match(/\.ui-button--ghost:active:not\(:disabled\) \{([\s\S]*?)\n {2}\}/)?.[1] ?? '';
+    buttonCss.match(
+      /\.ui-button--ghost:active:not\(:disabled\):not\(\[aria-disabled='true'\]\) \{([\s\S]*?)\n {2}\}/,
+    )?.[1] ?? '';
   const expectedGhostActiveFragments = [
-    'background: var(--neoverse-control-button-ghost-active-background);',
+    'background: var(--neoverse-control-ghost-active-background);',
     'transform: none;',
   ];
   const missingGhostActiveFragments = expectedGhostActiveFragments.filter(
@@ -446,6 +467,7 @@ try {
     emittedForbiddenSelectors.length > 0 ||
     missingValues.length > 0 ||
     missingFragments.length > 0 ||
+    emittedForbiddenNestedGlassFragments.length > 0 ||
     emittedForbiddenWebglFragments.length > 0 ||
     missingButtonFragments.length > 0 ||
     missingGhostActiveFragments.length > 0 ||
@@ -464,6 +486,9 @@ try {
         : '',
       missingValues.length > 0 ? `Missing token references: ${missingValues.join(', ')}` : '',
       missingFragments.length > 0 ? `Missing CSS fragments: ${missingFragments.join(', ')}` : '',
+      emittedForbiddenNestedGlassFragments.length > 0
+        ? `Forbidden nested Glass material fragments: ${emittedForbiddenNestedGlassFragments.join(', ')}`
+        : '',
       emittedForbiddenWebglFragments.length > 0
         ? `Forbidden WebGL material fragments: ${emittedForbiddenWebglFragments.join(', ')}`
         : '',

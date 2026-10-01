@@ -84,10 +84,38 @@
       var(--neoverse-control-active-background), transparent;
     --neoverse-control-button-ghost-active-background:
       var(--neoverse-control-active-background), transparent;
-    /* Ghost keeps the surrounding surface visible while each theme decides
-       whether its quiet boundary should be visible. */
-    --neoverse-control-ghost-border: var(--neoverse-color-border-strong);
+    /* Ghost is a transparent control, not a second filled Glass plate.
+       A soft semantic edge becomes slightly clearer only during interaction. */
+    --neoverse-control-ghost-border: color-mix(
+      in srgb,
+      var(--neoverse-color-border-default) 38%,
+      transparent
+    );
+    --neoverse-control-ghost-hover-border: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) 12%,
+      transparent
+    );
+    --neoverse-control-ghost-active-border: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) 16%,
+      transparent
+    );
+    --neoverse-control-ghost-shadow: inset 0 1px 0
+      color-mix(in srgb, var(--neoverse-color-edge-light) 5%, transparent);
+    --neoverse-control-ghost-hover-shadow: inset 0 1px 0
+      color-mix(in srgb, var(--neoverse-color-edge-light) 10%, transparent);
     --neoverse-control-ghost-background: transparent;
+    --neoverse-control-ghost-hover-background: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) 6%,
+      transparent
+    );
+    --neoverse-control-ghost-active-background: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) 10%,
+      transparent
+    );
 
     /* Button-only foreground and filter states. */
     --neoverse-control-secondary-foreground: var(--neoverse-color-text-secondary);

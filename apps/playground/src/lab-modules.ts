@@ -4,6 +4,7 @@ import ColorsModule from './modules/ColorsModule.vue';
 import CompositionModule from './modules/CompositionModule.vue';
 import ConsumerParityModule from './modules/ConsumerParityModule.vue';
 import ControlsModule from './modules/ControlsModule.vue';
+import DockModule from './modules/DockModule.vue';
 import LayoutShapeModule from './modules/LayoutShapeModule.vue';
 import MaterialsModule from './modules/MaterialsModule.vue';
 import MotionModule from './modules/MotionModule.vue';
@@ -62,6 +63,13 @@ export const labModules = [
     label: moduleCopy.controls.label,
     description: moduleCopy.controls.description,
     component: ControlsModule,
+  },
+  {
+    id: 'dock',
+    groupId: 'components',
+    label: moduleCopy.dock.label,
+    description: moduleCopy.dock.description,
+    component: DockModule,
   },
   {
     id: 'status-feedback',
@@ -126,7 +134,7 @@ export const moduleGroups = [
     id: 'components',
     label: groupCopy.components.label,
     description: groupCopy.components.description,
-    moduleIds: ['controls', 'status-feedback', 'card', 'scrollbar'],
+    moduleIds: ['controls', 'dock', 'status-feedback', 'card', 'scrollbar'],
   },
   {
     id: 'patterns',
@@ -274,6 +282,14 @@ export const labSpecimens = [
     kind: 'component',
   },
   {
+    id: 'dock-component',
+    moduleId: 'dock',
+    label: moduleCopy.dock.label,
+    apiNames: ['UiDock'],
+    tags: ['dock', 'navigation', 'composition', 'control-surface'],
+    kind: 'component',
+  },
+  {
     id: 'status-feedback-badge',
     moduleId: 'status-feedback',
     label: moduleCopy.badge.label,
@@ -328,6 +344,22 @@ export const labSpecimens = [
     apiNames: ['UiScrollbar'],
     tags: ['scrollbar', 'navigation', 'overlay'],
     kind: 'component',
+  },
+  {
+    id: 'composition-standard-mode',
+    moduleId: 'composition',
+    label: moduleCopy.composition.previewModes.standard.label,
+    apiNames: [],
+    tags: ['composition', 'glass', 'standard'],
+    kind: 'composition',
+  },
+  {
+    id: 'composition-accessibility-mode',
+    moduleId: 'composition',
+    label: moduleCopy.composition.previewModes.accessibility.label,
+    apiNames: [],
+    tags: ['composition', 'accessibility', 'reduced-transparency'],
+    kind: 'composition',
   },
   {
     id: 'composition-control-cluster',

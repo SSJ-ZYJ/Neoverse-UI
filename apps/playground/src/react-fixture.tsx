@@ -56,7 +56,12 @@ function ReactFixture() {
         data-react-adapter="UiSurface"
       >
         <div className="flex flex-wrap items-center gap-2">
-          <UiAction href="#react-runtime-fixture" variant="secondary" data-react-adapter="UiAction">
+          <UiAction
+            href="#react-runtime-fixture"
+            onClick={(event) => event.preventDefault()}
+            variant="secondary"
+            data-react-adapter="UiAction"
+          >
             {copy.action}
           </UiAction>
           <UiButton

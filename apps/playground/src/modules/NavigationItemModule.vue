@@ -24,6 +24,7 @@ const contractCopy = {
   >
     <UiNavigationItem
       href="#controls-navigation-item"
+      @click.prevent
       :label="localize(copy.controls.home, props.locale)"
       active
     >
@@ -31,6 +32,7 @@ const contractCopy = {
     </UiNavigationItem>
     <UiNavigationItem
       href="#controls-navigation-item"
+      @click.prevent
       :label="localize(copy.controls.projects, props.locale)"
     >
       <template #icon><LabIcon name="folder" /></template>
@@ -44,6 +46,7 @@ const contractCopy = {
   >
     <UiNavigationItem
       href="#controls-navigation-item"
+      @click.prevent
       :label="localize(copy.controls.focus, props.locale)"
       compact
     >
@@ -51,6 +54,7 @@ const contractCopy = {
     </UiNavigationItem>
     <UiNavigationItem
       href="#controls-navigation-item"
+      @click.prevent
       :label="localize(copy.controls.activity, props.locale)"
       compact
       active
@@ -62,6 +66,7 @@ const contractCopy = {
   <StateRow :label="copy.states.hover.label" :hint="copy.states.hover.hint" :locale="props.locale">
     <UiNavigationItem
       href="#controls-navigation-item"
+      @click.prevent
       :label="localize(copy.controls.hover, props.locale)"
     >
       <template #icon><LabIcon name="target" /></template>
@@ -71,6 +76,7 @@ const contractCopy = {
   <StateRow :label="copy.states.focus.label" :hint="copy.states.focus.hint" :locale="props.locale">
     <UiNavigationItem
       href="#controls-navigation-item"
+      @click.prevent
       :label="localize(copy.controls.keyboardFocus, props.locale)"
     >
       <template #icon><LabIcon name="activity" /></template>
@@ -80,6 +86,7 @@ const contractCopy = {
   <StateRow :label="copy.states.disabled.label" :locale="props.locale">
     <UiNavigationItem
       href="#controls-navigation-item"
+      @click.prevent
       :label="localize(copy.controls.disabled, props.locale)"
       disabled
     >
@@ -91,6 +98,7 @@ const contractCopy = {
     <div class="grid w-full gap-2 md:grid-cols-2">
       <UiNavigationItem
         href="#controls-navigation-item"
+        @click.prevent
         :label="localize(copy.controls.home, props.locale)"
         active
         stretch
@@ -101,6 +109,7 @@ const contractCopy = {
       </UiNavigationItem>
       <UiNavigationItem
         href="#controls-navigation-item"
+        @click.prevent
         :label="localize(copy.controls.projects, props.locale)"
         stretch
         surface="none"

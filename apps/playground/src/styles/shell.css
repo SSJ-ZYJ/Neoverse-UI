@@ -13,6 +13,117 @@
   overflow: hidden;
 }
 
+.playground-shell {
+  isolation: isolate;
+  gap: var(--neoverse-playground-shell-gap);
+  padding: var(--neoverse-playground-shell-inset);
+}
+
+.playground-shell__navigation {
+  inset-block: var(--neoverse-playground-shell-drawer-inset);
+  inset-inline-start: var(--neoverse-playground-shell-drawer-inset);
+  max-height: calc(100dvh - var(--neoverse-playground-shell-drawer-inset) * 2);
+}
+
+.playground-shell__navigation--open {
+  transform: translateX(0);
+}
+
+.playground-shell__navigation--closed {
+  transform: translateX(calc(-100% - var(--neoverse-playground-shell-drawer-inset)));
+}
+
+.playground-shell__navigation-header {
+  position: relative;
+  z-index: var(--neoverse-layout-layer-sticky);
+  flex: none;
+}
+
+.playground-shell__navigation-header::after {
+  position: absolute;
+  z-index: var(--neoverse-layout-layer-base);
+  inset-block-start: 100%;
+  inset-inline: 0;
+  height: var(--neoverse-playground-navigation-fade-size);
+  background: linear-gradient(
+    to bottom,
+    var(--neoverse-material-glass-elevated-background),
+    var(--neoverse-color-surface-subtle),
+    var(--neoverse-color-transparent)
+  );
+  content: '';
+  pointer-events: none;
+  -webkit-backdrop-filter: var(--neoverse-material-glass-elevated-filter);
+  backdrop-filter: var(--neoverse-material-glass-elevated-filter);
+  -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+  mask-image: linear-gradient(to bottom, black, transparent);
+}
+
+.playground-shell__navigation-scroll {
+  margin-block-start: calc(var(--neoverse-playground-navigation-fade-size) * -0.5);
+  padding-block-start: var(--neoverse-playground-navigation-fade-size);
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black var(--neoverse-playground-navigation-fade-size),
+    black
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent,
+    black var(--neoverse-playground-navigation-fade-size),
+    black
+  );
+}
+
+.playground-shell__content,
+.playground-shell__workspace {
+  min-width: 0;
+  border-radius: var(--neoverse-radius-panel);
+}
+
+.playground-shell__workspace {
+  scrollbar-gutter: stable;
+}
+
+.playground-shell__toolbar {
+  isolation: isolate;
+  min-height: var(--neoverse-playground-toolbar-min-height);
+}
+
+.playground-shell__toolbar-actions > .ui-segmented-control {
+  flex: 0 0 auto;
+}
+
+.playground-navigation-group {
+  box-shadow: var(--neoverse-playground-shell-group-shadow);
+}
+
+.playground-floating-interaction-surface {
+  position: relative;
+}
+
+.playground-floating-interaction-surface:is(:hover, :focus-within) {
+  z-index: var(--neoverse-layout-layer-raised);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .playground-shell__navigation-header::after {
+    background: linear-gradient(
+      to bottom,
+      var(--neoverse-material-glass-elevated-background-fallback),
+      var(--neoverse-color-transparent)
+    );
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .playground-shell__navigation-scroll {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+}
+
 [data-design-lab-workspace] {
   scrollbar-gutter: stable;
 }
@@ -43,6 +154,7 @@
 .playground-specimen-section {
   display: grid;
   gap: var(--neoverse-space-3);
+  box-shadow: var(--neoverse-shadow-xs);
 }
 
 .playground-specimen-section__header {
@@ -56,6 +168,70 @@
 .playground-specimen-row {
   border-radius: var(--neoverse-radius-card);
   padding: var(--neoverse-space-3);
+}
+
+.playground-specimen-preview {
+  min-width: 0;
+  overflow-x: auto;
+}
+
+.playground-specimen-preview__content {
+  width: max-content;
+  min-width: 100%;
+  zoom: var(--neoverse-playground-specimen-preview-scale);
+}
+
+.playground-dock-preview {
+  min-width: 0;
+  overflow-x: auto;
+  padding-block: var(--neoverse-space-2);
+}
+
+.playground-dock-preview__content {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  justify-content: center;
+}
+
+.playground-reduced-transparency-preview
+  :is(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive,
+    .material-glass-card
+  ) {
+  background-color: var(--neoverse-material-background-fallback);
+  background-image: none;
+  box-shadow:
+    var(--neoverse-material-edge-highlight), var(--neoverse-material-inner-glow),
+    var(--neoverse-material-shadow);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.playground-reduced-transparency-preview .ui-segmented-control.material-glass-subtle {
+  background-color: var(--neoverse-material-background-fallback);
+  background-image: none;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.playground-reduced-transparency-preview
+  :is(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive,
+    .material-glass-card
+  ):not(.ui-button)::before,
+.playground-reduced-transparency-preview
+  :is(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive,
+    .material-glass-card
+  )::after {
+  display: none;
 }
 
 .playground-specimen-panel {

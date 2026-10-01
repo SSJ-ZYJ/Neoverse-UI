@@ -208,11 +208,18 @@ const getVariant = (element: Element): GlassVariant | undefined => {
   return undefined;
 };
 
-const hasGlassAncestor = (element: Element): boolean => {
-  // Interactive controls keep their own material edge even when they sit on
-  // a Glass card or Playground state row. Other nested Glass surfaces remain
-  // deduplicated so one parent does not paint the same backdrop twice.
-  if (element.classList.contains('ui-button')) {
+const inheritsParentGlassEdge = (element: Element): boolean => {
+  // An independent Glass surface owns its own refractive silhouette, even
+  // when the layout around it is also Glass. In particular, Playground's
+  // Glass specimen cards must not lose the WebGL edge when the section itself
+  // becomes a Glass surface. Segmented controls own a separate control edge.
+  if (element.classList.contains('ui-segmented-control')) {
+    return true;
+  }
+  if (
+    element.classList.contains('ui-button') ||
+    element.getAttribute('data-neoverse-glass-nesting') !== 'inherit'
+  ) {
     return false;
   }
 
@@ -256,10 +263,12 @@ const firstPropertyValue = (
 };
 
 const getRadii = (style: CSSStyleDeclaration): Radii => [
-  parsePixels(style.borderTopRightRadius, 16),
-  parsePixels(style.borderBottomRightRadius, 16),
-  parsePixels(style.borderBottomLeftRadius, 16),
-  parsePixels(style.borderTopLeftRadius, 16),
+  // CSS surfaces are square when no radius is declared. Keep the WebGL edge
+  // congruent with the CSS fallback instead of inventing a card radius.
+  parsePixels(style.borderTopRightRadius, 0),
+  parsePixels(style.borderBottomRightRadius, 0),
+  parsePixels(style.borderBottomLeftRadius, 0),
+  parsePixels(style.borderTopLeftRadius, 0),
 ];
 
 const getCanvasViewport = (
@@ -980,7 +989,7 @@ class GlassRendererImpl implements GlassRenderer {
       if (element.matches(cssEdgePassSelector)) {
         continue;
       }
-      if (hasGlassAncestor(element)) {
+      if (inheritsParentGlassEdge(element)) {
         continue;
       }
 
