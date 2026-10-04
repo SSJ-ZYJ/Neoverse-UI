@@ -18,11 +18,29 @@
       var(--neoverse-color-neutral-600) 70%,
       var(--neoverse-color-accent-secondary) 30%
     );
+    --neoverse-control-segmented-active-background: var(--neoverse-control-active-background);
     --neoverse-control-segmented-active-fill: transparent;
+    --neoverse-control-segmented-active-border: var(--neoverse-control-active-border);
+    --neoverse-control-segmented-active-shadow: var(--neoverse-control-active-shadow);
+    --neoverse-control-segmented-shell-hover-background-image: var(
+      --neoverse-control-segmented-background-image
+    );
+    --neoverse-control-segmented-shell-hover-background-color: var(
+      --neoverse-control-segmented-background-color
+    );
+    --neoverse-control-segmented-shell-hover-border: var(--neoverse-control-segmented-border);
+    --neoverse-control-segmented-shell-hover-shadow: var(--neoverse-control-segmented-shadow);
+    /* Dark/default keeps the original segmented-control edge recipe. Light
+       opts into the shared Glass refraction field in its theme mapping. */
+    --neoverse-control-segmented-edge-refraction-opacity: 0;
+    --neoverse-control-segmented-edge-display: none;
     /* Geometry mirrors the deployed Neoverse segmented control. Embedded
        controls do not add a second inset; their parent chrome owns spacing. */
     --neoverse-control-segmented-inset: 0.18rem;
     --neoverse-control-segmented-embedded-inset: var(--neoverse-space-0);
+    --neoverse-control-segmented-corner-radius: var(--neoverse-control-corner-radius);
+    --neoverse-control-segmented-internal-inset: var(--neoverse-control-segmented-inset);
+    --neoverse-control-segmented-boundary-width: var(--neoverse-border-width-thin);
     --neoverse-control-segmented-gap: 0.2rem;
     --neoverse-control-segmented-option-min-width: 2.5rem;
     /* Embedded segmented controls use a tighter geometry than standalone
@@ -41,8 +59,5 @@
     --neoverse-control-segmented-border: var(--neoverse-control-button-border);
     --neoverse-control-segmented-shadow: var(--neoverse-control-secondary-shadow);
     --neoverse-control-segmented-filter: blur(6px) saturate(112%) brightness(102%);
-    --neoverse-control-segmented-focus-shadow:
-      0 0 0 1px color-mix(in srgb, var(--neoverse-color-accent-primary) 30%, transparent),
-      0 0 4px 1px color-mix(in srgb, var(--neoverse-color-accent-primary) 18%, transparent);
   }
 }

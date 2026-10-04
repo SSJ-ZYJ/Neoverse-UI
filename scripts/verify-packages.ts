@@ -172,12 +172,23 @@ try {
         ['tar', '-xOf', tarballPath, 'package/dist/index.css'],
         repositoryRoot,
       );
-      for (const fragment of ['.sr-only{', '.material-glass-card{', '.ui-button{']) {
+      for (const fragment of [
+        '.sr-only{',
+        '.material-glass-elevated{',
+        '.ui-button{',
+        '.ui-table-region{',
+        '.ui-disclosure__content{',
+        ':where(.ui-input,.ui-textarea,.ui-select){',
+      ]) {
         assert(
           consumerCss.includes(fragment),
           `@neoverse-ui/tailwind: compiled consumer bundle is missing ${fragment}`,
         );
       }
+      assert(
+        !consumerCss.includes('.material-glass-card{'),
+        '@neoverse-ui/tailwind: removed glass-card material leaked into the consumer bundle',
+      );
     }
 
     if (sourcePackage.name === '@neoverse-ui/vue' || sourcePackage.name === '@neoverse-ui/react') {

@@ -172,50 +172,6 @@
     white-space: pre;
   }
 
-  .neoverse-prose table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    color: var(--neoverse-color-text-secondary);
-    font-size: var(--neoverse-typography-body-sm-size);
-    line-height: var(--neoverse-typography-body-sm-line-height);
-  }
-
-  .neoverse-prose :where(th, td) {
-    border-block-end: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      var(--neoverse-color-border-subtle);
-    padding: var(--neoverse-space-3) var(--neoverse-space-4);
-    text-align: start;
-    vertical-align: top;
-    overflow-wrap: anywhere;
-  }
-
-  .neoverse-prose th {
-    color: var(--neoverse-color-text-primary);
-    background: var(--neoverse-color-surface-subtle);
-    font-weight: var(--neoverse-font-weight-semibold);
-  }
-
-  .neoverse-prose thead th:first-child {
-    border-start-start-radius: var(--neoverse-radius-card);
-  }
-
-  .neoverse-prose thead th:last-child {
-    border-start-end-radius: var(--neoverse-radius-card);
-  }
-
-  .neoverse-prose caption {
-    margin-block-end: var(--neoverse-space-2);
-    color: var(--neoverse-color-text-muted);
-    font-size: var(--neoverse-typography-caption-size);
-    line-height: var(--neoverse-typography-caption-line-height);
-    text-align: start;
-  }
-
-  .neoverse-prose tbody tr:last-child td {
-    border-block-end: 0;
-  }
-
   .neoverse-prose :where(img, video) {
     display: block;
     max-width: 100%;
@@ -242,30 +198,6 @@
     border: 0;
     border-block-start: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
       var(--neoverse-color-border-subtle);
-  }
-
-  .neoverse-prose details {
-    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      var(--neoverse-color-border-subtle);
-    border-radius: var(--neoverse-radius-control);
-    padding: var(--neoverse-space-4);
-    background: var(--neoverse-color-surface-subtle);
-  }
-
-  .neoverse-prose summary {
-    cursor: pointer;
-    color: var(--neoverse-color-text-primary);
-    font-weight: var(--neoverse-font-weight-semibold);
-  }
-
-  .neoverse-prose summary:focus-visible {
-    border-radius: var(--neoverse-radius-xs);
-    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
-    outline-offset: var(--neoverse-focus-ring-offset);
-  }
-
-  .neoverse-prose details[open] summary {
-    margin-block-end: var(--neoverse-space-3);
   }
 
   .neoverse-prose abbr[title] {

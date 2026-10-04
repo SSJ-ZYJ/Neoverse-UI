@@ -1,5 +1,5 @@
 import { createServer as createNetServer } from 'node:net';
-import { readAssetMtime } from './asset-state';
+import { readAssetMtime, waitForAssets } from './asset-state';
 import { appCopy, formatLocalized, isLocale, type Locale, localize } from './playground-content';
 import type { FrameTheme } from './playground-types';
 
@@ -14,14 +14,8 @@ const stylesheetPath = new URL('../../../packages/tailwind/dist/playground.css',
 const clientBundlePath = new URL('../dist/assets/playground.js', import.meta.url);
 const reactFixtureBundlePath = new URL('../dist/assets/react-fixture.js', import.meta.url);
 const scopedCssPath = new URL('../dist/assets/playground.css', import.meta.url);
-const materialBackgroundLightPath = new URL(
-  '../dist/assets/material-background-light.png',
-  import.meta.url,
-);
-const materialBackgroundDarkPath = new URL(
-  '../dist/assets/material-background-dark.png',
-  import.meta.url,
-);
+const assetAvailabilityAttempts = 20;
+const assetAvailabilityRetryDelayMs = 50;
 
 const isFrameTheme = (value: string | null): value is FrameTheme =>
   value === 'light' || value === 'dark';
@@ -152,18 +146,17 @@ const missingAssetResponse = (asset: string, locale: Locale): Response =>
       'content-type': 'text/plain; charset=utf-8',
     },
   });
+const waitForServedAssets = (assets: readonly ReturnType<typeof Bun.file>[]): Promise<boolean> =>
+  waitForAssets(assets, {
+    attempts: assetAvailabilityAttempts,
+    delay: () => Bun.sleep(assetAvailabilityRetryDelayMs),
+  });
+
 const ensureDesignLabAssets = async (locale: Locale): Promise<Response | undefined> => {
   const stylesheet = Bun.file(stylesheetPath);
   const clientBundle = Bun.file(clientBundlePath);
-  const materialBackgroundLight = Bun.file(materialBackgroundLightPath);
-  const materialBackgroundDark = Bun.file(materialBackgroundDarkPath);
 
-  if (
-    !(await stylesheet.exists()) ||
-    !(await clientBundle.exists()) ||
-    !(await materialBackgroundLight.exists()) ||
-    !(await materialBackgroundDark.exists())
-  ) {
+  if (!(await waitForServedAssets([stylesheet, clientBundle]))) {
     return missingAssetResponse(localize(appCopy.server.assetsLabel, locale), locale);
   }
 
@@ -173,7 +166,7 @@ const ensureDesignLabAssets = async (locale: Locale): Promise<Response | undefin
 const ensureReactFixtureAssets = async (locale: Locale): Promise<Response | undefined> => {
   const stylesheet = Bun.file(stylesheetPath);
   const reactFixtureBundle = Bun.file(reactFixtureBundlePath);
-  if (!(await stylesheet.exists()) || !(await reactFixtureBundle.exists())) {
+  if (!(await waitForServedAssets([stylesheet, reactFixtureBundle]))) {
     return missingAssetResponse('React fixture assets', locale);
   }
   return undefined;
@@ -291,27 +284,6 @@ const server = Bun.serve({
         headers: {
           'cache-control': 'no-cache',
           'content-type': assetContentType(relativePath),
-        },
-      });
-    }
-
-    if (
-      url.pathname === '/material-background-light.png' ||
-      url.pathname === '/material-background-dark.png'
-    ) {
-      const materialBackground = Bun.file(
-        url.pathname === '/material-background-dark.png'
-          ? materialBackgroundDarkPath
-          : materialBackgroundLightPath,
-      );
-      if (!(await materialBackground.exists())) {
-        return missingAssetResponse(url.pathname, locale);
-      }
-
-      return new Response(materialBackground, {
-        headers: {
-          'cache-control': 'no-cache',
-          'content-type': 'image/png',
         },
       });
     }

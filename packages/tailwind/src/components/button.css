@@ -1,9 +1,7 @@
 @layer components {
-  /* Filled buttons share the project's Glass surface. The variant only
-     changes the density of the plane; one tokenized cool border and the
-     shared refraction field keep the rounded edge consistent instead of
-     painting white rings. Ghost keeps the surrounding surface visible while
-     retaining a quiet boundary. */
+  /* Filled buttons share the project's Glass surface. Variants tune the
+     sampled plane and depth without painting extra rings. Ghost is deliberately
+     borderless so the surrounding surface remains visible in both themes. */
   .ui-button {
     position: relative;
     display: inline-flex;
@@ -30,117 +28,81 @@
       opacity var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
   }
 
-  /* Keep the legacy control root usable for consumers that still compose
-     `.ui-button-control` directly. New adapters use `.ui-button`, but the
-     legacy selector must retain the geometry it owned before the migration. */
-  .ui-button-control {
-    display: inline-flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    gap: var(--neoverse-space-2);
-    border-radius: var(--neoverse-radius-control-inner);
-    padding-inline: var(--neoverse-space-3);
-    font-family: var(--neoverse-font-family-sans);
-    font-size: var(--neoverse-typography-label-size);
-    font-weight: var(--neoverse-typography-label-weight);
-    line-height: var(--neoverse-typography-label-line-height);
-    cursor: pointer;
-    user-select: none;
-  }
-
-  /* Native control geometry is a component contract, not a consumer utility
-     contract. The ui-button-control selectors remain aliases for consumers of
-     the first React adapter release. */
-  .ui-button--sm,
-  .ui-button-control--sm {
+  .ui-button--sm {
     height: var(--neoverse-space-7);
     min-height: var(--neoverse-space-7);
     font-size: var(--neoverse-typography-caption-size);
     line-height: var(--neoverse-typography-caption-line-height);
   }
 
-  .ui-button--md,
-  .ui-button-control--md {
+  .ui-button--md {
     height: var(--neoverse-space-8);
     min-height: var(--neoverse-space-8);
-    font-size: var(--neoverse-typography-label-size);
-    line-height: var(--neoverse-typography-label-line-height);
+    font-size: var(--neoverse-typography-label-md-size);
+    line-height: var(--neoverse-typography-label-md-line-height);
   }
 
-  .ui-button--lg,
-  .ui-button-control--lg {
+  .ui-button--lg {
     height: var(--neoverse-space-9);
     min-height: var(--neoverse-space-9);
     padding-inline: var(--neoverse-space-4);
-    font-size: var(--neoverse-typography-label-size);
-    line-height: var(--neoverse-typography-label-line-height);
+    font-size: var(--neoverse-typography-label-md-size);
+    line-height: var(--neoverse-typography-label-md-line-height);
   }
 
-  .ui-button--stretch,
-  .ui-button-control--stretch {
+  .ui-button--stretch {
     height: auto;
     flex-grow: 1;
     align-self: stretch;
   }
 
-  .ui-icon-button,
-  .ui-button-icon-control {
+  .ui-icon-button {
     padding-inline: 0;
   }
 
-  .ui-icon-button--sm,
-  .ui-button-icon-control--sm {
+  .ui-icon-button--sm {
     width: var(--neoverse-space-7);
     height: var(--neoverse-space-7);
     min-height: var(--neoverse-space-7);
   }
 
-  .ui-icon-button--md,
-  .ui-button-icon-control--md {
+  .ui-icon-button--md {
     width: var(--neoverse-space-8);
     height: var(--neoverse-space-8);
     min-height: var(--neoverse-space-8);
   }
 
-  .ui-icon-button--lg,
-  .ui-button-icon-control--lg {
+  .ui-icon-button--lg {
     width: var(--neoverse-space-9);
     height: var(--neoverse-space-9);
     min-height: var(--neoverse-space-9);
   }
 
-  .ui-icon-button--stretch,
-  .ui-button-icon-control--stretch {
+  .ui-icon-button--stretch {
     height: auto;
     flex-grow: 1;
     align-self: stretch;
   }
 
-  .ui-button:focus-visible,
-  .ui-button-control:focus-visible {
+  .ui-button:focus-visible {
     outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
     outline-offset: var(--neoverse-focus-ring-offset);
   }
 
   .ui-button:disabled,
-  .ui-button[aria-disabled='true'],
-  .ui-button-control:disabled {
+  .ui-button[aria-disabled='true'] {
     cursor: not-allowed;
     opacity: 0.6;
   }
 
-  .ui-button__content,
-  .ui-button-control__content {
+  .ui-button__content {
     display: inline-flex;
     min-width: 0;
     align-items: center;
   }
 
   .ui-button__leading,
-  .ui-button__trailing,
-  .ui-button-control__leading,
-  .ui-button-control__trailing {
+  .ui-button__trailing {
     position: relative;
     display: inline-flex;
     min-width: var(--neoverse-space-4);
@@ -165,16 +127,11 @@
     justify-content: center;
   }
 
-  .ui-icon-button__content,
-  .ui-button-icon-control__content {
+  .ui-icon-button__content {
     display: inline-flex;
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-  }
-
-  .ui-button-control__spinner {
-    position: absolute;
   }
 
   .ui-button.material-glass-subtle {
@@ -238,7 +195,7 @@
   .ui-button > .ui-button__edge-field {
     position: absolute;
     z-index: 0;
-    inset: var(--neoverse-material-edge-refraction-width);
+    inset: 0;
     border-radius: inherit;
     background-color: transparent;
     background-image: var(--neoverse-material-refraction-gradient);
@@ -251,16 +208,15 @@
     backdrop-filter: var(--neoverse-material-edge-filter);
   }
 
-  /* Ghost owns a single semantic border. The inset Glass edge field has a
-     second radius and a tinted backdrop sample, so it must not paint here. */
+  /* Ghost is borderless and does not own the filled-button refraction
+     field. Hover/press feedback comes from its translucent wash instead. */
   .ui-button--ghost > .ui-button__edge-field,
   .ui-button[data-surface='none'] > .ui-button__edge-field {
     display: none;
   }
 
-  /* A button is not a Glass Edge Pass surface by default. Keep this narrow
-     compatibility rule for a consumer that explicitly opts a custom button
-     into the renderer. */
+  /* Buttons stay on their dedicated CSS edge recipe unless a consumer
+     explicitly opts the button into the shared WebGL Edge Pass. */
   [data-neoverse-glass-renderer='webgl']
   .ui-button.material-glass-subtle[data-neoverse-glass-edge-pass-active='webgl'] {
     --neoverse-material-shadow: 0 0 0 0 transparent;
@@ -295,6 +251,10 @@
     background-clip: padding-box;
   }
 
+  .ui-button--primary.material-glass-subtle {
+    --neoverse-material-shadow: var(--neoverse-control-primary-shadow);
+  }
+
   .ui-button--secondary {
     color: var(--neoverse-control-secondary-foreground);
     background-image: var(--neoverse-control-button-filled-background);
@@ -309,8 +269,7 @@
   }
 
   .ui-button--ghost.material-glass-subtle {
-    /* Ghost has one border at the control radius, without an inset
-       refraction silhouette or its tinted backdrop blur. */
+    /* Ghost has no painted edge or backdrop sample of its own. */
     --neoverse-material-edge-refraction-opacity: 0;
     --neoverse-material-shadow: var(--neoverse-control-ghost-shadow);
     --neoverse-material-filter: none;
@@ -326,7 +285,7 @@
   }
 
   .ui-button--primary:hover:not(:disabled) {
-    --neoverse-material-shadow: var(--neoverse-control-button-edge-hover);
+    --neoverse-material-shadow: var(--neoverse-control-primary-hover-shadow);
     color: var(--neoverse-control-secondary-hover-foreground);
     background-image: var(--neoverse-control-primary-hover-background);
     background-color: var(--neoverse-control-button-filled-hover-fill);
@@ -392,8 +351,8 @@
     opacity: 1;
   }
 
-  /* Unlike filled buttons, ghost uses only its semantic wash and border in
-     every state; never paint the extra glow on top of the same radius. */
+  /* Unlike filled buttons, ghost uses only its semantic wash in every
+     state; never paint the filled-button glow on top of it. */
   .ui-button--ghost.material-glass-subtle::after,
   .ui-button--ghost.material-glass-subtle:is(:hover, :active):not(:disabled)::after {
     background: none;

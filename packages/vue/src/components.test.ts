@@ -7,16 +7,20 @@ import UiBreadcrumb from './UiBreadcrumb.vue';
 import UiButton from './UiButton.vue';
 import UiCard from './UiCard.vue';
 import UiControlSurface from './UiControlSurface.vue';
+import UiDisclosure from './UiDisclosure.vue';
 import UiDock from './UiDock.vue';
-import UiGlassSurface from './UiGlassSurface.vue';
 import UiIconButton from './UiIconButton.vue';
+import UiInput from './UiInput.vue';
 import UiNavigationItem from './UiNavigationItem.vue';
 import UiNotice from './UiNotice.vue';
 import UiScrollbar from './UiScrollbar.vue';
 import UiSegmentedControl from './UiSegmentedControl.vue';
+import UiSelect from './UiSelect.vue';
 import UiSkeleton from './UiSkeleton.vue';
 import UiStatusIndicator from './UiStatusIndicator.vue';
 import UiSurface from './UiSurface.vue';
+import UiTable from './UiTable.vue';
+import UiTextarea from './UiTextarea.vue';
 import UiTooltipSurface from './UiTooltipSurface.vue';
 
 const options = [
@@ -561,28 +565,11 @@ describe('display components', () => {
       expect.arrayContaining(['ui-badge', 'ui-badge--danger', 'text-label']),
     );
 
-    const glass = mount(UiGlassSurface, { props: { variant: 'immersive' } });
-    expect(glass.classes()).toEqual(
-      expect.arrayContaining(['ui-glass-surface', 'material-glass-immersive']),
-    );
-
-    const glassCard = mount(UiGlassSurface, { props: { variant: 'card' } });
-    expect(glassCard.classes()).toEqual(
-      expect.arrayContaining(['ui-glass-surface', 'material-glass-card']),
-    );
-    const semanticGlassCard = mount(UiGlassSurface, {
-      attrs: { 'aria-label': 'Project card' },
-      props: { as: 'article', variant: 'card' },
-    });
-    expect(semanticGlassCard.element.tagName).toBe('ARTICLE');
-    expect(semanticGlassCard.attributes('aria-label')).toBe('Project card');
-    expect(semanticGlassCard.classes()).toContain('material-glass-card');
-
     const card = mount(UiCard, { attrs: { class: 'max-w-container-sm' } });
     expect(card.classes()).toEqual(
-      expect.arrayContaining(['ui-card', 'material-glass-card', 'max-w-container-sm']),
+      expect.arrayContaining(['ui-card', 'material-glass-elevated', 'max-w-container-sm']),
     );
-    expect(card.attributes('data-surface')).toBe('glass-card');
+    expect(card.attributes('data-surface')).toBe('glass-elevated');
 
     const bareCard = mount(UiCard, { props: { surface: 'none' } });
     expect(bareCard.attributes('data-surface')).toBe('none');
@@ -597,15 +584,15 @@ describe('display components', () => {
     expect(standardSurfaceCard.classes()).not.toContain('material-glass-elevated');
 
     const surface = mount(UiSurface, {
-      props: { as: 'section', surface: 'glass-card' },
+      props: { as: 'section', surface: 'glass-elevated' },
       attrs: { 'aria-label': 'Shared surface' },
     });
     expect(surface.element.tagName).toBe('SECTION');
     expect(surface.attributes('aria-label')).toBe('Shared surface');
-    expect(surface.attributes('data-surface')).toBe('glass-card');
+    expect(surface.attributes('data-surface')).toBe('glass-elevated');
     expect(surface.attributes('data-neoverse-glass-nesting')).toBe('local');
     expect(surface.attributes('data-neoverse-surface-overflow')).toBe('clip');
-    expect(surface.classes()).toContain('material-glass-card');
+    expect(surface.classes()).toContain('material-glass-elevated');
 
     const localGlassSurface = mount(UiSurface, {
       props: { surface: 'glass-subtle', glassNesting: 'local', contentOverflow: 'visible' },
@@ -634,8 +621,15 @@ describe('display components', () => {
       slots: { default: '12 contributions' },
     });
     expect(tooltip.classes()).toEqual(
-      expect.arrayContaining(['ui-tooltip-surface', 'ui-tooltip-surface--accent']),
+      expect.arrayContaining([
+        'ui-tooltip-surface',
+        'material-glass-subtle',
+        'ui-tooltip-surface--accent',
+      ]),
     );
+    expect(tooltip.attributes('data-surface')).toBe('glass-subtle');
+    expect(tooltip.attributes('data-neoverse-surface-hover')).toBe('static');
+    expect(tooltip.attributes()).toHaveProperty('data-neoverse-tooltip-surface');
 
     const skeleton = mount(UiSkeleton, { props: { variant: 'circle' } });
     expect(skeleton.attributes('aria-hidden')).toBe('true');
@@ -740,11 +734,121 @@ describe('UiScrollbar', () => {
     expect(scrollTo).toHaveBeenCalled();
   });
 });
+describe('UiTable', () => {
+  it('keeps native table semantics inside a local overflow region', () => {
+    const wrapper = mount(UiTable, {
+      attrs: { 'aria-label': 'Runtime support', class: 'consumer-table' },
+      props: { caption: 'Supported runtimes' },
+      slots: {
+        default: () => [
+          h('thead', [h('tr', [h('th', 'Runtime'), h('th', 'Status')])]),
+          h('tbody', [h('tr', [h('td', 'Windows'), h('td', 'Ready')])]),
+        ],
+      },
+    });
+
+    expect(wrapper.get('[data-ui-table-region]').classes()).toContain('ui-table-region');
+    const table = wrapper.get('table');
+    expect(table.attributes('aria-label')).toBe('Runtime support');
+    expect(table.classes()).toEqual(
+      expect.arrayContaining([
+        'ui-table',
+        'ui-table--striped',
+        'ui-table--hoverable',
+        'consumer-table',
+      ]),
+    );
+    expect(table.get('caption').text()).toBe('Supported runtimes');
+    expect(table.get('thead').element.tagName).toBe('THEAD');
+    expect(table.get('tbody').element.tagName).toBe('TBODY');
+  });
+
+  it('can disable optional row treatments without changing table semantics', () => {
+    const wrapper = mount(UiTable, {
+      props: { striped: false, hoverable: false },
+      slots: { default: () => h('tbody', [h('tr', [h('td', 'Static')])]) },
+    });
+
+    const table = wrapper.get('table');
+    expect(table.classes()).toEqual(['ui-table']);
+    expect(table.element.tagName).toBe('TABLE');
+  });
+});
+
+describe('UiDisclosure', () => {
+  it('uses native details and summary semantics and reports toggle state', async () => {
+    const wrapper = mount(UiDisclosure, {
+      attrs: { id: 'implementation-notes', class: 'consumer-disclosure' },
+      props: { summary: 'Implementation notes' },
+      slots: { default: () => h('p', 'Use semantic tokens.') },
+    });
+
+    const details = wrapper.get('details');
+    expect(details.attributes('id')).toBe('implementation-notes');
+    expect(details.classes()).toEqual(
+      expect.arrayContaining(['ui-disclosure', 'consumer-disclosure']),
+    );
+    expect(details.get('summary').classes()).toContain('ui-disclosure__summary');
+    expect(details.get('summary').text()).toBe('Implementation notes');
+    expect(details.get('.ui-disclosure__content').text()).toBe('Use semantic tokens.');
+
+    details.element.open = true;
+    await nextTick();
+    expect(wrapper.emitted('toggle')?.at(-1)).toEqual([true]);
+    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([true]);
+  });
+});
+
+describe('form controls', () => {
+  it('keeps input attributes and v-model updates native', async () => {
+    const wrapper = mount(UiInput, {
+      attrs: { type: 'email', name: 'email', 'aria-label': 'Email' },
+      props: { modelValue: 'hello@example.com' },
+    });
+
+    expect(wrapper.attributes('type')).toBe('email');
+    expect(wrapper.attributes('name')).toBe('email');
+    expect(wrapper.classes()).toContain('ui-input');
+    expect((wrapper.element as HTMLInputElement).value).toBe('hello@example.com');
+
+    await wrapper.setValue('next@example.com');
+    expect(wrapper.emitted('update:modelValue')).toEqual([['next@example.com']]);
+  });
+
+  it('keeps textarea attributes and v-model updates native', async () => {
+    const wrapper = mount(UiTextarea, {
+      attrs: { name: 'notes', rows: '4', 'aria-label': 'Notes' },
+      props: { modelValue: 'Initial' },
+    });
+
+    expect(wrapper.attributes('rows')).toBe('4');
+    expect(wrapper.classes()).toContain('ui-textarea');
+    await wrapper.setValue('Updated');
+    expect(wrapper.emitted('update:modelValue')).toEqual([['Updated']]);
+  });
+
+  it('keeps select options, attributes and v-model updates native', async () => {
+    const wrapper = mount(UiSelect, {
+      attrs: { name: 'runtime', 'aria-label': 'Runtime' },
+      props: { modelValue: 'native' },
+      slots: {
+        default: '<option value="native">Native</option><option value="remote">Remote</option>',
+      },
+    });
+
+    expect(wrapper.classes()).toContain('ui-select');
+    expect(wrapper.findAll('option')).toHaveLength(2);
+    await wrapper.setValue('remote');
+    expect(wrapper.emitted('update:modelValue')).toEqual([['remote']]);
+  });
+});
+
 describe('UiSegmentedControl', () => {
   it('uses the shared Glass surface by default and can opt out of outer chrome', () => {
     const glass = mount(UiSegmentedControl, { props: { options } });
     expect(glass.classes()).toContain('material-glass-subtle');
     expect(glass.attributes('data-surface')).toBe('glass-subtle');
+    expect(glass.attributes('data-neoverse-surface-hover')).toBe('static');
 
     const bare = mount(UiSegmentedControl, { props: { options, surface: 'none' } });
     expect(bare.classes()).not.toContain('material-glass-subtle');

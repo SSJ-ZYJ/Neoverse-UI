@@ -10,7 +10,7 @@
 | Bottom Dock | 单项使用 `UiNavigationItem`，共享外壳由 `UiDock` 负责；Consumer 只保留路由列表、active route 计算、固定定位与响应式断点决策 | `UiDock` 的 chrome、primary/trailing 分组、divider、整体 scale、compact contract 与共享 navigation indicator；`UiNavigationItem` 的 destination semantics | 无 Core 缺口；具体路由数据与页面定位仍属于 Product Layer | B. Core Component | 已进入 Core：`UiDock` + `UiNavigationItem` |
 | Language Segmented Control | 已替换为 `UiSegmentedControl`，Consumer 仅保留 i18n writable model 与外围布局 | 原生 radio-group 语义、roving focus、active slider、disabled/loading、reduced motion | 无 Core 缺口；Dock 内与相邻导航的表面关系属于组合 | C. Shared Composition / Pattern | 否；继续复用现有 Core |
 | Status Indicator | Home 已使用 `UiStatusIndicator` 表达当前构建状态；Pulse 的来源标签继续使用 `UiBadge`，两者语义职责分离 | `UiStatusIndicator` 的 dot/label/pulse/reduced-motion contract；`UiBadge` 的标签语义 | 无 Core 缺口 | B. Core Component | 已进入 Core：`UiStatusIndicator` |
-| Glass Card | Product 标准卡片已统一使用 `UiCard surface="glass-card"`，圆角与基础内边距由组件自身负责；通用非卡片材质容器继续使用 `UiSurface` | `UiCard` 复用完整 Surface contract 并拥有标准 card geometry；`UiSurface` 提供 polymorphic material plane；`UiGlassSurface` 仅保留 historical `variant` compatibility | 无 Core 缺口；业务内容布局与特定 hover 行为留在 Product Layer | B. Core Component | 是；标准卡片 canonical 用法为 `UiCard surface="glass-card"` |
+| Card | Product 标准卡片统一使用 `UiCard`，默认直接复用 `glass-elevated`；圆角与基础内边距由组件自身负责，通用非卡片材质容器继续使用 `UiSurface` | `UiCard` 复用完整 Surface contract 并拥有标准 card geometry；Glass 材质只保留 `subtle` / `elevated` / `immersive` 三种 | 无 Core 缺口；业务内容布局与特定 hover 行为留在 Product Layer | B. Core Component | 是；标准卡片 canonical 用法为 `UiCard`，需要其他材质时显式选择三种 Glass preset |
 | Floating Surface | `UiControlSurface` 保留为通用 grouped-control primitive；导航型悬浮外壳由 `UiDock` 专门复用该能力 | grouped-control chrome、primary/trailing 分组、divider、Surface contract、`hoverMode` / `edgeMode` 行为策略 | 无 Core 缺口；固定定位与业务容器约束不进入 Core | B. Core Component | 已进入 Core：`UiControlSurface` / `UiDock` |
 | Skeleton | `BaseSkeleton` 已由 `UiSkeleton` 替换；复杂 heatmap 与 inline text skeleton 继续用共享 `skeleton-surface` token facade | `UiSkeleton` geometry/effects、CSS skeleton facade、reduced-motion | 无 Core 缺口；复杂业务骨架只需 Consumer 布局 | A. Core Primitive（已有） | 否；不新增组件 |
 | Immersive Scrollbar | 已迁移到 `UiScrollbar`，Consumer 仅传入 route/layout `refreshKey` | document overlay、auto-hide、drag、track jump、native scrollbar visibility 与 token contract | 无 Core 缺口 | B. Core Component | 已进入 Core：`UiScrollbar` |
@@ -51,3 +51,13 @@ MDX 注册、Shiki、长代码降级、内容标题和正文排版仍属于产�
 | 4 | React 补齐 UiCard surface adapter | DocCard 保持产品层；其站内转场、外链目标、内容布局继续由 Doc 管理，并继续复用 UiSurface | React 通用原生/路由根节点与 Surface 测试 | 已完成 |
 
 Fumadocs 侧栏、TOC、搜索弹层和结果列表继续由框架适配及搜索功能层承担；任务列表等带业务状态的按钮也继续由对应产品功能拥有。Doc 的代码渲染、表格、引用、折叠、导航卡片和文章内容不批量迁移或改写。React/Vue 中其他目前未被 Doc 使用的组件差异，仅在出现具体消费场景时再列计划。
+
+## 0.2.0 Consumer Migration
+
+P1 已按 0.2.0 canonical API 对三个直接消费项目完成源码迁移准备：
+
+- Neoverse：标准卡片统一从 `glass-card` 切换到 `glass-elevated`，基础正文 Token 切换到 `body-md`，并把边界检查改为禁止已删除的 `UiGlassSurface` / `glass-card` API。
+- Neoverse-Doc：所有共享卡片材质从 `material-glass-card` 切换到 `material-glass-elevated`，同步修正文档中的三档 Glass 说明。
+- Neoverse-Slides：卡片 Surface 切换到 `glass-elevated`，展示标题切换到 `display-lg` Typography Token，并同步输出校验规则。
+
+本阶段不修改三个项目的 `@neoverse-ui/*` 版本声明，也不执行任何发布或版本落盘。版本依赖统一在正式批准 0.2.0 Release Candidate 后再切换；当前 P1 只负责清除会阻塞 0.2.0 的源码级 Breaking Change。

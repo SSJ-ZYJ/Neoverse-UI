@@ -51,7 +51,10 @@ const copy = moduleCopy.skeleton;
       </div>
     </UiSurface>
   </div>
-  <UiSurface surface="glass-subtle" class="playground-specimen-panel grid gap-2 sm:grid-cols-2">
+  <UiSurface
+    surface="glass-subtle"
+    class="playground-specimen-panel grid self-start gap-2 sm:grid-cols-2"
+  >
     <div class="grid gap-2">
       <h3 class="text-label font-label text-primary">
         {{ localize(copy.controls.pulse, props.locale) }}

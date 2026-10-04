@@ -1,17 +1,9 @@
 @layer components {
-  .ui-loading-indicator,
-  .ui-button-control__spinner {
+  .ui-loading-indicator {
     width: var(--neoverse-space-4);
     height: var(--neoverse-space-4);
     flex: 0 0 auto;
     animation: ui-loading-indicator-spin 1s var(--neoverse-motion-easing-linear) infinite;
-  }
-
-  /* The legacy spinner kept its own public animation name. Preserve its
-     timing and selector behavior while the new indicator uses the shared
-     semantic class above. */
-  .ui-button-control__spinner {
-    animation-name: ui-button-spin;
   }
 
   @keyframes ui-loading-indicator-spin {
@@ -20,15 +12,8 @@
     }
   }
 
-  @keyframes ui-button-spin {
-    to {
-      transform: rotate(360deg);
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .ui-loading-indicator,
-    .ui-button-control__spinner {
+    .ui-loading-indicator {
       animation: none;
     }
   }

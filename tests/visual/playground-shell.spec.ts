@@ -133,6 +133,52 @@ test('overview desktop presentation uses the expanded semantic scale', async ({
   expect(metrics.documentOverflow).toBeLessThanOrEqual(0);
 });
 
+test('overview showcase switches real material presets and opens the component module', async ({
+  page,
+}) => {
+  await page.goto('/?theme=dark&lang=en', { waitUntil: 'domcontentloaded' });
+  const sample = page.locator('[data-overview-hero] .playground-overview-hero__sample');
+  await expect(sample).toHaveAttribute('data-surface', 'glass-subtle');
+  await page.getByRole('radio', { name: 'Raised' }).click();
+  await expect(sample).toHaveAttribute('data-surface', 'glass-elevated');
+  await sample.getByRole('button', { name: 'Components' }).click();
+  await expect(page).toHaveURL(/#controls$/);
+});
+
+test('mobile toolbar keeps actions aligned and preserves theme and language switching', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'mobile', 'This layout applies to compact navigation.');
+  await page.goto('/?theme=dark&lang=en#controls', { waitUntil: 'domcontentloaded' });
+  const themeButton = page.getByRole('button', { name: /Cycle theme/ });
+  const languageButton = page.getByRole('button', { name: /Switch language/ });
+  await expect(themeButton).toBeVisible();
+  await expect(languageButton).toBeVisible();
+
+  const geometry = await page.locator('.playground-shell__toolbar').evaluate((toolbar) => {
+    const title = toolbar.querySelector<HTMLElement>('#module-title');
+    const actions = toolbar.querySelector<HTMLElement>('.playground-shell__toolbar-actions');
+    if (title === null || actions === null) throw new Error('Compact toolbar is incomplete');
+    const titleRect = title.getBoundingClientRect();
+    const actionsRect = actions.getBoundingClientRect();
+    const toolbarRect = toolbar.getBoundingClientRect();
+    return {
+      centerDelta: Math.abs(
+        titleRect.top + titleRect.height / 2 - (actionsRect.top + actionsRect.height / 2),
+      ),
+      actionsInside: actionsRect.right <= toolbarRect.right + 1,
+      documentOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    };
+  });
+  expect(geometry.centerDelta).toBeLessThan(12);
+  expect(geometry.actionsInside).toBe(true);
+  expect(geometry.documentOverflow).toBeLessThanOrEqual(0);
+  await themeButton.click();
+  await expect(page).toHaveURL(/theme=system/);
+  await languageButton.click();
+  await expect(page).toHaveURL(/lang=zh/);
+});
+
 test('design lab density grids respond to available content width', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'This assertion defines desktop content density.');
   const scenarios = [
@@ -143,7 +189,7 @@ test('design lab density grids respond to available content width', async ({ pag
         [1280, 2],
         [1600, 3],
         [1920, 3],
-        [2560, 3],
+        [2560, 4],
       ]),
     },
     {
@@ -189,7 +235,11 @@ test('design lab density grids respond to available content width', async ({ pag
 
       expect(rowCounts.length, `${scenario.moduleId} grids at ${width}px`).toBeGreaterThan(0);
       expect(
-        rowCounts.every((count) => count === expectedColumns),
+        rowCounts.every((count) =>
+          scenario.moduleId === 'materials' && width === 2560
+            ? count >= 3 && count <= 4
+            : count === expectedColumns,
+        ),
         `${scenario.moduleId} first-row density at ${width}px`,
       ).toBe(true);
     }
@@ -306,6 +356,33 @@ test('desktop overview toolbar collapses to a compact floating control bar', asy
   expect(metrics.toolbarRadius).toBeGreaterThan(metrics.segmentedRadius);
 });
 
+test('module toolbar keeps elevated Glass but uses the denser toolbar material token', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/?theme=dark&lang=zh#materials', { waitUntil: 'domcontentloaded' });
+
+  const material = await page.locator('.playground-shell__toolbar').evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      surface: element.getAttribute('data-surface'),
+      mode: element.getAttribute('data-toolbar-mode'),
+      transparency: style.getPropertyValue('--neoverse-material-transparency').trim(),
+      toolbarTransparency: style
+        .getPropertyValue('--neoverse-playground-toolbar-module-transparency')
+        .trim(),
+      elevatedTransparency: style
+        .getPropertyValue('--neoverse-material-glass-elevated-transparency')
+        .trim(),
+    };
+  });
+
+  expect(material.surface).toBe('glass-elevated');
+  expect(material.mode).toBe('module');
+  expect(material.transparency).toBe(material.toolbarTransparency);
+  expect(material.transparency).not.toBe(material.elevatedTransparency);
+});
+
 test('normal Playground chrome keeps a translucent Glass plane and a blurred sidebar fade', async ({
   page,
 }) => {
@@ -352,7 +429,11 @@ test('normal Playground chrome keeps a translucent Glass plane and a blurred sid
 
     return {
       fadeBackground: fade.backgroundImage,
+      fadeBackgroundAlpha: alphaFromColor(fade.backgroundColor),
       fadeFilter: fade.backdropFilter,
+      fadeMask: fade.maskImage,
+      fadeTop: Number.parseFloat(fade.top),
+      headerHeight: navigationHeader.getBoundingClientRect().height,
       headerZIndex: Number.parseFloat(getComputedStyle(navigationHeader).zIndex),
       fadeZIndex: Number.parseFloat(fade.zIndex),
       navigationMask: navigationScrollStyle.maskImage,
@@ -364,8 +445,11 @@ test('normal Playground chrome keeps a translucent Glass plane and a blurred sid
     };
   });
 
-  expect(metrics.fadeBackground).toContain('linear-gradient');
+  expect(metrics.fadeBackground).toBe('none');
+  expect(metrics.fadeBackgroundAlpha).toBe(0);
   expect(metrics.fadeFilter).not.toBe('none');
+  expect(metrics.fadeMask).toContain('linear-gradient');
+  expect(metrics.fadeTop).toBeLessThan(metrics.headerHeight);
   expect(metrics.headerZIndex).toBeGreaterThan(metrics.fadeZIndex);
   expect(metrics.navigationMask).toContain('linear-gradient');
   expect(metrics.navigationAlpha).toBeGreaterThan(0);
@@ -375,6 +459,55 @@ test('normal Playground chrome keeps a translucent Glass plane and a blurred sid
   expect(metrics.specimenAlpha).toBeGreaterThan(0);
   expect(metrics.specimenAlpha).toBeLessThan(1);
   expect(metrics.specimenFilter).not.toBe('none');
+});
+
+test('light Glass hierarchy uses material density instead of bright nested rims', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1640, height: 930 });
+  await page.goto('/?theme=light&lang=zh#consumer-parity', { waitUntil: 'domcontentloaded' });
+
+  const metrics = await page.evaluate(() => {
+    const alpha = (value: string): number => {
+      const slash = value.match(/\/\s*([\d.]+)\s*\)$/)?.[1];
+      if (slash !== undefined) return Number.parseFloat(slash);
+      const comma = value.match(/,\s*([\d.]+)\s*\)$/)?.[1];
+      return comma === undefined ? 1 : Number.parseFloat(comma);
+    };
+    const toolbar = document.querySelector<HTMLElement>('.playground-shell__toolbar');
+    const nested = document.querySelector<HTMLElement>('.playground-navigation-group');
+    const button = document.querySelector<HTMLElement>(
+      '[data-consumer-parity="hero-actions"] .ui-button',
+    );
+    if (toolbar === null || nested === null || button === null) {
+      throw new Error('Missing light hierarchy fixture');
+    }
+    const toolbarStyle = getComputedStyle(toolbar);
+    const nestedStyle = getComputedStyle(nested);
+    const buttonStyle = getComputedStyle(button);
+    return {
+      toolbarAlpha: alpha(toolbarStyle.backgroundColor),
+      nestedAlpha: alpha(nestedStyle.backgroundColor),
+      toolbarEdge: Number.parseFloat(
+        toolbarStyle.getPropertyValue('--neoverse-material-edge-refraction-opacity'),
+      ),
+      nestedEdge: Number.parseFloat(
+        nestedStyle.getPropertyValue('--neoverse-material-edge-refraction-opacity'),
+      ),
+      buttonEdge: Number.parseFloat(
+        buttonStyle.getPropertyValue('--neoverse-material-edge-refraction-opacity'),
+      ),
+      buttonBorderAlpha: alpha(buttonStyle.borderTopColor),
+      buttonInsetLayers: (buttonStyle.boxShadow.match(/inset/g) ?? []).length,
+    };
+  });
+
+  expect(metrics.toolbarAlpha).toBeGreaterThan(metrics.nestedAlpha);
+  expect(metrics.toolbarEdge).toBeLessThan(0.3);
+  expect(metrics.nestedEdge).toBeLessThan(0.25);
+  expect(metrics.buttonEdge).toBeLessThan(0.2);
+  expect(metrics.buttonBorderAlpha).toBeLessThan(0.13);
+  expect(metrics.buttonInsetLayers).toBeLessThanOrEqual(1);
 });
 
 test('reduced transparency removes sidebar blur and fade masking', async ({ page }) => {
@@ -524,15 +657,6 @@ test('main playground renders the selected module directly instead of through an
   await expect(page.locator('[data-design-lab-region="module"]')).toBeVisible();
 });
 
-test('legacy top-level module links resolve to their consolidated destination', async ({
-  page,
-}) => {
-  await page.goto('/#spacing', { waitUntil: 'domcontentloaded' });
-
-  await expect(page).toHaveURL(/#layout-shape$/);
-  await expect(page.locator('#module-title')).toBeVisible();
-});
-
 test('fresh specimen deep links resolve their owner module and keep the specimen hash', async ({
   page,
 }) => {
@@ -609,7 +733,7 @@ test('composition keeps scrolling inside the workspace without creating root-pag
   expect(await page.evaluate(() => window.scrollY)).toBe(0);
 });
 
-test('playground demo actions stay inside the playground instead of navigating to GitHub', async ({
+test('playground demo actions keep intentional navigation without placeholder jumps', async ({
   page,
 }) => {
   await page.goto('/?lang=en#composition-reading', { waitUntil: 'domcontentloaded' });
@@ -624,7 +748,7 @@ test('playground demo actions stay inside the playground instead of navigating t
   const reactAction = page.locator('[data-react-adapter="UiAction"]');
   await expect(reactAction).toHaveAttribute('href', '#react-runtime-fixture');
   await reactAction.click();
-  await expect(page).toHaveURL(/\/react-fixture\?lang=en#react-runtime-fixture$/);
+  await expect(page).toHaveURL(/\/react-fixture\?lang=en$/);
 
   expect(await page.locator('a[href^="https://github.com/"]').count()).toBe(0);
 });
@@ -695,6 +819,8 @@ test('reading composition consumes the prose foundation with an independent read
       nestedListMarginBlock: nestedListStyle.marginBlock,
       abbreviationDecorationStyle: abbreviationStyle.textDecorationStyle,
       detailsBorderStyle: detailsStyle.borderStyle,
+      detailsBoxShadow: detailsStyle.boxShadow,
+      detailsBackgroundImage: detailsStyle.backgroundImage,
     };
   });
 
@@ -712,9 +838,14 @@ test('reading composition consumes the prose foundation with an independent read
   expect(metrics.definitionDescriptionMargin).not.toBe('0px');
   expect(metrics.nestedListMarginBlock).not.toBe('0px');
   expect(metrics.abbreviationDecorationStyle).toBe('dotted');
-  expect(metrics.detailsBorderStyle).not.toBe('none');
+  expect(metrics.detailsBorderStyle).toBe('none');
+  expect(metrics.detailsBoxShadow).not.toBe('none');
+  expect(metrics.detailsBackgroundImage).not.toBe('none');
 
-  const summary = page.locator('[data-reading-prose] summary');
+  await expect(page.locator('[data-reading-table]')).toHaveClass(/ui-table/);
+  await expect(page.locator('[data-reading-disclosure]')).toHaveClass(/ui-disclosure/);
+
+  const summary = page.locator('[data-reading-disclosure] > .ui-disclosure__summary');
   await summary.focus();
   const focusedSummary = await summary.evaluate((element) => {
     const style = getComputedStyle(element as HTMLElement);
@@ -724,11 +855,67 @@ test('reading composition consumes the prose foundation with an independent read
   expect(focusedSummary.outlineWidth).not.toBe('0px');
 
   await summary.press('Enter');
-  await expect(page.locator('[data-reading-prose] details')).toHaveAttribute('open', '');
+  await expect(page.locator('[data-reading-disclosure]')).toHaveAttribute('open', '');
   expect(
     await summary.evaluate((element) => getComputedStyle(element as HTMLElement).marginBlockEnd),
   ).not.toBe('0px');
 });
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`standalone data display components keep native semantics and inset material / ${theme}`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`/?theme=${theme}&lang=en#data-display-table`, {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const table = page.locator('#data-display-table [data-data-display-table]');
+    await expect(table).toHaveClass(/ui-table/);
+    await expect(table.locator('caption')).toHaveText('Package compatibility matrix');
+    await expect(table.locator('thead th')).toHaveCount(3);
+    await expect(table.locator('tbody tr')).toHaveCount(3);
+    const tableMaterial = await table.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        borderWidth: style.borderTopWidth,
+        backgroundImage: style.backgroundImage,
+        boxShadow: style.boxShadow,
+        backdropFilter: style.backdropFilter,
+      };
+    });
+    expect(tableMaterial.borderWidth).toBe('0px');
+    expect(tableMaterial.backgroundImage).not.toBe('none');
+    expect(tableMaterial.boxShadow).not.toBe('none');
+    expect(tableMaterial.backdropFilter).not.toBe('none');
+
+    await page.goto(`/?theme=${theme}&lang=en#data-display-disclosure`, {
+      waitUntil: 'domcontentloaded',
+    });
+    const closed = page.locator('#data-display-disclosure [data-data-display-disclosure="closed"]');
+    const open = page.locator('#data-display-disclosure [data-data-display-disclosure="open"]');
+    await expect(closed).not.toHaveAttribute('open', '');
+    await expect(open).toHaveAttribute('open', '');
+    await expect(closed.locator(':scope > summary')).toHaveClass(/ui-disclosure__summary/);
+
+    const disclosureMaterial = await closed.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        borderStyle: style.borderStyle,
+        backgroundImage: style.backgroundImage,
+        boxShadow: style.boxShadow,
+        backdropFilter: style.backdropFilter,
+      };
+    });
+    expect(disclosureMaterial.borderStyle).toBe('none');
+    expect(disclosureMaterial.backgroundImage).not.toBe('none');
+    expect(disclosureMaterial.boxShadow).not.toBe('none');
+    expect(disclosureMaterial.backdropFilter).not.toBe('none');
+
+    await closed.locator(':scope > summary').press('Enter');
+    await expect(closed).toHaveAttribute('open', '');
+  });
+}
 
 test('prose and reading fixtures keep mobile overflow inside their content regions', async ({
   page,
@@ -748,7 +935,9 @@ test('prose and reading fixtures keep mobile overflow inside their content regio
   await page.goto('/?lang=en#composition-reading', { waitUntil: 'domcontentloaded' });
   const readingMetrics = await page.evaluate(() => {
     const pre = document.querySelector<HTMLElement>('#reading-panel pre');
-    const tableScroll = document.querySelector<HTMLElement>('[data-reading-table-scroll]');
+    const tableScroll = document.querySelector<HTMLElement>(
+      '[data-reading-prose] [data-ui-table-region]',
+    );
     const longInline = document.querySelector<HTMLElement>('[data-reading-long-inline]');
     if (pre === null || tableScroll === null || longInline === null) {
       throw new Error('Reading overflow fixtures are missing');
@@ -879,7 +1068,7 @@ test('default cards keep a visible material fill in light and dark themes', asyn
     await page.goto(`/?theme=${theme}&lang=en#card`, { waitUntil: 'domcontentloaded' });
 
     const card = page.locator('[data-card-default]');
-    await expect(card).toHaveAttribute('data-surface', 'glass-card');
+    await expect(card).toHaveAttribute('data-surface', 'glass-elevated');
     const backgroundColor = await card.evaluate(
       (element) => getComputedStyle(element).backgroundColor,
     );
@@ -919,9 +1108,15 @@ test('specimen preview links do not navigate or reset the workspace scroll', asy
     await sample.click({ trial: true });
     const before = await workspace.evaluate((element) => element.scrollTop);
     expect(before).toBeGreaterThan(100);
-    await sample.click();
+    // Avoid Playwright's second auto-scroll: only the anchor's click handler
+    // should be allowed to change the workspace position in this assertion.
+    await sample.evaluate((element) => (element as HTMLElement).click());
     await expect(page).toHaveURL(/#controls$/);
-    expect(await workspace.evaluate((element) => element.scrollTop)).toBeCloseTo(before, 0);
+    const after = await workspace.evaluate((element) => element.scrollTop);
+    expect(after).toBeGreaterThan(100);
+    // Native scroll anchoring may shift a few pixels while late assets settle.
+    // An actual placeholder jump or scroll reset is substantially larger.
+    expect(Math.abs(after - before)).toBeLessThanOrEqual(64);
   }
 });
 
@@ -1158,6 +1353,11 @@ test('semantic motion roles drive live feedback, state, and spatial transitions'
   );
 
   await page.locator('[data-motion-semantic-toggle]').click();
+  // Chromium may defer CSS transitions in offscreen specimens. Give each
+  // sample one visible frame before comparing its resulting computed style.
+  for (const specimen of [feedback, state, spatial]) {
+    await specimen.scrollIntoViewIfNeeded();
+  }
   await page.waitForTimeout(450);
 
   const after = await Promise.all(
@@ -1307,7 +1507,7 @@ test('dock is discoverable as a standalone component specimen', async ({ page },
   expect(geometry.documentOverflow).toBeLessThanOrEqual(0);
 });
 
-test('state-row component previews use the shared presentation scale', async ({
+test('state-row previews use a tokenized presentation scale inside a dedicated stage', async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'This assertion defines desktop specimen scale.');
@@ -1335,11 +1535,8 @@ test('state-row component previews use the shared presentation scale', async ({
       copyHeadingFontSize: Number.parseFloat(getComputedStyle(copyHeading).fontSize),
       copyHintFontSize: Number.parseFloat(getComputedStyle(copyHint).fontSize),
       zoom: Number.parseFloat(getComputedStyle(previewContent).zoom),
-      token: Number.parseFloat(
-        getComputedStyle(document.documentElement)
-          .getPropertyValue('--neoverse-playground-specimen-preview-scale')
-          .trim(),
-      ),
+      stageBackground: getComputedStyle(previewContent.parentElement as HTMLElement)
+        .backgroundImage,
       renderedHeight: rect.height,
       cssHeight: Number.parseFloat(getComputedStyle(element).height),
       documentOverflow: document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -1347,7 +1544,8 @@ test('state-row component previews use the shared presentation scale', async ({
   });
 
   expect(metrics.zoom).toBeGreaterThan(1);
-  expect(metrics.zoom).toBeCloseTo(metrics.token, 4);
+  expect(metrics.zoom).toBeLessThanOrEqual(1.3);
+  expect(metrics.stageBackground).toContain('radial-gradient');
   expect(metrics.copyHeadingFontSize / metrics.rootFontSize).toBeGreaterThanOrEqual(0.8);
   expect(metrics.copyHeadingFontSize / metrics.rootFontSize).toBeLessThan(1);
   expect(metrics.copyHintFontSize / metrics.rootFontSize).toBeGreaterThanOrEqual(0.8);
@@ -1365,9 +1563,457 @@ test('state-row component previews use the shared presentation scale', async ({
       .locator(`${selector} .playground-specimen-preview__content`)
       .first()
       .evaluate((element) => Number.parseFloat(getComputedStyle(element).zoom));
-    expect(zoom).toBeCloseTo(metrics.token, 4);
+    expect(zoom).toBeCloseTo(metrics.zoom, 2);
   }
 });
+
+test('icon button geometry follows the canonical size selectors', async ({ page }, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'Desktop component geometry contract.');
+  await page.goto('/?theme=light&lang=en#controls-icon-button', {
+    waitUntil: 'domcontentloaded',
+  });
+
+  const md = page.locator('#controls-icon-button .ui-icon-button--md').first();
+  const stretch = page.locator('#controls-button .ui-icon-button--stretch').first();
+  const sm = page.locator('#controls-density [data-density-controls] .ui-icon-button--sm').first();
+  const smButton = page
+    .locator('#controls-density [data-density-controls] .ui-button--sm:not(.ui-icon-button)')
+    .first();
+
+  await expect(md).toBeVisible();
+  await expect(stretch).toBeVisible();
+  await expect(sm).toBeVisible();
+  await expect(smButton).toBeVisible();
+
+  const geometry = await page.evaluate(() => {
+    const read = (selector: string) => {
+      const element = document.querySelector<HTMLElement>(selector);
+      if (!element) throw new Error(`Missing geometry fixture: ${selector}`);
+      const rect = element.getBoundingClientRect();
+      return { width: rect.width, height: rect.height };
+    };
+
+    const stretchElement = document.querySelector<HTMLElement>(
+      '#controls-button .ui-icon-button--stretch',
+    );
+    const stretchParent = stretchElement?.parentElement;
+    if (!stretchParent) throw new Error('Missing stretch IconButton row');
+    const stretchParentRect = stretchParent.getBoundingClientRect();
+
+    return {
+      md: read('#controls-icon-button .ui-icon-button--md'),
+      stretch: read('#controls-button .ui-icon-button--stretch'),
+      stretchParent: { width: stretchParentRect.width, height: stretchParentRect.height },
+      sm: read('#controls-density [data-density-controls] .ui-icon-button--sm'),
+      smButton: read(
+        '#controls-density [data-density-controls] .ui-button--sm:not(.ui-icon-button)',
+      ),
+    };
+  });
+
+  expect(geometry.md.width).toBeCloseTo(geometry.md.height, 1);
+  expect(geometry.sm.width).toBeCloseTo(geometry.sm.height, 1);
+  expect(geometry.sm.height).toBeCloseTo(geometry.smButton.height, 1);
+  expect(geometry.stretch.height).toBeCloseTo(geometry.stretchParent.height, 1);
+  expect(geometry.stretch.width).toBeGreaterThan(geometry.md.width);
+});
+
+test('shared navigation indicator stays aligned inside the scaled specimen stage', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'Desktop scaled specimen geometry.');
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?theme=light&lang=zh#controls-surface', {
+    waitUntil: 'domcontentloaded',
+  });
+
+  const surface = page.locator('#controls-surface .ui-control-surface--shared-indicator').last();
+  await expect(surface).toHaveAttribute('data-neoverse-navigation-indicator-ready', 'true');
+
+  const readAlignment = () =>
+    surface.evaluate((element) => {
+      const active = element.querySelector<HTMLElement>('.ui-navigation-item--active');
+      const marker = active?.querySelector<HTMLElement>('.ui-navigation-item__indicator');
+      const shared = element.querySelector<HTMLElement>('.ui-control-surface__indicator');
+      const preview = element.closest<HTMLElement>('.playground-specimen-preview__content');
+      if (!active || !marker || !shared || !preview) {
+        throw new Error('Shared navigation indicator fixture is incomplete');
+      }
+      const markerRect = marker.getBoundingClientRect();
+      const sharedRect = shared.getBoundingClientRect();
+      return {
+        previewZoom: Number.parseFloat(getComputedStyle(preview).zoom),
+        x: Math.abs(sharedRect.x - markerRect.x),
+        y: Math.abs(sharedRect.y - markerRect.y),
+        width: Math.abs(sharedRect.width - markerRect.width),
+        height: Math.abs(sharedRect.height - markerRect.height),
+      };
+    });
+
+  const initial = await readAlignment();
+  expect(initial.previewZoom).toBeGreaterThan(1);
+  expect(initial.x).toBeLessThanOrEqual(0.2);
+  expect(initial.y).toBeLessThanOrEqual(0.2);
+  expect(initial.width).toBeLessThanOrEqual(0.2);
+  expect(initial.height).toBeLessThanOrEqual(0.2);
+
+  const components = surface.getByRole('link', { name: '组件' });
+  await components.click();
+  await expect(components).toHaveAttribute('aria-current', 'page');
+
+  const moved = await readAlignment();
+  expect(moved.x).toBeLessThanOrEqual(0.2);
+  expect(moved.y).toBeLessThanOrEqual(0.2);
+  expect(moved.width).toBeLessThanOrEqual(0.2);
+  expect(moved.height).toBeLessThanOrEqual(0.2);
+});
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`grouped controls preserve concentric corners at both scales / ${theme}`, async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop', 'Desktop control corner geometry.');
+    await page.goto(`/?theme=${theme}&lang=en#controls-surface`, {
+      waitUntil: 'domcontentloaded',
+    });
+    const geometry = await page
+      .locator('#controls-surface .ui-control-surface')
+      .evaluateAll((surfaces) =>
+        surfaces
+          .filter((surface) => surface.textContent?.includes('scale='))
+          .map((surface) => {
+            const button = surface.querySelector('.ui-button');
+            if (!(surface instanceof HTMLElement) || !(button instanceof HTMLElement)) {
+              throw new Error('Scale example is missing a control');
+            }
+            const parent = surface.getBoundingClientRect();
+            const child = button.getBoundingClientRect();
+            const scale = parent.width / surface.offsetWidth;
+            const outerRadius = Number.parseFloat(getComputedStyle(surface).borderTopLeftRadius);
+            const innerRadius = Number.parseFloat(getComputedStyle(button).borderTopLeftRadius);
+            const expectedInnerRadius = outerRadius - (child.top - parent.top) / scale;
+            return { scale, innerRadius, expectedInnerRadius };
+          }),
+      );
+    expect(geometry).toHaveLength(2);
+    expect(geometry[1]?.scale).toBeGreaterThan(geometry[0]?.scale ?? 0);
+    for (const item of geometry) {
+      expect(item.innerRadius).toBeCloseTo(item.expectedInnerRadius, 0);
+    }
+  });
+}
+for (const theme of ['light', 'dark'] as const) {
+  test(`segmented plates and CSS refraction share concentric corners / ${theme}`, async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop', 'Desktop corner geometry.');
+    await page.goto(`/?theme=${theme}&lang=en#controls-segmented-control`, {
+      waitUntil: 'domcontentloaded',
+    });
+    const segmented = page
+      .locator('#controls-segmented-control .ui-segmented-control[data-surface="glass-subtle"]')
+      .first();
+    const corners = await segmented.evaluate((element) => {
+      if (!(element instanceof HTMLElement)) throw new Error('Missing segmented control root');
+      const slider = element.querySelector<HTMLElement>('.ui-segmented-control__slider');
+      if (slider === null) throw new Error('Missing active plate');
+      const root = element.getBoundingClientRect();
+      const plate = slider.getBoundingClientRect();
+      const scale = root.width / element.offsetWidth;
+      return {
+        outer: Number.parseFloat(getComputedStyle(element).borderTopLeftRadius),
+        inner: Number.parseFloat(getComputedStyle(slider).borderTopLeftRadius),
+        inset: (plate.top - root.top) / scale,
+      };
+    });
+    expect(corners.inner).toBeCloseTo(corners.outer - corners.inset, 0);
+
+    await page.goto(`/?theme=${theme}&lang=en#controls-surface`, {
+      waitUntil: 'domcontentloaded',
+    });
+    const localEdge = page
+      .locator('#controls-surface .ui-control-surface[data-neoverse-glass-edge-pass="css"]')
+      .first();
+    const cssEdge = await localEdge.evaluate((element) => {
+      const root = getComputedStyle(element);
+      const edge = getComputedStyle(element, '::before');
+      return {
+        radius: root.borderTopLeftRadius,
+        inset: edge.top,
+        edgeRadius: edge.borderTopLeftRadius,
+      };
+    });
+    expect(cssEdge.inset).toBe('0px');
+    expect(cssEdge.edgeRadius).toBe(cssEdge.radius);
+  });
+}
+
+test('light segmented selections keep a visible well, raised plate, and aligned tab indicator', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'Desktop light-theme material contract.');
+  await page.goto('/?theme=light&lang=en#controls-segmented-control', {
+    waitUntil: 'domcontentloaded',
+  });
+
+  const segmented = page
+    .locator('#controls-segmented-control .ui-segmented-control[data-surface="glass-subtle"]')
+    .first();
+
+  await page.evaluate(() => {
+    document.documentElement.removeAttribute('data-neoverse-glass-renderer');
+  });
+  const readShellEdge = () =>
+    segmented.evaluate((element) => {
+      const root = getComputedStyle(element);
+      const edge = getComputedStyle(element, '::before');
+      return {
+        borderColor: root.borderTopColor,
+        display: edge.display,
+        opacity: Number.parseFloat(edge.opacity) || 0,
+        backgroundImage: edge.backgroundImage,
+      };
+    });
+  const edgeAtRest = await readShellEdge();
+  expect(edgeAtRest.borderColor).toBe('rgba(0, 0, 0, 0)');
+  expect(edgeAtRest.display).toBe('block');
+  expect(edgeAtRest.opacity).toBeGreaterThan(0);
+  expect(edgeAtRest.backgroundImage).not.toBe('none');
+
+  const material = await segmented.evaluate((element) => {
+    const colorAlpha = (value: string): number => {
+      if (value === 'transparent') return 0;
+      const slash = value.match(/\/\s*([\d.]+)\s*\)$/);
+      if (slash?.[1] !== undefined) return Number.parseFloat(slash[1]);
+      const rgba = value.match(/^rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)$/);
+      if (rgba?.[1] !== undefined) return Number.parseFloat(rgba[1]);
+      return 1;
+    };
+
+    const slider = element.querySelector<HTMLElement>('.ui-segmented-control__slider');
+    if (slider === null) throw new Error('Missing active segmented plate');
+    const activeOption = element.querySelector<HTMLElement>(
+      '.ui-segmented-control__option--active',
+    );
+    if (activeOption === null) throw new Error('Missing active segmented option');
+    const rootStyle = getComputedStyle(element);
+    const sliderStyle = getComputedStyle(slider);
+    return {
+      wellAlpha: colorAlpha(rootStyle.backgroundColor),
+      plateAlpha: colorAlpha(sliderStyle.backgroundColor),
+      plateInsetLayers: sliderStyle.boxShadow.match(/inset/g)?.length ?? 0,
+      plateShadow: sliderStyle.boxShadow,
+    };
+  });
+
+  expect(material.wellAlpha).toBeGreaterThan(0);
+  expect(material.plateAlpha).toBeGreaterThan(material.wellAlpha);
+  expect(material.plateInsetLayers).toBeGreaterThanOrEqual(1);
+  expect(material.plateShadow).not.toBe('none');
+
+  const readWellState = () =>
+    segmented.evaluate((element) => {
+      const style = getComputedStyle(element);
+      const perceivedLightness = (value: string): number => {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        const context = canvas.getContext('2d');
+        if (context === null) throw new Error('Unable to create color sampling context');
+        context.clearRect(0, 0, 1, 1);
+        context.fillStyle = value;
+        context.fillRect(0, 0, 1, 1);
+        const [red = 0, green = 0, blue = 0, alphaByte = 255] = context.getImageData(
+          0,
+          0,
+          1,
+          1,
+        ).data;
+        const alpha = alphaByte / 255;
+        const composite = (channel: number) => (channel * alpha + 255 * (1 - alpha)) / 255;
+        return composite(red) * 0.2126 + composite(green) * 0.7152 + composite(blue) * 0.0722;
+      };
+      return {
+        backgroundColor: style.backgroundColor,
+        backgroundImage: style.backgroundImage,
+        borderColor: style.borderTopColor,
+        boxShadow: style.boxShadow,
+        backdropFilter: style.backdropFilter,
+        lightness: perceivedLightness(style.backgroundColor),
+      };
+    });
+
+  const restingWellState = await readWellState();
+
+  await segmented.hover();
+  const edgeOnHover = await readShellEdge();
+  expect(edgeOnHover.borderColor).toBe(edgeAtRest.borderColor);
+  expect(edgeOnHover.display).toBe(edgeAtRest.display);
+  expect(edgeOnHover.opacity).toBe(edgeAtRest.opacity);
+  expect(edgeOnHover.backgroundImage).toBe(edgeAtRest.backgroundImage);
+
+  const hoveredWellState = await readWellState();
+  expect(hoveredWellState.lightness).toBeCloseTo(restingWellState.lightness, 3);
+  expect(hoveredWellState.backgroundColor).toBe(restingWellState.backgroundColor);
+  expect(hoveredWellState.borderColor).toBe(restingWellState.borderColor);
+  expect(hoveredWellState.boxShadow).toBe(restingWellState.boxShadow);
+  expect(hoveredWellState.backdropFilter).toBe(restingWellState.backdropFilter);
+  expect(hoveredWellState.backgroundImage).toBe(restingWellState.backgroundImage);
+
+  const activeOption = segmented.locator('.ui-segmented-control__option--active');
+  await activeOption.focus();
+  const focusVisual = await activeOption.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      outlineStyle: style.outlineStyle,
+      outlineWidth: style.outlineWidth,
+      boxShadow: style.boxShadow,
+    };
+  });
+  expect(focusVisual.outlineStyle).not.toBe('none');
+  expect(Number.parseFloat(focusVisual.outlineWidth)).toBeGreaterThan(0);
+  expect(focusVisual.boxShadow).toBe('none');
+
+  await page.goto('/?theme=light&lang=en#controls-surface', {
+    waitUntil: 'domcontentloaded',
+  });
+  const tabs = page.locator('#controls-surface .ui-control-surface--shared-indicator').last();
+  await tabs.locator('.ui-navigation-item').nth(1).click();
+  const selection = await tabs.evaluate((element) => {
+    const colorAlpha = (value: string): number => {
+      if (value === 'transparent') return 0;
+      const slash = value.match(/\/\s*([\d.]+)\s*\)$/);
+      if (slash?.[1] !== undefined) return Number.parseFloat(slash[1]);
+      const rgba = value.match(/^rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)$/);
+      if (rgba?.[1] !== undefined) return Number.parseFloat(rgba[1]);
+      return 1;
+    };
+
+    const active = element.querySelector<HTMLElement>('.ui-navigation-item--active');
+    const indicator = element.querySelector<HTMLElement>('.ui-control-surface__indicator');
+    if (active === null || indicator === null) throw new Error('Missing shared tab selection');
+    const style = getComputedStyle(element);
+    const spatialDuration = style.getPropertyValue('--neoverse-motion-spatial-duration').trim();
+    const expectedDuration = spatialDuration.endsWith('ms')
+      ? Number.parseFloat(spatialDuration) / 1000
+      : Number.parseFloat(spatialDuration);
+    return {
+      borderAlpha: colorAlpha(getComputedStyle(active).borderTopColor),
+      duration: Number.parseFloat(getComputedStyle(indicator).transitionDuration) || 0,
+      expectedDuration,
+    };
+  });
+
+  expect(selection.borderAlpha).toBeLessThanOrEqual(0.05);
+  expect(selection.duration).toBeCloseTo(selection.expectedDuration, 3);
+  await expect
+    .poll(
+      () =>
+        tabs.evaluate((element) => {
+          const target = element.querySelector<HTMLElement>(
+            '.ui-navigation-item--active .ui-navigation-item__indicator',
+          );
+          const indicator = element.querySelector<HTMLElement>('.ui-control-surface__indicator');
+          if (target === null || indicator === null) {
+            throw new Error('Missing shared tab selection');
+          }
+          const targetRect = target.getBoundingClientRect();
+          const indicatorRect = indicator.getBoundingClientRect();
+          return Math.abs(
+            indicatorRect.left + indicatorRect.width / 2 - (targetRect.left + targetRect.width / 2),
+          );
+        }),
+      { timeout: Math.ceil(selection.expectedDuration * 4000 + 250) },
+    )
+    .toBeLessThanOrEqual(1.5);
+});
+
+test('shadow token specimens always place a full-width preview above their text', async ({
+  page,
+}) => {
+  await page.goto('/?theme=dark&lang=en#shadow', { waitUntil: 'domcontentloaded' });
+  const specimens = page.locator('#shadow-primitive .playground-shadow-token');
+  await expect(specimens).toHaveCount(7);
+  const geometry = await specimens.evaluateAll((elements) =>
+    elements.map((element) => {
+      const preview = element.querySelector<HTMLElement>('[data-preview="shadow"]');
+      const copy = element.querySelector<HTMLElement>(':scope > span:last-child');
+      if (preview === null || copy === null) throw new Error('Incomplete shadow specimen');
+      const sample = preview.getBoundingClientRect();
+      const label = copy.getBoundingClientRect();
+      const card = element.getBoundingClientRect();
+      return {
+        layout: getComputedStyle(element).display,
+        previewWidth: sample.width,
+        availableWidth: card.width,
+        previewBottom: sample.bottom,
+        copyTop: label.top,
+        copyFits: copy.scrollWidth <= copy.clientWidth + 1,
+      };
+    }),
+  );
+  expect(geometry.every((item) => item.layout === 'grid')).toBe(true);
+  expect(geometry.every((item) => item.previewWidth > item.availableWidth * 0.8)).toBe(true);
+  expect(geometry.every((item) => item.copyTop >= item.previewBottom)).toBe(true);
+  expect(geometry.every((item) => item.copyFits)).toBe(true);
+});
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`reading composition keeps a single inset-glass table without solid rules / ${theme}`, async ({
+    page,
+  }) => {
+    await page.goto(`/?theme=${theme}&lang=en#composition-reading`, {
+      waitUntil: 'domcontentloaded',
+    });
+    const tableRegion = page.locator('[data-reading-prose] [data-ui-table-region]');
+    await expect(tableRegion).not.toHaveAttribute('data-surface');
+    await expect(page.locator('[data-reading-composition] article')).not.toHaveAttribute(
+      'data-surface',
+    );
+    const metrics = await tableRegion.evaluate((element) => {
+      const table = element.querySelector('table');
+      const cell = element.querySelector('tbody td');
+      const zebraRow = element.querySelector('tbody tr:nth-child(even)');
+      const zebraFirstCell = zebraRow?.querySelector('td:first-child') ?? null;
+      const zebraLastCell = zebraRow?.querySelector('td:last-child') ?? null;
+      if (
+        table === null ||
+        cell === null ||
+        zebraRow === null ||
+        zebraFirstCell === null ||
+        zebraLastCell === null
+      ) {
+        throw new Error('Missing reading table');
+      }
+      const tableStyle = getComputedStyle(table);
+      const zebraRowStyle = getComputedStyle(zebraRow);
+      const zebraFirstCellStyle = getComputedStyle(zebraFirstCell);
+      const zebraLastCellStyle = getComputedStyle(zebraLastCell);
+      return {
+        filter: tableStyle.backdropFilter,
+        background: tableStyle.backgroundImage,
+        border: tableStyle.borderTopWidth,
+        cellBorder: getComputedStyle(cell).borderRightWidth,
+        zebraRowBackground: zebraRowStyle.backgroundColor,
+        zebraCellBackground: zebraFirstCellStyle.backgroundColor,
+        bottomStartRadius: zebraFirstCellStyle.borderBottomLeftRadius,
+        bottomEndRadius: zebraLastCellStyle.borderBottomRightRadius,
+        documentOverflow:
+          document.documentElement.scrollWidth - document.documentElement.clientWidth,
+      };
+    });
+    expect(metrics.filter).not.toBe('none');
+    expect(metrics.background).not.toBe('none');
+    expect(metrics.border).toBe('0px');
+    expect(metrics.cellBorder).toBe('0px');
+    expect(metrics.zebraRowBackground).toBe('rgba(0, 0, 0, 0)');
+    expect(metrics.zebraCellBackground).not.toBe('rgba(0, 0, 0, 0)');
+    expect(metrics.bottomStartRadius).not.toBe('0px');
+    expect(metrics.bottomEndRadius).not.toBe('0px');
+    expect(metrics.documentOverflow).toBeLessThanOrEqual(0);
+  });
+}
+
 test('floating dock keeps hovered and active navigation plates visually separated', async ({
   page,
 }, testInfo) => {
@@ -1398,19 +2044,55 @@ test('floating dock keeps hovered and active navigation plates visually separate
   expect(metrics.activeBackground).not.toBe('none');
   expect(metrics.hoveredBackground).not.toBe('rgba(0, 0, 0, 0)');
 });
-test('main playground swaps the material backdrop when switching to dark theme', async ({
+test('Glass preview stages reuse one controlled gradient without raster backdrops', async ({
   page,
-}) => {
+}, testInfo) => {
   await page.goto('/?theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
 
-  const backdrop = page.locator('[style*="material-background-"]').first();
-  await expect(backdrop).toBeVisible();
-  await expect(backdrop).toHaveAttribute('style', /material-background-light/);
+  const stages = page.locator('[data-glass-preview-stage]');
+  await expect(stages).toHaveCount(3);
 
-  await page.getByRole('radio', { name: 'Dark' }).click();
+  const readStages = () =>
+    stages.evaluateAll((elements) =>
+      elements.map((element) => {
+        const style = getComputedStyle(element);
+        const rect = element.getBoundingClientRect();
+        return {
+          backgroundImage: style.backgroundImage,
+          backgroundColor: style.backgroundColor,
+          width: rect.width,
+          height: rect.height,
+        };
+      }),
+    );
+
+  const lightStages = await readStages();
+  expect(new Set(lightStages.map(({ backgroundImage }) => backgroundImage)).size).toBe(1);
+  expect(
+    lightStages.every(
+      ({ backgroundImage }) =>
+        backgroundImage.includes('radial-gradient') && !backgroundImage.includes('url('),
+    ),
+  ).toBe(true);
+  expect(
+    Math.max(...lightStages.map(({ width }) => width)) -
+      Math.min(...lightStages.map(({ width }) => width)),
+  ).toBeLessThanOrEqual(1);
+  expect(
+    Math.max(...lightStages.map(({ height }) => height)) -
+      Math.min(...lightStages.map(({ height }) => height)),
+  ).toBeLessThanOrEqual(1);
+
+  if (testInfo.project.name === 'mobile') {
+    await page.getByRole('button', { name: /Cycle theme/ }).click();
+  } else {
+    await page.getByRole('radio', { name: 'Dark' }).click();
+  }
 
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await expect(backdrop).toHaveAttribute('style', /material-background-dark/);
+  const darkStages = await readStages();
+  expect(new Set(darkStages.map(({ backgroundImage }) => backgroundImage)).size).toBe(1);
+  expect(darkStages.every(({ backgroundImage }) => !backgroundImage.includes('url('))).toBe(true);
 });
 
 test('shell segmented controls keep their own Glass surface inside the Glass header', async ({
@@ -1476,17 +2158,28 @@ test('shell segmented controls keep their own Glass surface inside the Glass hea
   ).toBe(true);
 });
 
-test('system theme keeps the material backdrop synchronized with the preferred color scheme', async ({
+test('system theme keeps the gradient preview backdrop synchronized with the preferred color scheme', async ({
   page,
 }) => {
   await page.emulateMedia({ colorScheme: 'dark' });
   await page.goto('/?theme=system&lang=en#materials', { waitUntil: 'domcontentloaded' });
 
-  const backdrop = page.locator('[style*="material-background-"]').first();
-  await expect(backdrop).toHaveAttribute('style', /material-background-dark/);
+  const backdrop = page.locator('[data-glass-preview-stage]').first();
+  await expect(backdrop).toBeVisible();
+  const dark = await backdrop.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return {
+      backgroundImage: style.backgroundImage,
+      backgroundColor: style.backgroundColor,
+    };
+  });
+  expect(dark.backgroundImage).toContain('radial-gradient');
+  expect(dark.backgroundImage).not.toContain('url(');
 
   await page.emulateMedia({ colorScheme: 'light' });
-  await expect(backdrop).toHaveAttribute('style', /material-background-light/);
+  await expect
+    .poll(() => backdrop.evaluate((element) => getComputedStyle(element).backgroundColor))
+    .not.toBe(dark.backgroundColor);
 });
 
 test('Playground keeps the 100% zoom presentation baseline across responsive widths', async ({

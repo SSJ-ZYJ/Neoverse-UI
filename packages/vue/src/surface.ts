@@ -1,4 +1,4 @@
-import type { GlassSurfaceVariant, SurfacePreset } from './types';
+import type { SurfacePreset } from './types';
 
 export const surfaceClasses: Record<SurfacePreset, string> = {
   none: '',
@@ -9,16 +9,11 @@ export const surfaceClasses: Record<SurfacePreset, string> = {
   chrome: 'ui-surface-chrome',
   'glass-subtle': 'material-glass-subtle',
   'glass-elevated': 'material-glass-elevated',
-  'glass-card': 'material-glass-card',
   'glass-immersive': 'material-glass-immersive',
 };
 
 export function getSurfaceClass(surface: SurfacePreset = 'none'): string {
   return surfaceClasses[surface];
-}
-
-export function glassVariantToSurface(variant: GlassSurfaceVariant): SurfacePreset {
-  return `glass-${variant}` as SurfacePreset;
 }
 
 export function isGlassSurface(surface: SurfacePreset): boolean {

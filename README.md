@@ -23,7 +23,7 @@ Bun is the package manager, workspace manager, and script runner for this reposi
 | `@neoverse-ui/react` | Consumer Validation | React adapters for shared actions and surfaces |
 | `apps/playground` | Consumer Validation | Vue-driven Design Lab and visual reference surface |
 
-The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, and `UiTooltipSurface`. `UiDock` is the reusable floating-navigation shell; routing data, active destination state, and trailing controls remain consumer-owned. `UiSurface` is the canonical material primitive; `UiGlassSurface` remains exported only as a compatibility wrapper for the historical Glass `variant` API. The consumer-validated React adapter currently exposes `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiDock`, `UiSurface`, `UiCard`, and `UiNotice`. Vue and React share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
+The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiTable`, `UiDisclosure`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, and `UiTooltipSurface`. `UiDock` is the reusable floating-navigation shell; routing data, active destination state, and trailing controls remain consumer-owned. `UiSurface` is the canonical material primitive. The consumer-validated React adapter currently exposes `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiDock`, `UiSurface`, `UiCard`, `UiTable`, `UiDisclosure`, and `UiNotice`. Vue and React share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
 
 ## Architecture at a glance
 
@@ -49,7 +49,7 @@ bun add @neoverse-ui/vue
 
 The package dependency graph installs the shared Tailwind, Motion, and Tokens layers. Lower-level packages can also be installed directly when a consumer only needs a specific layer.
 
-Packages are versioned with Changesets. Release preparation, first-publish bootstrap, and npm Trusted Publishing are documented in [docs/releasing.md](docs/releasing.md).
+Packages are versioned with Changesets. The 0.1.x → 0.2.0 breaking-change migration is documented in [docs/migration-0.2.0.md](docs/migration-0.2.0.md); release preparation and npm Trusted Publishing are documented in [docs/releasing.md](docs/releasing.md).
 
 ## Commands
 
@@ -66,11 +66,11 @@ bun run test:visual
 bun run test:visual:update
 ```
 
-`bun run dev` starts the playground server at `http://localhost:3000`, a Vite client watcher, and source rebuilds for the generated token, motion, and Tailwind stylesheets. `bun run check` is the full pre-commit gate: it auto-fixes Biome lint/format/imports, runs the style and Tailwind-usage lints, typechecks every workspace, and runs all unit and contract tests. Visual regression is opt-in via `test:visual` because it rebuilds the workspace and drives a browser; use `test:visual:update` only when a reviewed visual change is intentional.
+`bun run dev` starts the playground server at `http://localhost:3000`, a Vite client watcher, and source rebuilds for the generated token, motion, and Tailwind stylesheets. `bun run check` is the full pre-commit gate: it auto-fixes Biome lint/format/imports, verifies text encoding integrity, runs the style and Tailwind-usage lints, typechecks every workspace, and runs all unit and contract tests. Visual regression is opt-in via `test:visual` because it rebuilds the workspace and drives a browser; use `test:visual:update` only when a reviewed visual change is intentional.
 
 ## Tokens and Tailwind Foundation
 
-`@neoverse-ui/tokens` owns the framework-agnostic CSS Variables. Its source layers cover primitives, semantic roles, geometry, typography, layout, Material, Motion, component contracts, and light/dark theme mappings. The organized TypeScript API is exposed through `cssVariables.components`; the older `cssVariables.control`, `cssVariables.scrollbar`, and `cssVariables.skeleton` names remain compatibility aliases.
+`@neoverse-ui/tokens` owns the framework-agnostic CSS Variables. Its source layers cover primitives, semantic roles, geometry, typography, layout, Material, Motion, component contracts, and light/dark theme mappings. The organized TypeScript API is exposed through `cssVariables.components`; component-owned tokens have a single canonical namespace and are not duplicated through alternate flat maps.
 
 `@neoverse-ui/tailwind` maps those values into semantic Tailwind utilities such as:
 
@@ -88,7 +88,7 @@ Consumers that compile their own Tailwind CSS should import the shared theme and
 @source './src';
 ```
 
-The component selector facade is part of the shared Tailwind layer. It includes the Button, IconButton, Action, NavigationItem, SegmentedControl, ControlSurface, Badge, StatusIndicator, Skeleton, Scrollbar, and Glass material contracts; it does not create project-specific mobile, dock, or docs components.
+The component selector facade is part of the shared Tailwind layer. It includes the Button, IconButton, Action, NavigationItem, SegmentedControl, ControlSurface, Table, Disclosure, Badge, StatusIndicator, Skeleton, Scrollbar, and Glass material contracts; it does not create project-specific mobile, dock, or docs components.
 
 ### Package entries
 
@@ -98,7 +98,8 @@ The component selector facade is part of the shared Tailwind layer. It includes 
 | --- | --- |
 | `.` / `./index.css` | Zero-config compiled consumer bundle (Tailwind utilities + theme, scanned over the Vue/React component sources) |
 | `./theme.css` | Semantic theme + Material utilities (needs a Tailwind build that also scans the component sources) |
-| `./components.css` | Component selector CSS (Button, Action, NavigationItem, SegmentedControl, ControlSurface, Badge, StatusIndicator, Skeleton, Scrollbar, Glass contracts) |
+| `./components.css` | Component selector CSS (Button, Action, NavigationItem, SegmentedControl, ControlSurface, Table, Disclosure, Badge, StatusIndicator, Skeleton, Scrollbar, Glass contracts) |
+| `./prose.css` | Standalone `.neoverse-prose` reading-content semantics |
 
 `dist/playground.css` exists only for this repository's Design Lab and is not part of the Consumer API.
 
@@ -118,9 +119,9 @@ Until the packages publish to a registry, Bun `file:` dependencies plus the vend
 
 ## Material and Glass
 
-Normal surfaces use semantic Tailwind composition. Glass uses `material-glass-subtle`, `material-glass-elevated`, `material-glass-card`, and `material-glass-immersive` with an opaque CSS fallback, tokenized tint, backdrop filter, and directional edge field.
+Normal surfaces use semantic Tailwind composition. Glass has exactly three material presets: `material-glass-subtle`, `material-glass-elevated`, and `material-glass-immersive`, each with an opaque CSS fallback, tokenized tint, backdrop filter, and directional edge field.
 
-The four Glass variants keep the CSS material baseline and are discovered automatically by a mounted renderer. There is no per-surface `edgePass` flag: the renderer paints the shared directional WebGL edge for every eligible top-level Glass surface in the document.
+The three Glass variants keep the CSS material baseline and are discovered automatically by a mounted renderer. There is no per-surface `edgePass` flag: the renderer paints the shared directional WebGL edge for every eligible top-level Glass surface in the document.
 
 Mount the runtime once per Document when the enhancement is wanted:
 
@@ -145,7 +146,7 @@ The Design Lab `density` module shows fine-pointer and coarse-pointer profiles s
 
 `@neoverse-ui/motion` exposes the shared duration/easing scale and three semantic roles used by real components: `feedback`, `state`, and `spatial`. The old standalone entrance/emphasis recipe classes were removed because no consumer used them. Shared Button, Surface, Navigation, SegmentedControl, Scrollbar, and ControlSurface CSS consumes the role variables directly. Reduced-motion collapses durations and removes spatial distance while preserving state correctness.
 
-Set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root element. The Design Lab keeps separate light and dark visual baselines. The root `.light` and `.dark` classes remain supported when `data-theme` is absent.
+Set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root element. The Design Lab keeps separate light and dark visual baselines. Theme selection has one canonical root contract: `data-theme`.
 
 ## Design Lab and visual regression
 
@@ -165,4 +166,4 @@ Create a release note with:
 bun run changeset
 ```
 
-The public packages use independent versions. The playground and the planned React boundary are excluded from releases.
+The public packages use independent versions. `apps/playground` is the only internal workspace excluded from package releases.

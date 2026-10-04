@@ -44,10 +44,10 @@ export const appCopy = {
   },
   overview: {
     eyebrow: localized('Workspace overview', '工作区总览'),
-    title: localized('Explore the system by discipline', '按设计领域探索系统'),
+    title: localized('Design. Preview. Refine.', '设计、预览、校准。'),
     description: localized(
-      'Open one focused module at a time while keeping the complete Design Lab map within reach.',
-      '一次专注查看一个模块，同时随时掌握设计实验室的完整结构。',
+      'Explore tokens, components, and patterns in one interactive workspace.',
+      '在同一个工作区中探索设计变量、组件与组合场景。',
     ),
     moduleCount: localized('{count} modules', '{count} 个模块'),
     openGroup: localized('Open {group}', '打开{group}'),
@@ -154,6 +154,13 @@ export const moduleCopy = {
     description: localized(
       'Badges, status indicators, and loading skeletons share one module for non-primary interaction feedback.',
       '徽章、状态指示器与加载骨架集中展示，用于校准非主要交互反馈。',
+    ),
+  },
+  dataDisplay: {
+    label: localized('Data & Disclosure', '数据与渐进披露'),
+    description: localized(
+      'Tables and disclosures share native semantics, inset material hierarchy, and local overflow without relying on prose-only styling.',
+      '表格与折叠披露共享原生语义、内嵌材质层级和局部溢出处理，不再依赖仅限正文的样式。',
     ),
   },
   colors: {
@@ -426,14 +433,14 @@ export const moduleCopy = {
   card: {
     label: localized('Card', '卡片'),
     description: localized(
-      'UiCard owns standard card geometry and uses glass-card by default; transparent cards require an explicit surface="none" opt-out.',
-      'UiCard 负责标准卡片几何，并默认使用 glass-card；透明卡片必须显式设置 surface="none" 才会启用。',
+      'UiCard owns standard card geometry and uses the shared glass-elevated material by default; transparent cards require an explicit surface="none" opt-out.',
+      'UiCard 负责标准卡片几何，并默认复用共享的 glass-elevated 材质；透明卡片必须显式设置 surface="none" 才会启用。',
     ),
     reference: localized('Reference card', '参考卡片'),
     ready: localized('Ready', '就绪'),
     body: localized(
-      'The default card is a grounded glass-card surface so content never floats on a fully transparent plane.',
-      '默认卡片使用有底色的 glass-card 表面，避免内容直接漂浮在完全透明的平面上。',
+      'The default card reuses the elevated Glass surface so cards do not define a fourth material variant.',
+      '默认卡片直接复用抬升玻璃表面，不再额外定义第四种玻璃材质。',
     ),
     continue: localized('Continue', '继续'),
     externalClass: localized('Elevated card', '抬升卡片'),
@@ -490,6 +497,13 @@ export const moduleCopy = {
       sectionB: localized('Section B', '区域 B'),
       sectionC: localized('Section C', '区域 C'),
     },
+  },
+  forms: {
+    label: localized('Form Controls', '表单控件'),
+    description: localized(
+      'Native text, multiline, and selection controls share one inset surface, focus contract, and disabled treatment.',
+      '原生文本、多行文本与选择控件共享同一套内嵌表面、焦点契约与禁用状态。',
+    ),
   },
   density: {
     label: localized('Control Density', '控件密度'),
@@ -1037,7 +1051,6 @@ export const tokenCopy = {
   glassVariants: {
     subtle: localized('Subtle', '弱化'),
     elevated: localized('Elevated', '抬升'),
-    card: localized('Card', '卡片'),
     immersive: localized('Immersive', '沉浸'),
   },
   motion: {

@@ -4,7 +4,9 @@ import ColorsModule from './modules/ColorsModule.vue';
 import CompositionModule from './modules/CompositionModule.vue';
 import ConsumerParityModule from './modules/ConsumerParityModule.vue';
 import ControlsModule from './modules/ControlsModule.vue';
+import DataDisplayModule from './modules/DataDisplayModule.vue';
 import DockModule from './modules/DockModule.vue';
+import FormsModule from './modules/FormsModule.vue';
 import LayoutShapeModule from './modules/LayoutShapeModule.vue';
 import MaterialsModule from './modules/MaterialsModule.vue';
 import MotionModule from './modules/MotionModule.vue';
@@ -79,6 +81,20 @@ export const labModules = [
     component: StatusFeedbackModule,
   },
   {
+    id: 'forms',
+    groupId: 'components',
+    label: moduleCopy.forms.label,
+    description: moduleCopy.forms.description,
+    component: FormsModule,
+  },
+  {
+    id: 'data-display',
+    groupId: 'components',
+    label: moduleCopy.dataDisplay.label,
+    description: moduleCopy.dataDisplay.description,
+    component: DataDisplayModule,
+  },
+  {
     id: 'card',
     groupId: 'components',
     label: moduleCopy.card.label,
@@ -134,7 +150,15 @@ export const moduleGroups = [
     id: 'components',
     label: groupCopy.components.label,
     description: groupCopy.components.description,
-    moduleIds: ['controls', 'dock', 'status-feedback', 'card', 'scrollbar'],
+    moduleIds: [
+      'controls',
+      'dock',
+      'status-feedback',
+      'forms',
+      'data-display',
+      'card',
+      'scrollbar',
+    ],
   },
   {
     id: 'patterns',
@@ -156,7 +180,7 @@ export const moduleGroups = [
 }[];
 
 export type ModuleGroupId = (typeof moduleGroups)[number]['id'];
-export const specimenKinds = ['foundation', 'component', 'composition', 'compatibility'] as const;
+export const specimenKinds = ['foundation', 'component', 'composition'] as const;
 export type SpecimenKind = (typeof specimenKinds)[number];
 
 export interface LabSpecimen {
@@ -217,14 +241,7 @@ export const labSpecimens = [
     tags: ['surface', 'material', 'primitive'],
     kind: 'component',
   },
-  {
-    id: 'materials-glass',
-    moduleId: 'materials',
-    label: localized('Glass surfaces', '玻璃表面'),
-    apiNames: ['UiGlassSurface'],
-    tags: ['glass', 'surface', 'compatibility'],
-    kind: 'compatibility',
-  },
+
   {
     id: 'controls-button',
     moduleId: 'controls',
@@ -330,6 +347,46 @@ export const labSpecimens = [
     kind: 'component',
   },
   {
+    id: 'forms-input',
+    moduleId: 'forms',
+    label: localized('Text input', '文本输入'),
+    apiNames: ['UiInput'],
+    tags: ['form', 'input', 'text', 'control'],
+    kind: 'component',
+  },
+  {
+    id: 'forms-textarea',
+    moduleId: 'forms',
+    label: localized('Textarea', '多行文本'),
+    apiNames: ['UiTextarea'],
+    tags: ['form', 'textarea', 'text', 'control'],
+    kind: 'component',
+  },
+  {
+    id: 'forms-select',
+    moduleId: 'forms',
+    label: localized('Select', '选择框'),
+    apiNames: ['UiSelect'],
+    tags: ['form', 'select', 'selection', 'control'],
+    kind: 'component',
+  },
+  {
+    id: 'data-display-table',
+    moduleId: 'data-display',
+    label: localized('Table', '表格'),
+    apiNames: ['UiTable'],
+    tags: ['data', 'table', 'overflow', 'content'],
+    kind: 'component',
+  },
+  {
+    id: 'data-display-disclosure',
+    moduleId: 'data-display',
+    label: localized('Disclosure', '渐进披露'),
+    apiNames: ['UiDisclosure'],
+    tags: ['disclosure', 'details', 'summary', 'content'],
+    kind: 'component',
+  },
+  {
     id: 'card-card',
     moduleId: 'card',
     label: moduleCopy.card.label,
@@ -429,17 +486,6 @@ export const labSpecimens = [
 
 export type SpecimenId = (typeof labSpecimens)[number]['id'];
 
-export const legacyModuleRedirects: Readonly<Partial<Record<string, ModuleId>>> = {
-  spacing: 'layout-shape',
-  radius: 'layout-shape',
-  border: 'layout-shape',
-  surface: 'materials',
-  glass: 'materials',
-  badge: 'status-feedback',
-  skeleton: 'status-feedback',
-  'status-indicator': 'status-feedback',
-};
-
 export function isModuleId(value: unknown): value is ModuleId {
   return typeof value === 'string' && labModules.some((module) => module.id === value);
 }
@@ -467,11 +513,6 @@ export function resolveLabHash(hash: string): ResolvedLabHash | null {
 
   if (isModuleId(normalized)) {
     return { moduleId: normalized, canonicalHash: normalized };
-  }
-
-  const redirected = legacyModuleRedirects[normalized];
-  if (redirected !== undefined) {
-    return { moduleId: redirected, canonicalHash: redirected };
   }
 
   if (isSpecimenId(normalized)) {

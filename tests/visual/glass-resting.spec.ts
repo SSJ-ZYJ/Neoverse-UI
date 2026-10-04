@@ -13,7 +13,7 @@ test('all Glass specimens render their own material at rest, after hover and in 
   for (const theme of ['light', 'dark'] as const) {
     await page.goto(`/?theme=${theme}&lang=en#materials`, { waitUntil: 'domcontentloaded' });
     const samples = page.locator('[data-glass-variant], [data-surface-preset^="glass-"]');
-    await expect(samples).toHaveCount(8);
+    await expect(samples).toHaveCount(6);
 
     for (const sample of await samples.all()) {
       const label =
@@ -58,7 +58,7 @@ test('only an explicitly inherited Glass grouping is transparent, including on h
     if (host === null) throw new Error('Glass specimen host is missing');
     for (const nesting of ['inherit', 'local', 'unmarked'] as const) {
       const element = document.createElement('div');
-      element.className = 'ui-surface material-glass-card rounded-card';
+      element.className = 'ui-surface material-glass-elevated rounded-card';
       element.dataset.glassFixture = nesting;
       if (nesting !== 'unmarked') element.dataset.neoverseGlassNesting = nesting;
       element.textContent = nesting;
@@ -111,7 +111,7 @@ test('reduced transparency keeps independent nested Glass visible without blur',
   await page.goto('/?theme=dark&lang=en#materials', { waitUntil: 'domcontentloaded' });
 
   const samples = page.locator('[data-glass-variant]');
-  await expect(samples).toHaveCount(4);
+  await expect(samples).toHaveCount(3);
   for (const sample of await samples.all()) {
     const material = await sample.evaluate((element) => {
       const style = getComputedStyle(element);
@@ -158,7 +158,7 @@ test('independent nested Glass uses the WebGL edge pass without duplicate CSS ou
 
     expect(metrics.canvas, `${theme}/shared renderer`).toBe(1);
     expect(metrics.outer.display, `${theme}/outer WebGL edge`).toBe('none');
-    expect(metrics.specimens).toHaveLength(4);
+    expect(metrics.specimens).toHaveLength(3);
     for (const specimen of metrics.specimens) {
       expect(specimen.display, `${theme}/nested WebGL edge`).toBe('none');
       expect(specimen.opacity, `${theme}/edge token`).toBeGreaterThan(0);
@@ -173,7 +173,7 @@ test('Glass CSS edge remains visible when WebGL is unavailable', async ({ page }
     document.documentElement.removeAttribute('data-neoverse-glass-renderer');
   });
 
-  const edge = await page.locator('[data-glass-variant="card"]').evaluate((element) => {
+  const edge = await page.locator('[data-glass-variant="elevated"]').evaluate((element) => {
     const style = getComputedStyle(element, '::before');
     return { display: style.display, opacity: Number(style.opacity) };
   });
@@ -199,7 +199,7 @@ test('masked scrolling navigation retains its CSS edge independently of WebGL', 
   expect(edge.opacity).toBeGreaterThan(0);
 });
 
-test('WebGL actually paints the nested card silhouette in light and dark modes', async ({
+test('WebGL actually paints the nested elevated silhouette in light and dark modes', async ({
   page,
 }) => {
   for (const theme of ['light', 'dark'] as const) {
@@ -209,16 +209,16 @@ test('WebGL actually paints the nested card silhouette in light and dark modes',
     );
     test.skip(renderer !== 'webgl', 'WebGL is unavailable; the CSS fallback is tested separately');
 
-    const card = page.locator('[data-glass-variant="card"]');
-    await card.scrollIntoViewIfNeeded();
+    const surface = page.locator('[data-glass-variant="elevated"]');
+    await surface.scrollIntoViewIfNeeded();
     await page.waitForTimeout(220);
-    const withEdge = await card.screenshot({ animations: 'disabled' });
+    const withEdge = await surface.screenshot({ animations: 'disabled' });
     await page.evaluate(() => {
       const canvas = document.querySelector<HTMLElement>('[data-neoverse-glass-renderer-canvas]');
       if (canvas === null) throw new Error('The shared Glass renderer canvas is missing');
       canvas.style.visibility = 'hidden';
     });
-    const withoutEdge = await card.screenshot({ animations: 'disabled' });
+    const withoutEdge = await surface.screenshot({ animations: 'disabled' });
 
     const difference = await page.evaluate(
       async ({ withEdge, withoutEdge }) => {

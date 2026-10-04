@@ -7,7 +7,7 @@ defineOptions({ inheritAttrs: false });
 
 const props = withDefaults(defineProps<CardProps>(), {
   as: 'div',
-  surface: 'glass-card',
+  surface: 'glass-elevated',
 });
 const attrs = useAttrs();
 const classes = computed(() => ['ui-card', getSurfaceClass(props.surface)]);

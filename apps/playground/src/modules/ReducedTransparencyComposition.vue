@@ -37,7 +37,7 @@ const options = computed<readonly SegmentOption[]>(() => [
           </UiBadge>
         </div>
         <div class="flex flex-wrap items-center justify-between gap-2">
-          <span class="text-caption text-muted">glass-card → fallback</span>
+          <span class="text-caption text-muted">glass-elevated → fallback</span>
           <UiButton variant="secondary" size="sm">
             {{ localize(copy.continue, props.locale) }}
           </UiButton>

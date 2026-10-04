@@ -4,17 +4,56 @@ import { fileURLToPath } from 'node:url';
 const output = new URL('../dist/contract.css', import.meta.url);
 const buttonSource = new URL('../src/components/button.css', import.meta.url);
 const badgeSource = new URL('../src/components/badge.css', import.meta.url);
+const navigationItemSource = new URL('../src/components/navigation-item.css', import.meta.url);
+const tooltipSource = new URL('../src/components/tooltip.css', import.meta.url);
 const componentsOutput = new URL('../dist/components.css', import.meta.url);
 const proseOutput = new URL('../dist/prose.css', import.meta.url);
+const vueClassesSource = new URL('../../vue/src/classes.ts', import.meta.url);
+const vueSurfaceSource = new URL('../../vue/src/surface.ts', import.meta.url);
+const reactSource = new URL('../../react/src/index.tsx', import.meta.url);
 
 try {
-  const [css, buttonCss, badgeCss, flattenedComponentsCss, proseCss] = await Promise.all([
+  const [
+    css,
+    buttonCss,
+    badgeCss,
+    navigationItemCss,
+    tooltipCss,
+    flattenedComponentsCss,
+    proseCss,
+    vueClasses,
+    vueSurface,
+    reactAdapter,
+  ] = await Promise.all([
     Bun.file(output).text(),
     Bun.file(buttonSource).text(),
     Bun.file(badgeSource).text(),
+    Bun.file(navigationItemSource).text(),
+    Bun.file(tooltipSource).text(),
     Bun.file(componentsOutput).text(),
     Bun.file(proseOutput).text(),
+    Bun.file(vueClassesSource).text(),
+    Bun.file(vueSurfaceSource).text(),
+    Bun.file(reactSource).text(),
   ]);
+  const adapterClassNames = new Set<string>();
+  for (const source of [vueClasses, vueSurface, reactAdapter]) {
+    for (const match of source.matchAll(
+      /['"]((?:ui-|material-glass-)[a-z0-9_-]+(?:\s+(?:ui-|material-glass-)[a-z0-9_-]+)*)['"]/g,
+    )) {
+      for (const className of match[1]?.split(/\s+/) ?? []) {
+        adapterClassNames.add(className);
+      }
+    }
+  }
+  const adapterCssClassNames = new Set(
+    [...`${flattenedComponentsCss}\n${css}`.matchAll(/\.([a-zA-Z][a-zA-Z0-9_-]*)/g)].map(
+      (match) => match[1],
+    ),
+  );
+  const missingAdapterSelectors = [...adapterClassNames]
+    .filter((className) => !adapterCssClassNames.has(className))
+    .sort();
   const componentSourceDirectory = fileURLToPath(new URL('../src/components/', import.meta.url));
   const componentSourceFiles = [
     ...new Bun.Glob('*.css').scanSync({ cwd: componentSourceDirectory }),
@@ -25,6 +64,22 @@ try {
       css: await Bun.file(`${componentSourceDirectory}/${file}`).text(),
     })),
   );
+  const malformedComponentSelectors = componentSources.flatMap(({ file, css: sourceCss }) => {
+    const classNames = [...sourceCss.matchAll(/\.([a-zA-Z][a-zA-Z0-9_-]*)/g)].map(
+      (match) => match[1] ?? '',
+    );
+    return classNames
+      .filter((className) => {
+        const modifiers = className.split('--');
+        const elements = className.split('__');
+        const repeatedModifier =
+          modifiers.length >= 3 && modifiers.at(-1) !== '' && modifiers.at(-1) === modifiers.at(-2);
+        const repeatedElement =
+          elements.length >= 3 && elements.at(-1) !== '' && elements.at(-1) === elements.at(-2);
+        return repeatedModifier || repeatedElement;
+      })
+      .map((className) => `${file}:.${className}`);
+  });
   const hardcodedGeometryLiterals = componentSources.flatMap(({ file, css: sourceCss }) => {
     const withoutComments = sourceCss.replace(/\/\*[\s\S]*?\*\//g, '');
     return [...withoutComments.matchAll(/\b\d+(?:\.\d+)?(?:rem|px)\b/g)].map(
@@ -32,18 +87,6 @@ try {
     );
   });
   const expectedSelectors = [
-    '.ui-button-control',
-    '.ui-button-control--sm',
-    '.ui-button-control--md',
-    '.ui-button-control--lg',
-    '.ui-button-control--stretch',
-    '.ui-button-icon-control',
-    '.ui-button-icon-control--sm',
-    '.ui-button-icon-control--md',
-    '.ui-button-icon-control--lg',
-    '.ui-button-icon-control--stretch',
-    '.ui-button-icon-control__content',
-    '.ui-button-control__spinner',
     '.bg-surface-canvas',
     '.bg-surface-subtle',
     '.bg-surface-raised',
@@ -172,6 +215,11 @@ try {
     '.ui-button--primary',
     '.ui-button--secondary',
     '.ui-button--ghost',
+    '.ui-icon-button--sm',
+    '.ui-icon-button--md',
+    '.ui-icon-button--lg',
+    '.ui-icon-button--stretch',
+    '.ui-icon-button__content',
     '.ui-action',
     '.ui-navigation-item',
     '.ui-breadcrumb',
@@ -186,12 +234,16 @@ try {
     '.ui-scrollbar',
     '.ui-scrollbar__thumb',
     '.ui-scrollbar-target',
+    '.ui-table',
+    '.ui-table-region',
+    '.ui-disclosure',
+    '.ui-disclosure__summary',
+    '.ui-input',
+    '.ui-textarea',
+    '.ui-select',
     '.material-glass-subtle',
     '.material-glass-elevated',
     '.material-glass-immersive',
-    '.material-glass-card',
-    '.glass-card',
-    '.glass-surface',
     '.ui-segmented-control',
     '.ui-segmented-control__slider',
     '.ui-skeleton',
@@ -205,7 +257,18 @@ try {
     '.neoverse-prose',
   ];
   const missingSelectors = expectedSelectors.filter((selector) => !css.includes(selector));
-  const forbiddenSelectors = ['.bg-background', '.text-foreground', '.border-border', '.shadow-sm'];
+  const forbiddenSelectors = [
+    '.bg-background',
+    '.text-foreground',
+    '.border-border',
+    '.shadow-sm',
+    '.material-glass-card',
+    '.ui-icon-button--sm--sm',
+    '.ui-icon-button--md--md',
+    '.ui-icon-button--lg--lg',
+    '.ui-icon-button--stretch--stretch',
+    '.ui-icon-button__content__content',
+  ];
   const emittedForbiddenSelectors = forbiddenSelectors.filter((selector) => css.includes(selector));
   const expectedValues = [
     '--neoverse-color-surface-canvas',
@@ -232,10 +295,8 @@ try {
     '--neoverse-material-refraction-gradient-immersive',
     '--neoverse-material-glass-subtle-background',
     '--neoverse-material-glass-immersive-background',
-    '--neoverse-material-glass-card-background',
     '--neoverse-material-transparency-subtle:30%',
     '--neoverse-material-transparency-elevated:20%',
-    '--neoverse-material-transparency-card:52%',
     '--neoverse-material-transparency-immersive:12%',
     '--neoverse-material-glass-elevated-background:var(--neoverse-color-surface-glass)',
     '--neoverse-motion-duration-fast',
@@ -281,6 +342,10 @@ try {
     '--neoverse-control-segmented-background-color',
     '--neoverse-control-segmented-foreground',
     '--neoverse-control-segmented-active-foreground',
+    '--neoverse-control-segmented-active-background',
+    '--neoverse-control-segmented-active-fill',
+    '--neoverse-control-segmented-active-border',
+    '--neoverse-control-segmented-active-shadow',
     '--neoverse-control-segmented-inset',
     '--neoverse-control-segmented-embedded-inset',
     '--neoverse-control-segmented-gap',
@@ -288,7 +353,6 @@ try {
     '--neoverse-control-segmented-border',
     '--neoverse-control-segmented-shadow',
     '--neoverse-control-segmented-filter',
-    '--neoverse-control-segmented-focus-shadow',
     '--neoverse-control-active-border',
     '--neoverse-badge-background',
     '--neoverse-badge-border',
@@ -310,11 +374,14 @@ try {
     '--neoverse-action-height-md',
     '--neoverse-action-icon-size-md',
     '--neoverse-navigation-item-active-background',
+    '--neoverse-navigation-item-active-border',
     '--neoverse-navigation-item-padding-block-md',
     '--neoverse-navigation-item-indicator-color',
     '--neoverse-control-surface-padding',
     '--neoverse-control-surface-item-gap',
     '--neoverse-control-surface-divider-gap',
+    '--neoverse-control-surface-indicator-duration',
+    '--neoverse-control-surface-indicator-easing',
     '--neoverse-status-indicator-dot-size-sm',
     '--neoverse-status-indicator-pulse-scale',
   ];
@@ -330,10 +397,8 @@ try {
     '[data-neoverse-glass-renderer=webgl]',
     'data-neoverse-glass-edge-pass=css',
     'data-neoverse-surface-hover=static',
-    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card):not(:focus-visible){box-shadow:var(--neoverse-material-shadow)',
-    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card):not(:focus-visible){box-shadow:var(--neoverse-material-shadow);-webkit-backdrop-filter:var(--neoverse-material-filter);backdrop-filter:var(--neoverse-material-filter);background-clip:padding-box',
-    '[data-neoverse-glass-renderer=webgl] :is(.glass-card,.glass-surface){box-shadow:var(--neoverse-material-shadow,var(--glass-shadow,none));border-color:#0000',
-    'border-color:#0000',
+    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow)',
+    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow);-webkit-backdrop-filter:var(--neoverse-material-filter);backdrop-filter:var(--neoverse-material-filter);background-clip:padding-box',
     'var(--neoverse-material-inner-glow)',
     'var(--neoverse-material-seam-glow)',
     'var(--neoverse-material-bloom)',
@@ -342,7 +407,7 @@ try {
     '-webkit-backdrop-filter:var(--neoverse-material-filter)',
     '@media (prefers-reduced-transparency:reduce)',
     'background-color:var(--neoverse-material-background-fallback)',
-    ':is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card):not(.ui-button):not(.ui-segmented-control)[data-neoverse-glass-nesting=inherit]{background-color:var(--neoverse-color-transparent)',
+    ':is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(.ui-button):not(.ui-segmented-control)[data-neoverse-glass-nesting=inherit]{background-color:var(--neoverse-color-transparent)',
     'border:var(--neoverse-border-width-none) var(--neoverse-border-style-solid) var(--neoverse-color-transparent)',
     'box-shadow:var(--neoverse-shadow-none)',
     '-webkit-backdrop-filter:none',
@@ -353,15 +418,14 @@ try {
     'transition-timing-function:var(--tw-ease)',
     '@keyframes ui-skeleton-shimmer',
     'transform:translateX(calc(var(--segment-index)',
-    'box-shadow:var(--neoverse-control-active-shadow)',
+    'box-shadow:var(--neoverse-control-segmented-active-shadow)',
     'background-image:var(--neoverse-control-segmented-background-image)',
     'background-color:var(--neoverse-control-segmented-background-color)',
     'color:var(--neoverse-control-segmented-foreground)',
     'color:var(--neoverse-control-segmented-active-foreground)',
     'border:var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) var(--neoverse-control-segmented-border)',
-    'border:var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) var(--neoverse-control-active-border)',
+    'border:var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) var(--neoverse-control-segmented-active-border)',
     'backdrop-filter:var(--neoverse-control-segmented-filter)',
-    'box-shadow:var(--neoverse-control-segmented-focus-shadow)',
     'scrollbar-color:var(--neoverse-scrollbar-immersive-thumb) var(--neoverse-scrollbar-immersive-track)',
     'scrollbar-width:thin',
     '::-webkit-scrollbar',
@@ -386,19 +450,27 @@ try {
     /* Never restore implicit nested flattening: independent Glass components
        must retain their resting material when placed inside Glass layouts. */
     ':not([data-neoverse-glass-nesting=local])',
-    ':is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card):not(.ui-button):not(.ui-segmented-control)[data-neoverse-glass-nesting=inherit]{background-color:var(--neoverse-color-surface-raised)',
+    ':is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(.ui-button):not(.ui-segmented-control)[data-neoverse-glass-nesting=inherit]{background-color:var(--neoverse-color-surface-raised)',
   ];
   const emittedForbiddenNestedGlassFragments = forbiddenNestedGlassFragments.filter((fragment) =>
     css.includes(fragment),
   );
   const forbiddenWebglFragments = [
-    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card){box-shadow:var(--neoverse-shadow-none)',
-    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive,.material-glass-card){box-shadow:var(--neoverse-material-shadow);-webkit-backdrop-filter:none',
+    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive){box-shadow:var(--neoverse-shadow-none)',
+    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive){box-shadow:var(--neoverse-material-shadow);-webkit-backdrop-filter:none',
   ];
   const emittedForbiddenWebglFragments = forbiddenWebglFragments.filter((fragment) =>
     css.includes(fragment),
   );
   const expectedButtonFragments = [
+    '.ui-icon-button--sm {',
+    'width: var(--neoverse-space-7);',
+    '.ui-icon-button--md {',
+    'width: var(--neoverse-space-8);',
+    '.ui-icon-button--lg {',
+    'width: var(--neoverse-space-9);',
+    '.ui-icon-button--stretch {',
+    '.ui-icon-button__content {',
     '--neoverse-material-shadow: var(--neoverse-control-button-edge);',
     '--neoverse-material-edge-refraction-carrier: var(--neoverse-control-button-edge-carrier);',
     'border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)',
@@ -407,6 +479,9 @@ try {
     'overflow: hidden;',
     '--neoverse-material-edge-highlight: 0 0 0 0 transparent;',
     '.ui-button.material-glass-subtle:hover:not(:disabled)::after',
+    '.ui-button--primary.material-glass-subtle {',
+    '--neoverse-material-shadow: var(--neoverse-control-primary-shadow);',
+    '--neoverse-material-shadow: var(--neoverse-control-primary-hover-shadow);',
     'background: var(--neoverse-control-ghost-background);',
     'border-color: var(--neoverse-control-ghost-border);',
     '--neoverse-material-edge-refraction-opacity: var(',
@@ -438,8 +513,6 @@ try {
   );
   const forbiddenButtonFragments = [
     'inset: 1px;',
-    'var(--neoverse-control-primary-shadow)',
-    'var(--neoverse-control-primary-hover-shadow)',
     'var(--neoverse-control-secondary-shadow)',
     'var(--neoverse-control-secondary-hover-shadow)',
     'var(--neoverse-control-active-shadow)',
@@ -453,13 +526,34 @@ try {
     '.neoverse-prose :where(ul, ol) :where(ul, ol)',
     '.neoverse-prose dt',
     '.neoverse-prose dd',
-    '.neoverse-prose caption',
-    '.neoverse-prose summary:focus-visible',
-    '.neoverse-prose details[open] summary',
+    ':where(.ui-table, .neoverse-prose table)',
+    ':where(.ui-table__caption, .neoverse-prose caption)',
+    ':where(.ui-table--striped, .neoverse-prose table) tbody tr:nth-child(even) td',
+    ':where(.ui-table--hoverable, .neoverse-prose table) tbody tr:hover td',
+    ':where(.ui-disclosure, .neoverse-prose details)',
+    ':where(.ui-disclosure__summary, .neoverse-prose summary)::-webkit-details-marker',
+    ':where(.ui-disclosure__summary, .neoverse-prose summary)::after',
+    ':where(.ui-disclosure__summary, .neoverse-prose summary):focus-visible',
     '.neoverse-prose abbr[title]',
   ];
   const missingProseFragments = expectedProseFragments.filter(
     (fragment) => !proseCss.includes(fragment),
+  );
+  const expectedNavigationMotionFragments = [
+    'opacity var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing)',
+    'transform var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing)',
+  ];
+  const missingNavigationMotionFragments = expectedNavigationMotionFragments.filter(
+    (fragment) => !navigationItemCss.includes(fragment),
+  );
+  const expectedTooltipFragments = [
+    '.ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface]',
+    '--neoverse-material-border: transparent;',
+    '--neoverse-material-hover-border: transparent;',
+    'backdrop-filter: var(--neoverse-material-glass-subtle-filter);',
+  ];
+  const missingTooltipFragments = expectedTooltipFragments.filter(
+    (fragment) => !tooltipCss.includes(fragment),
   );
 
   if (
@@ -474,6 +568,10 @@ try {
     emittedForbiddenButtonFragments.length > 0 ||
     missingBadgeFragments.length > 0 ||
     missingProseFragments.length > 0 ||
+    missingNavigationMotionFragments.length > 0 ||
+    missingTooltipFragments.length > 0 ||
+    missingAdapterSelectors.length > 0 ||
+    malformedComponentSelectors.length > 0 ||
     hardcodedGeometryLiterals.length > 0 ||
     flattenedComponentsCss.includes('@import') ||
     !proseCss.includes('.neoverse-prose') ||
@@ -506,6 +604,18 @@ try {
         : '',
       missingProseFragments.length > 0
         ? `Missing prose semantic fragments: ${missingProseFragments.join(', ')}`
+        : '',
+      missingNavigationMotionFragments.length > 0
+        ? `Missing navigation motion fragments: ${missingNavigationMotionFragments.join(', ')}`
+        : '',
+      missingTooltipFragments.length > 0
+        ? `Missing tooltip Glass fragments: ${missingTooltipFragments.join(', ')}`
+        : '',
+      missingAdapterSelectors.length > 0
+        ? `Adapter classes without component CSS selectors: ${missingAdapterSelectors.join(', ')}`
+        : '',
+      malformedComponentSelectors.length > 0
+        ? `Malformed duplicated component selectors: ${malformedComponentSelectors.join(', ')}`
         : '',
       hardcodedGeometryLiterals.length > 0
         ? `Hard-coded rem/px geometry in component CSS: ${hardcodedGeometryLiterals.join(', ')}`

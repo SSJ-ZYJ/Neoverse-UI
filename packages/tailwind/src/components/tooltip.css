@@ -3,17 +3,9 @@
     --ui-tooltip-tone: var(--neoverse-color-text-secondary);
     --ui-tooltip-arrow-left: 50%;
     position: relative;
-    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      color-mix(in srgb, var(--ui-tooltip-tone) 34%, var(--neoverse-color-border-subtle));
     border-radius: var(--neoverse-radius-control);
     padding: var(--neoverse-space-2) var(--neoverse-space-3);
     color: var(--neoverse-color-text-primary);
-    background: color-mix(
-      in srgb,
-      var(--neoverse-color-surface-raised) 92%,
-      var(--ui-tooltip-tone)
-    );
-    box-shadow: var(--neoverse-shadow-overlay);
     font-size: var(--neoverse-font-size-xs);
     font-weight: var(--neoverse-font-weight-semibold);
     line-height: 1.35;
@@ -23,22 +15,44 @@
     --ui-tooltip-tone: var(--neoverse-color-accent-primary);
   }
 
+  /* The tooltip body uses the shared Glass surface. Its pointer stays
+     borderless as well: a small sampled translucent plane and soft depth
+     continue the material without drawing a flat geometric outline. */
   .ui-tooltip-surface::after {
     position: absolute;
+    z-index: 0;
     bottom: calc(var(--neoverse-space-1) * -1.15);
     left: var(--ui-tooltip-arrow-left);
     width: var(--neoverse-space-2);
     height: var(--neoverse-space-2);
-    border-right: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      color-mix(in srgb, var(--ui-tooltip-tone) 34%, var(--neoverse-color-border-subtle));
-    border-bottom: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      color-mix(in srgb, var(--ui-tooltip-tone) 34%, var(--neoverse-color-border-subtle));
+    border: 0;
     background: color-mix(
       in srgb,
-      var(--neoverse-color-surface-raised) 92%,
-      var(--ui-tooltip-tone)
+      var(--neoverse-material-glass-subtle-tint) var(--neoverse-material-glass-subtle-transparency),
+      transparent
     );
+    box-shadow: var(--neoverse-shadow-xs);
     content: '';
     transform: translateX(-50%) rotate(45deg);
+    -webkit-backdrop-filter: var(--neoverse-material-glass-subtle-filter);
+    backdrop-filter: var(--neoverse-material-glass-subtle-filter);
+  }
+}
+
+@layer utilities {
+  /* Dark Glass normally retains a validated hairline, but tooltip chrome is
+     explicitly borderless in both themes. Refraction, backdrop sampling and
+     shadow carry the edge instead of a monochrome stroke. */
+  .ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface] {
+    --neoverse-material-border: transparent;
+    --neoverse-material-hover-border: transparent;
+  }
+
+  .ui-tooltip-surface--accent.material-glass-subtle[data-neoverse-tooltip-surface] {
+    --neoverse-material-tint: color-mix(
+      in srgb,
+      var(--neoverse-material-glass-subtle-tint) 88%,
+      var(--ui-tooltip-tone) 12%
+    );
   }
 }

@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, useSlots } from 'vue';
-import { getSurfaceClass, glassVariantToSurface } from './surface';
+import { getSurfaceClass } from './surface';
 import type { ControlSurfaceProps } from './types';
 
 defineOptions({ inheritAttrs: false });
 
 const props = withDefaults(defineProps<ControlSurfaceProps>(), {
   as: 'div',
-  variant: 'subtle',
   hoverMode: 'auto',
   edgeMode: 'auto',
   scale: 'md',
@@ -15,13 +14,26 @@ const props = withDefaults(defineProps<ControlSurfaceProps>(), {
 
 const attrs = useAttrs();
 const slots = useSlots();
-const surfaceRoot = ref<HTMLElement>();
 const primary = ref<HTMLElement>();
 const indicatorStyle = ref<Record<string, string>>();
 const indicatorReady = ref(false);
 let resizeObserver: ResizeObserver | undefined;
 let mutationObserver: MutationObserver | undefined;
 let frame = 0;
+let measurementFrame = 0;
+
+function getCumulativeZoom(element: HTMLElement): number {
+  let zoom = 1;
+  let current: HTMLElement | null = element;
+  while (current) {
+    const value = Number.parseFloat(getComputedStyle(current).zoom);
+    if (Number.isFinite(value) && value > 0) {
+      zoom *= value;
+    }
+    current = current.parentElement;
+  }
+  return zoom;
+}
 
 function measureIndicator() {
   if (!props.navigationIndicator || !primary.value) return;
@@ -35,10 +47,7 @@ function measureIndicator() {
   }
   const group = primary.value.getBoundingClientRect();
   const rect = marker.getBoundingClientRect();
-  const zoomValue = surfaceRoot.value
-    ? Number.parseFloat(getComputedStyle(surfaceRoot.value).getPropertyValue('zoom'))
-    : 1;
-  const zoom = Number.isFinite(zoomValue) && zoomValue > 0 ? zoomValue : 1;
+  const zoom = getCumulativeZoom(primary.value);
   indicatorStyle.value = {
     left: `${(rect.left - group.left) / zoom}px`,
     top: `${(rect.top - group.top) / zoom}px`,
@@ -52,6 +61,11 @@ function measureIndicator() {
       });
     });
   }
+}
+
+function scheduleIndicatorMeasurement() {
+  cancelAnimationFrame(measurementFrame);
+  measurementFrame = requestAnimationFrame(measureIndicator);
 }
 
 onMounted(() => {
@@ -81,6 +95,7 @@ onMounted(() => {
       return;
     observeItems();
     measureIndicator();
+    scheduleIndicatorMeasurement();
   });
   mutationObserver.observe(primary.value, {
     subtree: true,
@@ -96,8 +111,9 @@ onBeforeUnmount(() => {
   resizeObserver?.disconnect();
   mutationObserver?.disconnect();
   cancelAnimationFrame(frame);
+  cancelAnimationFrame(measurementFrame);
 });
-const surface = computed(() => props.surface ?? glassVariantToSurface(props.variant));
+const surface = computed(() => props.surface ?? 'glass-subtle');
 const classes = computed(() => [
   'ui-control-surface',
   getSurfaceClass(surface.value),
@@ -111,7 +127,6 @@ const forwardedAttrs = computed(() => {
 
 <template>
   <component
-    ref="surfaceRoot"
     :is="props.as"
     v-bind="forwardedAttrs"
     :class="[classes, { 'ui-control-surface--shared-indicator': props.navigationIndicator }, attrs.class]"

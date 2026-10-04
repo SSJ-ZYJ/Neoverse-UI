@@ -8,6 +8,9 @@
     --neoverse-motion-state-easing: var(--neoverse-motion-easing-standard);
     --neoverse-motion-spatial-duration: var(--neoverse-motion-duration-expressive);
     --neoverse-motion-spatial-easing: var(--neoverse-motion-easing-emphasized);
+    --neoverse-motion-theme-duration: var(--neoverse-motion-duration-standard);
+    --neoverse-motion-theme-fallback-duration: var(--neoverse-motion-duration-expressive);
+    --neoverse-motion-theme-easing: var(--neoverse-motion-easing-standard);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -23,7 +26,84 @@
       --neoverse-motion-feedback-easing: step-end;
       --neoverse-motion-state-easing: step-end;
       --neoverse-motion-spatial-easing: step-end;
+      --neoverse-motion-theme-duration: 1ms;
+      --neoverse-motion-theme-fallback-duration: 1ms;
+      --neoverse-motion-theme-easing: step-end;
       --neoverse-motion-spatial-distance: 0px;
     }
   }
+}
+
+:root[data-neoverse-theme-view-transitioning]::view-transition-old(root),
+:root[data-neoverse-theme-view-transitioning]::view-transition-new(root) {
+  animation-duration: var(--neoverse-motion-theme-duration);
+  animation-timing-function: var(--neoverse-motion-theme-easing);
+}
+
+/* Interpolate the shared semantic colors once, rather than starting a paint
+   transition on every element during a theme change. Theme tokens supply the
+   actual colors; these registration defaults are only unused fallbacks. */
+@property --neoverse-color-surface-canvas {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --neoverse-color-text-primary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --neoverse-color-text-secondary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --neoverse-color-text-muted {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --neoverse-color-text-disabled {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --neoverse-color-text-inverse {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --neoverse-color-text-on-accent {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --neoverse-color-accent-primary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+@property --neoverse-color-accent-tertiary {
+  syntax: '<color>';
+  inherits: true;
+  initial-value: transparent;
+}
+
+:root[data-neoverse-theme-transitioning] {
+  transition-property:
+    --neoverse-color-surface-canvas, --neoverse-color-text-primary, --neoverse-color-text-secondary,
+    --neoverse-color-text-muted, --neoverse-color-text-disabled, --neoverse-color-text-inverse,
+    --neoverse-color-text-on-accent, --neoverse-color-accent-primary,
+    --neoverse-color-accent-tertiary;
+  transition-duration: var(--neoverse-motion-theme-fallback-duration);
+  transition-timing-function: var(--neoverse-motion-theme-easing);
+  transition-delay: 0ms;
 }

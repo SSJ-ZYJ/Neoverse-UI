@@ -11,6 +11,7 @@ const props = withDefaults(defineProps<TooltipSurfaceProps>(), {
 const attrs = useAttrs();
 const classes = computed(() => [
   'ui-tooltip-surface',
+  'material-glass-subtle',
   `ui-tooltip-surface--${props.variant as TooltipSurfaceVariant}`,
 ]);
 const forwardedAttrs = computed(() => {
@@ -25,6 +26,10 @@ const forwardedAttrs = computed(() => {
     v-bind="forwardedAttrs"
     :class="[classes, attrs.class]"
     :style="attrs.style"
+    data-surface="glass-subtle"
+    data-neoverse-surface-hover="static"
+    data-neoverse-surface-overflow="visible"
+    data-neoverse-tooltip-surface
   >
     <slot />
   </component>

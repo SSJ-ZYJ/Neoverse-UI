@@ -6,12 +6,8 @@ const glassClassNames = [
   'material-glass-subtle',
   'material-glass-elevated',
   'material-glass-immersive',
-  'material-glass-card',
 ] as const;
-const glassAliasNames = ['glass-card', 'glass-surface'] as const;
-const glassSelector = [...glassClassNames, ...glassAliasNames]
-  .map((className) => `.${className}`)
-  .join(', ');
+const glassSelector = glassClassNames.map((className) => `.${className}`).join(', ');
 const cssEdgePassSelector = '[data-neoverse-glass-edge-pass="css"]';
 const reducedTransparencyQuery = '(prefers-reduced-transparency: reduce)';
 const maxDefaultDevicePixelRatio = 2;
@@ -24,7 +20,7 @@ const motionEvents = [
   'animationend',
   'animationcancel',
 ] as const;
-type GlassVariant = 'subtle' | 'elevated' | 'immersive' | 'card';
+type GlassVariant = 'subtle' | 'elevated' | 'immersive';
 type Color = [number, number, number];
 type Radii = [number, number, number, number];
 
@@ -197,14 +193,6 @@ const getVariant = (element: Element): GlassVariant | undefined => {
     return materialClassName.replace('material-glass-', '') as GlassVariant;
   }
 
-  if (element.classList.contains('glass-card')) {
-    return 'elevated';
-  }
-
-  if (element.classList.contains('glass-surface')) {
-    return 'subtle';
-  }
-
   return undefined;
 };
 
@@ -236,10 +224,7 @@ const inheritsParentGlassEdge = (element: Element): boolean => {
 
 const colorProperties = [
   '--neoverse-material-edge-refraction-carrier',
-  '--glass-card-highlight',
-  '--glass-highlight',
   '--neoverse-color-edge-light',
-  '--edge-light',
   '--neoverse-color-accent-primary',
   '--accent-primary',
   '--neoverse-color-accent-secondary',
@@ -262,14 +247,23 @@ const firstPropertyValue = (
   return undefined;
 };
 
-const getRadii = (style: CSSStyleDeclaration): Radii => [
-  // CSS surfaces are square when no radius is declared. Keep the WebGL edge
-  // congruent with the CSS fallback instead of inventing a card radius.
-  parsePixels(style.borderTopRightRadius, 0),
-  parsePixels(style.borderBottomRightRadius, 0),
-  parsePixels(style.borderBottomLeftRadius, 0),
-  parsePixels(style.borderTopLeftRadius, 0),
-];
+const getRadii = (
+  style: CSSStyleDeclaration,
+  scale: number,
+  width: number,
+  height: number,
+): Radii => {
+  // The canvas uses viewport coordinates; computed CSS radii do not include
+  // ancestor zoom. Match the rendered silhouette and CSS radius clamping.
+  const radius = (value: string): number =>
+    Math.min(Math.max(parsePixels(value, 0) * scale, 0), width / 2, height / 2);
+  return [
+    radius(style.borderTopRightRadius),
+    radius(style.borderBottomRightRadius),
+    radius(style.borderBottomLeftRadius),
+    radius(style.borderTopLeftRadius),
+  ];
+};
 
 const getCanvasViewport = (
   canvas: HTMLCanvasElement,
@@ -454,47 +448,41 @@ const readStyle = (
   }
   if (surfaceOpacity === 0) return undefined;
 
+  // offsetWidth is measured in layout pixels; the renderer samples the
+  // zoomed viewport box. This includes both the control's and its ancestors'
+  // zoom without depending on a single inherited CSS zoom declaration.
+  const scale = element.offsetWidth > 0 ? rect.width / element.offsetWidth : 1;
+  const surfaceScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
+
   const variant = getVariant(element) ?? 'subtle';
   const defaults = getDefaultEdgeValues(variant);
-  const edgeWidth = Math.max(
-    parsePixels(
-      firstPropertyValue(style, [
-        '--neoverse-material-edge-refraction-width',
-        '--glass-edge-width',
-      ]) ?? '',
-      defaults.width,
-    ),
-    0.5,
-  );
-  const softness = Math.max(
-    parsePixels(
-      firstPropertyValue(style, [
-        '--neoverse-material-edge-refraction-softness',
-        '--glass-edge-softness',
-      ]) ?? '',
-      defaults.softness,
-    ),
-    1,
-  );
+  const edgeWidth =
+    Math.max(
+      parsePixels(
+        firstPropertyValue(style, ['--neoverse-material-edge-refraction-width']) ?? '',
+        defaults.width,
+      ),
+      0.5,
+    ) * surfaceScale;
+  const softness =
+    Math.max(
+      parsePixels(
+        firstPropertyValue(style, ['--neoverse-material-edge-refraction-softness']) ?? '',
+        defaults.softness,
+      ),
+      1,
+    ) * surfaceScale;
   const opacity = Math.min(
     Math.max(
       parseFirstNumber(
-        firstPropertyValue(style, [
-          '--neoverse-material-edge-refraction-opacity',
-          '--glass-edge-opacity',
-        ]) ?? '',
+        firstPropertyValue(style, ['--neoverse-material-edge-refraction-opacity']) ?? '',
         defaults.opacity,
       ),
       0,
     ),
     1,
   );
-  const carrier = firstPropertyValue(style, [
-    '--neoverse-material-edge-refraction-carrier',
-    '--glass-card-highlight',
-    '--glass-highlight',
-    '--edge-light',
-  ]);
+  const carrier = firstPropertyValue(style, ['--neoverse-material-edge-refraction-carrier']);
   const carrierColor = resolveColor(
     style,
     carrier === undefined
@@ -507,7 +495,7 @@ const readStyle = (
 
   return {
     rect,
-    radii: getRadii(style),
+    radii: getRadii(style, surfaceScale, rect.width, rect.height),
     edgeWidth,
     softness,
     opacity: opacity * surfaceOpacity,

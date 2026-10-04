@@ -32,7 +32,6 @@ export type SurfacePreset =
   | 'chrome'
   | 'glass-subtle'
   | 'glass-elevated'
-  | 'glass-card'
   | 'glass-immersive';
 
 const buttonVariantClasses: Record<ButtonVariant, string> = {
@@ -87,7 +86,6 @@ const surfaceClasses: Record<SurfacePreset, string> = {
   chrome: 'ui-surface-chrome',
   'glass-subtle': 'material-glass-subtle',
   'glass-elevated': 'material-glass-elevated',
-  'glass-card': 'material-glass-card',
   'glass-immersive': 'material-glass-immersive',
 };
 
@@ -471,7 +469,7 @@ export type UiCardProps<T extends ElementType = 'div'> = {
 /** Surface-backed card geometry with a consumer-owned native or routed root.
  * 复用 Surface 表面的卡片几何，根节点由消费端保留原生或路由语义。 */
 export function UiCard<T extends ElementType = 'div'>(props: UiCardProps<T>) {
-  const { as, surface = 'glass-card', className, ...rest } = props;
+  const { as, surface = 'glass-elevated', className, ...rest } = props;
 
   return createElement(as ?? 'div', {
     ...rest,
@@ -479,6 +477,76 @@ export function UiCard<T extends ElementType = 'div'>(props: UiCardProps<T>) {
     'data-surface': surface,
   });
 }
+
+export type UiInputProps = ComponentPropsWithRef<'input'>;
+
+export function UiInput({ className, ...props }: UiInputProps) {
+  return <input {...props} className={['ui-input', className].filter(Boolean).join(' ')} />;
+}
+
+export type UiTextareaProps = ComponentPropsWithRef<'textarea'>;
+
+export function UiTextarea({ className, ...props }: UiTextareaProps) {
+  return <textarea {...props} className={['ui-textarea', className].filter(Boolean).join(' ')} />;
+}
+
+export type UiSelectProps = ComponentPropsWithRef<'select'>;
+
+export function UiSelect({ className, ...props }: UiSelectProps) {
+  return <select {...props} className={['ui-select', className].filter(Boolean).join(' ')} />;
+}
+
+export interface UiTableProps extends Omit<ComponentPropsWithRef<'table'>, 'children'> {
+  caption?: ReactNode;
+  striped?: boolean;
+  hoverable?: boolean;
+  children?: ReactNode;
+}
+
+/** Native table semantics with a shared inset data surface and local horizontal overflow. */
+export function UiTable({
+  caption,
+  striped = true,
+  hoverable = true,
+  className,
+  children,
+  ...rest
+}: UiTableProps) {
+  return (
+    <div className="ui-table-region" data-ui-table-region="">
+      <table
+        {...rest}
+        className={mergeClassNames(
+          'ui-table',
+          striped && 'ui-table--striped',
+          hoverable && 'ui-table--hoverable',
+          className,
+        )}
+      >
+        {caption !== undefined && caption !== null ? (
+          <caption className="ui-table__caption">{caption}</caption>
+        ) : null}
+        {children}
+      </table>
+    </div>
+  );
+}
+
+export interface UiDisclosureProps extends Omit<ComponentPropsWithRef<'details'>, 'children'> {
+  summary: ReactNode;
+  children?: ReactNode;
+}
+
+/** Native details/summary semantics with the shared inset progressive-disclosure material. */
+export function UiDisclosure({ summary, className, children, ...rest }: UiDisclosureProps) {
+  return (
+    <details {...rest} className={mergeClassNames('ui-disclosure', className)}>
+      <summary className="ui-disclosure__summary">{summary}</summary>
+      <div className="ui-disclosure__content">{children}</div>
+    </details>
+  );
+}
+
 export interface UiNoticeProps extends HTMLAttributes<HTMLElement> {
   as?: 'div' | 'aside' | 'section';
   variant?: NoticeVariant;

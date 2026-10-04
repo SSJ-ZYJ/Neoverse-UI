@@ -9,20 +9,23 @@ const props = defineProps<LabModuleProps>();
 const glassSurfaces = {
   subtle: 'glass-subtle',
   elevated: 'glass-elevated',
-  card: 'glass-card',
   immersive: 'glass-immersive',
 } satisfies Record<(typeof glassVariants)[number], SurfacePreset>;
 </script>
 
 <template>
-  <MaterialBackdrop>
-    <div class="playground-token-grid">
+  <div class="playground-token-grid">
+    <MaterialBackdrop
+      v-for="variant in glassVariants"
+      :key="variant"
+      data-glass-preview-stage
+      :data-glass-preview-variant="variant"
+      class="grid"
+    >
       <UiSurface
-        v-for="variant in glassVariants"
-        :key="variant"
         :surface="glassSurfaces[variant]"
         :data-glass-variant="variant"
-        class="rounded-card p-4"
+        class="grid min-h-40 content-center rounded-card p-5"
       >
         <div class="grid gap-2">
           <h3 class="text-label font-label text-primary">
@@ -33,6 +36,6 @@ const glassSurfaces = {
           </p>
         </div>
       </UiSurface>
-    </div>
-  </MaterialBackdrop>
+    </MaterialBackdrop>
+  </div>
 </template>

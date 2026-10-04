@@ -8,7 +8,7 @@ export {
   iconButtonSizeClasses,
   iconButtonStretchSizeClasses,
 } from './classes';
-export { getSurfaceClass, glassVariantToSurface, isGlassSurface, surfaceClasses } from './surface';
+export { getSurfaceClass, isGlassSurface, surfaceClasses } from './surface';
 export type {
   ActionProps,
   ActionScale,
@@ -26,11 +26,11 @@ export type {
   ControlSurfacePreset,
   ControlSurfaceProps,
   ControlSurfaceScale,
+  DisclosureProps,
   DockProps,
   GlassNestingMode,
-  GlassSurfaceProps,
-  GlassSurfaceVariant,
   IconButtonProps,
+  InputProps,
   NavigationIndicatorPlacement,
   NavigationItemProps,
   NoticeProps,
@@ -39,6 +39,7 @@ export type {
   SegmentedControlProps,
   SegmentedControlSize,
   SegmentOption,
+  SelectProps,
   SkeletonEffect,
   SkeletonProps,
   StatusIndicatorProps,
@@ -49,6 +50,8 @@ export type {
   SurfaceOverflowMode,
   SurfacePreset,
   SurfaceProps,
+  TableProps,
+  TextareaProps,
   TooltipSurfaceProps,
   TooltipSurfaceVariant,
 } from './types';
@@ -58,14 +61,18 @@ export { default as UiBreadcrumb } from './UiBreadcrumb.vue';
 export { default as UiButton } from './UiButton.vue';
 export { default as UiCard } from './UiCard.vue';
 export { default as UiControlSurface } from './UiControlSurface.vue';
+export { default as UiDisclosure } from './UiDisclosure.vue';
 export { default as UiDock } from './UiDock.vue';
-export { default as UiGlassSurface } from './UiGlassSurface.vue';
 export { default as UiIconButton } from './UiIconButton.vue';
+export { default as UiInput } from './UiInput.vue';
 export { default as UiNavigationItem } from './UiNavigationItem.vue';
 export { default as UiNotice } from './UiNotice.vue';
 export { default as UiScrollbar } from './UiScrollbar.vue';
 export { default as UiSegmentedControl } from './UiSegmentedControl.vue';
+export { default as UiSelect } from './UiSelect.vue';
 export { default as UiSkeleton } from './UiSkeleton.vue';
 export { default as UiStatusIndicator } from './UiStatusIndicator.vue';
 export { default as UiSurface } from './UiSurface.vue';
+export { default as UiTable } from './UiTable.vue';
+export { default as UiTextarea } from './UiTextarea.vue';
 export { default as UiTooltipSurface } from './UiTooltipSurface.vue';

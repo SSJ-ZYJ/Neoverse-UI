@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { UiSurface } from '@neoverse-ui/vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
-import { typographyCompatibilityTokens, typographyTokens } from '../lab-data';
+import { typographyTokens } from '../lab-data';
 import { localize, localized, moduleCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
 
@@ -9,13 +9,8 @@ const props = defineProps<LabModuleProps>();
 const scaleCopy = {
   title: localized('Semantic type scale', '语义字体层级'),
   description: localized(
-    'Display, title, body, and label roles expose explicit size levels without changing legacy aliases.',
+    'Display, title, body, and label roles expose one explicit canonical size scale.',
     'Display、Title、Body 与 Label 通过明确尺寸层级表达，同时保留旧有别名兼容。',
-  ),
-  compatibility: localized('Compatibility aliases', '兼容别名'),
-  compatibilityDescription: localized(
-    'Existing display, heading, subtitle, body, and label utilities continue to resolve to the new scale.',
-    '现有 display、heading、subtitle、body 与 label 工具类继续映射到新的语义层级。',
   ),
   prose: localized('Prose & content semantics', '正文与内容语义'),
   proseDescription: localized(
@@ -91,32 +86,6 @@ const scaleCopy = {
           </p>
         </div>
       </UiSurface>
-    </LabSpecimenSection>
-
-    <LabSpecimenSection
-      id="typography-compatibility"
-      :title="localize(scaleCopy.compatibility, props.locale)"
-      :description="localize(scaleCopy.compatibilityDescription, props.locale)"
-    >
-      <div class="playground-specimen-grid">
-        <UiSurface
-          v-for="token in typographyCompatibilityTokens"
-          :key="token.label.en"
-          as="article"
-          surface="subtle"
-          class="playground-specimen-panel grid gap-2"
-        >
-          <div class="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 class="text-label-md font-label text-primary">
-              {{ localize(token.label, props.locale) }}
-            </h3>
-            <code class="text-code text-secondary">{{ token.className }}</code>
-          </div>
-          <p :class="token.className">
-            {{ localize(moduleCopy.typography.sample, props.locale) }}
-          </p>
-        </UiSurface>
-      </div>
     </LabSpecimenSection>
   </div>
 </template>

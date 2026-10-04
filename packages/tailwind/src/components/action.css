@@ -10,7 +10,7 @@
     cursor: pointer;
     user-select: none;
     font-family: var(--neoverse-font-family-sans);
-    font-weight: var(--neoverse-typography-label-weight);
+    font-weight: var(--neoverse-typography-label-md-weight);
     line-height: 1;
     text-decoration: none;
   }
@@ -73,39 +73,5 @@
   :is(.ui-action__leading, .ui-action__trailing) > svg {
     width: var(--ui-action-icon-size);
     height: var(--ui-action-icon-size);
-  }
-
-  /* Preserve the legacy action selector contract for consumers that use
-     `.ui-action` without the adapter's shared `.ui-button` root. */
-  .ui-action[aria-disabled='true'] {
-    cursor: not-allowed;
-    opacity: 0.6;
-  }
-
-  .ui-action[aria-disabled='true']::before {
-    pointer-events: none;
-  }
-
-  .ui-action[aria-disabled='true']::after {
-    opacity: 0;
-  }
-
-  .ui-action[aria-disabled='true'].ui-button--primary:is(:hover, :active) {
-    background-image: var(--neoverse-control-primary-background);
-    background-color: var(--neoverse-control-secondary-fill);
-    box-shadow: var(--neoverse-control-button-edge);
-  }
-
-  .ui-action[aria-disabled='true'].ui-button--secondary:is(:hover, :active) {
-    color: var(--neoverse-control-secondary-foreground);
-    background-image: var(--neoverse-control-secondary-background);
-    background-color: var(--neoverse-control-secondary-fill);
-    box-shadow: var(--neoverse-control-button-edge);
-  }
-
-  .ui-action[aria-disabled='true'].ui-button--ghost:is(:hover, :active) {
-    color: var(--neoverse-control-ghost-foreground);
-    background: var(--neoverse-control-ghost-background);
-    box-shadow: var(--neoverse-control-ghost-shadow);
   }
 }

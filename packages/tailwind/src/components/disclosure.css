@@ -1,0 +1,101 @@
+@layer components {
+  :where(.ui-disclosure, .neoverse-prose details) {
+    border: 0;
+    border-radius: var(--neoverse-disclosure-radius);
+    padding: var(--neoverse-disclosure-padding);
+    background: var(--neoverse-disclosure-background);
+    box-shadow: var(--neoverse-disclosure-shadow);
+    -webkit-backdrop-filter: var(--neoverse-disclosure-filter);
+    backdrop-filter: var(--neoverse-disclosure-filter);
+    transition:
+      background-color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      box-shadow var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  :where(.ui-disclosure__summary, .neoverse-prose summary) {
+    display: flex;
+    min-height: var(--neoverse-disclosure-summary-min-height);
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--neoverse-disclosure-summary-gap);
+    border-radius: var(--neoverse-disclosure-summary-radius);
+    padding: var(--neoverse-disclosure-summary-padding-block)
+      var(--neoverse-disclosure-summary-padding-inline);
+    color: var(--neoverse-disclosure-foreground);
+    cursor: pointer;
+    font-weight: var(--neoverse-font-weight-semibold);
+    list-style: none;
+    transition:
+      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      background-color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  :where(.ui-disclosure__summary, .neoverse-prose summary)::-webkit-details-marker {
+    display: none;
+  }
+
+  :where(.ui-disclosure__summary, .neoverse-prose summary)::after {
+    width: var(--neoverse-disclosure-indicator-size);
+    height: var(--neoverse-disclosure-indicator-size);
+    flex: 0 0 auto;
+    border-inline-end: var(--neoverse-disclosure-indicator-stroke)
+      var(--neoverse-border-style-solid) currentColor;
+    border-block-end: var(--neoverse-disclosure-indicator-stroke) var(--neoverse-border-style-solid)
+      currentColor;
+    color: var(--neoverse-disclosure-indicator-foreground);
+    content: '';
+    transform: rotate(45deg);
+    transition:
+      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      transform var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
+  }
+
+  @media (hover: hover) {
+    :where(.ui-disclosure__summary, .neoverse-prose summary):hover {
+      color: var(--neoverse-disclosure-active-foreground);
+      background: var(--neoverse-disclosure-hover-background);
+    }
+
+    :where(.ui-disclosure__summary, .neoverse-prose summary):hover::after {
+      color: var(--neoverse-disclosure-active-foreground);
+    }
+  }
+
+  :where(.ui-disclosure__summary, .neoverse-prose summary):focus-visible {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: var(--neoverse-focus-ring-offset);
+  }
+
+  :where(.ui-disclosure, .neoverse-prose details)[open] {
+    background: var(--neoverse-disclosure-open-background);
+    box-shadow: var(--neoverse-disclosure-open-shadow);
+  }
+
+  :where(.ui-disclosure, .neoverse-prose details)[open] > :where(.ui-disclosure__summary, summary) {
+    margin-block-end: var(--neoverse-disclosure-content-gap);
+    color: var(--neoverse-disclosure-active-foreground);
+    background: var(--neoverse-disclosure-open-summary-background);
+  }
+
+  :where(.ui-disclosure, .neoverse-prose details)[open]
+    > :where(.ui-disclosure__summary, summary)::after {
+    color: var(--neoverse-disclosure-active-foreground);
+    transform: rotate(225deg);
+  }
+
+  .ui-disclosure__content {
+    padding-inline: var(--neoverse-disclosure-content-padding-inline);
+  }
+
+  .neoverse-prose details:not(.ui-disclosure) > :not(summary) {
+    margin-inline: var(--neoverse-disclosure-content-padding-inline);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :where(.ui-disclosure, .neoverse-prose details),
+    :where(.ui-disclosure__summary, .neoverse-prose summary),
+    :where(.ui-disclosure__summary, .neoverse-prose summary)::after {
+      transition: none;
+    }
+  }
+}

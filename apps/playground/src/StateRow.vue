@@ -14,13 +14,13 @@ const props = defineProps<StateRowProps>();
 <template>
   <UiSurface
     as="article"
-    surface="inset"
-    class="playground-specimen-row grid gap-3 lg:grid-cols-2 lg:items-center"
+    surface="none"
+    class="playground-specimen-row grid gap-3"
     data-specimen-state-row
     :data-specimen-label="localize(props.label, props.locale)"
     :aria-label="localize(props.label, props.locale)"
   >
-    <div class="min-w-0" data-specimen-copy>
+    <div class="playground-specimen-row__heading min-w-0" data-specimen-copy>
       <h3 class="text-label-lg font-label text-primary">
         {{ localize(props.label, props.locale) }}
       </h3>
@@ -28,7 +28,7 @@ const props = defineProps<StateRowProps>();
         {{ localize(props.hint, props.locale) }}
       </p>
     </div>
-    <div class="playground-specimen-preview scrollbar-immersive px-1 py-2" data-specimen-preview>
+    <div class="playground-specimen-preview scrollbar-immersive" data-specimen-preview>
       <div class="playground-specimen-preview__content flex flex-wrap items-center gap-3">
         <slot />
       </div>

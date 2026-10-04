@@ -21,19 +21,21 @@ const sourceFiles = [
   'components/badge.css',
   'components/skeleton.css',
   'components/scrollbar.css',
-  'themes/light.css',
+  'components/table.css',
+  'components/disclosure.css',
+  'components/form-control.css',
 ] as const;
+const lightSource = new URL('themes/light.css', sourceDirectory);
 const darkSource = new URL('themes/dark.css', sourceDirectory);
 const outputDirectory = new URL('dist/', packageDirectory);
 const output = new URL('tokens.css', outputDirectory);
 
-const extractCanonicalBody = (source: string): string => {
-  const marker = '@neoverse-dark-tokens';
+const extractCanonicalBody = (source: string, marker: string, label: string): string => {
   const markerIndex = source.indexOf(marker);
   const openingBrace = source.indexOf('{', markerIndex);
 
   if (markerIndex < 0 || openingBrace < 0) {
-    throw new Error('Dark theme source is missing the canonical declaration body.');
+    throw new Error(`${label} theme source is missing the canonical declaration body.`);
   }
 
   let depth = 0;
@@ -48,7 +50,7 @@ const extractCanonicalBody = (source: string): string => {
     }
   }
 
-  throw new Error('Dark theme source has an unclosed canonical declaration body.');
+  throw new Error(`${label} theme source has an unclosed canonical declaration body.`);
 };
 
 const indent = (source: string, spaces: number): string => {
@@ -59,18 +61,34 @@ const indent = (source: string, spaces: number): string => {
     .join('\n');
 };
 
+export const renderLightTheme = (source: string): string => {
+  const body = extractCanonicalBody(source, '@neoverse-light-tokens', 'Light');
+
+  return `@layer neoverse.tokens {
+  :root:not([data-theme]),
+  :root[data-theme='light'] {
+${indent(body, 4)}
+  }
+
+  @media (prefers-color-scheme: light) {
+    :root[data-theme='system'] {
+${indent(body, 6)}
+    }
+  }
+}`;
+};
+
 export const renderDarkTheme = (source: string): string => {
-  const body = extractCanonicalBody(source);
+  const body = extractCanonicalBody(source, '@neoverse-dark-tokens', 'Dark');
 
   return `@layer neoverse.tokens {
   @media (prefers-color-scheme: dark) {
     :root[data-theme='system'],
-    :root:not([data-theme], .light, .dark) {
+    :root:not([data-theme]) {
 ${indent(body, 6)}
     }
   }
 
-  :root.dark:not([data-theme]),
   :root[data-theme='dark'] {
 ${indent(body, 4)}
   }
@@ -81,6 +99,7 @@ const sourceParts: string[] = [];
 for (const fileName of sourceFiles) {
   sourceParts.push(await Bun.file(new URL(fileName, sourceDirectory)).text());
 }
+sourceParts.push(renderLightTheme(await Bun.file(lightSource).text()));
 sourceParts.push(renderDarkTheme(await Bun.file(darkSource).text()));
 const source = sourceParts.join('\n\n');
 

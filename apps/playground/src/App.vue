@@ -190,10 +190,32 @@ const catalogueCopy = {
     component: localized('Components', '组件'),
     composition: localized('Compositions', '组合'),
     foundation: localized('Foundations', '基础'),
-    compatibility: localized('Compatibility', '兼容'),
   },
 } as const;
 const catalogueKinds = ['all', ...specimenKinds] as const;
+const showcaseSurface = ref<'glass-subtle' | 'glass-elevated'>('glass-subtle');
+const showcaseCopy = {
+  caption: localized('INTERACTIVE SPECIMEN', '交互式预览'),
+  heading: localized('One system. Every surface.', '一种设计语言，多种表面。'),
+  detail: localized(
+    'Explore the actual components, materials, and interaction states.',
+    '直接体验真实组件、材质与交互状态。',
+  ),
+  surfaceLabel: localized('Preview material', '预览材质'),
+  subtle: localized('Soft', '柔和'),
+  elevated: localized('Raised', '悬浮'),
+  components: localized('Components', '查看组件'),
+  materials: localized('Materials', '浏览材质'),
+} as const;
+const showcaseOptions = computed(() => [
+  { value: 'glass-subtle', label: localize(showcaseCopy.subtle, locale.value) },
+  { value: 'glass-elevated', label: localize(showcaseCopy.elevated, locale.value) },
+]);
+function setShowcaseSurface(value: string): void {
+  if (value === 'glass-subtle' || value === 'glass-elevated') {
+    showcaseSurface.value = value;
+  }
+}
 const filteredSpecimens = computed(() => {
   const query = catalogueQuery.value.trim().toLowerCase();
   return labSpecimens.filter((specimen) => {
@@ -246,6 +268,20 @@ const languageOptions = computed(
       { value: 'zh', label: localize(appCopy.language.options.zh, locale.value) },
     ] as const,
 );
+const compactControlsCopy = {
+  theme: localized('Cycle theme', '切换主题'),
+  language: localized('Switch language', '切换语言'),
+} as const;
+
+function cycleTheme(): void {
+  const modes: readonly ThemeMode[] = ['system', 'light', 'dark'];
+  const current = modes.indexOf(themeMode.value);
+  setTheme(modes[(current + 1) % modes.length] ?? 'system');
+}
+
+function toggleLanguage(): void {
+  setLocale(locale.value === 'zh' ? 'en' : 'zh');
+}
 
 function applyTheme(value: ThemeMode): void {
   applyThemeMode(value);
@@ -421,7 +457,7 @@ function handleNavClick(event: MouseEvent, moduleId: ModuleId | null): void {
 }
 
 if (!isFrame) {
-  applyTheme(themeMode.value);
+  applyThemeMode(themeMode.value, false);
   document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en';
 }
 
@@ -484,7 +520,7 @@ onBeforeUnmount(() => {
       id="design-lab-navigation"
       data-playground-navigation
       :class="[
-        'playground-shell__navigation fixed z-layer-modal flex w-sidebar-drawer shrink-0 flex-col overflow-hidden rounded-panel border border-subtle material-glass-elevated p-4 transition-transform duration-standard ease-standard xl:relative xl:inset-auto xl:h-auto xl:w-sidebar xl:translate-x-0',
+        'playground-shell__navigation fixed z-layer-modal flex w-sidebar-drawer shrink-0 flex-col overflow-hidden rounded-panel border border-subtle material-glass-elevated transition-transform duration-standard ease-standard xl:relative xl:inset-auto xl:h-auto xl:w-sidebar xl:translate-x-0',
         isDesktopLayout || isNavOpen
           ? 'playground-shell__navigation--open'
           : 'playground-shell__navigation--closed',
@@ -611,7 +647,7 @@ onBeforeUnmount(() => {
             ]"
           >
             <div
-              class="playground-shell__toolbar-layout grid gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-between sm:gap-x-4"
+              class="playground-shell__toolbar-layout grid grid-cols-[minmax(0,1fr)_auto] items-center gap-2 sm:flex sm:flex-wrap sm:justify-between sm:gap-x-4"
             >
               <div
                 :class="[
@@ -646,9 +682,30 @@ onBeforeUnmount(() => {
                 </h2>
               </div>
               <div
-                class="playground-shell__toolbar-actions flex w-full flex-wrap items-center justify-end gap-2 sm:w-auto sm:shrink-0"
+                class="playground-shell__toolbar-actions flex w-auto shrink-0 items-center justify-end gap-2 sm:flex-wrap"
               >
+                <UiIconButton
+                  class="sm:hidden"
+                  size="sm"
+                  variant="ghost"
+                  surface="none"
+                  :label="`${localize(compactControlsCopy.theme, locale)}：${localize(appCopy.theme.options[themeMode], locale)}`"
+                  @click="cycleTheme"
+                >
+                  <LabIcon name="spark" />
+                </UiIconButton>
+                <UiIconButton
+                  class="sm:hidden"
+                  size="sm"
+                  variant="ghost"
+                  surface="none"
+                  :label="`${localize(compactControlsCopy.language, locale)}：${localize(appCopy.language.options[locale], locale)}`"
+                  @click="toggleLanguage"
+                >
+                  <LabIcon name="globe" />
+                </UiIconButton>
                 <UiSegmentedControl
+                  class="hidden sm:inline-flex"
                   :aria-label="localize(appCopy.theme.label, locale)"
                   :options="themeOptions"
                   :model-value="themeMode"
@@ -656,6 +713,7 @@ onBeforeUnmount(() => {
                   @update:model-value="setTheme"
                 />
                 <UiSegmentedControl
+                  class="hidden sm:inline-flex"
                   :aria-label="localize(appCopy.language.label, locale)"
                   :options="languageOptions"
                   :model-value="locale"
@@ -681,44 +739,90 @@ onBeforeUnmount(() => {
             <UiSurface
               data-overview-hero
               surface="glass-subtle"
-              class="grid gap-5 rounded-card p-6 md:p-8"
+              class="playground-overview-hero grid gap-6 rounded-card p-6 md:p-8 lg:grid-cols-2 lg:items-center"
             >
-              <header class="grid gap-4">
-                <p class="text-label-lg font-label text-accent-primary">
-                  {{ localize(appCopy.overview.eyebrow, locale) }}
+              <div class="grid content-center gap-6">
+                <header class="grid gap-4">
+                  <p class="text-label-lg font-label text-accent-primary">
+                    {{ localize(appCopy.overview.eyebrow, locale) }}
+                  </p>
+                  <h2
+                    id="overview-title"
+                    ref="overviewHeading"
+                    tabindex="-1"
+                    class="text-heading font-heading tracking-heading outline-none"
+                  >
+                    {{ localize(appCopy.overview.title, locale) }}
+                  </h2>
+                  <p class="max-w-reading-wide text-body-lg text-secondary">
+                    {{ localize(appCopy.overview.description, locale) }}
+                  </p>
+                </header>
+                <p class="text-body-sm text-muted">
+                  {{ formatLocalized(catalogueCopy.summary, locale, {
+                      modules: labModules.length,
+                      specimens: labSpecimens.length,
+                    }) }}
                 </p>
-                <h2
-                  id="overview-title"
-                  ref="overviewHeading"
-                  tabindex="-1"
-                  class="text-heading font-heading tracking-heading outline-none"
+              </div>
+
+              <div class="playground-overview-hero__stage">
+                <p class="text-label-sm font-label tracking-wide text-muted">
+                  {{ localize(showcaseCopy.caption, locale) }}
+                </p>
+                <UiSurface
+                  :surface="showcaseSurface"
+                  glass-nesting="local"
+                  content-overflow="visible"
+                  class="playground-overview-hero__sample playground-floating-interaction-surface grid gap-4 rounded-card p-5"
                 >
-                  {{ localize(appCopy.overview.title, locale) }}
-                </h2>
-                <p class="max-w-reading-wide text-body-lg text-secondary">
-                  {{ localize(appCopy.overview.description, locale) }}
-                </p>
-              </header>
-              <p class="text-body-sm text-muted">
-                {{ formatLocalized(catalogueCopy.summary, locale, {
-                    modules: labModules.length,
-                    specimens: labSpecimens.length,
-                  }) }}
-              </p>
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="text-label-sm font-label text-accent-primary">Neoverse UI</span>
+                    <span class="size-2 rounded-pill bg-accent-primary" aria-hidden="true" />
+                  </div>
+                  <div class="grid gap-1">
+                    <h3 class="text-title-sm font-title text-primary">
+                      {{ localize(showcaseCopy.heading, locale) }}
+                    </h3>
+                    <p class="text-body-sm text-secondary">
+                      {{ localize(showcaseCopy.detail, locale) }}
+                    </p>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <UiButton size="sm" @click="selectModule('controls')">
+                      {{ localize(showcaseCopy.components, locale) }}
+                    </UiButton>
+                    <UiButton size="sm" variant="ghost" @click="selectModule('materials')">
+                      {{ localize(showcaseCopy.materials, locale) }}
+                    </UiButton>
+                  </div>
+                </UiSurface>
+                <UiSegmentedControl
+                  :aria-label="localize(showcaseCopy.surfaceLabel, locale)"
+                  :model-value="showcaseSurface"
+                  :options="showcaseOptions"
+                  surface="glass-subtle"
+                  @update:model-value="setShowcaseSurface"
+                />
+              </div>
             </UiSurface>
 
-            <div
-              data-overview-groups
-              class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-5"
-            >
+            <div data-overview-groups class="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
               <UiSurface
-                v-for="group in sectionsByGroup"
+                v-for="(group, index) in sectionsByGroup"
                 :key="group.id"
                 surface="glass-subtle"
                 content-overflow="visible"
-                class="playground-floating-interaction-surface grid min-h-32 content-between gap-4 rounded-card p-5"
+                :class="[
+                  'playground-overview-group playground-floating-interaction-surface grid min-h-32 content-between gap-5 rounded-card p-5',
+                  index < 3 ? 'xl:col-span-2' : 'xl:col-span-3',
+                ]"
               >
-                <div class="grid gap-1">
+                <div class="grid gap-2">
+                  <span class="text-label-sm font-label text-accent-primary">
+                    {{ String(index + 1).padStart(2, '0') }}
+                    / {{ String(sectionsByGroup.length).padStart(2, '0') }}
+                  </span>
                   <h3 class="text-title-sm font-title text-primary">
                     {{ localize(group.label, locale) }}
                   </h3>
@@ -737,6 +841,7 @@ onBeforeUnmount(() => {
                   {{ formatLocalized(appCopy.overview.openGroup, locale, {
                       group: localize(group.label, locale),
                     }) }}
+                  <template #trailing><LabIcon name="arrow-right" /></template>
                 </UiButton>
               </UiSurface>
             </div>

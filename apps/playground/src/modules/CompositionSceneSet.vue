@@ -374,7 +374,7 @@ const navigationItems = computed(() => [
 
         <UiSurface
           as="nav"
-          surface="glass-card"
+          surface="glass-elevated"
           class="grid gap-3 rounded-card p-3"
           data-composition-surface
           :aria-label="localize(copy.scenes.docsNavigationGroup.navigationLabel, props.locale)"
@@ -483,7 +483,7 @@ const navigationItems = computed(() => [
 
         <UiSurface
           as="article"
-          surface="glass-card"
+          surface="glass-elevated"
           class="grid gap-4 rounded-card p-4"
           data-composition-surface
         >
@@ -503,7 +503,7 @@ const navigationItems = computed(() => [
             <p class="text-body text-secondary">
               {{ localize(copy.scenes.docsContentSurface.detail, props.locale) }}
             </p>
-            <div class="grid gap-2 rounded-control border border-subtle p-3">
+            <div class="grid gap-2 rounded-control border border-subtle bg-surface-subtle p-3">
               <p class="text-caption text-muted">
                 {{ localize(copy.scenes.docsContentSurface.reference, props.locale) }}
               </p>

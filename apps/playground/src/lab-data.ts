@@ -367,34 +367,6 @@ export const typographyTokens: TypographyToken[] = [
   },
 ];
 
-export const typographyCompatibilityTokens: TypographyToken[] = [
-  {
-    label: tokenCopy.typography.display,
-    className: 'text-display font-display leading-display tracking-display',
-    variables: Object.values(typography.display),
-  },
-  {
-    label: tokenCopy.typography.heading,
-    className: 'text-heading font-heading leading-heading tracking-heading',
-    variables: Object.values(typography.heading),
-  },
-  {
-    label: tokenCopy.typography.subtitle,
-    className: 'text-subtitle font-subtitle leading-subtitle tracking-subtitle',
-    variables: Object.values(typography.subtitle),
-  },
-  {
-    label: tokenCopy.typography.body,
-    className: 'text-body font-body leading-body tracking-body',
-    variables: Object.values(typography.body),
-  },
-  {
-    label: tokenCopy.typography.label,
-    className: 'text-label font-label leading-label tracking-label',
-    variables: Object.values(typography.label),
-  },
-];
-
 export const primitiveSpacingTokens: NamedToken[] = Object.entries(cssVariables.space).map(
   ([label, variable]) => ({ label: localized(label, label), variable }),
 );
@@ -516,11 +488,10 @@ export const surfaceSamples = [
   },
 ];
 
-export const glassVariants = ['subtle', 'elevated', 'card', 'immersive'] as const;
+export const glassVariants = ['subtle', 'elevated', 'immersive'] as const;
 export const glassVariantLabels: Record<(typeof glassVariants)[number], LocalizedText> = {
   subtle: tokenCopy.glassVariants.subtle,
   elevated: tokenCopy.glassVariants.elevated,
-  card: tokenCopy.glassVariants.card,
   immersive: tokenCopy.glassVariants.immersive,
 };
 export const motionBaseGroups = [

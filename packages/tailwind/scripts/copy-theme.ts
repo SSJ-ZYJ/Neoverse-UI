@@ -8,6 +8,8 @@ const outputDirectory = new URL('dist/', packageDirectory);
 const output = new URL('theme.css', outputDirectory);
 const componentsOutput = new URL('components.css', outputDirectory);
 const proseSource = new URL('src/components/prose.css', packageDirectory);
+const tableSource = new URL('src/components/table.css', packageDirectory);
+const disclosureSource = new URL('src/components/disclosure.css', packageDirectory);
 const proseOutput = new URL('prose.css', outputDirectory);
 await mkdir(outputDirectory, { recursive: true });
 const componentFacade = await Bun.file(componentsSource).text();
@@ -28,5 +30,12 @@ const componentCss = (
 await Promise.all([
   Bun.write(output, await Bun.file(source).text()),
   Bun.write(componentsOutput, `${componentCss}\n`),
-  Bun.write(proseOutput, await Bun.file(proseSource).text()),
+  Bun.write(
+    proseOutput,
+    [
+      await Bun.file(tableSource).text(),
+      await Bun.file(disclosureSource).text(),
+      await Bun.file(proseSource).text(),
+    ].join('\n\n'),
+  ),
 ]);

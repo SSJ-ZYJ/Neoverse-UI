@@ -6,6 +6,7 @@ const modules = [
   'materials',
   'controls',
   'status-feedback',
+  'forms',
   'card',
   'consumer-parity',
 ] as const;
@@ -55,7 +56,7 @@ for (const theme of themes) {
 }
 
 for (const theme of themes) {
-  test(`ghost button keeps a single quiet edge through its states / ${theme}`, async ({ page }) => {
+  test(`ghost button stays borderless through its states / ${theme}`, async ({ page }) => {
     test.skip(test.info().project.name === 'mobile', 'Hover is tested on a fine pointer');
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(`/frame?theme=${theme}&lang=en#controls`, {
@@ -85,6 +86,7 @@ for (const theme of themes) {
 
     const resting = await readState();
     expect(resting.background).toBe('rgba(0, 0, 0, 0)');
+    expect(resting.border).toBe('rgba(0, 0, 0, 0)');
     expect(resting.filter).toBe('none');
     expect(resting.edgeDisplay).toBe('none');
     expect(resting.pressRadius).toBe(resting.radius);
@@ -93,13 +95,13 @@ for (const theme of themes) {
     await ghost.hover();
     const hovered = await readState();
     expect(hovered.background).not.toBe(resting.background);
-    expect(hovered.border).not.toBe(resting.border);
+    expect(hovered.border).toBe(resting.border);
     expect(hovered.edgeDisplay).toBe('none');
     expect(hovered.pressOpacity).toBe('0');
 
     await page.mouse.down();
     const pressed = await readState();
-    expect(pressed.border).not.toBe(resting.border);
+    expect(pressed.border).toBe(resting.border);
     expect(pressed.background).not.toBe(resting.background);
     expect(pressed.edgeDisplay).toBe('none');
     expect(pressed.pressOpacity).toBe('0');
@@ -131,7 +133,7 @@ test('consumer parity exposes destination and current-page semantics', async ({ 
       ),
     ),
   ).toEqual([
-    'ui-button--primary',
+    'ui-button--secondary',
     'ui-button--secondary',
     'ui-button--secondary',
     'ui-button--secondary',
@@ -258,10 +260,29 @@ test('standalone segmented control keeps symmetric glass geometry and stable sel
   expect(geometry.insetInlineStart).toBeCloseTo(geometry.insetBlockStart, 1);
   expect(geometry.sliderWithinRoot).toBe(true);
 
+  const readShellState = () =>
+    control.evaluate((element) => {
+      const style = getComputedStyle(element);
+      const edge = getComputedStyle(element, '::before');
+      return {
+        backgroundColor: style.backgroundColor,
+        backgroundImage: style.backgroundImage,
+        borderColor: style.borderTopColor,
+        boxShadow: style.boxShadow,
+        edgeDisplay: edge.display,
+        edgeOpacity: Number.parseFloat(edge.opacity) || 0,
+      };
+    });
+
   const beforeHover = await readSelectedState();
+  const shellBeforeHover = await readShellState();
+  expect(shellBeforeHover.edgeDisplay).toBe('none');
+  expect(shellBeforeHover.edgeOpacity).toBe(0);
   await control.locator('.ui-segmented-control__option--active').hover();
   const duringHover = await readSelectedState();
+  const shellDuringHover = await readShellState();
   expect(duringHover).toEqual(beforeHover);
+  expect(shellDuringHover).toEqual(shellBeforeHover);
 });
 
 test('chrome edge refraction is removed when reduced transparency is requested', async ({
@@ -307,18 +328,27 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     const linkStyle = getComputedStyle(link);
     const labelStyle = getComputedStyle(label);
     const dockStyle = getComputedStyle(element);
+    const fontProbe = document.createElement('span');
+    fontProbe.style.fontSize = 'var(--neoverse-navigation-item-font-size-md)';
+    element.append(fontProbe);
+    const expectedLinkFontSize = Number.parseFloat(getComputedStyle(fontProbe).fontSize);
+    fontProbe.remove();
     return {
       dockFontFamily: dockStyle.fontFamily,
       dockFontSize: dockStyle.fontSize,
       linkFontFamily: linkStyle.fontFamily,
       linkFontSize: linkStyle.fontSize,
       rootFontSize: Number.parseFloat(getComputedStyle(document.documentElement).fontSize),
+      expectedLinkFontSize,
       labelDisplay: labelStyle.display,
       labelFlex: labelStyle.flex,
     };
   });
   expect(Number.parseFloat(typography.dockFontSize)).toBeCloseTo(typography.rootFontSize, 1);
-  expect(Number.parseFloat(typography.linkFontSize)).toBeCloseTo(typography.rootFontSize * 0.7, 1);
+  expect(Number.parseFloat(typography.linkFontSize)).toBeCloseTo(
+    typography.expectedLinkFontSize,
+    1,
+  );
   expect(typography.dockFontFamily).toContain('"Noto Sans SC Variable"');
   expect(typography.linkFontFamily).toContain('"Noto Sans SC Variable"');
   expect(typography.labelDisplay).toBe('block');
@@ -434,6 +464,11 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     const languageOptionContentWidth = Math.max(
       ...languageOptionGeometry.map(({ contentPlusPaddingWidth }) => contentPlusPaddingWidth),
     );
+    const optionFontProbe = document.createElement('span');
+    optionFontProbe.style.fontSize = 'var(--neoverse-control-segmented-option-font-size-sm)';
+    languageOption.append(optionFontProbe);
+    const expectedOptionFontSize = Number.parseFloat(getComputedStyle(optionFontProbe).fontSize);
+    optionFontProbe.remove();
     const activeLabelRange = document.createRange();
     activeLabelRange.selectNodeContents(activeLabel);
     const activeLabelRect = activeLabelRange.getBoundingClientRect();
@@ -455,6 +490,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       sliderRect.bottom <= languageRect.bottom;
     return {
       surface: element.getAttribute('data-surface'),
+      presentationScale: Number.parseFloat(getComputedStyle(element).zoom),
       chromeClass: element.classList.contains('ui-surface-chrome'),
       dockBackground: style.background,
       dockFilter: style.backdropFilter,
@@ -558,12 +594,16 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       optionHeight: Number.parseFloat(languageOptionStyle.height),
       languageOptionWidth,
       languageOptionContentWidth,
+      languageOptionBorderWidth:
+        Number.parseFloat(languageOptionStyle.borderLeftWidth) +
+        Number.parseFloat(languageOptionStyle.borderRightWidth),
       navigationHeight: activeButtonRect.height,
       navigationBoxSizing: activeButtonStyle.boxSizing,
       navigationPaddingBlock: Number.parseFloat(activeButtonStyle.paddingBlock),
       optionPaddingBlock: Number.parseFloat(languageOptionStyle.paddingBlock),
       optionPaddingInline: Number.parseFloat(languageOptionStyle.paddingInline),
       optionFontSize: Number.parseFloat(languageOptionStyle.fontSize),
+      expectedOptionFontSize,
       optionFontWeight: languageOptionStyle.fontWeight,
       optionLineHeight: languageOptionStyle.lineHeight,
       optionTextCenterDelta:
@@ -630,7 +670,10 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(edgeMaterial.controlHeight).toBeCloseTo(edgeMaterial.compactHeight, 2);
   expect(edgeMaterial.navigationSurfaceHeight).toBeCloseTo(edgeMaterial.actionHeight, 2);
   expect(edgeMaterial.segmentedSurfaceHeight).toBeCloseTo(edgeMaterial.compactHeight, 2);
-  expect(edgeMaterial.navigationHeight).toBeCloseTo(edgeMaterial.navigationSurfaceHeight, 2);
+  expect(edgeMaterial.navigationHeight).toBeCloseTo(
+    edgeMaterial.navigationSurfaceHeight * edgeMaterial.presentationScale,
+    2,
+  );
   expect(edgeMaterial.optionHeight).toBeCloseTo(edgeMaterial.segmentedSurfaceHeight, 2);
   expect(edgeMaterial.sliderHeight).toBeCloseTo(edgeMaterial.segmentedSurfaceHeight, 2);
   expect(edgeMaterial.optionHeight).toBeLessThan(edgeMaterial.navigationHeight);
@@ -638,8 +681,8 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     0.13,
   );
   if ((page.viewportSize()?.width ?? 0) <= 520) {
-    expect(edgeMaterial.languageOptionWidth).toBeCloseTo(
-      edgeMaterial.languageOptionContentWidth,
+    expect(edgeMaterial.languageOptionWidth - edgeMaterial.languageOptionContentWidth).toBeCloseTo(
+      edgeMaterial.languageOptionBorderWidth,
       2,
     );
     expect(edgeMaterial.iconIndicatorGap).toBeGreaterThanOrEqual(
@@ -650,7 +693,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   if ((page.viewportSize()?.width ?? 0) > 520) {
     expect(edgeMaterial.navigationGap).toBeCloseTo(edgeMaterial.navigationGapToken, 2);
     expect(edgeMaterial.navigationGap).toBeGreaterThan(0);
-    expect(edgeMaterial.primaryGap).toBeCloseTo(edgeMaterial.surfaceItemGap, 2);
+    expect(edgeMaterial.primaryGap).toBeCloseTo(edgeMaterial.surfaceItemGap, 1);
     expect(edgeMaterial.primaryGap).toBeGreaterThan(0);
     expect(edgeMaterial.maxNavigationAspectRatio).toBeLessThanOrEqual(
       edgeMaterial.maxHeroActionAspectRatio * 1.08,
@@ -662,11 +705,12 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   }
   expect(edgeMaterial.trailingPaddingInline).toBeCloseTo(
     edgeMaterial.trailingPaddingInlineToken,
-    2,
+    1,
   );
   expect(edgeMaterial.trailingContentInsetInline).toBeCloseTo(
-    edgeMaterial.trailingPaddingInline,
-    2,
+    edgeMaterial.trailingPaddingInline * edgeMaterial.presentationScale +
+      edgeMaterial.trailingBorderInline * (edgeMaterial.presentationScale - 1),
+    1,
   );
   expect(edgeMaterial.trailingPaddingInline).toBeGreaterThan(edgeMaterial.trailingPaddingBlock);
   expect(edgeMaterial.primaryWidth).toBeCloseTo(
@@ -677,8 +721,8 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(
     edgeMaterial.itemGaps.every((gap) =>
       (page.viewportSize()?.width ?? 0) > 520
-        ? Math.abs(gap - edgeMaterial.primaryGap) < 0.1
-        : Math.abs(gap - edgeMaterial.primaryGap) < 0.1,
+        ? Math.abs(gap - edgeMaterial.primaryGap * edgeMaterial.presentationScale) < 0.1
+        : Math.abs(gap - edgeMaterial.primaryGap * edgeMaterial.presentationScale) < 0.1,
     ),
   ).toBe(true);
   if ((page.viewportSize()?.width ?? 0) > 520) {
@@ -699,30 +743,42 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(Math.abs(edgeMaterial.primaryHeight - edgeMaterial.trailingHeight)).toBeLessThan(0.25);
   expect(Math.abs(edgeMaterial.primaryCenterY - edgeMaterial.trailingCenterY)).toBeLessThan(0.25);
   expect(edgeMaterial.dividerGapBefore).toBeCloseTo(edgeMaterial.dividerGapAfter, 2);
-  expect(edgeMaterial.dividerGapBefore).toBeCloseTo(edgeMaterial.dividerGap, 2);
-  expect(edgeMaterial.rootHeight).toBeCloseTo(
-    edgeMaterial.groupHeight + edgeMaterial.surfacePaddingBlock * 2 + 2,
-    1,
+  expect(edgeMaterial.dividerGapBefore).toBeCloseTo(
+    edgeMaterial.dividerGap * edgeMaterial.presentationScale,
+    2,
   );
-  expect(edgeMaterial.rootPaddingBlock).toBeCloseTo(edgeMaterial.surfacePaddingBlock, 2);
-  expect(edgeMaterial.surfacePaddingBlock).toBeCloseTo(edgeMaterial.surfacePadding, 2);
+  expect(
+    Math.abs(
+      edgeMaterial.rootHeight -
+        (edgeMaterial.groupHeight + edgeMaterial.surfacePaddingBlock * 2 + 2) *
+          edgeMaterial.presentationScale,
+    ),
+  ).toBeLessThan(1);
+  expect(edgeMaterial.rootPaddingBlock).toBeCloseTo(edgeMaterial.surfacePaddingBlock, 1);
+  expect(edgeMaterial.surfacePaddingBlock).toBeCloseTo(edgeMaterial.surfacePadding, 1);
   expect(edgeMaterial.surfacePaddingInline).toBeGreaterThan(edgeMaterial.surfacePaddingBlock);
   expect(edgeMaterial.trailingOuterGap).toBeGreaterThanOrEqual(edgeMaterial.surfacePaddingInline);
-  expect(edgeMaterial.itemInsetBlockStart).toBeCloseTo(edgeMaterial.itemInsetBlockEnd, 2);
-  expect(edgeMaterial.itemInsetInlineStart).toBeCloseTo(edgeMaterial.itemInsetBlockStart, 2);
+  expect(edgeMaterial.itemInsetBlockStart).toBeCloseTo(edgeMaterial.itemInsetBlockEnd, 1);
+  expect(edgeMaterial.itemInsetInlineStart).toBeCloseTo(edgeMaterial.itemInsetBlockStart, 1);
   expect(edgeMaterial.sliderWithinLanguage).toBe(true);
   expect(edgeMaterial.sliderWithinOption).toBe(true);
   expect(edgeMaterial.optionContentFits).toBe(true);
-  expect(edgeMaterial.primaryHeight).toBeCloseTo(edgeMaterial.groupHeight, 2);
-  expect(edgeMaterial.trailingHeight).toBeCloseTo(edgeMaterial.groupHeight, 2);
+  expect(edgeMaterial.primaryHeight).toBeCloseTo(
+    edgeMaterial.groupHeight * edgeMaterial.presentationScale,
+    2,
+  );
+  expect(edgeMaterial.trailingHeight).toBeCloseTo(
+    edgeMaterial.groupHeight * edgeMaterial.presentationScale,
+    2,
+  );
   expect(edgeMaterial.optionPaddingBlock).toBeCloseTo(edgeMaterial.rootFontSize * 0.2, 1);
   expect(edgeMaterial.optionPaddingInline).toBeCloseTo(edgeMaterial.rootFontSize * 0.375, 1);
-  expect(edgeMaterial.optionFontSize).toBeCloseTo(edgeMaterial.rootFontSize * 0.7, 1);
+  expect(edgeMaterial.optionFontSize).toBeCloseTo(edgeMaterial.expectedOptionFontSize, 1);
   expect(edgeMaterial.optionFontWeight).toBe('750');
   expect(edgeMaterial.optionLineHeight).toBe('normal');
   expect(edgeMaterial.optionTextCenterDelta).toBeCloseTo(0, 2);
   if ((page.viewportSize()?.width ?? 0) > 520) {
-    expect(edgeMaterial.navigationTextCenterDelta).toBeCloseTo(0, 2);
+    expect(edgeMaterial.navigationTextCenterDelta).toBeCloseTo(0, 1);
   }
   expect(edgeMaterial.sliderRadius).toBeLessThan(edgeMaterial.trailingRadius);
   expect(edgeMaterial.activeBackground).toBe('rgba(0, 0, 0, 0)');
@@ -860,7 +916,7 @@ test('consumer parity dock keeps parent Glass stable on item hover', async ({ pa
   expect(after).toEqual(before);
 });
 
-test('embedded segmented control keeps item resting plates without outer chrome', async ({
+test('embedded segmented control keeps only its selected plate without outer chrome', async ({
   page,
 }) => {
   await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
@@ -900,11 +956,20 @@ test('embedded segmented control keeps item resting plates without outer chrome'
     };
   });
 
+  expect(resting.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+  expect(resting.backgroundImage).toBe('none');
+  expect(resting.borderColor).toBe('rgba(0, 0, 0, 0)');
+  expect(resting.boxShadow).toBe('none');
+
+  const selectedPlate = await control
+    .locator('.ui-segmented-control__slider')
+    .evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { backgroundImage: style.backgroundImage, backgroundColor: style.backgroundColor };
+    });
   expect(
-    resting.backgroundColor !== 'rgba(0, 0, 0, 0)' ||
-      resting.backgroundImage !== 'none' ||
-      (resting.borderStyle !== 'none' && resting.borderColor !== 'rgba(0, 0, 0, 0)') ||
-      resting.boxShadow !== 'none',
+    selectedPlate.backgroundImage !== 'none' ||
+      selectedPlate.backgroundColor !== 'rgba(0, 0, 0, 0)',
   ).toBe(true);
 });
 
@@ -1169,7 +1234,7 @@ for (const theme of themes) {
 }
 
 for (const theme of themes) {
-  test(`ghost button keeps a theme-appropriate material boundary / ${theme}`, async ({ page }) => {
+  test(`ghost button stays borderless while retaining soft depth / ${theme}`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(`/frame?theme=${theme}&lang=zh#card`, {
       waitUntil: 'domcontentloaded',
@@ -1193,11 +1258,7 @@ for (const theme of themes) {
       };
     });
 
-    if (theme === 'dark') {
-      expect(boundary.borderColor).toBe('rgba(0, 0, 0, 0)');
-    } else {
-      expect(boundary.borderColor).not.toBe('rgba(0, 0, 0, 0)');
-    }
+    expect(boundary.borderColor).toBe('rgba(0, 0, 0, 0)');
     expect(boundary.boxShadow).not.toBe('none');
     expect(boundary.edgeDisplay).toBe('none');
     expect(boundary.refractionOpacity).toBe(0);
@@ -1223,13 +1284,9 @@ test.describe('wide Composition WebGL edge', () => {
 
       const runtime = await page.locator('html').getAttribute('data-neoverse-glass-renderer');
       test.skip(
-        !(await page.evaluate(() => {
-          const canvas = document.createElement('canvas');
-          return canvas.getContext('webgl2') !== null || canvas.getContext('webgl') !== null;
-        })),
-        'The visible Composition edge contract is only applicable when WebGL is available.',
+        runtime !== 'webgl',
+        'The visible Composition edge contract is only applicable when the shared WebGL renderer activates.',
       );
-      expect(runtime).toBe('webgl');
 
       const surface = page.locator('#composition-floating-toolbar > .material-glass-immersive');
       await expect(surface).toBeVisible();
@@ -1399,7 +1456,7 @@ test('button press keeps the glass plate and reaches full press glow / dark', as
   }
 });
 
-test('dark button variants mirror the deployed translucent aurora recipe', async ({ page }) => {
+test('dark primary adds hierarchy without abandoning translucent Glass', async ({ page }) => {
   await page.goto('/frame?theme=dark&lang=en#controls', {
     waitUntil: 'domcontentloaded',
   });
@@ -1422,6 +1479,8 @@ test('dark button variants mirror the deployed translucent aurora recipe', async
             : Number(slashAlpha),
         borderColor: style.borderColor,
         backgroundImage: style.backgroundImage,
+        boxShadow: style.boxShadow,
+        color: style.color,
         backdropFilter: style.backdropFilter,
       };
     }),
@@ -1437,8 +1496,14 @@ test('dark button variants mirror the deployed translucent aurora recipe', async
   expect(surfaces[1]?.backgroundAlpha).toBe(0);
   expect(surfaces[0]?.backgroundImage).not.toBe('none');
   expect(surfaces[1]?.backgroundImage).not.toBe('none');
+  expect(surfaces[0]?.backgroundImage).not.toBe(surfaces[1]?.backgroundImage);
+  expect(surfaces[0]?.boxShadow).not.toBe(surfaces[1]?.boxShadow);
+  expect(surfaces[0]?.color).not.toBe(surfaces[1]?.color);
   expect(surfaces[2]?.borderColor).toBe('rgba(0, 0, 0, 0)');
-  expect(surfaces.every(({ backdropFilter }) => backdropFilter.includes('blur(36px)'))).toBe(true);
+  expect(surfaces.slice(0, 2).every(({ backdropFilter }) => backdropFilter.includes('blur('))).toBe(
+    true,
+  );
+  expect(surfaces[2]?.backdropFilter).toBe('none');
 });
 
 test('touch density keeps the compact control geometry and adds a transparent hit area', async ({

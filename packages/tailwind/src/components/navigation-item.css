@@ -5,6 +5,10 @@
     --ui-action-icon-size: var(--neoverse-navigation-item-icon-size);
     gap: var(--neoverse-navigation-item-gap);
     line-height: var(--neoverse-control-compact-line-height);
+    /* Selection is represented by the shared plate/indicator, so the item
+       border must switch to its selected token immediately. Animating the
+       generic Button border leaves a brief double ring around the new tab. */
+    transition-property: color, background-color, box-shadow, transform;
   }
 
   .ui-navigation-item.ui-action--sm {
@@ -61,6 +65,7 @@
     color: var(--neoverse-navigation-item-active-foreground);
     background-image: var(--neoverse-navigation-item-active-background);
     background-color: var(--neoverse-navigation-item-active-fill);
+    border-color: var(--neoverse-navigation-item-active-border);
     background-clip: padding-box;
     box-shadow: var(--neoverse-navigation-item-active-shadow);
   }
@@ -73,6 +78,7 @@
     color: var(--neoverse-navigation-item-active-foreground);
     background-image: var(--neoverse-navigation-item-active-background);
     background-color: var(--neoverse-navigation-item-active-fill);
+    border-color: var(--neoverse-navigation-item-active-border);
     background-clip: padding-box;
     box-shadow: var(--neoverse-navigation-item-active-shadow);
   }
@@ -101,8 +107,12 @@
     background: var(--neoverse-navigation-item-indicator-color);
     opacity: 0;
     transform: translateX(-50%) scaleX(0.55);
+    /* Dock/navigation selection should move at the same perceptual rate
+       as the SegmentedControl slider. Using the shorter feedback timing for
+       opacity made the bottom indicator appear to snap before its scale
+       transition had finished. */
     transition:
-      opacity var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      opacity var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
       transform var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
   }
 

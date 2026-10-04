@@ -289,6 +289,25 @@ describe('Glass renderer', () => {
     expect(radiiCall).toEqual([expect.objectContaining({ name: 'u_radii' }), 12, 12, 12, 12]);
   });
 
+  it('scales the WebGL corner radius to match CSS when a parent enlarges the control', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    glass.style.borderRadius = '12px';
+    Object.defineProperty(glass, 'offsetWidth', { configurable: true, value: 100 });
+    setRect(glass, { width: 150, height: 90 });
+    document.body.append(glass);
+
+    const renderer = createTestRenderer();
+    renderer.mount();
+
+    const radiiCall = gl.uniform4f.mock.calls
+      .filter(([location]) => location?.name === 'u_radii')
+      .at(-1);
+    expect(radiiCall).toEqual([expect.objectContaining({ name: 'u_radii' }), 18, 18, 18, 18]);
+  });
+
   it('preserves translucent CSS color tokens in WebGL uniforms', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
@@ -421,13 +440,13 @@ describe('Glass renderer', () => {
     expect(document.documentElement.hasAttribute(glassRendererAttribute)).toBe(false);
   });
 
-  it('discovers the established Aurora Glass surface aliases', () => {
+  it('discovers the established Aurora Glass surface alias', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
-    const card = document.createElement('article');
-    card.className = 'glass-card';
-    setRect(card, { width: 320, height: 180 });
-    document.body.append(card);
+    const surface = document.createElement('article');
+    surface.className = 'material-glass-subtle';
+    setRect(surface, { width: 320, height: 180 });
+    document.body.append(surface);
 
     const renderer = createTestRenderer();
     renderer.mount();

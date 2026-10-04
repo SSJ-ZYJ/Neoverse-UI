@@ -7,6 +7,7 @@
        foreground color and the selected indicator bar. */
     --neoverse-navigation-item-active-background: var(--neoverse-control-active-background);
     --neoverse-navigation-item-active-fill: transparent;
+    --neoverse-navigation-item-active-border: var(--neoverse-control-active-border);
     --neoverse-navigation-item-active-foreground: var(
       --neoverse-control-segmented-active-foreground
     );

@@ -7,25 +7,44 @@ Neoverse UI publishes the following public packages under the npm `@neoverse-ui`
 - `@neoverse-ui/glass-runtime`
 - `@neoverse-ui/tailwind`
 - `@neoverse-ui/vue`
+- `@neoverse-ui/react`
+- `@neoverse-ui/giscus-theme`
 
-`@neoverse-ui/react` and `@neoverse-ui/playground` are private workspaces and are not published.
+`apps/playground` is an internal workspace and is never published.
+
+## Release preparation versus publishing
+
+Normal development and release-candidate preparation may create Changesets, run quality gates, build packages, and verify package contents. Those steps do not publish anything.
+
+The following commands are versioning or publication operations and must only run during an explicitly approved release:
+
+```sh
+bun run version
+bun run release:pack
+bun run release
+bun changeset version
+bun changeset publish
+npm publish
+```
+
+Do not run them merely to validate a release candidate.
 
 ## Release gates
 
-Before any npm publish, the repository must pass:
+Before any npm publication, the repository must pass:
 
 ```sh
 bun install --frozen-lockfile
 bun run release:check
 ```
 
-`release:check` runs the workspace checks and build, packs every public package, verifies package metadata and exported files, rejects leaked `workspace:` protocols and test/playground artifacts, and installs the tarballs into a temporary clean consumer for JS, CSS, and TypeScript smoke tests.
+`release:check` runs the workspace checks and build, verifies every public package, rejects leaked `workspace:` protocols and source/test/playground artifacts, and installs the generated package contents into a temporary clean consumer for JS, CSS, and TypeScript smoke tests.
 
-Public publishing is intentionally blocked until the repository has a chosen root license, the root `package.json` and every public package declare the same SPDX `license` value, and each public package carries the same `LICENSE` text in its tarball. Do not bypass this gate for the first release.
+The repository and all public packages use the MIT license. `scripts/verify-packages.ts` verifies the public package metadata and package contents before release.
 
-## Normal development flow
+## Changesets
 
-Code changes that affect a public package should include a Changeset:
+Code changes that affect a public package must include a Changeset:
 
 ```sh
 bun changeset
@@ -33,83 +52,75 @@ bun changeset
 
 Choose the affected packages and the appropriate SemVer bump. Commit the generated `.changeset/*.md` file with the code change.
 
-After changes land on `main`, `.github/workflows/release.yml` uses Changesets to select one of three modes:
+For the 0.2.0 line, breaking changes from 0.1.x use a `minor` bump because every public package is still pre-1.0. The migration contract is documented in [migration-0.2.0.md](migration-0.2.0.md).
+
+During release-candidate work, validate the pending release plan with:
+
+```sh
+bun changeset status
+bun run check
+bun run verify:packages
+```
+
+Do not run `changeset version` until the release is explicitly approved.
+
+## Automated release flow
+
+After release changes land on `main`, `.github/workflows/release.yml` uses Changesets to select one of three modes:
 
 - `version` — create or update the **Version Packages** pull request.
-- `publish` — pack and publish versions that have not reached npm yet.
+- `publish` — verify, pack, and publish versions that have not reached npm yet.
 - `none` — no release work is required.
 
 The version script runs `changeset version` and then refreshes `bun.lock`, so workspace versions used by Bun packing stay aligned with the versioned package manifests.
 
-## First release bootstrap
+## First publication of a package
 
-The first public release is different from later releases because npm Trusted Publisher settings can only be attached after the package exists on npm.
+A package that has never existed on npm needs an initial publication before npm Trusted Publisher settings can be attached to it.
 
-1. Choose the repository license, add the root `LICENSE`, copy the same license text into every public package directory, and add the same SPDX `license` value to the root and public package manifests.
-2. Run `bun changeset status` and resolve all accumulated pre-release Changesets into the intended first public version. Do not publish a version while leaving Changesets that describe content already included in that same release.
+Before that first publication:
+
+1. Confirm the package is listed as public in its `package.json` and carries the repository MIT license.
+2. Run `bun changeset status` and ensure the intended version is represented by the pending Changesets.
 3. Run `bun run release:check` and require it to pass without exceptions.
-4. Confirm the intended first versions and package contents with:
+4. Inspect the intended version and package contents before approving any publish step.
+5. Authenticate against the official npm registry only when publication is explicitly approved.
+6. Publish only the already-verified package artifacts.
+7. Verify the registry state before pushing release tags.
 
-   ```sh
-   bun run release:pack
-   ```
+Never use an install mirror as the publication endpoint.
 
-5. Authenticate this machine against the official npm registry. The local machine may use an install mirror globally, so specify npmjs explicitly instead of changing the global registry:
+## npm Trusted Publishing
 
-   ```sh
-   npm login --scope=@neoverse-ui --registry=https://registry.npmjs.org/
-   ```
-
-6. Publish the already-verified pack directory:
-
-   ```sh
-   bun changeset publish --from-pack-dir .release
-   ```
-
-   Package-level `publishConfig.registry` and `publishConfig.access` force the public packages to `https://registry.npmjs.org/` with public access.
-
-7. Verify that all five intended first-release versions are visible under the `neoverse-ui` npm organization and can be installed from a fresh directory.
-8. Push the release commit/tags only after the registry state is verified.
-
-Never use the Tencent/npm install mirror as the publication endpoint.
-
-## Enable npm Trusted Publishing after bootstrap
-
-After the five packages exist, configure a Trusted Publisher for each package in npm with:
+After a public package exists on npm, configure a Trusted Publisher for that package with:
 
 - GitHub owner: `SSJ-ZYJ`
 - Repository: `Neoverse-UI`
 - Workflow filename: `release.yml`
 - Environment name: `npm`
-- Allowed actions: enable direct `npm publish` in addition to the default staged-publish permission, because the Changesets publish action performs a normal npm publish
+- Allowed actions: direct npm publication in addition to staged publication when required by the Changesets workflow
 
 Then configure GitHub:
 
 1. In **Settings → Actions → General**, allow GitHub Actions to create and approve pull requests so the Version Packages PR can be maintained.
-2. Create an `npm` Environment. A required reviewer can be added if publication should always require explicit approval.
-3. Add the repository variable `NPM_TRUSTED_PUBLISHING_ENABLED` with value `true` only after every public package has its Trusted Publisher configured.
-4. Add the repository variable `RELEASE_AUTOMATION_ENABLED` with value `true` only after the first-release bootstrap is complete and the accumulated pre-release Changesets have been resolved.
+2. Create an `npm` Environment. Add a required reviewer if publication should always require explicit approval.
+3. Add the repository variable `NPM_TRUSTED_PUBLISHING_ENABLED=true` only after every public package has its Trusted Publisher configured.
+4. Add `RELEASE_AUTOMATION_ENABLED=true` only after the first-publication bootstrap is complete and all accumulated pre-release Changesets have been resolved.
 
-The release workflow stays dormant until `RELEASE_AUTOMATION_ENABLED` is enabled. In publish mode it always runs the verification/pack job, while the actual npm publish job additionally requires `NPM_TRUSTED_PUBLISHING_ENABLED=true`. The publish job uses a GitHub-hosted runner, Node 24, a current npm CLI, and `id-token: write`; no long-lived `NPM_TOKEN` is required.
+The release workflow stays dormant until `RELEASE_AUTOMATION_ENABLED` is enabled. In publish mode it always runs package verification first. The publication job additionally requires `NPM_TRUSTED_PUBLISHING_ENABLED=true` and uses OIDC instead of a long-lived `NPM_TOKEN`.
 
 ## Subsequent releases
 
-After Trusted Publishing is enabled, the normal release path is:
+After Trusted Publishing is enabled, the normal path is:
 
 ```text
 feature/fix + changeset
-        ↓
-main
-        ↓
-Version Packages PR
-        ↓
-review + merge
-        ↓
-release workflow verifies and packs tarballs
-        ↓
-npm Trusted Publishing (OIDC)
-        ↓
-Git tags + GitHub Releases
+        → main
+        → Version Packages PR
+        → review + merge
+        → release workflow verifies package contents
+        → npm Trusted Publishing
+        → Git tags + GitHub Releases
 ```
 
-Do not run `npm publish` directly from individual workspace source directories. The release path packs first, verifies the exact tarballs, and publishes only those verified artifacts; internal public-package dependencies remain explicit SemVer ranges in the published manifests.
+Do not run `npm publish` directly from individual workspace source directories. The release path verifies the exact public package contents first; internal public-package dependencies remain explicit SemVer ranges in the published manifests.

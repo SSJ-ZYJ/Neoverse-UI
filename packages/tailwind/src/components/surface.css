@@ -10,8 +10,7 @@
     border-radius: var(--neoverse-radius-card);
   }
 
-  .ui-card,
-  .ui-glass-surface {
+  .ui-card {
     border-radius: var(--neoverse-radius-card);
     padding: var(--neoverse-space-4);
   }

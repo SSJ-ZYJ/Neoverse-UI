@@ -13,4 +13,7 @@
 @import './components/segmented-control.css';
 @import './components/skeleton.css';
 @import './components/scrollbar.css';
+@import './components/table.css';
+@import './components/disclosure.css';
+@import './components/form-control.css';
 @import './components/prose.css';

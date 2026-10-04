@@ -6,14 +6,45 @@ import {
   UiBreadcrumb,
   UiButton,
   UiCard,
+  UiDisclosure,
   UiDock,
   UiIconButton,
+  UiInput,
   UiNotice,
+  UiSelect,
   UiSurface,
+  UiTable,
+  UiTextarea,
   uiActionClassName,
 } from './index.js';
 
 type TestElement = ReactElement<{ children?: ReactNode; [key: string]: unknown }>;
+
+test('form controls preserve native props and compose canonical classes', () => {
+  const input = UiInput({
+    type: 'email',
+    name: 'email',
+    className: 'consumer-input',
+  }) as TestElement;
+  expect(input.type).toBe('input');
+  expect(input.props.type).toBe('email');
+  expect(input.props.name).toBe('email');
+  expect(input.props.className).toBe('ui-input consumer-input');
+
+  const textarea = UiTextarea({ name: 'notes', rows: 4 }) as TestElement;
+  expect(textarea.type).toBe('textarea');
+  expect(textarea.props.rows).toBe(4);
+  expect(textarea.props.className).toBe('ui-textarea');
+
+  const select = UiSelect({
+    name: 'runtime',
+    children: createElement('option', { value: 'native' }, 'Native'),
+  }) as TestElement;
+  expect(select.type).toBe('select');
+  expect(select.props.name).toBe('runtime');
+  expect(select.props.className).toBe('ui-select');
+  expect(Children.count(select.props.children)).toBe(1);
+});
 
 test('builds the canonical secondary action contract', () => {
   const classes = uiActionClassName({ variant: 'secondary', size: 'sm', surface: 'glass-subtle' });
@@ -34,7 +65,7 @@ test('keeps consumer layout classes additive instead of replacing the contract',
 });
 
 test('surface can explicitly own a nested Glass material plane', () => {
-  const defaultSurface = UiSurface({ surface: 'glass-card' });
+  const defaultSurface = UiSurface({ surface: 'glass-elevated' });
   expect(defaultSurface.props['data-neoverse-glass-nesting']).toBe('local');
 
   const surface = UiSurface({
@@ -96,6 +127,55 @@ test('loading disables native activation without losing the label or submit sema
   const children = Children.toArray(element.props.children) as TestElement[];
   expect(children[2]?.props.children).toBe('Save');
   expect(UiButton({ disabled: true }).props.disabled).toBe(true);
+});
+
+test('table preserves native semantics inside a local overflow region', () => {
+  const table = UiTable({
+    caption: 'Runtime support',
+    'aria-label': 'Runtime support',
+    className: 'consumer-table',
+    children: createElement(
+      'tbody',
+      null,
+      createElement('tr', null, createElement('td', null, 'Ready')),
+    ),
+  });
+
+  expect(table.type).toBe('div');
+  expect(table.props.className).toBe('ui-table-region');
+  expect(table.props['data-ui-table-region']).toBe('');
+  const nativeTable = (table.props as unknown as { children: TestElement }).children;
+  expect(nativeTable.type).toBe('table');
+  expect(nativeTable.props['aria-label']).toBe('Runtime support');
+  expect(String(nativeTable.props.className)).toContain('ui-table');
+  expect(String(nativeTable.props.className)).toContain('ui-table--striped');
+  expect(String(nativeTable.props.className)).toContain('ui-table--hoverable');
+  expect(String(nativeTable.props.className)).toContain('consumer-table');
+  const tableChildren = Children.toArray(nativeTable.props.children) as TestElement[];
+  expect(tableChildren[0]?.type).toBe('caption');
+  expect(tableChildren[0]?.props.children).toBe('Runtime support');
+});
+
+test('disclosure preserves native details and summary semantics', () => {
+  const disclosure = UiDisclosure({
+    id: 'implementation-notes',
+    open: true,
+    className: 'consumer-disclosure',
+    summary: 'Implementation notes',
+    children: 'Use semantic tokens.',
+  });
+
+  expect(disclosure.type).toBe('details');
+  expect(disclosure.props.id).toBe('implementation-notes');
+  expect(disclosure.props.open).toBe(true);
+  expect(disclosure.props.className).toContain('ui-disclosure');
+  expect(disclosure.props.className).toContain('consumer-disclosure');
+  const children = Children.toArray(disclosure.props.children) as TestElement[];
+  expect(children[0]?.type).toBe('summary');
+  expect(children[0]?.props.className).toBe('ui-disclosure__summary');
+  expect(children[0]?.props.children).toBe('Implementation notes');
+  expect(children[1]?.props.className).toBe('ui-disclosure__content');
+  expect(children[1]?.props.children).toBe('Use semantic tokens.');
 });
 
 test('notice preserves native attributes and composes variant, content, and action', () => {
@@ -295,20 +375,20 @@ test('card keeps consumer root semantics and composes the shared surface', () =>
   const defaultCard = UiCard({
     children: 'Default card',
   });
-  expect(defaultCard.props['data-surface']).toBe('glass-card');
-  expect(defaultCard.props.className).toContain('material-glass-card');
+  expect(defaultCard.props['data-surface']).toBe('glass-elevated');
+  expect(defaultCard.props.className).toContain('material-glass-elevated');
 
   const article = UiCard<'article'>({
     as: 'article',
     id: 'reading-card',
-    surface: 'glass-card',
+    surface: 'glass-elevated',
     className: 'docs-card',
     children: 'Article content',
   });
   expect(article.type).toBe('article');
   expect(article.props.id).toBe('reading-card');
-  expect(article.props['data-surface']).toBe('glass-card');
-  expect(article.props.className).toBe('ui-card material-glass-card docs-card');
+  expect(article.props['data-surface']).toBe('glass-elevated');
+  expect(article.props.className).toBe('ui-card material-glass-elevated docs-card');
 
   const link = UiCard<'a'>({
     as: 'a',

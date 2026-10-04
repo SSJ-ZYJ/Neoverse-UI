@@ -3,7 +3,6 @@
     --neoverse-material-transparency-opaque: 100%;
     --neoverse-material-transparency-subtle: 30%;
     --neoverse-material-transparency-elevated: 20%;
-    --neoverse-material-transparency-card: 52%;
     --neoverse-material-transparency-immersive: 12%;
 
     --neoverse-material-blur-none: 0px;
@@ -37,7 +36,7 @@
        catches light without becoming a bright painted band. */
     --neoverse-material-edge-refraction-width-subtle: 1px;
     --neoverse-material-edge-refraction-width-elevated: 1.25px;
-    --neoverse-material-edge-refraction-width-immersive: 1.5px;
+    --neoverse-material-edge-refraction-width-immersive: 1.25px;
     --neoverse-material-edge-refraction-softness-subtle: blur(3px);
     --neoverse-material-edge-refraction-softness-elevated: blur(4px);
     --neoverse-material-edge-refraction-softness-immersive: blur(5px);
@@ -47,11 +46,6 @@
       var(--neoverse-color-accent-primary) 14%
     );
     --neoverse-material-tint-elevated: color-mix(
-      in srgb,
-      var(--neoverse-color-surface-glass) 88%,
-      var(--neoverse-color-accent-primary) 12%
-    );
-    --neoverse-material-tint-card: color-mix(
       in srgb,
       var(--neoverse-color-surface-glass) 88%,
       var(--neoverse-color-accent-primary) 12%
@@ -68,8 +62,8 @@
       inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-edge-light) 24%, transparent),
       inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 8%, transparent);
     --neoverse-material-inner-glow-immersive:
-      inset 0 1px 4px color-mix(in srgb, var(--neoverse-color-edge-light) 28%, transparent),
-      inset 0 -1px 4px color-mix(in srgb, var(--neoverse-color-accent-secondary) 10%, transparent);
+      inset 0 1px 4px color-mix(in srgb, var(--neoverse-color-edge-light) 16%, transparent),
+      inset 0 -1px 4px color-mix(in srgb, var(--neoverse-color-accent-secondary) 5%, transparent);
     /* One broad environmental transition is less illustrative than a pair
        of inset strokes and lets the sampled edge do the material work. */
     --neoverse-material-seam-glow-subtle: 0 0 20px -3px
@@ -77,7 +71,7 @@
     --neoverse-material-seam-glow-elevated: 0 0 22px -3px
       color-mix(in srgb, var(--neoverse-color-accent-primary) 12%, transparent);
     --neoverse-material-seam-glow-immersive: 0 0 24px -3px
-      color-mix(in srgb, var(--neoverse-color-accent-tertiary) 14%, transparent);
+      color-mix(in srgb, var(--neoverse-color-accent-tertiary) 7%, transparent);
     --neoverse-material-bloom-subtle:
       0 1.2rem 2.8rem -1.9rem
       color-mix(in srgb, var(--neoverse-color-accent-primary) 18%, transparent),
@@ -97,7 +91,7 @@
     --neoverse-material-edge-highlight-none: none;
     --neoverse-material-edge-refraction-opacity-subtle: 0.46;
     --neoverse-material-edge-refraction-opacity-elevated: 0.5;
-    --neoverse-material-edge-refraction-opacity-immersive: 0.54;
+    --neoverse-material-edge-refraction-opacity-immersive: 0.34;
     --neoverse-material-edge-refraction-carrier-subtle: color-mix(
       in srgb,
       var(--neoverse-color-edge-light) 30%,
@@ -110,7 +104,7 @@
     );
     --neoverse-material-edge-refraction-carrier-immersive: color-mix(
       in srgb,
-      var(--neoverse-color-edge-light) 34%,
+      var(--neoverse-color-edge-light) 23%,
       transparent
     );
     /* Keep a layered fallback for surfaces without the masked backdrop path;
@@ -170,26 +164,26 @@
       inset 0 1px 2px
       color-mix(
         in srgb,
-        var(--neoverse-color-edge-light) 28%,
-        var(--neoverse-color-accent-primary) 19%
+        var(--neoverse-color-edge-light) 19%,
+        var(--neoverse-color-accent-primary) 9%
       ),
       inset 0 -1px 2px
       color-mix(
         in srgb,
-        var(--neoverse-color-accent-secondary) 16%,
-        var(--neoverse-color-edge-light) 10%
+        var(--neoverse-color-accent-secondary) 8%,
+        var(--neoverse-color-edge-light) 7%
       ),
       inset 1px 0 2px
       color-mix(
         in srgb,
-        var(--neoverse-color-accent-primary) 14%,
-        var(--neoverse-color-edge-light) 10%
+        var(--neoverse-color-accent-primary) 7%,
+        var(--neoverse-color-edge-light) 7%
       ),
       inset -1px 0 2px
       color-mix(
         in srgb,
-        var(--neoverse-color-accent-tertiary) 12%,
-        var(--neoverse-color-edge-light) 10%
+        var(--neoverse-color-accent-tertiary) 6%,
+        var(--neoverse-color-edge-light) 7%
       );
 
     --neoverse-material-refraction-gradient-none: none;
@@ -225,24 +219,24 @@
     --neoverse-material-refraction-gradient-immersive:
       radial-gradient(
         110% 42% at 50% -4%,
-        color-mix(in srgb, var(--neoverse-color-edge-light) 32%, transparent),
-        color-mix(in srgb, var(--neoverse-color-accent-secondary) 14%, transparent) 42%,
+        color-mix(in srgb, var(--neoverse-color-edge-light) 19%, transparent),
+        color-mix(in srgb, var(--neoverse-color-accent-secondary) 8%, transparent) 42%,
         transparent 72%
       ),
       radial-gradient(
         110% 42% at 50% 104%,
-        color-mix(in srgb, var(--neoverse-color-accent-primary) 17%, transparent),
-        color-mix(in srgb, var(--neoverse-color-accent-tertiary) 11%, transparent) 44%,
+        color-mix(in srgb, var(--neoverse-color-accent-primary) 10%, transparent),
+        color-mix(in srgb, var(--neoverse-color-accent-tertiary) 7%, transparent) 44%,
         transparent 72%
       ),
       radial-gradient(
         42% 86% at -4% 50%,
-        color-mix(in srgb, var(--neoverse-color-accent-secondary) 13%, transparent),
+        color-mix(in srgb, var(--neoverse-color-accent-secondary) 7%, transparent),
         transparent 70%
       ),
       radial-gradient(
         42% 86% at 104% 50%,
-        color-mix(in srgb, var(--neoverse-color-accent-tertiary) 14%, transparent),
+        color-mix(in srgb, var(--neoverse-color-accent-tertiary) 8%, transparent),
         transparent 70%
       );
 
@@ -393,52 +387,6 @@
       --neoverse-material-refraction-gradient-elevated
     );
 
-    /* Glass Card sits between elevated and immersive: the product card
-       material. A hairline border and directional neutral sheen replace the
-       purely environmental edge of elevated, while the sampling stays calmer
-       than immersive. Dark restores theme-specific values in themes/dark.css. */
-    --neoverse-material-glass-card-background: var(--neoverse-color-surface-glass);
-    --neoverse-material-glass-card-background-fallback: var(--neoverse-color-surface-raised);
-    --neoverse-material-glass-card-transparency: var(--neoverse-material-transparency-card);
-    --neoverse-material-glass-card-blur: var(--neoverse-material-blur-lg);
-    --neoverse-material-glass-card-saturation: var(--neoverse-material-saturation-elevated);
-    --neoverse-material-glass-card-border: var(--neoverse-color-border-subtle);
-    --neoverse-material-glass-card-border-width: var(--neoverse-border-width-thin);
-    --neoverse-material-glass-card-edge-highlight: var(--neoverse-material-edge-highlight-subtle);
-    --neoverse-material-glass-card-shadow: var(--neoverse-shadow-card);
-    --neoverse-material-glass-card-filter: blur(var(--neoverse-material-blur-lg))
-      saturate(var(--neoverse-material-saturation-elevated)) brightness(106%) contrast(103%);
-    --neoverse-material-glass-card-edge-filter: var(--neoverse-material-edge-filter-subtle);
-    --neoverse-material-glass-card-tint: var(--neoverse-material-tint-card);
-    --neoverse-material-glass-card-inner-glow: var(--neoverse-material-inner-glow-subtle);
-    --neoverse-material-glass-card-seam-glow: var(--neoverse-material-seam-glow-subtle);
-    --neoverse-material-glass-card-bloom: var(--neoverse-material-bloom-elevated);
-    --neoverse-material-glass-card-edge-refraction-width: var(
-      --neoverse-material-edge-refraction-width-subtle
-    );
-    --neoverse-material-glass-card-edge-refraction-softness: var(
-      --neoverse-material-edge-refraction-softness-subtle
-    );
-    --neoverse-material-glass-card-edge-refraction-opacity: var(
-      --neoverse-material-edge-refraction-opacity-subtle
-    );
-    --neoverse-material-glass-card-edge-refraction-carrier: var(
-      --neoverse-material-edge-refraction-carrier-subtle
-    );
-    --neoverse-material-glass-card-refraction-gradient:
-      linear-gradient(
-        145deg,
-        color-mix(in srgb, var(--neoverse-color-text-secondary) 9%, transparent),
-        transparent 30%,
-        transparent 68%,
-        color-mix(in srgb, var(--neoverse-color-text-muted) 5%, transparent)
-      ),
-      var(--neoverse-material-refraction-gradient-subtle);
-    --neoverse-material-glass-card-hover-transparency: var(
-      --neoverse-material-glass-card-transparency
-    );
-    --neoverse-material-glass-card-hover-border: var(--neoverse-material-glass-card-border);
-    --neoverse-material-glass-card-hover-shadow: var(--neoverse-material-glass-card-shadow);
     --neoverse-material-glass-elevated-hover-transparency: var(
       --neoverse-material-glass-elevated-transparency
     );

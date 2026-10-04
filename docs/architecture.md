@@ -46,7 +46,7 @@ packages/tokens/src/
     light.css            dark.css
 ```
 
-`cssVariables.components` follows that ownership. The legacy flat control, scrollbar, and skeleton maps remain aliases for compatibility. The build emits the public `@neoverse-ui/tokens/css` entry after primitives, semantic roles, foundation layers, light mapping, component defaults, and the canonical dark mapping.
+`cssVariables.components` follows that ownership. The build emits the public `@neoverse-ui/tokens/css` entry after primitives, semantic roles, foundation layers, light mapping, component defaults, and the canonical dark mapping.
 
 ## Tailwind Foundation
 
@@ -80,7 +80,6 @@ UiControlSurface
 UiDock
 UiSurface
 UiCard
-UiGlassSurface  # compatibility wrapper
 UiBadge
 UiStatusIndicator
 UiNotice
@@ -89,7 +88,7 @@ UiSkeleton
 UiScrollbar
 ```
 
-They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. Components that own a visual plane consume the shared `surface` contract instead of hard-coding Glass as an intrinsic component trait. `UiButton`, `UiAction`, `UiIconButton`, and `UiSegmentedControl` keep `glass-subtle` as their compatibility default, while `UiNavigationItem` defaults to `none` so grouped navigation inherits the parent chrome rather than creating nested Glass. `UiSegmentedControl` keeps its active slider and keyboard interaction independent from the outer Surface, so `surface="none"` can be used inside a composition that already owns the chrome. `UiSurface` is the generic polymorphic material primitive. `UiCard` owns standard card geometry (`rounded-card` + base card padding) while consuming the same `surface` contract; standard cards should therefore use `UiCard surface="..."` rather than rebuilding card geometry around `UiSurface`. `UiControlSurface` owns one grouped-control chrome boundary and optional trailing separation. It also owns grouped-surface behavior policy: `hoverMode="static"` keeps parent material stable while descendants hover, and `edgeMode="local"` requests a locally rendered Glass edge without exposing renderer attributes to consumers. `UiDock` specializes that contract for reusable floating navigation: it owns Dock layout, chrome, scale, compact composition, and trailing separation while route data, destination state, icons, and trailing controls stay consumer-owned. `UiStatusIndicator` leaves live-region announcements to the caller. `UiGlassSurface` remains a compatibility wrapper that maps its historical Glass `variant` onto the shared Surface contract. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities.
+They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. Components that own a visual plane consume the shared `surface` contract instead of hard-coding Glass as an intrinsic component trait. `UiButton`, `UiAction`, `UiIconButton`, and `UiSegmentedControl` use `glass-subtle` as their canonical default, while `UiNavigationItem` defaults to `none` so grouped navigation inherits the parent chrome rather than creating nested Glass. `UiSegmentedControl` keeps its active slider and keyboard interaction independent from the outer Surface, so `surface="none"` can be used inside a composition that already owns the chrome. `UiSurface` is the generic polymorphic material primitive. `UiCard` owns standard card geometry (`rounded-card` + base card padding) while consuming the same `surface` contract; standard cards should therefore use `UiCard surface="..."` rather than rebuilding card geometry around `UiSurface`. `UiControlSurface` owns one grouped-control chrome boundary and optional trailing separation. It also owns grouped-surface behavior policy: `hoverMode="static"` keeps parent material stable while descendants hover, and `edgeMode="local"` requests a locally rendered Glass edge without exposing renderer attributes to consumers. `UiDock` specializes that contract for reusable floating navigation: it owns Dock layout, chrome, scale, compact composition, and trailing separation while route data, destination state, icons, and trailing controls stay consumer-owned. `UiStatusIndicator` leaves live-region announcements to the caller. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities.
 
 ## React components
 
@@ -114,9 +113,9 @@ Display-only semantic primitives do not gain a `surface` prop merely for API sym
 
 ## Material / Glass policy
 
-Material values are token-owned. Ordinary Surface Solid, Subtle, and Elevated use Tailwind composition. Glass uses `material-glass-subtle`, `material-glass-elevated`, `material-glass-card`, and `material-glass-immersive`, with CSS as the complete baseline: opaque fallback, tint, backdrop sampling, saturation, directional refraction field, shadow, and reduced-transparency behavior.
+Material values are token-owned. Ordinary Surface Solid, Subtle, and Elevated use Tailwind composition. Glass has exactly three material presets: `material-glass-subtle`, `material-glass-elevated`, and `material-glass-immersive`, with CSS as the complete baseline: opaque fallback, tint, backdrop sampling, saturation, directional refraction field, shadow, and reduced-transparency behavior.
 
-Independent Glass surfaces must render their own tint, border, backdrop filter, and shadow **before hover**, including when nested inside a Glass layout. Vue and React `UiSurface` therefore default to `glassNesting="local"`; `UiCard` and `UiGlassSurface` also retain their own material without a nesting override. Only a layout grouping that deliberately borrows its parent's Glass plane should set `glassNesting="inherit"` (Vue: `glass-nesting="inherit"`). A component that intentionally has no material should use `surface="none"` instead. Never flatten all unmarked nested Glass elements: that silently removes real card surfaces in the Playground and consumer compositions. Normal-state material and reduced-transparency fallbacks must remain independently testable, without relying on hover or the optional WebGL renderer.
+Independent Glass surfaces must render their own tint, border, backdrop filter, and shadow **before hover**, including when nested inside a Glass layout. Vue and React `UiSurface` therefore default to `glassNesting="local"`; `UiCard` also retains its own material without a nesting override. Only a layout grouping that deliberately borrows its parent's Glass plane should set `glassNesting="inherit"` (Vue: `glass-nesting="inherit"`). A component that intentionally has no material should use `surface="none"` instead. Never flatten all unmarked nested Glass elements: that silently removes real card surfaces in the Playground and consumer compositions. Normal-state material and reduced-transparency fallbacks must remain independently testable, without relying on hover or the optional WebGL renderer.
 
 `@neoverse-ui/glass-runtime` is an optional shared renderer, not a prerequisite for any base component. Its policy is:
 
@@ -124,7 +123,6 @@ Independent Glass surfaces must render their own tint, border, backdrop filter, 
 | --- | --- | --- |
 | Subtle | CSS baseline | automatically discovered when the renderer is mounted |
 | Elevated | CSS baseline | automatically discovered when the renderer is mounted |
-| Card | CSS baseline | automatically discovered when the renderer is mounted |
 | Immersive | CSS baseline | automatically discovered when the renderer is mounted |
 
 `createGlassRenderer()` creates at most one non-interactive Canvas per Document, prefers WebGL2, falls back to WebGL1, and keeps CSS active if neither context works. It renders independent eligible Glass surfaces, including nested ones, when they are visible, non-zero, on-screen, and not hidden by computed style. Device Pixel Ratio is capped by `maxDevicePixelRatio` (default 2).
@@ -158,7 +156,7 @@ The generated baselines are stored in `tests/visual/snapshots/`. This is intenti
 
 ## Theme model
 
-Consumers set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root. Light values are mapped from `themes/light.css`; one canonical dark declaration body is emitted for explicit dark and system-dark selectors. Root `.light` and `.dark` classes remain compatible when the data attribute is absent.
+Consumers set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root. Light values are mapped from `themes/light.css`; one canonical dark declaration body is emitted for explicit dark and system-dark selectors. `data-theme` is the only supported theme-selection contract.
 
 ## Verification commands
 
@@ -167,4 +165,4 @@ bun run check
 bun run test:visual
 ```
 
-`bun run check` auto-fixes Biome lint/format/imports, runs the style and Tailwind-usage lints, typechecks every workspace, and runs all unit and contract tests. `bun run test:visual:update` is the explicit baseline-update command. Generated package CSS and TypeScript declarations are rebuilt before the visual server starts.
+`bun run check` auto-fixes Biome lint/format/imports, verifies UTF-8 text integrity, runs the style and Tailwind-usage lints, typechecks every workspace, and runs all unit and contract tests. `bun run test:visual:update` is the explicit baseline-update command. Generated package CSS and TypeScript declarations are rebuilt before the visual server starts.

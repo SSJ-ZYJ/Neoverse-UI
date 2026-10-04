@@ -7,7 +7,7 @@ bun add @neoverse-ui/vue
 ```
 
 ```ts
-import { UiButton, UiCard, UiDock, UiNotice, UiTooltipSurface } from '@neoverse-ui/vue';
+import { UiButton, UiCard, UiDisclosure, UiDock, UiNotice, UiTable, UiTooltipSurface } from '@neoverse-ui/vue';
 ```
 
 Consumers without their own Tailwind build can import the packaged design-system styles. This entry forwards to the compiled shared consumer bundle, including Tokens, Motion, Material, component selectors, and the utilities required by the adapters:

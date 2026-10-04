@@ -1,0 +1,53 @@
+@layer components {
+  :where(.ui-input, .ui-textarea, .ui-select) {
+    width: 100%;
+    min-height: var(--neoverse-form-control-min-height);
+    border: 0;
+    border-radius: var(--neoverse-form-control-radius);
+    padding: var(--neoverse-form-control-padding-block) var(--neoverse-form-control-padding-inline);
+    color: var(--neoverse-form-control-foreground);
+    background: var(--neoverse-form-control-background);
+    box-shadow: var(--neoverse-form-control-shadow);
+    font: inherit;
+    font-size: var(--neoverse-form-control-font-size);
+    line-height: var(--neoverse-form-control-line-height);
+    -webkit-backdrop-filter: var(--neoverse-form-control-filter);
+    backdrop-filter: var(--neoverse-form-control-filter);
+    outline: none;
+    transition:
+      background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      box-shadow var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      opacity var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  :where(.ui-input, .ui-textarea)::placeholder {
+    color: var(--neoverse-form-control-placeholder);
+    opacity: 1;
+  }
+
+  @media (hover: hover) {
+    :where(.ui-input, .ui-textarea, .ui-select):not(:disabled):hover {
+      background: var(--neoverse-form-control-hover-background);
+    }
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select):focus-visible {
+    box-shadow: var(--neoverse-form-control-shadow), var(--neoverse-form-control-focus-shadow);
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select):disabled {
+    cursor: not-allowed;
+    opacity: var(--neoverse-form-control-disabled-opacity);
+  }
+
+  .ui-textarea {
+    min-block-size: var(--neoverse-textarea-min-block-size);
+    resize: vertical;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :where(.ui-input, .ui-textarea, .ui-select) {
+      transition: none;
+    }
+  }
+}

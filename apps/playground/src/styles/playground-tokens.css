@@ -2,14 +2,58 @@
   --neoverse-playground-shell-inset: var(--neoverse-space-3);
   --neoverse-playground-shell-gap: var(--neoverse-space-3);
   --neoverse-playground-shell-drawer-inset: var(--neoverse-space-2);
-  --neoverse-playground-shell-group-shadow: var(--neoverse-shadow-xs);
+  --neoverse-playground-navigation-inset: var(--neoverse-space-4);
+  --neoverse-playground-shell-group-shadow: var(--neoverse-shadow-none);
   --neoverse-playground-navigation-fade-size: var(--neoverse-space-12);
+  --neoverse-playground-navigation-fade-overlap: calc(
+    var(--neoverse-playground-navigation-fade-size) /
+    2
+  );
   --neoverse-playground-toolbar-min-height: calc(
     var(--neoverse-control-surface-control-height) +
     var(--neoverse-space-4)
   );
+  --neoverse-playground-toolbar-module-transparency: 52%;
   --neoverse-playground-consumer-dock-compact-breakpoint: 32.5rem;
   --neoverse-playground-token-card-min-width: 18rem;
   --neoverse-playground-specimen-card-min-width: 23.75rem;
-  --neoverse-playground-specimen-preview-scale: var(--neoverse-control-surface-scale-lg);
+  --neoverse-playground-showcase-min-height: calc(var(--neoverse-space-12) * 5);
+  --neoverse-playground-showcase-card-width: calc(var(--neoverse-space-12) * 6);
+  --neoverse-playground-preview-stage-height: calc(var(--neoverse-space-12) * 3);
+  --neoverse-playground-layout-preview-inline-size: calc(var(--neoverse-space-12) * 2);
+  --neoverse-playground-layout-preview-block-size: calc(
+    var(--neoverse-space-12) +
+    var(--neoverse-space-6)
+  );
+  --neoverse-playground-layout-preview-page-width: 92%;
+  --neoverse-playground-layout-preview-content-width: 82%;
+  --neoverse-playground-layout-preview-reading-width: 54%;
+  --neoverse-playground-layout-preview-reading-wide-width: 72%;
+  --neoverse-playground-layout-preview-sidebar-width: 24%;
+  --neoverse-playground-layout-preview-drawer-width: 38%;
+  --neoverse-playground-layout-preview-header-height: 24%;
+  --neoverse-playground-layout-preview-inline-gutter: 12%;
+  --neoverse-playground-layout-preview-block-gutter: 14%;
+  --neoverse-playground-preview-scale: calc(
+    (var(--neoverse-control-surface-scale-md) + var(--neoverse-control-surface-scale-lg)) /
+    2
+  );
+  /* Every preview stage samples the same controlled color field so material
+     differences come from the component, not from its backdrop position. */
+  --neoverse-playground-stage-gradient:
+    radial-gradient(
+      ellipse at 12% 12%,
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 24%, transparent),
+      transparent 60%
+    ),
+    radial-gradient(
+      ellipse at 88% 18%,
+      color-mix(in srgb, var(--neoverse-color-accent-tertiary) 17%, transparent),
+      transparent 64%
+    ),
+    radial-gradient(
+      ellipse at 56% 92%,
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 20%, transparent),
+      transparent 67%
+    );
 }

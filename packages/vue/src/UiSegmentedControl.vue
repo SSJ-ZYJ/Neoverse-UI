@@ -217,6 +217,7 @@ function optionClasses(option: SegmentOption): string[] {
     v-bind="forwardedAttrs"
     :aria-label="ariaLabel"
     :data-surface="props.surface"
+    data-neoverse-surface-hover="static"
     :class="[classes, attrs.class]"
     :style="[attrs.style, segmentStyle]"
     role="radiogroup"

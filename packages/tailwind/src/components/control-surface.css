@@ -4,10 +4,20 @@
     max-width: 100%;
     align-items: stretch;
     min-width: 0;
-    border-radius: var(--neoverse-radius-control);
+    border-radius: var(--neoverse-control-surface-corner-radius);
     gap: var(--neoverse-control-surface-gap);
     padding-block: var(--neoverse-control-surface-padding-block);
     padding-inline: var(--neoverse-control-surface-padding-inline);
+  }
+
+  .ui-control-surface[data-surface='none'] {
+    --neoverse-control-surface-boundary-width: var(--neoverse-border-width-none);
+  }
+
+  /* Grouped plates derive their radius from the owner's border and inset.
+     A standalone button keeps its own compact-radius contract. */
+  .ui-control-surface__group :is(.ui-button, .ui-action, .ui-navigation-item) {
+    border-radius: var(--neoverse-control-surface-inner-radius);
   }
 
   .ui-control-surface--scale-md {
@@ -49,7 +59,7 @@
   .ui-surface-chrome::before {
     position: absolute;
     z-index: 0;
-    inset: var(--neoverse-control-chrome-edge-refraction-width);
+    inset: 0;
     border-radius: inherit;
     background-color: transparent;
     background-image: var(--neoverse-control-chrome-refraction-gradient);
@@ -100,9 +110,12 @@
 
   .ui-control-surface__indicator[data-ready='true'] {
     transition:
-      left var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
-      top var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
-      width var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
+      left var(--neoverse-control-surface-indicator-duration)
+      var(--neoverse-control-surface-indicator-easing),
+      top var(--neoverse-control-surface-indicator-duration)
+      var(--neoverse-control-surface-indicator-easing),
+      width var(--neoverse-control-surface-indicator-duration)
+      var(--neoverse-control-surface-indicator-easing);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -139,15 +152,22 @@
     --neoverse-control-segmented-option-padding-inline-sm: var(
       --neoverse-control-segmented-embedded-option-padding-inline-sm
     );
+    --neoverse-control-segmented-corner-radius: var(--neoverse-control-surface-inner-radius);
   }
 
   .ui-surface-chrome .ui-control-surface__group--trailing {
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
       var(--neoverse-control-chrome-trailing-border);
-    border-radius: var(--neoverse-radius-control);
+    border-radius: var(--neoverse-control-surface-corner-radius);
     padding-block: var(--neoverse-control-chrome-trailing-padding);
     padding-inline: var(--neoverse-control-chrome-trailing-padding-inline);
     background: var(--neoverse-control-chrome-trailing-background);
+  }
+
+  .ui-surface-chrome .ui-control-surface__group--trailing:has(.ui-segmented-control) {
+    --neoverse-control-segmented-corner-radius: var(
+      --neoverse-control-chrome-trailing-inner-radius
+    );
   }
 
   .ui-control-surface__divider {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiButton, UiSurface } from '@neoverse-ui/vue';
+import { UiButton, UiDisclosure, UiSurface, UiTable } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
 import type { LabModuleProps } from './types';
 
@@ -169,12 +169,7 @@ function onTabKey(event: KeyboardEvent) {
         </p>
       </div>
     </UiSurface>
-    <UiSurface
-      as="article"
-      surface="glass-card"
-      class="rounded-card p-4 md:p-5"
-      data-composition-surface
-    >
+    <article class="min-w-0 p-4 md:p-5">
       <div data-reading-prose class="neoverse-prose max-w-reading">
         <h4>{{ copy.content }}</h4>
         <p>
@@ -205,42 +200,29 @@ function onTabKey(event: KeyboardEvent) {
           </template>
         </dl>
 
-        <UiSurface
-          as="section"
-          surface="none"
-          data-reading-table-scroll
-          class="max-w-full overflow-x-auto"
-          tabindex="0"
-          :aria-label="copy.content"
-        >
-          <table>
-            <caption>
-              {{ copy.tableCaption }}
-            </caption>
-            <thead>
-              <tr>
-                <th v-for="column in copy.columns" :key="column">
-                  {{ column }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="row in copy.rows" :key="row[0]">
-                <td v-for="cell in row" :key="cell">{{ cell }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </UiSurface>
+        <UiTable :caption="copy.tableCaption" :aria-label="copy.tableCaption" data-reading-table>
+          <thead>
+            <tr>
+              <th v-for="column in copy.columns" :key="column">
+                {{ column }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-for="row in copy.rows" :key="row[0]">
+              <td v-for="cell in row" :key="cell">{{ cell }}</td>
+            </tr>
+          </tbody>
+        </UiTable>
 
-        <details>
-          <summary>{{ copy.details }}</summary>
+        <UiDisclosure :summary="copy.details" data-reading-disclosure>
           <p>{{ copy.detail }}</p>
-        </details>
+        </UiDisclosure>
 
         <p>
           <a data-reading-surface-link href="#materials-surface">{{ copy.next }}</a>
         </p>
       </div>
-    </UiSurface>
+    </article>
   </section>
 </template>

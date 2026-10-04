@@ -13,7 +13,6 @@ export type SurfacePreset =
   | 'chrome'
   | 'glass-subtle'
   | 'glass-elevated'
-  | 'glass-card'
   | 'glass-immersive';
 
 export type ControlSurfacePreset = Extract<SurfacePreset, 'none' | 'glass-subtle'>;
@@ -100,20 +99,14 @@ export interface BadgeProps {
   size?: BadgeSize;
 }
 
-export type GlassSurfaceVariant = 'subtle' | 'elevated' | 'card' | 'immersive';
 export type SurfaceHoverMode = 'auto' | 'static';
 export type SurfaceEdgeMode = 'auto' | 'local';
 export type ControlSurfaceScale = 'md' | 'lg';
 
-export interface GlassSurfaceProps {
-  as?: string | Component;
-  variant?: GlassSurfaceVariant;
-}
 export interface ControlSurfaceProps {
   /** Move one indicator between content-sized navigation items. */
   navigationIndicator?: boolean;
   as?: string | Component;
-  variant?: GlassSurfaceVariant;
   surface?: SurfacePreset;
   hoverMode?: SurfaceHoverMode;
   edgeMode?: SurfaceEdgeMode;
@@ -134,6 +127,17 @@ export interface DockProps {
 export interface CardProps {
   as?: string | Component;
   surface?: SurfacePreset;
+}
+
+export interface TableProps {
+  caption?: string;
+  striped?: boolean;
+  hoverable?: boolean;
+}
+
+export interface DisclosureProps {
+  summary: string;
+  open?: boolean;
 }
 
 export type StatusIndicatorStatus = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
@@ -177,6 +181,20 @@ export interface SegmentedControlProps {
   loading?: boolean;
   ariaLabel?: string;
   surface?: ControlSurfacePreset;
+}
+
+export type FormControlValue = string | number;
+
+export interface InputProps {
+  modelValue?: FormControlValue;
+}
+
+export interface TextareaProps {
+  modelValue?: string;
+}
+
+export interface SelectProps {
+  modelValue?: FormControlValue;
 }
 
 export type SkeletonVariant = 'text' | 'title' | 'avatar' | 'circle' | 'rect';

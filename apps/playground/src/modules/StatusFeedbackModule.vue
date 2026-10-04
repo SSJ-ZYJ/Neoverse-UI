@@ -28,8 +28,8 @@ const copy = {
         '所有组件契约均通过了聚焦检查。',
       ),
       warning: localized(
-        'This compatibility path remains available but should not be used for new work.',
-        '该兼容路径仍可使用，但新实现不应继续依赖它。',
+        'This component state needs review before shipping.',
+        '该组件状态需要在发布前完成复核。',
       ),
       danger: localized(
         'The consumer contract is incompatible with the current component state.',

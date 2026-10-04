@@ -40,8 +40,8 @@ test('classifies semantic radius aliases outside the base scale', () => {
 test('keeps semantic typography family roles visible in the Design Lab token specimen', () => {
   const variables = typographyTokens.flatMap((token) => token.variables);
 
-  expect(variables).toContain(cssVariables.typography.display.fontFamily);
-  expect(variables).toContain(cssVariables.typography.body.fontFamily);
+  expect(variables).toContain(cssVariables.typography.family.display);
+  expect(variables).toContain(cssVariables.typography.family.body);
   expect(variables).toContain(cssVariables.typography.code.fontFamily);
 });
 
@@ -103,6 +103,8 @@ test('keeps the top-level lab information architecture compact and purpose-drive
     'controls',
     'dock',
     'status-feedback',
+    'forms',
+    'data-display',
     'card',
     'scrollbar',
     'composition',
@@ -112,7 +114,10 @@ test('keeps the top-level lab information architecture compact and purpose-drive
   expect(moduleGroups.map((group) => [group.id, [...group.moduleIds]])).toEqual([
     ['foundations', ['colors', 'typography', 'layout-shape', 'motion']],
     ['materials', ['materials', 'shadow']],
-    ['components', ['controls', 'dock', 'status-feedback', 'card', 'scrollbar']],
+    [
+      'components',
+      ['controls', 'dock', 'status-feedback', 'forms', 'data-display', 'card', 'scrollbar'],
+    ],
     ['patterns', ['composition']],
     ['validation', ['consumer-parity']],
   ]);
@@ -220,21 +225,4 @@ test('keeps every registered specimen backed by a stable module fixture id', asy
   for (const specimen of labSpecimens) {
     expect(source.includes(`id="${specimen.id}"`), specimen.id).toBe(true);
   }
-});
-
-test('resolves legacy module hashes without changing specimen deep links', () => {
-  expect(resolveLabHash('spacing')).toEqual({
-    moduleId: 'layout-shape',
-    canonicalHash: 'layout-shape',
-  });
-  expect(resolveLabHash('#glass')).toEqual({
-    moduleId: 'materials',
-    canonicalHash: 'materials',
-  });
-  expect(resolveLabHash('controls-action')).toEqual({
-    moduleId: 'controls',
-    specimenId: 'controls-action',
-    canonicalHash: 'controls-action',
-  });
-  expect(resolveLabHash('not-a-lab-route')).toBeNull();
 });

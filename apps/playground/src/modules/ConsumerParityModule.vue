@@ -42,12 +42,12 @@ onBeforeUnmount(() => {
 });
 
 const heroActions = [
-  { label: 'Website', icon: 'globe', primary: true },
-  { label: 'Blog', icon: 'article', primary: false },
-  { label: 'Linux.Do', icon: 'message', primary: false },
-  { label: 'RedNote', icon: 'bookmark', primary: false },
-  { label: 'Email', icon: 'mail', primary: false },
-  { label: 'GitHub', icon: 'github', primary: false },
+  { label: 'Website', icon: 'globe' },
+  { label: 'Blog', icon: 'article' },
+  { label: 'Linux.Do', icon: 'message' },
+  { label: 'RedNote', icon: 'bookmark' },
+  { label: 'Email', icon: 'mail' },
+  { label: 'GitHub', icon: 'github' },
 ] as const;
 
 const navigationItems = computed(
@@ -95,7 +95,7 @@ const languageOptions = computed(
         </header>
 
         <div
-          class="grid min-h-64 min-w-0 content-center gap-4 rounded-panel bg-surface-subtle p-5 shadow-card"
+          class="grid min-h-64 min-w-0 content-center gap-4 rounded-panel border border-subtle bg-surface-subtle p-5 shadow-card"
         >
           <UiStatusIndicator status="success" pulse role="status">
             {{ localize(copy.hero.status, props.locale) }}
@@ -120,7 +120,7 @@ const languageOptions = computed(
               :key="action.label"
               href="#consumer-parity"
               @click.prevent
-              :variant="action.primary ? 'primary' : 'secondary'"
+              variant="secondary"
               size="md"
             >
               <template #leading><LabIcon :name="action.icon" /></template>
@@ -144,7 +144,7 @@ const languageOptions = computed(
         </header>
 
         <div
-          class="flex min-h-40 min-w-0 items-center justify-center rounded-panel bg-surface-subtle p-2 shadow-card sm:p-4"
+          class="flex min-h-40 min-w-0 items-center justify-center rounded-panel border border-subtle bg-surface-subtle p-2 shadow-card sm:p-4"
         >
           <UiDock
             :compact="compactNavigation"

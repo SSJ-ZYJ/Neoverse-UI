@@ -10,277 +10,48 @@ test('exposes semantic color variables under the Neoverse namespace', () => {
   expect(cssVariables.color.action.primaryHover).toBe('--neoverse-color-action-primary-hover');
   expect(cssVariables.color.status.danger).toBe('--neoverse-color-status-danger');
 });
-test('exposes compact-control and skeleton effect tokens', () => {
-  expect(cssVariables.control.primaryBackground).toBe('--neoverse-control-primary-background');
-  expect(cssVariables.control.primaryForeground).toBe('--neoverse-control-primary-foreground');
-  expect(cssVariables.control.primaryHoverShadow).toBe('--neoverse-control-primary-hover-shadow');
-  expect(cssVariables.control.buttonBorder).toBe('--neoverse-control-button-border');
-  expect(cssVariables.control.secondaryForeground).toBe('--neoverse-control-secondary-foreground');
-  expect(cssVariables.control.secondaryHoverForeground).toBe(
-    '--neoverse-control-secondary-hover-foreground',
+test('exposes canonical component token namespaces', () => {
+  expect(cssVariables.components.button.primary.background).toBe(
+    '--neoverse-control-primary-background',
   );
-  expect(cssVariables.control.secondaryActiveForeground).toBe(
-    '--neoverse-control-secondary-active-foreground',
-  );
-  expect(cssVariables.control.ghostBorder).toBe('--neoverse-control-ghost-border');
-  expect(cssVariables.control.ghostForeground).toBe('--neoverse-control-ghost-foreground');
-  expect(cssVariables.control.ghostHoverForeground).toBe(
-    '--neoverse-control-ghost-hover-foreground',
-  );
-  expect(cssVariables.control.ghostActiveForeground).toBe(
-    '--neoverse-control-ghost-active-foreground',
-  );
-  expect(cssVariables.control.ghostBackground).toBe('--neoverse-control-ghost-background');
-  expect(cssVariables.control.buttonEdge).toBe('--neoverse-control-button-edge');
-  expect(cssVariables.control.buttonEdgeActive).toBe('--neoverse-control-button-edge-active');
-  expect(cssVariables.control.buttonEdgeCarrier).toBe('--neoverse-control-button-edge-carrier');
-  expect(cssVariables.control.buttonFilter).toBe('--neoverse-control-button-filter');
-  expect(cssVariables.control.buttonRefractionGradient).toBe(
-    '--neoverse-control-button-refraction-gradient',
-  );
-  expect(cssVariables.control.buttonPressGlow).toBe('--neoverse-control-button-press-glow');
-  expect(cssVariables.control.compactHeight).toBe('--neoverse-control-compact-height');
-  expect(cssVariables.control.compactLineHeight).toBe('--neoverse-control-compact-line-height');
-  expect(cssVariables.control.buttonHoverBackground).toBe(
-    '--neoverse-control-button-hover-background',
-  );
-  expect(cssVariables.control.buttonActiveBackground).toBe(
-    '--neoverse-control-button-active-background',
-  );
-  expect(cssVariables.control.buttonGhostActiveBackground).toBe(
-    '--neoverse-control-button-ghost-active-background',
-  );
-  expect(cssVariables.control.secondaryBackground).toBe('--neoverse-control-secondary-background');
-  expect(cssVariables.control.secondaryBorder).toBe('--neoverse-control-secondary-border');
-  expect(cssVariables.control.secondaryFilter).toBe('--neoverse-control-secondary-filter');
-  expect(cssVariables.control.segmentedBackgroundImage).toBe(
-    '--neoverse-control-segmented-background-image',
-  );
-  expect(cssVariables.control.segmentedBackgroundColor).toBe(
+  expect(cssVariables.components.button.ghost.border).toBe('--neoverse-control-ghost-border');
+  expect(cssVariables.components.segmentedControl.backgroundColor).toBe(
     '--neoverse-control-segmented-background-color',
   );
-  expect(cssVariables.control.segmentedForeground).toBe('--neoverse-control-segmented-foreground');
-  expect(cssVariables.control.segmentedActiveForeground).toBe(
-    '--neoverse-control-segmented-active-foreground',
+  expect(cssVariables.components.segmentedControl.activeBackground).toBe(
+    '--neoverse-control-segmented-active-background',
   );
-  expect(cssVariables.control.segmentedInset).toBe('--neoverse-control-segmented-inset');
-  expect(cssVariables.control.segmentedEmbeddedInset).toBe(
-    '--neoverse-control-segmented-embedded-inset',
+  expect(cssVariables.components.segmentedControl.activeShadow).toBe(
+    '--neoverse-control-segmented-active-shadow',
   );
-  expect(cssVariables.control.segmentedOptionMinWidthCompact).toBe(
-    '--neoverse-control-segmented-option-min-width-compact',
+  expect(cssVariables.components.segmentedControl.shellHoverBackgroundColor).toBe(
+    '--neoverse-control-segmented-shell-hover-background-color',
   );
-  expect(cssVariables.control.segmentedEmbeddedOptionMinWidth).toBe(
-    '--neoverse-control-segmented-embedded-option-min-width',
+  expect(cssVariables.components.segmentedControl.shellHoverBorder).toBe(
+    '--neoverse-control-segmented-shell-hover-border',
   );
-  expect(cssVariables.control.segmentedEmbeddedOptionPaddingInlineSm).toBe(
-    '--neoverse-control-segmented-embedded-option-padding-inline-sm',
+  expect(cssVariables.components.segmentedControl.edgeRefractionOpacity).toBe(
+    '--neoverse-control-segmented-edge-refraction-opacity',
   );
-  expect(cssVariables.control.segmentedOptionRadius).toBe(
-    '--neoverse-control-segmented-option-radius',
+  expect(cssVariables.components.segmentedControl.edgeDisplay).toBe(
+    '--neoverse-control-segmented-edge-display',
   );
-  expect(cssVariables.control.segmentedBorder).toBe('--neoverse-control-segmented-border');
-  expect(cssVariables.control.segmentedShadow).toBe('--neoverse-control-segmented-shadow');
-  expect(cssVariables.control.segmentedFilter).toBe('--neoverse-control-segmented-filter');
-  expect(cssVariables.control.segmentedFocusShadow).toBe(
-    '--neoverse-control-segmented-focus-shadow',
+  expect(cssVariables.components.segmentedControl.optionHoverBackground).toBe(
+    '--neoverse-control-hover-background',
   );
-  expect(cssVariables.control.activeBackground).toBe('--neoverse-control-active-background');
-  expect(cssVariables.control.activeBorder).toBe('--neoverse-control-active-border');
-  expect(cssVariables.control.hoverBackground).toBe('--neoverse-control-hover-background');
-  expect(cssVariables.scrollbar.immersive.size).toBe('--neoverse-scrollbar-immersive-size');
-  expect(cssVariables.scrollbar.overlay.thumbWidth).toBe(
-    '--neoverse-scrollbar-overlay-thumb-width',
+  expect(cssVariables.components.scrollbar.immersive.size).toBe(
+    '--neoverse-scrollbar-immersive-size',
   );
-  expect(cssVariables.scrollbar.immersive.track).toBe('--neoverse-scrollbar-immersive-track');
-  expect(cssVariables.scrollbar.immersive.thumb).toBe('--neoverse-scrollbar-immersive-thumb');
-  expect(cssVariables.scrollbar.immersive.thumbHover).toBe(
-    '--neoverse-scrollbar-immersive-thumb-hover',
-  );
-  expect(cssVariables.scrollbar.immersive.thumbActive).toBe(
-    '--neoverse-scrollbar-immersive-thumb-active',
-  );
-  expect(cssVariables.scrollbar.immersive.thumbEdge).toBe(
-    '--neoverse-scrollbar-immersive-thumb-edge',
-  );
-  expect(cssVariables.skeleton.fill).toBe('--neoverse-skeleton-fill');
-  expect(cssVariables.skeleton.highlight).toBe('--neoverse-skeleton-highlight');
-  expect(cssVariables.skeleton.edge).toBe('--neoverse-skeleton-edge');
-  expect(cssVariables.skeleton.textMinHeight).toBe('--neoverse-skeleton-text-min-height');
-  expect(cssVariables.skeleton.titleMinHeight).toBe('--neoverse-skeleton-title-min-height');
-});
-
-test('exposes component token namespaces while preserving compatibility aliases', () => {
-  const compatibilityMappings = [
-    [cssVariables.components.button.primary.background, cssVariables.control.primaryBackground],
-    [cssVariables.components.button.primary.foreground, cssVariables.control.primaryForeground],
-    [cssVariables.components.button.primary.border, cssVariables.control.primaryBorder],
-    [cssVariables.components.button.primary.shadow, cssVariables.control.primaryShadow],
-    [
-      cssVariables.components.button.primary.hoverBackground,
-      cssVariables.control.primaryHoverBackground,
-    ],
-    [cssVariables.components.button.primary.hoverShadow, cssVariables.control.primaryHoverShadow],
-    [
-      cssVariables.components.button.primary.activeBackground,
-      cssVariables.control.primaryActiveBackground,
-    ],
-    [cssVariables.components.button.secondary.background, cssVariables.control.secondaryBackground],
-    [cssVariables.components.button.secondary.border, cssVariables.control.secondaryBorder],
-    [
-      cssVariables.components.button.secondary.hoverBackground,
-      cssVariables.control.secondaryHoverBackground,
-    ],
-    [cssVariables.components.button.secondary.shadow, cssVariables.control.secondaryShadow],
-    [
-      cssVariables.components.button.secondary.hoverShadow,
-      cssVariables.control.secondaryHoverShadow,
-    ],
-    [cssVariables.components.button.secondary.foreground, cssVariables.control.secondaryForeground],
-    [
-      cssVariables.components.button.secondary.hoverForeground,
-      cssVariables.control.secondaryHoverForeground,
-    ],
-    [
-      cssVariables.components.button.secondary.activeForeground,
-      cssVariables.control.secondaryActiveForeground,
-    ],
-    [cssVariables.components.button.secondary.filter, cssVariables.control.secondaryFilter],
-    [cssVariables.components.button.ghost.border, cssVariables.control.ghostBorder],
-    [cssVariables.components.button.ghost.background, cssVariables.control.ghostBackground],
-    [cssVariables.components.button.ghost.foreground, cssVariables.control.ghostForeground],
-    [
-      cssVariables.components.button.ghost.hoverForeground,
-      cssVariables.control.ghostHoverForeground,
-    ],
-    [
-      cssVariables.components.button.ghost.activeForeground,
-      cssVariables.control.ghostActiveForeground,
-    ],
-    [cssVariables.components.button.border, cssVariables.control.buttonBorder],
-    [cssVariables.components.button.edge, cssVariables.control.buttonEdge],
-    [cssVariables.components.button.edgeActive, cssVariables.control.buttonEdgeActive],
-    [cssVariables.components.button.edgeCarrier, cssVariables.control.buttonEdgeCarrier],
-    [cssVariables.components.button.filter, cssVariables.control.buttonFilter],
-    [
-      cssVariables.components.button.refractionGradient,
-      cssVariables.control.buttonRefractionGradient,
-    ],
-    [cssVariables.components.button.pressGlow, cssVariables.control.buttonPressGlow],
-    [cssVariables.components.button.hoverBackground, cssVariables.control.buttonHoverBackground],
-    [cssVariables.components.button.activeBackground, cssVariables.control.buttonActiveBackground],
-    [
-      cssVariables.components.button.ghostActiveBackground,
-      cssVariables.control.buttonGhostActiveBackground,
-    ],
-    [
-      cssVariables.components.segmentedControl.backgroundColor,
-      cssVariables.control.segmentedBackgroundColor,
-    ],
-    [cssVariables.components.segmentedControl.foreground, cssVariables.control.segmentedForeground],
-    [
-      cssVariables.components.segmentedControl.activeForeground,
-      cssVariables.control.segmentedActiveForeground,
-    ],
-    [cssVariables.components.segmentedControl.inset, cssVariables.control.segmentedInset],
-    [
-      cssVariables.components.segmentedControl.embeddedInset,
-      cssVariables.control.segmentedEmbeddedInset,
-    ],
-    [
-      cssVariables.components.segmentedControl.optionMinWidthCompact,
-      cssVariables.control.segmentedOptionMinWidthCompact,
-    ],
-    [
-      cssVariables.components.segmentedControl.embeddedOptionMinWidth,
-      cssVariables.control.segmentedEmbeddedOptionMinWidth,
-    ],
-    [
-      cssVariables.components.segmentedControl.embeddedOptionPaddingInlineSm,
-      cssVariables.control.segmentedEmbeddedOptionPaddingInlineSm,
-    ],
-    [
-      cssVariables.components.segmentedControl.optionRadius,
-      cssVariables.control.segmentedOptionRadius,
-    ],
-    [cssVariables.components.segmentedControl.border, cssVariables.control.segmentedBorder],
-    [cssVariables.components.segmentedControl.shadow, cssVariables.control.segmentedShadow],
-    [cssVariables.components.segmentedControl.filter, cssVariables.control.segmentedFilter],
-    [
-      cssVariables.components.segmentedControl.focusShadow,
-      cssVariables.control.segmentedFocusShadow,
-    ],
-    [
-      cssVariables.components.segmentedControl.activeBackground,
-      cssVariables.control.activeBackground,
-    ],
-    [cssVariables.components.segmentedControl.activeBorder, cssVariables.control.activeBorder],
-    [
-      cssVariables.components.segmentedControl.activeHighlight,
-      cssVariables.control.activeHighlight,
-    ],
-    [cssVariables.components.segmentedControl.activeShadow, cssVariables.control.activeShadow],
-    [
-      cssVariables.components.segmentedControl.hoverBackground,
-      cssVariables.control.hoverBackground,
-    ],
-    [cssVariables.components.skeleton.fill, cssVariables.skeleton.fill],
-    [cssVariables.components.skeleton.highlight, cssVariables.skeleton.highlight],
-    [cssVariables.components.skeleton.edge, cssVariables.skeleton.edge],
-    [cssVariables.components.skeleton.textMinHeight, cssVariables.skeleton.textMinHeight],
-    [cssVariables.components.skeleton.titleMinHeight, cssVariables.skeleton.titleMinHeight],
-    [cssVariables.components.skeleton.shimmerDuration, cssVariables.skeleton.shimmerDuration],
-    [cssVariables.components.skeleton.shimmerEasing, cssVariables.skeleton.shimmerEasing],
-    [cssVariables.components.scrollbar.immersive.size, cssVariables.scrollbar.immersive.size],
-    [cssVariables.components.scrollbar.immersive.track, cssVariables.scrollbar.immersive.track],
-    [cssVariables.components.scrollbar.immersive.thumb, cssVariables.scrollbar.immersive.thumb],
-    [
-      cssVariables.components.scrollbar.immersive.thumbHover,
-      cssVariables.scrollbar.immersive.thumbHover,
-    ],
-    [
-      cssVariables.components.scrollbar.immersive.thumbActive,
-      cssVariables.scrollbar.immersive.thumbActive,
-    ],
-    [
-      cssVariables.components.scrollbar.immersive.thumbBackground,
-      cssVariables.scrollbar.immersive.thumbBackground,
-    ],
-    [
-      cssVariables.components.scrollbar.immersive.thumbHoverBackground,
-      cssVariables.scrollbar.immersive.thumbHoverBackground,
-    ],
-    [
-      cssVariables.components.scrollbar.immersive.thumbActiveBackground,
-      cssVariables.scrollbar.immersive.thumbActiveBackground,
-    ],
-    [
-      cssVariables.components.scrollbar.immersive.thumbEdge,
-      cssVariables.scrollbar.immersive.thumbEdge,
-    ],
-    [
-      cssVariables.components.scrollbar.immersive.thumbGlow,
-      cssVariables.scrollbar.immersive.thumbGlow,
-    ],
-    [
-      cssVariables.components.scrollbar.overlay.thumbWidth,
-      cssVariables.scrollbar.overlay.thumbWidth,
-    ],
-    [
-      cssVariables.components.scrollbar.overlay.thumbWidthHover,
-      cssVariables.scrollbar.overlay.thumbWidthHover,
-    ],
-  ] as const;
-
-  for (const [componentToken, legacyToken] of compatibilityMappings) {
-    expect(componentToken).toBe(legacyToken);
-  }
-
+  expect(cssVariables.components.skeleton.fill).toBe('--neoverse-skeleton-fill');
   expect(cssVariables.components.badge.background).toBe('--neoverse-badge-background');
-  expect(cssVariables.components.badge.border).toBe('--neoverse-badge-border');
-  expect(cssVariables.components.badge.foreground).toBe('--neoverse-badge-foreground');
+  expect(cssVariables.components.table.background).toBe('--neoverse-table-background');
+  expect(cssVariables.components.table.radius).toBe('--neoverse-table-radius');
+  expect(cssVariables.components.disclosure.background).toBe('--neoverse-disclosure-background');
+  expect(cssVariables.components.disclosure.openShadow).toBe('--neoverse-disclosure-open-shadow');
+  expect('control' in cssVariables).toBe(false);
+  expect('scrollbar' in cssVariables).toBe(false);
+  expect('skeleton' in cssVariables).toBe(false);
 });
-
 test('exposes consumer-validated action and navigation component tokens', () => {
   expect(cssVariables.iconSize.sm).toBe('--neoverse-icon-size-sm');
   expect(cssVariables.components.action.height.lg).toBe('--neoverse-action-height-lg');
@@ -390,9 +161,10 @@ test('keeps immersive scrollbars theme-aware and quiet at rest', async () => {
 });
 
 test('keeps the light segmented control edges translucent and blurred', async () => {
-  const [segmentedCss, sharedControlCss, themesCss] = await Promise.all([
+  const [segmentedCss, sharedControlCss, lightCss, themesCss] = await Promise.all([
     readTokenCss('components/segmented-control.css'),
     readTokenCss('components/shared-control.css'),
+    readTokenCss('themes/light.css'),
     readTokenCss('themes/dark.css'),
   ]);
   const semanticCss = `${segmentedCss}\n${sharedControlCss}`;
@@ -408,9 +180,17 @@ test('keeps the light segmented control edges translucent and blurred', async ()
   expect(semanticCss).toContain(
     '--neoverse-control-segmented-filter: blur(6px) saturate(112%) brightness(102%);',
   );
-  expect(semanticCss).toMatch(/--neoverse-control-segmented-focus-shadow:\s*0 0 0 1px/);
   expect(semanticCss).toMatch(/--neoverse-control-segmented-foreground:\s*color-mix\(/);
   expect(semanticCss).toMatch(/--neoverse-control-segmented-active-foreground:\s*color-mix\(/);
+  expect(semanticCss).toContain(
+    '--neoverse-control-segmented-active-background: var(--neoverse-control-active-background);',
+  );
+  expect(semanticCss).toContain(
+    '--neoverse-control-segmented-active-border: var(--neoverse-control-active-border);',
+  );
+  expect(semanticCss).toContain(
+    '--neoverse-control-segmented-active-shadow: var(--neoverse-control-active-shadow);',
+  );
   const activeForeground =
     semanticCss.match(/--neoverse-control-segmented-active-foreground:([\s\S]*?);/)?.[1] ?? '';
   expect(activeForeground).toContain('var(--neoverse-color-accent-secondary) 30%');
@@ -435,10 +215,34 @@ test('keeps the light segmented control edges translucent and blurred', async ()
   expect(activeHighlight).not.toContain('var(--neoverse-color-text-primary)');
   expect(activeHighlight).not.toContain('var(--neoverse-color-accent-primary)');
   expect(activeHighlight).toContain('var(--neoverse-color-accent-secondary) 14%');
-  const focusShadow =
-    semanticCss.match(/--neoverse-control-segmented-focus-shadow:([\s\S]*?);/)?.[1] ?? '';
-  expect(focusShadow).not.toContain('var(--neoverse-color-white)');
-  expect(focusShadow).not.toContain('rgb(255 255 255');
+  expect(lightCss).toContain(
+    '--neoverse-control-segmented-background-color: var(--neoverse-material-glass-subtle-background);',
+  );
+  expect(lightCss).toMatch(
+    /--neoverse-control-segmented-active-fill:\s*color-mix\(\s*in srgb,\s*var\(--neoverse-color-surface-raised\) 86%/,
+  );
+  expect(lightCss).toContain('var(--neoverse-color-accent-secondary) 14%');
+  expect(lightCss).toContain('--neoverse-control-segmented-border: transparent;');
+  expect(lightCss).toMatch(
+    /--neoverse-control-segmented-edge-refraction-opacity:\s*var\(\s*--neoverse-material-edge-refraction-opacity-subtle/,
+  );
+  expect(lightCss).toContain('--neoverse-control-segmented-edge-display: block;');
+  expect(lightCss).toContain(
+    '--neoverse-control-segmented-shell-hover-background-image: var(\n    --neoverse-control-segmented-background-image\n  );',
+  );
+  expect(lightCss).toContain(
+    '--neoverse-control-segmented-shell-hover-background-color: var(\n    --neoverse-control-segmented-background-color\n  );',
+  );
+  expect(lightCss).toContain('--neoverse-control-segmented-shell-hover-border: transparent;');
+  expect(lightCss).toContain(
+    '--neoverse-control-segmented-shell-hover-shadow: var(--neoverse-control-segmented-shadow);',
+  );
+  expect(lightCss).toContain(
+    '--neoverse-control-segmented-active-shadow: var(--neoverse-control-button-filled-shadow);',
+  );
+  expect(lightCss).toMatch(
+    /--neoverse-control-segmented-shadow:\s*inset 0 1px 0 color-mix\(in srgb, var\(--neoverse-color-edge-light\) 46%/,
+  );
   expect(semanticCss).toContain(
     '--neoverse-control-active-shadow:\n      var(--neoverse-control-active-highlight),\n      0 2px 7px -2px color-mix(in srgb, var(--neoverse-color-accent-secondary) 24%, transparent);',
   );
@@ -469,8 +273,35 @@ test('keeps the light segmented control edges translucent and blurred', async ()
   expect(themesCss.match(/--neoverse-control-active-border:\s*transparent;/g)).toHaveLength(1);
 });
 
-test('keeps dark segmented active surfaces aligned with Neoverse navigation', async () => {
+test('keeps dark segmented and navigation surfaces on the original dark recipe', async () => {
   const themesCss = await readTokenCss('themes/dark.css');
+  expect(themesCss).toContain('--neoverse-control-segmented-edge-display: none;');
+  expect(themesCss).toContain('--neoverse-control-segmented-edge-refraction-opacity: 0;');
+  expect(themesCss).toContain(
+    '--neoverse-control-segmented-option-radius: var(--neoverse-control-compact-radius);',
+  );
+  expect(themesCss).toContain(
+    '--neoverse-control-segmented-shell-hover-background-image: var(\n    --neoverse-control-segmented-background-image\n  );',
+  );
+  expect(themesCss).toContain(
+    '--neoverse-control-segmented-shell-hover-background-color: var(\n    --neoverse-control-segmented-background-color\n  );',
+  );
+  expect(themesCss).toContain(
+    '--neoverse-control-segmented-shell-hover-border: var(--neoverse-control-segmented-border);',
+  );
+  expect(themesCss).toContain(
+    '--neoverse-control-segmented-shell-hover-shadow: var(--neoverse-control-segmented-shadow);',
+  );
+  expect(themesCss).toContain(
+    '--neoverse-navigation-item-active-background: var(--neoverse-control-active-background);',
+  );
+  expect(themesCss).toContain('--neoverse-navigation-item-active-fill: transparent;');
+  expect(themesCss).toContain(
+    '--neoverse-navigation-item-active-border: var(--neoverse-control-active-border);',
+  );
+  expect(themesCss).toContain(
+    '--neoverse-navigation-item-active-shadow: var(--neoverse-control-active-highlight);',
+  );
   const activeBackgrounds = themesCss.match(/--neoverse-control-active-background:([\s\S]*?);/g);
 
   expect(activeBackgrounds).toHaveLength(1);
@@ -510,7 +341,6 @@ test('keeps dark elevated cards neutral and softly edged', async () => {
     ],
     [/--neoverse-material-tint-elevated:\s*var\(--neoverse-color-surface-glass\);/g, 1],
     [/--neoverse-material-transparency-elevated:\s*44%;/g, 1],
-    [/--neoverse-material-transparency-card:\s*56%;/g, 1],
     [/--neoverse-material-edge-refraction-opacity-elevated:\s*0\.24;/g, 1],
     [/--neoverse-material-refraction-gradient-elevated:\s*linear-gradient\(\s*125deg,/g, 1],
   ];
@@ -583,44 +413,46 @@ test('keeps dark subtle state cards neutral and softly grounded', async () => {
   }
 });
 
-test('aligns dark button states with the product glass button recipe', async () => {
+test('keeps dark primary and secondary buttons on distinct Glass hierarchy', async () => {
   const themesCss = await readTokenCss('themes/dark.css');
 
-  /* Dark buttons mirror the deployed Neoverse UiGlassButton recipe instead
-     of inventing a denser filled plate. */
-  const primaryBackgrounds = themesCss.match(/--neoverse-control-primary-background:([\s\S]*?);/g);
-  expect(primaryBackgrounds).toHaveLength(1);
-  for (const background of primaryBackgrounds ?? []) {
-    expect(background).toContain('var(--neoverse-control-button-filled-background)');
-  }
-
+  /* Secondary retains the neutral deployed Glass recipe. Primary layers a
+     restrained aurora field over that same sampled plane instead of becoming
+     an unrelated opaque CTA. */
   const buttonBackground = themesCss.match(
     /--neoverse-control-button-filled-background:\s*linear-gradient\(\s*145deg,\s*rgb\(181 197 213 \/ 13%\),\s*rgb\(127 147 168 \/ 7%\)\s*\);/g,
   );
   expect(buttonBackground).toHaveLength(1);
   expect(themesCss).toContain('--neoverse-control-button-filled-fill: transparent;');
-  expect(themesCss).toContain('rgb(181 197 213 / 17%)');
-  expect(themesCss).toContain('rgb(127 147 168 / 10%)');
+
+  const primaryBackground = themesCss.match(
+    /--neoverse-control-primary-background:([\s\S]*?);/,
+  )?.[1];
+  expect(primaryBackground).toContain('var(--neoverse-color-accent-secondary)');
+  expect(primaryBackground).toContain('var(--neoverse-color-accent-primary)');
+  expect(primaryBackground).toContain('var(--neoverse-control-button-filled-background)');
+  expect(themesCss).toContain(
+    '--neoverse-control-primary-foreground: var(--neoverse-color-text-primary);',
+  );
+
+  const primaryHover = themesCss.match(
+    /--neoverse-control-primary-hover-background:([\s\S]*?);/,
+  )?.[1];
+  expect(primaryHover).toContain('var(--neoverse-color-accent-secondary)');
+  expect(primaryHover).toContain('var(--neoverse-color-accent-primary)');
+  expect(primaryHover).toContain('var(--neoverse-control-button-filled-hover-background)');
 
   expect(
     themesCss.match(
       /--neoverse-control-secondary-filter:\s*var\(--neoverse-material-filter-subtle\);/g,
     ),
   ).toHaveLength(1);
-
   expect(
     themesCss.match(
       /--neoverse-control-button-filter:\s*blur\(36px\) saturate\(165%\) brightness\(108%\);/g,
     ),
   ).toHaveLength(1);
 
-  /* CTA label mirrors the product glass button: text-secondary by default and
-     text-primary on hover. */
-  expect(
-    themesCss.match(
-      /--neoverse-control-primary-foreground:\s*var\(--neoverse-control-secondary-foreground\);/g,
-    ),
-  ).toHaveLength(1);
   for (const token of [
     'secondary-hover-foreground',
     'secondary-active-foreground',
@@ -642,8 +474,6 @@ test('aligns dark button states with the product glass button recipe', async () 
       /--neoverse-control-button-edge:\s*var\(--neoverse-control-button-filled-shadow\);/g,
     ),
   ).toHaveLength(1);
-  /* Active state shares the hover highlight so the dark CTA keeps the
-     product's quiet press response: shadow brightens, no extra accent fill. */
   expect(
     themesCss.match(
       /--neoverse-control-button-edge-active:\s*var\(--neoverse-control-button-filled-hover-shadow\);/g,
@@ -651,7 +481,6 @@ test('aligns dark button states with the product glass button recipe', async () 
   ).toHaveLength(1);
   expect(themesCss).toContain('--neoverse-control-button-edge-refraction-opacity: 0;');
 
-  /* Pressed state keeps the accent pairing from the segmented language. */
   const activeBackground = themesCss.match(/--neoverse-control-active-background:([\s\S]*?);/g);
   expect(activeBackground).toHaveLength(1);
   for (const gradient of activeBackground ?? []) {
@@ -788,6 +617,9 @@ test('keeps button edges restrained and stable beside segmented controls', async
   expect(ghostGlass).toMatch(
     /--neoverse-material-shadow:\s*var\(--neoverse-control-ghost-shadow\);/,
   );
+  for (const token of ['ghost-border', 'ghost-hover-border', 'ghost-active-border']) {
+    expect(declaration(buttonTokensCss, token).trim()).toBe('transparent');
+  }
   expect(ghostGlass).toMatch(/border-color:\s*var\(--neoverse-control-ghost-border\);/);
   expect(ghostGlass).toMatch(/--neoverse-material-edge-refraction-opacity:\s*0;/);
   expect(buttonCss).toMatch(
@@ -899,12 +731,12 @@ test('exposes the shared geometry and typography contracts', () => {
   expect(cssVariables.radius['2xl']).toBe('--neoverse-radius-2xl');
   expect(cssVariables.shadow.inset).toBe('--neoverse-shadow-inset');
   expect(cssVariables.font.family.mono).toBe('--neoverse-font-family-mono');
-  expect(cssVariables.typography.display.fontFamily).toBe(
-    '--neoverse-typography-display-font-family',
-  );
-  expect(cssVariables.typography.body.fontFamily).toBe('--neoverse-typography-body-font-family');
+  expect(cssVariables.typography.family.display).toBe('--neoverse-typography-display-font-family');
+  expect(cssVariables.typography.family.body).toBe('--neoverse-typography-body-font-family');
   expect(cssVariables.typography.code.fontFamily).toBe('--neoverse-typography-code-font-family');
-  expect(cssVariables.typography.body.lineHeight).toBe('--neoverse-typography-body-line-height');
+  expect(cssVariables.typography.scale.body.md.lineHeight).toBe(
+    '--neoverse-typography-body-md-line-height',
+  );
 });
 
 test('keeps semantic typography families overrideable by role', async () => {
@@ -918,17 +750,10 @@ test('keeps semantic typography families overrideable by role', async () => {
   expect(typographyCss).toContain(
     '--neoverse-typography-code-font-family: var(--neoverse-font-family-code);',
   );
-  expect(typographyCss).toContain(
-    '--neoverse-typography-heading-font-family: var(--neoverse-typography-display-font-family);',
-  );
-  expect(typographyCss).toContain(
-    '--neoverse-typography-subtitle-font-family: var(--neoverse-typography-title-font-family);',
-  );
 });
 
-test('exposes the semantic type scale while preserving compatibility aliases', async () => {
+test('exposes only the canonical semantic type scale', async () => {
   const typographyCss = await readTokenCss('typography.css');
-
   expect(cssVariables.typography.family.title).toBe('--neoverse-typography-title-font-family');
   expect(cssVariables.typography.scale.display.lg.size).toBe(
     '--neoverse-typography-display-lg-size',
@@ -936,24 +761,10 @@ test('exposes the semantic type scale while preserving compatibility aliases', a
   expect(cssVariables.typography.scale.title.md.size).toBe('--neoverse-typography-title-md-size');
   expect(cssVariables.typography.scale.body.sm.size).toBe('--neoverse-typography-body-sm-size');
   expect(cssVariables.typography.scale.label.lg.size).toBe('--neoverse-typography-label-lg-size');
-
-  expect(typographyCss).toContain(
-    '--neoverse-typography-display-size: var(--neoverse-typography-display-lg-size);',
-  );
-  expect(typographyCss).toContain(
-    '--neoverse-typography-heading-size: var(--neoverse-typography-display-md-size);',
-  );
-  expect(typographyCss).toContain(
-    '--neoverse-typography-subtitle-size: var(--neoverse-typography-title-lg-size);',
-  );
-  expect(typographyCss).toContain(
-    '--neoverse-typography-body-size: var(--neoverse-typography-body-md-size);',
-  );
-  expect(typographyCss).toContain(
-    '--neoverse-typography-label-size: var(--neoverse-typography-label-md-size);',
-  );
+  expect(typographyCss).not.toContain('--neoverse-typography-heading-size');
+  expect(typographyCss).not.toContain('--neoverse-typography-subtitle-size');
+  expect(typographyCss).not.toContain('--neoverse-typography-body-size');
 });
-
 test('exposes semantic geometry and focus aliases', () => {
   expect(cssVariables.radius.control).toBe('--neoverse-radius-control');
   expect(cssVariables.radius.controlInner).toBe('--neoverse-radius-control-inner');
@@ -964,24 +775,30 @@ test('exposes semantic geometry and focus aliases', () => {
   expect(cssVariables.focus.ringOffsetColor).toBe('--neoverse-focus-ring-offset-color');
 });
 
-test('keeps compact-control inset and inner-radius geometry independently tunable', async () => {
+test('derives compact-control inner corners from the shared outer radius and inset', async () => {
   const geometryCss = await readTokenCss('geometry.css');
 
   expect(geometryCss).toContain('--neoverse-control-inset: 0.22rem;');
-  expect(geometryCss).toContain('--neoverse-radius-control-inner-offset: 0.18rem;');
-  expect(geometryCss).toMatch(
-    /--neoverse-radius-control-inner:\s*calc\(\s*var\(--neoverse-radius-control\)\s*-\s*var\(--neoverse-radius-control-inner-offset\)\s*\);/,
+  expect(geometryCss).toContain(
+    '--neoverse-radius-control-inner-offset: var(--neoverse-control-inset);',
   );
-  expect(geometryCss).not.toContain('calc(var(--neoverse-radius-control) - 0.18rem)');
+  expect(geometryCss).toContain(
+    '--neoverse-control-corner-radius: var(--neoverse-radius-control);',
+  );
+  expect(geometryCss).toMatch(
+    /--neoverse-radius-control-inner:\s*max\(\s*0px,\s*calc\(var\(--neoverse-control-corner-radius\) - var\(--neoverse-radius-control-inner-offset\)\)\s*\);/,
+  );
+  expect(geometryCss).not.toContain('--neoverse-radius-control-inner-offset: 0.18rem;');
 });
 
 test('keeps grouped controls on a compact, shared geometry contract', async () => {
-  const [sharedControlCss, controlSurfaceCss, navigationItemCss, segmentedControlCss] =
+  const [sharedControlCss, controlSurfaceCss, navigationItemCss, segmentedControlCss, lightCss] =
     await Promise.all([
       readTokenCss('components/shared-control.css'),
       readTokenCss('components/control-surface.css'),
       readTokenCss('components/navigation-item.css'),
       readTokenCss('components/segmented-control.css'),
+      readTokenCss('themes/light.css'),
     ]);
 
   expect(sharedControlCss).toContain('--neoverse-control-compact-height: var(--neoverse-space-6);');
@@ -1012,6 +829,12 @@ test('keeps grouped controls on a compact, shared geometry contract', async () =
   expect(controlSurfaceCss).toContain('--neoverse-control-surface-divider-height: 1rem;');
   expect(controlSurfaceCss).toContain(
     '--neoverse-control-surface-divider-gap: var(--neoverse-space-0);',
+  );
+  expect(controlSurfaceCss).toContain(
+    '--neoverse-control-surface-indicator-duration: var(--neoverse-motion-spatial-duration);',
+  );
+  expect(controlSurfaceCss).toContain(
+    '--neoverse-control-surface-indicator-easing: var(--neoverse-motion-spatial-easing);',
   );
   expect(controlSurfaceCss).toContain('--neoverse-control-chrome-edge-refraction-width: var(');
   expect(controlSurfaceCss).toMatch(
@@ -1071,6 +894,9 @@ test('keeps grouped controls on a compact, shared geometry contract', async () =
   expect(segmentedControlCss).toContain(
     '--neoverse-control-segmented-option-radius: var(--neoverse-control-compact-radius);',
   );
+  expect(lightCss).toContain('--neoverse-control-segmented-option-radius: max(');
+  expect(lightCss).toContain('var(--neoverse-control-segmented-corner-radius) -');
+  expect(lightCss).toContain('var(--neoverse-control-segmented-internal-inset) -');
 });
 
 test('exposes shared Surface and Glass material contracts', () => {
@@ -1119,7 +945,6 @@ test('exposes shared Surface and Glass material contracts', () => {
   const glassRoles = [
     cssVariables.material.glass.subtle,
     cssVariables.material.glass.elevated,
-    cssVariables.material.glass.card,
     cssVariables.material.glass.immersive,
   ];
 
@@ -1346,6 +1171,23 @@ const extractCssBlock = (css: string, selector: string): string => {
   throw new Error(`Unclosed selector block: ${selector}`);
 };
 
+test('isolates light control refinements from the explicit dark theme', async () => {
+  const lightSource = await readTokenCss('themes/light.css');
+  const builtCss = await readBuiltTokenCss();
+  const lightBody = extractCssBlock(
+    builtCss,
+    ":root:not([data-theme]),\n  :root[data-theme='light']",
+  );
+  const darkBody = extractCssBlock(builtCss, ":root[data-theme='dark']");
+
+  expect(lightSource).not.toMatch(/:root|\[data-theme=|@media/);
+  expect(builtCss).not.toContain('@neoverse-light-tokens');
+  expect(lightBody).toContain('--neoverse-control-segmented-edge-display: block;');
+  expect(lightBody).toContain('--neoverse-control-segmented-shell-hover-background-image: var(');
+  expect(darkBody).toContain('--neoverse-control-segmented-edge-display: none;');
+  expect(darkBody).toContain('--neoverse-control-segmented-shell-hover-background-image: var(');
+});
+
 test('renders one dark source into matching explicit and system wrappers', async () => {
   const darkSource = await readTokenCss('themes/dark.css');
   const declarations = [...darkSource.matchAll(/^\s*(--neoverse-[\w-]+):/gm)].map(
@@ -1354,17 +1196,15 @@ test('renders one dark source into matching explicit and system wrappers', async
   const builtCss = await readBuiltTokenCss();
   const systemBody = extractCssBlock(
     builtCss,
-    ":root[data-theme='system'],\n    :root:not([data-theme], .light, .dark)",
+    ":root[data-theme='system'],\n    :root:not([data-theme])",
   );
-  const explicitBody = extractCssBlock(
-    builtCss,
-    ":root.dark:not([data-theme]),\n  :root[data-theme='dark']",
-  );
+  const explicitBody = extractCssBlock(builtCss, ":root[data-theme='dark']");
 
   expect(declarations.length).toBeGreaterThan(0);
   expect(new Set(declarations).size).toBe(declarations.length);
   expect(darkSource).not.toMatch(/:root|\[data-theme=|@media/);
   expect(builtCss).not.toContain('@neoverse-dark-tokens');
+  expect(builtCss).not.toMatch(/:root\.(?:light|dark)/);
   expect(systemBody.replace(/\s+/g, ' ').trim()).toBe(explicitBody.replace(/\s+/g, ' ').trim());
 });
 
@@ -1392,14 +1232,36 @@ test('keeps light Glass surfaces free of dark hairline borders', async () => {
     expect(
       themesCss.match(
         new RegExp(
-          variant === 'elevated'
-            ? `--neoverse-material-glass-${variant}-border:\\s*color-mix\\(\\s*in srgb,\\s*var\\(--neoverse-color-border-subtle\\) 72%,\\s*transparent\\s*\\);`
+          variant === 'elevated' || variant === 'immersive'
+            ? `--neoverse-material-glass-${variant}-border:\\s*color-mix\\(\\s*in srgb,\\s*var\\(--neoverse-color-border-subtle\\) ${variant === 'elevated' ? 72 : 70}%,\\s*transparent\\s*\\);`
             : `--neoverse-material-glass-${variant}-border:\\s*var\\(--neoverse-color-border-(?:subtle|default)\\);`,
           'g',
         ),
       ),
     ).toHaveLength(1);
   }
+});
+
+test('keeps light Glass hierarchy density-led with restrained control edges', async () => {
+  const lightCss = await readTokenCss('themes/light.css');
+
+  for (const [token, value] of [
+    ['transparency-subtle', '24%'],
+    ['transparency-elevated', '42%'],
+    ['transparency-immersive', '18%'],
+    ['edge-refraction-opacity-subtle', '0.16'],
+    ['edge-refraction-opacity-elevated', '0.22'],
+    ['edge-refraction-opacity-immersive', '0.14'],
+  ] as const) {
+    expect(lightCss).toContain(`--neoverse-material-${token}: ${value};`);
+  }
+
+  expect(lightCss).toContain('--neoverse-control-button-edge-refraction-opacity: 0.12;');
+  expect(lightCss).toContain('var(--neoverse-color-border-default) 60%');
+  const secondaryShadow =
+    lightCss.match(/--neoverse-control-secondary-shadow:([\s\S]*?);/)?.[1] ?? '';
+  expect(secondaryShadow.match(/inset/g)).toHaveLength(1);
+  expect(secondaryShadow).not.toContain('var(--neoverse-color-border-interactive)');
 });
 
 test('keeps Glass edge highlights refractive and softly diffused', async () => {
