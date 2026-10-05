@@ -107,7 +107,7 @@
   }
 
   .ui-segmented-control__option:active:not(:disabled) {
-    transform: scale(0.97);
+    transform: scale(var(--neoverse-control-segmented-option-press-scale));
   }
 
   .ui-segmented-control__option:disabled {
@@ -115,7 +115,7 @@
   }
 
   .ui-segmented-control[aria-disabled='true'] {
-    opacity: 0.62;
+    opacity: var(--neoverse-control-segmented-disabled-opacity);
   }
 
   @media (pointer: coarse) {

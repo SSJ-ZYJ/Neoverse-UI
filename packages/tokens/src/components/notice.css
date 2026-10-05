@@ -1,0 +1,62 @@
+@layer neoverse.tokens {
+  :root {
+    /* Notices are feedback surfaces, not outlined callout boxes. Tone is
+       carried by an ambient tint over the shared inset material. */
+    --neoverse-notice-radius: var(--neoverse-radius-card);
+    --neoverse-notice-gap: var(--neoverse-space-4);
+    --neoverse-notice-padding-block: var(--neoverse-space-3);
+    --neoverse-notice-padding-inline: var(--neoverse-space-4);
+    --neoverse-notice-font-size: var(--neoverse-font-size-md);
+    --neoverse-notice-foreground: var(--neoverse-color-text-secondary);
+
+    --neoverse-notice-neutral-background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--neoverse-color-text-muted) 12%, transparent),
+        transparent 54%
+      ),
+      var(--neoverse-surface-inset-rest-background);
+    --neoverse-notice-info-background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--neoverse-color-status-info) 14%, transparent),
+        transparent 54%
+      ),
+      var(--neoverse-surface-inset-rest-background);
+    --neoverse-notice-success-background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--neoverse-color-status-success) 14%, transparent),
+        transparent 54%
+      ),
+      var(--neoverse-surface-inset-rest-background);
+    --neoverse-notice-warning-background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--neoverse-color-status-warning) 14%, transparent),
+        transparent 54%
+      ),
+      var(--neoverse-surface-inset-rest-background);
+    --neoverse-notice-danger-background:
+      linear-gradient(
+        135deg,
+        color-mix(in srgb, var(--neoverse-color-status-danger) 14%, transparent),
+        transparent 54%
+      ),
+      var(--neoverse-surface-inset-rest-background);
+
+    --neoverse-notice-neutral-shadow: var(--neoverse-shadow-inset);
+    --neoverse-notice-info-shadow:
+      var(--neoverse-shadow-inset),
+      0 8px 20px -18px color-mix(in srgb, var(--neoverse-color-status-info) 36%, transparent);
+    --neoverse-notice-success-shadow:
+      var(--neoverse-shadow-inset),
+      0 8px 20px -18px color-mix(in srgb, var(--neoverse-color-status-success) 36%, transparent);
+    --neoverse-notice-warning-shadow:
+      var(--neoverse-shadow-inset),
+      0 8px 20px -18px color-mix(in srgb, var(--neoverse-color-status-warning) 36%, transparent);
+    --neoverse-notice-danger-shadow:
+      var(--neoverse-shadow-inset),
+      0 8px 20px -18px color-mix(in srgb, var(--neoverse-color-status-danger) 36%, transparent);
+  }
+}

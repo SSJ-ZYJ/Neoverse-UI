@@ -193,8 +193,16 @@ export interface TextareaProps {
   modelValue?: string;
 }
 
+export interface SelectOption {
+  value: FormControlValue;
+  label: string;
+  disabled?: boolean;
+}
+
 export interface SelectProps {
   modelValue?: FormControlValue;
+  options: readonly SelectOption[];
+  placeholder?: string;
 }
 
 export type SkeletonVariant = 'text' | 'title' | 'avatar' | 'circle' | 'rect';

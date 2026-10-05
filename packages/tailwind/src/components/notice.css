@@ -1,33 +1,38 @@
 @layer components {
   .ui-notice {
-    --ui-notice-tone: var(--neoverse-color-text-muted);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--neoverse-space-4);
-    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      color-mix(in srgb, var(--ui-notice-tone) 28%, var(--neoverse-color-border-subtle));
-    border-radius: var(--neoverse-radius-control);
-    padding: var(--neoverse-space-3) var(--neoverse-space-4);
-    color: var(--neoverse-color-text-secondary);
-    background: color-mix(in srgb, var(--ui-notice-tone) 7%, var(--neoverse-color-surface-subtle));
-    font-size: var(--neoverse-font-size-md);
+    gap: var(--neoverse-notice-gap);
+    border: 0;
+    border-radius: var(--neoverse-notice-radius);
+    padding: var(--neoverse-notice-padding-block) var(--neoverse-notice-padding-inline);
+    color: var(--neoverse-notice-foreground);
+    background: var(--neoverse-notice-neutral-background);
+    box-shadow: var(--neoverse-notice-neutral-shadow);
+    font-size: var(--neoverse-notice-font-size);
+    -webkit-backdrop-filter: var(--neoverse-surface-inset-filter);
+    backdrop-filter: var(--neoverse-surface-inset-filter);
   }
 
   .ui-notice--info {
-    --ui-notice-tone: var(--neoverse-color-status-info);
+    background: var(--neoverse-notice-info-background);
+    box-shadow: var(--neoverse-notice-info-shadow);
   }
 
   .ui-notice--success {
-    --ui-notice-tone: var(--neoverse-color-status-success);
+    background: var(--neoverse-notice-success-background);
+    box-shadow: var(--neoverse-notice-success-shadow);
   }
 
   .ui-notice--warning {
-    --ui-notice-tone: var(--neoverse-color-status-warning);
+    background: var(--neoverse-notice-warning-background);
+    box-shadow: var(--neoverse-notice-warning-shadow);
   }
 
   .ui-notice--danger {
-    --ui-notice-tone: var(--neoverse-color-status-danger);
+    background: var(--neoverse-notice-danger-background);
+    box-shadow: var(--neoverse-notice-danger-shadow);
   }
 
   .ui-notice__content {

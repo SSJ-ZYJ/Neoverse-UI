@@ -63,6 +63,14 @@
   --neoverse-material-edge-refraction-opacity-subtle: 0.16;
   --neoverse-material-edge-refraction-opacity-elevated: 0.22;
   --neoverse-material-edge-refraction-opacity-immersive: 0.14;
+  /* Large Glass planes retain the three 0.1.0 material densities and catches.
+     Component controls keep their separate compact material contracts. */
+  --neoverse-surface-glass-subtle-transparency: 30%;
+  --neoverse-surface-glass-elevated-transparency: 20%;
+  --neoverse-surface-glass-immersive-transparency: 12%;
+  --neoverse-surface-glass-subtle-edge-opacity: 0.46;
+  --neoverse-surface-glass-elevated-edge-opacity: 0.5;
+  --neoverse-surface-glass-immersive-edge-opacity: 0.54;
   --neoverse-material-edge-refraction-carrier-subtle: color-mix(
     in srgb,
     var(--neoverse-color-border-default) 22%,

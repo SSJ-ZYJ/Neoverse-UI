@@ -9,12 +9,17 @@ import {
 import { ref } from 'vue';
 import LabIcon from '../LabIcon.vue';
 import { localize, localized, moduleCopy } from '../playground-content';
+import QaPreviewMatrix from '../QaPreviewMatrix.vue';
 import StateRow from '../StateRow.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.controlSurface;
-const variants = ['subtle', 'elevated', 'immersive'] as const;
+const surfaceVariants = [
+  { surface: 'glass-subtle', label: 'subtle' },
+  { surface: 'glass-elevated', label: 'elevated' },
+  { surface: 'glass-immersive', label: 'immersive' },
+] as const;
 const viewOptions = [
   { value: 'map', label: 'Map' },
   { value: 'list', label: 'List' },
@@ -62,6 +67,13 @@ const extraCopy = {
     ),
     aria: localized('Control surface navigation', '控件表面导航'),
   },
+  qa: {
+    label: localized('Cross-component QA', '跨组件 QA'),
+    hint: localized(
+      'One grouped cluster checks icon, text, segmented, and navigation geometry against the same backdrop contexts.',
+      '使用同一组背景环境同时检查图标、文本、分段控件与导航几何关系。',
+    ),
+  },
 } as const;
 </script>
 
@@ -71,19 +83,31 @@ const extraCopy = {
     :hint="copy.states.toolbar.hint"
     :locale="props.locale"
   >
-    <UiControlSurface role="toolbar" :aria-label="localize(copy.controls.toolbar, props.locale)">
-      <UiIconButton variant="ghost" size="sm" :label="localize(copy.controls.add, props.locale)">
+    <UiControlSurface
+      role="toolbar"
+      edge-mode="local"
+      :aria-label="localize(copy.controls.toolbar, props.locale)"
+    >
+      <UiIconButton
+        variant="ghost"
+        size="sm"
+        surface="none"
+        :label="localize(copy.controls.add, props.locale)"
+      >
         <LabIcon name="plus" />
       </UiIconButton>
       <UiIconButton
         variant="ghost"
         size="sm"
+        surface="none"
         :label="localize(copy.controls.confirm, props.locale)"
       >
         <LabIcon name="check" />
       </UiIconButton>
       <template #trailing>
-        <UiButton size="sm">{{ localize(copy.controls.publish, props.locale) }}</UiButton>
+        <UiButton size="sm" surface="none">
+          {{ localize(copy.controls.publish, props.locale) }}
+        </UiButton>
       </template>
     </UiControlSurface>
   </StateRow>
@@ -94,8 +118,14 @@ const extraCopy = {
     :locale="props.locale"
   >
     <div class="grid w-full gap-3 md:grid-cols-3">
-      <UiControlSurface v-for="variant in variants" :key="variant" :variant="variant">
-        <span class="px-2 text-caption font-label text-primary">{{ variant }}</span>
+      <UiControlSurface
+        v-for="variant in surfaceVariants"
+        :key="variant.surface"
+        :surface="variant.surface"
+        hover-mode="static"
+        edge-mode="local"
+      >
+        <span class="px-2 text-caption font-label text-primary">{{ variant.label }}</span>
       </UiControlSurface>
     </div>
   </StateRow>
@@ -105,12 +135,17 @@ const extraCopy = {
     :hint="copy.states.trailing.hint"
     :locale="props.locale"
   >
-    <UiControlSurface as="nav" :aria-label="localize(copy.controls.view, props.locale)">
-      <UiButton variant="ghost" size="sm"
-        >{{ localize(copy.controls.canvas, props.locale) }}</UiButton
-      >
+    <UiControlSurface
+      as="nav"
+      edge-mode="local"
+      :aria-label="localize(copy.controls.view, props.locale)"
+    >
+      <UiButton variant="ghost" size="sm" surface="none">
+        {{ localize(copy.controls.canvas, props.locale) }}
+      </UiButton>
       <template #trailing>
         <UiSegmentedControl
+          surface="none"
           :aria-label="localize(copy.controls.view, props.locale)"
           :options="viewOptions"
         />
@@ -119,25 +154,34 @@ const extraCopy = {
   </StateRow>
 
   <StateRow :label="extraCopy.surface.label" :hint="extraCopy.surface.hint" :locale="props.locale">
-    <div class="flex flex-wrap items-center gap-3">
-      <UiControlSurface surface="none">
-        <UiButton size="sm" variant="ghost" surface="none">surface="none"</UiButton>
-      </UiControlSurface>
-      <UiControlSurface surface="chrome">
-        <UiButton size="sm" variant="ghost" surface="none">surface="chrome"</UiButton>
-      </UiControlSurface>
-      <UiControlSurface surface="glass-subtle">
-        <UiButton size="sm" variant="ghost" surface="none">surface="glass-subtle"</UiButton>
-      </UiControlSurface>
+    <div class="grid w-full gap-2">
+      <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <code class="min-w-0 text-caption text-muted">surface="none"</code>
+        <UiControlSurface surface="none">
+          <UiButton size="sm" variant="ghost" surface="none">none</UiButton>
+        </UiControlSurface>
+      </div>
+      <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <code class="min-w-0 text-caption text-muted">surface="chrome"</code>
+        <UiControlSurface surface="chrome">
+          <UiButton size="sm" variant="ghost" surface="none">chrome</UiButton>
+        </UiControlSurface>
+      </div>
+      <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+        <code class="min-w-0 text-caption text-muted">surface="glass-subtle"</code>
+        <UiControlSurface surface="glass-subtle" edge-mode="local">
+          <UiButton size="sm" variant="ghost" surface="none">glass</UiButton>
+        </UiControlSurface>
+      </div>
     </div>
   </StateRow>
 
   <StateRow :label="extraCopy.hover.label" :hint="extraCopy.hover.hint" :locale="props.locale">
     <div class="flex flex-wrap items-center gap-3">
-      <UiControlSurface hover-mode="auto">
+      <UiControlSurface hover-mode="auto" edge-mode="local">
         <UiButton size="sm" variant="ghost" surface="none">hoverMode="auto"</UiButton>
       </UiControlSurface>
-      <UiControlSurface hover-mode="static">
+      <UiControlSurface hover-mode="static" edge-mode="local">
         <UiButton size="sm" variant="ghost" surface="none">hoverMode="static"</UiButton>
       </UiControlSurface>
     </div>
@@ -156,10 +200,10 @@ const extraCopy = {
 
   <StateRow :label="extraCopy.scale.label" :hint="extraCopy.scale.hint" :locale="props.locale">
     <div class="flex flex-wrap items-center gap-3">
-      <UiControlSurface scale="md">
+      <UiControlSurface scale="md" edge-mode="local">
         <UiButton size="sm" variant="ghost" surface="none">scale="md"</UiButton>
       </UiControlSurface>
-      <UiControlSurface scale="lg">
+      <UiControlSurface scale="lg" edge-mode="local">
         <UiButton size="sm" variant="ghost" surface="none">scale="lg"</UiButton>
       </UiControlSurface>
     </div>
@@ -173,6 +217,7 @@ const extraCopy = {
     <UiControlSurface
       as="nav"
       navigation-indicator
+      edge-mode="local"
       :aria-label="localize(extraCopy.indicator.aria, props.locale)"
     >
       <UiNavigationItem
@@ -185,5 +230,38 @@ const extraCopy = {
         @click.prevent="activeNavigation = item.id"
       />
     </UiControlSurface>
+  </StateRow>
+
+  <StateRow :label="extraCopy.qa.label" :hint="extraCopy.qa.hint" :locale="props.locale">
+    <QaPreviewMatrix :locale="props.locale">
+      <UiControlSurface
+        role="toolbar"
+        edge-mode="local"
+        :aria-label="localize(copy.controls.toolbar, props.locale)"
+      >
+        <UiIconButton
+          variant="ghost"
+          size="sm"
+          surface="none"
+          :label="localize(copy.controls.add, props.locale)"
+        >
+          <LabIcon name="plus" />
+        </UiIconButton>
+        <UiNavigationItem
+          href="#controls-surface"
+          :label="localize(navigationItems[0].label, props.locale)"
+          active
+          surface="none"
+          @click.prevent
+        />
+        <template #trailing>
+          <UiSegmentedControl
+            surface="none"
+            :aria-label="localize(copy.controls.view, props.locale)"
+            :options="viewOptions"
+          />
+        </template>
+      </UiControlSurface>
+    </QaPreviewMatrix>
   </StateRow>
 </template>

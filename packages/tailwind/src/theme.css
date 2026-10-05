@@ -508,7 +508,6 @@
             var(--neoverse-material-hover-transparency, var(--neoverse-material-transparency)),
           transparent
         );
-        border-color: var(--neoverse-material-hover-border, var(--neoverse-material-border));
         box-shadow:
           var(--neoverse-material-bloom),
           var(--neoverse-material-hover-shadow, var(--neoverse-material-shadow));
@@ -548,6 +547,70 @@
       -webkit-backdrop-filter: var(--neoverse-material-edge-filter);
       backdrop-filter: var(--neoverse-material-edge-filter);
     }
+  }
+
+  :is(.ui-card, .ui-surface).material-glass-subtle {
+    --neoverse-material-transparency: var(
+      --neoverse-surface-glass-subtle-transparency,
+      var(--neoverse-material-glass-subtle-transparency)
+    );
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-surface-glass-subtle-edge-opacity,
+      var(--neoverse-material-glass-subtle-edge-refraction-opacity)
+    );
+  }
+
+  :is(.ui-card, .ui-surface).material-glass-elevated {
+    --neoverse-material-transparency: var(
+      --neoverse-surface-glass-elevated-transparency,
+      var(--neoverse-material-glass-elevated-transparency)
+    );
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-surface-glass-elevated-edge-opacity,
+      var(--neoverse-material-glass-elevated-edge-refraction-opacity)
+    );
+  }
+
+  :is(.ui-card, .ui-surface).material-glass-immersive {
+    --neoverse-material-transparency: var(
+      --neoverse-surface-glass-immersive-transparency,
+      var(--neoverse-material-glass-immersive-transparency)
+    );
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-surface-glass-immersive-edge-opacity,
+      var(--neoverse-material-glass-immersive-edge-refraction-opacity)
+    );
+  }
+
+  :is(.ui-card, .ui-surface):is(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive
+  ) {
+    --neoverse-material-hover-transparency: var(--neoverse-material-transparency);
+  }
+
+  /* Cards reuse the Glass plane but adapt only its edge geometry. The regular
+     Glass hairline remains untouched; wide cards avoid exposing that
+     transparent gutter as a closed white outline. */
+  .ui-card:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+    border-width: 0;
+  }
+
+  /* CSS fallback keeps the exact shared refraction gradient and clips it to a
+     token-sized edge band. WebGL still owns the directional edge whenever the
+     shared renderer is active. */
+  .ui-card:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)::before {
+    box-sizing: border-box;
+    padding: var(--neoverse-border-width-thin);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
   }
 
   /* The optional WebGL renderer paints one edge per independent Glass

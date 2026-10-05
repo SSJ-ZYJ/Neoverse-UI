@@ -35,7 +35,7 @@ const copy = {
           v-for="preset in presets"
           :key="preset"
           :surface="preset"
-          class="grid min-h-32 content-between gap-3 rounded-card border border-subtle p-5"
+          class="grid min-h-32 content-between gap-3 rounded-card p-5"
           :data-surface-preset="preset"
         >
           <h3 class="text-label font-label text-primary">{{ preset }}</h3>

@@ -118,5 +118,7 @@
     --neoverse-control-ghost-foreground: var(--neoverse-color-text-secondary);
     --neoverse-control-ghost-hover-foreground: var(--neoverse-control-segmented-active-foreground);
     --neoverse-control-ghost-active-foreground: var(--neoverse-control-segmented-active-foreground);
+    --neoverse-control-button-disabled-opacity: 0.6;
+    --neoverse-control-button-hover-glow-opacity: 0.3;
   }
 }

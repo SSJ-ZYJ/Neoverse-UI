@@ -14,8 +14,9 @@
     --neoverse-control-surface-boundary-width: var(--neoverse-border-width-none);
   }
 
-  /* Grouped plates derive their radius from the owner's border and inset.
-     A standalone button keeps its own compact-radius contract. */
+  /* Grouped controls use the same inner corner contract as segmented
+     options. The surrounding ControlSurface uses the segmented shell radius,
+     so both layers stay visually consistent instead of becoming boxier. */
   .ui-control-surface__group :is(.ui-button, .ui-action, .ui-navigation-item) {
     border-radius: var(--neoverse-control-surface-inner-radius);
   }
@@ -152,22 +153,19 @@
     --neoverse-control-segmented-option-padding-inline-sm: var(
       --neoverse-control-segmented-embedded-option-padding-inline-sm
     );
-    --neoverse-control-segmented-corner-radius: var(--neoverse-control-surface-inner-radius);
+    border-radius: var(--neoverse-control-surface-trailing-radius);
+    padding: var(--neoverse-control-surface-trailing-padding);
+    background: var(--neoverse-control-surface-trailing-background);
+    box-shadow: var(--neoverse-control-surface-trailing-shadow);
   }
 
   .ui-surface-chrome .ui-control-surface__group--trailing {
-    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      var(--neoverse-control-chrome-trailing-border);
-    border-radius: var(--neoverse-control-surface-corner-radius);
+    border: 0;
+    border-radius: var(--neoverse-control-surface-trailing-radius);
     padding-block: var(--neoverse-control-chrome-trailing-padding);
     padding-inline: var(--neoverse-control-chrome-trailing-padding-inline);
     background: var(--neoverse-control-chrome-trailing-background);
-  }
-
-  .ui-surface-chrome .ui-control-surface__group--trailing:has(.ui-segmented-control) {
-    --neoverse-control-segmented-corner-radius: var(
-      --neoverse-control-chrome-trailing-inner-radius
-    );
+    box-shadow: var(--neoverse-control-surface-trailing-shadow);
   }
 
   .ui-control-surface__divider {

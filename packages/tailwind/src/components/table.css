@@ -12,12 +12,10 @@
     border-spacing: 0;
     border-radius: var(--neoverse-table-radius);
     color: var(--neoverse-table-foreground);
-    background: var(--neoverse-table-background);
+    background: transparent;
     box-shadow: var(--neoverse-table-shadow);
     font-size: var(--neoverse-table-font-size);
     line-height: var(--neoverse-table-line-height);
-    -webkit-backdrop-filter: var(--neoverse-table-filter);
-    backdrop-filter: var(--neoverse-table-filter);
   }
 
   :where(.ui-table, .neoverse-prose table) :where(th, td) {
@@ -26,26 +24,37 @@
     text-align: start;
     vertical-align: top;
     overflow-wrap: anywhere;
+    -webkit-backdrop-filter: var(--neoverse-table-filter);
+    backdrop-filter: var(--neoverse-table-filter);
     transition:
       background-color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
-      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      box-shadow var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
   }
 
   :where(.ui-table, .neoverse-prose table) th {
     color: var(--neoverse-table-header-foreground);
     background: var(--neoverse-table-header-background);
+    border-block-end: var(--neoverse-border-width-thin) solid var(--neoverse-table-grid-line-strong);
+    box-shadow: var(--neoverse-table-header-shadow);
     font-weight: var(--neoverse-font-weight-semibold);
+  }
+
+  :where(.ui-table, .neoverse-prose table) td {
+    background: var(--neoverse-table-background);
+    box-shadow: var(--neoverse-table-cell-shadow);
+  }
+
+  :where(.ui-table, .neoverse-prose table) :where(th, td):not(:last-child) {
+    border-inline-end: var(--neoverse-border-width-thin) solid var(--neoverse-table-grid-line);
+  }
+
+  :where(.ui-table, .neoverse-prose table) tbody tr:not(:last-child) td {
+    border-block-end: var(--neoverse-border-width-thin) solid var(--neoverse-table-grid-line);
   }
 
   :where(.ui-table--striped, .neoverse-prose table) tbody tr:nth-child(even) td {
     background: var(--neoverse-table-stripe-background);
-  }
-
-  @media (hover: hover) {
-    :where(.ui-table--hoverable, .neoverse-prose table) tbody tr:hover td {
-      color: var(--neoverse-table-hover-foreground);
-      background: var(--neoverse-table-hover-background);
-    }
   }
 
   :where(.ui-table, .neoverse-prose table) thead th:first-child {
@@ -65,11 +74,24 @@
   }
 
   :where(.ui-table__caption, .neoverse-prose caption) {
+    caption-side: top;
     margin-block-end: var(--neoverse-table-caption-gap);
+    padding: 0;
     color: var(--neoverse-table-caption-foreground);
+    background: transparent;
+    box-shadow: none;
     font-size: var(--neoverse-typography-caption-size);
+    font-weight: var(--neoverse-font-weight-semibold);
     line-height: var(--neoverse-typography-caption-line-height);
     text-align: start;
+  }
+
+  @media (hover: hover) {
+    :where(.ui-table--hoverable, .neoverse-prose table) tbody tr:hover td {
+      color: var(--neoverse-table-hover-foreground);
+      background: var(--neoverse-table-hover-background);
+      box-shadow: var(--neoverse-table-hover-shadow);
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {

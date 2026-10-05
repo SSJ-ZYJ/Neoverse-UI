@@ -16,29 +16,29 @@
   }
 
   .ui-surface-solid {
-    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      var(--neoverse-color-border-subtle);
-    background: var(--neoverse-color-surface-canvas);
+    border: 0;
+    background: var(--neoverse-material-surface-solid-background);
+    box-shadow: var(--neoverse-material-surface-solid-shadow);
   }
 
   .ui-surface-subtle {
-    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      var(--neoverse-color-border-subtle);
-    background: var(--neoverse-color-surface-subtle);
+    border: 0;
+    background: var(--neoverse-material-surface-subtle-background);
+    box-shadow: var(--neoverse-material-surface-subtle-shadow);
   }
 
   .ui-surface-elevated {
-    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      var(--neoverse-color-border-default);
-    background: var(--neoverse-color-surface-raised);
-    box-shadow: var(--neoverse-shadow-raised);
+    border: 0;
+    background: var(--neoverse-material-surface-elevated-background);
+    box-shadow:
+      var(--neoverse-material-surface-elevated-edge-highlight),
+      var(--neoverse-material-surface-elevated-shadow);
   }
 
   .ui-surface-inset {
-    background: var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-fill);
-    box-shadow:
-      inset 0 0 0 var(--neoverse-border-width-thin) var(--neoverse-color-border-subtle),
-      inset 0 var(--neoverse-border-width-thin) 0 var(--neoverse-surface-inset-highlight);
+    border: 0;
+    background: var(--neoverse-surface-inset-rest-background);
+    box-shadow: var(--neoverse-shadow-inset);
     -webkit-backdrop-filter: var(--neoverse-surface-inset-filter);
     backdrop-filter: var(--neoverse-surface-inset-filter);
   }
@@ -62,7 +62,7 @@
     }
 
     .ui-surface-interactive:active {
-      transform: translateY(0) scale(0.99);
+      transform: translateY(0) scale(var(--neoverse-surface-interactive-active-scale));
     }
   }
 

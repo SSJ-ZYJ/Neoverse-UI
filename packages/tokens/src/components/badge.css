@@ -1,8 +1,142 @@
 @layer neoverse.tokens {
   :root {
-    /* Badge defaults resolve through generic semantic roles in both themes. */
-    --neoverse-badge-background: var(--neoverse-color-surface-subtle);
-    --neoverse-badge-border: var(--neoverse-color-border-subtle);
+    /* CJK glyphs sit optically a little high inside compact pills even when
+       the line box itself is mathematically centered. Keep that correction
+       component-owned instead of nudging each consumer. */
+    --neoverse-badge-label-optical-offset: 0.035em;
+
+    /* Badge status is carried by the material itself, not only by the label.
+       Every semantic variant uses the same four-sided ambient geometry while
+       keeping its own resolved status color in the token layer. */
+    --neoverse-badge-background:
+      radial-gradient(
+        76% 112% at -8% -18%,
+        color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        76% 112% at 108% 118%,
+        color-mix(in srgb, var(--neoverse-color-text-primary) 7%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        54% 92% at 108% -12%,
+        color-mix(in srgb, var(--neoverse-color-text-primary) 5%, transparent),
+        transparent 78%
+      ),
+      radial-gradient(
+        54% 92% at -8% 112%,
+        color-mix(in srgb, var(--neoverse-color-text-primary) 4%, transparent),
+        transparent 80%
+      ),
+      color-mix(in srgb, var(--neoverse-color-text-primary) 4%, transparent);
     --neoverse-badge-foreground: var(--neoverse-color-text-secondary);
+    --neoverse-badge-shadow:
+      inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 58%, transparent),
+      inset 0 -1px 0 color-mix(in srgb, var(--neoverse-color-text-primary) 5%, transparent),
+      inset 1px 0 0 color-mix(in srgb, var(--neoverse-color-edge-light) 24%, transparent),
+      inset -1px 0 0 color-mix(in srgb, var(--neoverse-color-edge-light) 18%, transparent);
+
+    --neoverse-badge-info-background:
+      radial-gradient(
+        76% 112% at -8% -18%,
+        color-mix(in srgb, var(--neoverse-color-status-info) 12%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        76% 112% at 108% 118%,
+        color-mix(in srgb, var(--neoverse-color-status-info) 10%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        54% 92% at 108% -12%,
+        color-mix(in srgb, var(--neoverse-color-status-info) 7%, transparent),
+        transparent 78%
+      ),
+      radial-gradient(
+        54% 92% at -8% 112%,
+        color-mix(in srgb, var(--neoverse-color-status-info) 7%, transparent),
+        transparent 80%
+      ),
+      color-mix(in srgb, var(--neoverse-color-status-info) 7%, transparent);
+    --neoverse-badge-success-background:
+      radial-gradient(
+        76% 112% at -8% -18%,
+        color-mix(in srgb, var(--neoverse-color-status-success) 12%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        76% 112% at 108% 118%,
+        color-mix(in srgb, var(--neoverse-color-status-success) 10%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        54% 92% at 108% -12%,
+        color-mix(in srgb, var(--neoverse-color-status-success) 7%, transparent),
+        transparent 78%
+      ),
+      radial-gradient(
+        54% 92% at -8% 112%,
+        color-mix(in srgb, var(--neoverse-color-status-success) 7%, transparent),
+        transparent 80%
+      ),
+      color-mix(in srgb, var(--neoverse-color-status-success) 7%, transparent);
+    --neoverse-badge-warning-background:
+      radial-gradient(
+        76% 112% at -8% -18%,
+        color-mix(in srgb, var(--neoverse-color-status-warning) 12%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        76% 112% at 108% 118%,
+        color-mix(in srgb, var(--neoverse-color-status-warning) 10%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        54% 92% at 108% -12%,
+        color-mix(in srgb, var(--neoverse-color-status-warning) 7%, transparent),
+        transparent 78%
+      ),
+      radial-gradient(
+        54% 92% at -8% 112%,
+        color-mix(in srgb, var(--neoverse-color-status-warning) 7%, transparent),
+        transparent 80%
+      ),
+      color-mix(in srgb, var(--neoverse-color-status-warning) 7%, transparent);
+    --neoverse-badge-danger-background:
+      radial-gradient(
+        76% 112% at -8% -18%,
+        color-mix(in srgb, var(--neoverse-color-status-danger) 12%, transparent),
+        transparent 70%
+      ),
+      radial-gradient(
+        76% 112% at 108% 118%,
+        color-mix(in srgb, var(--neoverse-color-status-danger) 10%, transparent),
+        transparent 72%
+      ),
+      radial-gradient(
+        54% 92% at 108% -12%,
+        color-mix(in srgb, var(--neoverse-color-status-danger) 7%, transparent),
+        transparent 78%
+      ),
+      radial-gradient(
+        54% 92% at -8% 112%,
+        color-mix(in srgb, var(--neoverse-color-status-danger) 7%, transparent),
+        transparent 80%
+      ),
+      color-mix(in srgb, var(--neoverse-color-status-danger) 7%, transparent);
+
+    --neoverse-badge-info-shadow:
+      var(--neoverse-badge-shadow),
+      0 6px 16px -14px color-mix(in srgb, var(--neoverse-color-status-info) 18%, transparent);
+    --neoverse-badge-success-shadow:
+      var(--neoverse-badge-shadow),
+      0 6px 16px -14px color-mix(in srgb, var(--neoverse-color-status-success) 18%, transparent);
+    --neoverse-badge-warning-shadow:
+      var(--neoverse-badge-shadow),
+      0 6px 16px -14px color-mix(in srgb, var(--neoverse-color-status-warning) 18%, transparent);
+    --neoverse-badge-danger-shadow:
+      var(--neoverse-badge-shadow),
+      0 6px 16px -14px color-mix(in srgb, var(--neoverse-color-status-danger) 18%, transparent);
   }
 }

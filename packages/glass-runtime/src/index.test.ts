@@ -11,7 +11,25 @@ type FakeGl = {
   FLOAT: number;
   LINK_STATUS: number;
   SRC_ALPHA: number;
+  ONE: number;
   ONE_MINUS_SRC_ALPHA: number;
+  TEXTURE0: number;
+  TEXTURE_2D: number;
+  TEXTURE_MIN_FILTER: number;
+  TEXTURE_MAG_FILTER: number;
+  TEXTURE_WRAP_S: number;
+  TEXTURE_WRAP_T: number;
+  LINEAR: number;
+  CLAMP_TO_EDGE: number;
+  RGBA: number;
+  UNSIGNED_BYTE: number;
+  activeTexture: ReturnType<typeof vi.fn>;
+  bindTexture: ReturnType<typeof vi.fn>;
+  createTexture: ReturnType<typeof vi.fn>;
+  deleteTexture: ReturnType<typeof vi.fn>;
+  texParameteri: ReturnType<typeof vi.fn>;
+  texImage2D: ReturnType<typeof vi.fn>;
+  uniform1i: ReturnType<typeof vi.fn>;
   SCISSOR_TEST: number;
   STATIC_DRAW: number;
   TRIANGLE_STRIP: number;
@@ -19,6 +37,7 @@ type FakeGl = {
   attachShader: ReturnType<typeof vi.fn>;
   bindBuffer: ReturnType<typeof vi.fn>;
   blendFunc: ReturnType<typeof vi.fn>;
+  blendFuncSeparate: ReturnType<typeof vi.fn>;
   bufferData: ReturnType<typeof vi.fn>;
   clear: ReturnType<typeof vi.fn>;
   clearColor: ReturnType<typeof vi.fn>;
@@ -59,7 +78,25 @@ const createFakeGl = (): FakeGl => {
     FLOAT: 0x1406,
     LINK_STATUS: 0x8b82,
     SRC_ALPHA: 0x0302,
+    ONE: 1,
     ONE_MINUS_SRC_ALPHA: 0x0303,
+    TEXTURE0: 0x84c0,
+    TEXTURE_2D: 0x0de1,
+    TEXTURE_MIN_FILTER: 0x2801,
+    TEXTURE_MAG_FILTER: 0x2800,
+    TEXTURE_WRAP_S: 0x2802,
+    TEXTURE_WRAP_T: 0x2803,
+    LINEAR: 0x2601,
+    CLAMP_TO_EDGE: 0x812f,
+    RGBA: 0x1908,
+    UNSIGNED_BYTE: 0x1401,
+    activeTexture: vi.fn(),
+    bindTexture: vi.fn(),
+    createTexture: vi.fn(() => ({})),
+    deleteTexture: vi.fn(),
+    texParameteri: vi.fn(),
+    texImage2D: vi.fn(),
+    uniform1i: vi.fn(),
     SCISSOR_TEST: 0x0c11,
     STATIC_DRAW: 0x88e4,
     TRIANGLE_STRIP: 0x0005,
@@ -67,6 +104,7 @@ const createFakeGl = (): FakeGl => {
     attachShader: vi.fn(),
     bindBuffer: vi.fn(),
     blendFunc: vi.fn(),
+    blendFuncSeparate: vi.fn(),
     bufferData: vi.fn(),
     clear: vi.fn(),
     clearColor: vi.fn(),
@@ -144,6 +182,7 @@ describe('Glass renderer', () => {
   beforeEach(() => {
     document.documentElement.removeAttribute(glassRendererAttribute);
     document.documentElement.style.removeProperty('--neoverse-color-edge-light');
+    document.documentElement.style.removeProperty('color-scheme');
     document.body.innerHTML = '';
     vi.restoreAllMocks();
   });
@@ -210,6 +249,52 @@ describe('Glass renderer', () => {
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });
 
+  it.each(['ui-card', 'ui-surface'])('keeps %s on the established WebGL edge pass', (className) => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = `${className} material-glass-elevated`;
+    setRect(glass, {});
+    document.body.append(glass);
+
+    createTestRenderer().mount();
+
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    expect(
+      document.querySelector<HTMLCanvasElement>('[data-neoverse-glass-renderer-canvas]')?.style
+        .mixBlendMode,
+    ).toBe('');
+  });
+
+  it('leaves button-owned edge fields out of the shared WebGL pass by default', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const button = document.createElement('button');
+    button.className = 'ui-button material-glass-subtle';
+    setRect(button, { width: 100, height: 32 });
+    document.body.append(button);
+
+    const renderer = createTestRenderer();
+    renderer.mount();
+
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
+  it('allows an explicitly opted-in button to use the shared WebGL edge pass', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const button = document.createElement('button');
+    button.className = 'ui-button material-glass-subtle';
+    button.dataset.neoverseGlassEdgePassActive = 'webgl';
+    setRect(button, { width: 100, height: 32 });
+    document.body.append(button);
+
+    const renderer = createTestRenderer();
+    renderer.mount();
+
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+  });
+
   it('uses the fixed canvas viewport and clips each edge draw to its surface', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
@@ -252,6 +337,106 @@ describe('Glass renderer', () => {
     ]);
     expect(gl.scissor).toHaveBeenLastCalledWith(20, 40, 100, 60);
     expect(gl.disable).toHaveBeenLastCalledWith(gl.SCISSOR_TEST);
+  });
+
+  it('clips WebGL edges to overflow-clipping ancestors', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+
+    const viewport = document.createElement('section');
+    viewport.style.overflow = 'hidden';
+    setRect(viewport, { left: 20, top: 30, width: 80, height: 50 });
+
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, { left: 10, top: 20, width: 120, height: 80 });
+    viewport.append(glass);
+    document.body.append(viewport);
+
+    const renderer = createTestRenderer({ maxDevicePixelRatio: 1 });
+    renderer.mount();
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    expect(canvas).not.toBeNull();
+    if (canvas === null) return;
+
+    setRect(canvas, { left: 0, top: 0, width: 200, height: 150 });
+    gl.scissor.mockClear();
+    renderer.refresh();
+
+    expect(gl.scissor).toHaveBeenLastCalledWith(20, 70, 80, 50);
+  });
+
+  it('extends the tooltip contour to its resolved pointer while preserving zoom and clipping', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const viewport = document.createElement('section');
+    viewport.style.overflow = 'hidden';
+    setRect(viewport, { left: 0, top: 0, width: 300, height: 95 });
+    const tooltip = document.createElement('div');
+    tooltip.className = 'material-glass-subtle';
+    tooltip.setAttribute('data-neoverse-tooltip-surface', '');
+    tooltip.style.cssText =
+      'overflow: visible; border: 1px solid transparent; border-radius: 12px;';
+    Object.defineProperty(tooltip, 'offsetWidth', { configurable: true, value: 100 });
+    setRect(tooltip, { width: 150, height: 90 });
+    viewport.append(tooltip);
+    document.body.append(viewport);
+    const computedStyle = window.getComputedStyle.bind(window);
+    const arrowStyle = document.createElement('div').style;
+    arrowStyle.cssText = 'display: block; left: 40px; width: 16px; height: 6px;';
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) =>
+      element === tooltip && pseudo === '::after' ? arrowStyle : computedStyle(element),
+    );
+
+    const renderer = createTestRenderer({ maxDevicePixelRatio: 1 });
+    renderer.mount();
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    expect(canvas).not.toBeNull();
+    if (canvas === null) return;
+    setRect(canvas, { width: 300, height: 150 });
+    renderer.refresh();
+
+    expect(gl.uniform3f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_pointer' }),
+      -13.5,
+      12,
+      9,
+    );
+    expect(gl.uniform4f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_rect' }),
+      0,
+      0,
+      150,
+      99,
+    );
+    expect(gl.uniform2f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_rect_size' }),
+      150,
+      90,
+    );
+    expect(gl.uniform4f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_radii' }),
+      18,
+      18,
+      18,
+      18,
+    );
+    expect(gl.scissor).toHaveBeenLastCalledWith(0, 55, 150, 95);
+
+    arrowStyle.display = 'none';
+    gl.uniform3f.mockClear();
+    renderer.refresh();
+    expect(gl.uniform3f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_pointer' }),
+      0,
+      0,
+      0,
+    );
+    expect(gl.scissor).toHaveBeenLastCalledWith(0, 60, 150, 90);
   });
 
   it('keeps square corners when CSS does not declare a surface radius', () => {
@@ -341,6 +526,33 @@ describe('Glass renderer', () => {
     expect(carrierCall?.[3]).toBeCloseTo(0.0647, 3);
   });
 
+  it.each([
+    ['light', 1],
+    ['dark', 0],
+    ['normal', -1],
+  ] as const)('uses the %s color scheme independently of edge tint', (scheme, expected) => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    document.documentElement.style.setProperty('color-scheme', scheme);
+    document.documentElement.style.setProperty(
+      '--neoverse-color-edge-light',
+      'rgb(116 186 229 / 48%)',
+    );
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-elevated';
+    glass.style.setProperty('--neoverse-material-edge-refraction-opacity', '0.22');
+    setRect(glass, { width: 100, height: 60 });
+    document.body.append(glass);
+
+    const renderer = createTestRenderer();
+    renderer.mount();
+
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_light_surface' }),
+      expected,
+    );
+  });
+
   it('keeps the CSS fallback when no WebGL context is available', () => {
     installCanvasContext();
     const renderer = createTestRenderer();
@@ -389,8 +601,9 @@ describe('Glass renderer', () => {
     second.mount();
 
     expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
-    // Outer surface, nested independent surface and button have three edges.
-    expect(gl.drawArrays).toHaveBeenCalledTimes(3);
+    // Only independent surface planes use the shared renderer. Segmented
+    // controls and buttons retain their component-owned local edge fields.
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
     second.destroy();
     first.destroy();
   });
@@ -454,65 +667,16 @@ describe('Glass renderer', () => {
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
   });
 
-  it('scales chromatic refraction for thicker edges without a white ring', () => {
-    expect(glassFragmentShader).toContain('float thicknessScale');
-    expect(glassFragmentShader).toContain('float chromaticStrength');
-    expect(glassFragmentShader).toContain('float edgeLightCatch');
-    expect(glassFragmentShader).toContain('float cornerCatch');
-    expect(glassFragmentShader).toContain('uniform float u_pixel_ratio;');
-    expect(glassFragmentShader).toContain('vec2 pixelSize = vec2(1.0 / max(u_pixel_ratio, 1.0));');
+  it('preserves the established chromatic edge-refraction field', () => {
+    expect(glassFragmentShader).toContain('uniform vec3 u_primary;');
+    expect(glassFragmentShader).toContain('uniform vec3 u_secondary;');
+    expect(glassFragmentShader).toContain('uniform vec3 u_tertiary;');
     expect(glassFragmentShader).toContain(
-      'float antiAlias = max(max(pixelSize.x, pixelSize.y) * 0.75, 0.35);',
-    );
-    expect(glassFragmentShader).toContain(
-      'float inside = 1.0 - smoothstep(-antiAlias, antiAlias, distance);',
-    );
-    expect(glassFragmentShader).toContain('float edgeMask = inside * edge;');
-    expect(glassFragmentShader).toContain('#ifdef GL_FRAGMENT_PRECISION_HIGH');
-    expect(glassFragmentShader).toContain(
-      'float thicknessScale = clamp(0.82 + (u_edge_width * 0.55), 0.9, 1.65);',
-    );
-    expect(glassFragmentShader).toContain(
-      'float edgeFalloff = clamp(u_softness * 0.05, 0.2, 0.42);',
-    );
-    expect(glassFragmentShader).toContain(
-      'float chromaticStrength = clamp(0.9 + ((thicknessScale - 1.0) * 1.4), 0.9, 1.8);',
-    );
-    expect(glassFragmentShader).toContain(
-      'float edgeLightLuminance = dot(u_edge_light, vec3(0.2126, 0.7152, 0.0722));',
-    );
-    expect(glassFragmentShader).toContain(
-      'float lightSurface = smoothstep(0.55, 0.88, edgeLightLuminance);',
+      'vec3 refractedBase = mix(u_primary, u_secondary, 0.48 + (bottomRightScatter * 0.2));',
     );
     expect(glassFragmentShader).toContain(
       'float chromaticVisibility = mix(1.0, 1.34, lightSurface);',
     );
-    expect(glassFragmentShader).toContain(
-      'float edgeLightCatch = (0.003 + (topLeftLight * 0.012)) * (2.0 - thicknessScale) * mix(1.0, 0.24, lightSurface);',
-    );
-    expect(glassFragmentShader).toContain(
-      'float rightRefraction = clamp(rightCatch * 0.52 * chromaticStrength * chromaticVisibility, 0.0, 0.94);',
-    );
-    expect(glassFragmentShader).toContain(
-      'float lowerRightRefraction = rightCatch * bottomCatch * lightSurface;',
-    );
-    expect(glassFragmentShader).toContain('float lightAlphaGain = mix(1.0, 1.35, lightSurface);');
-    expect(glassFragmentShader).toContain(
-      'float alpha = edgeMask * u_opacity * directionalAlpha * thicknessScale * lightAlphaGain;',
-    );
-    expect(glassFragmentShader).toContain(
-      'vec3 lightChromaticColor = color * vec3(0.78, 0.88, 1.0);',
-    );
-    expect(glassFragmentShader).toContain(
-      'color = mix(color, lightChromaticColor, lightSurface * 0.72);',
-    );
-    expect(glassFragmentShader).toContain(
-      'vec3 topLeftRefraction = mix(u_secondary, u_primary, 0.35);',
-    );
-    expect(glassFragmentShader).toContain(
-      'mix(u_primary, u_secondary, 0.48 + (bottomRightScatter * 0.2))',
-    );
-    expect(glassFragmentShader).not.toContain('u_edge_light, 0.1 + (topLeftLight * 0.26)');
   });
 
   it('keeps the opposing rounded corners connected in the directional edge field', () => {
@@ -523,21 +687,6 @@ describe('Glass renderer', () => {
 
     expect(directionalAlpha).toContain('opposingCornerCatch');
     expect(opposingCornerCoefficient).toBeGreaterThanOrEqual(0.24);
-  });
-
-  it('keeps low-opacity dark elevated edge catches nearly neutral', () => {
-    expect(glassFragmentShader).toContain(
-      'float chromaticVariantStrength = smoothstep(0.3, 0.5, u_opacity);',
-    );
-    expect(glassFragmentShader).toContain(
-      'vec3 neutralEdgeColor = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)));',
-    );
-    expect(glassFragmentShader).toContain(
-      'float chromaticEdgeStrength = mix(0.12, 1.0, chromaticVariantStrength);',
-    );
-    expect(glassFragmentShader).toContain(
-      'color = mix(neutralEdgeColor, color, chromaticEdgeStrength);',
-    );
   });
 
   it('tracks moving glass during CSS transitions and stops repainting when they finish', () => {

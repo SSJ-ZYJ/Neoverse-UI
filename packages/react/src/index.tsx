@@ -480,20 +480,290 @@ export function UiCard<T extends ElementType = 'div'>(props: UiCardProps<T>) {
 
 export type UiInputProps = ComponentPropsWithRef<'input'>;
 
-export function UiInput({ className, ...props }: UiInputProps) {
-  return <input {...props} className={['ui-input', className].filter(Boolean).join(' ')} />;
+export function UiInput({ className, onPointerDown, onBlur, ...props }: UiInputProps) {
+  return (
+    <input
+      {...props}
+      className={['ui-input', className].filter(Boolean).join(' ')}
+      onPointerDown={(event) => {
+        event.currentTarget.dataset.neoverseFocusOrigin = 'pointer';
+        onPointerDown?.(event);
+      }}
+      onBlur={(event) => {
+        delete event.currentTarget.dataset.neoverseFocusOrigin;
+        onBlur?.(event);
+      }}
+    />
+  );
 }
 
 export type UiTextareaProps = ComponentPropsWithRef<'textarea'>;
 
-export function UiTextarea({ className, ...props }: UiTextareaProps) {
-  return <textarea {...props} className={['ui-textarea', className].filter(Boolean).join(' ')} />;
+export function UiTextarea({ className, onPointerDown, onBlur, ...props }: UiTextareaProps) {
+  return (
+    <span className="ui-textarea-shell">
+      <textarea
+        {...props}
+        className={['ui-textarea', className].filter(Boolean).join(' ')}
+        onPointerDown={(event) => {
+          event.currentTarget.dataset.neoverseFocusOrigin = 'pointer';
+          onPointerDown?.(event);
+        }}
+        onBlur={(event) => {
+          delete event.currentTarget.dataset.neoverseFocusOrigin;
+          onBlur?.(event);
+        }}
+      />
+    </span>
+  );
 }
 
-export type UiSelectProps = ComponentPropsWithRef<'select'>;
+export type FormControlValue = string | number;
 
-export function UiSelect({ className, ...props }: UiSelectProps) {
-  return <select {...props} className={['ui-select', className].filter(Boolean).join(' ')} />;
+const selectPopoverCleanup = new WeakMap<HTMLElement, () => void>();
+
+function supportsSelectPopover(element: HTMLElement): boolean {
+  return typeof element.showPopover === 'function' && typeof element.hidePopover === 'function';
+}
+
+function isSelectPopoverOpen(element: HTMLElement): boolean {
+  if (!supportsSelectPopover(element)) {
+    return element.classList.contains('ui-select__popover--fallback-open');
+  }
+  return element.matches(':popover-open');
+}
+
+function stopSelectPopoverTracking(popover: HTMLElement) {
+  selectPopoverCleanup.get(popover)?.();
+  selectPopoverCleanup.delete(popover);
+}
+
+function resolveSelectCssLength(element: HTMLElement, value: string): number {
+  const parsed = Number.parseFloat(value);
+  if (!Number.isFinite(parsed)) return 0;
+
+  const normalized = value.trim().toLowerCase();
+  if (normalized.endsWith('rem')) {
+    return parsed * Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
+  }
+  if (normalized.endsWith('em')) {
+    return parsed * Number.parseFloat(getComputedStyle(element).fontSize);
+  }
+  return parsed;
+}
+
+function resolveSelectEffectiveZoom(element: HTMLElement): number {
+  let zoom = 1;
+  let node: HTMLElement | null = element;
+  while (node !== null) {
+    const value = Number.parseFloat(getComputedStyle(node).zoom);
+    if (Number.isFinite(value) && value > 0) zoom *= value;
+    node = node.parentElement;
+  }
+  return zoom;
+}
+
+function positionSelectPopover(details: HTMLDetailsElement, popover: HTMLElement) {
+  const trigger = details.querySelector<HTMLElement>('.ui-select');
+  if (trigger === null || !details.open || !isSelectPopoverOpen(popover)) return;
+
+  const triggerRect = trigger.getBoundingClientRect();
+  const popoverStyle = getComputedStyle(popover);
+  const effectiveZoom = resolveSelectEffectiveZoom(popover);
+  const gap =
+    Math.max(
+      0,
+      resolveSelectCssLength(
+        popover,
+        popoverStyle.getPropertyValue('--neoverse-select-popover-gap'),
+      ),
+    ) * effectiveZoom;
+
+  popover.style.setProperty(
+    '--neoverse-select-popover-inline-size',
+    `${triggerRect.width / effectiveZoom}px`,
+  );
+
+  const popoverRect = popover.getBoundingClientRect();
+  const maxLeft = Math.max(gap, window.innerWidth - popoverRect.width - gap);
+  const left = Math.min(Math.max(triggerRect.left, gap), maxLeft);
+  const spaceBelow = window.innerHeight - triggerRect.bottom - gap;
+  const spaceAbove = triggerRect.top - gap;
+  const shouldOpenAbove = popoverRect.height > spaceBelow && spaceAbove >= popoverRect.height;
+  const unclampedTop = shouldOpenAbove
+    ? triggerRect.top - popoverRect.height - gap
+    : triggerRect.bottom + gap;
+  const maxTop = Math.max(gap, window.innerHeight - popoverRect.height - gap);
+  const top = Math.min(Math.max(unclampedTop, gap), maxTop);
+
+  popover.style.setProperty('--neoverse-select-popover-left', `${left / effectiveZoom}px`);
+  popover.style.setProperty('--neoverse-select-popover-top', `${top / effectiveZoom}px`);
+}
+
+function openSelectPopover(details: HTMLDetailsElement) {
+  const popover = details.querySelector<HTMLElement>('.ui-select__popover');
+  if (popover === null) return;
+
+  if (supportsSelectPopover(popover)) {
+    if (!popover.matches(':popover-open')) popover.showPopover();
+  } else {
+    popover.classList.add('ui-select__popover--fallback-open');
+  }
+
+  positionSelectPopover(details, popover);
+  stopSelectPopoverTracking(popover);
+  const update = () => positionSelectPopover(details, popover);
+  window.addEventListener('resize', update);
+  window.addEventListener('scroll', update, true);
+  selectPopoverCleanup.set(popover, () => {
+    window.removeEventListener('resize', update);
+    window.removeEventListener('scroll', update, true);
+  });
+}
+
+function closeSelectPopover(details: HTMLDetailsElement) {
+  const popover = details.querySelector<HTMLElement>('.ui-select__popover');
+  if (popover === null) return;
+
+  if (supportsSelectPopover(popover)) {
+    if (popover.matches(':popover-open')) popover.hidePopover();
+  } else {
+    popover.classList.remove('ui-select__popover--fallback-open');
+  }
+  stopSelectPopoverTracking(popover);
+}
+
+export interface UiSelectOption {
+  value: FormControlValue;
+  label: ReactNode;
+  disabled?: boolean;
+}
+
+export interface UiSelectProps
+  extends Omit<ComponentPropsWithRef<'summary'>, 'children' | 'onChange'> {
+  options: readonly UiSelectOption[];
+  value?: FormControlValue;
+  placeholder?: ReactNode;
+  name?: string;
+  disabled?: boolean;
+  onValueChange?: (value: FormControlValue) => void;
+}
+
+export function UiSelect({
+  options,
+  value,
+  placeholder,
+  name,
+  disabled = false,
+  onValueChange,
+  className,
+  onClick,
+  onPointerDown,
+  onBlur,
+  ...props
+}: UiSelectProps) {
+  const selected = options.find((option) => String(option.value) === String(value ?? ''));
+
+  return (
+    <details
+      className={['ui-select-shell', disabled && 'ui-select-shell--disabled']
+        .filter(Boolean)
+        .join(' ')}
+      onToggle={(event) => {
+        const details = event.currentTarget;
+        if (disabled && details.open) {
+          details.open = false;
+          return;
+        }
+        if (details.open) openSelectPopover(details);
+        else closeSelectPopover(details);
+      }}
+    >
+      {/* biome-ignore lint/a11y/noStaticElementInteractions: summary is the native interactive trigger for details. */}
+      <summary
+        {...props}
+        className={['ui-select', className].filter(Boolean).join(' ')}
+        aria-haspopup="listbox"
+        aria-disabled={disabled || undefined}
+        onClick={(event) => {
+          if (disabled) event.preventDefault();
+          onClick?.(event);
+        }}
+        onPointerDown={(event) => {
+          event.currentTarget.dataset.neoverseFocusOrigin = 'pointer';
+          onPointerDown?.(event);
+        }}
+        onBlur={(event) => {
+          delete event.currentTarget.dataset.neoverseFocusOrigin;
+          onBlur?.(event);
+        }}
+      >
+        <span
+          className={['ui-select__value', !selected && 'ui-select__value--placeholder']
+            .filter(Boolean)
+            .join(' ')}
+        >
+          {selected?.label ?? placeholder ?? ''}
+        </span>
+        <svg className="ui-select__indicator" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m5 12 4 4L19 6" />
+        </svg>
+      </summary>
+
+      <div
+        className="ui-select__popover"
+        role="listbox"
+        popover="auto"
+        onToggle={(event) => {
+          const popover = event.currentTarget;
+          if (isSelectPopoverOpen(popover)) return;
+
+          stopSelectPopoverTracking(popover);
+          const details = popover.closest('details');
+          if (details?.open) details.open = false;
+        }}
+      >
+        {options.map((option) => {
+          const selectedOption = String(option.value) === String(value ?? '');
+          return (
+            <button
+              key={String(option.value)}
+              className="ui-select__option"
+              type="button"
+              role="option"
+              disabled={option.disabled}
+              aria-selected={selectedOption}
+              onPointerDown={(event) => {
+                const trigger = event.currentTarget
+                  .closest('details')
+                  ?.querySelector<HTMLElement>('.ui-select');
+                if (trigger) trigger.dataset.neoverseFocusOrigin = 'pointer';
+              }}
+              onClick={(event) => {
+                if (option.disabled || disabled) return;
+                onValueChange?.(option.value);
+                const details = event.currentTarget.closest('details');
+                if (details) {
+                  details.open = false;
+                  closeSelectPopover(details);
+                }
+                details?.querySelector<HTMLElement>('.ui-select')?.focus();
+              }}
+            >
+              <span>{option.label}</span>
+              {selectedOption ? (
+                <svg className="ui-select__check" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="m5 12 4 4L19 6" />
+                </svg>
+              ) : null}
+            </button>
+          );
+        })}
+      </div>
+
+      {name ? <input type="hidden" name={name} value={value ?? ''} disabled={disabled} /> : null}
+    </details>
+  );
 }
 
 export interface UiTableProps extends Omit<ComponentPropsWithRef<'table'>, 'children'> {

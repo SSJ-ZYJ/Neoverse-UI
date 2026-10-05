@@ -2,6 +2,7 @@
 import { UiButton, UiIconButton } from '@neoverse-ui/vue';
 import LabIcon from '../LabIcon.vue';
 import { localize, localized, moduleCopy } from '../playground-content';
+import QaPreviewMatrix from '../QaPreviewMatrix.vue';
 import StateRow from '../StateRow.vue';
 import type { LabModuleProps } from './types';
 
@@ -12,6 +13,13 @@ const surfaceCopy = {
   hint: localized(
     'surface="none" removes the control plate when a parent composition already owns the material.',
     '当父级组合已经负责材质时，surface="none" 会移除控件自身的表面。',
+  ),
+} as const;
+const qaCopy = {
+  label: localized('Canonical QA', '规范 QA'),
+  hint: localized(
+    'Compare the same button hierarchy across gradient, neutral, and reduced-transparency contexts.',
+    '在渐变、中性与降低透明度环境中对比同一组按钮层级。',
   ),
 } as const;
 </script>
@@ -72,5 +80,12 @@ const surfaceCopy = {
     <UiButton surface="none" variant="ghost">
       {{ localize(copy.controls.ghost, props.locale) }}
     </UiButton>
+  </StateRow>
+  <StateRow :label="qaCopy.label" :hint="qaCopy.hint" :locale="props.locale">
+    <QaPreviewMatrix :locale="props.locale">
+      <UiButton>{{ localize(copy.controls.default, props.locale) }}</UiButton>
+      <UiButton variant="secondary">{{ localize(copy.controls.secondary, props.locale) }}</UiButton>
+      <UiButton variant="ghost">{{ localize(copy.controls.ghost, props.locale) }}</UiButton>
+    </QaPreviewMatrix>
   </StateRow>
 </template>

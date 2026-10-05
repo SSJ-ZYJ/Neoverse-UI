@@ -12,16 +12,16 @@
     --neoverse-control-surface-padding: var(--neoverse-space-1);
     --neoverse-control-surface-padding-block: var(--neoverse-control-surface-padding);
     --neoverse-control-surface-padding-inline: var(--neoverse-space-2);
-    --neoverse-control-surface-corner-radius: var(--neoverse-control-corner-radius);
+    /* ControlSurface deliberately shares SegmentedControl geometry.
+       Grouped controls should read as one family instead of shrinking their
+       corners again at each nesting level. */
+    --neoverse-control-surface-corner-radius: var(--neoverse-control-segmented-corner-radius);
     --neoverse-control-surface-boundary-width: var(--neoverse-border-width-thin);
-    --neoverse-control-surface-inner-radius: max(
-      0px,
-      calc(
-        var(--neoverse-control-surface-corner-radius) -
-        var(--neoverse-control-surface-padding-block) -
-        var(--neoverse-control-surface-boundary-width)
-      )
-    );
+    --neoverse-control-surface-inner-radius: var(--neoverse-control-segmented-option-radius);
+    --neoverse-control-surface-trailing-radius: var(--neoverse-control-segmented-corner-radius);
+    --neoverse-control-surface-trailing-padding: var(--neoverse-border-width-strong);
+    --neoverse-control-surface-trailing-background: var(--neoverse-surface-inset-rest-background);
+    --neoverse-control-surface-trailing-shadow: var(--neoverse-shadow-inset);
     /* Navigation chrome aligns its leading/trailing edge with the visible
        top inset of a centered navigation plate, rather than the group's box. */
     --neoverse-control-surface-navigation-edge-inset: calc(
@@ -75,17 +75,13 @@
       --neoverse-material-edge-refraction-opacity-subtle
     );
     --neoverse-control-chrome-edge-highlight: var(--neoverse-material-edge-highlight-elevated);
-    --neoverse-control-chrome-trailing-border: rgb(15 23 42 / 12%);
-    --neoverse-control-chrome-trailing-background: rgb(255 255 255 / 22%);
-    --neoverse-control-chrome-trailing-padding: 0.125rem;
-    --neoverse-control-chrome-trailing-padding-inline: var(--neoverse-space-1);
-    --neoverse-control-chrome-trailing-inner-radius: max(
-      0px,
-      calc(
-        var(--neoverse-control-surface-corner-radius) -
-        var(--neoverse-control-chrome-trailing-padding) -
-        var(--neoverse-border-width-thin)
-      )
+    --neoverse-control-chrome-trailing-border: var(--neoverse-color-transparent);
+    --neoverse-control-chrome-trailing-background: var(
+      --neoverse-control-surface-trailing-background
+    );
+    --neoverse-control-chrome-trailing-padding: var(--neoverse-control-surface-trailing-padding);
+    --neoverse-control-chrome-trailing-padding-inline: var(
+      --neoverse-control-surface-trailing-padding
     );
   }
 }

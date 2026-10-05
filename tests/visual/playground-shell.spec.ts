@@ -885,9 +885,71 @@ for (const theme of ['light', 'dark'] as const) {
       };
     });
     expect(tableMaterial.borderWidth).toBe('0px');
-    expect(tableMaterial.backgroundImage).not.toBe('none');
+    expect(tableMaterial.backgroundImage).toBe('none');
     expect(tableMaterial.boxShadow).not.toBe('none');
-    expect(tableMaterial.backdropFilter).not.toBe('none');
+    expect(tableMaterial.backdropFilter).toBe('none');
+
+    const tableBackdrop = page.locator('#data-display-table .playground-material-backdrop--inset');
+    const tableBackdropMaterial = await tableBackdrop.evaluate((element) => {
+      const style = getComputedStyle(element);
+      const edge = getComputedStyle(element, '::before');
+      return {
+        boxShadow: style.boxShadow,
+        edgeBackgroundImage: edge.backgroundImage,
+        edgeOpacity: edge.opacity,
+        edgeBackdropFilter: edge.backdropFilter,
+      };
+    });
+    expect(tableBackdropMaterial.boxShadow).not.toBe('none');
+    expect(tableBackdropMaterial.edgeBackgroundImage).not.toBe('none');
+    expect(Number(tableBackdropMaterial.edgeOpacity)).toBeGreaterThan(0);
+    expect(tableBackdropMaterial.edgeBackdropFilter).not.toBe('none');
+
+    const captionMaterial = await table.locator('caption').evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        backgroundImage: style.backgroundImage,
+        backgroundColor: style.backgroundColor,
+        boxShadow: style.boxShadow,
+      };
+    });
+    expect(captionMaterial.backgroundImage).toBe('none');
+    expect(captionMaterial.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    expect(captionMaterial.boxShadow).toBe('none');
+
+    const cellMaterial = await table
+      .locator('tbody td')
+      .first()
+      .evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          backgroundImage: style.backgroundImage,
+          boxShadow: style.boxShadow,
+          backdropFilter: style.backdropFilter,
+        };
+      });
+    expect(cellMaterial.backgroundImage).not.toBe('none');
+    expect(cellMaterial.boxShadow).not.toBe('none');
+    expect(cellMaterial.backdropFilter).not.toBe('none');
+
+    const headerMaterial = await table
+      .locator('thead th')
+      .first()
+      .evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          backgroundImage: style.backgroundImage,
+          backgroundColor: style.backgroundColor,
+          boxShadow: style.boxShadow,
+        };
+      });
+    const bodyBackgroundColor = await table
+      .locator('tbody td')
+      .first()
+      .evaluate((element) => getComputedStyle(element).backgroundColor);
+    expect(headerMaterial.backgroundImage).toBe(cellMaterial.backgroundImage);
+    expect(headerMaterial.backgroundColor).not.toBe(bodyBackgroundColor);
+    expect(headerMaterial.boxShadow).not.toBe(cellMaterial.boxShadow);
 
     await page.goto(`/?theme=${theme}&lang=en#data-display-disclosure`, {
       waitUntil: 'domcontentloaded',
@@ -912,10 +974,280 @@ for (const theme of ['light', 'dark'] as const) {
     expect(disclosureMaterial.boxShadow).not.toBe('none');
     expect(disclosureMaterial.backdropFilter).not.toBe('none');
 
+    const closedSummary = closed.locator(':scope > summary');
+    const summaryRest = await closedSummary.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        backgroundImage: style.backgroundImage,
+        backgroundColor: style.backgroundColor,
+      };
+    });
+    const supportsHover = await page.evaluate(() => window.matchMedia('(hover: hover)').matches);
+    if (supportsHover) {
+      const closedBackgroundRest = await closed.evaluate(
+        (element) => getComputedStyle(element).backgroundColor,
+      );
+      const closedShadowRest = await closed.evaluate(
+        (element) => getComputedStyle(element).boxShadow,
+      );
+      const indicatorRest = await closedSummary.evaluate(
+        (element) => getComputedStyle(element, '::after').color,
+      );
+      await closedSummary.hover();
+      const summaryHover = await closedSummary.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          backgroundImage: style.backgroundImage,
+          backgroundColor: style.backgroundColor,
+        };
+      });
+      const closedBackgroundHover = await closed.evaluate(
+        (element) => getComputedStyle(element).backgroundColor,
+      );
+      const closedShadowHover = await closed.evaluate(
+        (element) => getComputedStyle(element).boxShadow,
+      );
+      const indicatorHover = await closedSummary.evaluate(
+        (element) => getComputedStyle(element, '::after').color,
+      );
+      expect(summaryHover).toEqual(summaryRest);
+      expect(closedBackgroundHover).not.toBe(closedBackgroundRest);
+      expect(closedShadowHover).not.toBe(closedShadowRest);
+      expect(indicatorHover).toBe(indicatorRest);
+    }
+
     await closed.locator(':scope > summary').press('Enter');
     await expect(closed).toHaveAttribute('open', '');
   });
 }
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`form controls keep material state hierarchy without opacity-only disabled styling / ${theme}`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`/?theme=${theme}&lang=en#forms-input`, {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const rest = page.locator('#forms-input [data-form-input]');
+    const disabled = page.locator('#forms-input #forms-email-disabled');
+    await expect(rest).toBeVisible();
+    await expect(disabled).toBeDisabled();
+
+    const restState = await rest.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        borderWidth: style.borderTopWidth,
+        backgroundColor: style.backgroundColor,
+        backgroundImage: style.backgroundImage,
+        boxShadow: style.boxShadow,
+        backdropFilter: style.backdropFilter,
+      };
+    });
+    expect(restState.borderWidth).toBe('0px');
+    expect(restState.backgroundImage).not.toBe('none');
+    expect(restState.boxShadow).not.toBe('none');
+    expect(restState.backdropFilter).not.toBe('none');
+
+    await rest.focus();
+    const focusedState = await rest.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        backgroundColor: style.backgroundColor,
+        boxShadow: style.boxShadow,
+      };
+    });
+    expect(focusedState.backgroundColor).not.toBe(restState.backgroundColor);
+    expect(focusedState.boxShadow).not.toBe(restState.boxShadow);
+
+    const disabledState = await disabled.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        opacity: style.opacity,
+        cursor: style.cursor,
+        backgroundColor: style.backgroundColor,
+      };
+    });
+    expect(disabledState.opacity).toBe('1');
+    expect(disabledState.cursor).toBe('not-allowed');
+    expect(disabledState.backgroundColor).not.toBe(restState.backgroundColor);
+  });
+}
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`feedback surfaces stay borderless while retaining material depth / ${theme}`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`/?theme=${theme}&lang=en#status-feedback-badge`, {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const badge = page.locator('#status-feedback-badge .ui-badge--info');
+    const statusDot = page.locator('#status-feedback-indicator .ui-status-indicator__dot').first();
+    const notice = page.locator('#status-feedback-notice .ui-notice--info');
+    const tooltip = page.locator(
+      '#status-feedback-tooltip [data-qa-context="gradient"] .ui-tooltip-surface--accent',
+    );
+
+    await expect(badge).toBeVisible();
+    await expect(statusDot).toBeVisible();
+    await expect(notice).toBeVisible();
+    await expect(tooltip).toBeVisible();
+
+    const badgeStyle = await badge.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        borderWidth: style.borderTopWidth,
+        backgroundImage: style.backgroundImage,
+        boxShadow: style.boxShadow,
+      };
+    });
+    expect(badgeStyle.borderWidth).toBe('0px');
+    expect(badgeStyle.backgroundImage).not.toBe('none');
+    expect(badgeStyle.boxShadow).not.toBe('none');
+    expect(
+      badgeStyle.backgroundImage.match(/radial-gradient/g)?.length ?? 0,
+    ).toBeGreaterThanOrEqual(4);
+
+    const semanticBadgeBackgrounds = await page
+      .locator(
+        '#status-feedback-badge :is(.ui-badge--info, .ui-badge--success, .ui-badge--warning, .ui-badge--danger)',
+      )
+      .evaluateAll((elements) =>
+        elements.map((element) => getComputedStyle(element).backgroundImage),
+      );
+    expect(semanticBadgeBackgrounds).toHaveLength(4);
+    expect(new Set(semanticBadgeBackgrounds).size).toBe(4);
+
+    const noticeStyle = await notice.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        borderWidth: style.borderTopWidth,
+        backgroundImage: style.backgroundImage,
+        boxShadow: style.boxShadow,
+        backdropFilter: style.backdropFilter,
+      };
+    });
+    expect(noticeStyle.borderWidth).toBe('0px');
+    expect(noticeStyle.backgroundImage).not.toBe('none');
+    expect(noticeStyle.boxShadow).not.toBe('none');
+    expect(noticeStyle.backdropFilter).not.toBe('none');
+
+    const tooltipStyle = await tooltip.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        borderColor: style.borderTopColor,
+        boxShadow: style.boxShadow,
+        backdropFilter: style.backdropFilter,
+      };
+    });
+    expect(tooltipStyle.borderColor).toBe('rgba(0, 0, 0, 0)');
+    expect(tooltipStyle.boxShadow).not.toBe('none');
+    expect(tooltipStyle.backdropFilter).not.toBe('none');
+
+    expect(await statusDot.evaluate((element) => getComputedStyle(element).boxShadow)).not.toBe(
+      'none',
+    );
+  });
+}
+
+test('design QA matrices compare canonical components across shared backdrop contexts', async ({
+  page,
+}) => {
+  for (const theme of ['light', 'dark'] as const) {
+    await page.goto(`/?theme=${theme}&lang=en#controls-button`, {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const buttonMatrix = page.locator('#controls-button [data-qa-matrix]').first();
+    await expect(buttonMatrix.locator('[data-qa-context]')).toHaveCount(3);
+    await expect(buttonMatrix.locator('[data-qa-context="gradient"]')).toBeVisible();
+    await expect(buttonMatrix.locator('[data-qa-context="neutral"]')).toBeVisible();
+    await expect(buttonMatrix.locator('[data-qa-context="reduced"]')).toBeVisible();
+
+    const backdropMetrics = await buttonMatrix.evaluate((matrix) => {
+      const read = (id: string) => {
+        const stage = matrix.querySelector<HTMLElement>(`[data-qa-stage="${id}"]`);
+        if (!stage) throw new Error(`Missing QA stage: ${id}`);
+        const style = getComputedStyle(stage);
+        return {
+          backgroundColor: style.backgroundColor,
+          backgroundImage: style.backgroundImage,
+          borderWidth: style.borderTopWidth,
+          boxShadow: style.boxShadow,
+        };
+      };
+      return {
+        gradient: read('gradient'),
+        neutral: read('neutral'),
+        reduced: read('reduced'),
+      };
+    });
+
+    expect(backdropMetrics.gradient.backgroundImage).not.toBe('none');
+    expect(backdropMetrics.neutral.backgroundImage).toBe('none');
+    expect(backdropMetrics.gradient.backgroundColor).not.toBe(
+      backdropMetrics.neutral.backgroundColor,
+    );
+    expect(backdropMetrics.gradient.borderWidth).toBe('0px');
+    expect(backdropMetrics.neutral.borderWidth).toBe('0px');
+    expect(backdropMetrics.reduced.borderWidth).toBe('0px');
+    expect(backdropMetrics.reduced.boxShadow).not.toBe('none');
+
+    const reducedButton = buttonMatrix
+      .locator('[data-qa-context="reduced"] .ui-button.material-glass-subtle')
+      .first();
+    await expect(reducedButton).toBeVisible();
+    const reducedButtonStyle = await reducedButton.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        backdropFilter: style.backdropFilter,
+        backgroundColor: style.backgroundColor,
+      };
+    });
+    expect(reducedButtonStyle.backdropFilter).toBe('none');
+    expect(reducedButtonStyle.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+
+    const firstStateRow = page.locator('#controls-button [data-specimen-state-row]').first();
+    const stateShell = await firstStateRow.evaluate((element) => {
+      const preview = element.querySelector<HTMLElement>('[data-specimen-preview]');
+      if (!preview) throw new Error('Missing state preview');
+      const rowStyle = getComputedStyle(element);
+      const previewStyle = getComputedStyle(preview);
+      return {
+        rowBorder: rowStyle.borderTopWidth,
+        rowShadow: rowStyle.boxShadow,
+        previewBorder: previewStyle.borderTopWidth,
+        previewShadow: previewStyle.boxShadow,
+      };
+    });
+    expect(stateShell.rowBorder).toBe('0px');
+    expect(stateShell.previewBorder).toBe('0px');
+    expect(stateShell.rowShadow).not.toBe('none');
+    expect(stateShell.previewShadow).not.toBe('none');
+
+    await page.goto(`/?theme=${theme}&lang=en#forms-input`, {
+      waitUntil: 'domcontentloaded',
+    });
+    const formMatrix = page.locator('[data-forms-qa] [data-qa-matrix]');
+    await expect(formMatrix.locator('[data-qa-context]')).toHaveCount(3);
+    await expect(formMatrix.locator('[data-qa-context] .ui-input')).toHaveCount(3);
+    await expect(formMatrix.locator('[data-qa-context] .ui-select')).toHaveCount(3);
+    await expect(formMatrix.locator('[data-qa-context] .ui-textarea')).toHaveCount(3);
+
+    await page.goto(`/?theme=${theme}&lang=en#card-card`, { waitUntil: 'domcontentloaded' });
+    const cardMatrix = page.locator('[data-card-qa] [data-qa-matrix]');
+    await expect(cardMatrix.locator('[data-qa-context] .ui-card')).toHaveCount(3);
+    await page.goto(`/?theme=${theme}&lang=en#status-feedback-tooltip`, {
+      waitUntil: 'domcontentloaded',
+    });
+    const tooltipMatrix = page.locator('#status-feedback-tooltip [data-qa-matrix]');
+    await expect(tooltipMatrix.locator('[data-qa-context]')).toHaveCount(3);
+    await expect(tooltipMatrix.locator('[data-qa-context] .ui-tooltip-surface')).toHaveCount(6);
+  }
+});
 
 test('prose and reading fixtures keep mobile overflow inside their content regions', async ({
   page,
@@ -1075,8 +1407,65 @@ test('default cards keep a visible material fill in light and dark themes', asyn
     expect(backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
     expect(backgroundColor).not.toBe('transparent');
 
+    const elevated = page.locator('#card-card .ui-card[data-surface="elevated"]');
+    const elevatedStyle = await elevated.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        borderWidth: style.borderTopWidth,
+        backgroundColor: style.backgroundColor,
+        boxShadow: style.boxShadow,
+      };
+    });
+    expect(elevatedStyle.borderWidth).toBe('0px');
+    expect(elevatedStyle.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(elevatedStyle.boxShadow).not.toBe('none');
+
     const optOut = page.locator('[data-card-transparent-optout]');
     await expect(optOut).toHaveAttribute('data-surface', 'none');
+
+    const optOutShell = optOut.locator('..');
+    const shellStyle = await optOutShell.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        borderWidth: style.borderTopWidth,
+        backgroundColor: style.backgroundColor,
+      };
+    });
+    expect(shellStyle.borderWidth).toBe('0px');
+    expect(shellStyle.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+  }
+});
+
+test('surface presets expose their native material without preview-only hairline borders', async ({
+  page,
+}) => {
+  for (const theme of ['light', 'dark'] as const) {
+    await page.goto(`/?theme=${theme}&lang=en#materials-surface`, {
+      waitUntil: 'domcontentloaded',
+    });
+
+    for (const preset of ['solid', 'subtle', 'elevated', 'inset'] as const) {
+      const surface = page.locator(`[data-surface-preset="${preset}"]`);
+      await expect(surface).toBeVisible();
+      const metrics = await surface.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          borderWidth: style.borderTopWidth,
+          backgroundColor: style.backgroundColor,
+          backgroundImage: style.backgroundImage,
+          boxShadow: style.boxShadow,
+        };
+      });
+
+      expect(metrics.borderWidth).toBe('0px');
+      expect(
+        metrics.backgroundColor !== 'rgba(0, 0, 0, 0)' || metrics.backgroundImage !== 'none',
+      ).toBe(true);
+
+      if (preset === 'elevated' || preset === 'inset') {
+        expect(metrics.boxShadow).not.toBe('none');
+      }
+    }
   }
 });
 

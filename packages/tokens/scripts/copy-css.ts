@@ -19,6 +19,8 @@ const sourceFiles = [
   'components/status-indicator.css',
   'components/segmented-control.css',
   'components/badge.css',
+  'components/notice.css',
+  'components/tooltip.css',
   'components/skeleton.css',
   'components/scrollbar.css',
   'components/table.css',

@@ -3,7 +3,8 @@
     border: 0;
     border-radius: var(--neoverse-disclosure-radius);
     padding: var(--neoverse-disclosure-padding);
-    background: var(--neoverse-disclosure-background);
+    background-color: var(--neoverse-disclosure-fill);
+    background-image: var(--neoverse-disclosure-background);
     box-shadow: var(--neoverse-disclosure-shadow);
     -webkit-backdrop-filter: var(--neoverse-disclosure-filter);
     backdrop-filter: var(--neoverse-disclosure-filter);
@@ -25,9 +26,7 @@
     cursor: pointer;
     font-weight: var(--neoverse-font-weight-semibold);
     list-style: none;
-    transition:
-      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
-      background-color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+    transition: color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
   }
 
   :where(.ui-disclosure__summary, .neoverse-prose summary)::-webkit-details-marker {
@@ -51,13 +50,19 @@
   }
 
   @media (hover: hover) {
-    :where(.ui-disclosure__summary, .neoverse-prose summary):hover {
-      color: var(--neoverse-disclosure-active-foreground);
-      background: var(--neoverse-disclosure-hover-background);
+    :where(.ui-disclosure, .neoverse-prose details):not([open]):hover {
+      background-color: var(--neoverse-disclosure-hover-fill);
+      box-shadow: var(--neoverse-disclosure-hover-shadow);
     }
 
-    :where(.ui-disclosure__summary, .neoverse-prose summary):hover::after {
+    :where(.ui-disclosure__summary, .neoverse-prose summary):hover {
       color: var(--neoverse-disclosure-active-foreground);
+      background: transparent;
+    }
+
+    :where(.ui-disclosure, .neoverse-prose details)[open]:hover {
+      background-color: var(--neoverse-disclosure-open-hover-fill);
+      box-shadow: var(--neoverse-disclosure-hover-shadow);
     }
   }
 
@@ -67,7 +72,7 @@
   }
 
   :where(.ui-disclosure, .neoverse-prose details)[open] {
-    background: var(--neoverse-disclosure-open-background);
+    background-color: var(--neoverse-disclosure-open-fill);
     box-shadow: var(--neoverse-disclosure-open-shadow);
   }
 
@@ -79,12 +84,13 @@
 
   :where(.ui-disclosure, .neoverse-prose details)[open]
     > :where(.ui-disclosure__summary, summary)::after {
-    color: var(--neoverse-disclosure-active-foreground);
+    color: var(--neoverse-disclosure-active-indicator-foreground);
     transform: rotate(225deg);
   }
 
   .ui-disclosure__content {
-    padding-inline: var(--neoverse-disclosure-content-padding-inline);
+    padding: 0 var(--neoverse-disclosure-content-padding-inline)
+      var(--neoverse-disclosure-content-padding-block-end);
   }
 
   .neoverse-prose details:not(.ui-disclosure) > :not(summary) {

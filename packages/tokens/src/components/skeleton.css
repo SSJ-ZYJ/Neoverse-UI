@@ -3,8 +3,8 @@
     /* Skeletons use the same neutral loading material in both themes. */
     --neoverse-skeleton-fill: color-mix(
       in srgb,
-      var(--neoverse-color-text-secondary) 18%,
-      var(--neoverse-color-surface-canvas)
+      var(--neoverse-color-text-secondary) 16%,
+      transparent
     );
     --neoverse-skeleton-highlight: color-mix(
       in srgb,
@@ -17,5 +17,6 @@
     --neoverse-skeleton-title-min-height: 1.15rem;
     --neoverse-skeleton-shimmer-duration: 1.25s;
     --neoverse-skeleton-shimmer-easing: var(--neoverse-motion-easing-standard);
+    --neoverse-skeleton-pulse-mid-opacity: 0.58;
   }
 }

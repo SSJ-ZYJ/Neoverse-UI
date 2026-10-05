@@ -26,11 +26,22 @@ type Radii = [number, number, number, number];
 
 type GlassStyle = {
   rect: DOMRect;
+  clipRect: ClipRect;
   radii: Radii;
+  pointer: [number, number, number];
   edgeWidth: number;
   softness: number;
   opacity: number;
   carrier: Color;
+};
+
+type ClipRect = {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
 };
 
 type CanvasViewport = {
@@ -55,9 +66,11 @@ type ProgramLocations = {
   rectSize: WebGLUniformLocation | null;
   pixelRatio: WebGLUniformLocation | null;
   radii: WebGLUniformLocation | null;
+  pointer: WebGLUniformLocation | null;
   edgeWidth: WebGLUniformLocation | null;
   softness: WebGLUniformLocation | null;
   opacity: WebGLUniformLocation | null;
+  lightSurface: WebGLUniformLocation | null;
   carrier: WebGLUniformLocation | null;
   edgeLight: WebGLUniformLocation | null;
   primary: WebGLUniformLocation | null;
@@ -204,10 +217,10 @@ const inheritsParentGlassEdge = (element: Element): boolean => {
   if (element.classList.contains('ui-segmented-control')) {
     return true;
   }
-  if (
-    element.classList.contains('ui-button') ||
-    element.getAttribute('data-neoverse-glass-nesting') !== 'inherit'
-  ) {
+  if (element.classList.contains('ui-button')) {
+    return element.getAttribute('data-neoverse-glass-edge-pass-active') !== 'webgl';
+  }
+  if (element.getAttribute('data-neoverse-glass-nesting') !== 'inherit') {
     return false;
   }
 
@@ -294,7 +307,7 @@ const getCanvasViewport = (
 };
 
 const getScissorRect = (
-  rect: DOMRect,
+  rect: ClipRect,
   viewport: CanvasViewport,
   pixelRatio: number,
   drawingWidth: number,
@@ -308,6 +321,44 @@ const getScissorRect = (
   return {
     x: left,
     y: Math.max(drawingHeight - bottom, 0),
+    width: Math.max(right - left, 0),
+    height: Math.max(bottom - top, 0),
+  };
+};
+
+const clipsOverflowAxis = (value: string): boolean =>
+  value === 'auto' || value === 'clip' || value === 'hidden' || value === 'scroll';
+
+const getAncestorClipRect = (element: HTMLElement, rect: ClipRect, view: Window): ClipRect => {
+  let left = rect.left;
+  let top = rect.top;
+  let right = rect.right;
+  let bottom = rect.bottom;
+
+  for (let ancestor = element.parentElement; ancestor !== null; ancestor = ancestor.parentElement) {
+    const style = view.getComputedStyle(ancestor);
+    const overflowX = style.overflowX || style.overflow;
+    const overflowY = style.overflowY || style.overflow;
+    const clipX = clipsOverflowAxis(overflowX);
+    const clipY = clipsOverflowAxis(overflowY);
+    if (!clipX && !clipY) continue;
+
+    const ancestorRect = ancestor.getBoundingClientRect();
+    if (clipX) {
+      left = Math.max(left, ancestorRect.left);
+      right = Math.min(right, ancestorRect.right);
+    }
+    if (clipY) {
+      top = Math.max(top, ancestorRect.top);
+      bottom = Math.min(bottom, ancestorRect.bottom);
+    }
+  }
+
+  return {
+    left,
+    top,
+    right,
+    bottom,
     width: Math.max(right - left, 0),
     height: Math.max(bottom - top, 0),
   };
@@ -453,6 +504,31 @@ const readStyle = (
   // zoom without depending on a single inherited CSS zoom declaration.
   const scale = element.offsetWidth > 0 ? rect.width / element.offsetWidth : 1;
   const surfaceScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
+  const pointer: GlassStyle['pointer'] = [0, 0, 0];
+  if (element.hasAttribute('data-neoverse-tooltip-surface') && style.overflow === 'visible') {
+    const arrow = view.getComputedStyle(element, '::after');
+    const arrowWidth = parsePixels(arrow.width, 0) * surfaceScale;
+    const arrowHeight = parsePixels(arrow.height, 0) * surfaceScale;
+    if (arrow.display !== 'none' && arrowWidth > 0 && arrowHeight > 0) {
+      // Read resolved pseudo-element geometry so custom pointer positions and
+      // ancestor zoom keep the CSS fill and refractive contour aligned.
+      pointer[0] =
+        (parsePixels(arrow.left, rect.width / surfaceScale / 2) +
+          parsePixels(style.borderLeftWidth, 0)) *
+          surfaceScale -
+        rect.width / 2;
+      pointer[1] = arrowWidth / 2;
+      pointer[2] = arrowHeight;
+    }
+  }
+  const paintRect = {
+    left: rect.left,
+    top: rect.top,
+    right: rect.right,
+    bottom: rect.bottom + pointer[2],
+    width: rect.width,
+    height: rect.height + pointer[2],
+  };
 
   const variant = getVariant(element) ?? 'subtle';
   const defaults = getDefaultEdgeValues(variant);
@@ -495,7 +571,9 @@ const readStyle = (
 
   return {
     rect,
+    clipRect: getAncestorClipRect(element, paintRect, view),
     radii: getRadii(style, surfaceScale, rect.width, rect.height),
+    pointer,
     edgeWidth,
     softness,
     opacity: opacity * surfaceOpacity,
@@ -656,9 +734,11 @@ class GlassRendererImpl implements GlassRenderer {
       rectSize: gl.getUniformLocation(program, 'u_rect_size'),
       pixelRatio: gl.getUniformLocation(program, 'u_pixel_ratio'),
       radii: gl.getUniformLocation(program, 'u_radii'),
+      pointer: gl.getUniformLocation(program, 'u_pointer'),
       edgeWidth: gl.getUniformLocation(program, 'u_edge_width'),
       softness: gl.getUniformLocation(program, 'u_softness'),
       opacity: gl.getUniformLocation(program, 'u_opacity'),
+      lightSurface: gl.getUniformLocation(program, 'u_light_surface'),
       carrier: gl.getUniformLocation(program, 'u_carrier'),
       edgeLight: gl.getUniformLocation(program, 'u_edge_light'),
       primary: gl.getUniformLocation(program, 'u_primary'),
@@ -882,6 +962,11 @@ class GlassRendererImpl implements GlassRenderer {
     gl.uniform1f(locations.pixelRatio, pixelRatio);
 
     const rootStyle = view.getComputedStyle(this.ownerDocument.documentElement);
+    // Theme appearance must not depend on how bright a consumer's edge tint is.
+    // Keep the luminance fallback for integrations without an explicit scheme.
+    const lightSurface =
+      rootStyle.colorScheme === 'light' ? 1 : rootStyle.colorScheme === 'dark' ? 0 : -1;
+    gl.uniform1f(locations.lightSurface, lightSurface);
     const edgeLight = resolveColor(
       rootStyle,
       [
@@ -928,7 +1013,6 @@ class GlassRendererImpl implements GlassRenderer {
       this.colorProbe,
       [0.48, 0.43, 0.9],
     );
-
     gl.enable(gl.SCISSOR_TEST);
     for (const element of this.getGlassElements()) {
       const style = readStyle(element, view, this.colorProbe, viewport);
@@ -936,7 +1020,13 @@ class GlassRendererImpl implements GlassRenderer {
         continue;
       }
 
-      const scissor = getScissorRect(style.rect, viewport, pixelRatio, drawingWidth, drawingHeight);
+      const scissor = getScissorRect(
+        style.clipRect,
+        viewport,
+        pixelRatio,
+        drawingWidth,
+        drawingHeight,
+      );
       if (scissor.width === 0 || scissor.height === 0) {
         continue;
       }
@@ -948,10 +1038,11 @@ class GlassRendererImpl implements GlassRenderer {
         style.rect.left - viewport.left,
         style.rect.top - viewport.top,
         style.rect.width,
-        style.rect.height,
+        style.rect.height + style.pointer[2],
       );
       gl.uniform2f(locations.rectSize, style.rect.width, style.rect.height);
       gl.uniform4f(locations.radii, ...style.radii);
+      gl.uniform3f(locations.pointer, ...style.pointer);
       gl.uniform1f(locations.edgeWidth, style.edgeWidth);
       gl.uniform1f(locations.softness, style.softness);
       gl.uniform1f(locations.opacity, style.opacity);

@@ -1,0 +1,41 @@
+@layer neoverse.tokens {
+  :root {
+    /* Tooltip chrome inherits the shared Glass compositor. These tokens own
+       only the compact geometry and the pointer/accent adaptations. */
+    --neoverse-tooltip-radius: var(--neoverse-radius-control);
+    --neoverse-tooltip-padding-block: var(--neoverse-space-2);
+    --neoverse-tooltip-padding-inline: var(--neoverse-space-3);
+    --neoverse-tooltip-font-size: var(--neoverse-font-size-xs);
+    --neoverse-tooltip-font-weight: var(--neoverse-font-weight-semibold);
+    --neoverse-tooltip-line-height: var(--neoverse-typography-caption-line-height);
+    --neoverse-tooltip-foreground: var(--neoverse-color-text-primary);
+    --neoverse-tooltip-arrow-size: var(--neoverse-space-2);
+    --neoverse-tooltip-arrow-offset: calc(var(--neoverse-tooltip-arrow-size) * -0.75);
+    --neoverse-tooltip-arrow-background: color-mix(
+      in srgb,
+      var(--neoverse-material-glass-subtle-tint) var(--neoverse-material-glass-subtle-transparency),
+      transparent
+    );
+    --neoverse-tooltip-arrow-shadow: var(--neoverse-shadow-xs);
+    --neoverse-tooltip-accent-foreground: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) 76%,
+      var(--neoverse-color-accent-secondary)
+    );
+    --neoverse-tooltip-accent-tint: color-mix(
+      in srgb,
+      var(--neoverse-material-glass-subtle-tint) 72%,
+      var(--neoverse-color-accent-primary) 28%
+    );
+    --neoverse-tooltip-accent-arrow-background: color-mix(
+      in srgb,
+      var(--neoverse-tooltip-accent-tint) var(--neoverse-material-glass-subtle-transparency),
+      transparent
+    );
+    --neoverse-tooltip-accent-shadow:
+      var(--neoverse-shadow-xs),
+      0 8px 18px -16px color-mix(in srgb, var(--neoverse-color-accent-primary) 54%, transparent);
+    --neoverse-tooltip-accent-inner-glow: inset 0 1px 0
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 24%, transparent);
+  }
+}

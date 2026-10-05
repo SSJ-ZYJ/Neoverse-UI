@@ -29,6 +29,6 @@ const classes = computed(() => [
 
 <template>
   <span :class="classes">
-    <slot />
+    <span class="ui-badge__label"><slot /></span>
   </span>
 </template>

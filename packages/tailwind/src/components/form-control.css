@@ -11,13 +11,14 @@
     font: inherit;
     font-size: var(--neoverse-form-control-font-size);
     line-height: var(--neoverse-form-control-line-height);
+    caret-color: var(--neoverse-color-accent-secondary);
     -webkit-backdrop-filter: var(--neoverse-form-control-filter);
     backdrop-filter: var(--neoverse-form-control-filter);
     outline: none;
     transition:
       background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
       box-shadow var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
-      opacity var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
   }
 
   :where(.ui-input, .ui-textarea)::placeholder {
@@ -26,27 +27,217 @@
   }
 
   @media (hover: hover) {
-    :where(.ui-input, .ui-textarea, .ui-select):not(:disabled):hover {
+    :where(.ui-input, .ui-textarea, .ui-select):not(:disabled, [aria-disabled='true']):hover {
       background: var(--neoverse-form-control-hover-background);
+      box-shadow: var(--neoverse-form-control-hover-shadow);
     }
   }
 
-  :where(.ui-input, .ui-textarea, .ui-select):focus-visible {
-    box-shadow: var(--neoverse-form-control-shadow), var(--neoverse-form-control-focus-shadow);
+  :where(.ui-input, .ui-textarea, .ui-select):focus {
+    background: var(--neoverse-form-control-focus-background);
+    box-shadow: var(--neoverse-form-control-focus-depth-shadow);
   }
 
-  :where(.ui-input, .ui-textarea, .ui-select):disabled {
+  :where(.ui-input, .ui-textarea, .ui-select):focus-visible:not(
+    [data-neoverse-focus-origin='pointer']
+  ) {
+    background: var(--neoverse-form-control-focus-background);
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: var(--neoverse-focus-ring-offset);
+    box-shadow: var(--neoverse-form-control-focus-shadow);
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select):is(:disabled, [aria-disabled='true']) {
     cursor: not-allowed;
-    opacity: var(--neoverse-form-control-disabled-opacity);
+    color: var(--neoverse-form-control-disabled-foreground);
+    background: var(--neoverse-form-control-disabled-background);
+    box-shadow: var(--neoverse-form-control-shadow);
+    -webkit-text-fill-color: var(--neoverse-form-control-disabled-foreground);
+    opacity: 1;
+  }
+
+  :where(.ui-input, .ui-textarea):disabled::placeholder {
+    color: var(--neoverse-form-control-disabled-foreground);
   }
 
   .ui-textarea {
+    min-block-size: 100%;
+    block-size: 100%;
+    resize: none;
+  }
+
+  .ui-textarea-shell {
+    position: relative;
+    display: grid;
+    width: 100%;
     min-block-size: var(--neoverse-textarea-min-block-size);
+    overflow: hidden;
+    border-radius: var(--neoverse-form-control-radius);
     resize: vertical;
   }
 
+  .ui-textarea-shell::-webkit-resizer {
+    background: transparent;
+  }
+
+  .ui-textarea-shell::after {
+    position: absolute;
+    right: var(--neoverse-textarea-resize-handle-inset);
+    bottom: var(--neoverse-textarea-resize-handle-inset);
+    width: var(--neoverse-textarea-resize-handle-dot-size);
+    height: var(--neoverse-textarea-resize-handle-dot-size);
+    border-radius: var(--neoverse-radius-pill);
+    color: var(--neoverse-textarea-resize-handle-color);
+    background: currentColor;
+    box-shadow:
+      calc(var(--neoverse-textarea-resize-handle-dot-step) * -1)
+      calc(var(--neoverse-textarea-resize-handle-dot-step) * -1) 0 currentColor,
+      calc(var(--neoverse-textarea-resize-handle-dot-step) * -2)
+      calc(var(--neoverse-textarea-resize-handle-dot-step) * -2) 0 currentColor;
+    content: '';
+    pointer-events: none;
+    transition: color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  .ui-textarea-shell:focus-within::after {
+    color: var(--neoverse-textarea-resize-handle-focus-color);
+  }
+
+  .ui-select-shell {
+    position: relative;
+    width: 100%;
+  }
+
+  .ui-select-shell[open] {
+    z-index: var(--neoverse-select-popover-layer);
+  }
+
+  .ui-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--neoverse-form-control-gap);
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .ui-select::-webkit-details-marker {
+    display: none;
+  }
+
+  .ui-select__indicator,
+  .ui-select__check {
+    width: var(--neoverse-select-check-size);
+    height: var(--neoverse-select-check-size);
+    flex: 0 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--neoverse-select-check-stroke-width);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .ui-select__indicator {
+    color: var(--neoverse-select-check-color);
+  }
+
+  .ui-select__value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ui-select__value--placeholder {
+    color: var(--neoverse-form-control-placeholder);
+  }
+
+  .ui-select__popover {
+    position: fixed;
+    inset: auto;
+    top: var(--neoverse-select-popover-top);
+    left: var(--neoverse-select-popover-left);
+    display: none;
+    width: var(--neoverse-select-popover-inline-size);
+    gap: var(--neoverse-space-1);
+    margin: 0;
+    padding: var(--neoverse-select-popover-padding);
+    overflow: hidden;
+    border: 0;
+    border-radius: var(--neoverse-select-popover-radius);
+    background: var(--neoverse-select-popover-background);
+    box-shadow: var(--neoverse-select-popover-shadow);
+    -webkit-backdrop-filter: var(--neoverse-select-popover-filter);
+    backdrop-filter: var(--neoverse-select-popover-filter);
+  }
+
+  .ui-select__popover:popover-open {
+    display: grid;
+  }
+
+  .ui-select__popover--fallback-open {
+    position: absolute;
+    top: calc(100% + var(--neoverse-select-popover-gap));
+    right: 0;
+    left: 0;
+    display: grid;
+    width: auto;
+  }
+
+  .ui-select-shell--disabled .ui-select__popover {
+    display: none;
+  }
+
+  .ui-select__option {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--neoverse-form-control-gap);
+    border: 0;
+    border-radius: var(--neoverse-select-option-radius);
+    padding: var(--neoverse-select-option-padding-block)
+      var(--neoverse-select-option-padding-inline);
+    color: var(--neoverse-color-text-secondary);
+    background: transparent;
+    font: inherit;
+    font-size: var(--neoverse-form-control-font-size);
+    line-height: var(--neoverse-form-control-line-height);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      box-shadow var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  @media (hover: hover) {
+    .ui-select__option:not(:disabled):hover {
+      color: var(--neoverse-color-text-primary);
+      background: var(--neoverse-select-option-hover-background);
+    }
+  }
+
+  .ui-select__option[aria-selected='true'] {
+    color: var(--neoverse-select-option-selected-foreground);
+    background: var(--neoverse-select-option-selected-background);
+    box-shadow: var(--neoverse-surface-inset-active-highlight);
+  }
+
+  .ui-select__option:focus-visible {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: calc(var(--neoverse-focus-ring-offset) * -1);
+  }
+
+  .ui-select__option:disabled {
+    cursor: not-allowed;
+    opacity: var(--neoverse-select-option-disabled-opacity);
+  }
+
   @media (prefers-reduced-motion: reduce) {
-    :where(.ui-input, .ui-textarea, .ui-select) {
+    :where(.ui-input, .ui-textarea, .ui-select),
+    .ui-select__option {
       transition: none;
     }
   }

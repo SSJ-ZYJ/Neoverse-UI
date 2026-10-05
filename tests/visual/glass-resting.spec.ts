@@ -7,6 +7,17 @@ function isTransparent(color: string): boolean {
   return false;
 }
 
+function readGlassMaterial(element: Element) {
+  const root = getComputedStyle(element);
+  return {
+    background: root.backgroundColor,
+    filter: root.backdropFilter,
+    border: Number.parseFloat(root.borderTopWidth),
+    shadow: root.boxShadow,
+    nesting: (element as HTMLElement).dataset.neoverseGlassNesting,
+  };
+}
+
 test('all Glass specimens render their own material at rest, after hover and in both themes', async ({
   page,
 }) => {
@@ -19,33 +30,101 @@ test('all Glass specimens render their own material at rest, after hover and in 
       const label =
         (await sample.getAttribute('data-glass-variant')) ??
         (await sample.getAttribute('data-surface-preset'));
-      const rest = await sample.evaluate((element) => {
-        const style = getComputedStyle(element);
-        return {
-          background: style.backgroundColor,
-          border: Number.parseFloat(style.borderTopWidth),
-          filter: style.backdropFilter,
-          nesting: (element as HTMLElement).dataset.neoverseGlassNesting,
-        };
-      });
+      const rest = await sample.evaluate(readGlassMaterial);
       expect(rest.nesting, `${theme}/${label} nesting`).toBe('local');
       expect(isTransparent(rest.background), `${theme}/${label} rest background`).toBe(false);
       expect(rest.border, `${theme}/${label} rest border`).toBeGreaterThan(0);
       expect(rest.filter, `${theme}/${label} rest filter`).not.toBe('none');
 
       await sample.hover();
-      const hover = await sample.evaluate((element) => getComputedStyle(element).backgroundColor);
-      expect(isTransparent(hover), `${theme}/${label} hover background`).toBe(false);
+      const hover = await sample.evaluate(readGlassMaterial);
+      expect(isTransparent(hover.background), `${theme}/${label} hover background`).toBe(false);
     }
 
     await page.goto(`/?theme=${theme}&lang=en#card`, { waitUntil: 'domcontentloaded' });
     const card = page.locator('[data-card-default]');
-    const cardStyle = await card.evaluate((element) => ({
-      background: getComputedStyle(element).backgroundColor,
-      filter: getComputedStyle(element).backdropFilter,
-    }));
+    const cardStyle = await card.evaluate(readGlassMaterial);
     expect(isTransparent(cardStyle.background), `${theme}/UiCard rest background`).toBe(false);
     expect(cardStyle.filter, `${theme}/UiCard rest filter`).not.toBe('none');
+  }
+});
+
+test('UiCard adapts the Glass edge without changing the established light Glass hairline', async ({
+  page,
+}) => {
+  await page.goto('/?theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
+  const elevated = page.locator('[data-glass-variant="elevated"]');
+  const elevatedBorder = await elevated.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const edge = getComputedStyle(element, '::before');
+    return {
+      width: Number.parseFloat(style.borderTopWidth),
+      color: style.borderTopColor,
+      edgePadding: Number.parseFloat(edge.paddingTop),
+    };
+  });
+  expect(elevatedBorder.color).toBe('rgba(0, 0, 0, 0)');
+  expect(
+    elevatedBorder.width,
+    'light elevated Glass keeps its established hairline',
+  ).toBeGreaterThan(0);
+  expect(elevatedBorder.edgePadding, 'Card edge clipping must not affect Glass itself').toBe(0);
+
+  await page.goto('/?theme=light&lang=en#card', { waitUntil: 'domcontentloaded' });
+  const cardEdge = await page.locator('[data-card-default]').evaluate((element) => {
+    const style = getComputedStyle(element);
+    const edge = getComputedStyle(element, '::before');
+    return {
+      width: Number.parseFloat(style.borderTopWidth),
+      color: style.borderTopColor,
+      edgePadding: Number.parseFloat(edge.paddingTop),
+      maskComposite: edge.maskComposite,
+      webkitMaskComposite: (edge as CSSStyleDeclaration & { webkitMaskComposite?: string })
+        .webkitMaskComposite,
+    };
+  });
+  expect(cardEdge.color).toBe('rgba(0, 0, 0, 0)');
+  expect(cardEdge.width, 'UiCard removes only its own geometric hairline').toBe(0);
+  expect(cardEdge.edgePadding, 'UiCard keeps a token-sized refractive edge band').toBeGreaterThan(
+    0,
+  );
+  expect(
+    [cardEdge.maskComposite, cardEdge.webkitMaskComposite].some((value) =>
+      value?.includes('exclude'),
+    ),
+    'UiCard clips the shared refraction field to its edge band',
+  ).toBe(true);
+});
+
+test('UiCard reuses the glass-elevated CSS refraction field without a card-specific white edge', async ({
+  page,
+}) => {
+  for (const theme of ['light', 'dark'] as const) {
+    await page.goto(`/?theme=${theme}&lang=en#card`, { waitUntil: 'domcontentloaded' });
+
+    const fields = await page.evaluate(() => {
+      const card = document.querySelector<HTMLElement>('[data-card-default]');
+      if (card === null) throw new Error('Default card fixture is missing');
+
+      const reference = document.createElement('div');
+      reference.className = 'material-glass-elevated';
+      reference.style.position = 'fixed';
+      reference.style.width = '160px';
+      reference.style.height = '96px';
+      reference.style.borderRadius = '24px';
+      reference.style.pointerEvents = 'none';
+      reference.style.visibility = 'hidden';
+      document.body.append(reference);
+
+      const result = {
+        card: getComputedStyle(card, '::before').backgroundImage,
+        reference: getComputedStyle(reference, '::before').backgroundImage,
+      };
+      reference.remove();
+      return result;
+    });
+
+    expect(fields.card, `${theme}/card refraction field`).toBe(fields.reference);
   }
 });
 
@@ -68,20 +147,11 @@ test('only an explicitly inherited Glass grouping is transparent, including on h
   });
 
   const inherited = page.locator('[data-glass-fixture="inherit"]');
-  const sample = (selector: string) =>
-    page.locator(selector).evaluate((element) => {
-      const style = getComputedStyle(element);
-      return {
-        background: style.backgroundColor,
-        border: style.borderTopWidth,
-        shadow: style.boxShadow,
-        filter: style.backdropFilter,
-      };
-    });
+  const sample = (selector: string) => page.locator(selector).evaluate(readGlassMaterial);
 
   const rest = await sample('[data-glass-fixture="inherit"]');
   expect(isTransparent(rest.background)).toBe(true);
-  expect(rest.border).toBe('0px');
+  expect(rest.border).toBe(0);
   expect(rest.shadow).toBe('none');
   expect(rest.filter).toBe('none');
 
@@ -204,11 +274,6 @@ test('WebGL actually paints the nested elevated silhouette in light and dark mod
 }) => {
   for (const theme of ['light', 'dark'] as const) {
     await page.goto(`/?theme=${theme}&lang=en#materials`, { waitUntil: 'domcontentloaded' });
-    const renderer = await page.evaluate(
-      () => document.documentElement.dataset.neoverseGlassRenderer,
-    );
-    test.skip(renderer !== 'webgl', 'WebGL is unavailable; the CSS fallback is tested separately');
-
     const surface = page.locator('[data-glass-variant="elevated"]');
     await surface.scrollIntoViewIfNeeded();
     await page.waitForTimeout(220);
@@ -248,7 +313,9 @@ test('WebGL actually paints the nested elevated silhouette in light and dark mod
                 Math.abs((front.data[offset + 1] ?? 0) - (back.data[offset + 1] ?? 0)) +
                 Math.abs((front.data[offset + 2] ?? 0) - (back.data[offset + 2] ?? 0))) /
               3;
-            if (x < 5 || x >= front.width - 5) {
+            // The material edge is 1.25px, plus anti-aliasing. Measure that
+            // silhouette rather than diluting it with untouched interior pixels.
+            if (x < 2 || x >= front.width - 2) {
               edgeDelta += delta;
               edgeCount++;
             } else if (x >= 10 && x < front.width - 10) {

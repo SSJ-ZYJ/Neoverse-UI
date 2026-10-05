@@ -15,15 +15,27 @@ const forwardedAttrs = computed(() => {
 function onInput(event: Event) {
   emit('update:modelValue', (event.currentTarget as HTMLTextAreaElement).value);
 }
+
+function onPointerDown(event: PointerEvent) {
+  (event.currentTarget as HTMLElement).dataset.neoverseFocusOrigin = 'pointer';
+}
+
+function onBlur(event: FocusEvent) {
+  delete (event.currentTarget as HTMLElement).dataset.neoverseFocusOrigin;
+}
 </script>
 
 <template>
-  <textarea
-    v-bind="forwardedAttrs"
-    class="ui-textarea"
-    :class="attrs.class"
-    :style="attrs.style"
-    :value="props.modelValue"
-    @input="onInput"
-  />
+  <span class="ui-textarea-shell">
+    <textarea
+      v-bind="forwardedAttrs"
+      class="ui-textarea"
+      :class="attrs.class"
+      :style="attrs.style"
+      :value="props.modelValue"
+      @input="onInput"
+      @pointerdown="onPointerDown"
+      @blur="onBlur"
+    />
+  </span>
 </template>

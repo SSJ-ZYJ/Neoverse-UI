@@ -7,6 +7,7 @@ const modules = [
   'controls',
   'status-feedback',
   'forms',
+  'data-display',
   'card',
   'consumer-parity',
 ] as const;
@@ -53,6 +54,158 @@ for (const theme of themes) {
       await expect(region).toHaveScreenshot(`${moduleId}-${theme}.png`);
     });
   }
+}
+
+for (const theme of themes) {
+  test(`select popover uses the top layer Glass backdrop / ${theme}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`/frame?theme=${theme}&lang=en#forms`, {
+      waitUntil: 'domcontentloaded',
+    });
+    await page.addStyleTag({ content: freezeMotion });
+    await page.evaluate(waitForStableAssets);
+
+    const trigger = page.locator('#forms-runtime');
+    const popover = page.locator('#forms-runtime + .ui-select__popover');
+    await trigger.click();
+    await expect(popover).toBeVisible();
+
+    const state = await popover.evaluate((element) => {
+      const style = getComputedStyle(element);
+      const blurMatch = style.backdropFilter.match(/blur\(([-\d.]+)px\)/);
+      return {
+        topLayerOpen: element.matches(':popover-open'),
+        position: style.position,
+        backdropFilter: style.backdropFilter,
+        blurPx: blurMatch?.[1] ? Number.parseFloat(blurMatch[1]) : 0,
+      };
+    });
+    expect(state.topLayerOpen).toBe(true);
+    expect(state.position).toBe('fixed');
+    expect(state.backdropFilter).toContain('blur(');
+    expect(state.blurPx).toBeGreaterThan(0);
+    expect(state.blurPx).toBeLessThanOrEqual(10);
+
+    const readGeometry = async () => {
+      const triggerBox = await trigger.boundingBox();
+      const popoverBox = await popover.boundingBox();
+      if (triggerBox === null || popoverBox === null) {
+        throw new Error('Select overlay geometry is unavailable');
+      }
+
+      const verticalGap =
+        popoverBox.y >= triggerBox.y + triggerBox.height
+          ? popoverBox.y - (triggerBox.y + triggerBox.height)
+          : triggerBox.y - (popoverBox.y + popoverBox.height);
+
+      return {
+        triggerBox,
+        popoverBox,
+        verticalGap,
+      };
+    };
+
+    const beforeScroll = await readGeometry();
+    expect(beforeScroll.popoverBox.x).toBeCloseTo(beforeScroll.triggerBox.x, 1);
+    expect(beforeScroll.popoverBox.width).toBeCloseTo(beforeScroll.triggerBox.width, 1);
+    expect(beforeScroll.verticalGap).toBeGreaterThan(0);
+
+    await page.mouse.wheel(0, 80);
+    await page.waitForTimeout(50);
+
+    const afterScroll = await readGeometry();
+    expect(afterScroll.popoverBox.x).toBeCloseTo(afterScroll.triggerBox.x, 1);
+    expect(afterScroll.popoverBox.width).toBeCloseTo(afterScroll.triggerBox.width, 1);
+    expect(afterScroll.verticalGap).toBeCloseTo(beforeScroll.verticalGap, 1);
+
+    await page.keyboard.press('Escape');
+
+    const scaledTrigger = page
+      .locator('.playground-qa-stage__content .ui-select:not([aria-disabled="true"])')
+      .first();
+    await scaledTrigger.scrollIntoViewIfNeeded();
+    await scaledTrigger.click();
+    const scaledPopover = scaledTrigger.locator('xpath=..').locator('.ui-select__popover');
+    await expect(scaledPopover).toBeVisible();
+
+    const scaledTriggerBox = await scaledTrigger.boundingBox();
+    const scaledPopoverBox = await scaledPopover.boundingBox();
+    if (scaledTriggerBox === null || scaledPopoverBox === null) {
+      throw new Error('Scaled select overlay geometry is unavailable');
+    }
+
+    const indicator = scaledTrigger.locator('.ui-select__indicator');
+    await expect(indicator).toBeVisible();
+    const chevron = await indicator.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        width: Number.parseFloat(style.width),
+        height: Number.parseFloat(style.height),
+        stroke: style.stroke,
+        strokeWidth: Number.parseFloat(style.strokeWidth),
+        fill: style.fill,
+        path: element.querySelector('path')?.getAttribute('d') ?? '',
+      };
+    });
+    expect(chevron.width).toBeGreaterThan(10);
+    expect(chevron.height).toBeCloseTo(chevron.width, 1);
+    expect(chevron.stroke).not.toBe('none');
+    expect(chevron.strokeWidth).toBeGreaterThan(0);
+    expect(chevron.fill).toBe('none');
+    expect(chevron.path).toBe('m6 9 6 6 6-6');
+
+    expect(scaledPopoverBox.x).toBeCloseTo(scaledTriggerBox.x, 1);
+    expect(scaledPopoverBox.width).toBeCloseTo(scaledTriggerBox.width, 1);
+  });
+}
+
+for (const theme of themes) {
+  test(`form controls separate pointer focus from keyboard focus / ${theme}`, async ({ page }) => {
+    test.skip(
+      test.info().project.name === 'mobile',
+      'Keyboard focus modality is verified on desktop',
+    );
+    await page.goto(`/frame?theme=${theme}&lang=en#forms`, {
+      waitUntil: 'domcontentloaded',
+    });
+
+    const input = page.locator('#forms-email');
+    await input.click();
+    const pointerState = await input.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        focusVisible: element.matches(':focus-visible'),
+        focusOrigin: element.getAttribute('data-neoverse-focus-origin'),
+        outlineStyle: style.outlineStyle,
+      };
+    });
+    expect(pointerState.focusOrigin).toBe('pointer');
+    expect(pointerState.outlineStyle).toBe('none');
+
+    await page.locator('body').click({ position: { x: 2, y: 2 } });
+
+    let reachedInput = false;
+    for (let index = 0; index < 40; index += 1) {
+      await page.keyboard.press('Tab');
+      reachedInput = await input.evaluate((element) => document.activeElement === element);
+      if (reachedInput) break;
+    }
+    expect(reachedInput).toBe(true);
+
+    const keyboardState = await input.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        focusVisible: element.matches(':focus-visible'),
+        focusOrigin: element.getAttribute('data-neoverse-focus-origin'),
+        outlineStyle: style.outlineStyle,
+        outlineWidth: Number.parseFloat(style.outlineWidth),
+      };
+    });
+    expect(keyboardState.focusVisible).toBe(true);
+    expect(keyboardState.focusOrigin).toBeNull();
+    expect(keyboardState.outlineStyle).toBe('solid');
+    expect(keyboardState.outlineWidth).toBeGreaterThan(0);
+  });
 }
 
 for (const theme of themes) {

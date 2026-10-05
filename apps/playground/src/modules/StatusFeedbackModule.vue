@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { UiButton, UiNotice, UiSurface, UiTooltipSurface } from '@neoverse-ui/vue';
+import { UiButton, UiNotice, UiTooltipSurface } from '@neoverse-ui/vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
 import { localize, localized, moduleCopy } from '../playground-content';
+import QaPreviewMatrix from '../QaPreviewMatrix.vue';
 import BadgeModule from './BadgeModule.vue';
 import SkeletonModule from './SkeletonModule.vue';
 import StatusIndicatorModule from './StatusIndicatorModule.vue';
@@ -103,17 +104,14 @@ const copy = {
       :title="localize(copy.tooltip.label, props.locale)"
       :description="localize(copy.tooltip.description, props.locale)"
     >
-      <UiSurface
-        surface="subtle"
-        class="playground-specimen-panel flex flex-wrap items-center gap-3"
-      >
+      <QaPreviewMatrix :locale="props.locale">
         <UiTooltipSurface variant="neutral" role="tooltip">
           {{ localize(copy.tooltip.neutral, props.locale) }}
         </UiTooltipSurface>
         <UiTooltipSurface variant="accent" role="tooltip">
           {{ localize(copy.tooltip.accent, props.locale) }}
         </UiTooltipSurface>
-      </UiSurface>
+      </QaPreviewMatrix>
     </LabSpecimenSection>
   </div>
 </template>

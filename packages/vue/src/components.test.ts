@@ -811,6 +811,11 @@ describe('form controls', () => {
     expect(wrapper.classes()).toContain('ui-input');
     expect((wrapper.element as HTMLInputElement).value).toBe('hello@example.com');
 
+    await wrapper.trigger('pointerdown');
+    expect(wrapper.attributes('data-neoverse-focus-origin')).toBe('pointer');
+    await wrapper.trigger('blur');
+    expect(wrapper.attributes('data-neoverse-focus-origin')).toBeUndefined();
+
     await wrapper.setValue('next@example.com');
     expect(wrapper.emitted('update:modelValue')).toEqual([['next@example.com']]);
   });
@@ -821,24 +826,41 @@ describe('form controls', () => {
       props: { modelValue: 'Initial' },
     });
 
-    expect(wrapper.attributes('rows')).toBe('4');
-    expect(wrapper.classes()).toContain('ui-textarea');
-    await wrapper.setValue('Updated');
+    const textarea = wrapper.get('textarea');
+    expect(textarea.attributes('rows')).toBe('4');
+    expect(textarea.classes()).toContain('ui-textarea');
+    expect(wrapper.classes()).toContain('ui-textarea-shell');
+    await textarea.trigger('pointerdown');
+    expect(textarea.attributes('data-neoverse-focus-origin')).toBe('pointer');
+    await textarea.trigger('blur');
+    expect(textarea.attributes('data-neoverse-focus-origin')).toBeUndefined();
+    await textarea.setValue('Updated');
     expect(wrapper.emitted('update:modelValue')).toEqual([['Updated']]);
   });
 
-  it('keeps select options, attributes and v-model updates native', async () => {
+  it('renders the library select surface and emits option changes', async () => {
     const wrapper = mount(UiSelect, {
       attrs: { name: 'runtime', 'aria-label': 'Runtime' },
-      props: { modelValue: 'native' },
-      slots: {
-        default: '<option value="native">Native</option><option value="remote">Remote</option>',
+      props: {
+        modelValue: 'native',
+        options: [
+          { value: 'native', label: 'Native' },
+          { value: 'remote', label: 'Remote' },
+        ],
       },
     });
 
-    expect(wrapper.classes()).toContain('ui-select');
-    expect(wrapper.findAll('option')).toHaveLength(2);
-    await wrapper.setValue('remote');
+    expect(wrapper.classes()).toContain('ui-select-shell');
+    expect(wrapper.get('.ui-select').attributes('aria-label')).toBe('Runtime');
+    expect(wrapper.get('.ui-select__indicator path').attributes('d')).toBe('m6 9 6 6 6-6');
+    expect(wrapper.findAll('.ui-select__option')).toHaveLength(2);
+    expect(wrapper.get('.ui-select__popover').attributes('popover')).toBe('auto');
+    expect(wrapper.get('input[type="hidden"]').attributes('name')).toBe('runtime');
+    await wrapper.get('.ui-select').trigger('pointerdown');
+    expect(wrapper.get('.ui-select').attributes('data-neoverse-focus-origin')).toBe('pointer');
+    await wrapper.get('.ui-select').trigger('blur');
+    expect(wrapper.get('.ui-select').attributes('data-neoverse-focus-origin')).toBeUndefined();
+    await wrapper.findAll('.ui-select__option')[1]?.trigger('click');
     expect(wrapper.emitted('update:modelValue')).toEqual([['remote']]);
   });
 });
@@ -849,8 +871,10 @@ describe('UiSegmentedControl', () => {
     expect(glass.classes()).toContain('material-glass-subtle');
     expect(glass.attributes('data-surface')).toBe('glass-subtle');
     expect(glass.attributes('data-neoverse-surface-hover')).toBe('static');
+    expect(glass.attributes('data-neoverse-glass-edge-pass')).toBe('css');
 
     const bare = mount(UiSegmentedControl, { props: { options, surface: 'none' } });
+    expect(bare.attributes('data-neoverse-glass-edge-pass')).toBeUndefined();
     expect(bare.classes()).not.toContain('material-glass-subtle');
     expect(bare.attributes('data-surface')).toBe('none');
     expect(bare.find('.ui-segmented-control__slider').exists()).toBe(true);

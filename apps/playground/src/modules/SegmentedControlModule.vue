@@ -3,6 +3,7 @@ import type { SegmentOption } from '@neoverse-ui/vue';
 import { UiSegmentedControl } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
 import { formatLocalized, localize, localized, moduleCopy } from '../playground-content';
+import QaPreviewMatrix from '../QaPreviewMatrix.vue';
 import StateRow from '../StateRow.vue';
 import type { LabModuleProps } from './types';
 
@@ -43,6 +44,13 @@ const focusCopy = {
   hint: localized(
     'Tab to the active option to inspect the keyboard focus ring.',
     'Tab 到当前选项以查看键盘焦点环。',
+  ),
+} as const;
+const qaCopy = {
+  label: localized('Canonical QA', '规范 QA'),
+  hint: localized(
+    'The standalone well and selected plate are compared against the same three backdrop contexts.',
+    '在三种一致的背景环境中检查独立分段控件的底槽与选中层。',
   ),
 } as const;
 </script>
@@ -97,5 +105,13 @@ const focusCopy = {
       :aria-label="localize(copy.aria.view, props.locale)"
       :options="ariaOptions"
     />
+  </StateRow>
+  <StateRow :label="qaCopy.label" :hint="qaCopy.hint" :locale="props.locale">
+    <QaPreviewMatrix :locale="props.locale">
+      <UiSegmentedControl
+        :aria-label="localize(copy.aria.view, props.locale)"
+        :options="ariaOptions"
+      />
+    </QaPreviewMatrix>
   </StateRow>
 </template>

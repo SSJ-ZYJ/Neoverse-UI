@@ -52,7 +52,7 @@ const copy = {
       :title="localize(copy.table.label, props.locale)"
       :description="localize(copy.table.description, props.locale)"
     >
-      <MaterialBackdrop>
+      <MaterialBackdrop edge="inset">
         <UiTable
           :caption="localize(copy.table.caption, props.locale)"
           :aria-label="localize(copy.table.caption, props.locale)"
@@ -81,8 +81,8 @@ const copy = {
       :title="localize(copy.disclosure.label, props.locale)"
       :description="localize(copy.disclosure.description, props.locale)"
     >
-      <MaterialBackdrop>
-        <div class="grid gap-3 md:grid-cols-2">
+      <MaterialBackdrop edge="inset">
+        <div class="grid items-start gap-3 md:grid-cols-2">
           <UiDisclosure
             :summary="localize(copy.disclosure.closed, props.locale)"
             data-data-display-disclosure="closed"

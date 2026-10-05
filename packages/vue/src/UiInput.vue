@@ -15,6 +15,14 @@ const forwardedAttrs = computed(() => {
 function onInput(event: Event) {
   emit('update:modelValue', (event.currentTarget as HTMLInputElement).value);
 }
+
+function onPointerDown(event: PointerEvent) {
+  (event.currentTarget as HTMLElement).dataset.neoverseFocusOrigin = 'pointer';
+}
+
+function onBlur(event: FocusEvent) {
+  delete (event.currentTarget as HTMLElement).dataset.neoverseFocusOrigin;
+}
 </script>
 
 <template>
@@ -25,5 +33,7 @@ function onInput(event: Event) {
     :style="attrs.style"
     :value="props.modelValue"
     @input="onInput"
+    @pointerdown="onPointerDown"
+    @blur="onBlur"
   >
 </template>

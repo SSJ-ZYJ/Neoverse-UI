@@ -30,20 +30,41 @@ test('form controls preserve native props and compose canonical classes', () => 
   expect(input.props.type).toBe('email');
   expect(input.props.name).toBe('email');
   expect(input.props.className).toBe('ui-input consumer-input');
+  expect(typeof input.props.onPointerDown).toBe('function');
+  expect(typeof input.props.onBlur).toBe('function');
 
   const textarea = UiTextarea({ name: 'notes', rows: 4 }) as TestElement;
-  expect(textarea.type).toBe('textarea');
-  expect(textarea.props.rows).toBe(4);
-  expect(textarea.props.className).toBe('ui-textarea');
+  expect(textarea.type).toBe('span');
+  expect(textarea.props.className).toBe('ui-textarea-shell');
+  const textareaControl = Children.toArray(textarea.props.children)[0] as TestElement;
+  expect(textareaControl.type).toBe('textarea');
+  expect(textareaControl.props.rows).toBe(4);
+  expect(textareaControl.props.className).toBe('ui-textarea');
+  expect(typeof textareaControl.props.onPointerDown).toBe('function');
+  expect(typeof textareaControl.props.onBlur).toBe('function');
 
   const select = UiSelect({
     name: 'runtime',
-    children: createElement('option', { value: 'native' }, 'Native'),
+    value: 'native',
+    options: [
+      { value: 'native', label: 'Native' },
+      { value: 'remote', label: 'Remote' },
+    ],
   }) as TestElement;
-  expect(select.type).toBe('select');
-  expect(select.props.name).toBe('runtime');
-  expect(select.props.className).toBe('ui-select');
-  expect(Children.count(select.props.children)).toBe(1);
+  expect(select.type).toBe('details');
+  expect(select.props.className).toBe('ui-select-shell');
+  const selectChildren = Children.toArray(select.props.children) as TestElement[];
+  expect(selectChildren[0]?.type).toBe('summary');
+  expect(selectChildren[0]?.props.className).toBe('ui-select');
+  expect(typeof selectChildren[0]?.props.onPointerDown).toBe('function');
+  expect(typeof selectChildren[0]?.props.onBlur).toBe('function');
+  const triggerChildren = Children.toArray(selectChildren[0]?.props.children) as TestElement[];
+  expect(triggerChildren[1]?.type).toBe('svg');
+  expect(triggerChildren[1]?.props.className).toBe('ui-select__indicator');
+  expect(selectChildren[1]?.props.role).toBe('listbox');
+  expect(selectChildren[1]?.props.popover).toBe('auto');
+  expect(selectChildren[2]?.type).toBe('input');
+  expect(selectChildren[2]?.props.name).toBe('runtime');
 });
 
 test('builds the canonical secondary action contract', () => {

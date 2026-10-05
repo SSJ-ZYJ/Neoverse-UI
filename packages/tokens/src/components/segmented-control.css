@@ -54,6 +54,8 @@
     --neoverse-control-segmented-option-font-size-sm: var(--neoverse-font-size-2xs);
     --neoverse-control-segmented-option-font-weight: var(--neoverse-font-weight-bold);
     --neoverse-control-segmented-option-radius: var(--neoverse-control-compact-radius);
+    --neoverse-control-segmented-option-press-scale: 0.97;
+    --neoverse-control-segmented-disabled-opacity: 0.62;
     --neoverse-control-segmented-loading-gap: var(--neoverse-space-1);
     --neoverse-control-segmented-loading-size: var(--neoverse-space-4);
     --neoverse-control-segmented-border: var(--neoverse-control-button-border);

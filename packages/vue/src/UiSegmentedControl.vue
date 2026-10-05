@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue';
 import { computed, nextTick, ref, useAttrs, watch } from 'vue';
-import { getSurfaceClass } from './surface';
+import { getSurfaceClass, isGlassSurface } from './surface';
 import type { SegmentedControlProps, SegmentOption } from './types';
 import UiLoadingIndicator from './UiLoadingIndicator.vue';
 
@@ -217,6 +217,7 @@ function optionClasses(option: SegmentOption): string[] {
     v-bind="forwardedAttrs"
     :aria-label="ariaLabel"
     :data-surface="props.surface"
+    :data-neoverse-glass-edge-pass="isGlassSurface(props.surface) ? 'css' : undefined"
     data-neoverse-surface-hover="static"
     :class="[classes, attrs.class]"
     :style="[attrs.style, segmentStyle]"

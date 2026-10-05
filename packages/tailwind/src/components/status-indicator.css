@@ -1,6 +1,11 @@
 @layer components {
   .ui-status-indicator {
-    --ui-status-indicator-color: var(--neoverse-color-text-muted);
+    --ui-status-indicator-color: var(--neoverse-status-indicator-neutral-color);
+    --ui-status-indicator-glow: var(--neoverse-status-indicator-neutral-glow);
+    --ui-status-indicator-pulse-background: var(
+      --neoverse-status-indicator-neutral-pulse-background
+    );
+    --ui-status-indicator-pulse-shadow: var(--neoverse-status-indicator-neutral-pulse-shadow);
     display: inline-flex;
     align-items: center;
     font-family: var(--neoverse-typography-label-font-family);
@@ -19,23 +24,46 @@
   }
 
   .ui-status-indicator--neutral {
-    --ui-status-indicator-color: var(--neoverse-color-text-muted);
+    --ui-status-indicator-color: var(--neoverse-status-indicator-neutral-color);
+    --ui-status-indicator-glow: var(--neoverse-status-indicator-neutral-glow);
+    --ui-status-indicator-pulse-background: var(
+      --neoverse-status-indicator-neutral-pulse-background
+    );
+    --ui-status-indicator-pulse-shadow: var(--neoverse-status-indicator-neutral-pulse-shadow);
   }
 
   .ui-status-indicator--info {
-    --ui-status-indicator-color: var(--neoverse-color-status-info);
+    --ui-status-indicator-color: var(--neoverse-status-indicator-info-color);
+    --ui-status-indicator-glow: var(--neoverse-status-indicator-info-glow);
+    --ui-status-indicator-pulse-background: var(--neoverse-status-indicator-info-pulse-background);
+    --ui-status-indicator-pulse-shadow: var(--neoverse-status-indicator-info-pulse-shadow);
   }
 
   .ui-status-indicator--success {
-    --ui-status-indicator-color: var(--neoverse-color-status-success);
+    --ui-status-indicator-color: var(--neoverse-status-indicator-success-color);
+    --ui-status-indicator-glow: var(--neoverse-status-indicator-success-glow);
+    --ui-status-indicator-pulse-background: var(
+      --neoverse-status-indicator-success-pulse-background
+    );
+    --ui-status-indicator-pulse-shadow: var(--neoverse-status-indicator-success-pulse-shadow);
   }
 
   .ui-status-indicator--warning {
-    --ui-status-indicator-color: var(--neoverse-color-status-warning);
+    --ui-status-indicator-color: var(--neoverse-status-indicator-warning-color);
+    --ui-status-indicator-glow: var(--neoverse-status-indicator-warning-glow);
+    --ui-status-indicator-pulse-background: var(
+      --neoverse-status-indicator-warning-pulse-background
+    );
+    --ui-status-indicator-pulse-shadow: var(--neoverse-status-indicator-warning-pulse-shadow);
   }
 
   .ui-status-indicator--danger {
-    --ui-status-indicator-color: var(--neoverse-color-status-danger);
+    --ui-status-indicator-color: var(--neoverse-status-indicator-danger-color);
+    --ui-status-indicator-glow: var(--neoverse-status-indicator-danger-glow);
+    --ui-status-indicator-pulse-background: var(
+      --neoverse-status-indicator-danger-pulse-background
+    );
+    --ui-status-indicator-pulse-shadow: var(--neoverse-status-indicator-danger-pulse-shadow);
   }
 
   .ui-status-indicator__dot {
@@ -45,12 +73,7 @@
     flex: 0 0 auto;
     border-radius: var(--neoverse-radius-pill);
     background: var(--ui-status-indicator-color);
-    box-shadow: 0 0 calc(var(--ui-status-indicator-dot-size) * 1.2)
-      color-mix(
-        in srgb,
-        var(--ui-status-indicator-color) var(--neoverse-status-indicator-glow-opacity),
-        transparent
-      );
+    box-shadow: var(--ui-status-indicator-glow);
   }
 
   .ui-status-indicator--sm .ui-status-indicator__dot {
@@ -77,19 +100,10 @@
     width: 100%;
     height: 100%;
     border-radius: inherit;
-    background: color-mix(
-      in srgb,
-      var(--ui-status-indicator-color) var(--neoverse-status-indicator-pulse-opacity),
-      transparent
-    );
-    box-shadow: 0 0 calc(var(--ui-status-indicator-dot-size) * 1.3)
-      color-mix(
-        in srgb,
-        var(--ui-status-indicator-color) var(--neoverse-status-indicator-glow-opacity),
-        transparent
-      );
+    background: var(--ui-status-indicator-pulse-background);
+    box-shadow: var(--ui-status-indicator-pulse-shadow);
     content: '';
-    opacity: 0.9;
+    opacity: var(--neoverse-status-indicator-pulse-rest-opacity);
     pointer-events: none;
     transform: translate(-50%, -50%) scale(1);
     animation: ui-status-indicator-pulse calc(var(--neoverse-motion-duration-expressive) * 2)
@@ -98,7 +112,7 @@
 
   @keyframes ui-status-indicator-pulse {
     45% {
-      opacity: 0.38;
+      opacity: var(--neoverse-status-indicator-pulse-mid-opacity);
     }
 
     100% {

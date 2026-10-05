@@ -39,6 +39,7 @@ export type {
   SegmentedControlProps,
   SegmentedControlSize,
   SegmentOption,
+  SelectOption,
   SelectProps,
   SkeletonEffect,
   SkeletonProps,

@@ -26,9 +26,11 @@ export const glassFragmentShader = `
   uniform vec2 u_rect_size;
   uniform float u_pixel_ratio;
   uniform vec4 u_radii;
+  uniform vec3 u_pointer;
   uniform float u_edge_width;
   uniform float u_softness;
   uniform float u_opacity;
+  uniform float u_light_surface;
   uniform vec3 u_carrier;
   uniform vec3 u_edge_light;
   uniform vec3 u_primary;
@@ -45,12 +47,31 @@ export const glassFragmentShader = `
     return min(max(q.x, q.y), 0.0) + length(max(q, 0.0)) - radius;
   }
 
+  float segmentDistance(vec2 point, vec2 start, vec2 end) {
+    vec2 segment = end - start;
+    float projection = clamp(dot(point - start, segment) / dot(segment, segment), 0.0, 1.0);
+    return length(point - start - segment * projection);
+  }
+
   float edgeDistance(vec2 point, vec2 half_size, vec4 radii) {
+    if (u_pointer.z > 0.0) {
+      vec2 local = vec2(abs(point.x - u_pointer.x), point.y - half_size.y);
+      if (local.x < u_pointer.y + u_pointer.z && local.y > -u_pointer.z) {
+        // Replace the bottom segment with two slopes. Measuring the exposed
+        // contour directly keeps an internal horizontal seam out of the glass.
+        float slope = segmentDistance(local, vec2(u_pointer.y, 0.0), vec2(0.0, u_pointer.z));
+        float lowerSegment = length(vec2(max(u_pointer.y - local.x, 0.0), local.y));
+        float distance = min(slope, lowerSegment);
+        bool inside = local.y <= 0.0 || local.x / u_pointer.y + local.y / u_pointer.z <= 1.0;
+        return inside ? -distance : distance;
+      }
+    }
     return roundedBoxSdf(point, half_size, radii);
   }
 
   void main() {
-    vec2 point = (v_local * u_rect_size) - (u_rect_size * 0.5);
+    vec2 drawSize = u_rect_size + vec2(0.0, u_pointer.z);
+    vec2 point = (v_local * drawSize) - (u_rect_size * 0.5);
     vec2 halfSize = u_rect_size * 0.5;
     vec2 pixelSize = vec2(1.0 / max(u_pixel_ratio, 1.0));
     float antiAlias = max(max(pixelSize.x, pixelSize.y) * 0.75, 0.35);
@@ -78,7 +99,7 @@ export const glassFragmentShader = `
     float topCatch = max(-normal.y, 0.0);
     float bottomCatch = max(normal.y, 0.0);
     // The opposing corners are orthogonal to both main light directions.
-    // Give them a small chromatic bridge so the rounded silhouette never
+    // Give them a small light bridge so the rounded silhouette never
     // appears to have a missing piece.
     float cornerCatch = abs(normal.x * normal.y);
     // The top-right and bottom-left corners sit between the two directional
@@ -93,16 +114,15 @@ export const glassFragmentShader = `
     // become stronger. This is the refraction gain, not a white-line gain.
     float thicknessScale = clamp(0.82 + (u_edge_width * 0.55), 0.9, 1.65);
     float chromaticStrength = clamp(0.9 + ((thicknessScale - 1.0) * 1.4), 0.9, 1.8);
-    // The light theme's edge-light token is near-white. Use its luminance as
-    // a theme signal so light surfaces suppress white carrier light while
-    // increasing the visibility of the sampled accent colours.
     float edgeLightLuminance = dot(u_edge_light, vec3(0.2126, 0.7152, 0.0722));
-    float lightSurface = smoothstep(0.55, 0.88, edgeLightLuminance);
+    float lightSurface = u_light_surface >= 0.0
+      ? u_light_surface
+      : smoothstep(0.55, 0.88, edgeLightLuminance);
     float chromaticVisibility = mix(1.0, 1.34, lightSurface);
 
-    // Keep the carrier and incident light restrained. Directional accent colors
-    // do the visible refraction work; edgeLight must never close into a white
-    // outline, especially on the light theme where it is near-white.
+    // Restore the established Aurora chromatic edge field. The surface body
+    // still gets its transparency and blur from CSS; WebGL only supplies the
+    // directional refractive silhouette.
     vec3 refractedBase = mix(u_primary, u_secondary, 0.48 + (bottomRightScatter * 0.2));
     refractedBase = mix(refractedBase, u_carrier, 0.015);
     float edgeLightCatch = (0.003 + (topLeftLight * 0.012)) * (2.0 - thicknessScale) * mix(1.0, 0.24, lightSurface);
@@ -129,9 +149,8 @@ export const glassFragmentShader = `
     vec3 lightChromaticColor = color * vec3(0.78, 0.88, 1.0);
     color = mix(color, lightChromaticColor, lightSurface * 0.72);
 
-    // Elevated dark cards use a low edge opacity. Keep their silhouette nearly
-    // neutral so a translucent surface does not turn into a blue-violet outline;
-    // the brighter elevated/light variants retain their refractive color.
+    // Low-opacity elevated dark surfaces keep a mostly neutral silhouette so
+    // the edge reads as refraction rather than a painted blue-violet outline.
     float chromaticVariantStrength = smoothstep(0.3, 0.5, u_opacity);
     vec3 neutralEdgeColor = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)));
     float chromaticEdgeStrength = mix(0.12, 1.0, chromaticVariantStrength);

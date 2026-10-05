@@ -69,7 +69,7 @@
 
   @keyframes ui-skeleton-pulse {
     50% {
-      opacity: 0.58;
+      opacity: var(--neoverse-skeleton-pulse-mid-opacity);
     }
   }
 

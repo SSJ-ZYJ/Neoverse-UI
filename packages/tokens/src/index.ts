@@ -47,6 +47,8 @@ const componentCssVariables = {
     hoverBackground: '--neoverse-control-button-hover-background',
     activeBackground: '--neoverse-control-button-active-background',
     ghostActiveBackground: '--neoverse-control-button-ghost-active-background',
+    disabledOpacity: '--neoverse-control-button-disabled-opacity',
+    hoverGlowOpacity: '--neoverse-control-button-hover-glow-opacity',
   },
   action: {
     gap: '--neoverse-action-gap',
@@ -161,6 +163,38 @@ const componentCssVariables = {
     glowOpacity: '--neoverse-status-indicator-glow-opacity',
     pulseOpacity: '--neoverse-status-indicator-pulse-opacity',
     pulseScale: '--neoverse-status-indicator-pulse-scale',
+    pulseRestOpacity: '--neoverse-status-indicator-pulse-rest-opacity',
+    pulseMidOpacity: '--neoverse-status-indicator-pulse-mid-opacity',
+    neutral: {
+      color: '--neoverse-status-indicator-neutral-color',
+      glow: '--neoverse-status-indicator-neutral-glow',
+      pulseBackground: '--neoverse-status-indicator-neutral-pulse-background',
+      pulseShadow: '--neoverse-status-indicator-neutral-pulse-shadow',
+    },
+    info: {
+      color: '--neoverse-status-indicator-info-color',
+      glow: '--neoverse-status-indicator-info-glow',
+      pulseBackground: '--neoverse-status-indicator-info-pulse-background',
+      pulseShadow: '--neoverse-status-indicator-info-pulse-shadow',
+    },
+    success: {
+      color: '--neoverse-status-indicator-success-color',
+      glow: '--neoverse-status-indicator-success-glow',
+      pulseBackground: '--neoverse-status-indicator-success-pulse-background',
+      pulseShadow: '--neoverse-status-indicator-success-pulse-shadow',
+    },
+    warning: {
+      color: '--neoverse-status-indicator-warning-color',
+      glow: '--neoverse-status-indicator-warning-glow',
+      pulseBackground: '--neoverse-status-indicator-warning-pulse-background',
+      pulseShadow: '--neoverse-status-indicator-warning-pulse-shadow',
+    },
+    danger: {
+      color: '--neoverse-status-indicator-danger-color',
+      glow: '--neoverse-status-indicator-danger-glow',
+      pulseBackground: '--neoverse-status-indicator-danger-pulse-background',
+      pulseShadow: '--neoverse-status-indicator-danger-pulse-shadow',
+    },
   },
 
   segmentedControl: {
@@ -181,6 +215,8 @@ const componentCssVariables = {
     optionFontSizeSm: '--neoverse-control-segmented-option-font-size-sm',
     optionFontWeight: '--neoverse-control-segmented-option-font-weight',
     optionRadius: '--neoverse-control-segmented-option-radius',
+    optionPressScale: '--neoverse-control-segmented-option-press-scale',
+    disabledOpacity: '--neoverse-control-segmented-disabled-opacity',
     loadingGap: '--neoverse-control-segmented-loading-gap',
     loadingSize: '--neoverse-control-segmented-loading-size',
     border: '--neoverse-control-segmented-border',
@@ -199,9 +235,68 @@ const componentCssVariables = {
     optionHoverBackground: '--neoverse-control-hover-background',
   },
   badge: {
+    labelOpticalOffset: '--neoverse-badge-label-optical-offset',
     background: '--neoverse-badge-background',
-    border: '--neoverse-badge-border',
     foreground: '--neoverse-badge-foreground',
+    shadow: '--neoverse-badge-shadow',
+    info: {
+      background: '--neoverse-badge-info-background',
+      shadow: '--neoverse-badge-info-shadow',
+    },
+    success: {
+      background: '--neoverse-badge-success-background',
+      shadow: '--neoverse-badge-success-shadow',
+    },
+    warning: {
+      background: '--neoverse-badge-warning-background',
+      shadow: '--neoverse-badge-warning-shadow',
+    },
+    danger: {
+      background: '--neoverse-badge-danger-background',
+      shadow: '--neoverse-badge-danger-shadow',
+    },
+  },
+  notice: {
+    radius: '--neoverse-notice-radius',
+    gap: '--neoverse-notice-gap',
+    paddingBlock: '--neoverse-notice-padding-block',
+    paddingInline: '--neoverse-notice-padding-inline',
+    fontSize: '--neoverse-notice-font-size',
+    foreground: '--neoverse-notice-foreground',
+    neutral: {
+      background: '--neoverse-notice-neutral-background',
+      shadow: '--neoverse-notice-neutral-shadow',
+    },
+    info: {
+      background: '--neoverse-notice-info-background',
+      shadow: '--neoverse-notice-info-shadow',
+    },
+    success: {
+      background: '--neoverse-notice-success-background',
+      shadow: '--neoverse-notice-success-shadow',
+    },
+    warning: {
+      background: '--neoverse-notice-warning-background',
+      shadow: '--neoverse-notice-warning-shadow',
+    },
+    danger: {
+      background: '--neoverse-notice-danger-background',
+      shadow: '--neoverse-notice-danger-shadow',
+    },
+  },
+  tooltip: {
+    radius: '--neoverse-tooltip-radius',
+    paddingBlock: '--neoverse-tooltip-padding-block',
+    paddingInline: '--neoverse-tooltip-padding-inline',
+    fontSize: '--neoverse-tooltip-font-size',
+    fontWeight: '--neoverse-tooltip-font-weight',
+    lineHeight: '--neoverse-tooltip-line-height',
+    foreground: '--neoverse-tooltip-foreground',
+    arrowSize: '--neoverse-tooltip-arrow-size',
+    arrowOffset: '--neoverse-tooltip-arrow-offset',
+    arrowBackground: '--neoverse-tooltip-arrow-background',
+    arrowShadow: '--neoverse-tooltip-arrow-shadow',
+    accentTint: '--neoverse-tooltip-accent-tint',
   },
   skeleton: {
     fill: '--neoverse-skeleton-fill',
@@ -211,6 +306,7 @@ const componentCssVariables = {
     titleMinHeight: '--neoverse-skeleton-title-min-height',
     shimmerDuration: '--neoverse-skeleton-shimmer-duration',
     shimmerEasing: '--neoverse-skeleton-shimmer-easing',
+    pulseMidOpacity: '--neoverse-skeleton-pulse-mid-opacity',
   },
   scrollbar: {
     immersive: {
@@ -252,6 +348,11 @@ const componentCssVariables = {
     stripeBackground: '--neoverse-table-stripe-background',
     hoverBackground: '--neoverse-table-hover-background',
     shadow: '--neoverse-table-shadow',
+    cellShadow: '--neoverse-table-cell-shadow',
+    headerShadow: '--neoverse-table-header-shadow',
+    hoverShadow: '--neoverse-table-hover-shadow',
+    gridLine: '--neoverse-table-grid-line',
+    gridLineStrong: '--neoverse-table-grid-line-strong',
     filter: '--neoverse-table-filter',
   },
   disclosure: {
@@ -264,16 +365,23 @@ const componentCssVariables = {
     summaryGap: '--neoverse-disclosure-summary-gap',
     contentGap: '--neoverse-disclosure-content-gap',
     contentPaddingInline: '--neoverse-disclosure-content-padding-inline',
+    contentPaddingBlockEnd: '--neoverse-disclosure-content-padding-block-end',
     indicatorSize: '--neoverse-disclosure-indicator-size',
     indicatorStroke: '--neoverse-disclosure-indicator-stroke',
     foreground: '--neoverse-disclosure-foreground',
     activeForeground: '--neoverse-disclosure-active-foreground',
     indicatorForeground: '--neoverse-disclosure-indicator-foreground',
+    activeIndicatorForeground: '--neoverse-disclosure-active-indicator-foreground',
     background: '--neoverse-disclosure-background',
-    hoverBackground: '--neoverse-disclosure-hover-background',
-    openBackground: '--neoverse-disclosure-open-background',
+    fill: '--neoverse-disclosure-fill',
+    hoverFill: '--neoverse-disclosure-hover-fill',
+    openFill: '--neoverse-disclosure-open-fill',
+    openHoverFill: '--neoverse-disclosure-open-hover-fill',
     openSummaryBackground: '--neoverse-disclosure-open-summary-background',
+    edgeRest: '--neoverse-disclosure-edge-rest',
+    edgeActive: '--neoverse-disclosure-edge-active',
     shadow: '--neoverse-disclosure-shadow',
+    hoverShadow: '--neoverse-disclosure-hover-shadow',
     openShadow: '--neoverse-disclosure-open-shadow',
     filter: '--neoverse-disclosure-filter',
   },
@@ -287,12 +395,15 @@ const componentCssVariables = {
     lineHeight: '--neoverse-form-control-line-height',
     foreground: '--neoverse-form-control-foreground',
     placeholder: '--neoverse-form-control-placeholder',
+    disabledForeground: '--neoverse-form-control-disabled-foreground',
     background: '--neoverse-form-control-background',
     hoverBackground: '--neoverse-form-control-hover-background',
+    focusBackground: '--neoverse-form-control-focus-background',
+    disabledBackground: '--neoverse-form-control-disabled-background',
     shadow: '--neoverse-form-control-shadow',
+    hoverShadow: '--neoverse-form-control-hover-shadow',
     focusShadow: '--neoverse-form-control-focus-shadow',
     filter: '--neoverse-form-control-filter',
-    disabledOpacity: '--neoverse-form-control-disabled-opacity',
     textareaMinBlockSize: '--neoverse-textarea-min-block-size',
   },
 } as const;
@@ -774,8 +885,17 @@ export const cssVariables = {
         denseFill: '--neoverse-surface-inset-dense-fill',
         fill: '--neoverse-surface-inset-fill',
         sheen: '--neoverse-surface-inset-sheen',
+        restBackground: '--neoverse-surface-inset-rest-background',
+        hoverFill: '--neoverse-surface-inset-hover-fill',
+        hoverBackground: '--neoverse-surface-inset-hover-background',
+        strongFill: '--neoverse-surface-inset-strong-fill',
+        strongBackground: '--neoverse-surface-inset-strong-background',
+        alternateFill: '--neoverse-surface-inset-alternate-fill',
+        disabledFill: '--neoverse-surface-inset-disabled-fill',
+        disabledBackground: '--neoverse-surface-inset-disabled-background',
         activeHighlight: '--neoverse-surface-inset-active-highlight',
         filter: '--neoverse-surface-inset-filter',
+        interactiveActiveScale: '--neoverse-surface-interactive-active-scale',
       },
       solid: {
         background: '--neoverse-material-surface-solid-background',
@@ -966,6 +1086,8 @@ export type ControlSurfaceToken = keyof CssVariables['components']['controlSurfa
 export type StatusIndicatorToken = keyof CssVariables['components']['statusIndicator'];
 export type SegmentedControlToken = keyof CssVariables['components']['segmentedControl'];
 export type BadgeToken = keyof CssVariables['components']['badge'];
+export type NoticeToken = keyof CssVariables['components']['notice'];
+export type TooltipToken = keyof CssVariables['components']['tooltip'];
 export type SkeletonToken = keyof CssVariables['components']['skeleton'];
 export type ScrollbarToken = keyof CssVariables['components']['scrollbar'];
 export type ImmersiveScrollbarToken = keyof CssVariables['components']['scrollbar']['immersive'];

@@ -9,25 +9,21 @@
     --neoverse-table-foreground: var(--neoverse-color-text-secondary);
     --neoverse-table-hover-foreground: var(--neoverse-color-text-primary);
     --neoverse-table-header-foreground: var(--neoverse-color-text-primary);
-    --neoverse-table-caption-foreground: var(--neoverse-color-text-muted);
-    --neoverse-table-background:
-      var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-fill);
-    --neoverse-table-header-background: color-mix(
-      in srgb,
-      var(--neoverse-color-surface-raised) 58%,
-      var(--neoverse-color-accent-soft)
-    );
-    --neoverse-table-stripe-background: color-mix(
-      in srgb,
-      var(--neoverse-color-surface-subtle) 42%,
-      transparent
-    );
-    --neoverse-table-hover-background: color-mix(
-      in srgb,
-      var(--neoverse-color-accent-soft) 48%,
-      var(--neoverse-color-surface-subtle)
-    );
-    --neoverse-table-shadow: var(--neoverse-shadow-inset);
+    --neoverse-table-caption-foreground: var(--neoverse-color-text-secondary);
+    --neoverse-table-background: var(--neoverse-surface-inset-rest-background);
+    --neoverse-table-header-background: var(--neoverse-surface-inset-header-background);
+    --neoverse-table-stripe-background: var(--neoverse-surface-inset-alternate-fill);
+    --neoverse-table-hover-background: var(--neoverse-surface-inset-hover-background);
+    --neoverse-table-shadow:
+      var(--neoverse-material-glass-subtle-edge-highlight),
+      var(--neoverse-material-glass-subtle-inner-glow), var(--neoverse-material-glass-subtle-bloom);
+    --neoverse-table-cell-shadow: var(--neoverse-material-inner-glow-subtle);
+    --neoverse-table-header-shadow:
+      var(--neoverse-material-inner-glow-elevated), var(--neoverse-surface-inset-active-highlight);
+    --neoverse-table-hover-shadow:
+      var(--neoverse-material-inner-glow-elevated), var(--neoverse-surface-inset-active-highlight);
+    --neoverse-table-grid-line: var(--neoverse-surface-inset-grid-line);
+    --neoverse-table-grid-line-strong: var(--neoverse-surface-inset-grid-line-strong);
     --neoverse-table-filter: var(--neoverse-surface-inset-filter);
   }
 }

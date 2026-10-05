@@ -311,9 +311,76 @@
       transparent 68%,
       color-mix(in srgb, var(--neoverse-color-accent-soft) 10%, transparent)
     );
+    /* Shared inset state roles keep form controls, disclosure panels, tables,
+       and reading surfaces on one material ladder. Components alias these
+       roles instead of inventing local color-mix recipes. */
+    --neoverse-surface-inset-rest-background:
+      var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-hover-fill: color-mix(
+      in srgb,
+      var(--neoverse-surface-inset-dense-fill) 58%,
+      var(--neoverse-surface-inset-fill)
+    );
+    --neoverse-surface-inset-hover-background:
+      var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-hover-fill);
+    --neoverse-surface-inset-strong-fill: color-mix(
+      in srgb,
+      var(--neoverse-surface-inset-dense-fill) 82%,
+      var(--neoverse-color-accent-soft)
+    );
+    --neoverse-surface-inset-strong-background:
+      var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-strong-fill);
+    --neoverse-surface-inset-header-fill: color-mix(
+      in srgb,
+      var(--neoverse-surface-inset-dense-fill) 90%,
+      var(--neoverse-color-text-primary) 6%
+    );
+    --neoverse-surface-inset-header-background:
+      var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-header-fill);
+    --neoverse-surface-inset-alternate-fill: color-mix(
+      in srgb,
+      var(--neoverse-surface-inset-fill) 70%,
+      var(--neoverse-surface-inset-dense-fill)
+    );
+    --neoverse-surface-inset-disabled-fill: color-mix(
+      in srgb,
+      var(--neoverse-surface-inset-fill) 56%,
+      transparent
+    );
+    --neoverse-surface-inset-disabled-background:
+      var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-disabled-fill);
     --neoverse-surface-inset-active-highlight: inset 0 var(--neoverse-border-width-thin) 0
       color-mix(in srgb, var(--neoverse-color-edge-light) 16%, transparent);
+    --neoverse-surface-inset-strong-hover-fill: color-mix(
+      in srgb,
+      var(--neoverse-surface-inset-strong-fill) 72%,
+      var(--neoverse-surface-inset-hover-fill)
+    );
+    /* Prominent inset surfaces need a visible refractive silhouette without
+       falling back to a dark hairline. These roles are shared by data surfaces
+       and progressive controls so their depth reads consistently. */
+    --neoverse-surface-inset-edge-rest: var(--neoverse-material-glass-subtle-edge-highlight);
+    --neoverse-surface-inset-edge-active: var(--neoverse-material-glass-elevated-edge-highlight);
+    --neoverse-surface-inset-separator: inset 0 calc(var(--neoverse-border-width-thin) * -1) 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) 18%,
+        var(--neoverse-color-accent-primary) 16%
+      );
+    --neoverse-surface-inset-grid-line: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) 16%,
+      transparent
+    );
+    --neoverse-surface-inset-grid-line-strong: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) 30%,
+      transparent
+    );
+    --neoverse-surface-inset-bloom-rest: var(--neoverse-material-bloom-subtle);
+    --neoverse-surface-inset-bloom-active: var(--neoverse-material-bloom-elevated);
     --neoverse-surface-inset-filter: var(--neoverse-material-filter-subtle);
+    --neoverse-surface-interactive-active-scale: 0.99;
 
     --neoverse-material-glass-subtle-background: var(--neoverse-color-surface-subtle);
     --neoverse-material-glass-subtle-background-fallback: var(--neoverse-color-surface-raised);
