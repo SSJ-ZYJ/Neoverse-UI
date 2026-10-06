@@ -20,4 +20,24 @@ Consumers without their own Tailwind build can import the packaged design-system
 
 Vue `>=3.4 <4` is required as a peer dependency. The shared Tailwind, Motion, and Tokens layers are installed through the package dependency graph.
 
+## Public components
+
+`UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiTable`, `UiDisclosure`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, `UiTooltipSurface`, and `UiPresence` are exported from the package root.
+
+## Presence
+
+```vue
+<script setup lang="ts">
+import { UiPresence, presence, staggerStyle } from '@neoverse-ui/vue';
+</script>
+
+<UiPresence :show="open" variant="pop" origin="top">Panel content</UiPresence>
+
+<Transition name="nv">
+  <span v-if="open" v-bind="presence('rise')">Content</span>
+</Transition>
+```
+
+`UiPresence` retains its children through the shared exit animation, then unmounts, with a token-based timeout fallback. `presence(variant, origin?)` binds the shared preset attributes to native Vue transitions; `staggerStyle(index, options?)` sets entry delays for `TransitionGroup name="nv"` children. Presets, timing, and reduced-motion behavior belong to `@neoverse-ui/motion`.
+
 For the complete component API and architecture guidance, see the [Neoverse-UI repository](https://github.com/SSJ-ZYJ/Neoverse-UI).

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, onBeforeUnmount, ref, useAttrs } from 'vue';
+import { presence } from './presence';
 import type { FormControlValue, SelectOption, SelectProps } from './types';
 
 defineOptions({ inheritAttrs: false });
@@ -100,16 +101,20 @@ function updatePopoverPosition() {
     `${triggerRect.width / effectiveZoom}px`,
   );
 
-  const popoverRect = popover.getBoundingClientRect();
-  const maxLeft = Math.max(gap, window.innerWidth - popoverRect.width - gap);
+  /* Layout sizes instead of getBoundingClientRect: the presence transform
+     scales the popover while it enters, and transform-skewed rects would
+     clamp the popover to the wrong coordinates on its first open frame. */
+  const popoverWidth = popover.offsetWidth;
+  const popoverHeight = popover.offsetHeight;
+  const maxLeft = Math.max(gap, window.innerWidth - popoverWidth - gap);
   const left = Math.min(Math.max(triggerRect.left, gap), maxLeft);
   const spaceBelow = window.innerHeight - triggerRect.bottom - gap;
   const spaceAbove = triggerRect.top - gap;
-  const shouldOpenAbove = popoverRect.height > spaceBelow && spaceAbove >= popoverRect.height;
+  const shouldOpenAbove = popoverHeight > spaceBelow && spaceAbove >= popoverHeight;
   const unclampedTop = shouldOpenAbove
-    ? triggerRect.top - popoverRect.height - gap
+    ? triggerRect.top - popoverHeight - gap
     : triggerRect.bottom + gap;
-  const maxTop = Math.max(gap, window.innerHeight - popoverRect.height - gap);
+  const maxTop = Math.max(gap, window.innerHeight - popoverHeight - gap);
   const top = Math.min(Math.max(unclampedTop, gap), maxTop);
 
   popover.style.setProperty('--neoverse-select-popover-left', `${left / effectiveZoom}px`);
@@ -279,9 +284,10 @@ onBeforeUnmount(() => {
 
     <div
       ref="popoverRef"
-      class="ui-select__popover"
+      class="ui-select__popover nv-presence"
       role="listbox"
       popover="auto"
+      v-bind="presence('pop', 'top')"
       @toggle="onPopoverToggle"
     >
       <button
@@ -297,14 +303,17 @@ onBeforeUnmount(() => {
         @keydown="onOptionKeydown"
       >
         <span>{{ option.label }}</span>
-        <svg
-          v-if="String(option.value) === String(props.modelValue ?? '')"
-          class="ui-select__check"
-          viewBox="0 0 24 24"
-          aria-hidden="true"
-        >
-          <path d="m5 12 4 4L19 6" />
-        </svg>
+        <Transition name="nv">
+          <svg
+            v-if="String(option.value) === String(props.modelValue ?? '')"
+            v-bind="presence('pop')"
+            class="ui-select__check"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+          >
+            <path d="m5 12 4 4L19 6" />
+          </svg>
+        </Transition>
       </button>
     </div>
 

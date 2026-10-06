@@ -59,11 +59,14 @@
       "name": "@neoverse-ui/react",
       "version": "0.1.0",
       "dependencies": {
+        "@neoverse-ui/motion": "^0.1.0",
         "@neoverse-ui/tailwind": "^0.1.0",
       },
       "devDependencies": {
         "@types/react": "^19.2.18",
+        "@types/react-dom": "^19.2.7",
         "react": "^19.2.8",
+        "react-dom": "^19.2.8",
       },
       "peerDependencies": {
         "react": ">=19.0.0 <20.0.0",
@@ -89,6 +92,7 @@
       "name": "@neoverse-ui/vue",
       "version": "0.1.0",
       "dependencies": {
+        "@neoverse-ui/motion": "^0.1.0",
         "@neoverse-ui/tailwind": "^0.1.0",
       },
       "devDependencies": {

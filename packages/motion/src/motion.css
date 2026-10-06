@@ -1,13 +1,30 @@
+/* biome-ignore-all lint/complexity/noImportantStyles: particle capture sanitization intentionally overrides arbitrary consumer author styles inside a detached capture-only subtree. */
 @import '@neoverse-ui/tokens/css';
 
-@layer neoverse-motion {
+@layer neoverse.motion {
   :root {
+    /* Semantic roles. Components never reference raw durations/easings; they
+       reference the role so a single token edit retunes the whole system. */
     --neoverse-motion-feedback-duration: var(--neoverse-motion-duration-fast);
     --neoverse-motion-feedback-easing: var(--neoverse-motion-easing-standard);
     --neoverse-motion-state-duration: var(--neoverse-motion-duration-standard);
     --neoverse-motion-state-easing: var(--neoverse-motion-easing-standard);
     --neoverse-motion-spatial-duration: var(--neoverse-motion-duration-expressive);
     --neoverse-motion-spatial-easing: var(--neoverse-motion-easing-emphasized);
+
+    /* Presence roles. Elements arrive on the decelerating enter curve and
+       depart quicker on the accelerating exit curve, so interactions feel
+       responsive without the interface ever visibly "stopping". */
+    --neoverse-motion-enter-duration: var(--neoverse-motion-duration-standard);
+    --neoverse-motion-enter-easing: var(--neoverse-motion-easing-standard);
+    --neoverse-motion-exit-duration: var(--neoverse-motion-duration-fast);
+    --neoverse-motion-exit-easing: var(--neoverse-motion-easing-accelerate);
+
+    /* Per-element stagger hooks. The stagger helper sets these inline; both
+       values default to no delay so plain enter/leave never waits. */
+    --neoverse-motion-enter-delay: 0ms;
+    --neoverse-motion-exit-delay: 0ms;
+
     --neoverse-motion-theme-duration: var(--neoverse-motion-duration-standard);
     --neoverse-motion-theme-fallback-duration: var(--neoverse-motion-duration-expressive);
     --neoverse-motion-theme-easing: var(--neoverse-motion-easing-standard);
@@ -21,15 +38,228 @@
       --neoverse-motion-feedback-duration: 1ms;
       --neoverse-motion-state-duration: 1ms;
       --neoverse-motion-spatial-duration: 1ms;
+      --neoverse-motion-enter-duration: 1ms;
+      --neoverse-motion-exit-duration: 1ms;
       --neoverse-motion-easing-standard: step-end;
       --neoverse-motion-easing-emphasized: step-end;
+      --neoverse-motion-easing-accelerate: step-end;
       --neoverse-motion-feedback-easing: step-end;
       --neoverse-motion-state-easing: step-end;
       --neoverse-motion-spatial-easing: step-end;
+      --neoverse-motion-enter-easing: step-end;
+      --neoverse-motion-exit-easing: step-end;
       --neoverse-motion-theme-duration: 1ms;
       --neoverse-motion-theme-fallback-duration: 1ms;
       --neoverse-motion-theme-easing: step-end;
       --neoverse-motion-spatial-distance: 0px;
+      --neoverse-motion-distance-near: 0px;
+      --neoverse-motion-distance-mid: 0px;
+      --neoverse-motion-distance-far: 0px;
+      --neoverse-motion-scale-near: 1;
+      --neoverse-motion-scale-far: 1;
+      --neoverse-motion-veil-blur: 0px;
+      --neoverse-motion-enter-delay: 0ms;
+      --neoverse-motion-exit-delay: 0ms;
+      --neoverse-motion-particle-duration: 1ms;
+      --neoverse-motion-particle-enter-delay: 0ms;
+      --neoverse-motion-particle-enter-duration: 1ms;
+      --neoverse-motion-particle-blur: 0px;
+    }
+  }
+
+  /* --------------------------------------------------------------------
+     Presence engine - the one enter/exit contract for the whole library.
+     Framework adapters apply the class names below (Vue does this natively
+     with <Transition name="nv">); the visual behaviour lives only here.
+     Variant presets are chosen with data-neoverse-motion and only override
+     the "where the element comes from" custom properties, so every preset
+     shares the same timing tokens and the same exit destination: an element
+     always returns to wherever it entered from.
+     -------------------------------------------------------------------- */
+
+  [data-neoverse-motion='rise'] {
+    --neoverse-motion-from-translate: 0 var(--neoverse-motion-distance-mid);
+  }
+
+  [data-neoverse-motion='sink'] {
+    --neoverse-motion-from-translate: 0 calc(var(--neoverse-motion-distance-mid) * -1);
+  }
+
+  [data-neoverse-motion='pop'] {
+    --neoverse-motion-from-scale: var(--neoverse-motion-scale-near);
+    --neoverse-motion-from-translate: 0 var(--neoverse-motion-distance-near);
+  }
+
+  [data-neoverse-motion='veil'] {
+    --neoverse-motion-from-filter: blur(var(--neoverse-motion-veil-blur));
+  }
+
+  [data-neoverse-motion='slide-start'] {
+    --neoverse-motion-from-translate: var(--neoverse-motion-distance-mid) 0;
+  }
+
+  [data-neoverse-motion='slide-end'] {
+    --neoverse-motion-from-translate: calc(var(--neoverse-motion-distance-mid) * -1) 0;
+  }
+
+  /* Where an element grows from. Point the origin at the edge that launched
+     it (a popover anchored under its trigger uses 'top') so motion is always
+     edge-to-edge between the source and the destination. */
+  [data-neoverse-motion-origin='top'] {
+    transform-origin: 50% 0%;
+  }
+
+  [data-neoverse-motion-origin='bottom'] {
+    transform-origin: 50% 100%;
+  }
+
+  [data-neoverse-motion-origin='start'] {
+    transform-origin: 0% 50%;
+  }
+
+  [data-neoverse-motion-origin='end'] {
+    transform-origin: 100% 50%;
+  }
+
+  .nv-enter-active {
+    transition:
+      opacity var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
+      var(--neoverse-motion-enter-delay),
+      translate var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
+      var(--neoverse-motion-enter-delay),
+      scale var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
+      var(--neoverse-motion-enter-delay),
+      filter var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
+      var(--neoverse-motion-enter-delay);
+  }
+
+  .nv-leave-active {
+    transition:
+      opacity var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing)
+      var(--neoverse-motion-exit-delay),
+      translate var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing)
+      var(--neoverse-motion-exit-delay),
+      scale var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing)
+      var(--neoverse-motion-exit-delay),
+      filter var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing)
+      var(--neoverse-motion-exit-delay);
+    pointer-events: none;
+  }
+
+  .nv-enter-from,
+  .nv-leave-to {
+    opacity: 0;
+    translate: var(--neoverse-motion-from-translate, 0 0);
+    scale: var(--neoverse-motion-from-scale, 1);
+    filter: var(--neoverse-motion-from-filter, blur(0));
+  }
+
+  /* Vue <TransitionGroup> FLIP continuity: repositioned siblings glide to
+     their new coordinates instead of teleporting. */
+  .nv-move {
+    transition:
+      translate var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
+      scale var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
+  }
+
+  /* Mount-time entrance. The animation plays the moment the element is first
+     rendered, so components that conditionally render their own content stay
+     animated with zero JavaScript and zero framework coupling. The `from`
+     frame reads the same preset variables as the transition engine, so
+     data-neoverse-motion picks the choreography and exits (when the consumer
+     wraps the element in a Transition) return along the same path. */
+  .nv-appear {
+    animation: nv-appear var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
+      var(--neoverse-motion-enter-delay) both;
+  }
+
+  @keyframes nv-appear {
+    from {
+      opacity: 0;
+      translate: var(--neoverse-motion-from-translate, 0 0);
+      scale: var(--neoverse-motion-from-scale, 1);
+      filter: var(--neoverse-motion-from-filter, blur(0));
+    }
+  }
+
+  /* Mount-time exit for animation-based adapters (React presence): the `to`
+     frame reads the same preset variables, so an element always departs along
+     the exact path it arrived on. Declared after .nv-appear so the exit wins
+     when both classes are present. */
+  .nv-vanish {
+    animation: nv-vanish var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing)
+      both;
+    pointer-events: none;
+  }
+
+  @keyframes nv-vanish {
+    to {
+      opacity: 0;
+      translate: var(--neoverse-motion-from-translate, 0 0);
+      scale: var(--neoverse-motion-from-scale, 1);
+      filter: var(--neoverse-motion-from-filter, blur(0));
+    }
+  }
+
+  /* --------------------------------------------------------------------
+     Top-layer presence for popover/dialog surfaces. The closed state is the
+     exit destination, :popover-open is the resting state, and @starting-style
+     seeds the enter frame, so opening and closing are both continuous with
+     zero JavaScript. display/overlay interpolate via allow-discrete to keep
+     the element in the top layer for the whole departure.
+     -------------------------------------------------------------------- */
+  .nv-presence {
+    transition:
+      opacity var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
+      translate var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
+      scale var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
+      filter var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
+      overlay var(--neoverse-motion-exit-duration) allow-discrete,
+      display var(--neoverse-motion-exit-duration) allow-discrete;
+    opacity: 0;
+    translate: var(--neoverse-motion-from-translate, 0 0);
+    scale: var(--neoverse-motion-from-scale, 1);
+    filter: var(--neoverse-motion-from-filter, blur(0));
+  }
+
+  .nv-presence:popover-open {
+    transition:
+      opacity var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
+      translate var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
+      scale var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
+      filter var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
+      overlay var(--neoverse-motion-enter-duration) allow-discrete,
+      display var(--neoverse-motion-enter-duration) allow-discrete;
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+    filter: blur(0);
+  }
+
+  @starting-style {
+    .nv-presence:popover-open {
+      opacity: 0;
+      translate: var(--neoverse-motion-from-translate, 0 0);
+      scale: var(--neoverse-motion-from-scale, 1);
+      filter: var(--neoverse-motion-from-filter, blur(0));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nv-enter-active,
+    .nv-leave-active,
+    .nv-move,
+    .nv-presence,
+    .nv-presence:popover-open {
+      transition-duration: 1ms;
+    }
+
+    .nv-appear {
+      animation-duration: 1ms;
+    }
+
+    .nv-vanish {
+      animation-duration: 1ms;
     }
   }
 }
@@ -38,6 +268,99 @@
 :root[data-neoverse-theme-view-transitioning]::view-transition-new(root) {
   animation-duration: var(--neoverse-motion-theme-duration);
   animation-timing-function: var(--neoverse-motion-theme-easing);
+}
+
+/* Generic View Transition glue for callers of startViewTransition(): the root
+   crossfade inherits the spatial role, and callers can layer directional
+   choreography on named snapshots in their own stylesheets. The overlay is
+   pointer-transparent so the incoming page is interactive while the old one
+   is still on screen - transitions run in parallel with the user, never
+   against them. */
+::view-transition {
+  pointer-events: none;
+}
+
+:root[data-neoverse-view-transitioning]::view-transition-old(root),
+:root[data-neoverse-view-transitioning]::view-transition-new(root),
+:root[data-neoverse-view-transitioning-item]::view-transition-old(root),
+:root[data-neoverse-view-transitioning-item]::view-transition-new(root) {
+  animation-duration: var(--neoverse-motion-spatial-duration);
+  animation-timing-function: var(--neoverse-motion-spatial-easing);
+}
+
+/* --------------------------------------------------------------------
+   Particle dissolve - the shared page-change choreography.
+   1. WebGL path (preferred): startViewTransition() captures the element
+      marked with data-neoverse-dissolve through the official HTML-in-Canvas
+      API (or synthesizes a theme-colored dust field) and erodes it into fine
+      dust; the incoming element fades in after the dissolve has taken hold.
+      The overlay canvas is pointer-transparent and the stable chrome keeps
+      its own snapshot names.
+   2. Crossfade fallback: without WebGL2 the chain ends at the View
+      Transition's own crossfade, timed by the spatial role through the root
+      duration rule above - a dissolve that cannot be particles simply fades.
+   Both paths are interruptible: the next startViewTransition() call takes
+   over from the current frame.
+   -------------------------------------------------------------------- */
+.nv-particle-canvas {
+  position: fixed;
+  z-index: var(--neoverse-layout-layer-modal);
+  inset: 0;
+  display: block;
+  inline-size: 100vw;
+  block-size: 100vh;
+  pointer-events: none;
+  contain: strict;
+}
+
+/* The capture canvas hosts the sanitized clone for one paint frame but never
+   appears on the visible page. Explicit sizes are mandatory: contain:strict
+   collapses content-based sizing to zero, and the clone would lay out inside
+   a zero-bytes viewport and capture as an empty texture. */
+.nv-particle-source {
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  inline-size: 100vw;
+  block-size: 100vh;
+  pointer-events: none;
+  contain: strict;
+}
+
+/* Freeze motion in the capture clone without changing its painted appearance.
+   Shadows, backdrop filters, and pseudo-elements carry real visual detail and
+   must remain in the HTML-in-Canvas snapshot. The clone also carries
+   data-neoverse-dissolve, so animations must die outright or the incoming-enter
+   animation would freeze it at opacity 0 - an empty texture. */
+[data-neoverse-particle-capture],
+[data-neoverse-particle-capture] * {
+  animation: none !important;
+  transition: none !important;
+}
+
+/* The opacity entrance creates a Backdrop Root. Keep that boundary at rest
+   so descendant glass samples the same backdrop after the animation is
+   removed, instead of repainting against the surrounding page. */
+[data-neoverse-dissolve] {
+  will-change: opacity;
+}
+
+/* The incoming region is tagged by the engine after a page swap. A normal
+   transition uses the token delay; an interrupted transition uses the
+   remaining duration of its active particle dissolve. */
+:root[data-neoverse-particle-transitioning] [data-neoverse-motion-incoming] {
+  animation: neoverse-motion-particle-enter var(--neoverse-motion-particle-enter-duration) linear
+    var(--neoverse-motion-particle-enter-delay) both;
+}
+
+@keyframes neoverse-motion-particle-enter {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 /* Interpolate the shared semantic colors once, rather than starting a paint

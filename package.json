@@ -27,7 +27,7 @@
     "changeset": "changeset",
     "version": "changeset version && bun install --lockfile-only",
     "verify:packages": "bun run scripts/verify-packages.ts",
-    "release:check": "bun run check && bun run build && bun run verify:packages",
+    "release:check": "biome check . && bun run lint:text && bun run lint:style && bun run lint:tailwind && bun run typecheck && bun run test && bun run build && bun run verify:packages",
     "release:pack": "bun run build && changeset pack --out-dir .release",
     "release": "bun run release:pack && changeset publish --from-pack-dir .release"
   },

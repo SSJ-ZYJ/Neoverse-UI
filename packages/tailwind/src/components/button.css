@@ -417,6 +417,12 @@
       display: none;
     }
 
+    /* The opaque fallback plate still needs the normal pressed feedback.
+       Its tint stays inside the button and does not reveal the backdrop. */
+    .ui-button.material-glass-subtle:active:not(:disabled):not([aria-disabled='true'])::after {
+      display: block;
+    }
+
     .ui-button > .ui-button__edge-field {
       display: none;
     }

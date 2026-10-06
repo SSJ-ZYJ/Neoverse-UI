@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue';
 import { computed, nextTick, ref, useAttrs, watch } from 'vue';
+import { presence } from './presence';
 import { getSurfaceClass, isGlassSurface } from './surface';
 import type { SegmentedControlProps, SegmentOption } from './types';
 import UiLoadingIndicator from './UiLoadingIndicator.vue';
@@ -247,8 +248,15 @@ function optionClasses(option: SegmentOption): string[] {
         {{ option.label }}
       </button>
     </span>
-    <span v-if="props.loading" class="ui-segmented-control__loading" aria-hidden="true">
-      <UiLoadingIndicator />
-    </span>
+    <Transition name="nv">
+      <span
+        v-if="props.loading"
+        v-bind="presence('pop')"
+        class="ui-segmented-control__loading"
+        aria-hidden="true"
+      >
+        <UiLoadingIndicator />
+      </span>
+    </Transition>
   </div>
 </template>

@@ -11,6 +11,8 @@ const glassSelector = glassClassNames.map((className) => `.${className}`).join('
 const cssEdgePassSelector = '[data-neoverse-glass-edge-pass="css"]';
 const reducedTransparencyQuery = '(prefers-reduced-transparency: reduce)';
 const maxDefaultDevicePixelRatio = 2;
+const maxOccluders = 6;
+const occlusionSampleInset = 2;
 const quadPositions = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
 const motionEvents = [
   'transitionrun',
@@ -57,6 +59,16 @@ type GlassGl = WebGLRenderingContext | WebGL2RenderingContext;
 type GlassWindow = Window & {
   ResizeObserver?: typeof ResizeObserver;
   MutationObserver?: typeof MutationObserver;
+  Document?: typeof Document;
+};
+
+type Occluder = {
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+  radius: number;
+  area: number;
 };
 
 type ProgramLocations = {
@@ -76,6 +88,9 @@ type ProgramLocations = {
   primary: WebGLUniformLocation | null;
   secondary: WebGLUniformLocation | null;
   tertiary: WebGLUniformLocation | null;
+  occluders: WebGLUniformLocation | null;
+  occluderRadii: WebGLUniformLocation | null;
+  occluderCount: WebGLUniformLocation | null;
 };
 
 export interface GlassRendererOptions {
@@ -328,6 +343,98 @@ const getScissorRect = (
 
 const clipsOverflowAxis = (value: string): boolean =>
   value === 'auto' || value === 'clip' || value === 'hidden' || value === 'scroll';
+
+// The shared edge canvas paints above every overlay, so an edge must be
+// masked wherever an overlay covers its surface. Hit-test a small grid of
+// points against the real paint order: everything stacked above the surface
+// (drawers, popovers, scrims) at any sample point occludes it. Elements with
+// pointer-events: none are already excluded from the hit test, which keeps
+// the renderer's own canvas and probe out of the results.
+export const occlusionSamplePoints = (rect: {
+  left: number;
+  top: number;
+  right: number;
+  bottom: number;
+  width: number;
+  height: number;
+}): Array<[number, number]> => {
+  const clampX = (x: number): number =>
+    Math.min(Math.max(x, rect.left + occlusionSampleInset), rect.right - occlusionSampleInset);
+  const clampY = (y: number): number =>
+    Math.min(Math.max(y, rect.top + occlusionSampleInset), rect.bottom - occlusionSampleInset);
+  const midX = clampX(rect.left + rect.width / 2);
+  const midY = clampY(rect.top + rect.height / 2);
+  return [
+    [midX, midY],
+    [midX, clampY(rect.top)],
+    [midX, clampY(rect.bottom)],
+    [clampX(rect.left), midY],
+    [clampX(rect.right), midY],
+  ];
+};
+
+const occluderRadius = (element: Element, view: Window): number => {
+  const style = view.getComputedStyle(element);
+  return Math.max(
+    parsePixels(style.borderTopLeftRadius, 0),
+    parsePixels(style.borderTopRightRadius, 0),
+    parsePixels(style.borderBottomRightRadius, 0),
+    parsePixels(style.borderBottomLeftRadius, 0),
+  );
+};
+
+const intersectionArea = (rect: DOMRect, bounds: DOMRect): number => {
+  const width = Math.min(rect.right, bounds.right) - Math.max(rect.left, bounds.left);
+  const height = Math.min(rect.bottom, bounds.bottom) - Math.max(rect.top, bounds.top);
+  return width > 0 && height > 0 ? width * height : 0;
+};
+
+export const collectOccluders = (
+  element: HTMLElement,
+  bounds: DOMRect,
+  ownerDocument: Document,
+  view: Window,
+): Occluder[] => {
+  if (typeof ownerDocument.elementsFromPoint !== 'function') {
+    return [];
+  }
+
+  const occluders = new Map<Element, Occluder>();
+  for (const [x, y] of occlusionSamplePoints(bounds)) {
+    const stack = ownerDocument.elementsFromPoint(x, y);
+    const elementIndex = stack.indexOf(element);
+    // A missed hit (rounded corner outside its own silhouette) yields no
+    // information about what is above; slice(-1) would wrongly treat the
+    // whole stack as occluding, so skip the point instead.
+    if (elementIndex <= 0) {
+      continue;
+    }
+    for (const entry of stack.slice(0, elementIndex)) {
+      if (element.contains(entry) || occluders.has(entry)) {
+        continue;
+      }
+      const rect = entry.getBoundingClientRect();
+      if (rect.width <= 0 || rect.height <= 0) {
+        continue;
+      }
+      occluders.set(entry, {
+        left: rect.left,
+        top: rect.top,
+        width: rect.width,
+        height: rect.height,
+        radius: occluderRadius(entry, view),
+        area: intersectionArea(rect, bounds),
+      });
+    }
+    if (occluders.size >= maxOccluders) {
+      break;
+    }
+  }
+
+  return [...occluders.values()]
+    .sort((first, second) => second.area - first.area)
+    .slice(0, maxOccluders);
+};
 
 const getAncestorClipRect = (element: HTMLElement, rect: ClipRect, view: Window): ClipRect => {
   let left = rect.left;
@@ -744,6 +851,9 @@ class GlassRendererImpl implements GlassRenderer {
       primary: gl.getUniformLocation(program, 'u_primary'),
       secondary: gl.getUniformLocation(program, 'u_secondary'),
       tertiary: gl.getUniformLocation(program, 'u_tertiary'),
+      occluders: gl.getUniformLocation(program, 'u_occluders'),
+      occluderRadii: gl.getUniformLocation(program, 'u_occluder_radii'),
+      occluderCount: gl.getUniformLocation(program, 'u_occluder_count'),
     };
 
     this.canvas = canvas;
@@ -1014,6 +1124,8 @@ class GlassRendererImpl implements GlassRenderer {
       [0.48, 0.43, 0.9],
     );
     gl.enable(gl.SCISSOR_TEST);
+    const occluderRects = new Float32Array(maxOccluders * 4);
+    const occluderRadii = new Float32Array(maxOccluders);
     for (const element of this.getGlassElements()) {
       const style = readStyle(element, view, this.colorProbe, viewport);
       if (style === undefined) {
@@ -1051,6 +1163,27 @@ class GlassRendererImpl implements GlassRenderer {
       gl.uniform3f(locations.primary, ...primary);
       gl.uniform3f(locations.secondary, ...secondary);
       gl.uniform3f(locations.tertiary, ...tertiary);
+      let occluderCount = 0;
+      if (locations.occluders !== null && locations.occluderCount !== null) {
+        for (const occluder of collectOccluders(element, style.rect, this.ownerDocument, view)) {
+          occluderRects.set(
+            [
+              occluder.left - viewport.left,
+              occluder.top - viewport.top,
+              occluder.width,
+              occluder.height,
+            ],
+            occluderCount * 4,
+          );
+          occluderRadii[occluderCount] = occluder.radius;
+          occluderCount += 1;
+        }
+        gl.uniform4fv(locations.occluders, occluderRects);
+        if (locations.occluderRadii !== null) {
+          gl.uniform1fv(locations.occluderRadii, occluderRadii);
+        }
+        gl.uniform1f(locations.occluderCount, occluderCount);
+      }
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
     }
     gl.disable(gl.SCISSOR_TEST);

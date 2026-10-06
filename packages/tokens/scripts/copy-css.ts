@@ -25,6 +25,7 @@ const sourceFiles = [
   'components/scrollbar.css',
   'components/table.css',
   'components/disclosure.css',
+  'components/prose.css',
   'components/form-control.css',
 ] as const;
 const lightSource = new URL('themes/light.css', sourceDirectory);

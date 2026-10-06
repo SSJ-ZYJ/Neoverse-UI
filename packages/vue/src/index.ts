@@ -8,6 +8,8 @@ export {
   iconButtonSizeClasses,
   iconButtonStretchSizeClasses,
 } from './classes';
+export type { PresenceAttrs, StaggerStyle } from './presence';
+export { presence, staggerStyle } from './presence';
 export { getSurfaceClass, isGlassSurface, surfaceClasses } from './surface';
 export type {
   ActionProps,
@@ -68,6 +70,7 @@ export { default as UiIconButton } from './UiIconButton.vue';
 export { default as UiInput } from './UiInput.vue';
 export { default as UiNavigationItem } from './UiNavigationItem.vue';
 export { default as UiNotice } from './UiNotice.vue';
+export { default as UiPresence } from './UiPresence.vue';
 export { default as UiScrollbar } from './UiScrollbar.vue';
 export { default as UiSegmentedControl } from './UiSegmentedControl.vue';
 export { default as UiSelect } from './UiSelect.vue';

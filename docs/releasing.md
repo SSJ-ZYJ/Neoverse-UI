@@ -36,9 +36,12 @@ Before any npm publication, the repository must pass:
 ```sh
 bun install --frozen-lockfile
 bun run release:check
+bun run test:visual
+git diff --check
+bun changeset status
 ```
 
-`release:check` runs the workspace checks and build, verifies every public package, rejects leaked `workspace:` protocols and source/test/playground artifacts, and installs the generated package contents into a temporary clean consumer for JS, CSS, and TypeScript smoke tests.
+`release:check` runs non-mutating Biome checks, text/style/Tailwind checks, typechecks, tests, and build. It verifies every public package, rejects leaked `workspace:` protocols and source/test/playground artifacts, and installs the generated package contents into a temporary clean consumer for JS, CSS, and TypeScript smoke tests. The full Playwright gate must also finish with zero failures; conditional skips must have a documented design reason. Review expected/actual/diff images before accepting intentional snapshot changes, then rerun without snapshot updates. The release workflow runs these visual gates before packing.
 
 The repository and all public packages use the MIT license. `scripts/verify-packages.ts` verifies the public package metadata and package contents before release.
 
@@ -78,6 +81,8 @@ The version script runs `changeset version` and then refreshes `bun.lock`, so wo
 
 A package that has never existed on npm needs an initial publication before npm Trusted Publisher settings can be attached to it.
 
+For the 0.2.0 release, `@neoverse-ui/react` and `@neoverse-ui/giscus-theme` need that first-publication bootstrap. This RC phase checks their metadata, exports, dependency ranges, and packed contents only; it does not publish them. Their verified 0.2.0 artifacts must be published during the approved release before configuring Trusted Publishers.
+
 Before that first publication:
 
 1. Confirm the package is listed as public in its `package.json` and carries the repository MIT license.
@@ -108,6 +113,21 @@ Then configure GitHub:
 4. Add `RELEASE_AUTOMATION_ENABLED=true` only after the first-publication bootstrap is complete and all accumulated pre-release Changesets have been resolved.
 
 The release workflow stays dormant until `RELEASE_AUTOMATION_ENABLED` is enabled. In publish mode it always runs package verification first. The publication job additionally requires `NPM_TRUSTED_PUBLISHING_ENABLED=true` and uses OIDC instead of a long-lived `NPM_TOKEN`.
+
+Keep both variables disabled and leave the `npm` Environment unconfigured during RC preparation. The initial release sequence is:
+
+```text
+Code and visual gates pass
+  → approved RC commit
+  → approved Version Packages (all seven packages to 0.2.0)
+  → React / Giscus Theme first-publication bootstrap
+  → npm Trusted Publisher configuration for every public package
+  → GitHub npm Environment
+  → NPM_TRUSTED_PUBLISHING_ENABLED=true
+  → RELEASE_AUTOMATION_ENABLED=true
+```
+
+While automation is disabled, Version Packages is an explicitly approved manual step. Review and merge its resulting version changes before bootstrap. npm OIDC requirements and publisher fields are documented in the [official Trusted Publishing guide](https://docs.npmjs.com/trusted-publishers/); the split Changesets v2 actions are designed for Changesets v3 and support the workflow's publish-plan and packed-artifact handoff.
 
 ## Subsequent releases
 

@@ -307,24 +307,62 @@ export const moduleCopy = {
   motion: {
     label: localized('Motion', '动效'),
     description: localized(
-      'Semantic motion roles used by real components, with reduced-motion behavior and live state previews.',
-      '展示真实组件使用的语义动效角色、reduced-motion 行为与实时状态预览。',
+      'Semantic motion roles and presence presets shared by every component, with reduced-motion behavior and live previews.',
+      '所有组件共享的语义动效角色与 presence 预设，附带 reduced-motion 行为与实时演示。',
     ),
     primitive: {
       label: localized('Base motion values', '基础动效值'),
       description: localized(
-        'Base values define fast, standard, and expressive durations plus linear, standard, and emphasized easings.',
-        '基础值定义 fast、standard、expressive 时长，以及 linear、standard、emphasized 缓动。',
+        'Base values define fast, standard, and expressive durations; linear, standard, emphasized, and accelerate easings; plus the shared travel distances.',
+        '基础值定义 fast、standard、expressive 时长，linear、standard、emphasized、accelerate 缓动，以及共享行程距离。',
       ),
     },
-    aliases: {
-      label: localized('Semantic roles', '语义角色'),
+    presence: {
+      label: localized('Presence presets', '出场入场预设'),
       description: localized(
-        'Shared components consume three roles directly: feedback for immediate response, state for visual state changes, and spatial for movement.',
-        '共享组件直接消费三类角色：feedback 负责即时反馈，state 负责视觉状态变化，spatial 负责空间移动。',
+        'One enter/exit contract for the whole library: pick a preset, and elements arrive and leave along the same path. Spinners, tooltips, popovers, and lists all consume it.',
+        '全库唯一的出场入场契约：选择一个预设，元素沿同一路径出现与离开。加载指示、工具提示、弹层与列表都复用同一引擎。',
       ),
+      replay: localized('Replay', '重播'),
+      visible: localized('Show', '显示'),
+      hide: localized('Hide', '隐藏'),
+      stagger: localized('Staggered list', '交错列表'),
+      staggerDescription: localized(
+        'TransitionGroup glides reordered items (FLIP) and staggers entries; exits stay immediate.',
+        'TransitionGroup 让重排的条目滑行（FLIP）并交错入场；离开保持即时。',
+      ),
+      shuffle: localized('Shuffle', '重排'),
     },
-    cssVariables: localized('{label} CSS variables', '{label} CSS 变量'),
+    page: {
+      label: localized('Page dissolve', '页面消散'),
+      description: localized(
+        'The page-change choreography: the leaving region erodes into fine dust while the incoming content fades in late. The same startViewTransition call drives every route change in this lab — switch the pipeline below to preview every fallback.',
+        '页面切换编排：离场区域碎化为细尘消散，新内容延迟淡入。本实验站的路由切换都由同一个 startViewTransition 驱动——切换下方管线即可预览每一种回退。',
+      ),
+      replay: localized('Swap panel', '切换面板'),
+      pipeline: localized('Active pipeline', '当前管线'),
+      pipelineAuto: localized('Auto', '自动'),
+      pipelineCapture: localized('HTML capture', 'HTML 捕获'),
+      pipelineSynthetic: localized('Synthetic dust', '合成尘埃'),
+      pipelineCrossfade: localized('Crossfade', '淡入淡出'),
+      pipelineWebgl: localized(
+        'WebGL particles (HTML-in-Canvas capture)',
+        'WebGL 粒子（HTML-in-Canvas 捕获）',
+      ),
+      pipelineWebglSynthetic: localized(
+        'WebGL particles (synthetic dust)',
+        'WebGL 粒子（合成尘埃）',
+      ),
+      pipelineCrossfadeFallback: localized('Crossfade fallback', '淡入淡出回退'),
+      pipelineLabel: {
+        auto: localized('Auto (capture → dust → crossfade)', '自动（捕获 → 尘埃 → 淡入淡出）'),
+        capture: localized('Forced HTML capture', '强制 HTML 捕获'),
+        synthetic: localized('Forced synthetic dust', '强制合成尘埃'),
+        crossfade: localized('Forced crossfade', '强制淡入淡出'),
+      },
+      panelAlpha: localized('Panel Alpha', '面板 Alpha'),
+      panelBeta: localized('Panel Beta', '面板 Beta'),
+    },
   },
   button: {
     label: localized('Button', '按钮'),
@@ -1056,8 +1094,11 @@ export const tokenCopy = {
   motion: {
     durations: localized('Durations', '时长'),
     easings: localized('Easings', '缓动'),
+    distances: localized('Distances', '行程'),
     feedback: localized('Feedback', '反馈'),
     state: localized('State', '状态'),
     spatial: localized('Spatial', '空间'),
+    enter: localized('Enter', '进入'),
+    exit: localized('Exit', '离开'),
   },
 } as const;

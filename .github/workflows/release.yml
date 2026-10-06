@@ -104,6 +104,12 @@ jobs:
       - name: Verify workspace and release packages
         run: bun run release:check
 
+      - name: Install Chromium for visual release gates
+        run: bunx playwright install --with-deps chromium
+
+      - name: Verify visual release gates
+        run: bun run test:visual
+
       - name: Pack publishable packages
         id: pack
         uses: changesets/action/pack@v2

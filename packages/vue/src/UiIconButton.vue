@@ -7,6 +7,7 @@ import {
   iconButtonSizeClasses,
   iconButtonStretchSizeClasses,
 } from './classes';
+import { presence } from './presence';
 import { getSurfaceClass } from './surface';
 import type { ButtonSize, ButtonVariant, IconButtonProps } from './types';
 import UiLoadingIndicator from './UiLoadingIndicator.vue';
@@ -93,8 +94,10 @@ function handlePointerdown(event: PointerEvent): void {
   >
     <span class="ui-button__edge-field" aria-hidden="true" />
     <span class="ui-icon-button__content" aria-hidden="true">
-      <UiLoadingIndicator v-if="props.loading" />
-      <slot v-else />
+      <Transition name="nv" mode="out-in">
+        <UiLoadingIndicator v-if="props.loading" v-bind="presence('pop')" />
+        <slot v-else />
+      </Transition>
     </span>
   </component>
 </template>

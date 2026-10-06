@@ -5,6 +5,7 @@ export const glassVertexShader = `
   uniform vec4 u_rect;
 
   varying vec2 v_local;
+  varying vec2 v_viewport;
 
   void main() {
     vec2 position = u_rect.xy + (a_position * u_rect.zw);
@@ -12,6 +13,7 @@ export const glassVertexShader = `
     clip.y *= -1.0;
     gl_Position = vec4(clip, 0.0, 1.0);
     v_local = a_position;
+    v_viewport = position;
   }
 `;
 
@@ -36,8 +38,12 @@ export const glassFragmentShader = `
   uniform vec3 u_primary;
   uniform vec3 u_secondary;
   uniform vec3 u_tertiary;
+  uniform vec4 u_occluders[6];
+  uniform float u_occluder_radii[6];
+  uniform float u_occluder_count;
 
   varying vec2 v_local;
+  varying vec2 v_viewport;
 
   float roundedBoxSdf(vec2 point, vec2 half_size, vec4 radii) {
     vec2 signedPoint = point;
@@ -169,6 +175,27 @@ export const glassFragmentShader = `
     float lightAlphaGain = mix(1.0, 1.35, lightSurface);
     float alpha = edgeMask * u_opacity * directionalAlpha * thicknessScale * lightAlphaGain;
     alpha = clamp(alpha, 0.0, 0.34);
+
+    // The shared canvas paints above every overlay, so an edge would pierce
+    // drawers, popovers, and scrims that cover the surface. The DOM material
+    // below those overlays already supplies the correct blurred silhouette,
+    // so fade the crisp canvas edge out under each occluding rect.
+    float occlusionMask = 1.0;
+    for (int i = 0; i < 6; i++) {
+      if (float(i) >= u_occluder_count) {
+        break;
+      }
+      vec4 occluder = u_occluders[i];
+      vec2 occluderPoint = v_viewport - occluder.xy - (occluder.zw * 0.5);
+      float occluderRadius = max(u_occluder_radii[i], 0.0);
+      float occluderDistance = roundedBoxSdf(
+        occluderPoint,
+        occluder.zw * 0.5,
+        vec4(occluderRadius)
+      );
+      occlusionMask *= smoothstep(-antiAlias, 0.0, occluderDistance);
+    }
+    alpha *= occlusionMask;
 
     gl_FragColor = vec4(color, alpha);
   }

@@ -2,7 +2,7 @@
 
 React adapters for Neoverse UI.
 
-The package exposes token-backed React adapters for `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiDock`, `UiCard`, `UiTable`, `UiDisclosure`, `UiNotice`, and `UiSurface`, plus the `uiActionClassName` helper for consumers that need to style an existing routing component through `asChild` composition.
+The package exposes token-backed React adapters for `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiDock`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiTable`, `UiDisclosure`, `UiNotice`, `UiSurface`, and `UiPresence`, plus `useUiPresence` and the `uiActionClassName` helper for consumers that need to style an existing routing component through `asChild` composition.
 
 ```tsx
 import { UiAction } from '@neoverse-ui/react';
@@ -77,4 +77,16 @@ import { UiNotice } from '@neoverse-ui/react';
 
 `UiNotice` mirrors the Vue adapter with `neutral | info | success | warning | danger` variants, a `div | aside | section` root, forwarded native attributes, and an optional action region. It supplies the status surface; content semantics, icon, heading, and action behavior stay with the consumer.
 
-Consumers without their own Tailwind build can import `@neoverse-ui/react/index.css`; it forwards to the compiled `@neoverse-ui/tailwind/index.css` consumer bundle, including Tokens, Motion, Material, component selectors, and the utilities required by the adapters. No package-source utility scanning is required. Components remain server-compatible, while event handlers belong in the consumer's client boundary.
+## Presence
+
+```tsx
+import { UiPresence } from '@neoverse-ui/react';
+
+<UiPresence show={open} variant="pop" origin="top">
+  Panel content
+</UiPresence>
+```
+
+`UiPresence` retains children during the shared exit animation and unmounts when it finishes, with a token-based timeout fallback. `useUiPresence(open)` exposes `mounted`, `leaving`, and `ref` for consumer-owned markup; bind the Motion `nv-appear` / `nv-vanish` classes and preset attributes when using the hook directly. Presence hooks and interactive consumers belong in a client boundary. The presets and reduced-motion behavior are owned by `@neoverse-ui/motion`.
+
+Consumers without their own Tailwind build can import `@neoverse-ui/react/index.css`; it forwards to the compiled `@neoverse-ui/tailwind/index.css` consumer bundle, including Tokens, Motion, Material, component selectors, and the utilities required by the adapters. No package-source utility scanning is required. Static adapters support server rendering, while Presence hooks and event handlers belong in the consumer's client boundary.

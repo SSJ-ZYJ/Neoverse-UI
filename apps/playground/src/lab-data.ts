@@ -1,4 +1,4 @@
-import { motionDurations, motionEasings, motionRoles } from '@neoverse-ui/motion';
+import { motionDistances, motionDurations, motionEasings } from '@neoverse-ui/motion';
 import { cssVariables } from '@neoverse-ui/tokens';
 import { type LocalizedText, localized, tokenCopy } from './playground-content';
 
@@ -497,13 +497,8 @@ export const glassVariantLabels: Record<(typeof glassVariants)[number], Localize
 export const motionBaseGroups = [
   { label: tokenCopy.motion.durations, values: motionDurations },
   { label: tokenCopy.motion.easings, values: motionEasings },
+  { label: tokenCopy.motion.distances, values: motionDistances },
 ] as const;
-
-export const motionVariableGroups = [
-  { label: tokenCopy.motion.feedback, values: motionRoles.feedback },
-  { label: tokenCopy.motion.state, values: motionRoles.state },
-  { label: tokenCopy.motion.spatial, values: motionRoles.spatial },
-];
 
 export const focusClasses =
   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2';

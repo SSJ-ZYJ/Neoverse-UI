@@ -11,9 +11,12 @@
     --neoverse-tooltip-foreground: var(--neoverse-color-text-primary);
     --neoverse-tooltip-arrow-size: var(--neoverse-space-2);
     --neoverse-tooltip-arrow-offset: calc(var(--neoverse-tooltip-arrow-size) * -0.75);
+    /* The pointer is much smaller than the body plane, so it needs a denser
+       sample of the same Glass tint to remain visibly connected to the plate. */
+    --neoverse-tooltip-arrow-transparency: var(--neoverse-material-transparency-elevated);
     --neoverse-tooltip-arrow-background: color-mix(
       in srgb,
-      var(--neoverse-material-glass-subtle-tint) var(--neoverse-material-glass-subtle-transparency),
+      var(--neoverse-material-glass-subtle-tint) var(--neoverse-tooltip-arrow-transparency),
       transparent
     );
     --neoverse-tooltip-arrow-shadow: var(--neoverse-shadow-xs);
@@ -32,10 +35,10 @@
       var(--neoverse-tooltip-accent-tint) var(--neoverse-material-glass-subtle-transparency),
       transparent
     );
+    /* Accent depth stays diffuse. The shared Glass refraction owns the edge;
+       a hard inset highlight would read as a monochrome top border. */
     --neoverse-tooltip-accent-shadow:
       var(--neoverse-shadow-xs),
       0 8px 18px -16px color-mix(in srgb, var(--neoverse-color-accent-primary) 54%, transparent);
-    --neoverse-tooltip-accent-inner-glow: inset 0 1px 0
-      color-mix(in srgb, var(--neoverse-color-accent-secondary) 24%, transparent);
   }
 }

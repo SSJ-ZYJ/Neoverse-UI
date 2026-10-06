@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { presenceVariants } from '../../packages/motion/src/index';
 import { layoutBreakpoints } from '../../packages/tokens/src/index';
 
 const presentationViewports = [
@@ -218,6 +219,7 @@ test('design lab density grids respond to available content width', async ({ pag
     for (const [width, expectedColumns] of scenario.expected) {
       await page.setViewportSize({ width, height: 1000 });
       await page.goto(`/?lang=en#${scenario.moduleId}`, { waitUntil: 'domcontentloaded' });
+      await expect(page.locator(scenario.selector).first()).toBeVisible();
 
       const rowCounts = await page.locator(scenario.selector).evaluateAll((grids) =>
         grids.map((grid) => {
@@ -383,6 +385,57 @@ test('module toolbar keeps elevated Glass but uses the denser toolbar material t
   expect(material.transparency).not.toBe(material.elevatedTransparency);
 });
 
+test('resting Playground Glass stays outside View Transition capture layers', async ({ page }) => {
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.goto('/?theme=light&lang=zh#motion', { waitUntil: 'domcontentloaded' });
+
+  const state = await page.evaluate(() => {
+    const toolbar = document.querySelector<HTMLElement>('.playground-shell__toolbar');
+    const pageRegion = document.querySelector<HTMLElement>('[data-playground-page]');
+    const navigation = document.querySelector<HTMLElement>('.playground-shell__navigation');
+    if (toolbar === null || pageRegion === null || navigation === null) {
+      throw new Error('Missing Playground Glass transition fixtures');
+    }
+
+    const toolbarStyle = getComputedStyle(toolbar);
+    return {
+      toolbarBackdropFilter: toolbarStyle.backdropFilter,
+      toolbarViewTransitionName: toolbarStyle.viewTransitionName,
+      pageViewTransitionName: getComputedStyle(pageRegion).viewTransitionName,
+      navigationViewTransitionName: getComputedStyle(navigation).viewTransitionName,
+    };
+  });
+
+  expect(state.toolbarBackdropFilter).not.toBe('none');
+  expect(state.toolbarViewTransitionName).toBe('none');
+  expect(state.pageViewTransitionName).toBe('none');
+  expect(state.navigationViewTransitionName).toBe('none');
+
+  const activeNames = await page.evaluate(() => {
+    document.documentElement.setAttribute('data-neoverse-view-transitioning', '');
+    const toolbar = document.querySelector<HTMLElement>('.playground-shell__toolbar');
+    const pageRegion = document.querySelector<HTMLElement>('[data-playground-page]');
+    const navigation = document.querySelector<HTMLElement>('.playground-shell__navigation');
+    if (toolbar === null || pageRegion === null || navigation === null) {
+      throw new Error('Missing Playground Glass transition fixtures');
+    }
+    const names = {
+      toolbar: getComputedStyle(toolbar).viewTransitionName,
+      page: getComputedStyle(pageRegion).viewTransitionName,
+      navigation: getComputedStyle(navigation).viewTransitionName,
+    };
+    document.documentElement.removeAttribute('data-neoverse-view-transitioning');
+    return names;
+  });
+
+  expect(activeNames.toolbar).toBe('playground-toolbar');
+  // The page body is owned by the particle/crossfade choreography rather than
+  // a named shared snapshot. Only persistent Glass chrome receives a stable
+  // View Transition name while the fallback transition is active.
+  expect(activeNames.page).toBe('none');
+  expect(activeNames.navigation).toBe('playground-navigation');
+});
+
 test('normal Playground chrome keeps a translucent Glass plane and a blurred sidebar fade', async ({
   page,
 }) => {
@@ -503,8 +556,11 @@ test('light Glass hierarchy uses material density instead of bright nested rims'
   });
 
   expect(metrics.toolbarAlpha).toBeGreaterThan(metrics.nestedAlpha);
-  expect(metrics.toolbarEdge).toBeLessThan(0.3);
-  expect(metrics.nestedEdge).toBeLessThan(0.25);
+  // Large Glass planes use the restored refractive edge field. Hierarchy is
+  // expressed by density and relative edge strength rather than by forcing
+  // every surface below one historical absolute opacity threshold.
+  expect(metrics.toolbarEdge).toBeGreaterThanOrEqual(metrics.nestedEdge);
+  expect(metrics.nestedEdge).toBeGreaterThan(metrics.buttonEdge);
   expect(metrics.buttonEdge).toBeLessThan(0.2);
   expect(metrics.buttonBorderAlpha).toBeLessThan(0.13);
   expect(metrics.buttonInsetLayers).toBeLessThanOrEqual(1);
@@ -828,7 +884,8 @@ test('reading composition consumes the prose foundation with an independent read
   expect(metrics.hasReadingRole).toBe(true);
   expect(metrics.maxWidth).not.toBe('none');
   expect(metrics.blockquoteBackground).not.toBe('rgba(0, 0, 0, 0)');
-  expect(metrics.blockquoteBorderWidth).not.toBe('0px');
+  // Prose callouts use material fill/shadow instead of a single-color rule.
+  expect(metrics.blockquoteBorderWidth).toBe('0px');
   expect(metrics.codeFontFamily).not.toBe(metrics.bodyFontFamily);
   expect(metrics.tableCellPaddingInline).not.toBe('0px');
   expect(metrics.tableCaptionColor).not.toBe('rgba(0, 0, 0, 0)');
@@ -838,12 +895,16 @@ test('reading composition consumes the prose foundation with an independent read
   expect(metrics.definitionDescriptionMargin).not.toBe('0px');
   expect(metrics.nestedListMarginBlock).not.toBe('0px');
   expect(metrics.abbreviationDecorationStyle).toBe('dotted');
-  expect(metrics.detailsBorderStyle).toBe('none');
+  expect(metrics.detailsBorderStyle).toBe('solid');
   expect(metrics.detailsBoxShadow).not.toBe('none');
-  expect(metrics.detailsBackgroundImage).not.toBe('none');
+  expect(metrics.detailsBackgroundImage).toBe('none');
 
   await expect(page.locator('[data-reading-table]')).toHaveClass(/ui-table/);
   await expect(page.locator('[data-reading-disclosure]')).toHaveClass(/ui-disclosure/);
+  await expect(page.locator('[data-reading-disclosure]')).toHaveClass(/material-glass-elevated/);
+  await expect(page.locator('[data-reading-prose] .playground-data-table-surface')).toHaveClass(
+    /material-glass-elevated/,
+  );
 
   const summary = page.locator('[data-reading-disclosure] > .ui-disclosure__summary');
   await summary.focus();
@@ -862,7 +923,7 @@ test('reading composition consumes the prose foundation with an independent read
 });
 
 for (const theme of ['light', 'dark'] as const) {
-  test(`standalone data display components keep native semantics and inset material / ${theme}`, async ({
+  test(`standalone data display components keep native semantics and shared card material / ${theme}`, async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -886,8 +947,26 @@ for (const theme of ['light', 'dark'] as const) {
     });
     expect(tableMaterial.borderWidth).toBe('0px');
     expect(tableMaterial.backgroundImage).toBe('none');
-    expect(tableMaterial.boxShadow).not.toBe('none');
+    expect(tableMaterial.boxShadow).toBe('none');
     expect(tableMaterial.backdropFilter).toBe('none');
+    expect(
+      await table.locator('..').evaluate((element) => getComputedStyle(element).borderRadius),
+    ).toBe('0px');
+
+    const tableSurface = page.locator('#data-display-table .playground-data-table-surface');
+    await expect(tableSurface).toHaveClass(/material-glass-elevated/);
+    const cardMaterial = await tableSurface.evaluate((element) => {
+      const style = getComputedStyle(element);
+      const edge = getComputedStyle(element, '::before');
+      return {
+        boxShadow: style.boxShadow,
+        backdropFilter: style.backdropFilter,
+        edgeBackgroundImage: edge.backgroundImage,
+      };
+    });
+    expect(cardMaterial.boxShadow).not.toBe('none');
+    expect(cardMaterial.backdropFilter).not.toBe('none');
+    expect(cardMaterial.edgeBackgroundImage).not.toBe('none');
 
     const tableBackdrop = page.locator('#data-display-table .playground-material-backdrop--inset');
     const tableBackdropMaterial = await tableBackdrop.evaluate((element) => {
@@ -928,9 +1007,9 @@ for (const theme of ['light', 'dark'] as const) {
           backdropFilter: style.backdropFilter,
         };
       });
-    expect(cellMaterial.backgroundImage).not.toBe('none');
-    expect(cellMaterial.boxShadow).not.toBe('none');
-    expect(cellMaterial.backdropFilter).not.toBe('none');
+    expect(cellMaterial.backgroundImage).toBe('none');
+    expect(cellMaterial.boxShadow).toBe('none');
+    expect(cellMaterial.backdropFilter).toBe('none');
 
     const headerMaterial = await table
       .locator('thead th')
@@ -947,9 +1026,19 @@ for (const theme of ['light', 'dark'] as const) {
       .locator('tbody td')
       .first()
       .evaluate((element) => getComputedStyle(element).backgroundColor);
+    expect(bodyBackgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(
+      await table
+        .locator('thead th')
+        .first()
+        .evaluate((element) => {
+          const style = getComputedStyle(element);
+          return [style.borderBlockStartWidth, style.borderInlineStartWidth];
+        }),
+    ).toEqual(['1px', '1px']);
     expect(headerMaterial.backgroundImage).toBe(cellMaterial.backgroundImage);
     expect(headerMaterial.backgroundColor).not.toBe(bodyBackgroundColor);
-    expect(headerMaterial.boxShadow).not.toBe(cellMaterial.boxShadow);
+    expect(headerMaterial.boxShadow).toBe('none');
 
     await page.goto(`/?theme=${theme}&lang=en#data-display-disclosure`, {
       waitUntil: 'domcontentloaded',
@@ -958,19 +1047,21 @@ for (const theme of ['light', 'dark'] as const) {
     const open = page.locator('#data-display-disclosure [data-data-display-disclosure="open"]');
     await expect(closed).not.toHaveAttribute('open', '');
     await expect(open).toHaveAttribute('open', '');
+    await expect(closed).toHaveClass(/material-glass-elevated/);
+    await expect(open).toHaveClass(/material-glass-elevated/);
     await expect(closed.locator(':scope > summary')).toHaveClass(/ui-disclosure__summary/);
 
     const disclosureMaterial = await closed.evaluate((element) => {
       const style = getComputedStyle(element);
       return {
-        borderStyle: style.borderStyle,
         backgroundImage: style.backgroundImage,
         boxShadow: style.boxShadow,
         backdropFilter: style.backdropFilter,
+        edgeBackgroundImage: getComputedStyle(element, '::before').backgroundImage,
       };
     });
-    expect(disclosureMaterial.borderStyle).toBe('none');
-    expect(disclosureMaterial.backgroundImage).not.toBe('none');
+    expect(disclosureMaterial.backgroundImage).toBe('none');
+    expect(disclosureMaterial.edgeBackgroundImage).not.toBe('none');
     expect(disclosureMaterial.boxShadow).not.toBe('none');
     expect(disclosureMaterial.backdropFilter).not.toBe('none');
 
@@ -1001,18 +1092,16 @@ for (const theme of ['light', 'dark'] as const) {
           backgroundColor: style.backgroundColor,
         };
       });
-      const closedBackgroundHover = await closed.evaluate(
-        (element) => getComputedStyle(element).backgroundColor,
-      );
-      const closedShadowHover = await closed.evaluate(
-        (element) => getComputedStyle(element).boxShadow,
-      );
       const indicatorHover = await closedSummary.evaluate(
         (element) => getComputedStyle(element, '::after').color,
       );
       expect(summaryHover).toEqual(summaryRest);
-      expect(closedBackgroundHover).not.toBe(closedBackgroundRest);
-      expect(closedShadowHover).not.toBe(closedShadowRest);
+      await expect
+        .poll(() => closed.evaluate((element) => getComputedStyle(element).backgroundColor))
+        .not.toBe(closedBackgroundRest);
+      await expect
+        .poll(() => closed.evaluate((element) => getComputedStyle(element).boxShadow))
+        .not.toBe(closedShadowRest);
       expect(indicatorHover).toBe(indicatorRest);
     }
 
@@ -1090,11 +1179,15 @@ for (const theme of ['light', 'dark'] as const) {
     const tooltip = page.locator(
       '#status-feedback-tooltip [data-qa-context="gradient"] .ui-tooltip-surface--accent',
     );
+    const neutralTooltip = page.locator(
+      '#status-feedback-tooltip [data-qa-context="gradient"] .ui-tooltip-surface--neutral',
+    );
 
     await expect(badge).toBeVisible();
     await expect(statusDot).toBeVisible();
     await expect(notice).toBeVisible();
     await expect(tooltip).toBeVisible();
+    await expect(neutralTooltip).toBeVisible();
 
     const badgeStyle = await badge.evaluate((element) => {
       const style = getComputedStyle(element);
@@ -1137,15 +1230,57 @@ for (const theme of ['light', 'dark'] as const) {
 
     const tooltipStyle = await tooltip.evaluate((element) => {
       const style = getComputedStyle(element);
+      const edge = getComputedStyle(element, '::before');
+      const arrow = getComputedStyle(element, '::after');
       return {
         borderColor: style.borderTopColor,
+        borderWidth: style.borderTopWidth,
         boxShadow: style.boxShadow,
         backdropFilter: style.backdropFilter,
+        edgeBackgroundImage: edge.backgroundImage,
+        edgeOpacity: Number(edge.opacity),
+        arrowBorderWidth: arrow.borderTopWidth,
+        arrowBoxShadow: arrow.boxShadow,
       };
     });
     expect(tooltipStyle.borderColor).toBe('rgba(0, 0, 0, 0)');
+    expect(tooltipStyle.borderWidth).toBe('0px');
     expect(tooltipStyle.boxShadow).not.toBe('none');
+    expect(
+      tooltipStyle.boxShadow.includes('inset'),
+      'accent Tooltip must not render a continuous inset top stroke',
+    ).toBe(false);
+    expect(tooltipStyle.edgeBackgroundImage).not.toBe('none');
+    expect(tooltipStyle.edgeOpacity).toBeGreaterThan(0);
+    expect(tooltipStyle.arrowBorderWidth).toBe('0px');
+    expect(tooltipStyle.arrowBoxShadow.includes('inset')).toBe(false);
     expect(tooltipStyle.backdropFilter).not.toBe('none');
+
+    const neutralArrowContrast = await neutralTooltip.evaluate((element) => {
+      const body = getComputedStyle(element).backgroundColor;
+      const arrow = getComputedStyle(element, '::after').backgroundColor;
+      const alphaOf = (value: string): number => {
+        const modern = value.match(/\/\s*([\d.]+)\)/);
+        if (modern) return Number(modern[1]);
+        const legacy = value.match(/rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)/);
+        if (legacy) return Number(legacy[1]);
+        return 1;
+      };
+      return {
+        body,
+        arrow,
+        bodyAlpha: alphaOf(body),
+        arrowAlpha: alphaOf(arrow),
+      };
+    });
+    expect(
+      neutralArrowContrast.arrow,
+      'neutral Tooltip pointer must carry a visible fill',
+    ).not.toBe('rgba(0, 0, 0, 0)');
+    expect(
+      neutralArrowContrast.arrowAlpha,
+      'small neutral Tooltip pointer needs denser fill than the broad body plane',
+    ).toBeGreaterThan(neutralArrowContrast.bodyAlpha);
 
     expect(await statusDot.evaluate((element) => getComputedStyle(element).boxShadow)).not.toBe(
       'none',
@@ -1246,6 +1381,31 @@ test('design QA matrices compare canonical components across shared backdrop con
     const tooltipMatrix = page.locator('#status-feedback-tooltip [data-qa-matrix]');
     await expect(tooltipMatrix.locator('[data-qa-context]')).toHaveCount(3);
     await expect(tooltipMatrix.locator('[data-qa-context] .ui-tooltip-surface')).toHaveCount(6);
+
+    const tooltipPointerGeometry = await tooltipMatrix
+      .locator('[data-qa-context="gradient"] .ui-tooltip-surface')
+      .evaluateAll((elements) =>
+        elements.map((element) => {
+          const arrow = getComputedStyle(element, '::after');
+          const arrowBottom = Number.parseFloat(arrow.bottom);
+          return {
+            arrowBottom,
+            arrowLeftToken: getComputedStyle(element)
+              .getPropertyValue('--ui-tooltip-arrow-left')
+              .trim(),
+            arrowTransform: arrow.transform,
+          };
+        }),
+      );
+    for (const geometry of tooltipPointerGeometry) {
+      expect(geometry.arrowBottom, 'Tooltip pointer must sit below the surface body').toBeLessThan(
+        0,
+      );
+      expect(geometry.arrowLeftToken, 'Tooltip pointer anchor stays centered').toBe('50%');
+      expect(geometry.arrowTransform, 'Tooltip pointer compensates for its own width').not.toBe(
+        'none',
+      );
+    }
   }
 });
 
@@ -1719,56 +1879,70 @@ test('React runtime fixture renders and updates the public adapter set', async (
   await expect(button).toHaveClass(/ui-button/);
 });
 
-test('semantic motion roles drive live feedback, state, and spatial transitions', async ({
+test('motion playground exercises semantic roles and the current presence contract', async ({
   page,
 }) => {
   await page.goto('/?lang=en#motion', { waitUntil: 'domcontentloaded' });
 
-  const feedback = page.locator('[data-motion-semantic="feedback"]');
-  const state = page.locator('[data-motion-semantic="state"]');
-  const spatial = page.locator('[data-motion-semantic="spatial"]');
-  const before = await Promise.all(
-    [feedback, state, spatial].map((locator) =>
-      locator.evaluate((element) => {
-        const style = getComputedStyle(element);
-        return {
-          translate: style.translate,
-          opacity: style.opacity,
-          backgroundColor: style.backgroundColor,
-          duration: style.transitionDuration,
-        };
-      }),
-    ),
-  );
-
-  await page.locator('[data-motion-semantic-toggle]').click();
-  // Chromium may defer CSS transitions in offscreen specimens. Give each
-  // sample one visible frame before comparing its resulting computed style.
-  for (const specimen of [feedback, state, spatial]) {
-    await specimen.scrollIntoViewIfNeeded();
+  const roleDurations = await page.evaluate(() => {
+    const style = getComputedStyle(document.documentElement);
+    return {
+      feedback: style.getPropertyValue('--neoverse-motion-feedback-duration').trim(),
+      state: style.getPropertyValue('--neoverse-motion-state-duration').trim(),
+      spatial: style.getPropertyValue('--neoverse-motion-spatial-duration').trim(),
+      enter: style.getPropertyValue('--neoverse-motion-enter-duration').trim(),
+      exit: style.getPropertyValue('--neoverse-motion-exit-duration').trim(),
+    };
+  });
+  for (const duration of Object.values(roleDurations)) {
+    expect(duration).not.toBe('');
+    expect(duration).not.toBe('0ms');
+    expect(duration).not.toBe('0s');
   }
-  await page.waitForTimeout(450);
 
-  const after = await Promise.all(
-    [feedback, state, spatial].map((locator) =>
-      locator.evaluate((element) => {
-        const style = getComputedStyle(element);
-        return {
-          translate: style.translate,
-          opacity: style.opacity,
-          backgroundColor: style.backgroundColor,
-          duration: style.transitionDuration,
-        };
-      }),
+  const specimens = page.locator('[data-motion-presence-specimen]');
+  await expect(specimens).toHaveCount(presenceVariants.length);
+  const renderedVariants = await specimens.evaluateAll((elements) =>
+    elements.map((element) => element.getAttribute('data-neoverse-motion')),
+  );
+  expect(renderedVariants).toEqual([...presenceVariants]);
+
+  const vuePresence = page.locator('[data-motion-presence-adapter="vue"]');
+  await expect(vuePresence).toHaveAttribute('data-neoverse-motion', 'veil');
+  await expect(vuePresence).toHaveClass(/nv-appear/);
+
+  const staggeredItems = page.locator('[data-motion-presence-group-item]');
+  await expect(staggeredItems).toHaveCount(5);
+  const staggerDelays = await staggeredItems.evaluateAll((elements) =>
+    elements.map((element) =>
+      (element as HTMLElement).style.getPropertyValue('--neoverse-motion-enter-delay'),
     ),
   );
+  expect(staggerDelays[0]).toBe('');
+  expect(staggerDelays.slice(1)).toEqual(['40ms', '80ms', '120ms', '160ms']);
 
-  expect(before[0]?.duration).not.toBe('0s');
-  expect(before[1]?.duration).not.toBe('0s');
-  expect(before[2]?.duration).not.toBe('0s');
-  expect(after[0]?.opacity).not.toBe(before[0]?.opacity);
-  expect(after[1]?.backgroundColor).not.toBe(before[1]?.backgroundColor);
-  expect(after[2]?.opacity).not.toBe(before[2]?.opacity);
+  const toggle = page.locator('[data-motion-presence-toggle]');
+  await toggle.click();
+  await expect(specimens).toHaveCount(0);
+  await expect(vuePresence).toHaveCount(0);
+
+  await toggle.click();
+  await expect(specimens).toHaveCount(presenceVariants.length);
+  await expect(page.locator('[data-motion-presence-adapter="vue"]')).toBeVisible();
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const reducedDurations = await page.evaluate(() => {
+    const style = getComputedStyle(document.documentElement);
+    return {
+      feedback: style.getPropertyValue('--neoverse-motion-feedback-duration').trim(),
+      state: style.getPropertyValue('--neoverse-motion-state-duration').trim(),
+      spatial: style.getPropertyValue('--neoverse-motion-spatial-duration').trim(),
+      enter: style.getPropertyValue('--neoverse-motion-enter-duration').trim(),
+      exit: style.getPropertyValue('--neoverse-motion-exit-duration').trim(),
+      particle: style.getPropertyValue('--neoverse-motion-particle-duration').trim(),
+    };
+  });
+  expect(new Set(Object.values(reducedDurations))).toEqual(new Set(['1ms']));
 });
 
 test('floating dock keeps balanced geometry across desktop presentation scales', async ({
@@ -2076,11 +2250,16 @@ for (const theme of ['light', 'dark'] as const) {
               throw new Error('Scale example is missing a control');
             }
             const parent = surface.getBoundingClientRect();
-            const child = button.getBoundingClientRect();
             const scale = parent.width / surface.offsetWidth;
-            const outerRadius = Number.parseFloat(getComputedStyle(surface).borderTopLeftRadius);
             const innerRadius = Number.parseFloat(getComputedStyle(button).borderTopLeftRadius);
-            const expectedInnerRadius = outerRadius - (child.top - parent.top) / scale;
+            const radiusProbe = document.createElement('span');
+            radiusProbe.style.position = 'absolute';
+            radiusProbe.style.borderRadius = 'var(--neoverse-control-surface-inner-radius)';
+            surface.append(radiusProbe);
+            const expectedInnerRadius = Number.parseFloat(
+              getComputedStyle(radiusProbe).borderTopLeftRadius,
+            );
+            radiusProbe.remove();
             return { scale, innerRadius, expectedInnerRadius };
           }),
       );
@@ -2348,7 +2527,7 @@ test('shadow token specimens always place a full-width preview above their text'
 });
 
 for (const theme of ['light', 'dark'] as const) {
-  test(`reading composition keeps a single inset-glass table without solid rules / ${theme}`, async ({
+  test(`reading composition keeps prose on the shared Glass material without solid rules / ${theme}`, async ({
     page,
   }) => {
     await page.goto(`/?theme=${theme}&lang=en#composition-reading`, {
@@ -2356,9 +2535,70 @@ for (const theme of ['light', 'dark'] as const) {
     });
     const tableRegion = page.locator('[data-reading-prose] [data-ui-table-region]');
     await expect(tableRegion).not.toHaveAttribute('data-surface');
-    await expect(page.locator('[data-reading-composition] article')).not.toHaveAttribute(
-      'data-surface',
+    const tableSurface = page.locator('[data-reading-prose] .playground-data-table-surface');
+    await expect(tableSurface).toHaveAttribute('data-surface', 'glass-elevated');
+    const article = page.locator('[data-reading-composition] article');
+    await expect(article).toHaveAttribute('data-surface', 'glass-elevated');
+    const proseMaterial = await article.evaluate((element, activeTheme) => {
+      const quote = element.querySelector('blockquote');
+      const inlineCode = element.querySelector('p code');
+      const prose = element.querySelector('[data-reading-prose]');
+      if (quote === null || inlineCode === null || prose === null)
+        throw new Error('Missing prose material samples');
+      const articleStyle = getComputedStyle(element);
+      const quoteStyle = getComputedStyle(quote);
+      const inlineCodeStyle = getComputedStyle(inlineCode);
+      const inlineCodeProbe = document.createElement('span');
+      inlineCodeProbe.style.position = 'fixed';
+      inlineCodeProbe.style.insetInlineStart = '-9999px';
+      inlineCodeProbe.style.background =
+        activeTheme === 'light'
+          ? 'var(--neoverse-surface-inset-hover-background)'
+          : 'var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-alternate-fill)';
+      element.append(inlineCodeProbe);
+      const inlineCodeProbeStyle = getComputedStyle(inlineCodeProbe);
+      const expectedInlineCodeBackground = inlineCodeProbeStyle.backgroundImage;
+      const expectedInlineCodeBackgroundColor = inlineCodeProbeStyle.backgroundColor;
+      inlineCodeProbe.remove();
+      return {
+        articleBackground: articleStyle.backgroundImage,
+        articleBackgroundColor: articleStyle.backgroundColor,
+        articleFilter: articleStyle.backdropFilter,
+        proseBackground: getComputedStyle(prose).backgroundImage,
+        proseFilter: getComputedStyle(prose).backdropFilter,
+        articleShadow: articleStyle.boxShadow,
+        quoteBackground: quoteStyle.backgroundImage,
+        quoteBackgroundColor: quoteStyle.backgroundColor,
+        quoteShadow: quoteStyle.boxShadow,
+        quoteBorder: quoteStyle.borderTopWidth,
+        quoteFilter: quoteStyle.backdropFilter,
+        inlineCodeBackground: inlineCodeStyle.backgroundImage,
+        inlineCodeBackgroundColor: inlineCodeStyle.backgroundColor,
+        inlineCodeShadow: inlineCodeStyle.boxShadow,
+        inlineCodeBorder: inlineCodeStyle.borderTopWidth,
+        expectedInlineCodeBackground,
+        expectedInlineCodeBackgroundColor,
+      };
+    }, theme);
+    // UiSurface owns the sampled Glass color plane; prose owns typography and
+    // does not add another background or backdrop blur to that plane.
+    expect(proseMaterial.articleBackground).toBe('none');
+    expect(proseMaterial.articleBackgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(proseMaterial.articleFilter).toContain('blur(');
+    expect(proseMaterial.proseBackground).toBe('none');
+    expect(proseMaterial.proseFilter).toBe('none');
+    expect(proseMaterial.articleShadow).not.toBe('none');
+    expect(proseMaterial.quoteBackground).not.toBe('none');
+    expect(proseMaterial.quoteBorder).toBe('0px');
+    expect(proseMaterial.quoteFilter).not.toBe('none');
+    expect(proseMaterial.inlineCodeBackground).not.toBe('none');
+    expect(proseMaterial.inlineCodeBorder).toBe('0px');
+    expect(proseMaterial.inlineCodeBackground).toBe(proseMaterial.expectedInlineCodeBackground);
+    expect(proseMaterial.inlineCodeBackgroundColor).toBe(
+      proseMaterial.expectedInlineCodeBackgroundColor,
     );
+    expect(proseMaterial.quoteBackgroundColor).not.toBe(proseMaterial.inlineCodeBackgroundColor);
+    expect(proseMaterial.quoteShadow).not.toBe(proseMaterial.inlineCodeShadow);
     const metrics = await tableRegion.evaluate((element) => {
       const table = element.querySelector('table');
       const cell = element.querySelector('tbody td');
@@ -2375,10 +2615,14 @@ for (const theme of ['light', 'dark'] as const) {
         throw new Error('Missing reading table');
       }
       const tableStyle = getComputedStyle(table);
+      const surface = element.closest<HTMLElement>('.playground-data-table-surface');
+      if (surface === null) throw new Error('Missing reading table surface');
+      const surfaceStyle = getComputedStyle(surface);
       const zebraRowStyle = getComputedStyle(zebraRow);
       const zebraFirstCellStyle = getComputedStyle(zebraFirstCell);
       const zebraLastCellStyle = getComputedStyle(zebraLastCell);
       return {
+        surfaceFilter: surfaceStyle.backdropFilter,
         filter: tableStyle.backdropFilter,
         background: tableStyle.backgroundImage,
         border: tableStyle.borderTopWidth,
@@ -2391,10 +2635,11 @@ for (const theme of ['light', 'dark'] as const) {
           document.documentElement.scrollWidth - document.documentElement.clientWidth,
       };
     });
-    expect(metrics.filter).not.toBe('none');
-    expect(metrics.background).not.toBe('none');
+    expect(metrics.surfaceFilter).not.toBe('none');
+    expect(metrics.filter).toBe('none');
+    expect(metrics.background).toBe('none');
     expect(metrics.border).toBe('0px');
-    expect(metrics.cellBorder).toBe('0px');
+    expect(metrics.cellBorder).not.toBe('0px');
     expect(metrics.zebraRowBackground).toBe('rgba(0, 0, 0, 0)');
     expect(metrics.zebraCellBackground).not.toBe('rgba(0, 0, 0, 0)');
     expect(metrics.bottomStartRadius).not.toBe('0px');

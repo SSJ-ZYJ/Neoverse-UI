@@ -163,6 +163,8 @@ test('keeps the foundation modules represented in the specimen catalogue', () =>
     ['foundation-prose', 'typography'],
     ['foundation-layout-shape', 'layout-shape'],
     ['foundation-motion', 'motion'],
+    ['foundation-motion-presence', 'motion'],
+    ['foundation-motion-page', 'motion'],
   ]);
 });
 

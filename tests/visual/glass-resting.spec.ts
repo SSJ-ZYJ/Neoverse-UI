@@ -49,51 +49,59 @@ test('all Glass specimens render their own material at rest, after hover and in 
   }
 });
 
-test('UiCard adapts the Glass edge without changing the established light Glass hairline', async ({
+test('UiCard shares the Glass hairline and clips only its CSS refraction band', async ({
   page,
 }) => {
-  await page.goto('/?theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
-  const elevated = page.locator('[data-glass-variant="elevated"]');
-  const elevatedBorder = await elevated.evaluate((element) => {
-    const style = getComputedStyle(element);
-    const edge = getComputedStyle(element, '::before');
-    return {
-      width: Number.parseFloat(style.borderTopWidth),
-      color: style.borderTopColor,
-      edgePadding: Number.parseFloat(edge.paddingTop),
-    };
-  });
-  expect(elevatedBorder.color).toBe('rgba(0, 0, 0, 0)');
-  expect(
-    elevatedBorder.width,
-    'light elevated Glass keeps its established hairline',
-  ).toBeGreaterThan(0);
-  expect(elevatedBorder.edgePadding, 'Card edge clipping must not affect Glass itself').toBe(0);
+  for (const theme of ['light', 'dark'] as const) {
+    await page.goto(`/?theme=${theme}&lang=en#materials`, { waitUntil: 'domcontentloaded' });
+    const elevated = page.locator('[data-glass-variant="elevated"]');
+    const elevatedBorder = await elevated.evaluate((element) => {
+      const style = getComputedStyle(element);
+      const edge = getComputedStyle(element, '::before');
+      return {
+        width: Number.parseFloat(style.borderTopWidth),
+        color: style.borderTopColor,
+        edgePadding: Number.parseFloat(edge.paddingTop),
+      };
+    });
+    expect(elevatedBorder.edgePadding, 'Card edge clipping must not affect Glass itself').toBe(0);
 
-  await page.goto('/?theme=light&lang=en#card', { waitUntil: 'domcontentloaded' });
-  const cardEdge = await page.locator('[data-card-default]').evaluate((element) => {
-    const style = getComputedStyle(element);
-    const edge = getComputedStyle(element, '::before');
-    return {
-      width: Number.parseFloat(style.borderTopWidth),
-      color: style.borderTopColor,
-      edgePadding: Number.parseFloat(edge.paddingTop),
-      maskComposite: edge.maskComposite,
-      webkitMaskComposite: (edge as CSSStyleDeclaration & { webkitMaskComposite?: string })
-        .webkitMaskComposite,
-    };
-  });
-  expect(cardEdge.color).toBe('rgba(0, 0, 0, 0)');
-  expect(cardEdge.width, 'UiCard removes only its own geometric hairline').toBe(0);
-  expect(cardEdge.edgePadding, 'UiCard keeps a token-sized refractive edge band').toBeGreaterThan(
-    0,
+    await page.goto(`/?theme=${theme}&lang=en#card`, { waitUntil: 'domcontentloaded' });
+    const cardEdge = await page.locator('[data-card-default]').evaluate((element) => {
+      const style = getComputedStyle(element);
+      const edge = getComputedStyle(element, '::before');
+      return {
+        width: Number.parseFloat(style.borderTopWidth),
+        color: style.borderTopColor,
+        edgePadding: Number.parseFloat(edge.paddingTop),
+        maskComposite: edge.maskComposite,
+        webkitMaskComposite: (edge as CSSStyleDeclaration & { webkitMaskComposite?: string })
+          .webkitMaskComposite,
+      };
+    });
+    expect(cardEdge.color).toBe(elevatedBorder.color);
+    expect(
+      cardEdge.width,
+      `${theme}: UiCard keeps the shared Glass hairline so its refractive edge matches Glass`,
+    ).toBe(elevatedBorder.width);
+    expect(cardEdge.edgePadding, 'UiCard keeps a token-sized refractive edge band').toBeGreaterThan(
+      0,
+    );
+    expect(
+      [cardEdge.maskComposite, cardEdge.webkitMaskComposite].some((value) =>
+        value?.includes('exclude'),
+      ),
+      'UiCard clips the shared refraction field to its edge band',
+    ).toBe(true);
+  }
+
+  await page.goto('/?theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
+  const lightHairline = await page
+    .locator('[data-glass-variant="elevated"]')
+    .evaluate((element) => getComputedStyle(element).borderTopColor);
+  expect(lightHairline, 'light elevated Glass keeps its established transparent hairline').toBe(
+    'rgba(0, 0, 0, 0)',
   );
-  expect(
-    [cardEdge.maskComposite, cardEdge.webkitMaskComposite].some((value) =>
-      value?.includes('exclude'),
-    ),
-    'UiCard clips the shared refraction field to its edge band',
-  ).toBe(true);
 });
 
 test('UiCard reuses the glass-elevated CSS refraction field without a card-specific white edge', async ({

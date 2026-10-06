@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiDisclosure, UiTable } from '@neoverse-ui/vue';
+import { UiDisclosure, UiSurface, UiTable } from '@neoverse-ui/vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, localized } from '../playground-content';
@@ -53,26 +53,28 @@ const copy = {
       :description="localize(copy.table.description, props.locale)"
     >
       <MaterialBackdrop edge="inset">
-        <UiTable
-          :caption="localize(copy.table.caption, props.locale)"
-          :aria-label="localize(copy.table.caption, props.locale)"
-          data-data-display-table
-        >
-          <thead>
-            <tr>
-              <th v-for="column in copy.table.columns" :key="localize(column, props.locale)">
-                {{ localize(column, props.locale) }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in copy.table.rows" :key="row[0]">
-              <td>{{ row[0] }}</td>
-              <td>{{ row[1] }}</td>
-              <td>{{ localize(row[2], props.locale) }}</td>
-            </tr>
-          </tbody>
-        </UiTable>
+        <UiSurface surface="glass-elevated" class="playground-data-table-surface rounded-card p-4">
+          <UiTable
+            :caption="localize(copy.table.caption, props.locale)"
+            :aria-label="localize(copy.table.caption, props.locale)"
+            data-data-display-table
+          >
+            <thead>
+              <tr>
+                <th v-for="column in copy.table.columns" :key="localize(column, props.locale)">
+                  {{ localize(column, props.locale) }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in copy.table.rows" :key="row[0]">
+                <td>{{ row[0] }}</td>
+                <td>{{ row[1] }}</td>
+                <td>{{ localize(row[2], props.locale) }}</td>
+              </tr>
+            </tbody>
+          </UiTable>
+        </UiSurface>
       </MaterialBackdrop>
     </LabSpecimenSection>
 
@@ -84,6 +86,9 @@ const copy = {
       <MaterialBackdrop edge="inset">
         <div class="grid items-start gap-3 md:grid-cols-2">
           <UiDisclosure
+            class="material-glass-elevated playground-data-disclosure"
+            data-surface="glass-elevated"
+            data-neoverse-surface-overflow="visible"
             :summary="localize(copy.disclosure.closed, props.locale)"
             data-data-display-disclosure="closed"
           >
@@ -92,6 +97,9 @@ const copy = {
             </p>
           </UiDisclosure>
           <UiDisclosure
+            class="material-glass-elevated playground-data-disclosure"
+            data-surface="glass-elevated"
+            data-neoverse-surface-overflow="visible"
             :summary="localize(copy.disclosure.open, props.locale)"
             open
             data-data-display-disclosure="open"

@@ -1,0 +1,38 @@
+@layer neoverse.tokens {
+  :root {
+    --neoverse-prose-foreground: var(--neoverse-color-text-secondary);
+    --neoverse-prose-heading-foreground: var(--neoverse-color-text-primary);
+    --neoverse-prose-muted-foreground: var(--neoverse-color-text-muted);
+    --neoverse-prose-strong-foreground: var(--neoverse-color-text-primary);
+    --neoverse-prose-link-foreground: var(--neoverse-color-text-primary);
+    --neoverse-prose-link-hover-foreground: var(--neoverse-color-accent-primary);
+    --neoverse-prose-link-decoration: var(--neoverse-color-accent-soft);
+    --neoverse-prose-link-hover-decoration: var(--neoverse-color-accent-primary);
+    --neoverse-prose-marker-foreground: var(--neoverse-color-text-muted);
+
+    --neoverse-prose-quote-foreground: var(--neoverse-color-text-primary);
+    --neoverse-prose-quote-background: var(--neoverse-surface-inset-strong-background);
+    --neoverse-prose-quote-shadow:
+      var(--neoverse-surface-inset-edge-active), var(--neoverse-surface-inset-active-highlight),
+      var(--neoverse-surface-inset-bloom-rest), var(--neoverse-shadow-inset);
+    --neoverse-prose-quote-filter: var(--neoverse-surface-inset-filter);
+
+    --neoverse-prose-inline-code-foreground: var(--neoverse-color-text-primary);
+    --neoverse-prose-inline-code-background:
+      var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-alternate-fill);
+    --neoverse-prose-inline-code-shadow:
+      var(--neoverse-surface-inset-edge-active), var(--neoverse-surface-inset-active-highlight);
+
+    --neoverse-prose-code-block-foreground: var(--neoverse-color-text-primary);
+    --neoverse-prose-code-block-background: var(--neoverse-surface-inset-rest-background);
+    --neoverse-prose-code-block-shadow:
+      var(--neoverse-surface-inset-edge-rest), var(--neoverse-shadow-inset);
+    --neoverse-prose-code-block-filter: var(--neoverse-surface-inset-filter);
+
+    --neoverse-prose-rule: var(--neoverse-surface-inset-grid-line);
+    --neoverse-prose-media-background: var(--neoverse-color-surface-subtle);
+    --neoverse-prose-kbd-background: var(--neoverse-surface-inset-strong-background);
+    --neoverse-prose-kbd-shadow: var(--neoverse-shadow-control);
+    --neoverse-prose-mark-background: var(--neoverse-color-accent-soft);
+  }
+}

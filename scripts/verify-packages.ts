@@ -249,12 +249,15 @@ try {
     join(consumerDir, 'smoke.ts'),
     `import { existsSync } from 'node:fs';\n` +
       `import { fileURLToPath } from 'node:url';\n` +
-      `import { UiAction as ReactUiAction } from '@neoverse-ui/react';\n` +
-      `import { UiButton, UiNotice, UiTooltipSurface } from '@neoverse-ui/vue';\n` +
+      `import { UiAction as ReactUiAction, UiPresence as ReactUiPresence, useUiPresence } from '@neoverse-ui/react';\n` +
+      `import { UiButton, UiNotice, UiTooltipSurface, UiPresence as VueUiPresence, presence, staggerStyle } from '@neoverse-ui/vue';\n` +
       `import { cssVariables } from '@neoverse-ui/tokens';\n` +
       `import { createGlassRenderer } from '@neoverse-ui/glass-runtime';\n` +
+      `import { startViewTransition, createParticleDissolve, particleDissolvePresets, presenceVariants } from '@neoverse-ui/motion';\n` +
       `if (!ReactUiAction || !UiButton || !UiNotice || !UiTooltipSurface || !cssVariables || !createGlassRenderer) throw new Error('public JS exports are incomplete');\n` +
-      `for (const specifier of ['@neoverse-ui/tokens/css', '@neoverse-ui/motion/css', '@neoverse-ui/giscus-theme/light.css', '@neoverse-ui/giscus-theme/dark.css', '@neoverse-ui/tailwind/index.css', '@neoverse-ui/tailwind/theme.css', '@neoverse-ui/tailwind/components.css', '@neoverse-ui/vue/index.css', '@neoverse-ui/react/index.css']) {\n` +
+      `if (!ReactUiPresence || !VueUiPresence || typeof useUiPresence !== 'function' || typeof startViewTransition !== 'function' || typeof createParticleDissolve !== 'function') throw new Error('public Motion/Presence exports are incomplete');\n` +
+      `if (presence('pop', 'top')['data-neoverse-motion'] !== 'pop' || !('--neoverse-motion-enter-delay' in staggerStyle(1)) || !presenceVariants.includes('rise') || !particleDissolvePresets.medium) throw new Error('public Motion/Presence contracts are incomplete');\n` +
+      `for (const specifier of ['@neoverse-ui/tokens/css', '@neoverse-ui/motion/css', '@neoverse-ui/giscus-theme/light.css', '@neoverse-ui/giscus-theme/dark.css', '@neoverse-ui/tailwind/index.css', '@neoverse-ui/tailwind/theme.css', '@neoverse-ui/tailwind/components.css', '@neoverse-ui/tailwind/prose.css', '@neoverse-ui/vue/index.css', '@neoverse-ui/react/index.css']) {\n` +
       `  const resolved = import.meta.resolve(specifier);\n` +
       `  if (!existsSync(fileURLToPath(resolved))) throw new Error(\`missing CSS export: \${specifier}\`);\n` +
       `}\n`,

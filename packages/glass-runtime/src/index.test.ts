@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { createGlassRenderer, glassRendererAttribute } from './index';
+import { collectOccluders, createGlassRenderer, glassRendererAttribute } from './index';
 import { glassFragmentShader } from './shader';
 
 type FakeGl = {
@@ -63,6 +63,8 @@ type FakeGl = {
   uniform2f: ReturnType<typeof vi.fn>;
   uniform3f: ReturnType<typeof vi.fn>;
   uniform4f: ReturnType<typeof vi.fn>;
+  uniform4fv: ReturnType<typeof vi.fn>;
+  uniform1fv: ReturnType<typeof vi.fn>;
   useProgram: ReturnType<typeof vi.fn>;
   vertexAttribPointer: ReturnType<typeof vi.fn>;
   viewport: ReturnType<typeof vi.fn>;
@@ -130,6 +132,8 @@ const createFakeGl = (): FakeGl => {
     uniform2f: vi.fn(),
     uniform3f: vi.fn(),
     uniform4f: vi.fn(),
+    uniform4fv: vi.fn(),
+    uniform1fv: vi.fn(),
     useProgram: vi.fn(),
     vertexAttribPointer: vi.fn(),
     viewport: vi.fn(),
@@ -264,6 +268,121 @@ describe('Glass renderer', () => {
       document.querySelector<HTMLCanvasElement>('[data-neoverse-glass-renderer-canvas]')?.style
         .mixBlendMode,
     ).toBe('');
+  });
+
+  it('masks a Glass edge wherever an overlay paints above the surface', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const drawer = document.createElement('aside');
+    drawer.className = 'material-glass-elevated';
+    setRect(drawer, { left: 0, top: 0, width: 296, height: 800 });
+    const card = document.createElement('article');
+    card.className = 'ui-card material-glass-elevated';
+    setRect(card, { left: 200, top: 100, width: 460, height: 171 });
+    document.body.append(drawer, card);
+    // Hit-test like the browser: the drawer paints above the card, so points
+    // inside the drawer resolve to [drawer, card] and everything else to [card].
+    const withHitTest = (implementation: (x: number, y: number) => Element[]): void => {
+      Reflect.defineProperty(document, 'elementsFromPoint', {
+        configurable: true,
+        value: implementation,
+      });
+    };
+    withHitTest((x, y) => (x < 296 && y < 800 ? [drawer, card] : [card]));
+    try {
+      createTestRenderer({ maxDevicePixelRatio: 1 }).mount();
+
+      // DOM order draws the drawer first: nothing paints above it, so its own
+      // edge stays unmasked and the card's edge carries exactly one occluder.
+      expect(gl.uniform1f).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'u_occluder_count' }),
+        0,
+      );
+      expect(gl.uniform1f).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'u_occluder_count' }),
+        1,
+      );
+      const occluderCall = gl.uniform4fv.mock.calls.find(
+        ([location]) => (location as { name?: string }).name === 'u_occluders',
+      );
+      expect(occluderCall).toBeDefined();
+      const uploaded = occluderCall?.[1] as Float32Array;
+      expect([uploaded[0], uploaded[1], uploaded[2], uploaded[3]]).toEqual([0, 0, 296, 800]);
+    } finally {
+      Reflect.deleteProperty(document, 'elementsFromPoint');
+    }
+  });
+
+  it('keeps an unoccluded Glass edge free of occluder uniforms', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-elevated';
+    setRect(glass, { left: 300, top: 100 });
+    document.body.append(glass);
+    Reflect.defineProperty(document, 'elementsFromPoint', {
+      configurable: true,
+      value: () => [glass],
+    });
+    try {
+      createTestRenderer({ maxDevicePixelRatio: 1 }).mount();
+
+      expect(gl.uniform1f).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'u_occluder_count' }),
+        0,
+      );
+    } finally {
+      Reflect.deleteProperty(document, 'elementsFromPoint');
+    }
+  });
+
+  it('collects only the overlays that paint above the surface at its sample points', () => {
+    const drawer = document.createElement('aside');
+    const scrim = document.createElement('button');
+    const card = document.createElement('article');
+    const badge = document.createElement('span');
+    card.append(badge);
+    document.body.append(scrim, drawer, card);
+    setRect(drawer, { left: 0, top: 0, width: 296, height: 800 });
+    setRect(scrim, { left: 0, top: 0, width: 1100, height: 800 });
+    setRect(card, { left: 300, top: 100, width: 460, height: 171 });
+
+    const fakeDocument = {
+      elementsFromPoint: (x: number, y: number): Element[] => {
+        if (x < 320 && y < 800) return [scrim, drawer, card];
+        if (x > 500 && y > 150 && y < 220) return [badge, card];
+        return [card];
+      },
+    } as unknown as Document;
+
+    const occluders = collectOccluders(card, card.getBoundingClientRect(), fakeDocument, window);
+
+    // The center sample resolves to [badge, card]: the badge is the card's
+    // own descendant and must not count as an occluder. The left sample
+    // resolves under the drawer and the scrim, both fully above the card.
+    expect(occluders).toHaveLength(2);
+    const widths = occluders.map((occluder) => occluder.width);
+    expect(widths).toContain(296);
+    expect(widths).toContain(1100);
+    // The larger intersection (the full-viewport scrim) is kept first so the
+    // capped uniform array drops the least significant overlays first.
+    expect(occluders[0]?.width).toBe(1100);
+  });
+
+  it('skips sample points that miss the surface silhouette entirely', () => {
+    const other = document.createElement('div');
+    const card = document.createElement('article');
+    document.body.append(other, card);
+    setRect(card, { left: 300, top: 100, width: 460, height: 171 });
+    const fakeDocument = {
+      // A rounded-corner point misses the card; slice(-1) would otherwise
+      // promote unrelated stack entries to occluders.
+      elementsFromPoint: (x: number): Element[] => (x < 310 ? [other] : [card]),
+    } as unknown as Document;
+
+    const occluders = collectOccluders(card, card.getBoundingClientRect(), fakeDocument, window);
+
+    expect(occluders).toHaveLength(0);
   });
 
   it('leaves button-owned edge fields out of the shared WebGL pass by default', () => {

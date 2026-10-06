@@ -25,6 +25,10 @@ The canonical durations also changed:
 
 Use the `feedback`, `state`, and `spatial` roles instead of reconstructing component transitions in consumer code.
 
+0.2.0 also makes Motion the single owner of enter/exit presence and page-change choreography. The additive `enter` / `exit` roles, `presenceVariants`, framework Presence adapters, and `startViewTransition()` all consume the same Motion tokens; consumers should not duplicate those durations or keyframes locally.
+
+Vue exports `UiPresence`, `presence`, and `staggerStyle`; React exports `UiPresence` and `useUiPresence`. `startViewTransition(update, options?)` can use Particle Dissolve (`particleDissolvePresets`), View Transition crossfade, or a direct update when reduced motion or browser support requires it. Particle capture is optional; the synthetic pipeline does not reproduce outgoing content. See the [Motion guide](../packages/motion/README.md) for the public options and fallback contracts.
+
 ### @neoverse-ui/tokens
 
 Component token names now have one canonical TypeScript namespace under `cssVariables.components`.

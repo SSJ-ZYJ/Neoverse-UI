@@ -1,6 +1,6 @@
 # Neoverse UI
 
-A lightweight Bun monorepo for the Neoverse design tokens, Tailwind foundation, Material system, motion aliases, Vue components, and Design Lab.
+A lightweight Bun monorepo for the Neoverse design tokens, Tailwind foundation, Material system, Motion system, Vue/React adapters, and Design Lab.
 
 ## Requirements
 
@@ -16,14 +16,14 @@ Bun is the package manager, workspace manager, and script runner for this reposi
 | --- | --- | --- |
 | `@neoverse-ui/tokens` | Stable | CSS Variables and TypeScript token-name maps |
 | `@neoverse-ui/tailwind` | Stable | Tailwind v4 semantic theme and component CSS |
-| `@neoverse-ui/motion` | Stable | Framework-agnostic motion scale, semantic roles, and reduced-motion CSS |
+| `@neoverse-ui/motion` | Stable | Framework-agnostic motion scale, semantic roles, Presence engine, and page-transition choreography |
 | `@neoverse-ui/giscus-theme` | Consumer Validation | Standalone light/dark themes for the cross-origin Giscus widget |
 | `@neoverse-ui/glass-runtime` | Experimental | Shared WebGL Glass edge renderer with CSS fallback |
 | `@neoverse-ui/vue` | Consumer Validation | Vue 3 SFC components |
 | `@neoverse-ui/react` | Consumer Validation | React adapters for shared actions and surfaces |
 | `apps/playground` | Consumer Validation | Vue-driven Design Lab and visual reference surface |
 
-The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiTable`, `UiDisclosure`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, and `UiTooltipSurface`. `UiDock` is the reusable floating-navigation shell; routing data, active destination state, and trailing controls remain consumer-owned. `UiSurface` is the canonical material primitive. The consumer-validated React adapter currently exposes `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiDock`, `UiSurface`, `UiCard`, `UiTable`, `UiDisclosure`, and `UiNotice`. Vue and React share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
+The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiTable`, `UiDisclosure`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, `UiTooltipSurface`, and `UiPresence`. `UiDock` is the reusable floating-navigation shell; routing data, active destination state, and trailing controls remain consumer-owned. `UiSurface` is the canonical material primitive. The consumer-validated React adapter currently exposes `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiDock`, `UiSurface`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiTable`, `UiDisclosure`, `UiNotice`, and `UiPresence`. Vue and React share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
 
 ## Architecture at a glance
 
@@ -144,7 +144,9 @@ The Design Lab `density` module shows fine-pointer and coarse-pointer profiles s
 
 ## Motion and themes
 
-`@neoverse-ui/motion` exposes the shared duration/easing scale and three semantic roles used by real components: `feedback`, `state`, and `spatial`. The old standalone entrance/emphasis recipe classes were removed because no consumer used them. Shared Button, Surface, Navigation, SegmentedControl, Scrollbar, and ControlSurface CSS consumes the role variables directly. Reduced-motion collapses durations and removes spatial distance while preserving state correctness.
+`@neoverse-ui/motion` exposes the shared duration/easing scale and semantic roles `feedback`, `state`, `spatial`, `enter`, and `exit`. The old standalone entrance/emphasis recipe classes were removed. Shared Button, Surface, Navigation, SegmentedControl, Scrollbar, and ControlSurface CSS consumes the role variables directly. The Presence engine supplies `fade`, `rise`, `sink`, `pop`, `veil`, `slide-start`, and `slide-end`; Vue exports `UiPresence`, `presence`, and `staggerStyle`, while React exports `UiPresence` and `useUiPresence`. Reduced-motion collapses durations and removes spatial distance while preserving state correctness.
+
+`startViewTransition(update, options?)` coordinates page changes, including interruptible Particle Dissolve, View Transition crossfade, and direct-update fallbacks. Mark the outgoing region with `data-neoverse-dissolve`; the optional WebGL2 particle pipeline uses capture when supported or synthetic dust otherwise. See the [Motion API and pipeline guide](packages/motion/README.md) for presets, capture support, and lifecycle guarantees.
 
 Set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root element. The Design Lab keeps separate light and dark visual baselines. Theme selection has one canonical root contract: `data-theme`.
 

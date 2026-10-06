@@ -15,6 +15,9 @@ import {
   type Ref,
 } from 'react';
 
+export type { UiPresenceProps, UiPresenceState } from './presence';
+export { UiPresence, useUiPresence } from './presence';
+
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 export type NoticeVariant = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 export type ActionSize = 'sm' | 'md' | 'lg';
@@ -711,9 +714,11 @@ export function UiSelect({
       </summary>
 
       <div
-        className="ui-select__popover"
+        className="ui-select__popover nv-presence"
         role="listbox"
         popover="auto"
+        data-neoverse-motion="pop"
+        data-neoverse-motion-origin="top"
         onToggle={(event) => {
           const popover = event.currentTarget;
           if (isSelectPopoverOpen(popover)) return;
@@ -752,7 +757,12 @@ export function UiSelect({
             >
               <span>{option.label}</span>
               {selectedOption ? (
-                <svg className="ui-select__check" viewBox="0 0 24 24" aria-hidden="true">
+                <svg
+                  className="ui-select__check nv-appear"
+                  data-neoverse-motion="pop"
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                >
                   <path d="m5 12 4 4L19 6" />
                 </svg>
               ) : null}
@@ -900,7 +910,11 @@ export function UiButton({
             </span>
           ) : null}
           {loading && (
-            <span className="ui-button__spinner" aria-hidden="true">
+            <span
+              className="ui-button__spinner nv-appear"
+              data-neoverse-motion="pop"
+              aria-hidden="true"
+            >
               <svg
                 className={loadingIndicatorClass}
                 viewBox="0 0 16 16"
@@ -984,7 +998,13 @@ export function UiIconButton(props: UiIconButtonProps) {
   );
   const ariaBusy = loading ? true : rest['aria-busy'];
   const icon = loading ? (
-    <svg className={loadingIndicatorClass} viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <svg
+      className={`${loadingIndicatorClass} nv-appear`}
+      data-neoverse-motion="pop"
+      viewBox="0 0 16 16"
+      fill="none"
+      aria-hidden="true"
+    >
       <circle
         cx="8"
         cy="8"

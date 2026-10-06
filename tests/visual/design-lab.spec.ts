@@ -348,95 +348,107 @@ test('active navigation hover does not stack another visual state', async ({ pag
   expect(duringHover).toEqual(beforeHover);
 });
 
-test('standalone segmented control keeps symmetric glass geometry and stable selected hover', async ({
-  page,
-}) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/frame?theme=dark&lang=en#controls', {
-    waitUntil: 'domcontentloaded',
-  });
-  await page.addStyleTag({ content: freezeMotion });
-  await page.evaluate(waitForStableAssets);
+for (const theme of themes) {
+  test(`standalone segmented control keeps symmetric glass geometry and stable selected hover / ${theme}`, async ({
+    page,
+  }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`/frame?theme=${theme}&lang=en#controls`, {
+      waitUntil: 'domcontentloaded',
+    });
+    await page.addStyleTag({ content: freezeMotion });
+    await page.evaluate(waitForStableAssets);
 
-  const control = page
-    .locator('#controls-segmented-control .ui-segmented-control[data-surface="glass-subtle"]')
-    .first();
-  await expect(control).toBeVisible();
+    const control = page
+      .locator('#controls-segmented-control .ui-segmented-control[data-surface="glass-subtle"]')
+      .first();
+    await expect(control).toBeVisible();
 
-  const readSelectedState = () =>
-    control.locator('.ui-segmented-control__option--active').evaluate((element) => {
+    const readSelectedState = () =>
+      control.locator('.ui-segmented-control__option--active').evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          color: style.color,
+          backgroundColor: style.backgroundColor,
+          backgroundImage: style.backgroundImage,
+          boxShadow: style.boxShadow,
+        };
+      });
+
+    const geometry = await control.evaluate((element) => {
+      const options = element.querySelector<HTMLElement>('.ui-segmented-control__options');
+      const slider = element.querySelector<HTMLElement>('.ui-segmented-control__slider');
+      if (options === null || slider === null) {
+        throw new Error('Standalone segmented-control geometry is missing');
+      }
+
+      const rootRect = element.getBoundingClientRect();
+      const optionsRect = options.getBoundingClientRect();
+      const sliderRect = slider.getBoundingClientRect();
       const style = getComputedStyle(element);
+      const rgbaAlpha = style.backgroundColor.match(/^rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)$/)?.[1];
+      const slashAlpha = style.backgroundColor.match(/\/\s*([\d.]+)\s*\)$/)?.[1];
+
       return {
-        color: style.color,
-        backgroundColor: style.backgroundColor,
-        backgroundImage: style.backgroundImage,
-        boxShadow: style.boxShadow,
+        surface: element.getAttribute('data-surface'),
+        backgroundAlpha: Number.parseFloat(rgbaAlpha ?? slashAlpha ?? '1'),
+        backdropFilter: style.backdropFilter,
+        insetInlineStart: optionsRect.left - rootRect.left,
+        insetInlineEnd: rootRect.right - optionsRect.right,
+        insetBlockStart: optionsRect.top - rootRect.top,
+        insetBlockEnd: rootRect.bottom - optionsRect.bottom,
+        sliderWithinRoot:
+          sliderRect.left >= rootRect.left &&
+          sliderRect.right <= rootRect.right &&
+          sliderRect.top >= rootRect.top &&
+          sliderRect.bottom <= rootRect.bottom,
       };
     });
 
-  const geometry = await control.evaluate((element) => {
-    const options = element.querySelector<HTMLElement>('.ui-segmented-control__options');
-    const slider = element.querySelector<HTMLElement>('.ui-segmented-control__slider');
-    if (options === null || slider === null) {
-      throw new Error('Standalone segmented-control geometry is missing');
+    expect(geometry.surface).toBe('glass-subtle');
+    expect(geometry.backgroundAlpha).toBeGreaterThan(0);
+    expect(geometry.backgroundAlpha).toBeLessThan(1);
+    expect(geometry.backdropFilter).not.toBe('none');
+    expect(geometry.insetInlineStart).toBeCloseTo(geometry.insetInlineEnd, 1);
+    expect(geometry.insetBlockStart).toBeCloseTo(geometry.insetBlockEnd, 1);
+    expect(geometry.insetInlineStart).toBeCloseTo(geometry.insetBlockStart, 1);
+    expect(geometry.sliderWithinRoot).toBe(true);
+
+    const readShellState = () =>
+      control.evaluate((element) => {
+        const style = getComputedStyle(element);
+        const edge = getComputedStyle(element, '::before');
+        return {
+          backgroundColor: style.backgroundColor,
+          backgroundImage: style.backgroundImage,
+          borderColor: style.borderTopColor,
+          boxShadow: style.boxShadow,
+          edgeDisplay: edge.display,
+          edgeOpacity: Number.parseFloat(edge.opacity) || 0,
+        };
+      });
+
+    const beforeHover = await readSelectedState();
+    const shellBeforeHover = await readShellState();
+    const renderer = await page.locator('html').getAttribute('data-neoverse-glass-renderer');
+    await expect(control).toHaveAttribute('data-neoverse-glass-edge-pass', 'css');
+    // The CSS-backed field remains mounted under WebGL. Its theme-owned opacity
+    // keeps the dark edge absent while light retains its intentional refraction.
+    expect(shellBeforeHover.edgeDisplay).toBe(
+      renderer === 'webgl' || theme === 'light' ? 'block' : 'none',
+    );
+    if (theme === 'light') {
+      expect(shellBeforeHover.edgeOpacity).toBeGreaterThan(0);
+    } else {
+      expect(shellBeforeHover.edgeOpacity).toBe(0);
     }
-
-    const rootRect = element.getBoundingClientRect();
-    const optionsRect = options.getBoundingClientRect();
-    const sliderRect = slider.getBoundingClientRect();
-    const style = getComputedStyle(element);
-    const rgbaAlpha = style.backgroundColor.match(/^rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)$/)?.[1];
-    const slashAlpha = style.backgroundColor.match(/\/\s*([\d.]+)\s*\)$/)?.[1];
-
-    return {
-      surface: element.getAttribute('data-surface'),
-      backgroundAlpha: Number.parseFloat(rgbaAlpha ?? slashAlpha ?? '1'),
-      backdropFilter: style.backdropFilter,
-      insetInlineStart: optionsRect.left - rootRect.left,
-      insetInlineEnd: rootRect.right - optionsRect.right,
-      insetBlockStart: optionsRect.top - rootRect.top,
-      insetBlockEnd: rootRect.bottom - optionsRect.bottom,
-      sliderWithinRoot:
-        sliderRect.left >= rootRect.left &&
-        sliderRect.right <= rootRect.right &&
-        sliderRect.top >= rootRect.top &&
-        sliderRect.bottom <= rootRect.bottom,
-    };
+    await control.locator('.ui-segmented-control__option--active').hover();
+    const duringHover = await readSelectedState();
+    const shellDuringHover = await readShellState();
+    expect(duringHover).toEqual(beforeHover);
+    expect(shellDuringHover).toEqual(shellBeforeHover);
   });
-
-  expect(geometry.surface).toBe('glass-subtle');
-  expect(geometry.backgroundAlpha).toBeGreaterThan(0);
-  expect(geometry.backgroundAlpha).toBeLessThan(1);
-  expect(geometry.backdropFilter).not.toBe('none');
-  expect(geometry.insetInlineStart).toBeCloseTo(geometry.insetInlineEnd, 1);
-  expect(geometry.insetBlockStart).toBeCloseTo(geometry.insetBlockEnd, 1);
-  expect(geometry.insetInlineStart).toBeCloseTo(geometry.insetBlockStart, 1);
-  expect(geometry.sliderWithinRoot).toBe(true);
-
-  const readShellState = () =>
-    control.evaluate((element) => {
-      const style = getComputedStyle(element);
-      const edge = getComputedStyle(element, '::before');
-      return {
-        backgroundColor: style.backgroundColor,
-        backgroundImage: style.backgroundImage,
-        borderColor: style.borderTopColor,
-        boxShadow: style.boxShadow,
-        edgeDisplay: edge.display,
-        edgeOpacity: Number.parseFloat(edge.opacity) || 0,
-      };
-    });
-
-  const beforeHover = await readSelectedState();
-  const shellBeforeHover = await readShellState();
-  expect(shellBeforeHover.edgeDisplay).toBe('none');
-  expect(shellBeforeHover.edgeOpacity).toBe(0);
-  await control.locator('.ui-segmented-control__option--active').hover();
-  const duringHover = await readSelectedState();
-  const shellDuringHover = await readShellState();
-  expect(duringHover).toEqual(beforeHover);
-  expect(shellDuringHover).toEqual(shellBeforeHover);
-});
+}
 
 test('chrome edge refraction is removed when reduced transparency is requested', async ({
   page,
@@ -708,6 +720,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       trailingPaddingInlineToken: resolveLength(
         '--neoverse-control-chrome-trailing-padding-inline',
       ),
+      trailingPaddingBlockToken: resolveLength('--neoverse-control-chrome-trailing-padding'),
       trailingBorderInline: Number.parseFloat(trailingStyle.borderLeftWidth),
       trailingContentInsetInline:
         languageRect.left - trailingRect.left - Number.parseFloat(trailingStyle.borderLeftWidth),
@@ -808,7 +821,9 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(edgeMaterial.languagePaddingInline).toBe('0px');
   expect(edgeMaterial.languagePaddingBlock).toBe('0px');
   expect(edgeMaterial.languageOverflow).toBe('visible');
-  expect(edgeMaterial.trailingBorder).toBe('rgba(219, 234, 254, 0.09)');
+  // Chrome trailing groups are intentionally borderless; their separation is
+  // carried by the inset fill/shadow instead of a single-color hairline.
+  expect(edgeMaterial.trailingBorderInline).toBe(0);
   expect(edgeMaterial.trailingBackground).toBe('rgba(255, 255, 255, 0.03)');
   expect(edgeMaterial.itemRects).toHaveLength(4);
   expect(edgeMaterial.itemRects.every(({ width }) => width > 0)).toBe(true);
@@ -865,7 +880,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       edgeMaterial.trailingBorderInline * (edgeMaterial.presentationScale - 1),
     1,
   );
-  expect(edgeMaterial.trailingPaddingInline).toBeGreaterThan(edgeMaterial.trailingPaddingBlock);
+  expect(edgeMaterial.trailingPaddingBlock).toBeCloseTo(edgeMaterial.trailingPaddingBlockToken, 1);
   expect(edgeMaterial.primaryWidth).toBeCloseTo(
     edgeMaterial.itemRects.reduce((total, { width }) => total + width, 0) +
       edgeMaterial.itemGaps.reduce((total, gap) => total + gap, 0),
@@ -1069,62 +1084,85 @@ test('consumer parity dock keeps parent Glass stable on item hover', async ({ pa
   expect(after).toEqual(before);
 });
 
-test('embedded segmented control keeps only its selected plate without outer chrome', async ({
-  page,
-}) => {
-  await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
-    waitUntil: 'domcontentloaded',
-  });
-  await page.evaluate(waitForStableAssets);
-
-  const control = page.locator('.consumer-parity-dock__language');
-  await expect(control).toHaveAttribute('data-surface', 'none');
-
-  const outer = await control.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return {
-      backgroundColor: style.backgroundColor,
-      backgroundImage: style.backgroundImage,
-      boxShadow: style.boxShadow,
-      borderTopWidth: style.borderTopWidth,
-    };
-  });
-  expect(outer.backgroundColor).toBe('rgba(0, 0, 0, 0)');
-  expect(outer.backgroundImage).toBe('none');
-  expect(outer.boxShadow).toBe('none');
-  expect(outer.borderTopWidth).toBe('0px');
-
-  const inactive = control
-    .locator('.ui-segmented-control__option:not(.ui-segmented-control__option--active)')
-    .first();
-  await expect(inactive).toBeVisible();
-  const resting = await inactive.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return {
-      backgroundColor: style.backgroundColor,
-      backgroundImage: style.backgroundImage,
-      borderColor: style.borderColor,
-      borderStyle: style.borderStyle,
-      boxShadow: style.boxShadow,
-    };
-  });
-
-  expect(resting.backgroundColor).toBe('rgba(0, 0, 0, 0)');
-  expect(resting.backgroundImage).toBe('none');
-  expect(resting.borderColor).toBe('rgba(0, 0, 0, 0)');
-  expect(resting.boxShadow).toBe('none');
-
-  const selectedPlate = await control
-    .locator('.ui-segmented-control__slider')
-    .evaluate((element) => {
-      const style = getComputedStyle(element);
-      return { backgroundImage: style.backgroundImage, backgroundColor: style.backgroundColor };
+for (const theme of themes) {
+  test(`embedded segmented control keeps only its selected plate without outer chrome / ${theme}`, async ({
+    page,
+  }) => {
+    await page.goto(`/frame?theme=${theme}&lang=en#consumer-parity`, {
+      waitUntil: 'domcontentloaded',
     });
-  expect(
-    selectedPlate.backgroundImage !== 'none' ||
-      selectedPlate.backgroundColor !== 'rgba(0, 0, 0, 0)',
-  ).toBe(true);
-});
+    await page.evaluate(waitForStableAssets);
+
+    const navigation = page.getByRole('navigation', { name: 'Primary navigation' });
+    await expect(navigation).toBeVisible();
+    const control = navigation.getByRole('radiogroup', { name: 'Language', exact: true });
+    await expect(control).toBeVisible();
+    await expect(control).toHaveAttribute('data-surface', 'none');
+
+    const outer = await control.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        backgroundColor: style.backgroundColor,
+        backgroundImage: style.backgroundImage,
+        boxShadow: style.boxShadow,
+        borderTopWidth: style.borderTopWidth,
+        backdropFilter: style.backdropFilter,
+      };
+    });
+    expect(outer.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    expect(outer.backgroundImage).toBe('none');
+    expect(outer.boxShadow).toBe('none');
+    expect(outer.borderTopWidth).toBe('0px');
+    expect(outer.backdropFilter).toBe('none');
+
+    const inactive = control
+      .locator('.ui-segmented-control__option:not(.ui-segmented-control__option--active)')
+      .first();
+    await expect(inactive).toBeVisible();
+    const resting = await inactive.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        backgroundColor: style.backgroundColor,
+        backgroundImage: style.backgroundImage,
+        borderColor: style.borderColor,
+        borderStyle: style.borderStyle,
+        boxShadow: style.boxShadow,
+      };
+    });
+
+    expect(resting.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    expect(resting.backgroundImage).toBe('none');
+    expect(resting.borderColor).toBe('rgba(0, 0, 0, 0)');
+    expect(resting.boxShadow).toBe('none');
+
+    const selectedPlate = await control
+      .locator('.ui-segmented-control__slider')
+      .evaluate((element) => {
+        const style = getComputedStyle(element);
+        const root = element.closest('.ui-segmented-control');
+        if (root === null) throw new Error('Missing embedded segmented root');
+        const rootStyle = getComputedStyle(root);
+        const probe = document.createElement('span');
+        probe.style.borderRadius = 'var(--neoverse-control-segmented-option-radius)';
+        root.append(probe);
+        const expectedRadius = getComputedStyle(probe).borderTopLeftRadius;
+        probe.remove();
+        return {
+          backgroundImage: style.backgroundImage,
+          backgroundColor: style.backgroundColor,
+          radius: style.borderTopLeftRadius,
+          expectedRadius,
+          rootRadius: Number.parseFloat(rootStyle.borderTopLeftRadius),
+        };
+      });
+    expect(
+      selectedPlate.backgroundImage !== 'none' ||
+        selectedPlate.backgroundColor !== 'rgba(0, 0, 0, 0)',
+    ).toBe(true);
+    expect(selectedPlate.radius).toBe(selectedPlate.expectedRadius);
+    expect(Number.parseFloat(selectedPlate.radius)).toBeLessThan(selectedPlate.rootRadius);
+  });
+}
 
 for (const theme of themes) {
   test(`button press glow / ${theme}`, async ({ page }) => {
@@ -1136,7 +1174,9 @@ for (const theme of themes) {
     await page.evaluate(waitForStableAssets);
 
     const button = page.locator('#controls-button .ui-button--primary').first();
+    await expect(page.locator('#controls-button')).toBeVisible();
     await expect(button).toBeVisible();
+    await button.scrollIntoViewIfNeeded();
     const box = await button.boundingBox();
     expect(box).not.toBeNull();
     if (box === null) {
@@ -1146,6 +1186,27 @@ for (const theme of themes) {
     await page.mouse.move(box.x + box.width * 0.65, box.y + box.height * 0.5);
     await page.mouse.down();
     try {
+      const pressed = await button.evaluate((element) => {
+        const style = getComputedStyle(element);
+        const glow = getComputedStyle(element, '::after');
+        return {
+          pointerX: Number.parseFloat(style.getPropertyValue('--neoverse-button-press-x')),
+          pointerY: Number.parseFloat(style.getPropertyValue('--neoverse-button-press-y')),
+          glowDisplay: glow.display,
+          glowOpacity: Number.parseFloat(glow.opacity),
+          glowBackground: glow.backgroundImage,
+          radius: style.borderRadius,
+          glowRadius: glow.borderRadius,
+          backdropFilter: style.backdropFilter,
+        };
+      });
+      expect(pressed.pointerX).toBeCloseTo(65, 0);
+      expect(pressed.pointerY).toBeCloseTo(50, 0);
+      expect(pressed.glowDisplay).not.toBe('none');
+      expect(pressed.glowOpacity).toBeGreaterThan(0);
+      expect(pressed.glowBackground).not.toBe('none');
+      expect(pressed.glowRadius).toBe(pressed.radius);
+      expect(pressed.backdropFilter).not.toBe('none');
       await expect(button).toHaveScreenshot(`button-press-${theme}.png`);
     } finally {
       await page.mouse.up();
@@ -1344,6 +1405,39 @@ for (const theme of themes) {
       expect(surface.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
       expect(surface.beforeDisplay).toBe('none');
       expect(surface.afterDisplay).toBe('none');
+    }
+
+    const buttons = page.locator('[data-composition-mode="accessibility"] .ui-button');
+    await expect(buttons).toHaveCount(2);
+    for (let index = 0; index < 2; index += 1) {
+      const button = buttons.nth(index);
+      await button.scrollIntoViewIfNeeded();
+      const restDisplay = await button.evaluate(
+        (element) => getComputedStyle(element, '::after').display,
+      );
+      expect(restDisplay).toBe('none');
+
+      const box = await button.boundingBox();
+      if (box === null) throw new Error('Missing accessibility button bounds');
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      const pressed = await button.evaluate((element) => {
+        const style = getComputedStyle(element);
+        const pressField = getComputedStyle(element, '::after');
+        return {
+          active: element.matches(':active'),
+          backdropFilter: style.backdropFilter,
+          display: pressField.display,
+          opacity: pressField.opacity,
+          backgroundImage: pressField.backgroundImage,
+        };
+      });
+      expect(pressed.active).toBe(true);
+      expect(pressed.backdropFilter).toBe('none');
+      expect(pressed.display).toBe('block');
+      expect(pressed.opacity).toBe('1');
+      expect(pressed.backgroundImage).not.toBe('none');
+      await page.mouse.up();
     }
   });
 }

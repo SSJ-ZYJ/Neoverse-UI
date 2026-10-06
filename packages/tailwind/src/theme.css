@@ -501,7 +501,9 @@
     @media (hover: hover) {
       :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
           .ui-button
-        ):not(.ui-segmented-control):not([data-neoverse-surface-hover='static']):hover {
+        ):not(.ui-card):not(.ui-surface):not(.ui-segmented-control):not(
+          [data-neoverse-surface-hover='static']
+        ):hover {
         background-color: color-mix(
           in srgb,
           var(--neoverse-material-tint)
@@ -590,16 +592,11 @@
     --neoverse-material-hover-transparency: var(--neoverse-material-transparency);
   }
 
-  /* Cards reuse the Glass plane but adapt only its edge geometry. The regular
-     Glass hairline remains untouched; wide cards avoid exposing that
-     transparent gutter as a closed white outline. */
-  .ui-card:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
-    border-width: 0;
-  }
-
-  /* CSS fallback keeps the exact shared refraction gradient and clips it to a
-     token-sized edge band. WebGL still owns the directional edge whenever the
-     shared renderer is active. */
+  /* Cards carry the same Glass hairline as UiSurface. In dark themes the
+     token border is the pale refractive edge line; removing it leaves the
+     neutral WebGL catch alone, which reads as a washed-white outline instead
+     of refraction. Light themes resolve the same border to transparent, so
+     the shared hairline is free there. */
   .ui-card:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)::before {
     box-sizing: border-box;
     padding: var(--neoverse-border-width-thin);
@@ -635,7 +632,9 @@
   @media (hover: hover) {
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
         .ui-button
-      ):not(.ui-segmented-control):not([data-neoverse-surface-hover='static']):hover {
+      ):not(.ui-card):not(.ui-surface):not(.ui-segmented-control):not(
+        [data-neoverse-surface-hover='static']
+      ):hover {
       box-shadow:
         var(--neoverse-material-edge-highlight), var(--neoverse-material-inner-glow),
         var(--neoverse-material-seam-glow), var(--neoverse-material-bloom),
@@ -671,9 +670,9 @@
     [data-neoverse-glass-renderer='webgl']
       :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
         .ui-button
-      ):not(.ui-segmented-control):not([data-neoverse-surface-hover='static']):not(
-        :focus-visible
-      ):hover {
+      ):not(.ui-card):not(.ui-surface):not(.ui-segmented-control):not(
+        [data-neoverse-surface-hover='static']
+      ):not(:focus-visible):hover {
       background-clip: padding-box;
       box-shadow:
         var(--neoverse-material-bloom),

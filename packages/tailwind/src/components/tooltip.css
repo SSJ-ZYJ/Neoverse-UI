@@ -37,13 +37,15 @@
      shadow carry the edge instead of a monochrome stroke. */
   .ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface] {
     --neoverse-material-border: transparent;
+    --neoverse-material-border-width: var(--neoverse-border-width-none);
     --neoverse-material-hover-border: transparent;
   }
 
   .ui-tooltip-surface--accent.material-glass-subtle[data-neoverse-tooltip-surface] {
     --neoverse-material-tint: var(--neoverse-tooltip-accent-tint);
-    --neoverse-material-shadow:
-      var(--neoverse-tooltip-accent-inner-glow), var(--neoverse-tooltip-accent-shadow);
+    /* Emphasis comes from tint, refraction and ambient depth. Avoid an inset
+       top stroke: on a wide tooltip it collapses into a bright painted line. */
+    --neoverse-material-shadow: var(--neoverse-tooltip-accent-shadow);
     --neoverse-tooltip-arrow-background: var(--neoverse-tooltip-accent-arrow-background);
     color: var(--neoverse-tooltip-accent-foreground);
   }

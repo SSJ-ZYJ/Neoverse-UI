@@ -71,7 +71,7 @@ const scaleCopy = {
       :title="localize(scaleCopy.prose, props.locale)"
       :description="localize(scaleCopy.proseDescription, props.locale)"
     >
-      <UiSurface as="article" surface="subtle" class="playground-specimen-panel">
+      <UiSurface as="article" surface="none" class="playground-specimen-panel">
         <div data-foundation-prose class="neoverse-prose max-w-reading">
           <h3>{{ localize(scaleCopy.prose, props.locale) }}</h3>
           <p>{{ localize(scaleCopy.proseBody, props.locale) }}</p>

@@ -29,17 +29,20 @@
   "scripts": {
     "build": "rm -rf dist tsconfig.build.tsbuildinfo && tsc --project tsconfig.build.json && bun ./scripts/copy-css.ts",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "test": "bun test src/index.test.ts"
+    "test": "bun test src/index.test.ts src/presence.test.tsx"
   },
   "peerDependencies": {
     "react": ">=19.0.0 <20.0.0"
   },
   "dependencies": {
+    "@neoverse-ui/motion": "^0.1.0",
     "@neoverse-ui/tailwind": "^0.1.0"
   },
   "devDependencies": {
     "@types/react": "^19.2.18",
-    "react": "^19.2.8"
+    "@types/react-dom": "^19.2.7",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "publishConfig": {
     "access": "public",

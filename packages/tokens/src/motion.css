@@ -5,9 +5,27 @@
     --neoverse-motion-duration-expressive: 420ms;
 
     --neoverse-motion-easing-linear: linear;
+    /* Decelerating families settle gently; elements arrive instead of stopping. */
     --neoverse-motion-easing-standard: cubic-bezier(0.22, 1, 0.36, 1);
     --neoverse-motion-easing-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
+    /* Mirror curve for departures: exits accelerate away from the pointer. */
+    --neoverse-motion-easing-accelerate: cubic-bezier(0.5, 0, 0.75, 0);
 
     --neoverse-motion-spatial-distance: var(--neoverse-space-4);
+    --neoverse-motion-distance-near: var(--neoverse-space-2);
+    --neoverse-motion-distance-mid: var(--neoverse-space-4);
+    --neoverse-motion-distance-far: var(--neoverse-space-8);
+
+    /* Presence geometry shared by enter/exit presets and top-layer surfaces. */
+    --neoverse-motion-scale-near: 0.97;
+    --neoverse-motion-scale-far: 0.92;
+    --neoverse-motion-veil-blur: 8px;
+
+    /* Particle dissolve — the shared page-change choreography. The WebGL
+       path reads duration/enter timing from these tokens; without WebGL2 the
+       chain ends at a plain crossfade. */
+    --neoverse-motion-particle-duration: 910ms;
+    --neoverse-motion-particle-enter-delay: 455ms;
+    --neoverse-motion-particle-enter-duration: 234ms;
   }
 }

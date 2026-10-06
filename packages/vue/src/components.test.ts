@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { h, nextTick } from 'vue';
+import { presence, staggerStyle } from './presence';
 import UiAction from './UiAction.vue';
 import UiBadge from './UiBadge.vue';
 import UiBreadcrumb from './UiBreadcrumb.vue';
@@ -13,6 +14,7 @@ import UiIconButton from './UiIconButton.vue';
 import UiInput from './UiInput.vue';
 import UiNavigationItem from './UiNavigationItem.vue';
 import UiNotice from './UiNotice.vue';
+import UiPresence from './UiPresence.vue';
 import UiScrollbar from './UiScrollbar.vue';
 import UiSegmentedControl from './UiSegmentedControl.vue';
 import UiSelect from './UiSelect.vue';
@@ -32,6 +34,76 @@ const options = [
 afterEach(() => {
   vi.restoreAllMocks();
   document.body.innerHTML = '';
+});
+
+describe('Presence', () => {
+  it('maps variants, origins, and stagger timing onto the shared Motion contract', () => {
+    expect(presence('pop', 'top')).toEqual({
+      'data-neoverse-motion': 'pop',
+      'data-neoverse-motion-origin': 'top',
+    });
+    expect(presence('fade')).toEqual({ 'data-neoverse-motion': 'fade' });
+    expect(staggerStyle(0)).toEqual({});
+    expect(staggerStyle(3, { step: 50 })).toEqual({
+      '--neoverse-motion-enter-delay': '150ms',
+    });
+  });
+
+  it('keeps content mounted through exit and supports an interrupted departure', async () => {
+    const wrapper = mount(UiPresence, {
+      attachTo: document.body,
+      props: { show: true, variant: 'pop', origin: 'top', as: 'span' },
+      attrs: { 'data-test-presence': '' },
+      slots: { default: 'Presence content' },
+    });
+
+    expect(wrapper.element.tagName).toBe('SPAN');
+    expect(wrapper.attributes('data-neoverse-motion')).toBe('pop');
+    expect(wrapper.attributes('data-neoverse-motion-origin')).toBe('top');
+    expect(wrapper.classes()).toContain('nv-appear');
+    expect(wrapper.classes()).not.toContain('nv-vanish');
+
+    await wrapper.setProps({ show: false });
+    expect(wrapper.find('[data-test-presence]').exists()).toBe(true);
+    expect(wrapper.classes()).toContain('nv-vanish');
+
+    await wrapper.setProps({ show: true });
+    expect(wrapper.find('[data-test-presence]').exists()).toBe(true);
+    expect(wrapper.classes()).not.toContain('nv-vanish');
+
+    await wrapper.setProps({ show: false });
+    const animationEnd = new Event('animationend', { bubbles: true }) as AnimationEvent;
+    Object.defineProperty(animationEnd, 'animationName', { value: 'nv-vanish' });
+    wrapper.element.dispatchEvent(animationEnd);
+    await nextTick();
+
+    expect(wrapper.find('[data-test-presence]').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('interprets millisecond exit tokens without treating them as seconds', async () => {
+    vi.useFakeTimers();
+    const computedStyle = vi.spyOn(window, 'getComputedStyle').mockReturnValue({
+      getPropertyValue: () => '140ms',
+    } as unknown as CSSStyleDeclaration);
+    const wrapper = mount(UiPresence, {
+      props: { show: true },
+      attrs: { 'data-test-presence-timer': '' },
+      slots: { default: 'Timed presence' },
+    });
+
+    await wrapper.setProps({ show: false });
+    await vi.advanceTimersByTimeAsync(189);
+    expect(wrapper.find('[data-test-presence-timer]').exists()).toBe(true);
+
+    await vi.advanceTimersByTimeAsync(1);
+    await nextTick();
+    expect(wrapper.find('[data-test-presence-timer]').exists()).toBe(false);
+
+    computedStyle.mockRestore();
+    vi.useRealTimers();
+    wrapper.unmount();
+  });
 });
 
 describe('UiButton', () => {

@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { presenceAppearClassName } from '@neoverse-ui/motion';
 import { computed, useAttrs } from 'vue';
+import { presence } from './presence';
 import type { TooltipSurfaceProps, TooltipSurfaceVariant } from './types';
 
 defineOptions({ inheritAttrs: false });
@@ -11,6 +13,7 @@ const props = withDefaults(defineProps<TooltipSurfaceProps>(), {
 const attrs = useAttrs();
 const classes = computed(() => [
   'ui-tooltip-surface',
+  presenceAppearClassName,
   'material-glass-subtle',
   `ui-tooltip-surface--${props.variant as TooltipSurfaceVariant}`,
 ]);
@@ -23,7 +26,7 @@ const forwardedAttrs = computed(() => {
 <template>
   <component
     :is="props.as"
-    v-bind="forwardedAttrs"
+    v-bind="{ ...forwardedAttrs, ...presence('veil') }"
     :class="[classes, attrs.class]"
     :style="attrs.style"
     data-surface="glass-subtle"

@@ -7,6 +7,7 @@ import {
   buttonStretchSizeClasses,
   buttonVariantClasses,
 } from './classes';
+import { presence } from './presence';
 import { getSurfaceClass } from './surface';
 import type { ButtonProps, ButtonSize, ButtonVariant } from './types';
 import UiLoadingIndicator from './UiLoadingIndicator.vue';
@@ -60,17 +61,21 @@ const classes = computed(() => [
     @pointerdown="updateButtonPointerGlow"
   >
     <span class="ui-button__edge-field" aria-hidden="true" />
-    <span v-if="props.loading || $slots.leading" class="ui-button__leading">
-      <template v-if="props.loading">
-        <span v-if="$slots.leading" class="ui-button__leading-placeholder" aria-hidden="true">
-          <slot name="leading" />
-        </span>
-        <span class="ui-button__spinner" aria-hidden="true">
-          <UiLoadingIndicator />
-        </span>
-      </template>
-      <slot v-else name="leading" />
-    </span>
+    <Transition name="nv">
+      <span v-if="props.loading || $slots.leading" class="ui-button__leading">
+        <template v-if="props.loading">
+          <span v-if="$slots.leading" class="ui-button__leading-placeholder" aria-hidden="true">
+            <slot name="leading" />
+          </span>
+          <Transition name="nv">
+            <span v-bind="presence('pop')" class="ui-button__spinner" aria-hidden="true">
+              <UiLoadingIndicator />
+            </span>
+          </Transition>
+        </template>
+        <slot v-else name="leading" />
+      </span>
+    </Transition>
     <span class="ui-button__content">
       <slot />
     </span>

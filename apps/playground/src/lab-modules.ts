@@ -234,6 +234,22 @@ export const labSpecimens = [
     kind: 'foundation',
   },
   {
+    id: 'foundation-motion-presence',
+    moduleId: 'motion',
+    label: moduleCopy.motion.presence.label,
+    apiNames: ['UiPresence'],
+    tags: ['foundation', 'motion', 'presence', 'transition', 'stagger', 'view-transition'],
+    kind: 'foundation',
+  },
+  {
+    id: 'foundation-motion-page',
+    moduleId: 'motion',
+    label: moduleCopy.motion.page.label,
+    apiNames: [],
+    tags: ['foundation', 'motion', 'dissolve', 'particle', 'webgl', 'view-transition'],
+    kind: 'foundation',
+  },
+  {
     id: 'materials-surface',
     moduleId: 'materials',
     label: localized('Surface presets', '表面预设'),

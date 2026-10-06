@@ -169,7 +169,7 @@ function onTabKey(event: KeyboardEvent) {
         </p>
       </div>
     </UiSurface>
-    <article class="min-w-0 p-4 md:p-5">
+    <UiSurface as="article" surface="glass-elevated" class="min-w-0 p-4 md:p-5">
       <div data-reading-prose class="neoverse-prose max-w-reading">
         <h4>{{ copy.content }}</h4>
         <p>
@@ -200,22 +200,33 @@ function onTabKey(event: KeyboardEvent) {
           </template>
         </dl>
 
-        <UiTable :caption="copy.tableCaption" :aria-label="copy.tableCaption" data-reading-table>
-          <thead>
-            <tr>
-              <th v-for="column in copy.columns" :key="column">
-                {{ column }}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="row in copy.rows" :key="row[0]">
-              <td v-for="cell in row" :key="cell">{{ cell }}</td>
-            </tr>
-          </tbody>
-        </UiTable>
+        <UiSurface
+          surface="glass-elevated"
+          class="playground-data-table-surface my-5 rounded-card p-4"
+        >
+          <UiTable :caption="copy.tableCaption" :aria-label="copy.tableCaption" data-reading-table>
+            <thead>
+              <tr>
+                <th v-for="column in copy.columns" :key="column">
+                  {{ column }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="row in copy.rows" :key="row[0]">
+                <td v-for="cell in row" :key="cell">{{ cell }}</td>
+              </tr>
+            </tbody>
+          </UiTable>
+        </UiSurface>
 
-        <UiDisclosure :summary="copy.details" data-reading-disclosure>
+        <UiDisclosure
+          class="material-glass-elevated playground-data-disclosure"
+          data-surface="glass-elevated"
+          data-neoverse-surface-overflow="visible"
+          :summary="copy.details"
+          data-reading-disclosure
+        >
           <p>{{ copy.detail }}</p>
         </UiDisclosure>
 
@@ -223,6 +234,6 @@ function onTabKey(event: KeyboardEvent) {
           <a data-reading-surface-link href="#materials-surface">{{ copy.next }}</a>
         </p>
       </div>
-    </article>
+    </UiSurface>
   </section>
 </template>

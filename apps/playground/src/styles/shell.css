@@ -444,6 +444,64 @@
   z-index: 1;
 }
 
+/* The data specimen shares one card material instead of sampling each cell. */
+.playground-data-table-surface {
+  --neoverse-table-background: var(--neoverse-surface-inset-dense-fill);
+  --neoverse-table-header-background: var(--neoverse-surface-inset-header-fill);
+  --neoverse-table-stripe-background: var(--neoverse-surface-inset-hover-fill);
+  --neoverse-table-hover-background: var(--neoverse-surface-inset-strong-fill);
+  --neoverse-table-grid-line: var(--neoverse-color-border-subtle);
+  --neoverse-table-grid-line-strong: var(--neoverse-color-border-default);
+  --neoverse-table-shadow: none;
+  --neoverse-table-cell-shadow: none;
+  --neoverse-table-header-shadow: none;
+  --neoverse-table-hover-shadow: none;
+  --neoverse-table-filter: none;
+}
+
+.playground-data-table-surface .ui-table-region {
+  border-radius: 0;
+}
+
+.playground-data-table-surface .ui-table {
+  margin-block: 0;
+}
+
+.playground-data-table-surface .ui-table :is(th, td):first-child {
+  border-inline-start: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+}
+
+.playground-data-table-surface .ui-table :is(th, td):last-child {
+  border-inline-end: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+}
+
+.playground-data-table-surface .ui-table thead th {
+  border-block-start: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+}
+
+.playground-data-table-surface .ui-table tbody tr:last-child td {
+  border-block-end: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+}
+
+.playground-data-disclosure {
+  --neoverse-material-transparency: var(
+    --neoverse-surface-glass-elevated-transparency,
+    var(--neoverse-material-glass-elevated-transparency)
+  );
+  --neoverse-material-edge-refraction-opacity: var(
+    --neoverse-surface-glass-elevated-edge-opacity,
+    var(--neoverse-material-glass-elevated-edge-refraction-opacity)
+  );
+}
+
+/* Disclosure remains interactive while using the card's resting material. */
+.playground-data-disclosure[open] {
+  --neoverse-surface-glass-elevated-transparency: var(
+    --neoverse-material-glass-elevated-hover-transparency
+  );
+  --neoverse-material-shadow: var(--neoverse-material-glass-elevated-hover-shadow);
+}
+
 .playground-specimen-preview__content {
   width: max-content;
   min-width: 100%;
@@ -550,7 +608,7 @@
   margin-block: 0;
 }
 
-.playground-reading-table tbody tr:nth-child(even) > td {
+.playground-reading-table .ui-table tbody tr:nth-child(even) > td {
   background: var(--neoverse-color-accent-soft);
 }
 
@@ -579,19 +637,6 @@
 .playground-overview-hero__sample {
   width: min(100%, var(--neoverse-playground-showcase-card-width));
   box-shadow: var(--neoverse-shadow-raised);
-}
-
-.playground-overview-group {
-  transition:
-    transform var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-standard),
-    box-shadow var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-standard);
-}
-
-@media (hover: hover) {
-  .playground-overview-group:hover {
-    transform: translateY(calc(var(--neoverse-space-1) * -1));
-    box-shadow: var(--neoverse-shadow-raised);
-  }
 }
 
 .playground-dock-preview {
@@ -648,7 +693,41 @@
   display: none;
 }
 
+/* The accessibility preview removes backdrop sampling, not interaction
+   feedback. Re-enable UiButton's existing internal press field only while
+   pressed so fallback buttons feel identical to their standard counterparts. */
+.playground-reduced-transparency-preview
+.ui-button.material-glass-subtle:active:not(:disabled):not([aria-disabled='true'])::after {
+  display: block;
+}
+
 .playground-specimen-panel {
   border-radius: var(--neoverse-radius-card);
   padding: var(--neoverse-space-4);
+}
+
+/* Presence demo stage: a quiet inset stage so enter/exit travel reads clearly. */
+.playground-motion-stage {
+  display: grid;
+  min-height: var(--neoverse-playground-preview-stage-height);
+  align-items: center;
+  justify-items: center;
+  border-radius: var(--neoverse-radius-control);
+  background: var(--neoverse-playground-stage-gradient), var(--neoverse-color-surface-subtle);
+  box-shadow: var(--neoverse-shadow-inset);
+}
+
+/* --- One continuous take -----------------------------------------------
+   Module navigation runs inside a View Transition started by
+   @neoverse-ui/motion. The chrome keeps a stable snapshot name so it never
+   flashes; the page content is dissolved into WebGL particles by the engine,
+   with a plain crossfade as the terminal fallback. The names only exist for
+   the duration of a transition, so theme switches (which use their own
+   attribute) are unaffected. --- */
+:root[data-neoverse-view-transitioning] .playground-shell__toolbar {
+  view-transition-name: playground-toolbar;
+}
+
+:root[data-neoverse-view-transitioning] .playground-shell__navigation {
+  view-transition-name: playground-navigation;
 }

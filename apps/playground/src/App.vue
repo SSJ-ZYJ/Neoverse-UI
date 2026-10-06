@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { prewarmParticleDissolve, startViewTransition } from '@neoverse-ui/motion';
 import { layoutBreakpoints } from '@neoverse-ui/tokens';
 import {
+  staggerStyle,
   UiButton,
   UiIconButton,
   UiNavigationItem,
@@ -365,12 +367,20 @@ function focusCurrentView(specimenId: SpecimenId | null = null): void {
 
 function selectModule(moduleId: ModuleId): void {
   const changed = currentModuleId.value !== moduleId;
-  currentModuleId.value = moduleId;
-  pendingSpecimenId.value = null;
-  persistState({ module: moduleId });
+  const commit = (): void => {
+    currentModuleId.value = moduleId;
+    pendingSpecimenId.value = null;
+  };
   if (changed) {
     window.history.pushState(null, '', locationHref(moduleId));
+    /* One continuous take: the shell stays put while the page content
+       travels; the View Transition glue in @neoverse-ui/motion scopes the
+       animation and skips it under reduced motion. */
+    void startViewTransition(commit);
+  } else {
+    commit();
   }
+  persistState({ module: moduleId });
 
   isNavOpen.value = false;
   focusCurrentView();
@@ -378,26 +388,59 @@ function selectModule(moduleId: ModuleId): void {
 
 function showOverview(): void {
   const changed = currentModuleId.value !== null;
-  currentModuleId.value = null;
-  pendingSpecimenId.value = null;
+  const commit = (): void => {
+    currentModuleId.value = null;
+    pendingSpecimenId.value = null;
+  };
   if (changed) {
     window.history.pushState(null, '', locationHref(null));
+    void startViewTransition(commit);
+  } else {
+    commit();
   }
 
   isNavOpen.value = false;
   focusCurrentView();
 }
 
+/* Grid items leave in place while siblings glide into the freed cells: the
+   leaving card is pinned to its own coordinates so the FLIP move class can
+   animate the reflow instead of snapping at the end of the exit. */
+function onCatalogueLeave(element: Element): void {
+  const item = element as HTMLElement;
+  item.style.inlineSize = `${item.offsetWidth}px`;
+  item.style.blockSize = `${item.offsetHeight}px`;
+  item.style.position = 'absolute';
+  item.style.insetBlockStart = `${item.offsetTop}px`;
+  item.style.insetInlineStart = `${item.offsetLeft}px`;
+}
+
 function handleLocationChange(): void {
   const hash = readHash();
+  let targetSpecimenId: SpecimenId | null = null;
   if (hash.length === 0) {
-    currentModuleId.value = null;
-    pendingSpecimenId.value = null;
+    const commit = (): void => {
+      currentModuleId.value = null;
+      pendingSpecimenId.value = null;
+    };
+    if (currentModuleId.value !== null) {
+      void startViewTransition(commit);
+    } else {
+      commit();
+    }
   } else {
     const resolved = resolveLabHash(hash);
     if (resolved !== null) {
-      currentModuleId.value = resolved.moduleId;
-      pendingSpecimenId.value = resolved.specimenId ?? null;
+      targetSpecimenId = resolved.specimenId ?? null;
+      const commit = (): void => {
+        currentModuleId.value = resolved.moduleId;
+        pendingSpecimenId.value = targetSpecimenId;
+      };
+      if (currentModuleId.value !== resolved.moduleId) {
+        void startViewTransition(commit);
+      } else {
+        commit();
+      }
       persistState({ module: resolved.moduleId });
       if (resolved.canonicalHash !== hash) {
         replaceLocation(resolved.canonicalHash);
@@ -413,7 +456,7 @@ function handleLocationChange(): void {
   }
 
   isNavOpen.value = false;
-  focusCurrentView(pendingSpecimenId.value);
+  focusCurrentView(targetSpecimenId);
 }
 
 function openNav(): void {
@@ -479,6 +522,16 @@ onMounted(() => {
   stopSystemThemeObservation = observeSystemTheme();
   window.addEventListener('popstate', handleLocationChange);
   window.addEventListener('hashchange', handleLocationChange);
+  /* Build the WebGL particle resources while idle so the first navigation
+     pays no context-creation cost. */
+  const prewarm = (): void => {
+    prewarmParticleDissolve();
+  };
+  if (typeof window.requestIdleCallback === 'function') {
+    window.requestIdleCallback(prewarm, { timeout: 3000 });
+  } else {
+    window.setTimeout(prewarm, 1200);
+  }
   if (pendingSpecimenId.value !== null) {
     focusCurrentView(pendingSpecimenId.value);
   }
@@ -507,13 +560,15 @@ onBeforeUnmount(() => {
     class="playground-shell flex h-screen w-full flex-col overflow-hidden xl:flex-row"
     @keydown.esc.stop="handleEscape"
   >
-    <button
-      v-if="isNavOpen"
-      type="button"
-      class="fixed inset-0 z-layer-overlay bg-scrim xl:hidden"
-      :aria-label="localize(appCopy.navigation.close, locale)"
-      @click="closeNav(true)"
-    />
+    <Transition name="nv">
+      <button
+        v-if="isNavOpen"
+        type="button"
+        class="fixed inset-0 z-layer-overlay bg-scrim xl:hidden"
+        :aria-label="localize(appCopy.navigation.close, locale)"
+        @click="closeNav(true)"
+      />
+    </Transition>
 
     <aside
       ref="navElement"
@@ -735,7 +790,12 @@ onBeforeUnmount(() => {
             </p>
           </UiSurface>
 
-          <section v-if="isOverview" aria-labelledby="overview-title" class="grid gap-grid">
+          <section
+            v-if="isOverview"
+            aria-labelledby="overview-title"
+            data-neoverse-dissolve=""
+            class="grid gap-grid"
+          >
             <UiSurface
               data-overview-hero
               surface="glass-subtle"
@@ -892,15 +952,22 @@ onBeforeUnmount(() => {
                 </fieldset>
               </div>
 
-              <div data-specimen-catalogue class="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <TransitionGroup
+                name="nv"
+                tag="div"
+                data-specimen-catalogue
+                class="relative grid gap-3 sm:grid-cols-2 xl:grid-cols-3"
+                @leave="onCatalogueLeave"
+              >
                 <UiSurface
-                  v-for="specimen in filteredSpecimens"
+                  v-for="(specimen, index) in filteredSpecimens"
                   :key="specimen.id"
                   as="a"
                   :href="`#${specimen.id}`"
                   surface="glass-subtle"
                   glass-nesting="local"
-                  class="group grid min-w-0 gap-4 rounded-card p-5 transition duration-fast ease-standard hover:-translate-y-0.5 hover:shadow-raised"
+                  class="group grid min-w-0 gap-4 rounded-card p-5"
+                  :style="staggerStyle(index)"
                 >
                   <div class="flex items-start justify-between gap-3">
                     <div class="min-w-0">
@@ -932,17 +999,23 @@ onBeforeUnmount(() => {
                 </UiSurface>
                 <p
                   v-if="filteredSpecimens.length === 0"
+                  key="catalogue-empty"
                   class="sm:col-span-2 xl:col-span-3 text-body text-secondary"
                 >
                   {{ localize(catalogueCopy.noResults, locale) }}
                 </p>
-              </div>
+              </TransitionGroup>
             </UiSurface>
           </section>
 
           <section v-else aria-labelledby="module-title" class="grid gap-grid">
             <div v-if="selectedModule" data-design-lab-region="module" class="grid gap-grid">
-              <component :is="selectedModule.component" :key="selectedModule.id" :locale="locale" />
+              <component
+                :is="selectedModule.component"
+                :key="selectedModule.id"
+                :locale="locale"
+                data-neoverse-dissolve=""
+              />
             </div>
           </section>
         </div>

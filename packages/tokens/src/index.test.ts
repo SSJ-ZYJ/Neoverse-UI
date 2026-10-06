@@ -68,6 +68,10 @@ test('exposes canonical component token namespaces', () => {
   expect(cssVariables.components.disclosure.activeIndicatorForeground).toBe(
     '--neoverse-disclosure-active-indicator-foreground',
   );
+  expect(cssVariables.components.prose.quoteBackground).toBe('--neoverse-prose-quote-background');
+  expect(cssVariables.components.prose.inlineCodeBackground).toBe(
+    '--neoverse-prose-inline-code-background',
+  );
   expect(cssVariables.components.formControl.focusBackground).toBe(
     '--neoverse-form-control-focus-background',
   );
@@ -169,6 +173,7 @@ test('keeps semantic source generic and assigns component token ownership', asyn
     ['components/form-control.css', '--neoverse-form-control-background'],
     ['components/table.css', '--neoverse-table-background'],
     ['components/disclosure.css', '--neoverse-disclosure-background'],
+    ['components/prose.css', '--neoverse-prose-quote-background'],
   ] as const);
 
   for (const [fileName, token] of ownership) {
@@ -208,6 +213,7 @@ test('keeps high-traffic component recipes semantic instead of locally hardcoded
     'tooltip.css',
     'disclosure.css',
     'table.css',
+    'prose.css',
     'badge.css',
     'notice.css',
     'status-indicator.css',
@@ -227,11 +233,12 @@ test('keeps high-traffic component recipes semantic instead of locally hardcoded
 });
 
 test('keeps inset component states on shared material roles', async () => {
-  const [materialCss, formCss, tableCss, disclosureCss] = await Promise.all([
+  const [materialCss, formCss, tableCss, disclosureCss, proseCss] = await Promise.all([
     readTokenCss('material.css'),
     readTokenCss('components/form-control.css'),
     readTokenCss('components/table.css'),
     readTokenCss('components/disclosure.css'),
+    readTokenCss('components/prose.css'),
   ]);
 
   expect(materialCss).toContain('--neoverse-surface-inset-rest-background:');
@@ -254,10 +261,18 @@ test('keeps inset component states on shared material roles', async () => {
   expect(disclosureCss).toContain(
     '--neoverse-disclosure-open-fill: var(--neoverse-surface-inset-strong-fill);',
   );
+  expect(proseCss).toContain(
+    '--neoverse-prose-quote-background: var(--neoverse-surface-inset-strong-background);',
+  );
+  expect(proseCss).toContain('--neoverse-surface-inset-edge-active');
+  expect(proseCss).toContain('--neoverse-surface-inset-alternate-fill');
+  expect(proseCss).toContain('--neoverse-prose-inline-code-shadow:');
+  expect(proseCss).toContain('--neoverse-surface-inset-active-highlight');
 
   expect(formCss).not.toContain('color-mix(');
   expect(tableCss).not.toContain('color-mix(');
   expect(disclosureCss).not.toContain('color-mix(');
+  expect(proseCss).not.toContain('color-mix(');
 });
 
 test('keeps skeleton motion at a calmer loading pace', async () => {
@@ -1161,6 +1176,24 @@ test('exposes Motion duration, easing, and spatial tokens', () => {
   expect(cssVariables.motion.spatialDistance).toBe('--neoverse-motion-spatial-distance');
 });
 
+test('keeps the particle lifetime beyond the delayed incoming entrance', async () => {
+  const motionCss = await readTokenCss('motion.css');
+  const readMilliseconds = (token: string): number => {
+    const raw = motionCss.match(new RegExp(`${token}:\\s*([\\d.]+)(ms|s)`));
+    if (raw?.[1] === undefined || raw[2] === undefined) {
+      throw new Error(`Missing Motion timing token: ${token}`);
+    }
+    const value = Number.parseFloat(raw[1]);
+    return raw[2] === 's' ? value * 1000 : value;
+  };
+
+  const particle = readMilliseconds('--neoverse-motion-particle-duration');
+  const incomingDelay = readMilliseconds('--neoverse-motion-particle-enter-delay');
+  const incomingDuration = readMilliseconds('--neoverse-motion-particle-enter-duration');
+
+  expect(particle - incomingDelay - incomingDuration).toBeGreaterThanOrEqual(200);
+});
+
 test('exposes the optional presentation root-size layout token', async () => {
   const layoutCss = await readTokenCss('layout.css');
 
@@ -1332,8 +1365,13 @@ test('isolates light control refinements from the explicit dark theme', async ()
   expect(builtCss).not.toContain('@neoverse-light-tokens');
   expect(lightBody).toContain('--neoverse-control-segmented-edge-display: block;');
   expect(lightBody).toContain('--neoverse-control-segmented-shell-hover-background-image: var(');
+  expect(lightBody).toContain(
+    '--neoverse-prose-inline-code-background: var(--neoverse-surface-inset-hover-background);',
+  );
+  expect(lightBody).toContain('--neoverse-prose-inline-code-shadow:');
   expect(darkBody).toContain('--neoverse-control-segmented-edge-display: none;');
   expect(darkBody).toContain('--neoverse-control-segmented-shell-hover-background-image: var(');
+  expect(darkBody).not.toContain('--neoverse-prose-inline-code-background:');
 });
 
 test('renders one dark source into matching explicit and system wrappers', async () => {

@@ -97,10 +97,48 @@
     margin-inline: var(--neoverse-disclosure-content-padding-inline);
   }
 
+  /* Progressive disclosure unfolds from the summary edge: the content region
+     interpolates from zero to its natural block size while fading and settling
+     into place. Browsers without interpolate-size/::details-content keep the
+     instant open, which is the correct graceful degradation. */
+  @supports (interpolate-size: allow-keywords) and (selector(::details-content)) {
+    :where(.ui-disclosure, .neoverse-prose details) {
+      interpolate-size: allow-keywords;
+    }
+
+    :where(.ui-disclosure, .neoverse-prose details)::details-content {
+      display: flow-root;
+      block-size: 0;
+      overflow: clip;
+      opacity: 0;
+      translate: 0 calc(var(--neoverse-motion-distance-near) * -1);
+      transition:
+        block-size var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
+        opacity var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
+        translate var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
+        content-visibility var(--neoverse-motion-spatial-duration) allow-discrete;
+    }
+
+    :where(.ui-disclosure, .neoverse-prose details)[open]::details-content {
+      block-size: auto;
+      opacity: 1;
+      translate: 0 0;
+      transition:
+        block-size var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
+        opacity var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
+        translate var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
+        content-visibility var(--neoverse-motion-spatial-duration) allow-discrete;
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     :where(.ui-disclosure, .neoverse-prose details),
     :where(.ui-disclosure__summary, .neoverse-prose summary),
     :where(.ui-disclosure__summary, .neoverse-prose summary)::after {
+      transition: none;
+    }
+
+    :where(.ui-disclosure, .neoverse-prose details)::details-content {
       transition: none;
     }
   }

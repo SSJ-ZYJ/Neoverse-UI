@@ -99,6 +99,14 @@
   --neoverse-material-bloom-elevated: 0 1rem 2.6rem -1.7rem rgb(71 105 126 / 11%);
   --neoverse-material-bloom-immersive: 0 1.2rem 3rem -1.8rem rgb(71 105 126 / 9%);
 
+  /* Inline code needs a denser resting plate on the pale light canvas.
+     Keep Dark on the shared alternate inset recipe and keep this below
+     the stronger quote/callout material. */
+  --neoverse-prose-inline-code-background: var(--neoverse-surface-inset-hover-background);
+  --neoverse-prose-inline-code-shadow:
+    var(--neoverse-surface-inset-edge-active), var(--neoverse-surface-inset-active-highlight),
+    var(--neoverse-surface-inset-bloom-rest);
+
   /* Light elevation stays neutral and progressively deeper. Keeping these
        shadows below the refraction layer prevents the surface boundary from
        reading as a second painted border. */
