@@ -1,6 +1,6 @@
 {
   "name": "@neoverse-ui/tailwind",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "description": "Tailwind CSS v4 semantic theme and component styles for Neoverse UI.",
   "type": "module",
@@ -36,8 +36,8 @@
     "test": "bun run --filter @neoverse-ui/tokens build && bun run --filter @neoverse-ui/motion build && bun run build:theme && tailwindcss -i ./src/contract.css -o ./dist/contract.css --minify && bun ./scripts/assert-contract.ts"
   },
   "dependencies": {
-    "@neoverse-ui/motion": "^0.1.0",
-    "@neoverse-ui/tokens": "^0.1.0"
+    "@neoverse-ui/motion": "^0.2.0",
+    "@neoverse-ui/tokens": "^0.2.0"
   },
   "devDependencies": {
     "@tailwindcss/cli": "4.3.3",

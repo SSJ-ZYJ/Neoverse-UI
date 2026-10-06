@@ -38,11 +38,11 @@
     },
     "packages/giscus-theme": {
       "name": "@neoverse-ui/giscus-theme",
-      "version": "0.1.0",
+      "version": "0.2.0",
     },
     "packages/glass-runtime": {
       "name": "@neoverse-ui/glass-runtime",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "devDependencies": {
         "happy-dom": "^20.11.10",
         "vitest": "^4.1.11",
@@ -50,14 +50,14 @@
     },
     "packages/motion": {
       "name": "@neoverse-ui/motion",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@neoverse-ui/tokens": "^0.1.0",
       },
     },
     "packages/react": {
       "name": "@neoverse-ui/react",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@neoverse-ui/motion": "^0.1.0",
         "@neoverse-ui/tailwind": "^0.1.0",
@@ -74,7 +74,7 @@
     },
     "packages/tailwind": {
       "name": "@neoverse-ui/tailwind",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@neoverse-ui/motion": "^0.1.0",
         "@neoverse-ui/tokens": "^0.1.0",
@@ -86,11 +86,11 @@
     },
     "packages/tokens": {
       "name": "@neoverse-ui/tokens",
-      "version": "0.1.0",
+      "version": "0.2.0",
     },
     "packages/vue": {
       "name": "@neoverse-ui/vue",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "dependencies": {
         "@neoverse-ui/motion": "^0.1.0",
         "@neoverse-ui/tailwind": "^0.1.0",

@@ -1,6 +1,6 @@
 {
   "name": "@neoverse-ui/vue",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "description": "Vue 3 components for the Neoverse UI design system.",
   "type": "module",
@@ -35,8 +35,8 @@
     "vue": ">=3.4.0 <4.0.0"
   },
   "dependencies": {
-    "@neoverse-ui/motion": "^0.1.0",
-    "@neoverse-ui/tailwind": "^0.1.0"
+    "@neoverse-ui/motion": "^0.2.0",
+    "@neoverse-ui/tailwind": "^0.2.0"
   },
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.8",

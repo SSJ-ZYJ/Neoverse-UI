@@ -1,6 +1,6 @@
 {
   "name": "@neoverse-ui/tokens",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "description": "Design tokens, CSS variables, and token-name maps for Neoverse UI.",
   "type": "module",

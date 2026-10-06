@@ -1,6 +1,6 @@
 {
   "name": "@neoverse-ui/motion",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "license": "MIT",
   "description": "Framework-agnostic motion tokens and reduced-motion CSS for Neoverse UI.",
   "type": "module",
@@ -33,7 +33,7 @@
     "test": "bun run --filter @neoverse-ui/tokens build && bun run build:css && bun ./scripts/assert-css.ts && bun test src/index.test.ts"
   },
   "dependencies": {
-    "@neoverse-ui/tokens": "^0.1.0"
+    "@neoverse-ui/tokens": "^0.2.0"
   },
   "publishConfig": {
     "access": "public",
