@@ -29,31 +29,44 @@ const qaCopy = {
     :label="copy.states.default.label"
     :hint="copy.states.default.hint"
     :locale="props.locale"
+    contract-state="default"
   >
     <UiButton>{{ localize(copy.controls.default, props.locale) }}</UiButton>
     <UiButton variant="secondary">{{ localize(copy.controls.secondary, props.locale) }}</UiButton>
     <UiButton variant="ghost">{{ localize(copy.controls.ghost, props.locale) }}</UiButton>
   </StateRow>
-  <StateRow :label="copy.states.hover.label" :hint="copy.states.hover.hint" :locale="props.locale">
+  <StateRow
+    :label="copy.states.hover.label"
+    :hint="copy.states.hover.hint"
+    :locale="props.locale"
+    contract-state="hover"
+  >
     <UiButton>{{ localize(copy.controls.hover, props.locale) }}</UiButton>
   </StateRow>
   <StateRow
     :label="copy.states.active.label"
     :hint="copy.states.active.hint"
     :locale="props.locale"
+    contract-state="active"
   >
     <UiButton>{{ localize(copy.controls.active, props.locale) }}</UiButton>
   </StateRow>
-  <StateRow :label="copy.states.focus.label" :hint="copy.states.focus.hint" :locale="props.locale">
+  <StateRow
+    :label="copy.states.focus.label"
+    :hint="copy.states.focus.hint"
+    :locale="props.locale"
+    contract-state="focus"
+  >
     <UiButton>{{ localize(copy.controls.focus, props.locale) }}</UiButton>
   </StateRow>
-  <StateRow :label="copy.states.disabled.label" :locale="props.locale">
+  <StateRow :label="copy.states.disabled.label" :locale="props.locale" contract-state="disabled">
     <UiButton disabled>{{ localize(copy.controls.disabled, props.locale) }}</UiButton>
   </StateRow>
   <StateRow
     :label="copy.states.loading.label"
     :hint="copy.states.loading.hint"
     :locale="props.locale"
+    contract-state="loading"
   >
     <UiButton loading>{{ localize(copy.controls.loading, props.locale) }}</UiButton>
   </StateRow>

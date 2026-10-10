@@ -351,6 +351,12 @@
       var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-disabled-fill);
     --neoverse-surface-inset-active-highlight: inset 0 var(--neoverse-border-width-thin) 0
       color-mix(in srgb, var(--neoverse-color-edge-light) 16%, transparent);
+    --neoverse-surface-inset-danger-highlight: 0 0 0 var(--neoverse-border-width-thin)
+      color-mix(in srgb, var(--neoverse-color-status-danger) 42%, transparent);
+    --neoverse-surface-inset-warning-highlight: 0 0 0 var(--neoverse-border-width-thin)
+      color-mix(in srgb, var(--neoverse-color-status-warning) 42%, transparent);
+    --neoverse-surface-inset-success-highlight: 0 0 0 var(--neoverse-border-width-thin)
+      color-mix(in srgb, var(--neoverse-color-status-success) 42%, transparent);
     --neoverse-surface-inset-strong-hover-fill: color-mix(
       in srgb,
       var(--neoverse-surface-inset-strong-fill) 72%,

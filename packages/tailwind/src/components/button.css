@@ -135,6 +135,8 @@
   }
 
   .ui-button.material-glass-subtle {
+    /* Button-specific frosted plate; tokens keep fill alpha independent of
+       the surrounding segmented or navigation material. */
     --neoverse-material-filter: var(--neoverse-control-button-filter);
     --neoverse-material-background-fallback: var(--neoverse-color-surface-raised);
     --neoverse-material-edge-refraction-width: var(
@@ -371,8 +373,8 @@
 
   .ui-button[aria-disabled='true'].ui-button--secondary:is(:hover, :active) {
     color: var(--neoverse-control-secondary-foreground);
-    background-image: var(--neoverse-control-secondary-background);
-    background-color: var(--neoverse-control-secondary-fill);
+    background-image: var(--neoverse-control-button-filled-background);
+    background-color: var(--neoverse-control-button-filled-fill);
     box-shadow: var(--neoverse-control-button-edge);
   }
 

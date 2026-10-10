@@ -291,6 +291,14 @@ export const labSpecimens = [
     kind: 'component',
   },
   {
+    id: 'controls-overlays',
+    moduleId: 'controls',
+    label: localized('Overlay primitives', '弹层控件'),
+    apiNames: ['UiPopover', 'UiDropdownMenu'],
+    tags: ['control', 'overlay', 'popover', 'menu', 'top-layer'],
+    kind: 'component',
+  },
+  {
     id: 'controls-navigation-item',
     moduleId: 'controls',
     label: moduleCopy.navigationItem.label,
@@ -384,6 +392,22 @@ export const labSpecimens = [
     label: localized('Select', '选择框'),
     apiNames: ['UiSelect'],
     tags: ['form', 'select', 'selection', 'control'],
+    kind: 'component',
+  },
+  {
+    id: 'forms-choice-controls',
+    moduleId: 'forms',
+    label: localized('Choice controls', '选择控件'),
+    apiNames: ['UiCheckbox', 'UiRadioGroup', 'UiSwitch'],
+    tags: ['form', 'checkbox', 'radio', 'switch', 'selection', 'control'],
+    kind: 'component',
+  },
+  {
+    id: 'forms-field-states',
+    moduleId: 'forms',
+    label: localized('Field states', '字段状态'),
+    apiNames: ['UiField'],
+    tags: ['form', 'field', 'validation', 'readonly', 'message'],
     kind: 'component',
   },
   {

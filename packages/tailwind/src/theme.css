@@ -519,7 +519,12 @@
     /* This field is a set of broad environmental catches, not a border.
        Its gradients fade through the card while the backdrop filter samples
        whatever is behind each catch, so there is no closed geometric loop. */
-    :where(:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)) {
+    :where(
+        :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+          .ui-overlay-panel,
+          .ui-select__popover
+        )
+      ) {
       position: relative;
     }
 

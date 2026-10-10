@@ -7,20 +7,26 @@ import UiBadge from './UiBadge.vue';
 import UiBreadcrumb from './UiBreadcrumb.vue';
 import UiButton from './UiButton.vue';
 import UiCard from './UiCard.vue';
+import UiCheckbox from './UiCheckbox.vue';
 import UiControlSurface from './UiControlSurface.vue';
 import UiDisclosure from './UiDisclosure.vue';
 import UiDock from './UiDock.vue';
+import UiDropdownMenu from './UiDropdownMenu.vue';
+import UiField from './UiField.vue';
 import UiIconButton from './UiIconButton.vue';
 import UiInput from './UiInput.vue';
 import UiNavigationItem from './UiNavigationItem.vue';
 import UiNotice from './UiNotice.vue';
+import UiPopover from './UiPopover.vue';
 import UiPresence from './UiPresence.vue';
+import UiRadioGroup from './UiRadioGroup.vue';
 import UiScrollbar from './UiScrollbar.vue';
 import UiSegmentedControl from './UiSegmentedControl.vue';
 import UiSelect from './UiSelect.vue';
 import UiSkeleton from './UiSkeleton.vue';
 import UiStatusIndicator from './UiStatusIndicator.vue';
 import UiSurface from './UiSurface.vue';
+import UiSwitch from './UiSwitch.vue';
 import UiTable from './UiTable.vue';
 import UiTextarea from './UiTextarea.vue';
 import UiTooltipSurface from './UiTooltipSurface.vue';
@@ -935,6 +941,119 @@ describe('form controls', () => {
     await wrapper.findAll('.ui-select__option')[1]?.trigger('click');
     expect(wrapper.emitted('update:modelValue')).toEqual([['remote']]);
   });
+
+  it('maps validation and readonly state onto native text controls', () => {
+    const input = mount(UiInput, {
+      props: { modelValue: 'Locked', validation: 'error', readonly: true },
+    });
+    expect(input.attributes('data-validation')).toBe('error');
+    expect(input.attributes('readonly')).toBeDefined();
+    expect(input.attributes('aria-invalid')).toBe('true');
+
+    const explicit = mount(UiTextarea, {
+      attrs: { 'aria-invalid': 'false' },
+      props: { validation: 'error' },
+    });
+    expect(explicit.get('textarea').attributes('aria-invalid')).toBe('false');
+  });
+
+  it('uses native checkbox and switch semantics with v-model updates', async () => {
+    const checkbox = mount(UiCheckbox, {
+      props: { modelValue: false },
+      slots: { default: 'Release notifications' },
+    });
+    const checkboxInput = checkbox.get('input');
+    expect(checkboxInput.attributes('type')).toBe('checkbox');
+    await checkboxInput.setValue(true);
+    expect(checkbox.emitted('update:modelValue')).toEqual([[true]]);
+
+    const toggle = mount(UiSwitch, {
+      props: { modelValue: false, validation: 'success' },
+      slots: { default: 'Sync automatically' },
+    });
+    const switchInput = toggle.get('input');
+    expect(switchInput.attributes('role')).toBe('switch');
+    expect(toggle.attributes('data-validation')).toBe('success');
+    await switchInput.setValue(true);
+    expect(toggle.emitted('update:modelValue')).toEqual([[true]]);
+  });
+
+  it('keeps readonly choice controls focusable without emitting mutations', async () => {
+    const checkbox = mount(UiCheckbox, {
+      props: { modelValue: true, readonly: true },
+    });
+    const input = checkbox.get('input');
+    expect(input.attributes('disabled')).toBeUndefined();
+    expect(input.attributes('aria-disabled')).toBe('true');
+    await input.trigger('change');
+    expect(checkbox.emitted('update:modelValue')).toBeUndefined();
+  });
+
+  it('renders a semantic radio group and emits selected values', async () => {
+    const wrapper = mount(UiRadioGroup, {
+      props: {
+        modelValue: 'native',
+        name: 'runtime',
+        ariaLabel: 'Runtime',
+        options: [
+          { value: 'native', label: 'Native' },
+          { value: 'remote', label: 'Remote', description: 'Hosted runtime' },
+        ],
+      },
+    });
+    expect(wrapper.attributes('role')).toBe('radiogroup');
+    expect(wrapper.attributes('aria-label')).toBe('Runtime');
+    const inputs = wrapper.findAll('input[type="radio"]');
+    expect(inputs).toHaveLength(2);
+    await inputs[1]?.setValue(true);
+    expect(wrapper.emitted('update:modelValue')).toEqual([['remote']]);
+  });
+
+  it('composes labels, descriptions, controls and validation messages with UiField', () => {
+    const wrapper = mount(UiField, {
+      props: {
+        controlId: 'field-email',
+        label: 'Email',
+        description: 'Used for release notifications.',
+        message: 'Enter a valid email address.',
+        validation: 'error',
+        required: true,
+      },
+      slots: { default: '<input id="field-email" />' },
+    });
+    expect(wrapper.attributes('data-validation')).toBe('error');
+    expect(wrapper.get('label').attributes('for')).toBe('field-email');
+    expect(wrapper.get('.ui-field__description').text()).toContain('release notifications');
+    expect(wrapper.get('.ui-field__message').text()).toBe('Enter a valid email address.');
+    expect(wrapper.get('.ui-field__required').text()).toBe('*');
+  });
+
+  it('binds native Field state and updates description associations without dangling ids', async () => {
+    const wrapper = mount(UiField, {
+      props: {
+        controlId: 'release-email',
+        label: 'Email',
+        description: 'Release updates',
+        message: 'Invalid email',
+        descriptionId: 'release-help',
+        messageId: 'release-error',
+        required: true,
+        disabled: true,
+      },
+      slots: { default: ({ controlAttrs }) => h(UiInput, { ...controlAttrs, type: 'email' }) },
+    });
+    const input = wrapper.get('input');
+    expect(input.attributes('id')).toBe('release-email');
+    expect(input.attributes('aria-describedby')).toBe('release-help release-error');
+    expect((input.element as HTMLInputElement).required).toBe(true);
+    expect((input.element as HTMLInputElement).disabled).toBe(true);
+    expect(wrapper.get('#release-help').text()).toBe('Release updates');
+    expect(wrapper.get('#release-error').text()).toBe('Invalid email');
+    await wrapper.setProps({ description: '', message: '', required: false, disabled: false });
+    expect(input.attributes('aria-describedby')).toBeUndefined();
+    expect((input.element as HTMLInputElement).required).toBe(false);
+    expect((input.element as HTMLInputElement).disabled).toBe(false);
+  });
 });
 
 describe('UiSegmentedControl', () => {
@@ -1086,5 +1205,67 @@ describe('UiSegmentedControl', () => {
     expect(warn).toHaveBeenCalledWith(
       '[UiSegmentedControl] Duplicate option value "one" makes selection ambiguous.',
     );
+  });
+});
+
+describe('Overlay primitives', () => {
+  it('keeps a controlled Popover open when the parent rejects an Escape request', async () => {
+    const wrapper = mount(UiPopover, {
+      attachTo: document.body,
+      props: { open: true, ariaLabel: 'Controlled details' },
+      slots: { trigger: 'Details', default: '<p>Body</p>' },
+    });
+    await nextTick();
+    const panel = wrapper.get('.ui-popover__content');
+    expect(panel.classes()).toContain('ui-overlay-panel--fallback-open');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await nextTick();
+    await nextTick();
+    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([false]);
+    expect(panel.classes()).toContain('ui-overlay-panel--fallback-open');
+    expect(wrapper.get('button').attributes('aria-expanded')).toBe('true');
+    wrapper.unmount();
+  });
+  it('renders Popover with the shared trigger, top-layer panel, and dialog semantics', () => {
+    const wrapper = mount(UiPopover, {
+      props: { ariaLabel: 'Details' },
+      slots: { trigger: 'Open details', default: '<p>Overlay body</p>' },
+    });
+
+    const trigger = wrapper.get('.ui-popover__trigger');
+    const panel = wrapper.get('.ui-popover__content');
+    expect(trigger.attributes('type')).toBe('button');
+    expect(trigger.attributes('aria-expanded')).toBe('false');
+    expect(panel.attributes('popover')).toBe('auto');
+    expect(panel.attributes('role')).toBe('dialog');
+    expect(panel.attributes('aria-label')).toBe('Details');
+    expect(panel.classes()).toContain('material-glass-elevated');
+  });
+
+  it('renders DropdownMenu with native menu items, disabled state, and danger tone', () => {
+    const wrapper = mount(UiDropdownMenu, {
+      props: {
+        ariaLabel: 'Actions',
+        items: [
+          { id: 'open', label: 'Open' },
+          { id: 'disabled', label: 'Disabled', disabled: true },
+          { id: 'archive', label: 'Archive', tone: 'danger' },
+        ],
+      },
+      slots: { trigger: 'Open menu' },
+    });
+
+    const trigger = wrapper.get('.ui-dropdown-menu__trigger');
+    const panel = wrapper.get('.ui-dropdown-menu__panel');
+    expect(trigger.attributes('aria-haspopup')).toBe('menu');
+    expect(panel.attributes('popover')).toBe('auto');
+    expect(panel.attributes('role')).toBe('menu');
+    expect(panel.attributes('aria-label')).toBe('Actions');
+
+    const items = wrapper.findAll('.ui-dropdown-menu__item');
+    expect(items).toHaveLength(3);
+    expect(items[0]?.attributes('role')).toBe('menuitem');
+    expect(items[1]?.attributes('disabled')).toBeDefined();
+    expect(items[2]?.attributes('data-tone')).toBe('danger');
   });
 });

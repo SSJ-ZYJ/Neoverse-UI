@@ -11,7 +11,8 @@ The repository is a Bun workspace. Public-package dependencies use explicit SemV
 | `@neoverse-ui/tokens` | Stable | Framework-agnostic CSS Variables and token-name maps |
 | `@neoverse-ui/tailwind` | Stable | Tailwind v4 semantic theme and shared component selectors |
 | `@neoverse-ui/motion` | Stable | CSS motion aliases and reduced-motion policy |
-| `@neoverse-ui/glass-runtime` | Experimental | Optional static WebGL Glass Edge Pass |
+| `@neoverse-ui/overlay-runtime` | Consumer Validation | Framework-agnostic top-layer positioning, tracking, and dismiss runtime |
+| `@neoverse-ui/glass-runtime` | Consumer Validation | Optional shared WebGL Glass Edge Pass with CSS fallback and recovery |
 | `@neoverse-ui/vue` | Consumer Validation | Vue 3 SFC integration |
 | `@neoverse-ui/react` | Consumer Validation | React 19 adapters for consumer-validated shared components |
 | `apps/playground` | Consumer Validation | Design Lab, frame route, and visual baselines |
@@ -21,9 +22,11 @@ The dependency direction is:
 ```text
 tokens -> tailwind
 tokens -> motion
-tailwind + motion -> vue
-tailwind -> react
-tokens + tailwind + motion + vue + react -> playground
+overlay-runtime -> vue
+overlay-runtime -> react
+tailwind + motion + overlay-runtime -> vue
+tailwind + overlay-runtime -> react
+tokens + tailwind + motion + overlay-runtime + vue + react -> playground
 glass-runtime -> playground (optional enhancement)
 ```
 
@@ -38,10 +41,13 @@ packages/tokens/src/
   primitives.css  semantic.css  geometry.css  typography.css
   material.css    layout.css    motion.css
   components/
-    shared-control.css  button.css       action.css
-    breadcrumb.css      navigation-item.css control-surface.css
+    shared-control.css   button.css          action.css
+    breadcrumb.css       navigation-item.css control-surface.css
+    form-control.css     overlay.css         disclosure.css
+    table.css
     status-indicator.css segmented-control.css badge.css
-    skeleton.css        scrollbar.css
+    skeleton.css         scrollbar.css       notice.css
+    tooltip.css          prose.css
   themes/
     light.css            dark.css
 ```
@@ -80,12 +86,24 @@ UiControlSurface
 UiDock
 UiSurface
 UiCard
+UiCheckbox
+UiRadioGroup
+UiSwitch
+UiField
+UiInput
+UiTextarea
+UiSelect
+UiPopover
+UiDropdownMenu
+UiTable
+UiDisclosure
 UiBadge
 UiStatusIndicator
 UiNotice
 UiTooltipSurface
 UiSkeleton
 UiScrollbar
+UiPresence
 ```
 
 They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. Components that own a visual plane consume the shared `surface` contract instead of hard-coding Glass as an intrinsic component trait. `UiButton`, `UiAction`, `UiIconButton`, and `UiSegmentedControl` use `glass-subtle` as their canonical default, while `UiNavigationItem` defaults to `none` so grouped navigation inherits the parent chrome rather than creating nested Glass. `UiSegmentedControl` keeps its active slider and keyboard interaction independent from the outer Surface, so `surface="none"` can be used inside a composition that already owns the chrome. `UiSurface` is the generic polymorphic material primitive. `UiCard` owns standard card geometry (`rounded-card` + base card padding) while consuming the same `surface` contract; standard cards should therefore use `UiCard surface="..."` rather than rebuilding card geometry around `UiSurface`. `UiControlSurface` owns one grouped-control chrome boundary and optional trailing separation. It also owns grouped-surface behavior policy: `hoverMode="static"` keeps parent material stable while descendants hover, and `edgeMode="local"` requests a locally rendered Glass edge without exposing renderer attributes to consumers. `UiDock` specializes that contract for reusable floating navigation: it owns Dock layout, chrome, scale, compact composition, and trailing separation while route data, destination state, icons, and trailing controls stay consumer-owned. `UiStatusIndicator` leaves live-region announcements to the caller. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities.
@@ -102,10 +120,30 @@ UiBreadcrumb
 UiDock
 UiSurface
 UiCard
+UiCheckbox
+UiRadioGroup
+UiSwitch
+UiField
+UiInput
+UiTextarea
+UiSelect
+UiPopover
+UiDropdownMenu
+UiTable
+UiDisclosure
 UiNotice
+UiPresence
 ```
 
-React adapters share the same Tailwind component selectors, Surface presets, native interaction semantics, and accessibility expectations as Vue. They intentionally cover concrete React consumer needs rather than claiming full framework parity. `UiAction` supports `asChild` routing composition, `UiBreadcrumb` exposes a custom item renderer seam, `UiDock` exposes the same shared Dock shell while leaving navigation content and active state to the consumer, and native controls preserve refs and platform attributes. Additional adapters are added only when a real consumer requires them.
+React adapters share the same Tailwind component selectors, Surface presets, native interaction semantics, and accessibility expectations as Vue. The canonical shared set currently includes Button, IconButton, Action, Surface, Card, Checkbox, RadioGroup, Switch, Field, Input, Textarea, Select, Popover, DropdownMenu, Table, Disclosure, and Presence. Consumer-driven adapters such as Dock and Breadcrumb remain available where concrete React consumers need them; additional framework parity is added by contract rather than by component-count symmetry. `UiAction` supports `asChild` routing composition, `UiBreadcrumb` exposes a custom item renderer seam, `UiDock` exposes the same shared Dock shell while leaving navigation content and active state to the consumer, and native controls preserve refs and platform attributes. Form controls share the state and accessibility rules documented in [`form-control-contract.md`](./form-control-contract.md). Top-layer controls share the positioning and dismiss rules documented in [`overlay-contract.md`](./overlay-contract.md).
+
+Framework parity is declared in `contracts/framework-parity.json` and validated by `scripts/check-framework-parity.ts`. The contract covers every Canonical Shared component, shared option/item structures, and shared literal unions. Framework-native binding names are normalized explicitly—for example Vue `modelValue` maps to React `value`/`checked`, while Vue `readonly` maps to React `readOnly`. Consumer-driven components are intentionally excluded from this lockstep contract. The React Runtime Fixture is checked against `component-matrix.json` rather than a handwritten component list, so a newly runtime-validated adapter cannot silently miss browser coverage.
+
+## Overlay runtime
+
+`@neoverse-ui/overlay-runtime` owns framework-agnostic anchored-overlay behavior. It computes viewport coordinates, supports automatic top/bottom flipping and edge clamping, accounts for CSS zoom, tracks scroll/resize while open, and uses the native Popover API when available. Browsers without Popover support keep the same fixed-position contract through the fallback class rather than falling back to container-relative absolute positioning.
+
+`UiPopover`, `UiDropdownMenu`, and `UiSelect` all consume this runtime instead of owning independent positioning algorithms. Framework adapters remain responsible for state bindings, focus policy, ARIA roles, and menu keyboard semantics. Generic Glass rules deliberately exclude top-layer panels from their normal `position: relative` context so runtime-owned viewport coordinates remain authoritative.
 
 Display-only semantic primitives do not gain a `surface` prop merely for API symmetry. `UiBadge` owns status/semantic color, `UiStatusIndicator` owns presence language, `UiSkeleton` owns loading geometry/effect, and `UiScrollbar` owns document-scroll runtime. Consumers should wrap those primitives in `UiSurface`, `UiCard`, or `UiControlSurface` when a material plane is needed instead of making every primitive a Glass surface.
 
@@ -125,13 +163,13 @@ Independent Glass surfaces must render their own tint, border, backdrop filter, 
 | Elevated | CSS baseline | automatically discovered when the renderer is mounted |
 | Immersive | CSS baseline | automatically discovered when the renderer is mounted |
 
-`createGlassRenderer()` creates at most one non-interactive Canvas per Document, prefers WebGL2, falls back to WebGL1, and keeps CSS active if neither context works. It renders independent eligible Glass surfaces, including nested ones, when they are visible, non-zero, on-screen, and not hidden by computed style. Device Pixel Ratio is capped by `maxDevicePixelRatio` (default 2).
+`createGlassRenderer()` creates at most one non-interactive Canvas per Document, prefers WebGL2, falls back to WebGL1, and keeps CSS active if neither context works. Mount/destroy cycles are idempotent, and a renderer may be mounted again after destroy without duplicating Canvas or observers. It renders independent eligible Glass surfaces, including nested ones, when they are visible, non-zero, on-screen, and not hidden by computed style. Device Pixel Ratio is normalized and capped by `maxDevicePixelRatio` (default 2).
 
 WebGL draws one directional edge per independently materialized Glass surface, including surfaces nested inside Glass containers. Only explicitly inherited nested groupings suppress their own edge. Components with a dedicated edge recipe, such as `UiSegmentedControl`, and masked scrolling navigation groups can keep the CSS edge by opting out of WebGL using `data-neoverse-glass-edge-pass="css"`. While WebGL owns a surface's edge, its CSS `::before` stays disabled to prevent a duplicate ring; when WebGL is unavailable, CSS supplies the fallback edge. Reduced transparency disables both refraction passes.
 
 The edge pass retains the original directional silhouette and material plane. A cached texture rasterizes the computed CSS background layers of each surface's ancestors, including gradients and readable background images. The shader takes nearby pixels from that texture instead of theme accents or fixed chromatic fringes. Unreadable images keep a neutral catch; the texture does not capture arbitrary foreground DOM content. Card and Surface CSS fallback fields retain native backdrop filtering with neutral directional lighting. A white backdrop stays achromatic.
 
-The renderer listens for DOM, resize, scroll, and theme changes. `webglcontextlost` immediately removes the renderer marker and hides the Canvas so CSS takes over; `webglcontextrestored` rebuilds the shared pass. `prefers-reduced-transparency` keeps the renderer on CSS. The root `data-neoverse-glass-renderer` attribute and the Canvas `data-neoverse-glass-renderer-canvas` attribute expose the active state for development diagnostics.
+The renderer listens for DOM, resize, scroll, toggle, theme, Glass nesting, and edge-ownership changes. Refresh requests are coalesced to one animation frame, while active CSS motion is repainted only for as long as the affected animation remains live. ResizeObserver subscriptions are reconciled against the current eligible surface set so removed or inherited surfaces are unobserved rather than retained indefinitely. `webglcontextlost` prevents the browser's default terminal loss path, removes the renderer marker, and hides the Canvas so CSS takes over; `webglcontextrestored` discards the lost resources and rebuilds the shared pass. `prefers-reduced-transparency` keeps the renderer on CSS. The root `data-neoverse-glass-renderer` attribute and the Canvas `data-neoverse-glass-renderer-canvas` attribute expose the active state for development diagnostics.
 
 Compositions that need the complete CSS Glass edge while the shared renderer
 paints other surfaces may set `data-neoverse-glass-edge-pass="css"`. The
@@ -151,6 +189,8 @@ Controls retain compact painted dimensions on every viewport. Shared Button and 
 `apps/playground` uses Bun.serve for the HTML shell, `/frame` theme-isolated documents, built Tailwind CSS, and the Vite browser bundle. The main shell uses the optional presentation root-size role so 100% browser zoom remains readable on wide desktops: 1280 / 1600 / 1920 / 2560 CSS-pixel viewports resolve to 17 / 18 / 19 / 20px. The isolated `/frame` route stays at the canonical 16px component baseline. Persistent navigation begins at the shared `xl` / 1280px breakpoint; narrower layouts keep the same module content behind drawer navigation.
 
 Playground-only composition helpers keep specimen structure consistent without becoming Consumer API. `LabSpecimenSection` owns subsection heading, description, spacing, and optional action placement. `playground-token-grid` and `playground-specimen-grid` use the available content width rather than fixed viewport column counts, while `playground-specimen-panel` and `playground-specimen-row` provide shared specimen geometry. Module specimens select material through `UiSurface surface="..."` instead of directly attaching Glass implementation classes; the Playground shell itself may still use Material classes because its sidebar and sticky header are application chrome boundaries. `StateRow` exposes stable `data-specimen-state-row` markers only for Design Lab validation; these markers are not public component API.
+
+The validation area also acts as the Playground Contract Lab. `apps/playground/src/contract-lab.ts` derives component maturity, release-visual status, runtime validation, and framework parity from the repository contracts instead of maintaining a second component inventory. Interaction-heavy specimens declare stable state ids and browser checks; `StateRow` exposes non-localized `data-contract-state` markers so automation does not depend on English copy. The Contract Lab table mirrors the component matrix and exposes explicit Vue and React runtime-validation entry points. These `data-contract-*` attributes are development/test instrumentation only and are not part of the public package API.
 
 `tests/visual/playground-shell.spec.ts` validates shell scaling, navigation breakpoints, deep links, content overflow, interactive state coverage, and representative geometry across 1280 / 1600 / 1920 desktop widths. `tests/visual/design-lab.spec.ts` captures only `[data-design-lab-region="module"]`, with fixed light/dark query parameters, reduced motion, awaited fonts/images, disabled animation/caret, and separate Playwright projects for a 1920×1080 desktop viewport at 100% CSS-pixel scaling and 390px touch. The desktop module region remains constrained by the semantic content-width role rather than stretching to the full viewport.
 

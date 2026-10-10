@@ -118,10 +118,10 @@ export const groupCopy = {
     ),
   },
   validation: {
-    label: localized('Validation', '产品校验'),
+    label: localized('Contract Lab', '契约实验室'),
     description: localized(
-      'Consumer-facing parity fixtures used to validate the system against real products.',
-      '用于将设计系统与真实消费端产品进行一致性校验的场景。',
+      'Contract coverage, framework parity, runtime behavior, and audited consumer fixtures share one validation area.',
+      '契约覆盖、框架一致性、Runtime 行为与真实消费端校验集中在同一验证区域。',
     ),
   },
 } as const;
@@ -819,10 +819,10 @@ export const moduleCopy = {
     },
   },
   consumerParity: {
-    label: localized('Product Parity', '产品一致性校验'),
+    label: localized('Contract Lab', '契约实验室'),
     description: localized(
-      'Validates the public component API against audited Neoverse product patterns using controlled fake data.',
-      '使用可控假数据，将公开组件 API 与经审计的 Neoverse 产品模式进行一致性校验。',
+      'Audits component coverage and framework/runtime contracts, then validates them against controlled Neoverse product patterns.',
+      '审计组件覆盖、框架与 Runtime 契约，并使用可控 Neoverse 产品模式进行实际校验。',
     ),
     hero: {
       label: localized('Hero Actions', 'Hero 操作区'),

@@ -1,18 +1,23 @@
 import { expect, test } from 'bun:test';
 import { Children, createElement, type ReactElement, type ReactNode } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 import {
   UiAction,
   UiBreadcrumb,
   UiButton,
   UiCard,
+  UiCheckbox,
   UiDisclosure,
   UiDock,
+  UiField,
   UiIconButton,
   UiInput,
   UiNotice,
+  UiRadioGroup,
   UiSelect,
   UiSurface,
+  UiSwitch,
   UiTable,
   UiTextarea,
   uiActionClassName,
@@ -43,28 +48,120 @@ test('form controls preserve native props and compose canonical classes', () => 
   expect(typeof textareaControl.props.onPointerDown).toBe('function');
   expect(typeof textareaControl.props.onBlur).toBe('function');
 
-  const select = UiSelect({
+  const selectHtml = renderToStaticMarkup(
+    createElement(UiSelect, {
+      name: 'runtime',
+      value: 'native',
+      options: [
+        { value: 'native', label: 'Native' },
+        { value: 'remote', label: 'Remote' },
+      ],
+    }),
+  );
+  expect(selectHtml).toContain('<details class="ui-select-shell">');
+  expect(selectHtml).toContain('class="ui-select"');
+  expect(selectHtml).toContain('role="combobox"');
+  expect(selectHtml).toContain('aria-haspopup="listbox"');
+  expect(selectHtml).toContain('aria-expanded="false"');
+  expect(selectHtml).toContain('class="ui-select__indicator"');
+  expect(selectHtml).toContain('role="listbox"');
+  expect(selectHtml).toContain('popover="auto"');
+  expect(selectHtml).toContain('type="hidden" name="runtime" value="native"');
+});
+
+test('form controls expose validation and readonly semantics', () => {
+  const input = UiInput({ validation: 'error', readOnly: true }) as TestElement;
+  expect(input.props['data-validation']).toBe('error');
+  expect(input.props['aria-invalid']).toBe(true);
+  expect(input.props.readOnly).toBe(true);
+
+  const selectHtml = renderToStaticMarkup(
+    createElement(UiSelect, {
+      value: 'native',
+      readOnly: true,
+      validation: 'warning',
+      options: [{ value: 'native', label: 'Native' }],
+    }),
+  );
+  expect(selectHtml).toContain('ui-select-shell--readonly');
+  expect(selectHtml).toContain('aria-disabled="true"');
+  expect(selectHtml).toContain('data-validation="warning"');
+});
+
+test('choice controls preserve native input semantics and state callbacks', () => {
+  let checkboxValue = false;
+  const checkbox = UiCheckbox({
+    children: 'Release notifications',
+    onCheckedChange: (value) => {
+      checkboxValue = value;
+    },
+  }) as TestElement;
+  expect(checkbox.type).toBe('label');
+  expect(checkbox.props.className).toBe('ui-choice ui-checkbox');
+  const checkboxInput = Children.toArray(checkbox.props.children)[0] as TestElement;
+  expect(checkboxInput.props.type).toBe('checkbox');
+  (checkboxInput.props.onChange as (event: { currentTarget: { checked: boolean } }) => void)({
+    currentTarget: { checked: true },
+  });
+  expect(checkboxValue).toBe(true);
+
+  const toggle = UiSwitch({ children: 'Sync automatically', validation: 'success' }) as TestElement;
+  const switchInput = Children.toArray(toggle.props.children)[0] as TestElement;
+  expect(switchInput.props.role).toBe('switch');
+  expect(toggle.props['data-validation']).toBe('success');
+});
+
+test('Switch uses native checked state without a competing ARIA state', () => {
+  const html = renderToStaticMarkup(
+    createElement(UiSwitch, { name: 'sync', defaultChecked: true }, 'Sync automatically'),
+  );
+  expect(html).toContain('type="checkbox"');
+  expect(html).toContain('role="switch"');
+  expect(html).toContain('checked=""');
+  expect(html).not.toContain('aria-checked');
+});
+
+test('radio group and field expose composable semantic contracts', () => {
+  let selectedValue: string | number | undefined;
+  const group = UiRadioGroup({
     name: 'runtime',
     value: 'native',
+    'aria-label': 'Runtime',
     options: [
       { value: 'native', label: 'Native' },
-      { value: 'remote', label: 'Remote' },
+      { value: 'remote', label: 'Remote', description: 'Hosted runtime' },
     ],
+    onValueChange: (value) => {
+      selectedValue = value;
+    },
   }) as TestElement;
-  expect(select.type).toBe('details');
-  expect(select.props.className).toBe('ui-select-shell');
-  const selectChildren = Children.toArray(select.props.children) as TestElement[];
-  expect(selectChildren[0]?.type).toBe('summary');
-  expect(selectChildren[0]?.props.className).toBe('ui-select');
-  expect(typeof selectChildren[0]?.props.onPointerDown).toBe('function');
-  expect(typeof selectChildren[0]?.props.onBlur).toBe('function');
-  const triggerChildren = Children.toArray(selectChildren[0]?.props.children) as TestElement[];
-  expect(triggerChildren[1]?.type).toBe('svg');
-  expect(triggerChildren[1]?.props.className).toBe('ui-select__indicator');
-  expect(selectChildren[1]?.props.role).toBe('listbox');
-  expect(selectChildren[1]?.props.popover).toBe('auto');
-  expect(selectChildren[2]?.type).toBe('input');
-  expect(selectChildren[2]?.props.name).toBe('runtime');
+  expect(group.props.role).toBe('radiogroup');
+  const radioLabels = Children.toArray(group.props.children) as TestElement[];
+  const secondInput = Children.toArray(radioLabels[1]?.props.children)[0] as TestElement;
+  expect(secondInput.props.type).toBe('radio');
+  expect(secondInput.props.name).toBe('runtime');
+  (secondInput.props.onChange as (event: { currentTarget: { checked: boolean } }) => void)({
+    currentTarget: { checked: true },
+  });
+  expect(selectedValue).toBe('remote');
+
+  const fieldHtml = renderToStaticMarkup(
+    createElement(
+      UiField,
+      {
+        controlId: 'email',
+        label: 'Email',
+        description: 'Release notifications',
+        message: 'Enter a valid email.',
+        validation: 'error',
+        required: true,
+      },
+      createElement('input', { id: 'email' }),
+    ),
+  );
+  expect(fieldHtml).toContain('data-validation="error"');
+  expect(fieldHtml).toContain('class="ui-field__label-row"');
+  expect(fieldHtml).toContain('id="email-message" class="ui-field__message"');
 });
 
 test('builds the canonical secondary action contract', () => {

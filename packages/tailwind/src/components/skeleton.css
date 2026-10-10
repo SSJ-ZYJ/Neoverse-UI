@@ -10,11 +10,21 @@
     overflow: hidden;
     background: var(--neoverse-skeleton-fill);
     box-shadow: var(--neoverse-skeleton-edge);
+    -webkit-backdrop-filter: var(--neoverse-skeleton-backdrop-filter);
+    backdrop-filter: var(--neoverse-skeleton-backdrop-filter);
   }
 
   .ui-skeleton--text {
     min-height: var(--neoverse-skeleton-text-min-height);
     border-radius: var(--neoverse-radius-control-inner);
+  }
+
+  /* Glass ancestors already filter the backdrop. Dense grids must not create
+     one extra backdrop surface per placeholder. Keep the shared tint intact. */
+  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
+  :is(.ui-skeleton, .skeleton-surface) {
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
 
   .ui-skeleton--title {
@@ -30,6 +40,9 @@
   }
 
   .ui-skeleton--rect {
+    /* A custom rectangle height may be smaller than a text line. */
+    height: var(--neoverse-skeleton-text-min-height);
+    min-height: 0;
     border-radius: var(--ui-skeleton-radius, var(--neoverse-radius-xs));
   }
 

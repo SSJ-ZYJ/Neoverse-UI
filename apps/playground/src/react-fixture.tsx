@@ -1,8 +1,28 @@
-import { UiAction, UiButton, UiCard, UiIconButton, UiNotice, UiSurface } from '@neoverse-ui/react';
-import { useState } from 'react';
+import {
+  UiAction,
+  UiButton,
+  UiCard,
+  UiCheckbox,
+  UiDisclosure,
+  UiDropdownMenu,
+  UiField,
+  UiIconButton,
+  UiInput,
+  UiNotice,
+  UiPopover,
+  UiPresence,
+  UiRadioGroup,
+  UiSelect,
+  UiSurface,
+  UiSwitch,
+  UiTable,
+  UiTextarea,
+} from '@neoverse-ui/react';
+import { useCallback, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 
 const locale = new URLSearchParams(window.location.search).get('lang') === 'zh' ? 'zh' : 'en';
+const contractMode = new URLSearchParams(window.location.search).has('contract-fixtures');
 document.documentElement.lang = locale === 'zh' ? 'zh-CN' : 'en';
 
 const copy =
@@ -10,7 +30,11 @@ const copy =
     ? {
         eyebrow: 'React Adapter Fixture',
         title: 'React 运行态校验',
-        description: '直接渲染公开 React Adapter，校验 DOM 语义、交互与共享视觉契约。',
+        description:
+          '直接渲染 Canonical Shared React Adapter，校验真实 DOM、状态更新、原生语义与共享视觉契约。',
+        actions: '动作与表面',
+        forms: '表单契约',
+        data: '数据、披露与 Presence',
         action: '打开文档',
         button: '交互按钮',
         icon: '增加计数',
@@ -19,12 +43,41 @@ const copy =
         card: 'React Card',
         surface: 'React Surface',
         count: '计数',
+        email: '通知邮箱',
+        emailDescription: '字段标签、错误状态和原生输入保持同一契约。',
+        notes: '备注',
+        runtime: '运行方式',
+        native: '本地',
+        remote: '远程',
+        notifications: '版本发布通知',
+        channel: '发布通道',
+        stable: '稳定版',
+        preview: '预览版',
+        sync: '自动同步',
+        table: '运行态组件状态',
+        component: '组件',
+        state: '状态',
+        ready: 'Ready',
+        disclosure: '查看运行态细节',
+        disclosureBody: '原生 details/summary 语义由 React Adapter 保留。',
+        presence: 'Presence 内容',
+        presenceShow: '显示 Presence',
+        presenceHide: '隐藏 Presence',
+        popover: '打开 Popover',
+        popoverBody: 'Popover 使用统一的 top-layer overlay runtime。',
+        menu: '打开菜单',
+        menuOpen: '打开',
+        menuArchive: '归档',
+        menuRemove: '移除',
       }
     : {
         eyebrow: 'React Adapter Fixture',
         title: 'React runtime validation',
         description:
-          'Public React adapters are rendered directly to validate DOM semantics, interaction, and the shared visual contract.',
+          'Canonical Shared React adapters are rendered directly to validate real DOM, state updates, native semantics, and the shared visual contract.',
+        actions: 'Actions and surfaces',
+        forms: 'Form contract',
+        data: 'Data, disclosure, and presence',
         action: 'Open documentation',
         button: 'Interactive button',
         icon: 'Increase count',
@@ -33,10 +86,64 @@ const copy =
         card: 'React Card',
         surface: 'React Surface',
         count: 'Count',
+        email: 'Notification email',
+        emailDescription: 'Field labels, validation state, and native input share one contract.',
+        notes: 'Notes',
+        runtime: 'Runtime',
+        native: 'Native',
+        remote: 'Remote',
+        notifications: 'Release notifications',
+        channel: 'Release channel',
+        stable: 'Stable',
+        preview: 'Preview',
+        sync: 'Automatic synchronization',
+        table: 'Runtime component state',
+        component: 'Component',
+        state: 'State',
+        ready: 'Ready',
+        disclosure: 'Show runtime details',
+        disclosureBody: 'Native details/summary semantics are preserved by the React adapter.',
+        presence: 'Presence content',
+        presenceShow: 'Show presence',
+        presenceHide: 'Hide presence',
+        popover: 'Open popover',
+        popoverBody: 'Popover uses the shared top-layer overlay runtime.',
+        menu: 'Open menu',
+        menuOpen: 'Open',
+        menuArchive: 'Archive',
+        menuRemove: 'Remove',
       };
 
+const runtimeOptions = [
+  { value: 'native', label: copy.native },
+  { value: 'remote', label: copy.remote },
+] as const;
+
+const channelOptions = [
+  { value: 'stable', label: copy.stable },
+  { value: 'preview', label: copy.preview },
+] as const;
+
 function ReactFixture() {
+  const [controlledOpen, setControlledOpen] = useState(false);
+  const [controlledMounted, setControlledMounted] = useState(true);
+  const [dismissAttempts, setDismissAttempts] = useState(0);
+  const requestControlledOpen = useCallback((value: boolean) => {
+    if (value) setControlledOpen(true);
+    else setDismissAttempts((count) => count + 1);
+  }, []);
+  const [formNotifications, setFormNotifications] = useState(true);
+  const [formChannel, setFormChannel] = useState<string | number>(2);
+  const [formSync, setFormSync] = useState(true);
   const [count, setCount] = useState(0);
+  const [email, setEmail] = useState('runtime@neoverse.dev');
+  const [notes, setNotes] = useState('Shared React runtime fixture');
+  const [runtime, setRuntime] = useState<string | number>('native');
+  const [notifications, setNotifications] = useState(true);
+  const [channel, setChannel] = useState<string | number>('stable');
+  const [autoSync, setAutoSync] = useState(true);
+  const [presenceVisible, setPresenceVisible] = useState(true);
+  const [menuSelection, setMenuSelection] = useState('');
 
   return (
     <main
@@ -55,6 +162,7 @@ function ReactFixture() {
         className="grid gap-4 rounded-card p-4"
         data-react-adapter="UiSurface"
       >
+        <h2 className="text-subtitle font-heading tracking-heading text-primary">{copy.actions}</h2>
         <div className="flex flex-wrap items-center gap-2">
           <UiAction
             href="#react-runtime-fixture"
@@ -79,7 +187,35 @@ function ReactFixture() {
           >
             +
           </UiIconButton>
+
+          <div data-react-adapter="UiPopover">
+            <UiPopover trigger={copy.popover} ariaLabel={copy.popover}>
+              <p className="max-w-container-xs p-2 text-body-sm text-secondary">
+                {copy.popoverBody}
+              </p>
+            </UiPopover>
+          </div>
+
+          <div data-react-adapter="UiDropdownMenu">
+            <UiDropdownMenu
+              trigger={copy.menu}
+              ariaLabel={copy.menu}
+              items={[
+                { id: 'open', label: copy.menuOpen },
+                { id: 'archive', label: copy.menuArchive },
+                ...(contractMode
+                  ? [{ id: 'disabled', label: 'Disabled action', disabled: true }]
+                  : []),
+                { id: 'remove', label: copy.menuRemove, tone: 'danger' },
+              ]}
+              onSelect={(item) => setMenuSelection(item.id)}
+            />
+          </div>
         </div>
+
+        <output className="text-caption text-secondary" aria-live="polite" data-react-overlay-state>
+          {menuSelection}
+        </output>
 
         <UiNotice
           variant="info"
@@ -94,12 +230,246 @@ function ReactFixture() {
         </UiNotice>
 
         <UiCard as="article" surface="elevated" className="grid gap-2" data-react-adapter="UiCard">
-          <h2 className="text-subtitle font-heading tracking-heading text-primary">{copy.card}</h2>
-          <p className="text-body text-secondary">
+          <h3 className="text-subtitle font-heading tracking-heading text-primary">{copy.card}</h3>
+          <p className="text-body text-secondary" data-react-count>
             {copy.surface} · {copy.count} {count}
           </p>
         </UiCard>
       </UiSurface>
+
+      <UiSurface surface="glass-subtle" className="grid gap-4 rounded-card p-4">
+        <h2 className="text-subtitle font-heading tracking-heading text-primary">{copy.forms}</h2>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <UiField
+            controlId="react-runtime-email"
+            label={copy.email}
+            description={copy.emailDescription}
+            required
+            validation="success"
+            data-react-adapter="UiField"
+          >
+            {(controlAttrs) => (
+              <UiInput
+                {...controlAttrs}
+                value={email}
+                validation="success"
+                onChange={(event) => setEmail(event.currentTarget.value)}
+                data-react-adapter="UiInput"
+              />
+            )}
+          </UiField>
+
+          <UiField controlId="react-runtime-notes" label={copy.notes}>
+            {(controlAttrs) => (
+              <UiTextarea
+                {...controlAttrs}
+                value={notes}
+                onChange={(event) => setNotes(event.currentTarget.value)}
+                data-react-adapter="UiTextarea"
+              />
+            )}
+          </UiField>
+
+          <UiField label={copy.runtime}>
+            <UiSelect
+              value={runtime}
+              options={runtimeOptions}
+              name="runtime"
+              onValueChange={setRuntime}
+              data-react-adapter="UiSelect"
+            />
+          </UiField>
+
+          <UiField label={copy.channel}>
+            <UiRadioGroup
+              name="release-channel"
+              value={channel}
+              options={channelOptions}
+              onValueChange={setChannel}
+              aria-label={copy.channel}
+              data-react-adapter="UiRadioGroup"
+            />
+          </UiField>
+
+          <div data-react-adapter="UiCheckbox">
+            <UiCheckbox
+              checked={notifications}
+              onCheckedChange={setNotifications}
+              aria-label={copy.notifications}
+            >
+              {copy.notifications}
+            </UiCheckbox>
+          </div>
+
+          <div data-react-adapter="UiSwitch">
+            <UiSwitch checked={autoSync} onCheckedChange={setAutoSync} aria-label={copy.sync}>
+              {copy.sync}
+            </UiSwitch>
+          </div>
+        </div>
+
+        <output className="text-caption text-secondary" data-react-form-state aria-live="polite">
+          {email} · {notes} · {String(runtime)} · {String(channel)} · {String(notifications)} ·{' '}
+          {String(autoSync)}
+        </output>
+      </UiSurface>
+
+      <UiSurface surface="glass-subtle" className="grid gap-4 rounded-card p-4">
+        <h2 className="text-subtitle font-heading tracking-heading text-primary">{copy.data}</h2>
+
+        <UiTable caption={copy.table} data-react-adapter="UiTable">
+          <thead>
+            <tr>
+              <th scope="col">{copy.component}</th>
+              <th scope="col">{copy.state}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>React runtime</td>
+              <td>{copy.ready}</td>
+            </tr>
+          </tbody>
+        </UiTable>
+
+        <UiDisclosure summary={copy.disclosure} data-react-adapter="UiDisclosure">
+          <p className="text-body-sm text-secondary">{copy.disclosureBody}</p>
+        </UiDisclosure>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <UiButton
+            size="sm"
+            variant="secondary"
+            data-react-presence-toggle
+            onClick={() => setPresenceVisible((value) => !value)}
+          >
+            {presenceVisible ? copy.presenceHide : copy.presenceShow}
+          </UiButton>
+
+          <UiPresence
+            show={presenceVisible}
+            variant="pop"
+            origin="start"
+            className="rounded-control px-3 py-2 text-body-sm text-primary"
+            data-react-adapter="UiPresence"
+          >
+            {copy.presence}
+          </UiPresence>
+        </div>
+      </UiSurface>
+      {contractMode ? (
+        <>
+          <div data-overlay-controlled>
+            {controlledMounted ? (
+              <UiPopover
+                open={controlledOpen}
+                trigger="Controlled popover"
+                ariaLabel="Controlled details"
+                data-overlay-controlled-popover
+                onOpenChange={requestControlledOpen}
+              >
+                <p>Parent retains open state after a dismiss request.</p>
+              </UiPopover>
+            ) : null}
+            <button type="button" data-overlay-unmount onClick={() => setControlledMounted(false)}>
+              Unmount overlay
+            </button>
+            <output data-overlay-dismiss-attempts>{dismissAttempts}</output>
+          </div>
+          <form
+            data-contract-form
+            className="grid gap-3"
+            onReset={(event) => {
+              event.preventDefault();
+              setFormNotifications(true);
+              setFormChannel(2);
+              setFormSync(true);
+            }}
+          >
+            <UiCheckbox
+              checked={formNotifications}
+              onCheckedChange={setFormNotifications}
+              name="notifications"
+              value="yes"
+              data-contract-checkbox
+            >
+              Notifications
+            </UiCheckbox>
+            <UiRadioGroup
+              value={formChannel}
+              onValueChange={setFormChannel}
+              options={[
+                { value: 1, label: 'First channel' },
+                { value: 2, label: 'Second channel' },
+              ]}
+              name="channel"
+              aria-label="Channel"
+              data-contract-radio
+            />
+            <UiSwitch
+              checked={formSync}
+              onCheckedChange={setFormSync}
+              name="sync"
+              value="yes"
+              data-contract-switch
+            >
+              Synchronization
+            </UiSwitch>
+            <UiCheckbox checked readOnly name="locked" value="yes" data-contract-readonly-checkbox>
+              Locked notifications
+            </UiCheckbox>
+            <UiRadioGroup
+              value={2}
+              readOnly
+              options={[
+                { value: 1, label: 'First channel' },
+                { value: 2, label: 'Second channel' },
+              ]}
+              name="locked-channel"
+              aria-label="Locked channel"
+              data-contract-readonly-radio
+            />
+            <UiSwitch checked readOnly name="locked-sync" value="yes" data-contract-readonly-switch>
+              Locked synchronization
+            </UiSwitch>
+            <UiCheckbox
+              checked
+              disabled
+              name="disabled"
+              value="yes"
+              data-contract-disabled-checkbox
+            >
+              Disabled notifications
+            </UiCheckbox>
+            <button type="reset" data-contract-reset>
+              Reset controlled form
+            </button>
+            <output data-contract-form-state>
+              {String(formNotifications)} / {formChannel} / {String(formSync)} /{' '}
+              {typeof formChannel}
+            </output>
+          </form>
+          <form data-contract-uncontrolled-form className="grid gap-3">
+            <UiCheckbox defaultChecked name="notifications" value="yes">
+              Uncontrolled notifications
+            </UiCheckbox>
+            <UiRadioGroup
+              defaultValue={2}
+              options={[
+                { value: 1, label: 'Uncontrolled first' },
+                { value: 2, label: 'Uncontrolled second' },
+              ]}
+              name="channel"
+              aria-label="Uncontrolled channel"
+            />
+            <UiSwitch defaultChecked name="sync" value="yes">
+              Uncontrolled synchronization
+            </UiSwitch>
+            <button type="reset">Reset native form</button>
+          </form>
+        </>
+      ) : null}
     </main>
   );
 }

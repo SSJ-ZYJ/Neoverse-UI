@@ -1,11 +1,17 @@
 @layer neoverse.tokens {
   :root {
-    /* Skeletons use the same neutral loading material in both themes. */
-    --neoverse-skeleton-fill: color-mix(
+    /* Neutral translucent frost; the opaque plate is only an accessibility fallback. */
+    --neoverse-skeleton-base-fill: color-mix(
       in srgb,
       var(--neoverse-color-text-secondary) 16%,
+      var(--neoverse-color-surface-canvas)
+    );
+    --neoverse-skeleton-fill: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) 26%,
       transparent
     );
+    --neoverse-skeleton-backdrop-filter: blur(12px);
     --neoverse-skeleton-highlight: color-mix(
       in srgb,
       var(--neoverse-color-text-primary) 14%,
@@ -18,5 +24,12 @@
     --neoverse-skeleton-shimmer-duration: 1.25s;
     --neoverse-skeleton-shimmer-easing: var(--neoverse-motion-easing-standard);
     --neoverse-skeleton-pulse-mid-opacity: 0.58;
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    :root {
+      --neoverse-skeleton-fill: var(--neoverse-skeleton-base-fill);
+      --neoverse-skeleton-backdrop-filter: none;
+    }
   }
 }

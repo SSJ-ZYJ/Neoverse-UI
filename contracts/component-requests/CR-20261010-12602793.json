@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261010-12602793",
+  "kind": "new-component",
+  "target": "UiTerminalSurface",
+  "summary": "通用终端窗口 Surface、标题栏与操作槽位",
+  "expected": "基于现有 UiSurface 与 Glass 材质组合终端窗口，提供标题和状态信息、工具按钮槽位、可聚焦容器与 compact/expanded 密度；不包含 XCA 命令、路由或 Boot 动画。应先评估 UiSurface 组合是否已充分。",
+  "acceptanceCriteria": [
+    "Light/Dark/System 下标题栏与边缘具有足够对比度，不出现孤立单色细框，保持现有玻璃折射和焦点语义。",
+    "嵌入式、全屏/放大、窄屏布局复用同一窗口组件，标题/操作区具备 aria 语义；不重建 Glass Renderer。",
+    "提供 Vue 消费示例和真实 XCA 终端宿主视觉回归；若既有 UiSurface 组合足够则记录不新增的结论。"
+  ],
+  "impact": "normal",
+  "status": "reported",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/components/home/HeroSection.vue",
+      "framework": "vue",
+      "scenario": "XCA 首页计划由普通 Hero 改为居中可交互终端，需要统一窗口结构和材质"
+    }
+  ],
+  "createdAt": "2026-10-10T07:43:53.624Z",
+  "updatedAt": "2026-10-10T07:43:53.624Z"
+}

@@ -91,6 +91,7 @@ const copy = {
             data-neoverse-surface-overflow="visible"
             :summary="localize(copy.disclosure.closed, props.locale)"
             data-data-display-disclosure="closed"
+            data-contract-state="default"
           >
             <p class="text-body-sm text-secondary">
               {{ localize(copy.disclosure.closedBody, props.locale) }}
@@ -103,6 +104,7 @@ const copy = {
             :summary="localize(copy.disclosure.open, props.locale)"
             open
             data-data-display-disclosure="open"
+            data-contract-state="open"
           >
             <p class="text-body-sm text-secondary">
               {{ localize(copy.disclosure.openBody, props.locale) }}

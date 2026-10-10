@@ -1,3 +1,5 @@
+import type { PresenceOrigin, PresenceVariant } from '@neoverse-ui/motion';
+import type { OverlayPlacement } from '@neoverse-ui/overlay-runtime';
 import type { Component } from 'vue';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
@@ -185,11 +187,19 @@ export interface SegmentedControlProps {
 
 export type FormControlValue = string | number;
 
-export interface InputProps {
+export type FormControlValidation = 'none' | 'error' | 'warning' | 'success';
+
+export interface FormControlStateProps {
+  validation?: FormControlValidation;
+  disabled?: boolean;
+  readonly?: boolean;
+}
+
+export interface InputProps extends FormControlStateProps {
   modelValue?: FormControlValue;
 }
 
-export interface TextareaProps {
+export interface TextareaProps extends FormControlStateProps {
   modelValue?: string;
 }
 
@@ -199,10 +209,85 @@ export interface SelectOption {
   disabled?: boolean;
 }
 
-export interface SelectProps {
+export interface SelectProps extends FormControlStateProps {
   modelValue?: FormControlValue;
   options: readonly SelectOption[];
   placeholder?: string;
+}
+
+export interface CheckboxProps extends FormControlStateProps {
+  modelValue?: boolean;
+}
+
+export interface RadioOption {
+  value: FormControlValue;
+  label: string;
+  description?: string;
+  disabled?: boolean;
+}
+
+export interface RadioGroupProps extends FormControlStateProps {
+  modelValue?: FormControlValue;
+  options: readonly RadioOption[];
+  name?: string;
+  ariaLabel?: string;
+}
+
+export interface SwitchProps extends FormControlStateProps {
+  modelValue?: boolean;
+}
+
+export interface FieldControlAttrs {
+  id?: string;
+  'aria-describedby'?: string;
+  required?: boolean;
+  disabled?: boolean;
+}
+
+export interface FieldProps {
+  controlId?: string;
+  descriptionId?: string;
+  messageId?: string;
+  label?: string;
+  description?: string;
+  message?: string;
+  validation?: FormControlValidation;
+  required?: boolean;
+  disabled?: boolean;
+}
+
+export interface PopoverProps {
+  open?: boolean | undefined;
+  defaultOpen?: boolean;
+  disabled?: boolean;
+  placement?: OverlayPlacement;
+  matchTriggerWidth?: boolean;
+  ariaLabel?: string;
+}
+
+export type DropdownMenuItemTone = 'default' | 'danger';
+
+export interface DropdownMenuItem {
+  id: string;
+  label: string;
+  disabled?: boolean;
+  tone?: DropdownMenuItemTone;
+}
+
+export interface DropdownMenuProps {
+  items: readonly DropdownMenuItem[];
+  open?: boolean | undefined;
+  defaultOpen?: boolean;
+  disabled?: boolean;
+  placement?: OverlayPlacement;
+  ariaLabel: string;
+}
+
+export interface PresenceProps {
+  show: boolean;
+  variant?: PresenceVariant;
+  origin?: PresenceOrigin;
+  as?: string;
 }
 
 export type SkeletonVariant = 'text' | 'title' | 'avatar' | 'circle' | 'rect';

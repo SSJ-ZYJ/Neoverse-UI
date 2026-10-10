@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { UiSurface } from '@neoverse-ui/vue';
+import type { ContractStateId } from './contract-lab';
 import type { Locale, LocalizedText } from './playground-content';
 import { localize } from './playground-content';
 
@@ -7,6 +8,7 @@ interface StateRowProps {
   label: LocalizedText;
   locale: Locale;
   hint?: LocalizedText;
+  contractState?: ContractStateId;
 }
 
 const props = defineProps<StateRowProps>();
@@ -18,6 +20,7 @@ const props = defineProps<StateRowProps>();
     class="playground-specimen-row grid gap-3"
     data-specimen-state-row
     :data-specimen-label="localize(props.label, props.locale)"
+    :data-contract-state="props.contractState"
     :aria-label="localize(props.label, props.locale)"
   >
     <div class="playground-specimen-row__heading min-w-0" data-specimen-copy>

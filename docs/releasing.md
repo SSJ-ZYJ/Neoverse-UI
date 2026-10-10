@@ -4,6 +4,7 @@ Neoverse UI publishes the following public packages under the npm `@neoverse-ui`
 
 - `@neoverse-ui/tokens`
 - `@neoverse-ui/motion`
+- `@neoverse-ui/overlay-runtime`
 - `@neoverse-ui/glass-runtime`
 - `@neoverse-ui/tailwind`
 - `@neoverse-ui/vue`
@@ -11,6 +12,8 @@ Neoverse UI publishes the following public packages under the npm `@neoverse-ui`
 - `@neoverse-ui/giscus-theme`
 
 `apps/playground` is an internal workspace and is never published.
+
+The current workspace has eight public packages. The new Overlay Runtime must be included in the same release plan as its Vue/React dependents. The pending form/overlay Changeset proposes the 0.3.x contract line; package versions remain 0.2.0 until the approved versioning step. Historical 0.2.0 bootstrap instructions below describe that earlier release sequence; current registry and Trusted Publisher state must be checked at publication time.
 
 ## Release preparation versus publishing
 

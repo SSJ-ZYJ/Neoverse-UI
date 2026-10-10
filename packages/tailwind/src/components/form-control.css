@@ -1,5 +1,7 @@
 @layer components {
   :where(.ui-input, .ui-textarea, .ui-select) {
+    --neoverse-form-control-current-shadow: var(--neoverse-form-control-shadow);
+    --neoverse-form-control-validation-shadow: 0 0 0 var(--neoverse-border-width-none) transparent;
     width: 100%;
     min-height: var(--neoverse-form-control-min-height);
     border: 0;
@@ -7,7 +9,8 @@
     padding: var(--neoverse-form-control-padding-block) var(--neoverse-form-control-padding-inline);
     color: var(--neoverse-form-control-foreground);
     background: var(--neoverse-form-control-background);
-    box-shadow: var(--neoverse-form-control-shadow);
+    box-shadow:
+      var(--neoverse-form-control-current-shadow), var(--neoverse-form-control-validation-shadow);
     font: inherit;
     font-size: var(--neoverse-form-control-font-size);
     line-height: var(--neoverse-form-control-line-height);
@@ -27,15 +30,20 @@
   }
 
   @media (hover: hover) {
-    :where(.ui-input, .ui-textarea, .ui-select):not(:disabled, [aria-disabled='true']):hover {
+    :where(.ui-input, .ui-textarea, .ui-select):not(
+        :disabled,
+        [aria-disabled='true'],
+        [readonly],
+        [aria-readonly='true']
+      ):hover {
       background: var(--neoverse-form-control-hover-background);
-      box-shadow: var(--neoverse-form-control-hover-shadow);
+      --neoverse-form-control-current-shadow: var(--neoverse-form-control-hover-shadow);
     }
   }
 
   :where(.ui-input, .ui-textarea, .ui-select):focus {
     background: var(--neoverse-form-control-focus-background);
-    box-shadow: var(--neoverse-form-control-focus-depth-shadow);
+    --neoverse-form-control-current-shadow: var(--neoverse-form-control-focus-depth-shadow);
   }
 
   :where(.ui-input, .ui-textarea, .ui-select):focus-visible:not(
@@ -44,16 +52,50 @@
     background: var(--neoverse-form-control-focus-background);
     outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
     outline-offset: var(--neoverse-focus-ring-offset);
-    box-shadow: var(--neoverse-form-control-focus-shadow);
+    --neoverse-form-control-current-shadow: var(--neoverse-form-control-focus-shadow);
   }
 
   :where(.ui-input, .ui-textarea, .ui-select):is(:disabled, [aria-disabled='true']) {
     cursor: not-allowed;
     color: var(--neoverse-form-control-disabled-foreground);
     background: var(--neoverse-form-control-disabled-background);
-    box-shadow: var(--neoverse-form-control-shadow);
+    --neoverse-form-control-current-shadow: var(--neoverse-form-control-shadow);
     -webkit-text-fill-color: var(--neoverse-form-control-disabled-foreground);
     opacity: 1;
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select):is([readonly], [aria-readonly='true']) {
+    cursor: default;
+    color: var(--neoverse-form-control-readonly-foreground);
+    background: var(--neoverse-form-control-readonly-background);
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select)[data-validation='error'] {
+    --neoverse-form-control-validation-shadow: var(--neoverse-form-control-validation-error-shadow);
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select)[data-validation='warning'] {
+    --neoverse-form-control-validation-shadow: var(
+      --neoverse-form-control-validation-warning-shadow
+    );
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select)[data-validation='success'] {
+    --neoverse-form-control-validation-shadow: var(
+      --neoverse-form-control-validation-success-shadow
+    );
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select)[data-validation='error']:focus-visible {
+    outline-color: var(--neoverse-form-control-validation-error);
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select)[data-validation='warning']:focus-visible {
+    outline-color: var(--neoverse-form-control-validation-warning);
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select)[data-validation='success']:focus-visible {
+    outline-color: var(--neoverse-form-control-validation-success);
   }
 
   :where(.ui-input, .ui-textarea):disabled::placeholder {
@@ -177,15 +219,10 @@
   }
 
   .ui-select__popover--fallback-open {
-    position: absolute;
-    top: calc(100% + var(--neoverse-select-popover-gap));
-    right: 0;
-    left: 0;
     display: grid;
-    width: auto;
   }
 
-  .ui-select-shell--disabled .ui-select__popover {
+  :where(.ui-select-shell--disabled, .ui-select-shell--readonly) .ui-select__popover {
     display: none;
   }
 
@@ -235,9 +272,260 @@
     opacity: var(--neoverse-select-option-disabled-opacity);
   }
 
+  .ui-choice {
+    position: relative;
+    display: inline-flex;
+    min-width: 0;
+    align-items: flex-start;
+    gap: var(--neoverse-choice-control-label-gap);
+    color: var(--neoverse-form-control-foreground);
+    font-size: var(--neoverse-form-control-font-size);
+    line-height: var(--neoverse-form-control-line-height);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .ui-checkbox {
+    align-items: flex-start;
+  }
+
+  .ui-choice__native {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    margin: 0;
+    opacity: 0;
+    cursor: inherit;
+  }
+
+  .ui-choice__control {
+    --neoverse-choice-validation-shadow: 0 0 0 var(--neoverse-border-width-none) transparent;
+    position: relative;
+    display: inline-grid;
+    width: var(--neoverse-choice-control-size);
+    height: var(--neoverse-choice-control-size);
+    flex: 0 0 auto;
+    place-items: center;
+    overflow: hidden;
+    border-radius: var(--neoverse-choice-control-radius);
+    color: var(--neoverse-choice-control-active-foreground);
+    background: var(--neoverse-choice-control-background);
+    box-shadow: var(--neoverse-choice-control-shadow), var(--neoverse-choice-validation-shadow);
+    -webkit-backdrop-filter: var(--neoverse-form-control-filter);
+    backdrop-filter: var(--neoverse-form-control-filter);
+    transition:
+      background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      box-shadow var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      transform var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
+  }
+
+  .ui-choice__content {
+    display: grid;
+    min-width: 0;
+    gap: var(--neoverse-field-label-gap);
+    padding-block: calc(
+      (var(--neoverse-choice-control-size) - var(--neoverse-form-control-line-height)) /
+      2
+    );
+  }
+
+  .ui-choice__label {
+    color: var(--neoverse-form-control-foreground);
+  }
+
+  .ui-choice__description {
+    color: var(--neoverse-field-description-foreground);
+    font-size: var(--neoverse-typography-caption-size);
+    line-height: var(--neoverse-typography-caption-line-height);
+  }
+
+  .ui-choice__indicator {
+    width: var(--neoverse-choice-control-indicator-size);
+    height: var(--neoverse-choice-control-indicator-size);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--neoverse-border-width-strong);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    opacity: 0;
+    transform: scale(0.72);
+    transition:
+      opacity var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      transform var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
+  }
+
+  .ui-choice__native:checked + .ui-choice__control {
+    background: var(--neoverse-choice-control-active-background);
+    box-shadow:
+      var(--neoverse-choice-control-active-shadow), var(--neoverse-choice-validation-shadow);
+  }
+
+  .ui-choice__native:checked + .ui-choice__control .ui-choice__indicator {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .ui-choice__native:focus-visible + .ui-choice__control {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: var(--neoverse-focus-ring-offset);
+  }
+
+  @media (hover: hover) {
+    .ui-choice:not([data-disabled='true'], [data-readonly='true']):hover .ui-choice__control {
+      background: var(--neoverse-choice-control-hover-background);
+    }
+
+    .ui-choice:not([data-disabled='true'], [data-readonly='true']):has(
+        .ui-choice__native:checked
+      ):hover
+      .ui-choice__control {
+      background: var(--neoverse-choice-control-active-background);
+    }
+  }
+
+  .ui-choice[data-disabled='true'] {
+    cursor: not-allowed;
+    color: var(--neoverse-form-control-disabled-foreground);
+    opacity: var(--neoverse-choice-control-disabled-opacity);
+  }
+
+  .ui-choice[data-readonly='true'] {
+    cursor: default;
+    color: var(--neoverse-form-control-readonly-foreground);
+  }
+
+  :where(.ui-choice[data-validation='error'], .ui-radio-group[data-validation='error']) {
+    --neoverse-choice-validation-color: var(--neoverse-form-control-validation-error);
+  }
+
+  :where(.ui-choice[data-validation='warning'], .ui-radio-group[data-validation='warning']) {
+    --neoverse-choice-validation-color: var(--neoverse-form-control-validation-warning);
+  }
+
+  :where(.ui-choice[data-validation='success'], .ui-radio-group[data-validation='success']) {
+    --neoverse-choice-validation-color: var(--neoverse-form-control-validation-success);
+  }
+
+  :where(.ui-choice[data-validation='error'], .ui-radio-group[data-validation='error'])
+    .ui-choice__control {
+    --neoverse-choice-validation-shadow: var(--neoverse-form-control-validation-error-shadow);
+  }
+
+  :where(.ui-choice[data-validation='warning'], .ui-radio-group[data-validation='warning'])
+    .ui-choice__control {
+    --neoverse-choice-validation-shadow: var(--neoverse-form-control-validation-warning-shadow);
+  }
+
+  :where(.ui-choice[data-validation='success'], .ui-radio-group[data-validation='success'])
+    .ui-choice__control {
+    --neoverse-choice-validation-shadow: var(--neoverse-form-control-validation-success-shadow);
+  }
+
+  :where(.ui-choice, .ui-radio-group)[data-validation]:not([data-validation='none'])
+    .ui-choice__native:focus-visible
+    + .ui-choice__control {
+    outline-color: var(--neoverse-choice-validation-color);
+  }
+
+  .ui-radio-group {
+    display: grid;
+    gap: var(--neoverse-choice-control-group-gap);
+  }
+
+  .ui-radio .ui-choice__control {
+    border-radius: var(--neoverse-radius-pill);
+  }
+
+  .ui-radio .ui-choice__indicator {
+    border-radius: var(--neoverse-radius-pill);
+    background: currentColor;
+    stroke: none;
+  }
+
+  .ui-switch .ui-choice__control {
+    width: var(--neoverse-switch-inline-size);
+    height: var(--neoverse-switch-block-size);
+    border-radius: var(--neoverse-radius-pill);
+  }
+
+  .ui-switch__thumb {
+    position: absolute;
+    inset-block-start: var(--neoverse-switch-thumb-inset);
+    inset-inline-start: var(--neoverse-switch-thumb-inset);
+    width: var(--neoverse-switch-thumb-size);
+    height: var(--neoverse-switch-thumb-size);
+    border-radius: var(--neoverse-radius-pill);
+    background: var(--neoverse-switch-thumb-background);
+    box-shadow: var(--neoverse-switch-thumb-shadow);
+    transition: transform var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  .ui-switch__native:checked + .ui-switch__control .ui-switch__thumb {
+    transform: translateX(
+      calc(
+        var(--neoverse-switch-inline-size) -
+        var(--neoverse-switch-thumb-size) -
+        (var(--neoverse-switch-thumb-inset) * 2)
+      )
+    );
+  }
+
+  .ui-field {
+    display: grid;
+    gap: var(--neoverse-field-gap);
+    min-width: 0;
+  }
+
+  .ui-field__control {
+    min-width: 0;
+  }
+
+  .ui-field__label-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--neoverse-field-label-gap);
+  }
+
+  .ui-field__label {
+    color: var(--neoverse-field-label-foreground);
+    font-size: var(--neoverse-typography-label-sm-size);
+    line-height: var(--neoverse-typography-label-sm-line-height);
+    font-weight: var(--neoverse-typography-label-sm-weight);
+  }
+
+  .ui-field__required,
+  .ui-field__message {
+    color: var(--neoverse-field-message-foreground);
+  }
+
+  .ui-field__description,
+  .ui-field__message {
+    font-size: var(--neoverse-typography-caption-size);
+    line-height: var(--neoverse-typography-caption-line-height);
+  }
+
+  .ui-field__description {
+    color: var(--neoverse-field-description-foreground);
+  }
+
+  .ui-field[data-validation='error'] :where(.ui-field__required, .ui-field__message) {
+    color: var(--neoverse-form-control-validation-error);
+  }
+
+  .ui-field[data-validation='warning'] .ui-field__message {
+    color: var(--neoverse-form-control-validation-warning);
+  }
+
+  .ui-field[data-validation='success'] .ui-field__message {
+    color: var(--neoverse-form-control-validation-success);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     :where(.ui-input, .ui-textarea, .ui-select),
-    .ui-select__option {
+    .ui-select__option,
+    .ui-choice__control,
+    .ui-choice__indicator,
+    .ui-switch__thumb {
       transition: none;
     }
   }

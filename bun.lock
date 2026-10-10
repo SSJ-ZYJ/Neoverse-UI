@@ -52,15 +52,20 @@
       "name": "@neoverse-ui/motion",
       "version": "0.2.0",
       "dependencies": {
-        "@neoverse-ui/tokens": "^0.1.0",
+        "@neoverse-ui/tokens": "^0.2.0",
       },
+    },
+    "packages/overlay-runtime": {
+      "name": "@neoverse-ui/overlay-runtime",
+      "version": "0.2.0",
     },
     "packages/react": {
       "name": "@neoverse-ui/react",
       "version": "0.2.0",
       "dependencies": {
-        "@neoverse-ui/motion": "^0.1.0",
-        "@neoverse-ui/tailwind": "^0.1.0",
+        "@neoverse-ui/motion": "^0.2.0",
+        "@neoverse-ui/overlay-runtime": "^0.2.0",
+        "@neoverse-ui/tailwind": "^0.2.0",
       },
       "devDependencies": {
         "@types/react": "^19.2.18",
@@ -76,8 +81,8 @@
       "name": "@neoverse-ui/tailwind",
       "version": "0.2.0",
       "dependencies": {
-        "@neoverse-ui/motion": "^0.1.0",
-        "@neoverse-ui/tokens": "^0.1.0",
+        "@neoverse-ui/motion": "^0.2.0",
+        "@neoverse-ui/tokens": "^0.2.0",
       },
       "devDependencies": {
         "@tailwindcss/cli": "4.3.3",
@@ -92,8 +97,9 @@
       "name": "@neoverse-ui/vue",
       "version": "0.2.0",
       "dependencies": {
-        "@neoverse-ui/motion": "^0.1.0",
-        "@neoverse-ui/tailwind": "^0.1.0",
+        "@neoverse-ui/motion": "^0.2.0",
+        "@neoverse-ui/overlay-runtime": "^0.2.0",
+        "@neoverse-ui/tailwind": "^0.2.0",
       },
       "devDependencies": {
         "@vitejs/plugin-vue": "^6.0.8",
@@ -105,7 +111,7 @@
         "vue-tsc": "^3.3.11",
       },
       "peerDependencies": {
-        "vue": ">=3.4.0 <4.0.0",
+        "vue": ">=3.5.0 <4.0.0",
       },
     },
   },
@@ -213,6 +219,8 @@
     "@neoverse-ui/glass-runtime": ["@neoverse-ui/glass-runtime@workspace:packages/glass-runtime"],
 
     "@neoverse-ui/motion": ["@neoverse-ui/motion@workspace:packages/motion"],
+
+    "@neoverse-ui/overlay-runtime": ["@neoverse-ui/overlay-runtime@workspace:packages/overlay-runtime"],
 
     "@neoverse-ui/playground": ["@neoverse-ui/playground@workspace:apps/playground"],
 

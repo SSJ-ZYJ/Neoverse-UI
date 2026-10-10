@@ -200,12 +200,29 @@
   /* Light buttons stay airy and pale instead of inheriting the dark navy
        CTA plate. Theme ownership is explicit so the same UiButton/UiAction
        API adapts its material without Consumer overrides. */
-  --neoverse-control-button-filled-background: var(--neoverse-control-secondary-background);
-  --neoverse-control-button-filled-fill: var(--neoverse-control-secondary-fill);
-  --neoverse-control-button-filled-hover-background: var(
-    --neoverse-control-secondary-hover-background
+  /* A button samples the scene through a lightly tinted, blurred plate.
+     Keep this button-only so segmented controls retain their own density. */
+  --neoverse-control-button-filter: blur(18px) saturate(142%) brightness(103%);
+  --neoverse-control-button-filled-background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--neoverse-color-edge-light) 24%, transparent),
+    color-mix(in srgb, var(--neoverse-color-accent-primary) 9%, transparent)
   );
-  --neoverse-control-button-filled-hover-fill: var(--neoverse-control-secondary-hover-fill);
+  --neoverse-control-button-filled-fill: color-mix(
+    in srgb,
+    var(--neoverse-color-surface-glass) 52%,
+    transparent
+  );
+  --neoverse-control-button-filled-hover-background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--neoverse-color-edge-light) 30%, transparent),
+    color-mix(in srgb, var(--neoverse-color-accent-primary) 13%, transparent)
+  );
+  --neoverse-control-button-filled-hover-fill: color-mix(
+    in srgb,
+    var(--neoverse-color-surface-glass) 62%,
+    transparent
+  );
   --neoverse-control-button-filled-shadow: var(--neoverse-control-secondary-shadow);
   --neoverse-control-button-filled-hover-shadow: var(--neoverse-control-secondary-hover-shadow);
   --neoverse-control-button-edge-active: var(--neoverse-control-button-filled-hover-shadow);

@@ -1,4 +1,10 @@
 import { expect, test } from '@playwright/test';
+import {
+  componentContracts,
+  contractLabSummary,
+  interactionContracts,
+} from '../../apps/playground/src/contract-lab';
+import componentMatrix from '../../contracts/component-matrix.json' with { type: 'json' };
 import { presenceVariants } from '../../packages/motion/src/index';
 import { layoutBreakpoints } from '../../packages/tokens/src/index';
 
@@ -1425,6 +1431,10 @@ test('prose and reading fixtures keep mobile overflow inside their content regio
   expect(foundationMetrics.rootScrollWidth).toBe(foundationMetrics.viewportWidth);
 
   await page.goto('/?lang=en#composition-reading', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('#reading-panel pre')).toBeVisible();
+  await expect(page.locator('[data-reading-prose] [data-ui-table-region]')).toBeVisible();
+  await expect(page.locator('[data-reading-long-inline]')).toBeVisible();
+
   const readingMetrics = await page.evaluate(() => {
     const pre = document.querySelector<HTMLElement>('#reading-panel pre');
     const tableScroll = document.querySelector<HTMLElement>(
@@ -1459,6 +1469,47 @@ test('overview catalogue searches public component API names', async ({ page }) 
   const result = page.locator('[data-specimen-catalogue] a[href="#status-feedback-tooltip"]');
   await expect(result).toBeVisible();
   await expect(page.locator('[data-specimen-catalogue] a')).toHaveCount(1);
+});
+
+test('Contract Lab renders the component matrix from shared contract metadata', async ({
+  page,
+}) => {
+  await page.goto('/?lang=en#consumer-parity', { waitUntil: 'domcontentloaded' });
+
+  const lab = page.locator('[data-contract-lab]');
+  await expect(lab).toBeVisible();
+  await expect(lab.locator('[data-contract-summary] > *')).toHaveCount(4);
+  await expect(lab.locator('[data-contract-runtime-framework="vue"]')).toBeVisible();
+  await expect(lab.locator('[data-contract-runtime-framework="react"]')).toHaveAttribute(
+    'href',
+    '/react-fixture?lang=en',
+  );
+
+  const rows = lab.locator('[data-contract-component]');
+  await expect(rows).toHaveCount(contractLabSummary.totalComponents);
+
+  for (const contract of componentContracts) {
+    const row = lab.locator(`[data-contract-component="${contract.name}"]`);
+    await expect(row).toHaveCount(1);
+    await expect(row).toHaveAttribute('data-contract-track', contract.track);
+    await expect(row).toHaveAttribute('data-contract-visual', contract.visual);
+    await expect(row).toHaveAttribute('data-contract-runtime', contract.runtime);
+  }
+});
+
+test('interaction contract metadata resolves to stable state fixtures', async ({ page }) => {
+  for (const contract of interactionContracts) {
+    await page.goto(`/?lang=en#${contract.specimenId}`, { waitUntil: 'domcontentloaded' });
+    const specimen = page.locator(`#${contract.specimenId}`);
+    await expect(specimen).toBeVisible();
+
+    for (const state of contract.states) {
+      await expect(
+        specimen.locator(`[data-contract-state="${state}"]`).first(),
+        `${contract.specimenId} should expose ${state}`,
+      ).toBeVisible();
+    }
+  }
 });
 
 test('control specimens expose the complete interactive state matrix', async ({ page }) => {
@@ -1856,27 +1907,217 @@ test('isolated scrollbar fixture renders the real UiScrollbar overlay', async ({
   await expect.poll(() => scrollbar.getAttribute('data-visible')).toBe('true');
 });
 
-test('React runtime fixture renders and updates the public adapter set', async ({ page }) => {
+test('React runtime fixture renders every runtime-validated adapter and updates real DOM state', async ({
+  page,
+}) => {
   await page.goto('/react-fixture?lang=en', { waitUntil: 'domcontentloaded' });
 
+  const runtimeValidatedAdapters = componentMatrix.components
+    .filter((component) => component.runtime === 'validated')
+    .map((component) => component.name);
+  const canonicalAdapters = componentMatrix.components
+    .filter((component) => component.track === 'canonical-shared')
+    .map((component) => component.name);
+
   const adapters = page.locator('[data-react-adapter]');
-  await expect(adapters).toHaveCount(6);
-  for (const adapter of [
-    'UiSurface',
-    'UiAction',
-    'UiButton',
-    'UiIconButton',
-    'UiNotice',
-    'UiCard',
-  ]) {
+  await expect(adapters).toHaveCount(runtimeValidatedAdapters.length);
+  for (const adapter of runtimeValidatedAdapters) {
     await expect(page.locator(`[data-react-adapter="${adapter}"]`)).toBeVisible();
   }
+  expect(runtimeValidatedAdapters).toEqual(expect.arrayContaining(canonicalAdapters));
 
   const button = page.locator('[data-react-adapter="UiButton"]');
   await expect(button).toContainText('Count 0');
   await button.click();
   await expect(button).toContainText('Count 1');
+  await expect(page.locator('[data-react-count]')).toContainText('Count 1');
   await expect(button).toHaveClass(/ui-button/);
+
+  const action = page.locator('[data-react-adapter="UiAction"]');
+  await expect(action).toHaveAttribute('href', '#react-runtime-fixture');
+
+  const iconButton = page.locator('[data-react-adapter="UiIconButton"]');
+  await expect(iconButton).toHaveAttribute('aria-label', 'Increase count');
+
+  const popoverAdapter = page.locator('[data-react-adapter="UiPopover"]');
+  const popoverTrigger = popoverAdapter.locator('.ui-popover__trigger');
+  const popoverPanel = popoverAdapter.locator('.ui-popover__content');
+  await popoverTrigger.click();
+  await expect(popoverPanel).toBeVisible();
+  await expect(popoverPanel).toHaveAttribute('role', 'dialog');
+  await page.keyboard.press('Escape');
+  await expect(popoverPanel).toBeHidden();
+  await expect(popoverTrigger).toBeFocused();
+
+  const dropdownAdapter = page.locator('[data-react-adapter="UiDropdownMenu"]');
+  const dropdownTrigger = dropdownAdapter.locator('.ui-dropdown-menu__trigger');
+  const dropdownPanel = dropdownAdapter.locator('.ui-dropdown-menu__panel');
+  await dropdownTrigger.click();
+  await expect(dropdownPanel).toBeVisible();
+  const runtimeMenuItems = dropdownPanel.getByRole('menuitem');
+  await expect(runtimeMenuItems.first()).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(runtimeMenuItems.nth(1)).toBeFocused();
+  await runtimeMenuItems.nth(1).click();
+  await expect(page.locator('[data-react-overlay-state]')).toHaveText('archive');
+  await expect(dropdownPanel).toBeHidden();
+  await expect(dropdownTrigger).toBeFocused();
+
+  const email = page.locator('[data-react-adapter="UiInput"]');
+  await expect(page.locator('label[for="react-runtime-email"]')).toHaveText('Notification email');
+  await email.fill('contracts@neoverse.dev');
+  await expect(page.locator('[data-react-form-state]')).toContainText('contracts@neoverse.dev');
+
+  const textarea = page.locator('[data-react-adapter="UiTextarea"]');
+  await textarea.fill('Runtime DOM updated');
+  await expect(page.locator('[data-react-form-state]')).toContainText('Runtime DOM updated');
+
+  const select = page.locator('[data-react-adapter="UiSelect"]');
+  await expect(select).toHaveRole('combobox');
+  await expect(select).toHaveAttribute('aria-expanded', 'false');
+  await select.click();
+  await expect(select).toHaveAttribute('aria-expanded', 'true');
+  const nativeOption = page.getByRole('option', { name: 'Native' });
+  const remoteOption = page.getByRole('option', { name: 'Remote' });
+  await expect(remoteOption).toBeVisible();
+  await nativeOption.focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(remoteOption).toBeFocused();
+  await page.keyboard.press('Home');
+  await expect(nativeOption).toBeFocused();
+  await page.keyboard.press('End');
+  await expect(remoteOption).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(remoteOption).toBeHidden();
+  await expect(select).toBeFocused();
+  await expect(select).toHaveAttribute('aria-expanded', 'false');
+  await select.click();
+  await remoteOption.click();
+  await expect(page.locator('[data-react-form-state]')).toContainText('remote');
+  await expect(select).toHaveAttribute('aria-expanded', 'false');
+
+  const checkbox = page.locator('[data-react-adapter="UiCheckbox"]');
+  await checkbox.locator('.ui-checkbox').click();
+  await expect(page.locator('[data-react-form-state]')).toContainText('false');
+
+  const previewRadio = page.getByRole('radio', { name: 'Preview' });
+  await previewRadio.click();
+  await expect(previewRadio).toBeChecked();
+  await expect(page.locator('[data-react-form-state]')).toContainText('preview');
+
+  const runtimeSwitch = page.getByRole('switch', { name: 'Automatic synchronization' });
+  await expect(runtimeSwitch).toBeChecked();
+  await expect(runtimeSwitch).not.toHaveAttribute('aria-checked');
+  await page.locator('[data-react-adapter="UiSwitch"] .ui-switch').click();
+  await expect(runtimeSwitch).not.toBeChecked();
+  await expect(runtimeSwitch).not.toHaveAttribute('aria-checked');
+
+  const table = page.locator('[data-react-adapter="UiTable"]');
+  await expect(table).toHaveRole('table');
+  await expect(table.locator('caption')).toHaveText('Runtime component state');
+  await expect(table.getByRole('columnheader')).toHaveCount(2);
+
+  const disclosure = page.locator('[data-react-adapter="UiDisclosure"]');
+  await expect(disclosure).not.toHaveAttribute('open', '');
+  await disclosure.locator('summary').click();
+  await expect(disclosure).toHaveAttribute('open', '');
+
+  const presence = page.locator('[data-react-adapter="UiPresence"]');
+  await expect(presence).toBeVisible();
+  const presenceToggle = page.locator('[data-react-presence-toggle]');
+  await presenceToggle.click();
+  await expect(presence).toHaveCount(0);
+  await presenceToggle.click();
+  await expect(page.locator('[data-react-adapter="UiPresence"]')).toBeVisible();
+});
+
+test('Vue Select keeps the shared combobox and option keyboard contract', async ({ page }) => {
+  await page.goto('/frame?theme=light&lang=en#forms', { waitUntil: 'domcontentloaded' });
+
+  const select = page.locator('#forms-select [data-form-select]');
+  const shell = select.locator('xpath=..');
+  await expect(select).toHaveRole('combobox');
+  await expect(select).toHaveAttribute('aria-expanded', 'false');
+
+  await select.click();
+  await expect(select).toHaveAttribute('aria-expanded', 'true');
+
+  const options = shell.getByRole('option');
+  await expect(options).toHaveCount(2);
+  await options.first().focus();
+  await page.keyboard.press('ArrowDown');
+  await expect(options.nth(1)).toBeFocused();
+  await page.keyboard.press('Home');
+  await expect(options.first()).toBeFocused();
+  await page.keyboard.press('End');
+  await expect(options.last()).toBeFocused();
+  await page.keyboard.press('Escape');
+
+  await expect(options.first()).toBeHidden();
+  await expect(select).toBeFocused();
+  await expect(select).toHaveAttribute('aria-expanded', 'false');
+});
+
+test('Vue overlay primitives share top-layer positioning, light dismiss, keyboard focus, and menu navigation', async ({
+  page,
+}) => {
+  await page.goto('/frame?theme=light&lang=en#controls', { waitUntil: 'domcontentloaded' });
+
+  const section = page.locator('#controls-overlays');
+  await expect(section).toBeVisible();
+
+  const popover = section.locator('[data-overlay-popover]');
+  const popoverTrigger = popover.locator('.ui-popover__trigger');
+  const popoverPanel = popover.locator('.ui-popover__content');
+  await popoverTrigger.click();
+  await expect(popoverPanel).toBeVisible();
+
+  const geometry = await popoverPanel.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const rect = element.getBoundingClientRect();
+    return {
+      position: style.position,
+      backdropFilter: style.backdropFilter,
+      left: rect.left,
+      top: rect.top,
+      right: rect.right,
+      bottom: rect.bottom,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+    };
+  });
+  expect(geometry.position).toBe('fixed');
+  expect(geometry.backdropFilter).not.toBe('none');
+  expect(geometry.left).toBeGreaterThanOrEqual(0);
+  expect(geometry.top).toBeGreaterThanOrEqual(0);
+  expect(geometry.right).toBeLessThanOrEqual(geometry.viewportWidth);
+  expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportHeight);
+
+  await page.keyboard.press('Escape');
+  await expect(popoverPanel).toBeHidden();
+  await expect(popoverTrigger).toBeFocused();
+
+  await popoverTrigger.click();
+  await expect(popoverPanel).toBeVisible();
+  await page.mouse.click(8, 8);
+  await expect(popoverPanel).toBeHidden();
+
+  const dropdown = section.locator('[data-overlay-dropdown]');
+  const dropdownTrigger = dropdown.locator('.ui-dropdown-menu__trigger');
+  const menu = dropdown.locator('.ui-dropdown-menu__panel');
+  await dropdownTrigger.click();
+  await expect(menu).toBeVisible();
+
+  const items = menu.getByRole('menuitem');
+  await expect(items.first()).toBeFocused();
+  await page.keyboard.press('ArrowDown');
+  await expect(items.nth(1)).toBeFocused();
+  await page.keyboard.press('End');
+  await expect(items.last()).toBeFocused();
+  await items.nth(1).click();
+  await expect(section.locator('[data-overlay-selection]')).toContainText('archive');
+  await expect(menu).toBeHidden();
+  await expect(dropdownTrigger).toBeFocused();
 });
 
 test('motion playground exercises semantic roles and the current presence contract', async ({
@@ -2446,6 +2687,25 @@ test('light segmented selections keep a visible well, raised plate, and aligned 
     waitUntil: 'domcontentloaded',
   });
   const tabs = page.locator('#controls-surface .ui-control-surface--shared-indicator').last();
+  await page.evaluate(async () => {
+    const surfaces = document.querySelectorAll(
+      '#controls-surface .ui-control-surface--shared-indicator',
+    );
+    const surface = surfaces.item(surfaces.length - 1);
+    const items = surface?.querySelectorAll<HTMLElement>('.ui-navigation-item');
+    const firstItem = items?.item(0);
+    if (!items || firstItem === null || firstItem === undefined) {
+      throw new Error('Missing shared navigation labels for font stabilization');
+    }
+    const style = getComputedStyle(firstItem);
+    const family = style.fontFamily.split(',')[0]?.trim();
+    if (!family) throw new Error('Missing preferred navigation font family');
+    const labels = Array.from(items, (item) => item.textContent ?? '').join(' ');
+    await document.fonts.load(`${style.fontWeight} ${style.fontSize} ${family}`, labels);
+    await new Promise<void>((resolve) => {
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve()));
+    });
+  });
   await tabs.locator('.ui-navigation-item').nth(1).click();
   const selection = await tabs.evaluate((element) => {
     const colorAlpha = (value: string): number => {

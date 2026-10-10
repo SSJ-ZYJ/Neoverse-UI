@@ -81,6 +81,17 @@ test('exposes canonical component token namespaces', () => {
   expect(cssVariables.components.formControl.disabledForeground).toBe(
     '--neoverse-form-control-disabled-foreground',
   );
+  expect(cssVariables.components.formControl.readonlyBackground).toBe(
+    '--neoverse-form-control-readonly-background',
+  );
+  expect(cssVariables.components.formControl.validationError).toBe(
+    '--neoverse-form-control-validation-error',
+  );
+  expect(cssVariables.components.formControl.choiceSize).toBe('--neoverse-choice-control-size');
+  expect(cssVariables.components.formControl.switchInlineSize).toBe(
+    '--neoverse-switch-inline-size',
+  );
+  expect(cssVariables.components.formControl.fieldGap).toBe('--neoverse-field-gap');
   expect('control' in cssVariables).toBe(false);
   expect('scrollbar' in cssVariables).toBe(false);
   expect('skeleton' in cssVariables).toBe(false);
@@ -292,6 +303,57 @@ test('keeps skeleton motion at a calmer loading pace', async () => {
   );
   expect(skeletonCss).toContain('opacity: var(--neoverse-skeleton-pulse-mid-opacity);');
   expect(skeletonCss).not.toContain('opacity: 0.58;');
+});
+
+test('keeps skeletons translucent and blurred with an opaque accessibility fallback', async () => {
+  const [tokens, skeletonCss, darkTheme] = await Promise.all([
+    readTokenCss('components/skeleton.css'),
+    readCssFile(new URL('../../tailwind/src/components/skeleton.css', import.meta.url)),
+    readTokenCss('themes/dark.css'),
+  ]);
+
+  expect(skeletonCss).toContain(
+    '-webkit-backdrop-filter: var(--neoverse-skeleton-backdrop-filter);',
+  );
+  expect(skeletonCss).toContain('backdrop-filter: var(--neoverse-skeleton-backdrop-filter);');
+  expect(tokens).toMatch(/--neoverse-skeleton-backdrop-filter:\s*blur\([1-9]\d*px\)/);
+  expect(tokens).toContain('var(--neoverse-color-surface-canvas)');
+  const fill = tokens.match(/--neoverse-skeleton-fill:\s*color-mix\(([^;]+)\);/)?.[1] ?? '';
+  const fillOpacity = Number(fill.match(/var\(--neoverse-color-text-secondary\)\s+(\d+)%/)?.[1]);
+  expect(fill).toContain('transparent');
+  expect(fill).not.toContain('--neoverse-skeleton-base-fill');
+  expect(fillOpacity).toBeGreaterThanOrEqual(20);
+  expect(fillOpacity).toBeLessThanOrEqual(35);
+  expect(darkTheme).not.toContain('--neoverse-skeleton-fill:');
+  expect(tokens).toContain('(prefers-reduced-transparency: reduce)');
+  expect(tokens).toContain('(forced-colors: active)');
+  expect(tokens).toContain('--neoverse-skeleton-fill: var(--neoverse-skeleton-base-fill);');
+  expect(tokens).toContain('--neoverse-skeleton-backdrop-filter: none;');
+  expect(cssVariables.components.skeleton.backdropFilter).toBe(
+    '--neoverse-skeleton-backdrop-filter',
+  );
+});
+
+test('lets rectangular skeletons honor short custom heights without losing their default size', async () => {
+  const skeletonCss = await readCssFile(
+    new URL('../../tailwind/src/components/skeleton.css', import.meta.url),
+  );
+  const rectRule = skeletonCss.match(/\.ui-skeleton--rect\s*\{([^}]+)\}/)?.[1] ?? '';
+  expect(rectRule).toContain('min-height: 0;');
+  expect(rectRule).toContain('height: var(--neoverse-skeleton-text-min-height);');
+});
+
+test('reuses ancestor Glass blur instead of filtering every nested skeleton cell', async () => {
+  const skeletonCss = await readCssFile(
+    new URL('../../tailwind/src/components/skeleton.css', import.meta.url),
+  );
+  const nestedRule =
+    skeletonCss.match(
+      /:is\(\.material-glass-subtle,\s*\.material-glass-elevated,\s*\.material-glass-immersive\)\s+:is\(\.ui-skeleton,\s*\.skeleton-surface\)\s*\{([^}]+)\}/,
+    )?.[1] ?? '';
+  expect(nestedRule).toContain('-webkit-backdrop-filter: none;');
+  expect(nestedRule).toContain('backdrop-filter: none;');
+  expect(nestedRule).not.toMatch(/background:|opacity:/);
 });
 
 test('keeps immersive scrollbars theme-aware and quiet at rest', async () => {
@@ -569,7 +631,12 @@ test('keeps dark primary and secondary buttons on distinct Glass hierarchy', asy
     /--neoverse-control-button-filled-background:\s*linear-gradient\(\s*145deg,\s*rgb\(181 197 213 \/ 13%\),\s*rgb\(127 147 168 \/ 7%\)\s*\);/g,
   );
   expect(buttonBackground).toHaveLength(1);
-  expect(themesCss).toContain('--neoverse-control-button-filled-fill: transparent;');
+  expect(themesCss).toMatch(
+    /--neoverse-control-button-filled-fill:\s*color-mix\([\s\S]*?--neoverse-color-surface-glass\) 10%,\s*transparent\s*\);/,
+  );
+  expect(themesCss).toMatch(
+    /--neoverse-control-button-filled-hover-fill:\s*color-mix\([\s\S]*?--neoverse-color-surface-glass\) 16%,\s*transparent\s*\);/,
+  );
 
   const primaryBackground = themesCss.match(
     /--neoverse-control-primary-background:([\s\S]*?);/,
@@ -688,12 +755,15 @@ test('aligns light buttons with the pale mint segmented-control surface', async 
   );
   expect(declaration('secondary-background')).not.toContain('var(--neoverse-color-surface-glass)');
   expect(declaration('secondary-fill')).toContain('var(--neoverse-color-surface-glass)');
-  expect(lightCss).toContain(
-    '--neoverse-control-button-filled-background: var(--neoverse-control-secondary-background);',
+  expect(lightCss).toMatch(/--neoverse-control-button-filter:\s*blur\(18px\)/);
+  expect(lightCss).toContain('--neoverse-control-button-filled-background: linear-gradient(');
+  expect(lightCss).toMatch(
+    /--neoverse-control-button-filled-fill:\s*color-mix\([\s\S]*?--neoverse-color-surface-glass\) 52%,\s*transparent\s*\);/,
   );
-  expect(lightCss).toContain(
-    '--neoverse-control-button-filled-fill: var(--neoverse-control-secondary-fill);',
+  expect(lightCss).toMatch(
+    /--neoverse-control-button-filled-hover-fill:\s*color-mix\([\s\S]*?--neoverse-color-surface-glass\) 62%,\s*transparent\s*\);/,
   );
+  expect(lightCss).not.toContain('--neoverse-control-secondary-fill: color-mix(');
   expect(declaration('primary-foreground')).toMatch(
     /var\(\s*--neoverse-control-segmented-active-foreground\s*\)/,
   );
@@ -1157,6 +1227,9 @@ test('keeps inset surface effects owned by the material token layer', async () =
     'disabledFill',
     'disabledBackground',
     'activeHighlight',
+    'dangerHighlight',
+    'warningHighlight',
+    'successHighlight',
     'filter',
     'interactiveActiveScale',
   ]);

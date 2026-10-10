@@ -111,7 +111,19 @@ for (const theme of themes) {
     expect(beforeScroll.verticalGap).toBeGreaterThan(0);
 
     await page.mouse.wheel(0, 80);
-    await page.waitForTimeout(50);
+    await expect
+      .poll(
+        async () => {
+          const geometry = await readGeometry();
+          return {
+            alignedX: Math.abs(geometry.popoverBox.x - geometry.triggerBox.x) < 0.05,
+            matchedWidth: Math.abs(geometry.popoverBox.width - geometry.triggerBox.width) < 0.05,
+            stableGap: Math.abs(geometry.verticalGap - beforeScroll.verticalGap) < 0.05,
+          };
+        },
+        { timeout: 2_000 },
+      )
+      .toEqual({ alignedX: true, matchedWidth: true, stableGap: true });
 
     const afterScroll = await readGeometry();
     expect(afterScroll.popoverBox.x).toBeCloseTo(afterScroll.triggerBox.x, 1);
@@ -1216,31 +1228,70 @@ for (const theme of themes) {
 
 for (const theme of themes) {
   test(`floating toolbar refraction / ${theme}`, async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto(`/frame?theme=${theme}&lang=zh#composition`, {
-      waitUntil: 'domcontentloaded',
+    const remoteFontPattern = /^https:\/\/cdn\.jsdelivr\.net\/.*\.woff2(?:\?.*)?$/;
+    const stallExternalFonts = theme === 'light';
+    const pendingFontRoutes: Promise<void>[] = [];
+    let releaseFontRequests = (): void => undefined;
+    const fontRequestGate = new Promise<void>((resolve) => {
+      releaseFontRequests = resolve;
     });
-    await page.addStyleTag({ content: freezeMotion });
-    await page.evaluate(waitForStableAssets);
+    const firstFontRequest = stallExternalFonts
+      ? page.waitForRequest(remoteFontPattern)
+      : undefined;
 
-    const renderer = await page.locator('html').getAttribute('data-neoverse-glass-renderer');
-    const surface = page.locator('#composition-floating-toolbar > .material-glass-immersive');
-    await expect(surface).toBeVisible();
-    const edge = await surface.evaluate((element) => {
-      const style = getComputedStyle(element, '::before');
-      return {
-        display: style.display,
-        opacity: Number(style.opacity),
-        backgroundImage: style.backgroundImage,
-        backgroundClip: getComputedStyle(element).backgroundClip,
-      };
-    });
+    if (stallExternalFonts) {
+      // This CSS edge assertion does not depend on text shaping. Hold a remote
+      // CJK font request so this test guards against page-wide font waits.
+      await page.route(remoteFontPattern, (route) => {
+        const pendingRoute = (async () => {
+          await fontRequestGate;
+          await route.abort();
+        })();
+        pendingFontRoutes.push(pendingRoute);
+        return pendingRoute;
+      });
+    }
 
-    expect(edge.display).toBe(renderer === 'webgl' ? 'none' : 'block');
-    expect(edge.opacity).toBeGreaterThan(0);
-    expect(edge.backgroundImage).toContain('radial-gradient');
-    if (renderer === 'webgl') {
-      expect(edge.backgroundClip).toBe('padding-box');
+    try {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto(`/frame?theme=${theme}&lang=zh#composition`, {
+        waitUntil: 'domcontentloaded',
+      });
+      if (firstFontRequest !== undefined) {
+        await firstFontRequest;
+        await expect.poll(() => page.evaluate(() => document.fonts?.status)).toBe('loading');
+      }
+      await page.addStyleTag({ content: freezeMotion });
+      await expect(page.locator('html')).toHaveAttribute(
+        'data-neoverse-glass-renderer',
+        /^(webgl|css)$/,
+      );
+
+      const renderer = await page.locator('html').getAttribute('data-neoverse-glass-renderer');
+      const surface = page.locator('#composition-floating-toolbar > .material-glass-immersive');
+      await expect(surface).toBeVisible();
+      const edge = await surface.evaluate((element) => {
+        const style = getComputedStyle(element, '::before');
+        return {
+          display: style.display,
+          opacity: Number(style.opacity),
+          backgroundImage: style.backgroundImage,
+          backgroundClip: getComputedStyle(element).backgroundClip,
+        };
+      });
+
+      expect(edge.display).toBe(renderer === 'webgl' ? 'none' : 'block');
+      expect(edge.opacity).toBeGreaterThan(0);
+      expect(edge.backgroundImage).toContain('radial-gradient');
+      if (renderer === 'webgl') {
+        expect(edge.backgroundClip).toBe('padding-box');
+      }
+    } finally {
+      if (stallExternalFonts) {
+        releaseFontRequests();
+        await Promise.all(pendingFontRoutes);
+        await page.unroute(remoteFontPattern);
+      }
     }
   });
 }
@@ -1445,29 +1496,29 @@ for (const theme of themes) {
 for (const theme of themes) {
   test(`icon button icons stay geometrically centered / ${theme}`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto(`/frame?theme=${theme}&lang=zh#controls`, {
+    const response = await page.goto(`/frame?theme=${theme}&lang=zh#controls`, {
       waitUntil: 'domcontentloaded',
     });
+    expect(response?.status()).toBe(200);
     await page.addStyleTag({ content: freezeMotion });
-    await page.evaluate(waitForStableAssets);
+    const icons = page.locator('#controls-icon-button .ui-button svg');
+    await expect(icons.first()).toBeVisible();
 
-    const centers = await page
-      .locator('#controls-icon-button .ui-button svg')
-      .evaluateAll((icons) =>
-        icons.map((icon) => {
-          const button = icon.closest('button');
-          if (button === null) {
-            return null;
-          }
+    const centers = await icons.evaluateAll((elements) =>
+      elements.map((icon) => {
+        const button = icon.closest('button');
+        if (button === null) {
+          return null;
+        }
 
-          const buttonRect = button.getBoundingClientRect();
-          const iconRect = icon.getBoundingClientRect();
-          return {
-            x: iconRect.left + iconRect.width / 2 - (buttonRect.left + buttonRect.width / 2),
-            y: iconRect.top + iconRect.height / 2 - (buttonRect.top + buttonRect.height / 2),
-          };
-        }),
-      );
+        const buttonRect = button.getBoundingClientRect();
+        const iconRect = icon.getBoundingClientRect();
+        return {
+          x: iconRect.left + iconRect.width / 2 - (buttonRect.left + buttonRect.width / 2),
+          y: iconRect.top + iconRect.height / 2 - (buttonRect.top + buttonRect.height / 2),
+        };
+      }),
+    );
 
     expect(centers.length).toBeGreaterThan(0);
     for (const center of centers) {
@@ -1483,13 +1534,15 @@ for (const theme of themes) {
 for (const theme of themes) {
   test(`ghost button stays borderless while retaining soft depth / ${theme}`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto(`/frame?theme=${theme}&lang=zh#card`, {
+    const response = await page.goto(`/frame?theme=${theme}&lang=zh#card`, {
       waitUntil: 'domcontentloaded',
     });
+    expect(response?.status()).toBe(200);
     await page.addStyleTag({ content: freezeMotion });
-    await page.evaluate(waitForStableAssets);
+    const ghost = page.locator('#card .ui-button--ghost');
+    await expect(ghost).toBeVisible();
 
-    const boundary = await page.locator('#card .ui-button--ghost').evaluate((element) => {
+    const boundary = await ghost.evaluate((element) => {
       const style = getComputedStyle(element);
       const edge = element.querySelector('.ui-button__edge-field');
       if (edge === null) {

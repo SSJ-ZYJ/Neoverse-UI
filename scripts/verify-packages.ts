@@ -8,6 +8,7 @@ const npmRegistry = 'https://registry.npmjs.org/';
 const packageDirs = [
   'tokens',
   'motion',
+  'overlay-runtime',
   'giscus-theme',
   'glass-runtime',
   'tailwind',
@@ -179,6 +180,11 @@ try {
         '.ui-table-region{',
         '.ui-disclosure__content{',
         ':where(.ui-input,.ui-textarea,.ui-select){',
+        '.ui-choice__native',
+        '.ui-switch__native',
+        '.ui-field__message',
+        '.ui-overlay-panel--fallback-open',
+        '.ui-dropdown-menu__item',
       ]) {
         assert(
           consumerCss.includes(fragment),
@@ -250,11 +256,21 @@ try {
     `import { existsSync } from 'node:fs';\n` +
       `import { fileURLToPath } from 'node:url';\n` +
       `import { UiAction as ReactUiAction, UiPresence as ReactUiPresence, useUiPresence } from '@neoverse-ui/react';\n` +
+      `import { UiCheckbox as ReactUiCheckbox, UiRadioGroup as ReactUiRadioGroup, UiSwitch as ReactUiSwitch, UiField as ReactUiField, UiPopover as ReactUiPopover, UiDropdownMenu as ReactUiDropdownMenu, type UiFieldControlAttrs } from '@neoverse-ui/react';\n` +
       `import { UiButton, UiNotice, UiTooltipSurface, UiPresence as VueUiPresence, presence, staggerStyle } from '@neoverse-ui/vue';\n` +
+      `import { UiCheckbox as VueUiCheckbox, UiRadioGroup as VueUiRadioGroup, UiSwitch as VueUiSwitch, UiField as VueUiField, UiPopover as VueUiPopover, UiDropdownMenu as VueUiDropdownMenu, type FieldControlAttrs } from '@neoverse-ui/vue';\n` +
+      `import { showAnchoredOverlay, hideAnchoredOverlay, stopOverlayTracking, positionAnchoredOverlay, resolveAnchoredPosition, type AnchoredOverlayOptions } from '@neoverse-ui/overlay-runtime';\n` +
       `import { cssVariables } from '@neoverse-ui/tokens';\n` +
       `import { createGlassRenderer } from '@neoverse-ui/glass-runtime';\n` +
       `import { startViewTransition, createParticleDissolve, particleDissolvePresets, presenceVariants } from '@neoverse-ui/motion';\n` +
       `if (!ReactUiAction || !UiButton || !UiNotice || !UiTooltipSurface || !cssVariables || !createGlassRenderer) throw new Error('public JS exports are incomplete');\n` +
+      `if (![ReactUiCheckbox, ReactUiRadioGroup, ReactUiSwitch, ReactUiField, ReactUiPopover, ReactUiDropdownMenu, VueUiCheckbox, VueUiRadioGroup, VueUiSwitch, VueUiField, VueUiPopover, VueUiDropdownMenu].every(Boolean)) throw new Error('public form/overlay exports are incomplete');\n` +
+      `if (![showAnchoredOverlay, hideAnchoredOverlay, stopOverlayTracking, positionAnchoredOverlay, resolveAnchoredPosition].every((entry) => typeof entry === 'function')) throw new Error('public Overlay Runtime exports are incomplete');\n` +
+      `const vueFieldAttrs: FieldControlAttrs = { id: 'email', 'aria-describedby': 'email-help', required: true };\n` +
+      `const reactFieldAttrs: UiFieldControlAttrs = vueFieldAttrs;\n` +
+      `const overlayPlacement: AnchoredOverlayOptions['placement'] = 'auto';\n` +
+      `const position = resolveAnchoredPosition({ trigger: { top: 10, right: 110, bottom: 50, left: 10, width: 100, height: 40 }, overlayWidth: 200, overlayHeight: 100, viewport: { width: 800, height: 600 }, gap: 8, placement: overlayPlacement });\n` +
+      `if (reactFieldAttrs['aria-describedby'] !== 'email-help' || position.top !== 58) throw new Error('public form/overlay contracts are incomplete');\n` +
       `if (!ReactUiPresence || !VueUiPresence || typeof useUiPresence !== 'function' || typeof startViewTransition !== 'function' || typeof createParticleDissolve !== 'function') throw new Error('public Motion/Presence exports are incomplete');\n` +
       `if (presence('pop', 'top')['data-neoverse-motion'] !== 'pop' || !('--neoverse-motion-enter-delay' in staggerStyle(1)) || !presenceVariants.includes('rise') || !particleDissolvePresets.medium) throw new Error('public Motion/Presence contracts are incomplete');\n` +
       `for (const specifier of ['@neoverse-ui/tokens/css', '@neoverse-ui/motion/css', '@neoverse-ui/giscus-theme/light.css', '@neoverse-ui/giscus-theme/dark.css', '@neoverse-ui/tailwind/index.css', '@neoverse-ui/tailwind/theme.css', '@neoverse-ui/tailwind/components.css', '@neoverse-ui/tailwind/prose.css', '@neoverse-ui/vue/index.css', '@neoverse-ui/react/index.css']) {\n` +

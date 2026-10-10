@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261010-3F8FF4A9",
+  "kind": "enhancement",
+  "target": "@neoverse-ui/motion",
+  "summary": "可中断的锚点窗口 FLIP 转场能力评估",
+  "expected": "评估通用 anchoredMorph/FLIP 几何过渡帮助器，让同一视图由全屏居中回缩到布局锚点，支持中断、尺寸重测和 reduced-motion；XCA Boot 日志、命令执行和具体路由时序均留在消费者。若仅单项目需要则不提炼。",
+  "acceptanceCriteria": [
+    "resize、跳过、路由切换、重复动画以及动画中途取消均可稳定收口至最终锚点，无重复挂载或残影。",
+    "遵循现有 Motion spatial/enter/exit Token 与 reduced-motion 配置，不能额外创建 Glass WebGL Canvas。",
+    "通用性不足时保留在 XCA Presentation Controller，UI 库只记录设计决策，不新增产品专属动画 API。"
+  ],
+  "impact": "low",
+  "status": "reported",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/components/home/HeroSection.vue",
+      "framework": "vue",
+      "scenario": "XCA 首次访问将使用 Boot → Dock → Reveal，终端从中央大窗口缩回首页居中主终端"
+    }
+  ],
+  "createdAt": "2026-10-10T07:43:54.106Z",
+  "updatedAt": "2026-10-10T07:43:54.106Z"
+}

@@ -17,7 +17,7 @@ const surfaceCopy = {
 </script>
 
 <template>
-  <StateRow :label="copy.states.default.label" :locale="props.locale">
+  <StateRow :label="copy.states.default.label" :locale="props.locale" contract-state="default">
     <UiIconButton :label="localize(copy.controls.addItem, props.locale)">
       <LabIcon name="plus" />
     </UiIconButton>
@@ -28,7 +28,12 @@ const surfaceCopy = {
       <LabIcon name="arrow-right" />
     </UiIconButton>
   </StateRow>
-  <StateRow :label="copy.states.hover.label" :hint="copy.states.hover.hint" :locale="props.locale">
+  <StateRow
+    :label="copy.states.hover.label"
+    :hint="copy.states.hover.hint"
+    :locale="props.locale"
+    contract-state="hover"
+  >
     <UiIconButton :label="localize(copy.controls.hover, props.locale)">
       <LabIcon name="spark" />
     </UiIconButton>
@@ -37,22 +42,28 @@ const surfaceCopy = {
     :label="copy.states.active.label"
     :hint="copy.states.active.hint"
     :locale="props.locale"
+    contract-state="active"
   >
     <UiIconButton :label="localize(copy.controls.active, props.locale)">
       <LabIcon name="plus" />
     </UiIconButton>
   </StateRow>
-  <StateRow :label="copy.states.focus.label" :hint="copy.states.focus.hint" :locale="props.locale">
+  <StateRow
+    :label="copy.states.focus.label"
+    :hint="copy.states.focus.hint"
+    :locale="props.locale"
+    contract-state="focus"
+  >
     <UiIconButton :label="localize(copy.controls.focus, props.locale)">
       <LabIcon name="check" />
     </UiIconButton>
   </StateRow>
-  <StateRow :label="copy.states.disabled.label" :locale="props.locale">
+  <StateRow :label="copy.states.disabled.label" :locale="props.locale" contract-state="disabled">
     <UiIconButton :label="localize(copy.controls.disabled, props.locale)" disabled>
       <LabIcon name="plus" />
     </UiIconButton>
   </StateRow>
-  <StateRow :label="copy.states.loading.label" :locale="props.locale">
+  <StateRow :label="copy.states.loading.label" :locale="props.locale" contract-state="loading">
     <UiIconButton :label="localize(copy.controls.loading, props.locale)" loading>
       <LabIcon name="spark" />
     </UiIconButton>

@@ -11,6 +11,17 @@ const glassSelector = glassClassNames.map((className) => `.${className}`).join('
 const cssEdgePassSelector = '[data-neoverse-glass-edge-pass="css"]';
 const reducedTransparencyQuery = '(prefers-reduced-transparency: reduce)';
 const maxDefaultDevicePixelRatio = 2;
+const glassMutationAttributes = [
+  'class',
+  'style',
+  'hidden',
+  'data-theme',
+  glassRendererAttribute,
+  'data-neoverse-glass-edge-pass',
+  'data-neoverse-glass-edge-pass-active',
+  'data-neoverse-glass-nesting',
+  'data-neoverse-tooltip-surface',
+] as const;
 const maxOccluders = 6;
 const occlusionSampleInset = 2;
 const quadPositions = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
@@ -116,6 +127,20 @@ const getDocument = (candidate?: Document): Document | undefined => {
 
 const getWindow = (ownerDocument?: Document): GlassWindow | undefined =>
   (ownerDocument?.defaultView as GlassWindow | null | undefined) ?? undefined;
+
+const normalizeMaxDevicePixelRatio = (candidate: number | undefined): number => {
+  if (candidate === undefined || !Number.isFinite(candidate)) {
+    return maxDefaultDevicePixelRatio;
+  }
+
+  return Math.max(candidate, 1);
+};
+
+const resolveDevicePixelRatio = (view: Window, maximum: number): number => {
+  const candidate = view.devicePixelRatio;
+  const ratio = Number.isFinite(candidate) && candidate > 0 ? candidate : 1;
+  return Math.min(Math.max(ratio, 1), maximum);
+};
 
 const parseFirstNumber = (value: string, fallback: number): number => {
   const match = /-?[\d.]+/.exec(value);
@@ -704,6 +729,7 @@ class GlassRendererImpl implements GlassRenderer {
   private mutationObserver: MutationObserver | undefined;
   private transparencyQuery: MediaQueryList | undefined;
   private animationFrame: number | undefined;
+  private contextLost = false;
   private readonly animatedElements = new Set<Element>();
   private readonly handleMotion = (event: Event): void => {
     const target = event.target as Element | null;
@@ -720,6 +746,7 @@ class GlassRendererImpl implements GlassRenderer {
   private previousRendererAttribute: string | null = null;
   private readonly handleResize = (): void => this.scheduleRefresh();
   private readonly handleScroll = (): void => this.scheduleRefresh();
+  private readonly handleToggle = (): void => this.scheduleRefresh();
   private readonly handleMutations = (records: MutationRecord[]): void => {
     if (records.every((record) => record.target === this.colorProbe)) {
       return;
@@ -730,18 +757,36 @@ class GlassRendererImpl implements GlassRenderer {
   private readonly handleTransparencyChange = (event: MediaQueryListEvent): void => {
     if (event.matches) {
       this.deactivate();
-    } else if (this.mounted && !this.active) {
+    } else if (this.mounted && !this.active && !this.contextLost) {
       this.activate();
     }
   };
-  private readonly handleContextLoss = (): void => this.deactivate();
+  private readonly handleContextLoss = (event: Event): void => {
+    event.preventDefault();
+    if (!this.active) return;
+
+    this.contextLost = true;
+    this.cancelScheduledRefresh();
+    this.animatedElements.clear();
+    this.disconnectObservers();
+    if (this.canvas !== undefined) {
+      this.canvas.style.display = 'none';
+    }
+    this.restoreRendererAttribute();
+    this.active = false;
+  };
+  private readonly handleContextRestore = (): void => {
+    if (!this.mounted || !this.contextLost) return;
+
+    this.discardLostContext();
+    if (this.transparencyQuery?.matches !== true) {
+      this.activate();
+    }
+  };
 
   public constructor(options: GlassRendererOptions) {
     this.ownerDocument = getDocument(options.document);
-    this.maxDevicePixelRatio = Math.max(
-      options.maxDevicePixelRatio ?? maxDefaultDevicePixelRatio,
-      1,
-    );
+    this.maxDevicePixelRatio = normalizeMaxDevicePixelRatio(options.maxDevicePixelRatio);
   }
 
   public mount(): void {
@@ -760,6 +805,7 @@ class GlassRendererImpl implements GlassRenderer {
     this.transparencyQuery = view?.matchMedia?.(reducedTransparencyQuery);
     this.transparencyQuery?.addEventListener('change', this.handleTransparencyChange);
     this.ownerDocument.addEventListener('scroll', this.handleScroll, true);
+    this.ownerDocument.addEventListener('toggle', this.handleToggle, true);
     for (const event of motionEvents) {
       this.ownerDocument.addEventListener(event, this.handleMotion, true);
     }
@@ -783,6 +829,7 @@ class GlassRendererImpl implements GlassRenderer {
     this.transparencyQuery?.removeEventListener('change', this.handleTransparencyChange);
     this.transparencyQuery = undefined;
     this.ownerDocument?.removeEventListener('scroll', this.handleScroll, true);
+    this.ownerDocument?.removeEventListener('toggle', this.handleToggle, true);
     for (const event of motionEvents) {
       this.ownerDocument?.removeEventListener(event, this.handleMotion, true);
     }
@@ -876,6 +923,7 @@ class GlassRendererImpl implements GlassRenderer {
     this.ownerDocument.body.append(colorProbe);
     this.colorProbe = colorProbe;
     canvas.addEventListener('webglcontextlost', this.handleContextLoss);
+    canvas.addEventListener('webglcontextrestored', this.handleContextRestore);
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, quadPositions, gl.STATIC_DRAW);
     gl.enable(gl.BLEND);
@@ -905,41 +953,71 @@ class GlassRendererImpl implements GlassRenderer {
     }
   }
 
-  private deactivate(): void {
-    if (this.animationFrame !== undefined) {
-      getWindow(this.ownerDocument)?.cancelAnimationFrame(this.animationFrame);
-      this.animationFrame = undefined;
-    }
-    this.animatedElements.clear();
+  private cancelScheduledRefresh(): void {
+    if (this.animationFrame === undefined) return;
+
+    getWindow(this.ownerDocument)?.cancelAnimationFrame(this.animationFrame);
+    this.animationFrame = undefined;
+  }
+
+  private disconnectObservers(): void {
     this.resizeObserver?.disconnect();
     this.resizeObserver = undefined;
     this.observedGlassElements.clear();
     this.mutationObserver?.disconnect();
     this.mutationObserver = undefined;
+  }
+
+  private restoreRendererAttribute(): void {
+    if (this.ownerDocument === undefined) return;
+
+    if (this.previousRendererAttribute === null) {
+      this.ownerDocument.documentElement.removeAttribute(glassRendererAttribute);
+    } else {
+      this.ownerDocument.documentElement.setAttribute(
+        glassRendererAttribute,
+        this.previousRendererAttribute,
+      );
+    }
+  }
+
+  private discardLostContext(): void {
+    if (this.canvas !== undefined) {
+      this.canvas.removeEventListener('webglcontextlost', this.handleContextLoss);
+      this.canvas.removeEventListener('webglcontextrestored', this.handleContextRestore);
+      this.canvas.remove();
+    }
+    this.colorProbe?.remove();
+    this.canvas = undefined;
+    this.colorProbe = undefined;
+    this.gl = undefined;
+    this.program = undefined;
+    this.locations = undefined;
+    this.buffer = undefined;
+    this.previousRendererAttribute = null;
+    this.contextLost = false;
+  }
+
+  private deactivate(): void {
+    this.cancelScheduledRefresh();
+    this.animatedElements.clear();
+    this.disconnectObservers();
 
     if (this.canvas !== undefined) {
       this.canvas.removeEventListener('webglcontextlost', this.handleContextLoss);
+      this.canvas.removeEventListener('webglcontextrestored', this.handleContextRestore);
       this.canvas.remove();
     }
     this.colorProbe?.remove();
 
-    if (this.gl !== undefined && this.program !== undefined) {
+    if (!this.contextLost && this.gl !== undefined && this.program !== undefined) {
       this.gl.deleteProgram(this.program);
     }
-    if (this.gl !== undefined && this.buffer !== undefined) {
+    if (!this.contextLost && this.gl !== undefined && this.buffer !== undefined) {
       this.gl.deleteBuffer(this.buffer);
     }
 
-    if (this.ownerDocument !== undefined) {
-      if (this.previousRendererAttribute === null) {
-        this.ownerDocument.documentElement.removeAttribute(glassRendererAttribute);
-      } else {
-        this.ownerDocument.documentElement.setAttribute(
-          glassRendererAttribute,
-          this.previousRendererAttribute,
-        );
-      }
-    }
+    this.restoreRendererAttribute();
 
     this.canvas = undefined;
     this.colorProbe = undefined;
@@ -948,6 +1026,7 @@ class GlassRendererImpl implements GlassRenderer {
     this.locations = undefined;
     this.buffer = undefined;
     this.previousRendererAttribute = null;
+    this.contextLost = false;
     this.active = false;
   }
 
@@ -992,7 +1071,7 @@ class GlassRendererImpl implements GlassRenderer {
         subtree: true,
         childList: true,
         attributes: true,
-        attributeFilter: ['class', 'style', 'hidden', 'data-theme', glassRendererAttribute],
+        attributeFilter: [...glassMutationAttributes],
       });
       this.mutationObserver = mutationObserver;
     }
@@ -1009,7 +1088,12 @@ class GlassRendererImpl implements GlassRenderer {
       return;
     }
 
-    this.animationFrame = view.requestAnimationFrame(() => {
+    // Reserve the frame slot before calling requestAnimationFrame so test
+    // realms with a synchronous RAF shim cannot leave a stale frame id.
+    this.animationFrame = -1;
+    let completedSynchronously = false;
+    const frame = view.requestAnimationFrame(() => {
+      completedSynchronously = true;
       this.animationFrame = undefined;
       this.refresh();
       // CSS transforms/opacity do not emit DOM mutations or resize events.
@@ -1026,6 +1110,9 @@ class GlassRendererImpl implements GlassRenderer {
       }
       if (this.animatedElements.size > 0) this.scheduleRefresh();
     });
+    if (!completedSynchronously) {
+      this.animationFrame = frame;
+    }
   }
 
   private render(): void {
@@ -1050,7 +1137,7 @@ class GlassRendererImpl implements GlassRenderer {
     const viewport = getCanvasViewport(this.canvas, this.ownerDocument, view);
     const width = viewport.width;
     const height = viewport.height;
-    const pixelRatio = Math.min(Math.max(view.devicePixelRatio || 1, 1), this.maxDevicePixelRatio);
+    const pixelRatio = resolveDevicePixelRatio(view, this.maxDevicePixelRatio);
     const drawingWidth = Math.max(Math.round(width * pixelRatio), 1);
     const drawingHeight = Math.max(Math.round(height * pixelRatio), 1);
     if (this.canvas.width !== drawingWidth || this.canvas.height !== drawingHeight) {
@@ -1221,6 +1308,14 @@ class GlassRendererImpl implements GlassRenderer {
         if (!this.observedGlassElements.has(element)) {
           this.observedGlassElements.add(element);
           this.resizeObserver.observe(element);
+        }
+      }
+
+      const currentSet = new Set(currentElements);
+      for (const element of this.observedGlassElements) {
+        if (!currentSet.has(element)) {
+          this.resizeObserver.unobserve(element);
+          this.observedGlassElements.delete(element);
         }
       }
     }

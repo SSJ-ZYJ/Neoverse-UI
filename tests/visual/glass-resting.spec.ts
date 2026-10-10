@@ -259,6 +259,64 @@ test('Glass CSS edge remains visible when WebGL is unavailable', async ({ page }
   expect(edge.opacity).toBeGreaterThan(0);
 });
 
+test('Glass renderer falls back to CSS and rebuilds after a real WebGL context restore', async ({
+  page,
+}) => {
+  await page.goto('/?theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.dataset.neoverseGlassRenderer))
+    .toBe('webgl');
+
+  const canLoseContext = await page.evaluate(() => {
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    if (canvas === null) throw new Error('The shared Glass renderer canvas is missing');
+    const gl = canvas.getContext('webgl2') ?? canvas.getContext('webgl');
+    if (gl === null) return false;
+    const extension = gl.getExtension('WEBGL_lose_context');
+    if (extension === null) return false;
+    const state = window as typeof window & {
+      __neoverseGlassLoseContext?: { loseContext(): void; restoreContext(): void };
+    };
+    state.__neoverseGlassLoseContext = extension;
+    extension.loseContext();
+    return true;
+  });
+  test.skip(!canLoseContext, 'Chromium does not expose WEBGL_lose_context in this environment.');
+
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.dataset.neoverseGlassRenderer))
+    .toBeUndefined();
+  const fallback = await page.locator('[data-glass-variant="elevated"]').evaluate((element) => {
+    const edge = getComputedStyle(element, '::before');
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    return {
+      edgeDisplay: edge.display,
+      edgeOpacity: Number(edge.opacity),
+      canvasDisplay: canvas?.style.display,
+    };
+  });
+  expect(fallback.edgeDisplay).toBe('block');
+  expect(fallback.edgeOpacity).toBeGreaterThan(0);
+  expect(fallback.canvasDisplay).toBe('none');
+
+  await page.evaluate(() => {
+    const state = window as typeof window & {
+      __neoverseGlassLoseContext?: { loseContext(): void; restoreContext(): void };
+    };
+    state.__neoverseGlassLoseContext?.restoreContext();
+  });
+
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.dataset.neoverseGlassRenderer))
+    .toBe('webgl');
+  await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCount(1);
+  await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCSS('display', 'block');
+});
+
 test('masked scrolling navigation retains its CSS edge independently of WebGL', async ({
   page,
 }) => {

@@ -1,25 +1,12 @@
 <script setup lang="ts">
-import {
-  motionRoles,
-  type PresenceOrigin,
-  type PresenceVariant,
-  presenceAppearClassName,
-  presenceVanishClassName,
-} from '@neoverse-ui/motion';
+import { motionRoles, presenceAppearClassName, presenceVanishClassName } from '@neoverse-ui/motion';
 import { computed, onBeforeUnmount, ref, watch } from 'vue';
 import { presence } from './presence';
+import type { PresenceProps } from './types';
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(
-  defineProps<{
-    show: boolean;
-    variant?: PresenceVariant;
-    origin?: PresenceOrigin;
-    as?: string;
-  }>(),
-  { variant: 'fade', as: 'div' },
-);
+const props = withDefaults(defineProps<PresenceProps>(), { variant: 'fade', as: 'div' });
 
 const fallbackExitDurationMs = 400;
 const exitDurationBufferMs = 50;

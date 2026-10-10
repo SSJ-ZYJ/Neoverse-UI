@@ -21,6 +21,7 @@ const contractCopy = {
     :label="copy.states.default.label"
     :hint="copy.states.default.hint"
     :locale="props.locale"
+    contract-state="default"
   >
     <UiAction href="#controls-action" @click.prevent>
       <template #leading><LabIcon name="globe" /></template>
@@ -47,7 +48,12 @@ const contractCopy = {
     >
   </StateRow>
 
-  <StateRow :label="copy.states.hover.label" :hint="copy.states.hover.hint" :locale="props.locale">
+  <StateRow
+    :label="copy.states.hover.label"
+    :hint="copy.states.hover.hint"
+    :locale="props.locale"
+    contract-state="hover"
+  >
     <UiAction href="#controls-action" @click.prevent
       >{{ localize(copy.controls.hover, props.locale) }}</UiAction
     >
@@ -57,19 +63,25 @@ const contractCopy = {
     :label="copy.states.active.label"
     :hint="copy.states.active.hint"
     :locale="props.locale"
+    contract-state="active"
   >
     <UiAction href="#controls-action" @click.prevent
       >{{ localize(copy.controls.active, props.locale) }}</UiAction
     >
   </StateRow>
 
-  <StateRow :label="copy.states.focus.label" :hint="copy.states.focus.hint" :locale="props.locale">
+  <StateRow
+    :label="copy.states.focus.label"
+    :hint="copy.states.focus.hint"
+    :locale="props.locale"
+    contract-state="focus"
+  >
     <UiAction href="#controls-action" @click.prevent
       >{{ localize(copy.controls.focus, props.locale) }}</UiAction
     >
   </StateRow>
 
-  <StateRow :label="copy.states.disabled.label" :locale="props.locale">
+  <StateRow :label="copy.states.disabled.label" :locale="props.locale" contract-state="disabled">
     <UiAction href="#controls-action" @click.prevent disabled
       >{{ localize(copy.controls.disabled, props.locale) }}</UiAction
     >

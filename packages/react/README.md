@@ -2,7 +2,29 @@
 
 React adapters for Neoverse UI.
 
-The package exposes token-backed React adapters for `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiDock`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiTable`, `UiDisclosure`, `UiNotice`, `UiSurface`, and `UiPresence`, plus `useUiPresence` and the `uiActionClassName` helper for consumers that need to style an existing routing component through `asChild` composition.
+The package exposes token-backed React adapters for `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiDock`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch`, `UiField`, `UiPopover`, `UiDropdownMenu`, `UiTable`, `UiDisclosure`, `UiNotice`, `UiSurface`, and `UiPresence`, plus `useUiPresence` and the `uiActionClassName` helper for consumers that need to style an existing routing component through `asChild` composition.
+
+## Forms and overlays
+
+```tsx
+<UiField controlId="email" label="Email" description="Release notifications" message={emailError} required>
+  {(controlAttrs) => (
+    <UiInput {...controlAttrs} type="email" value={email} onChange={(event) => setEmail(event.currentTarget.value)} validation={emailError ? 'error' : 'none'} />
+  )}
+</UiField>
+
+<UiCheckbox checked={notifications} onCheckedChange={setNotifications} name="notifications">
+  Release notifications
+</UiCheckbox>
+<UiPopover trigger="Details" ariaLabel="Project details"><p>Project details</p></UiPopover>
+<UiDropdownMenu trigger="Actions" ariaLabel="Project actions" items={actions} onSelect={onAction} />
+```
+
+Field function children receive `UiFieldControlAttrs`: supplied control ID, `aria-describedby` for rendered descriptions/messages, and native `required`/`disabled` flags when enabled. `descriptionId` / `messageId` override SSR-stable defaults. Spread these on the control and explicitly merge any consumer description IDs. Ordinary children continue to work without automatic rewriting. Field does not validate values or reset controlled state.
+
+Checkbox/Switch accept native `checked/defaultChecked/onChange` plus `onCheckedChange`; RadioGroup uses `value/defaultValue/onValueChange`. Controlled form resets must synchronize consumer state; uncontrolled native choice inputs preserve their browser reset behavior. `readOnly` prevents value changes while retaining focusability.
+
+Popover is non-modal; DropdownMenu supplies menu keyboard navigation. Both accept `open/defaultOpen/onOpenChange`, disabled state and placement, and share the Overlay Runtime with Select.
 
 ```tsx
 import { UiAction } from '@neoverse-ui/react';
