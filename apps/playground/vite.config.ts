@@ -3,6 +3,7 @@ import vue from '@vitejs/plugin-vue';
 import { defineConfig } from 'vite';
 
 export default defineConfig(({ mode }) => ({
+  base: '/assets/',
   plugins: [vue()],
   resolve: {
     // Compile the workspace source so the Vite watcher does not depend on a

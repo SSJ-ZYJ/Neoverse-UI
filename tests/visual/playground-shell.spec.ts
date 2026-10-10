@@ -701,11 +701,21 @@ test('playground shows the Neoverse wordmark and site icon', async ({ page }) =>
   const brandLogo = page.locator('[data-playground-brand-logo]');
   await expect(brandLogo).toBeVisible();
   await expect(brandLogo).toHaveAttribute('aria-label', 'Neoverse UI');
-  await expect(brandLogo).toHaveCSS('mask-image', /neoverse-wordmark\.svg/);
+  await expect(brandLogo).toHaveCSS('mask-image', /\/assets\/neoverse-wordmark\.svg/);
+  const wordmarkUrl = await brandLogo.evaluate((element: HTMLElement) => {
+    const match = getComputedStyle(element).maskImage.match(/url\(["']?(.*?)["']?\)/);
+    return match?.[1] === undefined ? null : new URL(match[1], window.location.href).href;
+  });
+  expect(wordmarkUrl).not.toBeNull();
+  expect((await page.request.get(wordmarkUrl!)).status()).toBe(200);
 
   const favicon = page.locator('link[rel~="icon"]');
   await expect(favicon).toHaveAttribute('type', 'image/svg+xml');
-  await expect(favicon).toHaveAttribute('href', /neoverse-site-icon\.svg/);
+  await expect(favicon).toHaveAttribute('href', /\/assets\/neoverse-site-icon\.svg/);
+  const siteIconUrl = await favicon.evaluate((link: HTMLLinkElement) => link.href);
+  const siteIconResponse = await page.request.get(siteIconUrl);
+  expect(siteIconResponse.status()).toBe(200);
+  expect(siteIconResponse.headers()['content-type']).toContain('image/svg+xml');
 });
 
 test('main playground renders the selected module directly instead of through an adaptive iframe', async ({
