@@ -44,6 +44,20 @@
   padding-block-end: var(--neoverse-space-4);
 }
 
+.playground-shell__brand-wordmark {
+  display: block;
+  inline-size: 6rem;
+  block-size: 2rem;
+  flex: none;
+  background-color: currentColor;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
 .playground-shell__navigation-header::after {
   position: absolute;
   z-index: var(--neoverse-layout-layer-base);

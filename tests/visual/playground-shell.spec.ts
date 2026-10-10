@@ -695,19 +695,17 @@ test('isolated frame keeps the canonical 16px component baseline', async ({ page
   ).toBeCloseTo(16, 1);
 });
 
-test('playground visibly applies the Neoverse UI brand icon and favicon', async ({ page }) => {
+test('playground shows the Neoverse wordmark and site icon', async ({ page }) => {
   await page.goto('/?lang=zh', { waitUntil: 'domcontentloaded' });
 
-  const brandIcon = page.locator('[data-playground-brand-icon]');
-  await expect(brandIcon).toBeVisible();
-  await expect
-    .poll(() =>
-      brandIcon.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0),
-    )
-    .toBe(true);
+  const brandLogo = page.locator('[data-playground-brand-logo]');
+  await expect(brandLogo).toBeVisible();
+  await expect(brandLogo).toHaveAttribute('aria-label', 'Neoverse UI');
+  await expect(brandLogo).toHaveCSS('mask-image', /neoverse-wordmark\.svg/);
 
   const favicon = page.locator('link[rel~="icon"]');
-  await expect(favicon).toHaveAttribute('href', /^data:image\/svg\+xml/);
+  await expect(favicon).toHaveAttribute('type', 'image/svg+xml');
+  await expect(favicon).toHaveAttribute('href', /neoverse-site-icon\.svg/);
 });
 
 test('main playground renders the selected module directly instead of through an adaptive iframe', async ({

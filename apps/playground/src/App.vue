@@ -10,7 +10,7 @@ import {
   UiSurface,
 } from '@neoverse-ui/vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
-import brandIconUrl from './assets/neoverse-ui-icon.svg';
+import brandWordmarkUrl from './assets/neoverse-wordmark.svg';
 import LabBoard from './LabBoard.vue';
 import LabIcon from './LabIcon.vue';
 import {
@@ -586,22 +586,20 @@ onBeforeUnmount(() => {
     >
       <div class="playground-shell__navigation-header">
         <div class="flex items-start justify-between gap-3">
-          <div class="flex min-w-0 items-center gap-3">
-            <img
-              data-playground-brand-icon
-              :src="brandIconUrl"
-              alt=""
-              aria-hidden="true"
-              class="size-9 shrink-0 object-contain"
-            >
-            <div class="min-w-0">
-              <p class="text-label-lg font-label text-accent-primary">
-                {{ localize(appCopy.brand, locale) }}
-              </p>
-              <h1 class="mt-1 text-title-lg font-heading tracking-title-lg text-primary">
-                {{ localize(appCopy.designLab, locale) }}
-              </h1>
-            </div>
+          <div class="min-w-0">
+            <span
+              data-playground-brand-logo
+              role="img"
+              :aria-label="localize(appCopy.brand, locale)"
+              class="playground-shell__brand-wordmark text-primary"
+              :style="{
+                maskImage: `url('${brandWordmarkUrl}')`,
+                WebkitMaskImage: `url('${brandWordmarkUrl}')`,
+              }"
+            />
+            <h1 class="mt-1 text-title-lg font-heading tracking-title-lg text-primary">
+              {{ localize(appCopy.designLab, locale) }}
+            </h1>
           </div>
           <UiIconButton
             class="xl:hidden"
