@@ -7,6 +7,32 @@
 /* biome-ignore lint/suspicious/noUnknownAtRules: build-only source marker is stripped by copy-css.ts */
 @neoverse-dark-tokens {
   color-scheme: dark;
+  --neoverse-effect-grouped-inset-field: var(--neoverse-effect-grouped-inset-field-dark);
+  --neoverse-effect-grouped-inset-border: var(--neoverse-effect-grouped-inset-border-dark);
+  /* Effect identity is theme-specific; Glass blur and alpha remain tier-owned. */
+  --neoverse-effect-compact-rest-shadow: var(--neoverse-effect-compact-rest-shadow-dark);
+  --neoverse-effect-compact-hover-shadow: var(--neoverse-effect-compact-hover-shadow-dark);
+  --neoverse-effect-selection-highlight: var(--neoverse-effect-selection-highlight-dark);
+  --neoverse-effect-selection-shadow: var(--neoverse-effect-selection-shadow-dark);
+  --neoverse-effect-selection-field: var(--neoverse-effect-selection-field-dark);
+  --neoverse-effect-command-rest-shadow: var(--neoverse-effect-command-rest-shadow-dark);
+  --neoverse-effect-command-hover-shadow: var(--neoverse-effect-command-hover-shadow-dark);
+  --neoverse-effect-primary-rest-shadow: var(--neoverse-effect-primary-rest-shadow-dark);
+  --neoverse-effect-primary-hover-shadow: var(--neoverse-effect-primary-hover-shadow-dark);
+  --neoverse-effect-choice-rest-shadow: var(--neoverse-effect-choice-rest-shadow-dark);
+  --neoverse-effect-choice-selected-field: var(--neoverse-effect-choice-selected-field-dark);
+  --neoverse-effect-choice-selected-fill: var(--neoverse-effect-choice-selected-fill-dark);
+  --neoverse-effect-choice-selected-border: var(--neoverse-effect-choice-selected-border-dark);
+  --neoverse-effect-choice-selected-shadow: var(--neoverse-effect-choice-selected-shadow-dark);
+  --neoverse-effect-command-edge-field: var(--neoverse-effect-command-edge-field-dark);
+  --neoverse-effect-command-edge-carrier: var(--neoverse-effect-command-edge-carrier-dark);
+  --neoverse-effect-command-press-light: var(--neoverse-effect-command-press-light-dark);
+  --neoverse-effect-floating-chrome-shadow: var(--neoverse-effect-floating-chrome-shadow-dark);
+  --neoverse-effect-floating-chrome-border: var(--neoverse-effect-floating-chrome-border-dark);
+  --neoverse-effect-hover-field: var(--neoverse-effect-hover-field-dark);
+  --neoverse-effect-command-edge-opacity: var(--neoverse-effect-command-edge-opacity-dark);
+
+  --neoverse-material-glass-base-tint: rgb(12 24 41);
 
   --neoverse-color-surface-canvas: var(--neoverse-color-neutral-950);
   --neoverse-color-surface-subtle: rgb(19 33 52 / 62%);
@@ -19,6 +45,53 @@
   --neoverse-color-text-disabled: var(--neoverse-color-neutral-500);
   --neoverse-color-text-inverse: var(--neoverse-color-neutral-800);
   --neoverse-color-text-on-accent: var(--neoverse-color-neutral-950);
+  --neoverse-terminal-background: transparent;
+  --neoverse-terminal-header-background: transparent;
+  --neoverse-terminal-foreground: var(--neoverse-color-text-primary);
+  --neoverse-terminal-muted: var(--neoverse-color-text-secondary);
+  --neoverse-terminal-command: var(--neoverse-color-text-primary);
+  --neoverse-terminal-prompt: var(--neoverse-color-accent-secondary);
+  --neoverse-terminal-cursor: var(--neoverse-color-accent-secondary);
+  --neoverse-terminal-selection: var(--neoverse-color-accent-soft);
+  /* Keep the layered terminal hierarchy while deriving its tint from the theme. */
+  --neoverse-terminal-segment-host-background: color-mix(
+    in srgb,
+    var(--neoverse-color-accent-primary) var(--neoverse-effect-alpha-soft),
+    var(--neoverse-color-text-secondary)
+  );
+  --neoverse-terminal-segment-path-background: color-mix(
+    in srgb,
+    var(--neoverse-color-accent-primary) var(--neoverse-effect-alpha-dominant),
+    var(--neoverse-color-text-primary)
+  );
+  --neoverse-terminal-segment-branch-background: color-mix(
+    in srgb,
+    var(--neoverse-color-accent-primary) var(--neoverse-effect-alpha-soft),
+    var(--neoverse-color-neutral-800)
+  );
+  --neoverse-terminal-segment-runtime-background: color-mix(
+    in srgb,
+    var(--neoverse-color-accent-primary) var(--neoverse-effect-alpha-quiet),
+    var(--neoverse-color-neutral-900)
+  );
+  --neoverse-terminal-segment-time-background: color-mix(
+    in srgb,
+    var(--neoverse-color-accent-primary) var(--neoverse-effect-alpha-faint),
+    var(--neoverse-color-surface-canvas)
+  );
+  --neoverse-terminal-segment-accent-foreground: var(--neoverse-color-accent-primary-foreground);
+  --neoverse-terminal-segment-soft-foreground: var(--neoverse-color-text-primary);
+  --neoverse-terminal-segment-branch-foreground: color-mix(
+    in srgb,
+    var(--neoverse-color-accent-primary) var(--neoverse-effect-alpha-strong),
+    var(--neoverse-color-text-primary)
+  );
+  --neoverse-terminal-segment-runtime-foreground: var(--neoverse-terminal-segment-path-background);
+  --neoverse-terminal-segment-time-foreground: color-mix(
+    in srgb,
+    var(--neoverse-color-accent-primary) var(--neoverse-effect-alpha-subtle),
+    var(--neoverse-color-text-secondary)
+  );
   --neoverse-color-edge-light: rgb(255 255 255 / 13%);
   --neoverse-color-border-subtle: rgb(219 234 254 / 13%);
   --neoverse-color-border-default: rgb(219 234 254 / 18%);
@@ -62,41 +135,36 @@
 
   /* Floating chrome mirrors the currently deployed Neoverse dock. Keep it
      intentionally quieter than the general Glass surfaces. */
-  --neoverse-control-chrome-border: rgb(219 234 254 / 8%);
-  --neoverse-control-chrome-background:
-    radial-gradient(120% 150% at 7% -45%, rgb(88 195 255 / 3%), transparent 52%),
-    radial-gradient(105% 150% at 94% 145%, rgb(61 214 166 / 2%), transparent 52%),
-    linear-gradient(115deg, rgb(255 255 255 / 1%), rgb(255 255 255 / 0.5%) 48%, transparent 76%),
-    rgb(152 186 220 / 4%);
-  --neoverse-control-chrome-shadow:
-    0 18px 42px -20px rgb(0 0 0 / 48%), 0 6px 18px -12px rgb(0 0 0 / 58%);
-  --neoverse-control-chrome-filter: blur(12px) saturate(128%) brightness(104%);
-  --neoverse-control-chrome-trailing-border: rgb(219 234 254 / 9%);
-  --neoverse-control-chrome-trailing-background: rgb(255 255 255 / 3%);
+  --neoverse-control-chrome-border: var(--neoverse-effect-floating-chrome-border);
+  --neoverse-control-chrome-shadow: var(--neoverse-effect-floating-chrome-shadow);
+  --neoverse-control-chrome-trailing-border: var(--neoverse-effect-grouped-inset-border);
+  --neoverse-control-chrome-trailing-background: var(--neoverse-effect-grouped-inset-field);
+
+  --neoverse-control-button-filled-background: var(--neoverse-effect-command-rest-field-dark);
+  --neoverse-control-button-filled-hover-background: var(
+    --neoverse-effect-command-hover-field-dark
+  );
+  --neoverse-control-primary-background: var(--neoverse-effect-primary-rest-field-dark);
+  --neoverse-control-primary-hover-background: var(--neoverse-effect-primary-hover-field-dark);
+  --neoverse-control-primary-active-background: var(--neoverse-effect-primary-press-field-dark);
 
   /* Dark control mappings. */
   --neoverse-control-secondary-border: var(--neoverse-color-border-subtle);
-  --neoverse-control-segmented-background-image: var(--neoverse-control-secondary-background);
-  --neoverse-control-segmented-background-color: var(--neoverse-material-glass-subtle-background);
   --neoverse-control-segmented-foreground: var(--neoverse-color-text-secondary);
   --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
   --neoverse-control-segmented-border: var(--neoverse-control-button-border);
-  --neoverse-control-segmented-filter: var(--neoverse-control-secondary-filter);
-  --neoverse-control-segmented-shadow: var(--neoverse-control-secondary-shadow);
-  /* Theme-owned resets keep light-only segmented refinements out of dark. */
-  --neoverse-control-segmented-edge-refraction-opacity: 0;
-  --neoverse-control-segmented-edge-display: none;
+  --neoverse-control-segmented-shadow: var(--neoverse-effect-choice-rest-shadow);
+  /* Dark segmented controls use the same Glass edge field as system-dark.
+     Lower its opacity instead of disabling it: no hard monochrome outline. */
+  --neoverse-control-segmented-edge-refraction-opacity: var(
+    --neoverse-material-edge-refraction-opacity-subtle
+  );
+  --neoverse-control-segmented-edge-display: block;
   --neoverse-control-segmented-option-radius: var(--neoverse-control-compact-radius);
-  --neoverse-control-segmented-active-background: var(--neoverse-control-active-background);
-  --neoverse-control-segmented-active-fill: transparent;
-  --neoverse-control-segmented-active-border: var(--neoverse-control-active-border);
-  --neoverse-control-segmented-active-shadow: var(--neoverse-control-active-shadow);
-  --neoverse-control-segmented-shell-hover-background-image: var(
-    --neoverse-control-segmented-background-image
-  );
-  --neoverse-control-segmented-shell-hover-background-color: var(
-    --neoverse-control-segmented-background-color
-  );
+  --neoverse-control-segmented-active-background: var(--neoverse-effect-choice-selected-field);
+  --neoverse-control-segmented-active-fill: var(--neoverse-effect-choice-selected-fill);
+  --neoverse-control-segmented-active-border: var(--neoverse-effect-choice-selected-border);
+  --neoverse-control-segmented-active-shadow: var(--neoverse-effect-choice-selected-shadow);
   --neoverse-control-segmented-shell-hover-border: var(--neoverse-control-segmented-border);
   --neoverse-control-segmented-shell-hover-shadow: var(--neoverse-control-segmented-shadow);
   /* Dark buttons mirror the product glass button: the site sheen reads as a
@@ -105,66 +173,17 @@
      grounding fill keeps the button legible when the backdrop is a flat
      canvas with no detail to blur; hover densifies it slightly for
      feedback without returning to an opaque block. */
-  --neoverse-control-secondary-background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--neoverse-color-text-secondary) 8%, transparent),
-    color-mix(in srgb, var(--neoverse-color-text-muted) 4%, transparent)
-  );
-  --neoverse-control-secondary-fill: color-mix(
-    in srgb,
-    var(--neoverse-color-surface-glass) 18%,
-    transparent
-  );
-  --neoverse-control-secondary-hover-background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--neoverse-color-text-secondary) 11%, transparent),
-    color-mix(in srgb, var(--neoverse-color-text-muted) 6%, transparent)
-  );
-  --neoverse-control-secondary-hover-fill: color-mix(
-    in srgb,
-    var(--neoverse-color-surface-glass) 24%,
-    transparent
-  );
-  --neoverse-control-secondary-shadow: inset 0 1px 0
-    color-mix(in srgb, var(--neoverse-color-edge-light) 62%, transparent);
-  --neoverse-control-secondary-hover-shadow: inset 0 1px 0
-    color-mix(in srgb, var(--neoverse-color-edge-light) 77%, transparent);
-  --neoverse-control-secondary-filter: var(--neoverse-material-filter-subtle);
+  --neoverse-control-secondary-shadow: var(--neoverse-effect-compact-rest-shadow);
+  --neoverse-control-secondary-hover-shadow: var(--neoverse-effect-compact-hover-shadow);
   /* Deployed Neoverse CTA recipe. Keep this independent from the generic
      segmented/navigation plane: the button is a very light aurora sheen over
      the sampled backdrop, not an opaque navy tile. */
-  --neoverse-control-button-filter: blur(36px) saturate(165%) brightness(108%);
-  --neoverse-control-button-filled-background: linear-gradient(
-    145deg,
-    rgb(181 197 213 / 13%),
-    rgb(127 147 168 / 7%)
-  );
-  --neoverse-control-button-filled-fill: color-mix(
-    in srgb,
-    var(--neoverse-color-surface-glass) 10%,
-    transparent
-  );
-  --neoverse-control-button-filled-hover-background: linear-gradient(
-    145deg,
-    rgb(181 197 213 / 17%),
-    rgb(127 147 168 / 10%)
-  );
-  --neoverse-control-button-filled-hover-fill: color-mix(
-    in srgb,
-    var(--neoverse-color-surface-glass) 16%,
-    transparent
-  );
-  --neoverse-control-button-filled-shadow: inset 0 1px 0 rgb(255 255 255 / 8%);
-  --neoverse-control-button-filled-hover-shadow: inset 0 1px 0 rgb(255 255 255 / 10%);
-  --neoverse-control-active-background: linear-gradient(
-    145deg,
-    color-mix(in srgb, var(--neoverse-color-accent-secondary) 13%, transparent),
-    color-mix(in srgb, var(--neoverse-color-accent-primary) 7%, transparent)
-  );
+  --neoverse-control-button-filled-shadow: var(--neoverse-effect-command-rest-shadow);
+  --neoverse-control-button-filled-hover-shadow: var(--neoverse-effect-command-hover-shadow);
+  --neoverse-control-active-background: var(--neoverse-effect-selection-field);
   --neoverse-control-active-border: transparent;
-  --neoverse-control-active-highlight: inset 0 1px 0
-    color-mix(in srgb, var(--neoverse-color-edge-light) 62%, transparent);
-  --neoverse-control-active-shadow: var(--neoverse-control-active-highlight);
+  --neoverse-control-active-highlight: var(--neoverse-effect-selection-highlight);
+  --neoverse-control-active-shadow: var(--neoverse-effect-selection-shadow);
   --neoverse-navigation-item-active-background: var(--neoverse-control-active-background);
   --neoverse-navigation-item-active-fill: transparent;
   --neoverse-navigation-item-active-border: var(--neoverse-control-active-border);
@@ -172,18 +191,9 @@
   --neoverse-navigation-item-active-shadow: var(--neoverse-control-active-highlight);
   /* Primary stays on the same sampled Glass plane as secondary, but owns
      a restrained accent field and stronger depth so hierarchy is visible. */
-  --neoverse-control-primary-background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--neoverse-color-accent-secondary) 18%, transparent),
-      color-mix(in srgb, var(--neoverse-color-accent-primary) 10%, transparent)
-    ),
-    var(--neoverse-control-button-filled-background);
   --neoverse-control-primary-foreground: var(--neoverse-color-text-primary);
   --neoverse-control-primary-border: transparent;
-  --neoverse-control-primary-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 72%, transparent),
-    0 8px 20px -16px color-mix(in srgb, var(--neoverse-color-accent-secondary) 42%, transparent);
+  --neoverse-control-primary-shadow: var(--neoverse-effect-primary-rest-shadow);
   --neoverse-control-secondary-active-foreground: var(--neoverse-color-text-primary);
   --neoverse-control-ghost-foreground: var(--neoverse-color-text-muted);
   --neoverse-control-ghost-hover-foreground: var(--neoverse-color-text-primary);
@@ -191,65 +201,15 @@
   --neoverse-control-ghost-border: transparent;
   --neoverse-control-button-border: transparent;
   --neoverse-control-button-edge: var(--neoverse-control-button-filled-shadow);
-  --neoverse-control-button-edge-active: var(--neoverse-control-button-filled-hover-shadow);
-  --neoverse-control-button-edge-hover: var(--neoverse-control-button-filled-hover-shadow);
-  --neoverse-control-button-edge-refraction-opacity: 0;
-  --neoverse-control-primary-hover-background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--neoverse-color-accent-secondary) 24%, transparent),
-      color-mix(in srgb, var(--neoverse-color-accent-primary) 14%, transparent)
-    ),
-    var(--neoverse-control-button-filled-hover-background);
-  --neoverse-control-primary-hover-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--neoverse-color-edge-light) 82%, transparent),
-    0 10px 24px -17px color-mix(in srgb, var(--neoverse-color-accent-secondary) 50%, transparent);
-  --neoverse-control-primary-active-background:
-    linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--neoverse-color-accent-secondary) 30%, transparent),
-      color-mix(in srgb, var(--neoverse-color-accent-primary) 18%, transparent)
-    ),
-    var(--neoverse-control-button-filled-hover-background);
+  --neoverse-control-button-edge-active: var(--neoverse-effect-command-hover-shadow);
+  --neoverse-control-button-edge-hover: var(--neoverse-effect-command-hover-shadow);
+  --neoverse-control-button-edge-refraction-opacity: var(--neoverse-effect-command-edge-opacity);
+  --neoverse-control-primary-hover-shadow: var(--neoverse-effect-primary-hover-shadow);
   --neoverse-control-secondary-hover-foreground: var(--neoverse-color-text-primary);
 
-  --neoverse-control-button-edge-carrier: color-mix(
-    in srgb,
-    var(--neoverse-color-border-interactive) 42%,
-    transparent
-  );
-  --neoverse-control-button-refraction-gradient:
-    radial-gradient(
-      120% 80% at 0% 0%,
-      color-mix(in srgb, var(--neoverse-color-accent-secondary) 24%, transparent),
-      transparent 70%
-    ),
-    radial-gradient(
-      120% 80% at 100% 100%,
-      color-mix(in srgb, var(--neoverse-color-accent-primary) 16%, transparent),
-      transparent 74%
-    ),
-    radial-gradient(
-      70% 100% at 0% 50%,
-      color-mix(in srgb, var(--neoverse-color-accent-secondary) 10%, transparent),
-      transparent 76%
-    ),
-    radial-gradient(
-      70% 100% at 100% 50%,
-      color-mix(in srgb, var(--neoverse-color-accent-primary) 8%, transparent),
-      transparent 76%
-    );
-  --neoverse-control-button-press-glow:
-    radial-gradient(
-      90% 140% at var(--neoverse-button-press-x, 50%) var(--neoverse-button-press-y, 50%),
-      color-mix(in srgb, var(--neoverse-color-accent-secondary) 36%, transparent),
-      transparent 68%
-    ),
-    radial-gradient(
-      75% 100% at var(--neoverse-button-press-x, 50%) var(--neoverse-button-press-y, 50%),
-      color-mix(in srgb, var(--neoverse-color-accent-primary) 14%, transparent),
-      transparent 72%
-    );
+  --neoverse-control-button-edge-carrier: var(--neoverse-effect-command-edge-carrier);
+  --neoverse-control-button-refraction-gradient: var(--neoverse-effect-command-edge-field);
+  --neoverse-control-button-press-glow: var(--neoverse-effect-command-press-light);
   --neoverse-control-button-hover-background: var(--neoverse-control-hover-background);
   --neoverse-control-button-active-background: var(--neoverse-control-active-background);
   --neoverse-control-button-ghost-active-background: var(--neoverse-control-active-background);
@@ -322,30 +282,6 @@
     in srgb,
     var(--neoverse-color-border-subtle) 70%,
     transparent
-  );
-  --neoverse-material-filter-subtle: blur(10px) saturate(112%) brightness(102%) contrast(102%);
-  --neoverse-material-filter-elevated: blur(28px) saturate(145%) brightness(106%) contrast(103%);
-  --neoverse-material-filter-immersive: blur(28px) saturate(153%) brightness(104%) contrast(104%);
-  --neoverse-material-edge-filter-subtle: blur(12px) saturate(118%) brightness(102%) contrast(103%);
-  --neoverse-material-edge-filter-elevated: blur(16px) saturate(118%) brightness(102%)
-    contrast(103%);
-  --neoverse-material-edge-filter-immersive: blur(30px) saturate(142%) brightness(102%)
-    contrast(104%);
-  --neoverse-material-transparency-subtle: 24%;
-  --neoverse-material-transparency-elevated: 44%;
-  --neoverse-material-edge-refraction-softness-subtle: blur(3px);
-  --neoverse-material-edge-refraction-softness-elevated: blur(4px);
-  --neoverse-material-edge-refraction-softness-immersive: blur(5px);
-  --neoverse-material-tint-subtle: color-mix(
-    in srgb,
-    var(--neoverse-color-surface-raised) 84%,
-    var(--neoverse-color-text-primary) 16%
-  );
-  --neoverse-material-tint-elevated: var(--neoverse-color-surface-glass);
-  --neoverse-material-tint-immersive: color-mix(
-    in srgb,
-    var(--neoverse-color-surface-glass) 80%,
-    var(--neoverse-color-accent-tertiary) 20%
   );
   --neoverse-material-inner-glow-subtle:
     inset 0 1px 2px color-mix(in srgb, var(--neoverse-color-edge-light) 10%, transparent),
@@ -450,7 +386,9 @@
   --neoverse-material-glass-subtle-hover-transparency: var(
     --neoverse-material-glass-subtle-transparency
   );
-  --neoverse-material-glass-elevated-hover-transparency: 48%;
+  --neoverse-material-glass-elevated-hover-transparency: var(
+    --neoverse-material-glass-elevated-transparency
+  );
   --neoverse-material-glass-immersive-hover-transparency: var(
     --neoverse-material-glass-immersive-transparency
   );
@@ -461,9 +399,5 @@
   --neoverse-material-glass-elevated-hover-shadow:
     0 1.25rem 3rem -1.7rem rgb(0 0 0 / 68%), 0 4px 12px -1px rgb(0 0 0 / 22%);
   --neoverse-material-glass-immersive-hover-shadow: var(--neoverse-material-glass-immersive-shadow);
-  --neoverse-control-hover-background: color-mix(
-    in srgb,
-    var(--neoverse-color-accent-primary) 10%,
-    transparent
-  );
+  --neoverse-control-hover-background: var(--neoverse-effect-hover-field);
 }

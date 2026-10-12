@@ -28,7 +28,7 @@ for (const theme of ['light', 'dark'] as const) {
       });
       expect(alpha(style.backgroundColor)).toBeGreaterThan(0);
       expect(alpha(style.backgroundColor)).toBeLessThan(0.5);
-      expect(style.backgroundImage).toContain('gradient');
+      expect(style.backgroundImage).toBe('none');
       expect(style.backdropFilter).toMatch(/blur\(\d+px\)/);
     }
 
@@ -42,7 +42,7 @@ for (const theme of ['light', 'dark'] as const) {
           alpha(await secondary.evaluate((element) => getComputedStyle(element).backgroundColor)),
         { timeout: 2_000 },
       )
-      .toBeGreaterThan(before);
+      .toBeCloseTo(before, 3);
 
     const ghostStyle = await ghost.evaluate((element) => {
       const computed = getComputedStyle(element);

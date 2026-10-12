@@ -39,7 +39,7 @@ export type ActionScale = 'md' | 'lg';
 export type ControlSurfaceScale = 'md' | 'lg';
 export type SurfaceHoverMode = 'auto' | 'static';
 export type SurfaceEdgeMode = 'auto' | 'local';
-export type ControlSurfacePreset = 'none' | 'glass-subtle';
+export type ControlSurfacePreset = 'none' | 'glass-subtle' | 'glass-elevated' | 'glass-immersive';
 export type SurfacePreset =
   | 'none'
   | 'solid'
@@ -216,6 +216,7 @@ export function UiAction({
   });
   const renderContent = (content: ReactNode) => (
     <>
+      <span className="ui-button__tone-field" aria-hidden="true" />
       <span className="ui-button__edge-field" aria-hidden="true" />
       {leading ? (
         <span className="ui-action__leading" aria-hidden="true">
@@ -1479,6 +1480,7 @@ export function UiButton({
         onPointerDown?.(event);
       }}
     >
+      <span className="ui-button__tone-field" aria-hidden="true" />
       <span className="ui-button__edge-field" aria-hidden="true" />
       {leading || loading ? (
         <span className="ui-button__leading">
@@ -1598,6 +1600,7 @@ export function UiIconButton(props: UiIconButtonProps) {
   );
   const content = (
     <>
+      <span className="ui-button__tone-field" aria-hidden="true" />
       <span className="ui-button__edge-field" aria-hidden="true" />
       <span className="ui-icon-button__content" aria-hidden="true">
         {icon}

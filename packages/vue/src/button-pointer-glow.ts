@@ -15,6 +15,7 @@ export function updateButtonPointerGlow(event: PointerEvent): void {
   }
 
   const element = target as HTMLElement;
+  if (element.matches(':disabled, [aria-disabled="true"]')) return;
   const rect = element.getBoundingClientRect();
 
   if (rect.width <= 0 || rect.height <= 0) {

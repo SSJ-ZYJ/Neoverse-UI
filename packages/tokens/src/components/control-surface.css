@@ -2,13 +2,16 @@
   :root {
     --neoverse-control-surface-gap: var(--neoverse-space-2);
     --neoverse-control-surface-item-gap: var(--neoverse-space-1);
-    --neoverse-control-surface-group-height: 1.875rem;
+    --neoverse-control-surface-group-height: var(--neoverse-space-9);
     --neoverse-control-surface-control-height: var(--neoverse-control-compact-height);
     /* Grouped navigation keeps destination-sized rhythm while embedded
        segmented controls stay compact. The surface owns this relationship so
        consumers do not need to force both control families to one height. */
     --neoverse-control-surface-navigation-height: var(--neoverse-action-height-sm);
-    --neoverse-control-surface-segmented-height: var(--neoverse-control-compact-height);
+    /* Embedded language options retain the 0.2.0 footprint independently of
+       the larger standalone compact-control baseline. */
+    --neoverse-control-surface-segmented-height: var(--neoverse-space-6);
+    --neoverse-control-surface-segmented-group-height: 1.875rem;
     --neoverse-control-surface-padding: var(--neoverse-space-1);
     --neoverse-control-surface-padding-block: var(--neoverse-control-surface-padding);
     --neoverse-control-surface-padding-inline: var(--neoverse-space-2);
@@ -20,7 +23,7 @@
     --neoverse-control-surface-inner-radius: var(--neoverse-control-segmented-option-radius);
     --neoverse-control-surface-trailing-radius: var(--neoverse-control-segmented-corner-radius);
     --neoverse-control-surface-trailing-padding: var(--neoverse-border-width-strong);
-    --neoverse-control-surface-trailing-background: var(--neoverse-surface-inset-rest-background);
+    --neoverse-control-surface-trailing-background: var(--neoverse-effect-grouped-inset-field);
     --neoverse-control-surface-trailing-shadow: var(--neoverse-shadow-inset);
     /* Navigation chrome aligns its leading/trailing edge with the visible
        top inset of a centered navigation plate, rather than the group's box. */
@@ -37,28 +40,18 @@
     /* Scale the complete composition as one unit so every existing proportion remains intact. */
     --neoverse-control-surface-scale-md: 1;
     --neoverse-control-surface-scale-lg: 1.3;
-    /* Large grouped controls need optical type compensation: geometry grows
-       more than labels so the shell gains presence without oversized text. */
-    --neoverse-control-surface-scale-lg-type-factor: 0.9;
-    --neoverse-control-surface-divider-color: color-mix(
-      in srgb,
-      var(--neoverse-color-border-default) 72%,
-      transparent
-    );
+    /* Scaling keeps labels, icons and the shell on the same ratio. */
+    --neoverse-control-surface-scale-lg-type-factor: 1;
+    --neoverse-control-surface-divider-color: var(--neoverse-color-border-default);
     /* The shared Dock indicator is the navigation counterpart of the
        SegmentedControl slider. Both move between peer selections, so they
        deliberately share the same spatial timing contract. */
     --neoverse-control-surface-indicator-duration: var(--neoverse-motion-spatial-duration);
     --neoverse-control-surface-indicator-easing: var(--neoverse-motion-spatial-easing);
-    --neoverse-control-chrome-border: rgb(15 23 42 / 12%);
-    --neoverse-control-chrome-background:
-      radial-gradient(120% 150% at 7% -45%, rgb(88 195 255 / 5%), transparent 52%),
-      radial-gradient(105% 150% at 94% 145%, rgb(61 214 166 / 4%), transparent 52%),
-      linear-gradient(115deg, rgb(255 255 255 / 26%), rgb(255 255 255 / 12%) 48%, transparent 76%),
-      rgb(244 250 255 / 36%);
-    --neoverse-control-chrome-shadow:
-      0 18px 42px -20px rgb(14 34 44 / 20%), 0 6px 18px -12px rgb(14 34 44 / 14%);
-    --neoverse-control-chrome-filter: blur(12px) saturate(128%) brightness(104%);
+    --neoverse-control-chrome-border: var(--neoverse-effect-floating-chrome-border);
+    --neoverse-control-chrome-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-control-chrome-shadow: var(--neoverse-effect-floating-chrome-shadow);
+    --neoverse-control-chrome-filter: var(--neoverse-material-glass-subtle-filter);
     /* Chrome keeps its quieter fill while reusing the material system's
        directional edge-refraction contract. */
     --neoverse-control-chrome-edge-refraction-width: var(
@@ -75,7 +68,7 @@
       --neoverse-material-edge-refraction-opacity-subtle
     );
     --neoverse-control-chrome-edge-highlight: var(--neoverse-material-edge-highlight-elevated);
-    --neoverse-control-chrome-trailing-border: var(--neoverse-color-transparent);
+    --neoverse-control-chrome-trailing-border: var(--neoverse-effect-grouped-inset-border);
     --neoverse-control-chrome-trailing-background: var(
       --neoverse-control-surface-trailing-background
     );

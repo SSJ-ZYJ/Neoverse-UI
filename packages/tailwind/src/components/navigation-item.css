@@ -63,30 +63,35 @@
 
   .ui-navigation-item.ui-navigation-item--active {
     color: var(--neoverse-navigation-item-active-foreground);
-    background-image: var(--neoverse-navigation-item-active-background);
-    background-color: var(--neoverse-navigation-item-active-fill);
     border-color: var(--neoverse-navigation-item-active-border);
     background-clip: padding-box;
     box-shadow: var(--neoverse-navigation-item-active-shadow);
   }
 
-  /* Active navigation already owns its visual state. Hover must not stack the
+  @media (hover: hover) {
+    /* Active navigation already owns its visual state. Hover must not stack the
      generic Ghost hover field on top of the selected destination. */
-  .ui-navigation-item.ui-navigation-item--active.ui-button--ghost:is(:hover, :active):not(
-    :disabled
-  ):not([aria-disabled='true']) {
-    color: var(--neoverse-navigation-item-active-foreground);
-    background-image: var(--neoverse-navigation-item-active-background);
-    background-color: var(--neoverse-navigation-item-active-fill);
-    border-color: var(--neoverse-navigation-item-active-border);
-    background-clip: padding-box;
-    box-shadow: var(--neoverse-navigation-item-active-shadow);
+    .ui-navigation-item.ui-navigation-item--active.ui-button--ghost:hover:not(:active):not(
+        :disabled
+      ):not([aria-disabled='true']) {
+      color: var(--neoverse-navigation-item-active-foreground);
+      background-image: var(--neoverse-navigation-item-active-background);
+      background-color: var(--neoverse-navigation-item-active-fill);
+      border-color: var(--neoverse-navigation-item-active-border);
+      background-clip: padding-box;
+      box-shadow: var(--neoverse-navigation-item-active-shadow);
+    }
+
+    .ui-navigation-item.ui-navigation-item--active.material-glass-subtle:hover:not(:active):not(
+        :disabled
+      ):not([aria-disabled='true'])::after {
+      opacity: 0;
+    }
   }
 
-  .ui-navigation-item.ui-navigation-item--active.material-glass-subtle:is(:hover, :active):not(
-    :disabled
-  ):not([aria-disabled='true'])::after {
-    opacity: 0;
+  .ui-navigation-item.ui-navigation-item--active:active:not(:disabled):not([aria-disabled='true']) {
+    color: var(--neoverse-navigation-item-active-foreground);
+    box-shadow: var(--neoverse-effect-press-shadow);
   }
 
   .ui-navigation-item__label {
@@ -144,5 +149,37 @@
     .ui-navigation-item__indicator {
       transition: none;
     }
+  }
+}
+
+@layer utilities {
+  /* The persistent selection field is a local navigation effect. It must also
+     exist at rest and during press, rather than appearing only on hover. */
+  .ui-navigation-item.ui-navigation-item--active.ui-button--ghost {
+    color: var(--neoverse-navigation-item-active-foreground);
+    background-image: var(--neoverse-navigation-item-active-background);
+    background-color: var(--neoverse-navigation-item-active-fill);
+    border-color: var(--neoverse-navigation-item-active-border);
+    box-shadow: var(--neoverse-navigation-item-active-shadow);
+  }
+
+  @media (hover: hover) {
+    .ui-navigation-item.ui-navigation-item--active.ui-button--ghost:hover:not(:active):not(
+        :disabled
+      ):not([aria-disabled='true']) {
+      color: var(--neoverse-navigation-item-active-foreground);
+      background-image: var(--neoverse-navigation-item-active-background);
+      background-color: var(--neoverse-navigation-item-active-fill);
+      box-shadow: var(--neoverse-navigation-item-active-shadow);
+    }
+  }
+
+  .ui-navigation-item.ui-navigation-item--active.ui-button--ghost:active:not(:disabled):not(
+    [aria-disabled='true']
+  ) {
+    color: var(--neoverse-navigation-item-active-foreground);
+    background-image: var(--neoverse-navigation-item-active-background);
+    background-color: var(--neoverse-navigation-item-active-fill);
+    box-shadow: var(--neoverse-effect-press-shadow);
   }
 }

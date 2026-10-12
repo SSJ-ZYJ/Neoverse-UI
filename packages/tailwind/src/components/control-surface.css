@@ -27,19 +27,19 @@
 
   .ui-control-surface--scale-lg {
     --neoverse-navigation-item-font-size-sm: calc(
-      var(--neoverse-font-size-2xs) *
+      var(--neoverse-font-size-sm) *
       var(--neoverse-control-surface-scale-lg-type-factor)
     );
     --neoverse-navigation-item-font-size-md: calc(
-      var(--neoverse-font-size-2xs) *
+      var(--neoverse-font-size-sm) *
       var(--neoverse-control-surface-scale-lg-type-factor)
     );
     --neoverse-navigation-item-font-size-lg: calc(
-      var(--neoverse-font-size-xs) *
+      var(--neoverse-font-size-md) *
       var(--neoverse-control-surface-scale-lg-type-factor)
     );
     --neoverse-control-segmented-option-font-size-sm: calc(
-      var(--neoverse-font-size-2xs) *
+      var(--neoverse-font-size-sm) *
       var(--neoverse-control-surface-scale-lg-type-factor)
     );
     zoom: var(--neoverse-control-surface-scale-lg);
@@ -153,10 +153,20 @@
     --neoverse-control-segmented-option-padding-inline-sm: var(
       --neoverse-control-segmented-embedded-option-padding-inline-sm
     );
+    --neoverse-control-segmented-option-font-size-sm: var(
+      --neoverse-control-segmented-embedded-option-font-size-sm
+    );
     border-radius: var(--neoverse-control-surface-trailing-radius);
     padding: var(--neoverse-control-surface-trailing-padding);
     background: var(--neoverse-control-surface-trailing-background);
     box-shadow: var(--neoverse-control-surface-trailing-shadow);
+  }
+
+  .ui-control-surface--scale-lg .ui-control-surface__group--trailing:has(.ui-segmented-control) {
+    --neoverse-control-segmented-option-font-size-sm: calc(
+      var(--neoverse-control-segmented-embedded-option-font-size-sm) *
+      var(--neoverse-control-segmented-embedded-option-scale-lg-type-factor)
+    );
   }
 
   .ui-surface-chrome .ui-control-surface__group--trailing {
@@ -166,6 +176,10 @@
     padding-inline: var(--neoverse-control-chrome-trailing-padding-inline);
     background: var(--neoverse-control-chrome-trailing-background);
     box-shadow: var(--neoverse-control-surface-trailing-shadow);
+  }
+
+  .ui-surface-chrome .ui-control-surface__group--trailing:has(.ui-segmented-control) {
+    height: var(--neoverse-control-surface-segmented-group-height);
   }
 
   .ui-control-surface__divider {
@@ -180,12 +194,12 @@
   }
 
   @media (prefers-reduced-transparency: reduce) {
-    .ui-control-surface:not(.ui-surface-chrome) {
-      background-color: var(--neoverse-color-surface-raised);
+    .ui-control-surface:not(.ui-surface-chrome):not([data-surface='none']) {
+      background-color: var(--neoverse-material-glass-base-tint);
     }
 
     .ui-surface-chrome {
-      background: var(--neoverse-color-surface-raised);
+      background: var(--neoverse-material-glass-base-tint);
       box-shadow: var(--neoverse-control-chrome-shadow);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;

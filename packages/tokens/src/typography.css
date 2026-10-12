@@ -37,7 +37,7 @@
     --neoverse-typography-body-md-line-height: var(--neoverse-line-height-normal);
     --neoverse-typography-body-md-weight: var(--neoverse-font-weight-regular);
     --neoverse-typography-body-md-letter-spacing: var(--neoverse-letter-spacing-normal);
-    --neoverse-typography-body-sm-size: var(--neoverse-font-size-md);
+    --neoverse-typography-body-sm-size: var(--neoverse-font-size-sm);
     --neoverse-typography-body-sm-line-height: var(--neoverse-line-height-normal);
     --neoverse-typography-body-sm-weight: var(--neoverse-font-weight-regular);
     --neoverse-typography-body-sm-letter-spacing: var(--neoverse-letter-spacing-normal);

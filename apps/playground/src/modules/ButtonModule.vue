@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { UiButton, UiIconButton } from '@neoverse-ui/vue';
+import {
+  UiButton,
+  UiCard,
+  UiIconButton,
+  UiInput,
+  UiSegmentedControl,
+  UiSelect,
+} from '@neoverse-ui/vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import LabIcon from '../LabIcon.vue';
 import { localize, localized, moduleCopy } from '../playground-content';
 import QaPreviewMatrix from '../QaPreviewMatrix.vue';
@@ -8,6 +16,34 @@ import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.button;
+const tiers = ['glass-subtle', 'glass-elevated', 'glass-immersive'] as const;
+const customTier = ref('glass-elevated');
+const customBlur = ref('');
+const customAlpha = ref('');
+const customOptions = tiers.map((value) => ({ value, label: value }));
+function resetCustom() {
+  const style = getComputedStyle(document.documentElement);
+  customBlur.value = style
+    .getPropertyValue(`--neoverse-material-${customTier.value}-blur`)
+    .trim()
+    .replace('px', '');
+  customAlpha.value = style
+    .getPropertyValue(`--neoverse-material-${customTier.value}-transparency`)
+    .trim()
+    .replace('%', '');
+}
+onMounted(resetCustom);
+watch(customTier, resetCustom);
+const customStyle = computed(() => ({
+  [`--neoverse-material-${customTier.value}-blur`]: `${Math.max(0, Math.min(64, Number(customBlur.value)))}px`,
+  [`--neoverse-material-${customTier.value}-transparency`]: `${Math.max(0, Math.min(100, Number(customAlpha.value)))}%`,
+}));
+const clicks = ref(0);
+const selection = ref('one');
+const options = [
+  { value: 'one', label: 'One' },
+  { value: 'two', label: 'Two' },
+];
 const surfaceCopy = {
   label: localized('Surface ownership', 'Surface 归属'),
   hint: localized(
@@ -25,6 +61,81 @@ const qaCopy = {
 </script>
 
 <template>
+  <StateRow
+    :label="localized('Three material tiers', '三档材质')"
+    :hint="localized('Identical backdrop; each preset can be overridden through CSS tokens.', '同一背景对比；每档支持 CSS token 覆盖。')"
+    :locale="props.locale"
+  >
+    <div v-for="tier in tiers" :key="tier" class="grid gap-3">
+      <UiButton :surface="tier" @click="clicks += 1">{{ tier }}</UiButton>
+      <UiButton :surface="tier" variant="secondary">Secondary</UiButton>
+      <UiSegmentedControl
+        v-model="selection"
+        :surface="tier"
+        :options="options"
+        :aria-label="tier"
+      />
+      <UiCard :surface="tier"><span>{{ tier }}</span></UiCard>
+    </div>
+  </StateRow>
+  <StateRow
+    :label="localized('Customize a tier', '自定义档位')"
+    :hint="localized('Only this region changes; all children share the selected tier tokens.', '仅修改本区域；内部组件复用所选档位 token。')"
+    :locale="props.locale"
+  >
+    <div class="grid gap-3" data-material-custom-controls>
+      <UiSelect
+        v-model="customTier"
+        :options="customOptions"
+        :aria-label="props.locale === 'zh' ? '自定义档位' : 'Custom tier'"
+      />
+      <label for="material-custom-blur" class="grid gap-1 text-caption text-secondary"
+        >{{ props.locale === 'zh' ? '模糊（px）' : 'Blur (px)' }}
+        <UiInput
+          id="material-custom-blur"
+          v-model="customBlur"
+          type="number"
+          min="0"
+          max="64"
+          data-custom-blur
+        /></label
+      >
+      <label for="material-custom-alpha" class="grid gap-1 text-caption text-secondary"
+        >{{ props.locale === 'zh' ? '背景不透明度（%）' : 'Background opacity (%)' }}
+        <UiInput
+          id="material-custom-alpha"
+          v-model="customAlpha"
+          type="number"
+          min="0"
+          max="100"
+          data-custom-alpha
+        /></label
+      >
+      <UiButton surface="none" @click="resetCustom"
+        >{{ props.locale === 'zh' ? '恢复规范值' : 'Reset to standard' }}</UiButton
+      >
+    </div>
+    <div class="grid gap-3" :style="customStyle" data-material-custom-preview>
+      <UiButton :surface="customTier as typeof tiers[number]"
+        >{{ props.locale === 'zh' ? '自定义按钮' : 'Custom button' }}</UiButton
+      >
+      <UiCard :surface="customTier as typeof tiers[number]"
+        >{{ props.locale === 'zh' ? '自定义卡片' : 'Custom card' }}</UiCard
+      >
+    </div>
+  </StateRow>
+  <StateRow
+    :label="localized('Hover and press', '悬停与按下')"
+    :hint="localized('Hover, hold, release, or focus with Tab. Activation updates the counter once.', '悬停、按住、松开，或用 Tab 聚焦；每次激活计数一次。')"
+    :locale="props.locale"
+  >
+    <UiButton @click="clicks += 1"
+      >{{ props.locale === 'zh' ? '交互验证' : 'Interaction' }}
+      · {{ clicks }}</UiButton
+    >
+    <UiButton disabled>{{ props.locale === 'zh' ? '禁用' : 'Disabled' }}</UiButton>
+    <UiButton loading>{{ props.locale === 'zh' ? '加载中' : 'Loading' }}</UiButton>
+  </StateRow>
   <StateRow
     :label="copy.states.default.label"
     :hint="copy.states.default.hint"

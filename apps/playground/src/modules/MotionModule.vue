@@ -197,15 +197,17 @@ const variantLabels = computed(() =>
           class="flex flex-wrap gap-2"
           data-motion-presence-group
         >
-          <span
+          <UiSurface
+            as="span"
+            surface="glass-subtle"
             v-for="(item, index) in staggerOrder"
             :key="item.seed"
             data-motion-presence-group-item
             :style="staggerStyle(index)"
-            class="rounded-control bg-surface-raised px-3 py-1.5 text-label text-secondary"
+            class="rounded-control px-3 py-1.5 text-label text-secondary"
           >
             {{ item.label }}
-          </span>
+          </UiSurface>
         </TransitionGroup>
       </UiSurface>
     </LabSpecimenSection>

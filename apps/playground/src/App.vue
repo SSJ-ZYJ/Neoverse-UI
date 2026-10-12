@@ -11,6 +11,7 @@ import {
 } from '@neoverse-ui/vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import brandWordmarkUrl from './assets/neoverse-wordmark.svg';
+import FpsOverlay from './FpsOverlay.vue';
 import LabBoard from './LabBoard.vue';
 import LabIcon from './LabIcon.vue';
 import {
@@ -149,8 +150,8 @@ const pendingSpecimenId = ref<SpecimenId | null>(initial.specimenId);
 const isOverview = computed(() => currentModuleId.value === null);
 const sectionsByGroup = moduleGroups.map((group) => ({
   ...group,
-  modules: labModules.filter((module) =>
-    group.moduleIds.some((moduleId) => moduleId === module.id),
+  modules: group.moduleIds.map(
+    (moduleId) => labModules.find((module) => module.id === moduleId) as LabModule,
   ),
 }));
 const selectedModule = computed<LabModule | null>(() => {
@@ -166,7 +167,9 @@ const selectedGroup = computed(() => {
     return null;
   }
 
-  return sectionsByGroup.find((group) => group.id === module.groupId) ?? null;
+  return (
+    sectionsByGroup.find((group) => group.modules.some((entry) => entry.id === module.id)) ?? null
+  );
 });
 const catalogueQuery = ref('');
 const catalogueKind = ref<'all' | SpecimenKind>('all');
@@ -218,9 +221,14 @@ function setShowcaseSurface(value: string): void {
     showcaseSurface.value = value;
   }
 }
+const catalogueSpecimens = sectionsByGroup.flatMap((group) =>
+  group.modules.flatMap((module) =>
+    labSpecimens.filter((specimen) => specimen.moduleId === module.id),
+  ),
+);
 const filteredSpecimens = computed(() => {
   const query = catalogueQuery.value.trim().toLowerCase();
-  return labSpecimens.filter((specimen) => {
+  return catalogueSpecimens.filter((specimen) => {
     if (catalogueKind.value !== 'all' && specimen.kind !== catalogueKind.value) {
       return false;
     }
@@ -558,13 +566,15 @@ onBeforeUnmount(() => {
     v-else
     ref="shellElement"
     class="playground-shell flex h-screen w-full flex-col overflow-hidden xl:flex-row"
+    :class="{ 'playground-shell--nav-open': isNavOpen && !isDesktopLayout }"
     @keydown.esc.stop="handleEscape"
   >
+    <FpsOverlay />
     <Transition name="nv">
       <button
         v-if="isNavOpen"
         type="button"
-        class="fixed inset-0 z-layer-overlay bg-scrim xl:hidden"
+        class="fixed inset-0 z-layer-overlay bg-transparent xl:hidden"
         :aria-label="localize(appCopy.navigation.close, locale)"
         @click="closeNav(true)"
       />
@@ -575,7 +585,7 @@ onBeforeUnmount(() => {
       id="design-lab-navigation"
       data-playground-navigation
       :class="[
-        'playground-shell__navigation fixed z-layer-modal flex w-sidebar-drawer shrink-0 flex-col overflow-hidden rounded-panel border border-subtle material-glass-elevated transition-transform duration-standard ease-standard xl:relative xl:inset-auto xl:h-auto xl:w-sidebar xl:translate-x-0',
+        'playground-shell__navigation fixed z-layer-modal flex w-sidebar-drawer shrink-0 flex-col overflow-hidden rounded-panel border border-subtle material-glass-elevated xl:relative xl:inset-auto xl:h-auto xl:w-sidebar xl:translate-x-0',
         isDesktopLayout || isNavOpen
           ? 'playground-shell__navigation--open'
           : 'playground-shell__navigation--closed',
@@ -641,21 +651,36 @@ onBeforeUnmount(() => {
                 : 'text-secondary hover:bg-accent-soft hover:text-primary',
             ]"
             @click="handleNavClick($event, null)"
-          />
+          >
+            <template #icon><LabIcon name="home" /></template>
+          </UiNavigationItem>
         </UiSurface>
 
         <UiSurface
           v-for="group in sectionsByGroup"
           :key="group.id"
-          surface="glass-subtle"
-          glass-nesting="local"
-          data-neoverse-glass-edge-pass="css"
+          as="section"
+          surface="none"
           content-overflow="visible"
-          class="playground-navigation-group playground-floating-interaction-surface grid gap-1 rounded-card p-2"
+          :aria-labelledby="`navigation-group-${group.id}`"
+          class="playground-navigation-group playground-navigation-group--plain playground-floating-interaction-surface grid gap-1 rounded-card p-2"
         >
-          <h2 class="px-2 py-1 text-label-sm font-semibold uppercase tracking-wide text-muted">
-            {{ localize(group.label, locale) }}
-          </h2>
+          <header class="grid gap-1 px-2 py-1" :title="group.packages.join(' · ')">
+            <div class="flex min-w-0 items-center justify-between gap-2">
+              <h2
+                :id="`navigation-group-${group.id}`"
+                class="text-label-sm font-semibold text-secondary"
+              >
+                {{ localize(group.label, locale) }}
+              </h2>
+              <span class="text-caption tabular-nums text-muted" aria-hidden="true">
+                {{ group.modules.length }}
+              </span>
+            </div>
+            <p class="break-words text-caption text-muted">
+              {{ group.packages.map((name) => name.replace('@neoverse-ui/', '')).join(' · ') }}
+            </p>
+          </header>
           <div class="mt-1 grid gap-0.5">
             <UiNavigationItem
               v-for="module in group.modules"
@@ -865,16 +890,13 @@ onBeforeUnmount(() => {
               </div>
             </UiSurface>
 
-            <div data-overview-groups class="grid gap-4 sm:grid-cols-2 xl:grid-cols-6">
+            <div data-overview-groups class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
               <UiSurface
                 v-for="(group, index) in sectionsByGroup"
                 :key="group.id"
                 surface="glass-subtle"
                 content-overflow="visible"
-                :class="[
-                  'playground-overview-group playground-floating-interaction-surface grid min-h-32 content-between gap-5 rounded-card p-5',
-                  index < 3 ? 'xl:col-span-2' : 'xl:col-span-3',
-                ]"
+                class="playground-overview-group playground-floating-interaction-surface grid content-between gap-5 rounded-card p-5"
               >
                 <div class="grid gap-2">
                   <span class="text-label-sm font-label text-accent-primary">
@@ -884,6 +906,18 @@ onBeforeUnmount(() => {
                   <h3 class="text-title-sm font-title text-primary">
                     {{ localize(group.label, locale) }}
                   </h3>
+                  <div class="flex flex-wrap gap-1">
+                    <code
+                      v-for="packageName in group.packages"
+                      :key="packageName"
+                      class="break-all rounded-control bg-surface-inset px-2 py-1 text-caption text-muted"
+                    >
+                      {{ packageName }}
+                    </code>
+                  </div>
+                  <p class="text-body-sm text-secondary">
+                    {{ localize(group.description, locale) }}
+                  </p>
                   <p class="text-body-sm text-secondary">
                     {{ formatLocalized(appCopy.overview.moduleCount, locale, {
                         count: group.modules.length,

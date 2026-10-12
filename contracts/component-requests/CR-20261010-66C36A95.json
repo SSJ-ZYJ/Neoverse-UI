@@ -11,7 +11,7 @@
     "评估后若原生 caret 与局部 CSS 足够，记录拒绝新增独立公开组件的依据。"
   ],
   "impact": "low",
-  "status": "reported",
+  "status": "rejected",
   "consumers": [
     {
       "project": "XCA-Portal",
@@ -21,5 +21,6 @@
     }
   ],
   "createdAt": "2026-10-10T07:43:53.959Z",
-  "updatedAt": "2026-10-10T07:43:53.959Z"
+  "updatedAt": "2026-10-10T13:19:57.611Z",
+  "resolution": "Standalone cursor rejected: UiInput appearance=terminal uses native caret-color, preserves IME, text selection and reduced-motion semantics; decorative boot cursor remains in the consumer. See docs/terminal-composition.md."
 }

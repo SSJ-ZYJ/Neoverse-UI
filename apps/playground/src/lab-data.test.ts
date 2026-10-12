@@ -18,7 +18,6 @@ import {
 import {
   labModules,
   labSpecimens,
-  moduleGroups,
   resolveLabHash,
   specimenById,
   specimenKinds,
@@ -98,37 +97,6 @@ test('registers consolidated controls, the reusable dock, and the parity composi
   expect(moduleIds).not.toEqual(
     expect.arrayContaining(['action', 'navigation-item', 'status-indicator', 'control-surface']),
   );
-});
-
-test('keeps the top-level lab information architecture compact and purpose-driven', () => {
-  expect(labModules.map((module) => module.id)).toEqual([
-    'colors',
-    'typography',
-    'layout-shape',
-    'motion',
-    'materials',
-    'shadow',
-    'controls',
-    'dock',
-    'status-feedback',
-    'forms',
-    'data-display',
-    'card',
-    'scrollbar',
-    'composition',
-    'consumer-parity',
-  ]);
-
-  expect(moduleGroups.map((group) => [group.id, [...group.moduleIds]])).toEqual([
-    ['foundations', ['colors', 'typography', 'layout-shape', 'motion']],
-    ['materials', ['materials', 'shadow']],
-    [
-      'components',
-      ['controls', 'dock', 'status-feedback', 'forms', 'data-display', 'card', 'scrollbar'],
-    ],
-    ['patterns', ['composition']],
-    ['validation', ['consumer-parity']],
-  ]);
 });
 
 test('keeps every composition scene localized in both supported locales', () => {

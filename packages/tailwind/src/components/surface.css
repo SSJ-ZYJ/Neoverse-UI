@@ -57,13 +57,19 @@
   }
 
   @media (hover: hover) {
-    .ui-surface-interactive:hover {
+    .ui-surface-interactive:hover:not(:active):not(
+        :disabled,
+        [aria-disabled='true'],
+        [aria-busy='true']
+      ) {
       transform: translateY(calc(var(--neoverse-border-width-thin) * -1));
+      box-shadow: var(--neoverse-effect-hover-shadow);
     }
+  }
 
-    .ui-surface-interactive:active {
-      transform: translateY(0) scale(var(--neoverse-surface-interactive-active-scale));
-    }
+  .ui-surface-interactive:active:not(:disabled, [aria-disabled='true'], [aria-busy='true']) {
+    transform: translateY(0) scale(var(--neoverse-surface-interactive-active-scale));
+    box-shadow: var(--neoverse-effect-press-shadow);
   }
 
   @media (prefers-reduced-motion: reduce) {

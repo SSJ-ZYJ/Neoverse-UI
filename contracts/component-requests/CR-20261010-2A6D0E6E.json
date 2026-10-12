@@ -11,7 +11,7 @@
     "语义变量进入 Tokens、消费端 CSS 与设计实验室证据，XCA 可以只依赖正式发布的变量；未发布前不得在消费应用引用。"
   ],
   "impact": "normal",
-  "status": "reported",
+  "status": "implementing",
   "consumers": [
     {
       "project": "XCA-Portal",
@@ -21,5 +21,5 @@
     }
   ],
   "createdAt": "2026-10-10T07:43:54.029Z",
-  "updatedAt": "2026-10-10T07:43:54.029Z"
+  "updatedAt": "2026-10-10T13:19:57.220Z"
 }

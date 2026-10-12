@@ -11,7 +11,7 @@
     "可组合提示符、自动补全建议区域，不能在公共输入组件中放 XCA 专属命令解析或历史管理。"
   ],
   "impact": "normal",
-  "status": "reported",
+  "status": "implementing",
   "consumers": [
     {
       "project": "XCA-Portal",
@@ -21,5 +21,5 @@
     }
   ],
   "createdAt": "2026-10-10T07:43:53.708Z",
-  "updatedAt": "2026-10-10T07:43:53.708Z"
+  "updatedAt": "2026-10-10T13:19:56.903Z"
 }

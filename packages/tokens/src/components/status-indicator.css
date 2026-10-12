@@ -4,11 +4,11 @@
     --neoverse-status-indicator-gap-md: var(--neoverse-space-2);
     --neoverse-status-indicator-dot-size-sm: 0.42rem;
     --neoverse-status-indicator-dot-size-md: var(--neoverse-space-2);
-    --neoverse-status-indicator-glow-opacity: 42%;
-    --neoverse-status-indicator-pulse-opacity: 88%;
+    --neoverse-status-indicator-glow-opacity: var(--neoverse-effect-glow-alpha);
+    --neoverse-status-indicator-pulse-opacity: var(--neoverse-effect-pulse-alpha);
     --neoverse-status-indicator-pulse-scale: 2.14;
-    --neoverse-status-indicator-pulse-rest-opacity: 0.9;
-    --neoverse-status-indicator-pulse-mid-opacity: 0.38;
+    --neoverse-status-indicator-pulse-rest-opacity: var(--neoverse-effect-pulse-rest-opacity);
+    --neoverse-status-indicator-pulse-mid-opacity: var(--neoverse-effect-pulse-mid-opacity);
 
     --neoverse-status-indicator-neutral-color: var(--neoverse-color-text-muted);
     --neoverse-status-indicator-info-color: var(--neoverse-color-status-info);
@@ -16,102 +16,40 @@
     --neoverse-status-indicator-warning-color: var(--neoverse-color-status-warning);
     --neoverse-status-indicator-danger-color: var(--neoverse-color-status-danger);
 
-    --neoverse-status-indicator-neutral-glow: 0 0
-      calc(var(--neoverse-status-indicator-dot-size-md) * 1.2)
-      color-mix(
-        in srgb,
-        var(--neoverse-color-text-muted) var(--neoverse-status-indicator-glow-opacity),
-        transparent
-      );
-    --neoverse-status-indicator-info-glow: 0 0
-      calc(var(--neoverse-status-indicator-dot-size-md) * 1.2)
-      color-mix(
-        in srgb,
-        var(--neoverse-color-status-info) var(--neoverse-status-indicator-glow-opacity),
-        transparent
-      );
-    --neoverse-status-indicator-success-glow: 0 0
-      calc(var(--neoverse-status-indicator-dot-size-md) * 1.2)
-      color-mix(
-        in srgb,
-        var(--neoverse-color-status-success) var(--neoverse-status-indicator-glow-opacity),
-        transparent
-      );
-    --neoverse-status-indicator-warning-glow: 0 0
-      calc(var(--neoverse-status-indicator-dot-size-md) * 1.2)
-      color-mix(
-        in srgb,
-        var(--neoverse-color-status-warning) var(--neoverse-status-indicator-glow-opacity),
-        transparent
-      );
-    --neoverse-status-indicator-danger-glow: 0 0
-      calc(var(--neoverse-status-indicator-dot-size-md) * 1.2)
-      color-mix(
-        in srgb,
-        var(--neoverse-color-status-danger) var(--neoverse-status-indicator-glow-opacity),
-        transparent
-      );
+    --neoverse-status-indicator-neutral-glow: var(--neoverse-effect-status-neutral-glow);
+    --neoverse-status-indicator-info-glow: var(--neoverse-effect-status-info-glow);
+    --neoverse-status-indicator-success-glow: var(--neoverse-effect-status-success-glow);
+    --neoverse-status-indicator-warning-glow: var(--neoverse-effect-status-warning-glow);
+    --neoverse-status-indicator-danger-glow: var(--neoverse-effect-status-danger-glow);
 
-    --neoverse-status-indicator-neutral-pulse-background: color-mix(
-      in srgb,
-      var(--neoverse-color-text-muted) var(--neoverse-status-indicator-pulse-opacity),
-      transparent
+    --neoverse-status-indicator-neutral-pulse-background: var(
+      --neoverse-effect-status-neutral-pulse-background
     );
-    --neoverse-status-indicator-info-pulse-background: color-mix(
-      in srgb,
-      var(--neoverse-color-status-info) var(--neoverse-status-indicator-pulse-opacity),
-      transparent
+    --neoverse-status-indicator-info-pulse-background: var(
+      --neoverse-effect-status-info-pulse-background
     );
-    --neoverse-status-indicator-success-pulse-background: color-mix(
-      in srgb,
-      var(--neoverse-color-status-success) var(--neoverse-status-indicator-pulse-opacity),
-      transparent
+    --neoverse-status-indicator-success-pulse-background: var(
+      --neoverse-effect-status-success-pulse-background
     );
-    --neoverse-status-indicator-warning-pulse-background: color-mix(
-      in srgb,
-      var(--neoverse-color-status-warning) var(--neoverse-status-indicator-pulse-opacity),
-      transparent
+    --neoverse-status-indicator-warning-pulse-background: var(
+      --neoverse-effect-status-warning-pulse-background
     );
-    --neoverse-status-indicator-danger-pulse-background: color-mix(
-      in srgb,
-      var(--neoverse-color-status-danger) var(--neoverse-status-indicator-pulse-opacity),
-      transparent
+    --neoverse-status-indicator-danger-pulse-background: var(
+      --neoverse-effect-status-danger-pulse-background
     );
 
-    --neoverse-status-indicator-neutral-pulse-shadow: 0 0
-      calc(var(--neoverse-status-indicator-dot-size-md) * 1.3)
-      color-mix(
-        in srgb,
-        var(--neoverse-color-text-muted) var(--neoverse-status-indicator-glow-opacity),
-        transparent
-      );
-    --neoverse-status-indicator-info-pulse-shadow: 0 0
-      calc(var(--neoverse-status-indicator-dot-size-md) * 1.3)
-      color-mix(
-        in srgb,
-        var(--neoverse-color-status-info) var(--neoverse-status-indicator-glow-opacity),
-        transparent
-      );
-    --neoverse-status-indicator-success-pulse-shadow: 0 0
-      calc(var(--neoverse-status-indicator-dot-size-md) * 1.3)
-      color-mix(
-        in srgb,
-        var(--neoverse-color-status-success) var(--neoverse-status-indicator-glow-opacity),
-        transparent
-      );
-    --neoverse-status-indicator-warning-pulse-shadow: 0 0
-      calc(var(--neoverse-status-indicator-dot-size-md) * 1.3)
-      color-mix(
-        in srgb,
-        var(--neoverse-color-status-warning) var(--neoverse-status-indicator-glow-opacity),
-        transparent
-      );
-    --neoverse-status-indicator-danger-pulse-shadow: 0 0
-      calc(var(--neoverse-status-indicator-dot-size-md) * 1.3)
-      color-mix(
-        in srgb,
-        var(--neoverse-color-status-danger) var(--neoverse-status-indicator-glow-opacity),
-        transparent
-      );
+    --neoverse-status-indicator-neutral-pulse-shadow: var(
+      --neoverse-effect-status-neutral-pulse-shadow
+    );
+    --neoverse-status-indicator-info-pulse-shadow: var(--neoverse-effect-status-info-pulse-shadow);
+    --neoverse-status-indicator-success-pulse-shadow: var(
+      --neoverse-effect-status-success-pulse-shadow
+    );
+    --neoverse-status-indicator-warning-pulse-shadow: var(
+      --neoverse-effect-status-warning-pulse-shadow
+    );
+    --neoverse-status-indicator-danger-pulse-shadow: var(
+      --neoverse-effect-status-danger-pulse-shadow
+    );
   }
 }

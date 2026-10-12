@@ -1,5 +1,6 @@
 [data-playground-view='shell'] {
-  font-size: var(--neoverse-layout-presentation-root-size);
+  /* Show the same defaults as consumers; presentation zoom hides small tokens. */
+  font-size: 1rem;
 }
 
 [data-playground-view='shell'],
@@ -27,6 +28,33 @@
   inset-inline-start: var(--neoverse-playground-shell-drawer-inset);
   max-height: calc(100dvh - var(--neoverse-playground-shell-drawer-inset) * 2);
   padding: var(--neoverse-playground-navigation-inset);
+  /* Glass defines visual transitions; the drawer must also animate its position. */
+  transition: transform var(--neoverse-motion-duration-standard)
+    var(--neoverse-motion-easing-standard);
+}
+
+/* Paint the scrim above the Glass sampling layer, with a rounded opening
+   that follows the drawer. The transparent dismiss button handles outside clicks. */
+.playground-shell::after {
+  position: fixed;
+  z-index: var(--neoverse-layout-layer-modal);
+  inset-block: var(--neoverse-playground-shell-drawer-inset);
+  inset-inline-start: var(--neoverse-playground-shell-drawer-inset);
+  width: var(--neoverse-layout-sidebar-drawer-width);
+  border-radius: var(--neoverse-radius-panel);
+  box-shadow: 0 0 0 100vmax var(--neoverse-color-overlay-scrim);
+  content: '';
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(calc(-100% - var(--neoverse-playground-shell-drawer-inset)));
+  transition:
+    transform var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-standard),
+    opacity var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-standard);
+}
+
+.playground-shell--nav-open::after {
+  opacity: 1;
+  transform: translateX(0);
 }
 
 .playground-shell__navigation--open {
@@ -133,18 +161,22 @@
   box-shadow: var(--neoverse-shadow-sm);
 }
 
-.playground-shell__toolbar[data-toolbar-mode='module'] {
-  --neoverse-material-transparency: var(--neoverse-playground-toolbar-module-transparency);
-}
-
 .playground-shell__toolbar-actions > .ui-segmented-control {
   flex: 0 0 auto;
 }
 
 .playground-navigation-group {
-  box-shadow: var(--neoverse-playground-shell-group-shadow);
-  transition: border-color var(--neoverse-motion-duration-standard)
-    var(--neoverse-motion-easing-standard);
+  box-shadow: var(--neoverse-shadow-none);
+}
+
+.playground-navigation-group--plain + .playground-navigation-group--plain {
+  background-image: linear-gradient(
+    var(--neoverse-color-border-subtle),
+    var(--neoverse-color-border-subtle)
+  );
+  background-position: center top;
+  background-size: calc(100% - var(--neoverse-space-4)) var(--neoverse-border-width-thin);
+  background-repeat: no-repeat;
 }
 
 .playground-floating-interaction-surface {
@@ -178,6 +210,7 @@
 
 .playground-navigation-item--flat-active {
   --neoverse-navigation-item-active-background: none;
+  --neoverse-navigation-item-active-fill: var(--neoverse-color-accent-soft);
   --neoverse-navigation-item-active-shadow: var(--neoverse-shadow-none);
 }
 
@@ -199,7 +232,7 @@
   overflow: hidden;
   border: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
   border-radius: var(--neoverse-radius-control);
-  background: var(--neoverse-playground-stage-gradient), var(--neoverse-color-surface-canvas);
+  background: var(--neoverse-playground-stage-color-field), var(--neoverse-color-surface-canvas);
   padding: var(--neoverse-space-1);
 }
 
@@ -417,14 +450,33 @@
   overflow-x: auto;
   border: 0;
   border-radius: var(--neoverse-radius-control);
-  background: var(--neoverse-playground-stage-gradient), var(--neoverse-color-surface-subtle);
+  background:
+    var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
+    var(--neoverse-color-surface-canvas);
   padding: var(--neoverse-space-6) var(--neoverse-space-4);
   box-shadow: var(--neoverse-shadow-inset);
 }
 
 .playground-material-backdrop {
   border: 0;
-  background: var(--neoverse-playground-stage-gradient), var(--neoverse-color-surface-subtle);
+  background:
+    var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
+    var(--neoverse-color-surface-canvas);
+}
+
+/* Paint observation shapes once, inside the stage rather than behind its headings. */
+.playground-material-backdrop:has(
+  :is(
+      .playground-specimen-preview,
+      .playground-qa-stage,
+      .playground-dock-preview,
+      .playground-motion-stage,
+      .playground-overview-hero__stage,
+      .playground-material-backdrop
+    )
+) {
+  background-image:
+    var(--neoverse-playground-stage-color-field), var(--neoverse-playground-stage-underlay);
 }
 
 .playground-material-backdrop--framed {
@@ -458,21 +510,6 @@
   z-index: 1;
 }
 
-/* The data specimen shares one card material instead of sampling each cell. */
-.playground-data-table-surface {
-  --neoverse-table-background: var(--neoverse-surface-inset-dense-fill);
-  --neoverse-table-header-background: var(--neoverse-surface-inset-header-fill);
-  --neoverse-table-stripe-background: var(--neoverse-surface-inset-hover-fill);
-  --neoverse-table-hover-background: var(--neoverse-surface-inset-strong-fill);
-  --neoverse-table-grid-line: var(--neoverse-color-border-subtle);
-  --neoverse-table-grid-line-strong: var(--neoverse-color-border-default);
-  --neoverse-table-shadow: none;
-  --neoverse-table-cell-shadow: none;
-  --neoverse-table-header-shadow: none;
-  --neoverse-table-hover-shadow: none;
-  --neoverse-table-filter: none;
-}
-
 .playground-data-table-surface .ui-table-region {
   border-radius: 0;
 }
@@ -497,30 +534,10 @@
   border-block-end: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
 }
 
-.playground-data-disclosure {
-  --neoverse-material-transparency: var(
-    --neoverse-surface-glass-elevated-transparency,
-    var(--neoverse-material-glass-elevated-transparency)
-  );
-  --neoverse-material-edge-refraction-opacity: var(
-    --neoverse-surface-glass-elevated-edge-opacity,
-    var(--neoverse-material-glass-elevated-edge-refraction-opacity)
-  );
-}
-
-/* Disclosure remains interactive while using the card's resting material. */
-.playground-data-disclosure[open] {
-  --neoverse-surface-glass-elevated-transparency: var(
-    --neoverse-material-glass-elevated-hover-transparency
-  );
-  --neoverse-material-shadow: var(--neoverse-material-glass-elevated-hover-shadow);
-}
-
 .playground-specimen-preview__content {
   width: max-content;
   min-width: 100%;
   justify-content: center;
-  zoom: var(--neoverse-playground-preview-scale);
 }
 
 .playground-qa-matrix {
@@ -559,7 +576,9 @@
 }
 
 .playground-qa-stage--gradient {
-  background: var(--neoverse-playground-stage-gradient), var(--neoverse-color-surface-subtle);
+  background:
+    var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
+    var(--neoverse-color-surface-canvas);
 }
 
 .playground-qa-stage--neutral {
@@ -578,7 +597,6 @@
   align-items: center;
   justify-content: center;
   gap: var(--neoverse-space-3);
-  zoom: var(--neoverse-playground-preview-scale);
 }
 
 .playground-shadow-token {
@@ -661,7 +679,9 @@
   overflow-x: auto;
   border: 0;
   border-radius: var(--neoverse-radius-control);
-  background: var(--neoverse-playground-stage-gradient), var(--neoverse-color-surface-subtle);
+  background:
+    var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
+    var(--neoverse-color-surface-canvas);
   padding-inline: var(--neoverse-space-3);
   padding-block: var(--neoverse-space-2);
   box-shadow: var(--neoverse-shadow-inset);
@@ -672,12 +692,6 @@
   width: max-content;
   min-width: 100%;
   justify-content: center;
-}
-
-@media (max-width: 48rem) {
-  :root {
-    --neoverse-playground-preview-scale: var(--neoverse-control-surface-scale-md);
-  }
 }
 
 .playground-reduced-transparency-preview
@@ -727,7 +741,9 @@
   align-items: center;
   justify-items: center;
   border-radius: var(--neoverse-radius-control);
-  background: var(--neoverse-playground-stage-gradient), var(--neoverse-color-surface-subtle);
+  background:
+    var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
+    var(--neoverse-color-surface-canvas);
   box-shadow: var(--neoverse-shadow-inset);
 }
 

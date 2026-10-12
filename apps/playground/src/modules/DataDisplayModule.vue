@@ -38,8 +38,8 @@ const copy = {
       '消费端负责内容，共享组件负责摘要几何、焦点反馈与状态表现。',
     ),
     openBody: localized(
-      'Opening increases material density and rotates the indicator using the shared spatial motion role.',
-      '展开后提升材质密度，并使用共享空间动效角色旋转状态指示器。',
+      'Opening retains the Light material and rotates the indicator using shared spatial motion.',
+      '展开后保持轻薄档材质，并使用共享空间动效旋转状态指示器。',
     ),
   },
 } as const;
@@ -53,7 +53,7 @@ const copy = {
       :description="localize(copy.table.description, props.locale)"
     >
       <MaterialBackdrop edge="inset">
-        <UiSurface surface="glass-elevated" class="playground-data-table-surface rounded-card p-4">
+        <UiSurface surface="none" class="playground-data-table-surface rounded-card p-4">
           <UiTable
             :caption="localize(copy.table.caption, props.locale)"
             :aria-label="localize(copy.table.caption, props.locale)"
@@ -86,9 +86,6 @@ const copy = {
       <MaterialBackdrop edge="inset">
         <div class="grid items-start gap-3 md:grid-cols-2">
           <UiDisclosure
-            class="material-glass-elevated playground-data-disclosure"
-            data-surface="glass-elevated"
-            data-neoverse-surface-overflow="visible"
             :summary="localize(copy.disclosure.closed, props.locale)"
             data-data-display-disclosure="closed"
             data-contract-state="default"
@@ -98,9 +95,6 @@ const copy = {
             </p>
           </UiDisclosure>
           <UiDisclosure
-            class="material-glass-elevated playground-data-disclosure"
-            data-surface="glass-elevated"
-            data-neoverse-surface-overflow="visible"
             :summary="localize(copy.disclosure.open, props.locale)"
             open
             data-data-display-disclosure="open"

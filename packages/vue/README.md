@@ -22,7 +22,9 @@ Vue `>=3.5 <4` is required as a peer dependency. Field and choice-control IDs us
 
 ## Public components
 
-`UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch`, `UiField`, `UiPopover`, `UiDropdownMenu`, `UiTable`, `UiDisclosure`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, `UiTooltipSurface`, and `UiPresence` are exported from the package root.
+`UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch`, `UiField`, `UiPopover`, `UiDropdownMenu`, `UiTable`, `UiDisclosure`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, `UiTooltipSurface`, `UiPresence`, `UiTerminalSurface`, `UiTerminalLine`, `UiTerminalTranscript`, and `UiTerminalPrompt` are exported from the package root.
+
+Terminal composition (Glass window, output lines, scrollback, and native terminal input) is documented in [Terminal composition](../../docs/terminal-composition.md). The embedded transcript uses `scrollbar-immersive`; `UiScrollbar` is reserved for document scrolling.
 
 ## Forms and overlays
 

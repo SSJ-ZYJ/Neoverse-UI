@@ -43,6 +43,7 @@
 
   .ui-tooltip-surface--accent.material-glass-subtle[data-neoverse-tooltip-surface] {
     --neoverse-material-tint: var(--neoverse-tooltip-accent-tint);
+    --neoverse-material-background: var(--neoverse-effect-accent-background);
     /* Emphasis comes from tint, refraction and ambient depth. Avoid an inset
        top stroke: on a wide tooltip it collapses into a bright painted line. */
     --neoverse-material-shadow: var(--neoverse-tooltip-accent-shadow);

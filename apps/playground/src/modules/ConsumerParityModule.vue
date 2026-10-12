@@ -193,7 +193,7 @@ const languageOptions = computed(
           </UiAction>
         </UiSurface>
 
-        <UiSurface surface="glass-elevated" class="rounded-card p-3" data-contract-matrix>
+        <UiSurface surface="none" class="rounded-card p-3" data-contract-matrix>
           <UiTable :caption="localize(contractCopy.tableCaption, props.locale)" striped hoverable>
             <thead>
               <tr>
@@ -249,8 +249,9 @@ const languageOptions = computed(
           </p>
         </header>
 
-        <div
-          class="grid min-h-64 min-w-0 content-center gap-4 rounded-panel border border-subtle bg-surface-subtle p-5 shadow-card"
+        <UiSurface
+          surface="glass-elevated"
+          class="grid min-h-64 min-w-0 content-center gap-4 rounded-panel p-5"
         >
           <UiStatusIndicator status="success" pulse role="status">
             {{ localize(copy.hero.status, props.locale) }}
@@ -282,7 +283,7 @@ const languageOptions = computed(
               {{ action.label }}
             </UiAction>
           </div>
-        </div>
+        </UiSurface>
       </section>
 
       <section class="grid min-w-0 gap-3" aria-labelledby="consumer-parity-navigation-title">
@@ -298,8 +299,10 @@ const languageOptions = computed(
           </p>
         </header>
 
-        <div
-          class="flex min-h-40 min-w-0 items-center justify-center rounded-panel border border-subtle bg-surface-subtle p-2 shadow-card sm:p-4"
+        <UiSurface
+          surface="glass-elevated"
+          class="flex min-h-40 min-w-0 items-center justify-center rounded-panel p-2 sm:p-4"
+          content-overflow="visible"
         >
           <UiDock
             :compact="compactNavigation"
@@ -330,7 +333,7 @@ const languageOptions = computed(
               />
             </template>
           </UiDock>
-        </div>
+        </UiSurface>
       </section>
     </div>
   </MaterialBackdrop>

@@ -1,5 +1,6 @@
 {
   "schemaVersion": 1,
+  "materialStandard": "docs/material-standards.md",
   "tracks": {
     "canonical-shared": "Framework-shared components that must keep stable Vue and React contracts in lockstep.",
     "consumer-driven": "Components whose framework adapters are added when real consumers require them; framework-count symmetry is not mandatory."
@@ -359,6 +360,58 @@
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
+      "runtime": "not-applicable"
+    },
+    {
+      "name": "UiTerminalPrompt",
+      "track": "consumer-driven",
+      "maturity": "consumer-validation",
+      "tokens": "stable",
+      "css": "stable",
+      "vue": "stable",
+      "react": "none",
+      "unit": "stable",
+      "visual": "playground",
+      "consumer": "validated",
+      "runtime": "not-applicable"
+    },
+    {
+      "name": "UiTerminalSurface",
+      "track": "consumer-driven",
+      "maturity": "consumer-validation",
+      "tokens": "stable",
+      "css": "stable",
+      "vue": "stable",
+      "react": "none",
+      "unit": "stable",
+      "visual": "playground",
+      "consumer": "pending",
+      "runtime": "not-applicable"
+    },
+    {
+      "name": "UiTerminalLine",
+      "track": "consumer-driven",
+      "maturity": "consumer-validation",
+      "tokens": "stable",
+      "css": "stable",
+      "vue": "stable",
+      "react": "none",
+      "unit": "stable",
+      "visual": "playground",
+      "consumer": "pending",
+      "runtime": "not-applicable"
+    },
+    {
+      "name": "UiTerminalTranscript",
+      "track": "consumer-driven",
+      "maturity": "consumer-validation",
+      "tokens": "stable",
+      "css": "stable",
+      "vue": "stable",
+      "react": "none",
+      "unit": "stable",
+      "visual": "playground",
+      "consumer": "pending",
       "runtime": "not-applicable"
     },
     {

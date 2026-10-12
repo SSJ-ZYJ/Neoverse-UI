@@ -11,7 +11,7 @@
     "提供 Vue 消费示例和真实 XCA 终端宿主视觉回归；若既有 UiSurface 组合足够则记录不新增的结论。"
   ],
   "impact": "normal",
-  "status": "reported",
+  "status": "implementing",
   "consumers": [
     {
       "project": "XCA-Portal",
@@ -21,5 +21,5 @@
     }
   ],
   "createdAt": "2026-10-10T07:43:53.624Z",
-  "updatedAt": "2026-10-10T07:43:53.624Z"
+  "updatedAt": "2026-10-10T13:19:57.059Z"
 }

@@ -1,29 +1,16 @@
 @layer neoverse.tokens {
   :root {
     /* Neutral translucent frost; the opaque plate is only an accessibility fallback. */
-    --neoverse-skeleton-base-fill: color-mix(
-      in srgb,
-      var(--neoverse-color-text-secondary) 16%,
-      var(--neoverse-color-surface-canvas)
-    );
-    --neoverse-skeleton-fill: color-mix(
-      in srgb,
-      var(--neoverse-color-text-secondary) 26%,
-      transparent
-    );
-    --neoverse-skeleton-backdrop-filter: blur(12px);
-    --neoverse-skeleton-highlight: color-mix(
-      in srgb,
-      var(--neoverse-color-text-primary) 14%,
-      transparent
-    );
-    --neoverse-skeleton-edge: inset 0 1px 0
-      color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent);
+    --neoverse-skeleton-base-fill: var(--neoverse-effect-loading-base);
+    --neoverse-skeleton-fill: var(--neoverse-material-glass-subtle-background);
+    --neoverse-skeleton-backdrop-filter: var(--neoverse-material-glass-subtle-filter);
+    --neoverse-skeleton-highlight: var(--neoverse-effect-placeholder-highlight);
+    --neoverse-skeleton-edge: var(--neoverse-effect-placeholder-edge);
     --neoverse-skeleton-text-min-height: var(--neoverse-font-size-md);
     --neoverse-skeleton-title-min-height: 1.15rem;
     --neoverse-skeleton-shimmer-duration: 1.25s;
     --neoverse-skeleton-shimmer-easing: var(--neoverse-motion-easing-standard);
-    --neoverse-skeleton-pulse-mid-opacity: 0.58;
+    --neoverse-skeleton-pulse-mid-opacity: var(--neoverse-effect-pulse-mid-opacity);
   }
 
   @media (prefers-reduced-transparency: reduce), (forced-colors: active) {

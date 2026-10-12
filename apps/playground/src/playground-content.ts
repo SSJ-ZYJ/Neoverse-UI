@@ -89,32 +89,39 @@ export const appCopy = {
 } as const;
 
 export const groupCopy = {
-  foundations: {
-    label: localized('Foundations', '基础'),
+  tokens: {
+    label: localized('Design Tokens', '设计令牌'),
     description: localized(
-      'Core tokens for color, type, layout geometry, and motion.',
-      '覆盖色彩、字体、布局几何与动效的基础设计令牌。',
+      'Color, typography, layout geometry, and elevation from the shared token package.',
+      '共享令牌包中的色彩、字体、布局几何与阴影层级。',
     ),
   },
   materials: {
-    label: localized('Materials', '材质与层级'),
+    label: localized('Materials & Styles', '材质与样式'),
     description: localized(
-      'Surface materials and elevation rules that establish visual hierarchy.',
-      '用于建立视觉层级的表面材质与阴影规则。',
+      'Tailwind surface styles and the optional Glass runtime enhancement.',
+      'Tailwind 表面样式与可选的 Glass Runtime 增强。',
+    ),
+  },
+  motion: {
+    label: localized('Motion', '动效'),
+    description: localized(
+      'Motion roles, Presence transitions, and page-transition choreography.',
+      '动效角色、Presence 过渡与页面转场编排。',
     ),
   },
   components: {
-    label: localized('Components', '组件'),
+    label: localized('UI Components', 'UI 组件'),
     description: localized(
-      'Interactive, status, content, and scrolling primitives for product UI.',
-      '产品界面使用的交互、状态、内容与滚动基础组件。',
+      'Framework components, ordered from controls and forms to content and navigation.',
+      '框架组件，按控件、表单、反馈、内容与导航的使用顺序排列。',
     ),
   },
   patterns: {
-    label: localized('Patterns', '组合模式'),
+    label: localized('Compositions', '组合场景'),
     description: localized(
-      'Reusable interface compositions that show components working together.',
-      '展示多个组件如何协同工作的可复用界面组合。',
+      'Multi-component interface patterns and the terminal composition, rather than standalone package APIs.',
+      '多组件界面模式与终端组合，而非独立的包级组件 API。',
     ),
   },
   validation: {

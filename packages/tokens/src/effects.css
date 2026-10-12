@@ -1,0 +1,409 @@
+/* Shared effect vocabulary. Components consume roles, never independent alpha recipes. */
+@layer neoverse.tokens {
+  :root {
+    --neoverse-effect-alpha-faint: 5%;
+    --neoverse-effect-alpha-quiet: 10%;
+    --neoverse-effect-alpha-subtle: 15%;
+    --neoverse-effect-alpha-soft: 20%;
+    --neoverse-effect-alpha-medium: 30%;
+    --neoverse-effect-alpha-strong: 40%;
+    --neoverse-effect-alpha-intense: 60%;
+    --neoverse-effect-alpha-dominant: 80%;
+    --neoverse-effect-alpha-full: 100%;
+    --neoverse-effect-disabled-content-opacity: 0.6;
+    --neoverse-effect-disabled-foreground: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary)
+        calc(var(--neoverse-effect-disabled-content-opacity) * 100%),
+      transparent
+    );
+    --neoverse-effect-hover-opacity: 0.3;
+    --neoverse-effect-press-opacity: 1;
+    --neoverse-effect-press-scale: 0.97;
+    --neoverse-effect-pulse-rest-opacity: 0.9;
+    --neoverse-effect-pulse-mid-opacity: 0.58;
+    --neoverse-effect-glow-alpha: 42%;
+    --neoverse-effect-pulse-alpha: 88%;
+    --neoverse-effect-terminal-dim-opacity: 0.25;
+    --neoverse-effect-terminal-muted-opacity: 0.5;
+    --neoverse-effect-terminal-soft-opacity: 0.75;
+    --neoverse-effect-highlight-color: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) var(--neoverse-effect-alpha-subtle),
+      transparent
+    );
+    --neoverse-effect-hover-wash: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) var(--neoverse-effect-alpha-faint),
+      transparent
+    );
+    --neoverse-effect-press-wash: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) var(--neoverse-effect-alpha-quiet),
+      transparent
+    );
+    --neoverse-effect-rest-shadow: var(--neoverse-shadow-inset);
+    --neoverse-effect-selected-shadow:
+      var(--neoverse-material-edge-highlight-subtle), var(--neoverse-shadow-control);
+    --neoverse-effect-loading-base: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) var(--neoverse-effect-alpha-subtle),
+      var(--neoverse-color-surface-canvas)
+    );
+    --neoverse-effect-affordance-track: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) var(--neoverse-effect-alpha-faint),
+      transparent
+    );
+    --neoverse-effect-affordance-rest: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) var(--neoverse-effect-alpha-strong),
+      transparent
+    );
+    --neoverse-effect-affordance-hover: var(--neoverse-color-accent-primary);
+    --neoverse-effect-affordance-press: var(--neoverse-color-accent-secondary);
+    --neoverse-effect-hover-shadow: var(--neoverse-shadow-control);
+    --neoverse-effect-press-shadow: var(--neoverse-shadow-inset);
+    --neoverse-effect-press-light: radial-gradient(
+      ellipse at var(--neoverse-button-press-x, 50%) var(--neoverse-button-press-y, 50%),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-alpha-strong),
+        transparent
+      ),
+      transparent 68%
+    );
+  }
+
+  /* Compose at the material owner, so inherited and instance overrides are live.
+     Defining these only on :root would freeze dependent custom properties there. */
+  :root,
+  :where(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive,
+    .ui-surface-chrome,
+    .ui-surface-inset,
+    .ui-input,
+    .ui-textarea,
+    .ui-select,
+    .ui-select__popover,
+    .ui-overlay-panel,
+    .ui-disclosure,
+    .ui-table,
+    .ui-badge,
+    .ui-notice,
+    .ui-choice__control,
+    .ui-skeleton,
+    .skeleton-surface,
+    .ui-terminal-surface__header,
+    .neoverse-prose table,
+    .neoverse-prose details,
+    .neoverse-prose blockquote,
+    .neoverse-prose pre,
+    .neoverse-prose kbd,
+    .neoverse-prose :not(pre) > code
+  ) {
+    --neoverse-material-glass-subtle-filter: blur(var(--neoverse-material-glass-subtle-blur))
+      saturate(var(--neoverse-material-glass-subtle-saturation));
+    --neoverse-material-glass-elevated-filter: blur(var(--neoverse-material-glass-elevated-blur))
+      saturate(var(--neoverse-material-glass-elevated-saturation));
+    --neoverse-material-glass-immersive-filter: blur(var(--neoverse-material-glass-immersive-blur))
+      saturate(var(--neoverse-material-glass-immersive-saturation));
+    --neoverse-material-glass-subtle-background: color-mix(
+      in srgb,
+      var(--neoverse-material-glass-subtle-tint) var(--neoverse-material-glass-subtle-transparency),
+      transparent
+    );
+    --neoverse-material-glass-elevated-background: color-mix(
+      in srgb,
+      var(--neoverse-material-glass-elevated-tint)
+        var(--neoverse-material-glass-elevated-transparency),
+      transparent
+    );
+    --neoverse-material-glass-immersive-background: color-mix(
+      in srgb,
+      var(--neoverse-material-glass-immersive-tint)
+        var(--neoverse-material-glass-immersive-transparency),
+      transparent
+    );
+    --neoverse-surface-inset-fill: var(--neoverse-material-glass-subtle-background);
+    --neoverse-surface-inset-rest-background: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-hover-background: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-strong-background: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-disabled-background: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-filter: var(--neoverse-material-glass-subtle-filter);
+    --neoverse-form-control-background: var(--neoverse-surface-inset-fill);
+    --neoverse-form-control-hover-background: var(--neoverse-surface-inset-fill);
+    --neoverse-form-control-focus-background: var(--neoverse-surface-inset-fill);
+    --neoverse-form-control-disabled-background: var(--neoverse-surface-inset-fill);
+    --neoverse-form-control-readonly-background: var(--neoverse-surface-inset-fill);
+    --neoverse-form-control-filter: var(--neoverse-surface-inset-filter);
+    --neoverse-disclosure-fill: var(--neoverse-surface-inset-fill);
+    --neoverse-disclosure-hover-fill: var(--neoverse-surface-inset-fill);
+    --neoverse-disclosure-open-fill: var(--neoverse-surface-inset-fill);
+    --neoverse-disclosure-open-hover-fill: var(--neoverse-surface-inset-fill);
+    --neoverse-disclosure-filter: var(--neoverse-surface-inset-filter);
+    --neoverse-table-background: var(--neoverse-surface-inset-fill);
+    --neoverse-table-header-background: var(--neoverse-surface-inset-fill);
+    --neoverse-table-stripe-background: var(--neoverse-surface-inset-fill);
+    --neoverse-table-hover-background: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-header-background: var(--neoverse-surface-inset-fill);
+    --neoverse-table-filter: var(--neoverse-surface-inset-filter);
+    --neoverse-overlay-background: var(--neoverse-material-glass-elevated-background);
+    --neoverse-overlay-filter: var(--neoverse-material-glass-elevated-filter);
+    --neoverse-select-popover-background: var(--neoverse-material-glass-elevated-background);
+    --neoverse-select-popover-filter: var(--neoverse-material-glass-elevated-filter);
+    --neoverse-control-chrome-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-control-chrome-filter: var(--neoverse-material-glass-subtle-filter);
+    --neoverse-prose-quote-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-prose-quote-filter: var(--neoverse-material-glass-subtle-filter);
+    --neoverse-prose-code-block-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-prose-code-block-filter: var(--neoverse-material-glass-subtle-filter);
+    --neoverse-prose-kbd-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-prose-inline-code-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-badge-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-notice-neutral-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-choice-control-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-choice-control-hover-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-choice-control-active-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-badge-info-background: var(--neoverse-effect-status-info-background);
+    --neoverse-badge-success-background: var(--neoverse-effect-status-success-background);
+    --neoverse-badge-warning-background: var(--neoverse-effect-status-warning-background);
+    --neoverse-badge-danger-background: var(--neoverse-effect-status-danger-background);
+    --neoverse-notice-info-background: var(--neoverse-effect-status-info-background);
+    --neoverse-notice-success-background: var(--neoverse-effect-status-success-background);
+    --neoverse-notice-warning-background: var(--neoverse-effect-status-warning-background);
+    --neoverse-notice-danger-background: var(--neoverse-effect-status-danger-background);
+    --neoverse-surface-inset-dense-fill: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-hover-fill: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-strong-fill: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-header-fill: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-alternate-fill: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-disabled-fill: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-strong-hover-fill: var(--neoverse-surface-inset-fill);
+    --neoverse-skeleton-fill: var(--neoverse-material-glass-subtle-background);
+    --neoverse-skeleton-backdrop-filter: var(--neoverse-material-glass-subtle-filter);
+    --neoverse-effect-accent-tint: color-mix(
+      in srgb,
+      var(--neoverse-material-glass-base-tint) var(--neoverse-effect-strength-72),
+      var(--neoverse-color-accent-primary)
+    );
+    --neoverse-effect-accent-background: color-mix(
+      in srgb,
+      var(--neoverse-effect-accent-tint) var(--neoverse-material-glass-subtle-transparency),
+      transparent
+    );
+    --neoverse-tooltip-arrow-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-tooltip-accent-tint: var(--neoverse-effect-accent-tint);
+    --neoverse-tooltip-accent-arrow-background: var(--neoverse-effect-accent-background);
+    --neoverse-effect-status-neutral-shadow:
+      var(--neoverse-effect-rest-shadow),
+      0 6px 16px -14px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-muted) var(--neoverse-effect-alpha-soft),
+        transparent
+      );
+    --neoverse-effect-status-neutral-glow: 0 0 calc(var(--neoverse-space-2) * 1.2)
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-muted) var(--neoverse-effect-glow-alpha),
+        transparent
+      );
+    --neoverse-effect-status-neutral-pulse-background: color-mix(
+      in srgb,
+      var(--neoverse-color-text-muted) var(--neoverse-effect-pulse-alpha),
+      transparent
+    );
+    --neoverse-effect-status-neutral-pulse-shadow: 0 0 calc(var(--neoverse-space-2) * 1.3)
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-muted) var(--neoverse-effect-glow-alpha),
+        transparent
+      );
+    --neoverse-effect-status-info-shadow:
+      var(--neoverse-effect-rest-shadow),
+      0 6px 16px -14px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-status-info) var(--neoverse-effect-alpha-soft),
+        transparent
+      );
+    --neoverse-effect-status-info-glow: 0 0 calc(var(--neoverse-space-2) * 1.2)
+      color-mix(
+        in srgb,
+        var(--neoverse-color-status-info) var(--neoverse-effect-glow-alpha),
+        transparent
+      );
+    --neoverse-effect-status-info-pulse-background: color-mix(
+      in srgb,
+      var(--neoverse-color-status-info) var(--neoverse-effect-pulse-alpha),
+      transparent
+    );
+    --neoverse-effect-status-info-pulse-shadow: 0 0 calc(var(--neoverse-space-2) * 1.3)
+      color-mix(
+        in srgb,
+        var(--neoverse-color-status-info) var(--neoverse-effect-glow-alpha),
+        transparent
+      );
+    --neoverse-effect-status-success-shadow:
+      var(--neoverse-effect-rest-shadow),
+      0 6px 16px -14px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-status-success) var(--neoverse-effect-alpha-soft),
+        transparent
+      );
+    --neoverse-effect-status-success-glow: 0 0 calc(var(--neoverse-space-2) * 1.2)
+      color-mix(
+        in srgb,
+        var(--neoverse-color-status-success) var(--neoverse-effect-glow-alpha),
+        transparent
+      );
+    --neoverse-effect-status-success-pulse-background: color-mix(
+      in srgb,
+      var(--neoverse-color-status-success) var(--neoverse-effect-pulse-alpha),
+      transparent
+    );
+    --neoverse-effect-status-success-pulse-shadow: 0 0 calc(var(--neoverse-space-2) * 1.3)
+      color-mix(
+        in srgb,
+        var(--neoverse-color-status-success) var(--neoverse-effect-glow-alpha),
+        transparent
+      );
+    --neoverse-effect-status-warning-shadow:
+      var(--neoverse-effect-rest-shadow),
+      0 6px 16px -14px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-status-warning) var(--neoverse-effect-alpha-soft),
+        transparent
+      );
+    --neoverse-effect-status-warning-glow: 0 0 calc(var(--neoverse-space-2) * 1.2)
+      color-mix(
+        in srgb,
+        var(--neoverse-color-status-warning) var(--neoverse-effect-glow-alpha),
+        transparent
+      );
+    --neoverse-effect-status-warning-pulse-background: color-mix(
+      in srgb,
+      var(--neoverse-color-status-warning) var(--neoverse-effect-pulse-alpha),
+      transparent
+    );
+    --neoverse-effect-status-warning-pulse-shadow: 0 0 calc(var(--neoverse-space-2) * 1.3)
+      color-mix(
+        in srgb,
+        var(--neoverse-color-status-warning) var(--neoverse-effect-glow-alpha),
+        transparent
+      );
+    --neoverse-effect-status-danger-shadow:
+      var(--neoverse-effect-rest-shadow),
+      0 6px 16px -14px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-status-danger) var(--neoverse-effect-alpha-soft),
+        transparent
+      );
+    --neoverse-effect-status-danger-glow: 0 0 calc(var(--neoverse-space-2) * 1.2)
+      color-mix(
+        in srgb,
+        var(--neoverse-color-status-danger) var(--neoverse-effect-glow-alpha),
+        transparent
+      );
+    --neoverse-effect-status-danger-pulse-background: color-mix(
+      in srgb,
+      var(--neoverse-color-status-danger) var(--neoverse-effect-pulse-alpha),
+      transparent
+    );
+    --neoverse-effect-status-danger-pulse-shadow: 0 0 calc(var(--neoverse-space-2) * 1.3)
+      color-mix(
+        in srgb,
+        var(--neoverse-color-status-danger) var(--neoverse-effect-glow-alpha),
+        transparent
+      );
+    --neoverse-effect-status-info-background: color-mix(
+      in srgb,
+      var(--neoverse-color-status-info) var(--neoverse-material-glass-subtle-transparency),
+      transparent
+    );
+    --neoverse-effect-status-success-background: color-mix(
+      in srgb,
+      var(--neoverse-color-status-success) var(--neoverse-material-glass-subtle-transparency),
+      transparent
+    );
+    --neoverse-effect-status-warning-background: color-mix(
+      in srgb,
+      var(--neoverse-color-status-warning) var(--neoverse-material-glass-subtle-transparency),
+      transparent
+    );
+    --neoverse-effect-status-danger-background: color-mix(
+      in srgb,
+      var(--neoverse-color-status-danger) var(--neoverse-material-glass-subtle-transparency),
+      transparent
+    );
+  }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :where(
+        .ui-surface-inset,
+        .ui-input,
+        .ui-textarea,
+        .ui-select,
+        .ui-select__popover,
+        .ui-overlay-panel,
+        .ui-disclosure,
+        .ui-table,
+        .ui-choice__control,
+        .ui-notice,
+        .neoverse-prose table,
+        .neoverse-prose details,
+        .neoverse-prose blockquote,
+        .neoverse-prose pre,
+        .neoverse-prose kbd
+      ) {
+      --neoverse-material-glass-subtle-background: var(--neoverse-material-glass-base-tint);
+      --neoverse-material-glass-elevated-background: var(--neoverse-material-glass-base-tint);
+      --neoverse-material-glass-subtle-filter: none;
+      --neoverse-material-glass-elevated-filter: none;
+      --neoverse-notice-info-background: var(--neoverse-material-glass-base-tint);
+      --neoverse-notice-success-background: var(--neoverse-material-glass-base-tint);
+      --neoverse-notice-warning-background: var(--neoverse-material-glass-base-tint);
+      --neoverse-notice-danger-background: var(--neoverse-material-glass-base-tint);
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    :where(
+        .ui-surface-inset,
+        .ui-input,
+        .ui-textarea,
+        .ui-select,
+        .ui-select__popover,
+        .ui-overlay-panel,
+        .ui-disclosure,
+        .ui-table,
+        .ui-choice__control,
+        .ui-notice,
+        .neoverse-prose table,
+        .neoverse-prose details,
+        .neoverse-prose blockquote,
+        .neoverse-prose pre,
+        .neoverse-prose kbd
+      ) {
+      --neoverse-material-glass-subtle-background: var(--neoverse-material-glass-base-tint);
+      --neoverse-material-glass-elevated-background: var(--neoverse-material-glass-base-tint);
+      --neoverse-material-glass-subtle-filter: none;
+      --neoverse-material-glass-elevated-filter: none;
+      --neoverse-notice-info-background: var(--neoverse-material-glass-base-tint);
+      --neoverse-notice-success-background: var(--neoverse-material-glass-base-tint);
+      --neoverse-notice-warning-background: var(--neoverse-material-glass-base-tint);
+      --neoverse-notice-danger-background: var(--neoverse-material-glass-base-tint);
+    }
+
+    :where(.ui-skeleton, .skeleton-surface) {
+      --neoverse-skeleton-fill: var(--neoverse-skeleton-base-fill);
+      --neoverse-skeleton-backdrop-filter: none;
+    }
+  }
+}

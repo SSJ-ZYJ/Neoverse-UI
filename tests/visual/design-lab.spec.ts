@@ -246,6 +246,7 @@ for (const theme of themes) {
           edgeDisplay: getComputedStyle(edge).display,
           pressRadius: press.borderRadius,
           pressOpacity: press.opacity,
+          pressDisplay: press.display,
         };
       });
 
@@ -262,14 +263,14 @@ for (const theme of themes) {
     expect(hovered.background).not.toBe(resting.background);
     expect(hovered.border).toBe(resting.border);
     expect(hovered.edgeDisplay).toBe('none');
-    expect(hovered.pressOpacity).toBe('0');
+    expect(hovered.pressDisplay).toBe('none');
 
     await page.mouse.down();
     const pressed = await readState();
     expect(pressed.border).toBe(resting.border);
     expect(pressed.background).not.toBe(resting.background);
     expect(pressed.edgeDisplay).toBe('none');
-    expect(pressed.pressOpacity).toBe('0');
+    expect(pressed.pressDisplay).toBe('none');
     await page.mouse.up();
   });
 }
@@ -329,7 +330,9 @@ test('consumer parity exposes destination and current-page semantics', async ({ 
   expect(pulseAnimation).toBe('none');
 });
 
-test('active navigation hover does not stack another visual state', async ({ page }) => {
+test('active navigation retains selection while hover provides shared feedback', async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
     waitUntil: 'domcontentloaded',
@@ -357,7 +360,9 @@ test('active navigation hover does not stack another visual state', async ({ pag
   await activeItem.hover();
   const duringHover = await readVisualState();
 
-  expect(duringHover).toEqual(beforeHover);
+  expect(duringHover.color).toBe(beforeHover.color);
+  expect(duringHover.backgroundImage).toBe(beforeHover.backgroundImage);
+  await expect(activeItem).toHaveAttribute('aria-current', 'page');
 });
 
 for (const theme of themes) {
@@ -444,16 +449,12 @@ for (const theme of themes) {
     const shellBeforeHover = await readShellState();
     const renderer = await page.locator('html').getAttribute('data-neoverse-glass-renderer');
     await expect(control).toHaveAttribute('data-neoverse-glass-edge-pass', 'css');
-    // The CSS-backed field remains mounted under WebGL. Its theme-owned opacity
-    // keeps the dark edge absent while light retains its intentional refraction.
-    expect(shellBeforeHover.edgeDisplay).toBe(
-      renderer === 'webgl' || theme === 'light' ? 'block' : 'none',
-    );
-    if (theme === 'light') {
-      expect(shellBeforeHover.edgeOpacity).toBeGreaterThan(0);
-    } else {
-      expect(shellBeforeHover.edgeOpacity).toBe(0);
-    }
+    // The CSS refraction fallback stays enabled in both themes. WebGL must
+    // not accidentally erase the dark control's material edge.
+    expect(['webgl', 'css', null]).toContain(renderer);
+    expect(shellBeforeHover.edgeDisplay).toBe('block');
+    expect(shellBeforeHover.edgeOpacity).toBeGreaterThan(0);
+    expect(shellBeforeHover.edgeOpacity).toBeLessThanOrEqual(1);
     await control.locator('.ui-segmented-control__option--active').hover();
     const duringHover = await readSelectedState();
     const shellDuringHover = await readShellState();
@@ -665,11 +666,17 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       sliderRect.right <= languageRect.right &&
       sliderRect.top >= languageRect.top &&
       sliderRect.bottom <= languageRect.bottom;
+    const materialProbe = document.createElement('span');
+    materialProbe.style.background = 'var(--neoverse-material-glass-subtle-background)';
+    element.append(materialProbe);
+    const expectedDockBackground = getComputedStyle(materialProbe).background;
+    materialProbe.remove();
     return {
       surface: element.getAttribute('data-surface'),
       presentationScale: Number.parseFloat(getComputedStyle(element).zoom),
       chromeClass: element.classList.contains('ui-surface-chrome'),
       dockBackground: style.background,
+      expectedDockBackground,
       dockFilter: style.backdropFilter,
       dockBorder: style.borderColor,
       dockEdgeBackgroundImage: chromeEdgeStyle.backgroundImage,
@@ -816,7 +823,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   });
   expect(edgeMaterial.surface).toBe('chrome');
   expect(edgeMaterial.chromeClass).toBe(true);
-  expect(edgeMaterial.dockBackground).toContain('rgba(152, 186, 220, 0.04)');
+  expect(edgeMaterial.dockBackground).toBe(edgeMaterial.expectedDockBackground);
   expect(edgeMaterial.dockFilter).toContain('blur(12px)');
   expect(edgeMaterial.dockBorder).toBe('rgba(219, 234, 254, 0.08)');
   expect(edgeMaterial.dockEdgeBackgroundImage).not.toBe('none');
@@ -1097,7 +1104,7 @@ test('consumer parity dock keeps parent Glass stable on item hover', async ({ pa
 });
 
 for (const theme of themes) {
-  test(`embedded segmented control keeps only its selected plate without outer chrome / ${theme}`, async ({
+  test(`embedded segmented control borrows its plate and uses a selection edge / ${theme}`, async ({
     page,
   }) => {
     await page.goto(`/frame?theme=${theme}&lang=en#consumer-parity`, {
@@ -1162,15 +1169,16 @@ for (const theme of themes) {
         return {
           backgroundImage: style.backgroundImage,
           backgroundColor: style.backgroundColor,
+          boxShadow: style.boxShadow,
           radius: style.borderTopLeftRadius,
           expectedRadius,
           rootRadius: Number.parseFloat(rootStyle.borderTopLeftRadius),
         };
       });
-    expect(
-      selectedPlate.backgroundImage !== 'none' ||
-        selectedPlate.backgroundColor !== 'rgba(0, 0, 0, 0)',
-    ).toBe(true);
+    expect(selectedPlate.backgroundImage).not.toBe('none');
+    if (theme === 'dark') expect(selectedPlate.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    else expect(selectedPlate.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(selectedPlate.boxShadow).not.toBe('none');
     expect(selectedPlate.radius).toBe(selectedPlate.expectedRadius);
     expect(Number.parseFloat(selectedPlate.radius)).toBeLessThan(selectedPlate.rootRadius);
   });
@@ -1532,7 +1540,9 @@ for (const theme of themes) {
 }
 
 for (const theme of themes) {
-  test(`ghost button stays borderless while retaining soft depth / ${theme}`, async ({ page }) => {
+  test(`ghost button borrows material and adds no independent resting plate / ${theme}`, async ({
+    page,
+  }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     const response = await page.goto(`/frame?theme=${theme}&lang=zh#card`, {
       waitUntil: 'domcontentloaded',
@@ -1559,7 +1569,7 @@ for (const theme of themes) {
     });
 
     expect(boundary.borderColor).toBe('rgba(0, 0, 0, 0)');
-    expect(boundary.boxShadow).not.toBe('none');
+    expect(boundary.boxShadow).toBe('none');
     expect(boundary.edgeDisplay).toBe('none');
     expect(boundary.refractionOpacity).toBe(0);
   });
@@ -1744,11 +1754,11 @@ test('button press keeps the glass plate and reaches full press glow / dark', as
     });
 
     expect(press.active).toBe(true);
-    /* The deployed dark button is an aurora image over a transparent sampled
-       backdrop. Press feedback stays in the dedicated ::after glow. */
-    expect(press.backgroundColor).toBe('rgba(0, 0, 0, 0)');
-    expect(press.backgroundImage).not.toBe('none');
-    expect(press.backdropFilter).toContain('blur(36px)');
+    /* Press feedback stays in the dedicated local field, leaving Light optics stable. */
+    expect(press.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(press.backgroundAlpha).toBeCloseTo(0.15, 3);
+    expect(press.backgroundImage).toBe('none');
+    expect(press.backdropFilter).toContain('blur(12px)');
     expect(press.pressGlowBackground).not.toBe('none');
     expect(press.pressGlowOpacity).toBe('1');
   } finally {
@@ -1756,35 +1766,37 @@ test('button press keeps the glass plate and reaches full press glow / dark', as
   }
 });
 
-test('dark primary adds hierarchy without abandoning translucent Glass', async ({ page }) => {
+test('dark filled variants share Light optics and Ghost keeps no plate', async ({ page }) => {
   await page.goto('/frame?theme=dark&lang=en#controls', {
     waitUntil: 'domcontentloaded',
   });
   await page.evaluate(waitForStableAssets);
 
-  const surfaces = await page.locator('#controls-button .ui-button').evaluateAll((elements) =>
-    elements.slice(0, 3).map((element) => {
-      const style = getComputedStyle(element);
-      const slashAlpha = style.backgroundColor.match(/\/\s*([0-9.]+)\)/)?.[1];
-      const rgbaAlpha = style.backgroundColor.match(/,\s*([0-9.]+)\)$/)?.[1];
-      return {
-        variant: [...element.classList].find((className) => className.startsWith('ui-button--')),
-        backgroundAlpha:
-          slashAlpha === undefined
-            ? rgbaAlpha === undefined
-              ? style.backgroundColor === 'transparent'
-                ? 0
-                : 1
-              : Number(rgbaAlpha)
-            : Number(slashAlpha),
-        borderColor: style.borderColor,
-        backgroundImage: style.backgroundImage,
-        boxShadow: style.boxShadow,
-        color: style.color,
-        backdropFilter: style.backdropFilter,
-      };
-    }),
-  );
+  const surfaces = await page
+    .locator('#controls-button [data-contract-state="default"] .ui-button')
+    .evaluateAll((elements) =>
+      elements.slice(0, 3).map((element) => {
+        const style = getComputedStyle(element);
+        const slashAlpha = style.backgroundColor.match(/\/\s*([0-9.]+)\)/)?.[1];
+        const rgbaAlpha = style.backgroundColor.match(/,\s*([0-9.]+)\)$/)?.[1];
+        return {
+          variant: [...element.classList].find((className) => className.startsWith('ui-button--')),
+          backgroundAlpha:
+            slashAlpha === undefined
+              ? rgbaAlpha === undefined
+                ? style.backgroundColor === 'transparent'
+                  ? 0
+                  : 1
+                : Number(rgbaAlpha)
+              : Number(slashAlpha),
+          borderColor: style.borderColor,
+          backgroundImage: style.backgroundImage,
+          boxShadow: style.boxShadow,
+          color: style.color,
+          backdropFilter: style.backdropFilter,
+        };
+      }),
+    );
 
   expect(surfaces).toHaveLength(3);
   expect(surfaces.map(({ variant }) => variant)).toEqual([
@@ -1792,12 +1804,17 @@ test('dark primary adds hierarchy without abandoning translucent Glass', async (
     'ui-button--secondary',
     'ui-button--ghost',
   ]);
-  expect(surfaces[0]?.backgroundAlpha).toBe(0);
-  expect(surfaces[1]?.backgroundAlpha).toBe(0);
-  expect(surfaces[0]?.backgroundImage).not.toBe('none');
-  expect(surfaces[1]?.backgroundImage).not.toBe('none');
-  expect(surfaces[0]?.backgroundImage).not.toBe(surfaces[1]?.backgroundImage);
-  expect(surfaces[0]?.boxShadow).not.toBe(surfaces[1]?.boxShadow);
+  // Both filled variants retain a sampled, translucent plate; their
+  // low-alpha tint is not an opaque background or a zero-alpha fake Glass.
+  expect(surfaces[0]?.backgroundAlpha).toBeGreaterThan(0);
+  expect(surfaces[0]?.backgroundAlpha).toBeLessThan(0.2);
+  expect(surfaces[1]?.backgroundAlpha).toBeGreaterThan(0);
+  expect(surfaces[1]?.backgroundAlpha).toBeLessThan(0.2);
+  expect(surfaces[0]?.backgroundImage).toBe('none');
+  expect(surfaces[1]?.backgroundImage).toBe('none');
+  expect(surfaces[0]?.backgroundAlpha).toBeCloseTo(0.15, 3);
+  expect(surfaces[1]?.backgroundAlpha).toBeCloseTo(0.15, 3);
+  expect(surfaces[0]?.boxShadow).toBe(surfaces[1]?.boxShadow);
   expect(surfaces[0]?.color).not.toBe(surfaces[1]?.color);
   expect(surfaces[2]?.borderColor).toBe('rgba(0, 0, 0, 0)');
   expect(surfaces.slice(0, 2).every(({ backdropFilter }) => backdropFilter.includes('blur('))).toBe(
@@ -1848,7 +1865,7 @@ test('touch density keeps the compact control geometry and adds a transparent hi
     });
 
   expect(buttonContract).toMatchObject({
-    height: 28,
+    height: 36,
     inset: '-8px',
     pointerEvents: 'auto',
     hitTarget: true,

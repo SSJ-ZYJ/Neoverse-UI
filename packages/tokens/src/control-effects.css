@@ -1,0 +1,585 @@
+/* Shared visual effects retain the established control identity.
+   Glass base alpha/filter belong exclusively to material.css. Colour strengths
+   are exact compatibility values, independent of material tier opacity. */
+@layer neoverse.tokens {
+  :root {
+    --neoverse-effect-strength-17: 17%;
+    /* Established command emphasis is decorative; it does not own a Glass fill/filter. */
+    --neoverse-effect-command-rest-field-dark: linear-gradient(
+      145deg,
+      rgb(181 197 213 / var(--neoverse-effect-strength-13)),
+      rgb(127 147 168 / var(--neoverse-effect-strength-7))
+    );
+    --neoverse-effect-command-hover-field-dark: linear-gradient(
+      145deg,
+      rgb(181 197 213 / var(--neoverse-effect-strength-17)),
+      rgb(127 147 168 / var(--neoverse-effect-alpha-quiet))
+    );
+    --neoverse-effect-primary-rest-field-dark: linear-gradient(
+      145deg,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-secondary) var(--neoverse-effect-strength-18),
+        transparent
+      ),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-muted) var(--neoverse-effect-alpha-quiet),
+        transparent
+      )
+    );
+    --neoverse-effect-primary-hover-field-dark: linear-gradient(
+      145deg,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-secondary) var(--neoverse-effect-strength-24),
+        transparent
+      ),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-muted) var(--neoverse-effect-strength-14),
+        transparent
+      )
+    );
+    --neoverse-effect-primary-press-field-dark: linear-gradient(
+      145deg,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-secondary) var(--neoverse-effect-alpha-medium),
+        transparent
+      ),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-muted) var(--neoverse-effect-strength-18),
+        transparent
+      )
+    );
+    --neoverse-effect-strength-3: 3%;
+    --neoverse-effect-strength-6: 6%;
+    --neoverse-effect-strength-9: 9%;
+    --neoverse-effect-strength-7: 7%;
+    --neoverse-effect-strength-8: 8%;
+    --neoverse-effect-strength-12: 12%;
+    --neoverse-effect-strength-13: 13%;
+    --neoverse-effect-strength-14: 14%;
+    --neoverse-effect-strength-16: 16%;
+    --neoverse-effect-strength-18: 18%;
+    --neoverse-effect-strength-22: 22%;
+    --neoverse-effect-strength-24: 24%;
+    --neoverse-effect-strength-28: 28%;
+    --neoverse-effect-strength-32: 32%;
+    --neoverse-effect-strength-34: 34%;
+    --neoverse-effect-strength-36: 36%;
+    --neoverse-effect-strength-38: 38%;
+    --neoverse-effect-strength-42: 42%;
+    --neoverse-effect-strength-44: 44%;
+    --neoverse-effect-strength-46: 46%;
+    --neoverse-effect-strength-48: 48%;
+    --neoverse-effect-strength-50: 50%;
+    --neoverse-effect-strength-54: 54%;
+    --neoverse-effect-strength-58: 58%;
+    --neoverse-effect-strength-62: 62%;
+    --neoverse-effect-strength-64: 64%;
+    --neoverse-effect-strength-68: 68%;
+    --neoverse-effect-strength-72: 72%;
+    --neoverse-effect-strength-76: 76%;
+    --neoverse-effect-strength-77: 77%;
+    --neoverse-effect-strength-82: 82%;
+    --neoverse-effect-strength-86: 86%;
+    --neoverse-effect-command-edge-opacity-light: 0.12;
+    --neoverse-effect-command-edge-opacity-dark: 0;
+    --neoverse-effect-quiet-command-rest-shadow: inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-alpha-faint),
+        transparent
+      );
+    --neoverse-effect-quiet-command-hover-shadow: inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-alpha-quiet),
+        transparent
+      );
+    --neoverse-effect-quiet-command-hover-wash: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) var(--neoverse-effect-strength-6),
+      transparent
+    );
+    /* Local grouping contrast borrows the parent's material; it has no blur. */
+    --neoverse-effect-grouped-inset-field-light:
+      linear-gradient(
+        125deg,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-edge-light) var(--neoverse-effect-alpha-quiet),
+          transparent
+        ),
+        transparent 30%,
+        transparent 68%,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-accent-soft) var(--neoverse-effect-alpha-quiet),
+          transparent
+        )
+      ),
+      var(--neoverse-material-glass-subtle-background);
+    --neoverse-effect-grouped-inset-field-dark: rgb(
+      255 255 255 /
+      var(--neoverse-effect-strength-3)
+    );
+    --neoverse-effect-grouped-inset-border-light: var(--neoverse-color-transparent);
+    --neoverse-effect-grouped-inset-border-dark: rgb(
+      219 234 254 /
+      var(--neoverse-effect-strength-9)
+    );
+    --neoverse-effect-grouped-inset-field: var(--neoverse-effect-grouped-inset-field-light);
+    --neoverse-effect-grouped-inset-border: var(--neoverse-effect-grouped-inset-border-light);
+    --neoverse-effect-compact-rest-shadow-light:
+      inset 0 1px 0 rgb(255 255 255 / var(--neoverse-effect-strength-36)),
+      0 3px 9px -5px rgb(14 34 44 / var(--neoverse-effect-strength-18)),
+      var(--neoverse-shadow-control);
+    --neoverse-effect-compact-rest-shadow-dark: inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-62),
+        transparent
+      );
+    --neoverse-effect-compact-hover-shadow-light:
+      inset 0 1px 0 rgb(255 255 255 / var(--neoverse-effect-strength-44)),
+      0 4px 12px -6px rgb(14 34 44 / var(--neoverse-effect-alpha-soft)),
+      var(--neoverse-shadow-control);
+    --neoverse-effect-compact-hover-shadow-dark: inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-77),
+        transparent
+      );
+    --neoverse-effect-selection-highlight-light: inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-secondary) var(--neoverse-effect-alpha-soft),
+        transparent
+      );
+    --neoverse-effect-selection-highlight-dark: inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-62),
+        transparent
+      );
+    --neoverse-effect-selection-shadow-light:
+      var(--neoverse-effect-selection-highlight),
+      0 3px 8px -5px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-secondary) var(--neoverse-effect-strength-18),
+        transparent
+      );
+    --neoverse-effect-selection-shadow-dark: var(--neoverse-effect-selection-highlight);
+    --neoverse-effect-selection-field-light: linear-gradient(
+      145deg,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-secondary) var(--neoverse-effect-strength-13),
+        transparent
+      ),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-secondary) var(--neoverse-effect-strength-7),
+        transparent
+      )
+    );
+    --neoverse-effect-selection-field-dark: linear-gradient(
+      145deg,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-secondary) var(--neoverse-effect-strength-13),
+        transparent
+      ),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-7),
+        transparent
+      )
+    );
+    --neoverse-effect-command-rest-shadow-light: var(--neoverse-effect-compact-rest-shadow);
+    --neoverse-effect-command-rest-shadow-dark: inset 0 1px 0
+      rgb(255 255 255 / var(--neoverse-effect-strength-8));
+    --neoverse-effect-command-hover-shadow-light: var(--neoverse-effect-compact-hover-shadow);
+    --neoverse-effect-command-hover-shadow-dark: inset 0 1px 0
+      rgb(255 255 255 / var(--neoverse-effect-alpha-quiet));
+    --neoverse-effect-primary-rest-shadow-light: var(--neoverse-effect-command-rest-shadow);
+    --neoverse-effect-primary-rest-shadow-dark:
+      inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-24),
+        transparent
+      ),
+      0 8px 20px -16px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-muted) var(--neoverse-effect-strength-22),
+        transparent
+      );
+    --neoverse-effect-primary-hover-shadow-light: var(--neoverse-effect-command-hover-shadow);
+    --neoverse-effect-primary-hover-shadow-dark:
+      inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-34),
+        transparent
+      ),
+      0 10px 24px -17px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-muted) var(--neoverse-effect-strength-28),
+        transparent
+      );
+    --neoverse-effect-choice-rest-shadow-light:
+      inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-46),
+        transparent
+      ),
+      0 4px 14px -8px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-primary) var(--neoverse-effect-strength-22),
+        transparent
+      ),
+      var(--neoverse-shadow-control);
+    --neoverse-effect-choice-rest-shadow-dark: var(--neoverse-effect-compact-rest-shadow);
+    --neoverse-effect-choice-selected-field-light: linear-gradient(
+      145deg,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-secondary) var(--neoverse-effect-strength-24),
+        transparent
+      ),
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-primary) var(--neoverse-effect-alpha-quiet),
+        transparent
+      )
+    );
+    --neoverse-effect-choice-selected-field-dark: var(--neoverse-effect-selection-field);
+    --neoverse-effect-choice-selected-fill-light: color-mix(
+      in srgb,
+      var(--neoverse-color-surface-raised) var(--neoverse-effect-strength-86),
+      var(--neoverse-color-accent-secondary) var(--neoverse-effect-strength-14)
+    );
+    --neoverse-effect-choice-selected-fill-dark: transparent;
+    --neoverse-effect-choice-selected-border-light: color-mix(
+      in srgb,
+      var(--neoverse-color-border-interactive) var(--neoverse-effect-strength-34),
+      transparent
+    );
+    --neoverse-effect-choice-selected-border-dark: var(--neoverse-color-transparent);
+    --neoverse-effect-choice-selected-shadow-light: var(--neoverse-effect-command-rest-shadow);
+    --neoverse-effect-choice-selected-shadow-dark: var(--neoverse-effect-selection-shadow);
+    --neoverse-effect-command-edge-field-light:
+      radial-gradient(
+        120% 80% at 0% 0%,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-border-interactive) var(--neoverse-effect-strength-28),
+          transparent
+        ),
+        transparent 70%
+      ),
+      radial-gradient(
+        120% 80% at 100% 100%,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-border-default) var(--neoverse-effect-strength-18),
+          transparent
+        ),
+        transparent 74%
+      ),
+      radial-gradient(
+        70% 100% at 0% 50%,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-border-interactive) var(--neoverse-effect-strength-16),
+          transparent
+        ),
+        transparent 76%
+      ),
+      radial-gradient(
+        70% 100% at 100% 50%,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-border-default) var(--neoverse-effect-strength-12),
+          transparent
+        ),
+        transparent 76%
+      );
+    --neoverse-effect-command-edge-field-dark:
+      radial-gradient(
+        120% 80% at 0% 0%,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-accent-secondary) var(--neoverse-effect-strength-24),
+          transparent
+        ),
+        transparent 70%
+      ),
+      radial-gradient(
+        120% 80% at 100% 100%,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-16),
+          transparent
+        ),
+        transparent 74%
+      ),
+      radial-gradient(
+        70% 100% at 0% 50%,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-accent-secondary) var(--neoverse-effect-alpha-quiet),
+          transparent
+        ),
+        transparent 76%
+      ),
+      radial-gradient(
+        70% 100% at 100% 50%,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-8),
+          transparent
+        ),
+        transparent 76%
+      );
+    --neoverse-effect-command-edge-carrier-light: color-mix(
+      in srgb,
+      var(--neoverse-color-border-interactive) var(--neoverse-effect-strength-14),
+      transparent
+    );
+    --neoverse-effect-command-edge-carrier-dark: color-mix(
+      in srgb,
+      var(--neoverse-color-border-interactive) var(--neoverse-effect-strength-42),
+      transparent
+    );
+    --neoverse-effect-command-press-light-light:
+      radial-gradient(
+        90% 140% at var(--neoverse-button-press-x, 50%) var(--neoverse-button-press-y, 50%),
+        color-mix(
+          in srgb,
+          var(--neoverse-color-accent-secondary) var(--neoverse-effect-strength-36),
+          transparent
+        ),
+        transparent 68%
+      ),
+      radial-gradient(
+        75% 100% at var(--neoverse-button-press-x, 50%) var(--neoverse-button-press-y, 50%),
+        color-mix(
+          in srgb,
+          var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-14),
+          transparent
+        ),
+        transparent 72%
+      );
+    --neoverse-effect-command-press-light-dark:
+      radial-gradient(
+        90% 140% at var(--neoverse-button-press-x, 50%) var(--neoverse-button-press-y, 50%),
+        color-mix(
+          in srgb,
+          var(--neoverse-color-accent-secondary) var(--neoverse-effect-strength-36),
+          transparent
+        ),
+        transparent 68%
+      ),
+      radial-gradient(
+        75% 100% at var(--neoverse-button-press-x, 50%) var(--neoverse-button-press-y, 50%),
+        color-mix(
+          in srgb,
+          var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-14),
+          transparent
+        ),
+        transparent 72%
+      );
+    --neoverse-effect-floating-chrome-shadow-light:
+      0 18px 42px -20px rgb(14 34 44 / var(--neoverse-effect-alpha-soft)),
+      0 6px 18px -12px rgb(14 34 44 / var(--neoverse-effect-strength-14));
+    --neoverse-effect-floating-chrome-shadow-dark:
+      0 18px 42px -20px rgb(0 0 0 / var(--neoverse-effect-strength-48)),
+      0 6px 18px -12px rgb(0 0 0 / var(--neoverse-effect-strength-58));
+    --neoverse-effect-floating-chrome-border-light: rgb(
+      15 23 42 /
+      var(--neoverse-effect-strength-12)
+    );
+    --neoverse-effect-floating-chrome-border-dark: rgb(
+      219 234 254 /
+      var(--neoverse-effect-strength-8)
+    );
+    --neoverse-effect-hover-field-light: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-22),
+      transparent
+    );
+    --neoverse-effect-hover-field-dark: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-primary) var(--neoverse-effect-alpha-quiet),
+      transparent
+    );
+    --neoverse-effect-placeholder-edge: inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-primary) var(--neoverse-effect-strength-8),
+        transparent
+      );
+    --neoverse-effect-placeholder-highlight: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) var(--neoverse-effect-strength-14),
+      transparent
+    );
+    --neoverse-effect-label-edge:
+      inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-58),
+        transparent
+      ),
+      inset 0 -1px 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-primary) var(--neoverse-effect-alpha-faint),
+        transparent
+      ),
+      inset 1px 0 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-24),
+        transparent
+      ),
+      inset -1px 0 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-18),
+        transparent
+      );
+    --neoverse-effect-accent-foreground: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) var(--neoverse-effect-strength-76),
+      var(--neoverse-color-accent-secondary)
+    );
+    --neoverse-effect-accent-floating-shadow:
+      var(--neoverse-shadow-xs),
+      0 8px 18px -16px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-54),
+        transparent
+      );
+    --neoverse-effect-rail-thumb-hover-shadow: 0 0 var(--neoverse-space-4) -0.35rem
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-primary) var(--neoverse-effect-alpha-intense),
+        transparent
+      );
+    --neoverse-effect-rail-track: color-mix(
+      in srgb,
+      var(--neoverse-color-surface-raised) var(--neoverse-effect-strength-24),
+      transparent
+    );
+    --neoverse-effect-rail-thumb: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) var(--neoverse-effect-strength-46),
+      transparent
+    );
+    --neoverse-effect-rail-thumb-hover: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-62),
+      var(--neoverse-color-text-secondary) var(--neoverse-effect-strength-38)
+    );
+    --neoverse-effect-rail-thumb-active: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-secondary) var(--neoverse-effect-strength-68),
+      var(--neoverse-color-text-secondary) var(--neoverse-effect-strength-32)
+    );
+    --neoverse-effect-rail-thumb-background: linear-gradient(
+      180deg,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-46),
+        transparent
+      ),
+      var(--neoverse-effect-rail-thumb) 48%,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-34),
+        transparent
+      )
+    );
+    --neoverse-effect-rail-thumb-hover-background: linear-gradient(
+      180deg,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-58),
+        transparent
+      ),
+      var(--neoverse-effect-rail-thumb-hover) 48%,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-tertiary) var(--neoverse-effect-strength-42),
+        transparent
+      )
+    );
+    --neoverse-effect-rail-thumb-active-background: linear-gradient(
+      180deg,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-64),
+        transparent
+      ),
+      var(--neoverse-effect-rail-thumb-active) 48%,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-48),
+        transparent
+      )
+    );
+    --neoverse-effect-rail-thumb-edge:
+      inset 0 1px 1px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-42),
+        transparent
+      ),
+      inset 0 -1px 2px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-primary) var(--neoverse-effect-strength-18),
+        transparent
+      );
+    --neoverse-effect-rail-thumb-glow: 0 0 12px -4px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-32),
+        transparent
+      );
+    --neoverse-effect-compact-rest-shadow: var(--neoverse-effect-compact-rest-shadow-light);
+    --neoverse-effect-compact-hover-shadow: var(--neoverse-effect-compact-hover-shadow-light);
+    --neoverse-effect-selection-highlight: var(--neoverse-effect-selection-highlight-light);
+    --neoverse-effect-selection-shadow: var(--neoverse-effect-selection-shadow-light);
+    --neoverse-effect-selection-field: var(--neoverse-effect-selection-field-light);
+    --neoverse-effect-command-rest-shadow: var(--neoverse-effect-command-rest-shadow-light);
+    --neoverse-effect-command-hover-shadow: var(--neoverse-effect-command-hover-shadow-light);
+    --neoverse-effect-primary-rest-shadow: var(--neoverse-effect-primary-rest-shadow-light);
+    --neoverse-effect-primary-hover-shadow: var(--neoverse-effect-primary-hover-shadow-light);
+    --neoverse-effect-choice-rest-shadow: var(--neoverse-effect-choice-rest-shadow-light);
+    --neoverse-effect-choice-selected-field: var(--neoverse-effect-choice-selected-field-light);
+    --neoverse-effect-choice-selected-fill: var(--neoverse-effect-choice-selected-fill-light);
+    --neoverse-effect-choice-selected-border: var(--neoverse-effect-choice-selected-border-light);
+    --neoverse-effect-choice-selected-shadow: var(--neoverse-effect-choice-selected-shadow-light);
+    --neoverse-effect-command-edge-field: var(--neoverse-effect-command-edge-field-light);
+    --neoverse-effect-command-edge-carrier: var(--neoverse-effect-command-edge-carrier-light);
+    --neoverse-effect-command-press-light: var(--neoverse-effect-command-press-light-light);
+    --neoverse-effect-floating-chrome-shadow: var(--neoverse-effect-floating-chrome-shadow-light);
+    --neoverse-effect-floating-chrome-border: var(--neoverse-effect-floating-chrome-border-light);
+    --neoverse-effect-hover-field: var(--neoverse-effect-hover-field-light);
+    --neoverse-effect-command-edge-opacity: var(--neoverse-effect-command-edge-opacity-light);
+  }
+}

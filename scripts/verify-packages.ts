@@ -258,6 +258,7 @@ try {
       `import { UiAction as ReactUiAction, UiPresence as ReactUiPresence, useUiPresence } from '@neoverse-ui/react';\n` +
       `import { UiCheckbox as ReactUiCheckbox, UiRadioGroup as ReactUiRadioGroup, UiSwitch as ReactUiSwitch, UiField as ReactUiField, UiPopover as ReactUiPopover, UiDropdownMenu as ReactUiDropdownMenu, type UiFieldControlAttrs } from '@neoverse-ui/react';\n` +
       `import { UiButton, UiNotice, UiTooltipSurface, UiPresence as VueUiPresence, presence, staggerStyle } from '@neoverse-ui/vue';\n` +
+      `import { UiTerminalSurface, UiTerminalLine, UiTerminalTranscript, UiTerminalPrompt, type TerminalSurfaceProps, type TerminalLineProps, type TerminalTranscriptProps, type TerminalPromptProps } from '@neoverse-ui/vue';\n` +
       `import { UiCheckbox as VueUiCheckbox, UiRadioGroup as VueUiRadioGroup, UiSwitch as VueUiSwitch, UiField as VueUiField, UiPopover as VueUiPopover, UiDropdownMenu as VueUiDropdownMenu, type FieldControlAttrs } from '@neoverse-ui/vue';\n` +
       `import { showAnchoredOverlay, hideAnchoredOverlay, stopOverlayTracking, positionAnchoredOverlay, resolveAnchoredPosition, type AnchoredOverlayOptions } from '@neoverse-ui/overlay-runtime';\n` +
       `import { cssVariables } from '@neoverse-ui/tokens';\n` +
@@ -265,6 +266,12 @@ try {
       `import { startViewTransition, createParticleDissolve, particleDissolvePresets, presenceVariants } from '@neoverse-ui/motion';\n` +
       `if (!ReactUiAction || !UiButton || !UiNotice || !UiTooltipSurface || !cssVariables || !createGlassRenderer) throw new Error('public JS exports are incomplete');\n` +
       `if (![ReactUiCheckbox, ReactUiRadioGroup, ReactUiSwitch, ReactUiField, ReactUiPopover, ReactUiDropdownMenu, VueUiCheckbox, VueUiRadioGroup, VueUiSwitch, VueUiField, VueUiPopover, VueUiDropdownMenu].every(Boolean)) throw new Error('public form/overlay exports are incomplete');\n` +
+      `if (![UiTerminalSurface, UiTerminalLine, UiTerminalTranscript, UiTerminalPrompt].every(Boolean)) throw new Error('public terminal exports are incomplete');\n` +
+      `const terminalSurfaceProps: TerminalSurfaceProps = { title: 'Smoke terminal', density: 'compact' };\n` +
+      `const terminalLineProps: TerminalLineProps = { text: 'Ready', tone: 'normal' };\n` +
+      `const terminalTranscriptProps: TerminalTranscriptProps = { followTail: true };\n` +
+      `const terminalPromptProps: TerminalPromptProps = { label: 'Smoke input', segments: [{ id: 'host', label: 'neoverse', tone: 'host' }] };\n` +
+      `if (terminalSurfaceProps.title !== 'Smoke terminal' || terminalLineProps.text !== 'Ready' || !terminalTranscriptProps.followTail || terminalPromptProps.label !== 'Smoke input' || cssVariables.components.terminal.cursor !== '--neoverse-terminal-cursor') throw new Error('public terminal types/tokens are incomplete');\n` +
       `if (![showAnchoredOverlay, hideAnchoredOverlay, stopOverlayTracking, positionAnchoredOverlay, resolveAnchoredPosition].every((entry) => typeof entry === 'function')) throw new Error('public Overlay Runtime exports are incomplete');\n` +
       `const vueFieldAttrs: FieldControlAttrs = { id: 'email', 'aria-describedby': 'email-help', required: true };\n` +
       `const reactFieldAttrs: UiFieldControlAttrs = vueFieldAttrs;\n` +

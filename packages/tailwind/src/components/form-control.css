@@ -250,7 +250,7 @@
   }
 
   @media (hover: hover) {
-    .ui-select__option:not(:disabled):hover {
+    .ui-select__option:not(:disabled):hover:not(:active) {
       color: var(--neoverse-color-text-primary);
       background: var(--neoverse-select-option-hover-background);
     }
@@ -260,6 +260,11 @@
     color: var(--neoverse-select-option-selected-foreground);
     background: var(--neoverse-select-option-selected-background);
     box-shadow: var(--neoverse-surface-inset-active-highlight);
+  }
+
+  .ui-select__option:active:not(:disabled) {
+    background: var(--neoverse-effect-press-wash);
+    box-shadow: var(--neoverse-effect-press-shadow);
   }
 
   .ui-select__option:focus-visible {
@@ -386,7 +391,16 @@
   .ui-choice[data-disabled='true'] {
     cursor: not-allowed;
     color: var(--neoverse-form-control-disabled-foreground);
+  }
+
+  :where(.ui-choice[data-disabled='true'])
+    :where(.ui-choice__content, .ui-choice__indicator, .ui-switch__thumb) {
     opacity: var(--neoverse-choice-control-disabled-opacity);
+  }
+
+  .ui-choice:not([data-disabled='true'], [data-readonly='true']):active .ui-choice__control,
+  .ui-select:active:not([aria-disabled='true']):not([aria-readonly='true']) {
+    box-shadow: var(--neoverse-effect-press-shadow);
   }
 
   .ui-choice[data-readonly='true'] {

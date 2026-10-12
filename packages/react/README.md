@@ -4,6 +4,8 @@ React adapters for Neoverse UI.
 
 The package exposes token-backed React adapters for `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiDock`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch`, `UiField`, `UiPopover`, `UiDropdownMenu`, `UiTable`, `UiDisclosure`, `UiNotice`, `UiSurface`, and `UiPresence`, plus `useUiPresence` and the `uiActionClassName` helper for consumers that need to style an existing routing component through `asChild` composition.
 
+For shell-style command entry, use the terminal composition pattern rather than turning a form control into a shell prompt. The Vue `UiTerminalPrompt` adapter currently owns this consumer-driven composition. See [terminal composition](../../docs/terminal-composition.md).
+
 ## Forms and overlays
 
 ```tsx

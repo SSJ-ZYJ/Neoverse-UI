@@ -16,6 +16,53 @@ const presentationViewports = [
   { label: 'desktop 2560', width: 2560, height: 1080 },
 ] as const;
 
+test('toolbar segmented options hug their labels and keep the active slider aligned', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'Desktop toolbar uses segmented controls.');
+  await page.goto('/?theme=dark&lang=zh#controls', { waitUntil: 'domcontentloaded' });
+
+  const theme = page.getByRole('radiogroup', { name: '实验室主题' });
+  await expect(theme).toBeVisible();
+  const options = theme.getByRole('radio');
+  const dimensions = await options.evaluateAll((elements) =>
+    elements.map((element) => {
+      const style = getComputedStyle(element);
+      return {
+        width: element.getBoundingClientRect().width,
+        height: Number.parseFloat(style.height),
+        fontSize: Number.parseFloat(style.fontSize),
+      };
+    }),
+  );
+  expect(dimensions).toHaveLength(3);
+  const [systemOption, lightOption, darkOption] = dimensions;
+  if (!systemOption || !lightOption || !darkOption) {
+    throw new Error('Theme segment options are missing');
+  }
+  expect(systemOption.width).toBeGreaterThan(lightOption.width + 14);
+  expect(lightOption.width).toBeCloseTo(darkOption.width, 0);
+  for (const item of dimensions) {
+    expect(item.height / item.fontSize).toBeLessThan(2.3);
+  }
+
+  const alignedSliderDelta = async () =>
+    theme.evaluate((root) => {
+      const active = root.querySelector<HTMLElement>('[role="radio"][aria-checked="true"]');
+      const slider = root.querySelector<HTMLElement>('.ui-segmented-control__slider');
+      if (!active || !slider) throw new Error('Selected segment or slider missing');
+      const item = active.getBoundingClientRect();
+      const plate = slider.getBoundingClientRect();
+      return Math.max(Math.abs(item.left - plate.left), Math.abs(item.right - plate.right));
+    });
+
+  await expect.poll(alignedSliderDelta).toBeLessThan(1.5);
+  await theme.getByRole('radio', { name: '浅色' }).click();
+  await expect.poll(alignedSliderDelta).toBeLessThan(1.5);
+  await theme.getByRole('radio', { name: '跟随系统' }).click();
+  await expect.poll(alignedSliderDelta).toBeLessThan(1.5);
+});
+
 test('desktop playground uses the 1920x1080 100% baseline and fills the viewport', async ({
   page,
 }, testInfo) => {
@@ -45,7 +92,7 @@ test('desktop playground uses the 1920x1080 100% baseline and fills the viewport
   });
 });
 
-test('playground presentation density scales with desktop viewport width', async ({ page }) => {
+test('playground uses the consumer root size at every viewport width', async ({ page }) => {
   await page.goto('/#controls', { waitUntil: 'domcontentloaded' });
 
   const readRootFontSize = async (width: number): Promise<number> => {
@@ -57,10 +104,10 @@ test('playground presentation density scales with desktop viewport width', async
   };
 
   const expectedRootSizes = new Map([
-    [1280, 17],
-    [1600, 18],
-    [1920, 19],
-    [2560, 20],
+    [1280, 16],
+    [1600, 16],
+    [1920, 16],
+    [2560, 16],
   ]);
 
   for (const [width, expected] of expectedRootSizes) {
@@ -123,7 +170,7 @@ test('overview desktop presentation uses the expanded semantic scale', async ({
     };
   });
 
-  expect(metrics.rootSize).toBeCloseTo(19, 1);
+  expect(metrics.rootSize).toBeCloseTo(16, 1);
   expect(metrics.navigationFontSize).toBeGreaterThanOrEqual(metrics.rootSize * 0.84);
   expect(metrics.heroPaddingInline).toBeGreaterThanOrEqual(metrics.rootSize * 1.9);
   expect(metrics.heroTitleFontSize).toBeGreaterThanOrEqual(metrics.rootSize * 2.9);
@@ -293,7 +340,7 @@ test('playground shell consumes semantic page and sidebar layout roles', async (
     };
   });
 
-  expect(desktopMetrics.rootSize).toBeCloseTo(19, 1);
+  expect(desktopMetrics.rootSize).toBeCloseTo(16, 1);
   expect(desktopMetrics.navigationWidth).toBeCloseTo(desktopMetrics.rootSize * 13, 1);
   expect(desktopMetrics.pageMaxWidth).toBeCloseTo(desktopMetrics.rootSize * 88, 1);
   expect(desktopMetrics.pageWidth).toBeLessThanOrEqual(desktopMetrics.pageMaxWidth);
@@ -308,7 +355,7 @@ test('playground shell consumes semantic page and sidebar layout roles', async (
   );
   expect(desktopMetrics.navigationRadius).toBeGreaterThan(0);
   expect(desktopMetrics.headerRadius).toBeGreaterThan(0);
-  expect(desktopMetrics.headerMinHeight).toBeCloseTo(desktopMetrics.rootSize * 2.5, 1);
+  expect(desktopMetrics.headerMinHeight).toBeCloseTo(desktopMetrics.rootSize * 3, 1);
 
   await page.setViewportSize({ width: 390, height: 844 });
   await page.reload({ waitUntil: 'domcontentloaded' });
@@ -909,15 +956,21 @@ test('reading composition consumes the prose foundation with an independent read
   expect(metrics.definitionDescriptionMargin).not.toBe('0px');
   expect(metrics.nestedListMarginBlock).not.toBe('0px');
   expect(metrics.abbreviationDecorationStyle).toBe('dotted');
-  expect(metrics.detailsBorderStyle).toBe('solid');
+  expect(metrics.detailsBorderStyle).toBe('none');
   expect(metrics.detailsBoxShadow).not.toBe('none');
   expect(metrics.detailsBackgroundImage).toBe('none');
 
   await expect(page.locator('[data-reading-table]')).toHaveClass(/ui-table/);
   await expect(page.locator('[data-reading-disclosure]')).toHaveClass(/ui-disclosure/);
-  await expect(page.locator('[data-reading-disclosure]')).toHaveClass(/material-glass-elevated/);
-  await expect(page.locator('[data-reading-prose] .playground-data-table-surface')).toHaveClass(
-    /material-glass-elevated/,
+  await expect(page.locator('[data-reading-disclosure]')).not.toHaveClass(/material-glass-/);
+  expect(
+    await page
+      .locator('[data-reading-disclosure]')
+      .evaluate((element) => getComputedStyle(element).backdropFilter),
+  ).toContain('blur(12px)');
+  await expect(page.locator('[data-reading-prose] .playground-data-table-surface')).toHaveAttribute(
+    'data-surface',
+    'none',
   );
 
   const summary = page.locator('[data-reading-disclosure] > .ui-disclosure__summary');
@@ -937,7 +990,7 @@ test('reading composition consumes the prose foundation with an independent read
 });
 
 for (const theme of ['light', 'dark'] as const) {
-  test(`standalone data display components keep native semantics and shared card material / ${theme}`, async ({
+  test(`standalone data display components keep native semantics and shared inset material / ${theme}`, async ({
     page,
   }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -961,14 +1014,14 @@ for (const theme of ['light', 'dark'] as const) {
     });
     expect(tableMaterial.borderWidth).toBe('0px');
     expect(tableMaterial.backgroundImage).toBe('none');
-    expect(tableMaterial.boxShadow).toBe('none');
+    expect(tableMaterial.boxShadow).not.toBe('none');
     expect(tableMaterial.backdropFilter).toBe('none');
     expect(
       await table.locator('..').evaluate((element) => getComputedStyle(element).borderRadius),
     ).toBe('0px');
 
     const tableSurface = page.locator('#data-display-table .playground-data-table-surface');
-    await expect(tableSurface).toHaveClass(/material-glass-elevated/);
+    await expect(tableSurface).toHaveAttribute('data-surface', 'none');
     const cardMaterial = await tableSurface.evaluate((element) => {
       const style = getComputedStyle(element);
       const edge = getComputedStyle(element, '::before');
@@ -978,9 +1031,9 @@ for (const theme of ['light', 'dark'] as const) {
         edgeBackgroundImage: edge.backgroundImage,
       };
     });
-    expect(cardMaterial.boxShadow).not.toBe('none');
-    expect(cardMaterial.backdropFilter).not.toBe('none');
-    expect(cardMaterial.edgeBackgroundImage).not.toBe('none');
+    expect(cardMaterial.boxShadow).toBe('none');
+    expect(cardMaterial.backdropFilter).toBe('none');
+    expect(cardMaterial.edgeBackgroundImage).toBe('none');
 
     const tableBackdrop = page.locator('#data-display-table .playground-material-backdrop--inset');
     const tableBackdropMaterial = await tableBackdrop.evaluate((element) => {
@@ -1022,8 +1075,8 @@ for (const theme of ['light', 'dark'] as const) {
         };
       });
     expect(cellMaterial.backgroundImage).toBe('none');
-    expect(cellMaterial.boxShadow).toBe('none');
-    expect(cellMaterial.backdropFilter).toBe('none');
+    expect(cellMaterial.boxShadow).not.toBe('none');
+    expect(cellMaterial.backdropFilter).toContain('blur(12px)');
 
     const headerMaterial = await table
       .locator('thead th')
@@ -1051,8 +1104,8 @@ for (const theme of ['light', 'dark'] as const) {
         }),
     ).toEqual(['1px', '1px']);
     expect(headerMaterial.backgroundImage).toBe(cellMaterial.backgroundImage);
-    expect(headerMaterial.backgroundColor).not.toBe(bodyBackgroundColor);
-    expect(headerMaterial.boxShadow).toBe('none');
+    expect(headerMaterial.backgroundColor).toBe(bodyBackgroundColor);
+    expect(headerMaterial.boxShadow).not.toBe(cellMaterial.boxShadow);
 
     await page.goto(`/?theme=${theme}&lang=en#data-display-disclosure`, {
       waitUntil: 'domcontentloaded',
@@ -1061,8 +1114,8 @@ for (const theme of ['light', 'dark'] as const) {
     const open = page.locator('#data-display-disclosure [data-data-display-disclosure="open"]');
     await expect(closed).not.toHaveAttribute('open', '');
     await expect(open).toHaveAttribute('open', '');
-    await expect(closed).toHaveClass(/material-glass-elevated/);
-    await expect(open).toHaveClass(/material-glass-elevated/);
+    await expect(closed).not.toHaveClass(/material-glass-/);
+    await expect(open).not.toHaveClass(/material-glass-/);
     await expect(closed.locator(':scope > summary')).toHaveClass(/ui-disclosure__summary/);
 
     const disclosureMaterial = await closed.evaluate((element) => {
@@ -1075,9 +1128,9 @@ for (const theme of ['light', 'dark'] as const) {
       };
     });
     expect(disclosureMaterial.backgroundImage).toBe('none');
-    expect(disclosureMaterial.edgeBackgroundImage).not.toBe('none');
+    expect(disclosureMaterial.edgeBackgroundImage).toBe('none');
     expect(disclosureMaterial.boxShadow).not.toBe('none');
-    expect(disclosureMaterial.backdropFilter).not.toBe('none');
+    expect(disclosureMaterial.backdropFilter).toContain('blur(12px)');
 
     const closedSummary = closed.locator(':scope > summary');
     const summaryRest = await closedSummary.evaluate((element) => {
@@ -1112,7 +1165,7 @@ for (const theme of ['light', 'dark'] as const) {
       expect(summaryHover).toEqual(summaryRest);
       await expect
         .poll(() => closed.evaluate((element) => getComputedStyle(element).backgroundColor))
-        .not.toBe(closedBackgroundRest);
+        .toBe(closedBackgroundRest);
       await expect
         .poll(() => closed.evaluate((element) => getComputedStyle(element).boxShadow))
         .not.toBe(closedShadowRest);
@@ -1790,6 +1843,202 @@ test('mobile playground header preserves title width and stays within the viewpo
   }
 });
 
+test('drawer content and scrim opening share the same enter and exit transform', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/?theme=light&lang=en#terminal', { waitUntil: 'domcontentloaded' });
+  await page.addStyleTag({ content: ':root { --neoverse-motion-duration-standard: 1000ms; }' });
+
+  const sampleTransition = async (opening: boolean) =>
+    page.evaluate(async (opening) => {
+      const shell = document.querySelector<HTMLElement>('.playground-shell');
+      const navigation = document.querySelector<HTMLElement>('#design-lab-navigation');
+      const title = navigation?.querySelector<HTMLElement>('h1');
+      const trigger = document.querySelector<HTMLElement>('[data-playground-nav-trigger]');
+      const close = navigation?.querySelector<HTMLElement>('button');
+      if (!shell || !navigation || !title || !trigger || !close) {
+        throw new Error('Drawer animation fixtures are missing');
+      }
+      const titleOffset = title.getBoundingClientRect().x - navigation.getBoundingClientRect().x;
+      (opening ? trigger : close).click();
+      await new Promise(requestAnimationFrame);
+      await new Promise(requestAnimationFrame);
+      const ownAnimations = (element: HTMLElement) =>
+        document
+          .getAnimations()
+          .filter(
+            (animation) =>
+              animation.effect instanceof KeyframeEffect && animation.effect.target === element,
+          );
+      const transform = (element: HTMLElement) =>
+        ownAnimations(element).find(
+          (animation) =>
+            animation instanceof CSSTransition && animation.transitionProperty === 'transform',
+        );
+      const drawerAnimation = transform(navigation);
+      const scrimAnimation = transform(shell);
+      if (!drawerAnimation || !scrimAnimation) {
+        return { animating: false, titleOffset, frames: [] };
+      }
+      const animations = [...ownAnimations(navigation), ...ownAnimations(shell)];
+      animations.forEach((animation) => {
+        animation.pause();
+      });
+      const frames = [];
+      for (const time of [0, 250, 500, 1000]) {
+        animations.forEach((animation) => {
+          animation.currentTime = time;
+        });
+        await new Promise(requestAnimationFrame);
+        const bounds = navigation.getBoundingClientRect();
+        const scrim = getComputedStyle(shell, '::after');
+        frames.push({
+          x: bounds.x,
+          titleX: title.getBoundingClientRect().x,
+          scrimX: Number.parseFloat(scrim.left) + new DOMMatrixReadOnly(scrim.transform).m41,
+        });
+      }
+      animations.forEach((animation) => {
+        animation.finish();
+      });
+      return { animating: true, titleOffset, frames };
+    }, opening);
+
+  for (const opening of [true, false]) {
+    const transition = await sampleTransition(opening);
+    expect(transition.animating, 'both the drawer and the scrim must animate').toBe(true);
+    expect(transition.frames).toHaveLength(4);
+    for (const frame of transition.frames) {
+      expect(frame.x).toBeCloseTo(frame.scrimX, 1);
+      expect(frame.titleX - frame.x).toBeCloseTo(transition.titleOffset, 1);
+    }
+    const first = transition.frames[0];
+    const last = transition.frames[3];
+    if (!first || !last) throw new Error('Drawer animation samples are missing');
+    if (opening) {
+      expect(first.titleX).toBeLessThan(0);
+      expect(first.x).toBeLessThan(last.x);
+    } else {
+      expect(last.titleX).toBeLessThan(0);
+      expect(last.x).toBeLessThan(first.x);
+    }
+  }
+});
+
+for (const theme of ['light', 'dark'] as const) {
+  for (const width of [390, 1024]) {
+    test(`drawer scrim dims only outside the sidebar at ${width}px in ${theme} theme`, async ({
+      page,
+    }) => {
+      await page.setViewportSize({ width, height: 844 });
+      await page.goto(`/?theme=${theme}&lang=en#materials`, { waitUntil: 'domcontentloaded' });
+
+      const navigation = page.locator('#design-lab-navigation');
+      const trigger = page.locator('[data-playground-nav-trigger]');
+      const dismissLayer = page.locator('.playground-shell > button');
+      const readMaterial = () =>
+        navigation.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return {
+            background: style.backgroundColor,
+            filter: style.backdropFilter,
+            opacity: style.opacity,
+          };
+        });
+      const restingMaterial = await readMaterial();
+
+      await trigger.click();
+      await expect(dismissLayer).toBeVisible();
+      await expect(dismissLayer).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+      await expect(dismissLayer).toHaveCSS('backdrop-filter', 'none');
+      await expect(dismissLayer).toHaveCSS('filter', 'none');
+      expect(await readMaterial()).toEqual(restingMaterial);
+
+      const shell = page.locator('.playground-shell');
+      await expect
+        .poll(() => shell.evaluate((element) => getComputedStyle(element, '::after').opacity))
+        .toBe('1');
+      const scrim = await shell.evaluate((element) => {
+        const style = getComputedStyle(element, '::after');
+        const drawer = element.querySelector<HTMLElement>('#design-lab-navigation');
+        if (!drawer) throw new Error('Navigation is missing');
+        const bounds = drawer.getBoundingClientRect();
+        return {
+          shadow: style.boxShadow,
+          pointerEvents: style.pointerEvents,
+          inset: Number.parseFloat(style.left),
+          width: Number.parseFloat(style.width),
+          radius: style.borderTopLeftRadius,
+          drawerRadius: getComputedStyle(drawer).borderTopLeftRadius,
+          bounds: { x: bounds.x, y: bounds.y, width: bounds.width, height: bounds.height },
+        };
+      });
+      expect(scrim.shadow).not.toBe('none');
+      expect(scrim.pointerEvents).toBe('none');
+      expect(scrim.inset).toBeCloseTo(scrim.bounds.x, 1);
+      expect(scrim.width).toBeCloseTo(scrim.bounds.width, 1);
+      expect(scrim.radius).toBe(scrim.drawerRadius);
+
+      // Compare actual pixels with and without the scrim in the same open state.
+      // This catches dark backdrop sampling even when the Glass tokens stay unchanged.
+      const dimmed = await page.screenshot({ animations: 'disabled' });
+      const noScrim = await page.addStyleTag({
+        content: '.playground-shell::after { visibility: hidden; }',
+      });
+      const undimmed = await page.screenshot({ animations: 'disabled' });
+      await noScrim.evaluate((element) => (element as HTMLElement).remove());
+      const samples = await page.evaluate(
+        async ({ dimmed, undimmed, bounds, width }) => {
+          const sample = async (source: string) => {
+            const image = new Image();
+            image.src = `data:image/png;base64,${source}`;
+            await image.decode();
+            const canvas = document.createElement('canvas');
+            canvas.width = image.width;
+            canvas.height = image.height;
+            const context = canvas.getContext('2d');
+            if (!context) throw new Error('Pixel sampling context is unavailable');
+            context.drawImage(image, 0, 0);
+            const brightness = (x: number, y: number) => {
+              const { data } = context.getImageData(Math.floor(x), Math.floor(y), 8, 8);
+              let total = 0;
+              for (let i = 0; i < data.length; i += 4) {
+                total += (data[i] ?? 0) + (data[i + 1] ?? 0) + (data[i + 2] ?? 0);
+              }
+              return total / (8 * 8 * 3);
+            };
+            return {
+              sidebar: brightness(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2),
+              outside: brightness(width - 20, 422),
+            };
+          };
+          return { dimmed: await sample(dimmed), undimmed: await sample(undimmed) };
+        },
+        {
+          dimmed: dimmed.toString('base64'),
+          undimmed: undimmed.toString('base64'),
+          bounds: scrim.bounds,
+          width,
+        },
+      );
+      expect(Math.abs(samples.dimmed.sidebar - samples.undimmed.sidebar)).toBeLessThan(1);
+      expect(samples.dimmed.outside).toBeLessThan(samples.undimmed.outside - 1);
+
+      await dismissLayer.click({ position: { x: width - 2, y: 422 } });
+      await expect(navigation).toHaveAttribute('inert', '');
+      await expect(trigger).toBeFocused();
+      await expect(dismissLayer).toHaveCount(0);
+
+      await trigger.click();
+      await page.keyboard.press('Escape');
+      await expect(navigation).toHaveAttribute('inert', '');
+      await expect(trigger).toBeFocused();
+      await expect(dismissLayer).toHaveCount(0);
+    });
+  }
+}
+
 test('closed mobile navigation is inert and restores focus to its trigger', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/?lang=en', { waitUntil: 'domcontentloaded' });
@@ -1804,6 +2053,9 @@ test('closed mobile navigation is inert and restores focus to its trigger', asyn
   expect(await navigation.evaluate((element) => element.contains(document.activeElement))).toBe(
     true,
   );
+  await expect
+    .poll(() => navigation.evaluate((element) => element.getBoundingClientRect().left))
+    .toBeGreaterThan(0);
   const drawerMetrics = await navigation.evaluate((element) => {
     const rect = element.getBoundingClientRect();
     return {
@@ -2289,7 +2541,7 @@ test('dock is discoverable as a standalone component specimen', async ({ page },
   const docks = specimen.locator('.ui-dock');
   await expect(docks).toHaveCount(2);
   await expect(docks.first()).toHaveAttribute('data-surface', 'chrome');
-  await expect(docks.first()).toHaveClass(/ui-control-surface--scale-lg/);
+  await expect(docks.first()).toHaveClass(/ui-control-surface--scale-md/);
   await expect(docks.nth(1)).toHaveClass(/ui-dock--compact/);
   await expect(docks.nth(1)).toHaveClass(/ui-control-surface--scale-md/);
   await expect(docks.first().locator('.ui-control-surface__group--trailing')).toHaveCount(1);
@@ -2319,10 +2571,13 @@ test('dock is discoverable as a standalone component specimen', async ({ page },
   expect(geometry.documentOverflow).toBeLessThanOrEqual(0);
 });
 
-test('state-row previews use a tokenized presentation scale inside a dedicated stage', async ({
+test('state-row previews preserve component proportions inside a dedicated stage', async ({
   page,
 }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'This assertion defines desktop specimen scale.');
+  test.skip(
+    testInfo.project.name !== 'desktop',
+    'This assertion defines desktop specimen geometry.',
+  );
 
   await page.goto('/?theme=dark&lang=zh#controls-navigation-item', {
     waitUntil: 'domcontentloaded',
@@ -2355,8 +2610,7 @@ test('state-row previews use a tokenized presentation scale inside a dedicated s
     };
   });
 
-  expect(metrics.zoom).toBeGreaterThan(1);
-  expect(metrics.zoom).toBeLessThanOrEqual(1.3);
+  expect(metrics.zoom).toBe(1);
   expect(metrics.stageBackground).toContain('radial-gradient');
   expect(metrics.copyHeadingFontSize / metrics.rootFontSize).toBeGreaterThanOrEqual(0.8);
   expect(metrics.copyHeadingFontSize / metrics.rootFontSize).toBeLessThan(1);
@@ -2430,10 +2684,10 @@ test('icon button geometry follows the canonical size selectors', async ({ page 
   expect(geometry.stretch.width).toBeGreaterThan(geometry.md.width);
 });
 
-test('shared navigation indicator stays aligned inside the scaled specimen stage', async ({
+test('shared navigation indicator stays aligned inside the specimen stage', async ({
   page,
 }, testInfo) => {
-  test.skip(testInfo.project.name !== 'desktop', 'Desktop scaled specimen geometry.');
+  test.skip(testInfo.project.name !== 'desktop', 'Desktop specimen geometry.');
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/?theme=light&lang=zh#controls-surface', {
     waitUntil: 'domcontentloaded',
@@ -2463,7 +2717,7 @@ test('shared navigation indicator stays aligned inside the scaled specimen stage
     });
 
   const initial = await readAlignment();
-  expect(initial.previewZoom).toBeGreaterThan(1);
+  expect(initial.previewZoom).toBe(1);
   expect(initial.x).toBeLessThanOrEqual(0.2);
   expect(initial.y).toBeLessThanOrEqual(0.2);
   expect(initial.width).toBeLessThanOrEqual(0.2);
@@ -2759,7 +3013,9 @@ test('light segmented selections keep a visible well, raised plate, and aligned 
             indicatorRect.left + indicatorRect.width / 2 - (targetRect.left + targetRect.width / 2),
           );
         }),
-      { timeout: Math.ceil(selection.expectedDuration * 4000 + 250) },
+      // Hash navigation and Glass repaint may delay the browser's transition start.
+      // Check the CSS duration above; allow the normal assertion window to settle.
+      { timeout: Math.max(5000, Math.ceil(selection.expectedDuration * 4000 + 250)) },
     )
     .toBeLessThanOrEqual(1.5);
 });
@@ -2804,10 +3060,10 @@ for (const theme of ['light', 'dark'] as const) {
     const tableRegion = page.locator('[data-reading-prose] [data-ui-table-region]');
     await expect(tableRegion).not.toHaveAttribute('data-surface');
     const tableSurface = page.locator('[data-reading-prose] .playground-data-table-surface');
-    await expect(tableSurface).toHaveAttribute('data-surface', 'glass-elevated');
+    await expect(tableSurface).toHaveAttribute('data-surface', 'none');
     const article = page.locator('[data-reading-composition] article');
     await expect(article).toHaveAttribute('data-surface', 'glass-elevated');
-    const proseMaterial = await article.evaluate((element, activeTheme) => {
+    const proseMaterial = await article.evaluate((element) => {
       const quote = element.querySelector('blockquote');
       const inlineCode = element.querySelector('p code');
       const prose = element.querySelector('[data-reading-prose]');
@@ -2819,10 +3075,7 @@ for (const theme of ['light', 'dark'] as const) {
       const inlineCodeProbe = document.createElement('span');
       inlineCodeProbe.style.position = 'fixed';
       inlineCodeProbe.style.insetInlineStart = '-9999px';
-      inlineCodeProbe.style.background =
-        activeTheme === 'light'
-          ? 'var(--neoverse-surface-inset-hover-background)'
-          : 'var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-alternate-fill)';
+      inlineCodeProbe.style.background = 'var(--neoverse-prose-inline-code-background)';
       element.append(inlineCodeProbe);
       const inlineCodeProbeStyle = getComputedStyle(inlineCodeProbe);
       const expectedInlineCodeBackground = inlineCodeProbeStyle.backgroundImage;
@@ -2847,7 +3100,7 @@ for (const theme of ['light', 'dark'] as const) {
         expectedInlineCodeBackground,
         expectedInlineCodeBackgroundColor,
       };
-    }, theme);
+    });
     // UiSurface owns the sampled Glass color plane; prose owns typography and
     // does not add another background or backdrop blur to that plane.
     expect(proseMaterial.articleBackground).toBe('none');
@@ -2856,16 +3109,18 @@ for (const theme of ['light', 'dark'] as const) {
     expect(proseMaterial.proseBackground).toBe('none');
     expect(proseMaterial.proseFilter).toBe('none');
     expect(proseMaterial.articleShadow).not.toBe('none');
-    expect(proseMaterial.quoteBackground).not.toBe('none');
+    expect(proseMaterial.quoteBackground).toBe('none');
+    expect(proseMaterial.quoteBackgroundColor).toMatch(/(?:\/\s*0\.15\)|,\s*0\.15\))/);
     expect(proseMaterial.quoteBorder).toBe('0px');
-    expect(proseMaterial.quoteFilter).not.toBe('none');
-    expect(proseMaterial.inlineCodeBackground).not.toBe('none');
+    expect(proseMaterial.quoteFilter).toContain('blur(12px)');
+    expect(proseMaterial.inlineCodeBackground).toBe('none');
+    expect(proseMaterial.inlineCodeBackgroundColor).toMatch(/(?:\/\s*0\.15\)|,\s*0\.15\))/);
     expect(proseMaterial.inlineCodeBorder).toBe('0px');
     expect(proseMaterial.inlineCodeBackground).toBe(proseMaterial.expectedInlineCodeBackground);
     expect(proseMaterial.inlineCodeBackgroundColor).toBe(
       proseMaterial.expectedInlineCodeBackgroundColor,
     );
-    expect(proseMaterial.quoteBackgroundColor).not.toBe(proseMaterial.inlineCodeBackgroundColor);
+    expect(proseMaterial.quoteBackgroundColor).toBe(proseMaterial.inlineCodeBackgroundColor);
     expect(proseMaterial.quoteShadow).not.toBe(proseMaterial.inlineCodeShadow);
     const metrics = await tableRegion.evaluate((element) => {
       const table = element.querySelector('table');
@@ -2891,6 +3146,7 @@ for (const theme of ['light', 'dark'] as const) {
       const zebraLastCellStyle = getComputedStyle(zebraLastCell);
       return {
         surfaceFilter: surfaceStyle.backdropFilter,
+        cellFilter: getComputedStyle(cell).backdropFilter,
         filter: tableStyle.backdropFilter,
         background: tableStyle.backgroundImage,
         border: tableStyle.borderTopWidth,
@@ -2903,7 +3159,8 @@ for (const theme of ['light', 'dark'] as const) {
           document.documentElement.scrollWidth - document.documentElement.clientWidth,
       };
     });
-    expect(metrics.surfaceFilter).not.toBe('none');
+    expect(metrics.surfaceFilter).toBe('none');
+    expect(metrics.cellFilter).toContain('blur(12px)');
     expect(metrics.filter).toBe('none');
     expect(metrics.background).toBe('none');
     expect(metrics.border).toBe('0px');

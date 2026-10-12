@@ -10,7 +10,7 @@
     justify-content: center;
     gap: var(--neoverse-space-2);
     border-radius: var(--neoverse-radius-control-inner);
-    padding-inline: var(--neoverse-space-3);
+    padding-inline: var(--neoverse-button-padding-inline-md);
     font-family: var(--neoverse-font-family-sans);
     font-weight: var(--neoverse-font-weight-medium);
     touch-action: manipulation;
@@ -29,24 +29,25 @@
   }
 
   .ui-button--sm {
-    height: var(--neoverse-space-7);
-    min-height: var(--neoverse-space-7);
-    font-size: var(--neoverse-typography-caption-size);
+    height: var(--neoverse-button-height-sm);
+    min-height: var(--neoverse-button-height-sm);
+    padding-inline: var(--neoverse-button-padding-inline-sm);
+    font-size: var(--neoverse-button-font-size-sm);
     line-height: var(--neoverse-typography-caption-line-height);
   }
 
   .ui-button--md {
-    height: var(--neoverse-space-8);
-    min-height: var(--neoverse-space-8);
-    font-size: var(--neoverse-typography-label-md-size);
+    height: var(--neoverse-button-height-md);
+    min-height: var(--neoverse-button-height-md);
+    font-size: var(--neoverse-button-font-size-md);
     line-height: var(--neoverse-typography-label-md-line-height);
   }
 
   .ui-button--lg {
-    height: var(--neoverse-space-9);
-    min-height: var(--neoverse-space-9);
-    padding-inline: var(--neoverse-space-4);
-    font-size: var(--neoverse-typography-label-md-size);
+    height: var(--neoverse-button-height-lg);
+    min-height: var(--neoverse-button-height-lg);
+    padding-inline: var(--neoverse-button-padding-inline-lg);
+    font-size: var(--neoverse-button-font-size-lg);
     line-height: var(--neoverse-typography-label-md-line-height);
   }
 
@@ -57,25 +58,29 @@
   }
 
   .ui-icon-button {
+    --neoverse-icon-button-icon-size: var(--neoverse-icon-button-icon-size-md);
     padding-inline: 0;
   }
 
   .ui-icon-button--sm {
-    width: var(--neoverse-space-7);
-    height: var(--neoverse-space-7);
-    min-height: var(--neoverse-space-7);
+    --neoverse-icon-button-icon-size: var(--neoverse-icon-button-icon-size-sm);
+    width: var(--neoverse-button-height-sm);
+    height: var(--neoverse-button-height-sm);
+    min-height: var(--neoverse-button-height-sm);
   }
 
   .ui-icon-button--md {
-    width: var(--neoverse-space-8);
-    height: var(--neoverse-space-8);
-    min-height: var(--neoverse-space-8);
+    --neoverse-icon-button-icon-size: var(--neoverse-icon-button-icon-size-md);
+    width: var(--neoverse-button-height-md);
+    height: var(--neoverse-button-height-md);
+    min-height: var(--neoverse-button-height-md);
   }
 
   .ui-icon-button--lg {
-    width: var(--neoverse-space-9);
-    height: var(--neoverse-space-9);
-    min-height: var(--neoverse-space-9);
+    --neoverse-icon-button-icon-size: var(--neoverse-icon-button-icon-size-lg);
+    width: var(--neoverse-button-height-lg);
+    height: var(--neoverse-button-height-lg);
+    min-height: var(--neoverse-button-height-lg);
   }
 
   .ui-icon-button--stretch {
@@ -92,7 +97,7 @@
   .ui-button:disabled,
   .ui-button[aria-disabled='true'] {
     cursor: not-allowed;
-    opacity: var(--neoverse-control-button-disabled-opacity);
+    color: var(--neoverse-color-text-primary);
   }
 
   .ui-button__content {
@@ -134,47 +139,30 @@
     justify-content: center;
   }
 
-  .ui-button.material-glass-subtle {
-    /* Button-specific frosted plate; tokens keep fill alpha independent of
-       the surrounding segmented or navigation material. */
-    --neoverse-material-filter: var(--neoverse-control-button-filter);
-    --neoverse-material-background-fallback: var(--neoverse-color-surface-raised);
-    --neoverse-material-edge-refraction-width: var(
-      --neoverse-material-edge-refraction-width-subtle
-    );
-    --neoverse-material-edge-refraction-softness: var(
-      --neoverse-material-edge-refraction-softness-subtle
-    );
-    --neoverse-material-tint: var(--neoverse-color-surface-raised);
-    --neoverse-material-refraction-gradient: var(--neoverse-control-button-refraction-gradient);
-    --neoverse-material-edge-refraction-opacity: var(
-      --neoverse-control-button-edge-refraction-opacity
-    );
-    --neoverse-material-edge-refraction-carrier: var(--neoverse-control-button-edge-carrier);
-    --neoverse-material-edge-filter: var(--neoverse-material-edge-filter-subtle);
-    --neoverse-material-shadow: var(--neoverse-control-button-edge);
-    /* Keep the shared Glass composition valid without adding an extra outer
-       shadow layer. `none, <shadow>` is invalid CSS, so use transparent zero-
-       length layers for the unused ambient slots. */
-    --neoverse-material-edge-highlight: 0 0 0 0 transparent;
-    --neoverse-material-inner-glow: 0 0 0 0 transparent;
-    --neoverse-material-seam-glow: 0 0 0 0 transparent;
-    --neoverse-material-bloom: 0 0 0 0 transparent;
-    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      var(--neoverse-control-button-border);
-    background-clip: padding-box;
-    box-shadow: var(--neoverse-material-shadow);
-    /* The press field is an internal layer. Clip it at the button's border
-       radius so pointer highlights cannot square off or escape the silhouette. */
-    overflow: hidden;
-    isolation: isolate;
-    -webkit-backdrop-filter: var(--neoverse-control-button-filter);
-    backdrop-filter: var(--neoverse-control-button-filter);
+  .ui-icon-button__content > svg {
+    width: var(--neoverse-icon-button-icon-size);
+    height: var(--neoverse-icon-button-icon-size);
   }
 
-  /* This is an internal light field, not a second border. Its own radius
-     keeps the press bloom inside the existing button silhouette. */
-  .ui-button.material-glass-subtle::after {
+  .ui-button:is(:disabled, [aria-disabled='true'])
+    > :not(.ui-button__edge-field):not(.ui-button__tone-field) {
+    opacity: var(--neoverse-control-button-disabled-opacity);
+  }
+
+  .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-control-button-border);
+    background-color: var(--neoverse-material-background);
+    background-image: none;
+    background-clip: padding-box;
+    box-shadow: var(--neoverse-material-shadow);
+    overflow: hidden;
+    isolation: isolate;
+    -webkit-backdrop-filter: var(--neoverse-material-filter);
+    backdrop-filter: var(--neoverse-material-filter);
+  }
+
+  .ui-button::after {
     position: absolute;
     z-index: 0;
     inset: 0;
@@ -192,239 +180,146 @@
     z-index: 1;
   }
 
-  /* Buttons use their own edge field so the coarse-pointer hit target can
-     occupy ::before without competing with the generic Glass pseudo-element. */
+  /* Command emphasis is separate from the tier-owned background and edge
+     refraction. It contributes no backdrop filter or layout geometry. */
+  .ui-button > .ui-button__tone-field {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    border-radius: inherit;
+    background-image: var(--neoverse-control-button-filled-background);
+    pointer-events: none;
+  }
+
+  .ui-button--primary > .ui-button__tone-field {
+    background-image: var(--neoverse-control-primary-background);
+  }
+
+  .ui-button--ghost > .ui-button__tone-field,
+  .ui-button[data-surface='none'] > .ui-button__tone-field {
+    display: none;
+  }
+
+  @media (hover: hover) {
+    .ui-button:hover:not(:active):not(:disabled):not([aria-disabled='true'])
+      > .ui-button__tone-field {
+      background-image: var(--neoverse-control-button-filled-hover-background);
+    }
+    .ui-button--primary:hover:not(:active):not(:disabled):not([aria-disabled='true'])
+      > .ui-button__tone-field {
+      background-image: var(--neoverse-control-primary-hover-background);
+    }
+  }
+
+  .ui-button:active:not(:disabled):not([aria-disabled='true']) > .ui-button__tone-field {
+    background-image: var(--neoverse-control-button-active-background);
+  }
+  .ui-button--primary:active:not(:disabled):not([aria-disabled='true']) > .ui-button__tone-field {
+    background-image: var(--neoverse-control-primary-active-background);
+  }
+
   .ui-button > .ui-button__edge-field {
     position: absolute;
     z-index: 0;
     inset: 0;
     border-radius: inherit;
-    background-color: transparent;
     background-image: var(--neoverse-material-refraction-gradient);
-    content: '';
     opacity: var(--neoverse-material-edge-refraction-opacity);
     pointer-events: none;
     filter: var(--neoverse-material-edge-refraction-softness);
-    mix-blend-mode: normal;
     -webkit-backdrop-filter: var(--neoverse-material-edge-filter);
     backdrop-filter: var(--neoverse-material-edge-filter);
   }
 
-  /* Ghost is borderless and does not own the filled-button refraction
-     field. Hover/press feedback comes from its translucent wash instead. */
   .ui-button--ghost > .ui-button__edge-field,
   .ui-button[data-surface='none'] > .ui-button__edge-field {
     display: none;
   }
 
-  /* Buttons stay on their dedicated CSS edge recipe unless a consumer
-     explicitly opts the button into the shared WebGL Edge Pass. */
-  [data-neoverse-glass-renderer='webgl']
-  .ui-button.material-glass-subtle[data-neoverse-glass-edge-pass-active='webgl'] {
-    --neoverse-material-shadow: 0 0 0 0 transparent;
+  .ui-button--primary {
+    color: var(--neoverse-control-primary-foreground);
+  }
+  .ui-button--secondary {
+    color: var(--neoverse-control-secondary-foreground);
+  }
+
+  .ui-button--ghost {
+    color: var(--neoverse-control-ghost-foreground);
+    background: transparent;
+  }
+
+  .ui-button--ghost:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive),
+  .ui-button[data-surface='none'] {
+    --neoverse-material-filter: none;
+    --neoverse-material-shadow: var(--neoverse-shadow-none);
+    --neoverse-material-edge-refraction-opacity: 0;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  @media (hover: hover) {
+    .ui-button:hover:not(:disabled):not([aria-disabled='true']) {
+      color: var(--neoverse-control-secondary-hover-foreground);
+      box-shadow: var(--neoverse-effect-hover-shadow);
+    }
+    .ui-button:hover:not(:disabled):not([aria-disabled='true'])::after {
+      opacity: var(--neoverse-effect-hover-opacity);
+    }
+    .ui-button--ghost:hover:not(:disabled):not([aria-disabled='true']) {
+      background: var(--neoverse-effect-hover-wash);
+    }
+  }
+
+  .ui-button:active:not(:disabled):not([aria-disabled='true']) {
+    color: var(--neoverse-control-secondary-active-foreground);
+    box-shadow: var(--neoverse-effect-press-shadow);
+    transition: none;
+  }
+  .ui-button:active:not(:disabled):not([aria-disabled='true'])::after {
+    opacity: var(--neoverse-effect-press-opacity);
+    transition: none;
+  }
+  .ui-button--ghost:active:not(:disabled):not([aria-disabled='true']) {
+    background: var(--neoverse-effect-press-wash);
+  }
+  .ui-button--ghost::after {
+    display: none;
   }
 
   @media (pointer: coarse) {
-    /* The pseudo-element is transparent and participates only in hit testing;
-       the painted control keeps its compact desktop geometry. */
-    .ui-button.material-glass-subtle {
+    .ui-button {
       --neoverse-control-hit-area: var(--neoverse-control-touch-hit-area);
       overflow: visible;
     }
-
     .ui-button::before {
       position: absolute;
-      z-index: 0;
       inset: calc(var(--neoverse-control-hit-area) * -1);
       border-radius: inherit;
       content: '';
       pointer-events: auto;
     }
-
     .ui-button:is(:disabled, [aria-disabled='true'])::before {
       pointer-events: none;
     }
   }
 
-  .ui-button--primary {
-    color: var(--neoverse-control-primary-foreground);
-    background-image: var(--neoverse-control-primary-background);
-    background-color: var(--neoverse-control-button-filled-fill);
-    background-clip: padding-box;
-  }
-
-  .ui-button--primary.material-glass-subtle {
-    --neoverse-material-shadow: var(--neoverse-control-primary-shadow);
-  }
-
-  .ui-button--secondary {
-    color: var(--neoverse-control-secondary-foreground);
-    background-image: var(--neoverse-control-button-filled-background);
-    background-color: var(--neoverse-control-button-filled-fill);
-    background-clip: padding-box;
-  }
-
-  .ui-button--ghost {
-    color: var(--neoverse-control-ghost-foreground);
-    background: var(--neoverse-control-ghost-background);
-    background-clip: padding-box;
-  }
-
-  .ui-button--ghost.material-glass-subtle {
-    /* Ghost has no painted edge or backdrop sample of its own. */
-    --neoverse-material-edge-refraction-opacity: 0;
-    --neoverse-material-shadow: var(--neoverse-control-ghost-shadow);
-    --neoverse-material-filter: none;
-    border-color: var(--neoverse-control-ghost-border);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-
-  .ui-button--primary,
-  .ui-button--secondary,
-  .ui-button--ghost {
-    transform: none;
-  }
-
-  .ui-button--primary:hover:not(:disabled) {
-    --neoverse-material-shadow: var(--neoverse-control-primary-hover-shadow);
-    color: var(--neoverse-control-secondary-hover-foreground);
-    background-image: var(--neoverse-control-primary-hover-background);
-    background-color: var(--neoverse-control-button-filled-hover-fill);
-    background-clip: padding-box;
-  }
-
-  .ui-button--secondary:hover:not(:disabled) {
-    --neoverse-material-shadow: var(--neoverse-control-button-edge-hover);
-    color: var(--neoverse-control-secondary-hover-foreground);
-    background-image: var(--neoverse-control-button-filled-hover-background);
-    background-color: var(--neoverse-control-button-filled-hover-fill);
-    background-clip: padding-box;
-  }
-
-  .ui-button--ghost:hover:not(:disabled):not([aria-disabled='true']) {
-    color: var(--neoverse-control-ghost-hover-foreground);
-    background: var(--neoverse-control-ghost-hover-background);
-    background-clip: padding-box;
-  }
-
-  .ui-button--ghost.material-glass-subtle:hover:not(:disabled):not([aria-disabled='true']) {
-    --neoverse-material-shadow: var(--neoverse-control-ghost-hover-shadow);
-    border-color: var(--neoverse-control-ghost-hover-border);
-  }
-
-  .ui-button.material-glass-subtle:hover:not(:disabled)::after {
-    opacity: var(--neoverse-control-button-hover-glow-opacity);
-  }
-
-  .ui-button--primary:active:not(:disabled) {
-    --neoverse-material-shadow: var(--neoverse-control-button-edge-active);
-    background-image: var(--neoverse-control-primary-active-background);
-    background-color: var(--neoverse-control-button-filled-fill);
-    background-clip: padding-box;
-  }
-
-  .ui-button--secondary:active:not(:disabled) {
-    --neoverse-material-shadow: var(--neoverse-control-button-edge-active);
-    color: var(--neoverse-control-secondary-active-foreground);
-    background-image: var(--neoverse-control-button-active-background);
-    background-color: var(--neoverse-control-button-filled-fill);
-    background-clip: padding-box;
-  }
-
-  .ui-button--primary:active:not(:disabled),
-  .ui-button--secondary:active:not(:disabled) {
-    transform: none;
-  }
-
-  .ui-button--ghost:active:not(:disabled):not([aria-disabled='true']) {
-    color: var(--neoverse-control-ghost-active-foreground);
-    background: var(--neoverse-control-ghost-active-background);
-    background-clip: padding-box;
-    transform: none;
-  }
-
-  .ui-button--ghost.material-glass-subtle:active:not(:disabled):not([aria-disabled='true']) {
-    --neoverse-material-shadow: var(--neoverse-control-ghost-hover-shadow);
-    border-color: var(--neoverse-control-ghost-active-border);
-  }
-
-  .ui-button.material-glass-subtle:active:not(:disabled)::after {
-    opacity: 1;
-  }
-
-  /* Unlike filled buttons, ghost uses only its semantic wash in every
-     state; never paint the filled-button glow on top of it. */
-  .ui-button--ghost.material-glass-subtle::after,
-  .ui-button--ghost.material-glass-subtle:is(:hover, :active):not(:disabled)::after {
-    background: none;
-    opacity: 0;
-  }
-
-  /* Links and routed components cannot use the native :disabled pseudo-class.
-     Their aria-disabled state must therefore cancel the same hover/press
-     composition as a disabled button. */
-  .ui-button[aria-disabled='true'].ui-button--primary:is(:hover, :active) {
-    color: var(--neoverse-control-primary-foreground);
-    background-image: var(--neoverse-control-primary-background);
-    background-color: var(--neoverse-control-button-filled-fill);
-    box-shadow: var(--neoverse-control-button-edge);
-  }
-
-  .ui-button[aria-disabled='true'].ui-button--secondary:is(:hover, :active) {
-    color: var(--neoverse-control-secondary-foreground);
-    background-image: var(--neoverse-control-button-filled-background);
-    background-color: var(--neoverse-control-button-filled-fill);
-    box-shadow: var(--neoverse-control-button-edge);
-  }
-
-  .ui-button[aria-disabled='true'].ui-button--ghost:is(:hover, :active) {
-    --neoverse-material-shadow: var(--neoverse-control-ghost-shadow);
-    --neoverse-material-edge-refraction-opacity: 0;
-    color: var(--neoverse-control-ghost-foreground);
-    border-color: var(--neoverse-control-ghost-border);
-    background: var(--neoverse-control-ghost-background);
-    box-shadow: var(--neoverse-control-ghost-shadow);
-  }
-
-  .ui-button.material-glass-subtle[aria-disabled='true']:is(:hover, :active)::after {
-    opacity: 0;
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .ui-button,
-    .ui-button.material-glass-subtle::after {
+    .ui-button::after {
       transition: none;
     }
   }
-
   @media (prefers-reduced-transparency: reduce) {
-    .ui-button.material-glass-subtle {
-      --neoverse-material-edge-refraction-opacity: 0;
-      background-image: none;
+    .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+        .ui-button--ghost
+      ) {
+      background: var(--neoverse-material-background-fallback);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
-
-    .ui-button--primary,
-    .ui-button--secondary {
-      background-color: var(--neoverse-color-surface-raised);
-    }
-
-    .ui-button--ghost.material-glass-subtle {
-      background-color: var(--neoverse-control-ghost-background);
-    }
-
-    .ui-button.material-glass-subtle::after {
-      display: none;
-    }
-
-    /* The opaque fallback plate still needs the normal pressed feedback.
-       Its tint stays inside the button and does not reveal the backdrop. */
-    .ui-button.material-glass-subtle:active:not(:disabled):not([aria-disabled='true'])::after {
-      display: block;
-    }
-
     .ui-button > .ui-button__edge-field {
       display: none;
     }
@@ -432,10 +327,56 @@
 }
 
 @layer utilities {
-  /* This sits beside the generic transition utility. Its more specific
-     selector makes the pressed surface switch immediately without relying on
-     !important or changing normal hover motion. */
-  .ui-button.material-glass-subtle:active:not(:disabled) {
+  /* Same layer as Glass; interactions change feedback, never the base plate. */
+  .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    .ui-button--ghost
+  ) {
+    --neoverse-material-refraction-gradient: var(--neoverse-control-button-refraction-gradient);
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-control-button-edge-refraction-opacity
+    );
+    --neoverse-material-shadow: var(--neoverse-control-button-filled-shadow);
+    box-shadow: var(--neoverse-control-button-filled-shadow);
+  }
+
+  .ui-button.ui-button--primary:is(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive
+  ) {
+    --neoverse-material-shadow: var(--neoverse-control-primary-shadow);
+    box-shadow: var(--neoverse-control-primary-shadow);
+  }
+
+  .ui-button:active:not(:disabled):not([aria-disabled='true']) {
+    --neoverse-material-shadow: var(--neoverse-control-button-edge-active);
+    box-shadow: var(--neoverse-control-button-edge-active);
     transition: none;
+  }
+  .ui-button.ui-button--primary:is(:hover, :active):not(:disabled):not([aria-disabled='true']) {
+    color: var(--neoverse-control-primary-foreground);
+  }
+  .ui-button.ui-button--ghost:active:not(:disabled):not([aria-disabled='true']) {
+    color: var(--neoverse-control-ghost-active-foreground);
+    background-color: var(--neoverse-control-ghost-active-background);
+    --neoverse-material-shadow: var(--neoverse-control-ghost-hover-shadow);
+    box-shadow: var(--neoverse-control-ghost-hover-shadow);
+  }
+  @media (hover: hover) {
+    .ui-button.ui-button--ghost:hover:not(:active):not(:disabled):not([aria-disabled='true']) {
+      color: var(--neoverse-control-ghost-hover-foreground);
+      background-color: var(--neoverse-control-ghost-hover-background);
+      --neoverse-material-shadow: var(--neoverse-control-ghost-hover-shadow);
+      box-shadow: var(--neoverse-control-ghost-hover-shadow);
+    }
+
+    .ui-button:hover:not(:active):not(:disabled):not([aria-disabled='true']) {
+      --neoverse-material-shadow: var(--neoverse-control-button-filled-hover-shadow);
+      box-shadow: var(--neoverse-control-button-filled-hover-shadow);
+    }
+    .ui-button.ui-button--primary:hover:not(:active):not(:disabled):not([aria-disabled='true']) {
+      --neoverse-material-shadow: var(--neoverse-control-primary-hover-shadow);
+      box-shadow: var(--neoverse-control-primary-hover-shadow);
+    }
   }
 }

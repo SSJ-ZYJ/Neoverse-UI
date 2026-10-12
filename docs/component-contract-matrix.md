@@ -62,9 +62,16 @@ Column values:
 | `UiTooltipSurface` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | — | Stable | — | Release | Pending |
 | `UiSkeleton` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
 | `UiScrollbar` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
+| `UiTerminalPrompt` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | — | Stable | — | Playground | Validated |
+| `UiTerminalSurface` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | — | Stable | — | Playground | Pending |
+| `UiTerminalLine` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | — | Stable | — | Playground | Pending |
+| `UiTerminalTranscript` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | — | Stable | — | Playground | Pending |
 
 ## Change policy
 
 A new public component must be added to the matrix in the same change that exports it. Canonical Shared components cannot be marked complete while either Vue or React is missing, and every Canonical Shared React adapter must appear in the browser runtime fixture. A component cannot be promoted to Stable without release visual coverage and real consumer validation.
 
 `bun run check:contracts` validates matrix schema invariants, public Vue/React export coverage, Canonical Shared parity, React runtime fixture markers, Stable maturity requirements, and the presence of a documentation row for every registered component.
+
+
+Material tiers, customization, component audit and hover/press policy: [Material standards](material-standards.md).

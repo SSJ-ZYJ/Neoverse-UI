@@ -9,54 +9,16 @@
     --neoverse-notice-font-size: var(--neoverse-font-size-md);
     --neoverse-notice-foreground: var(--neoverse-color-text-secondary);
 
-    --neoverse-notice-neutral-background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--neoverse-color-text-muted) 12%, transparent),
-        transparent 54%
-      ),
-      var(--neoverse-surface-inset-rest-background);
-    --neoverse-notice-info-background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--neoverse-color-status-info) 14%, transparent),
-        transparent 54%
-      ),
-      var(--neoverse-surface-inset-rest-background);
-    --neoverse-notice-success-background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--neoverse-color-status-success) 14%, transparent),
-        transparent 54%
-      ),
-      var(--neoverse-surface-inset-rest-background);
-    --neoverse-notice-warning-background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--neoverse-color-status-warning) 14%, transparent),
-        transparent 54%
-      ),
-      var(--neoverse-surface-inset-rest-background);
-    --neoverse-notice-danger-background:
-      linear-gradient(
-        135deg,
-        color-mix(in srgb, var(--neoverse-color-status-danger) 14%, transparent),
-        transparent 54%
-      ),
-      var(--neoverse-surface-inset-rest-background);
+    --neoverse-notice-neutral-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-notice-info-background: var(--neoverse-effect-status-info-background);
+    --neoverse-notice-success-background: var(--neoverse-effect-status-success-background);
+    --neoverse-notice-warning-background: var(--neoverse-effect-status-warning-background);
+    --neoverse-notice-danger-background: var(--neoverse-effect-status-danger-background);
 
-    --neoverse-notice-neutral-shadow: var(--neoverse-shadow-inset);
-    --neoverse-notice-info-shadow:
-      var(--neoverse-shadow-inset),
-      0 8px 20px -18px color-mix(in srgb, var(--neoverse-color-status-info) 36%, transparent);
-    --neoverse-notice-success-shadow:
-      var(--neoverse-shadow-inset),
-      0 8px 20px -18px color-mix(in srgb, var(--neoverse-color-status-success) 36%, transparent);
-    --neoverse-notice-warning-shadow:
-      var(--neoverse-shadow-inset),
-      0 8px 20px -18px color-mix(in srgb, var(--neoverse-color-status-warning) 36%, transparent);
-    --neoverse-notice-danger-shadow:
-      var(--neoverse-shadow-inset),
-      0 8px 20px -18px color-mix(in srgb, var(--neoverse-color-status-danger) 36%, transparent);
+    --neoverse-notice-neutral-shadow: var(--neoverse-effect-rest-shadow);
+    --neoverse-notice-info-shadow: var(--neoverse-effect-status-info-shadow);
+    --neoverse-notice-success-shadow: var(--neoverse-effect-status-success-shadow);
+    --neoverse-notice-warning-shadow: var(--neoverse-effect-status-warning-shadow);
+    --neoverse-notice-danger-shadow: var(--neoverse-effect-status-danger-shadow);
   }
 }

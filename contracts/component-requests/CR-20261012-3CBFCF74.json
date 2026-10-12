@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261012-3CBFCF74",
+  "kind": "new-component",
+  "target": "UiStatCard",
+  "summary": "数据指标卡：大数字指标与标签的展示卡片",
+  "expected": "指标卡组件，展示大号数字（展示字体）、单位后缀与说明标签，可选趋势/脚注，2-4 列自适应",
+  "acceptanceCriteria": [
+    "数字层级用展示字体且深浅主题下均有正确对比度",
+    "标签、脚注与数字的排版层级明确",
+    "卡片材质与 UiSurface Glass 契约一致"
+  ],
+  "impact": "normal",
+  "status": "reported",
+  "consumers": [
+    {
+      "project": "Neoverse-Slides",
+      "location": "packages/slidev-theme-neoverse/layouts/stats.vue",
+      "framework": "vue",
+      "scenario": "技术分享中的关键数据/指标展示"
+    }
+  ],
+  "createdAt": "2026-10-12T08:42:54.182Z",
+  "updatedAt": "2026-10-12T08:42:54.182Z"
+}

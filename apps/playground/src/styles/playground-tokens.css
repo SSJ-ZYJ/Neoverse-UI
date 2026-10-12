@@ -3,7 +3,6 @@
   --neoverse-playground-shell-gap: var(--neoverse-space-3);
   --neoverse-playground-shell-drawer-inset: var(--neoverse-space-2);
   --neoverse-playground-navigation-inset: var(--neoverse-space-4);
-  --neoverse-playground-shell-group-shadow: var(--neoverse-shadow-none);
   --neoverse-playground-navigation-fade-size: var(--neoverse-space-12);
   --neoverse-playground-navigation-fade-overlap: calc(
     var(--neoverse-playground-navigation-fade-size) /
@@ -34,13 +33,14 @@
   --neoverse-playground-layout-preview-header-height: 24%;
   --neoverse-playground-layout-preview-inline-gutter: 12%;
   --neoverse-playground-layout-preview-block-gutter: 14%;
-  --neoverse-playground-preview-scale: calc(
-    (var(--neoverse-control-surface-scale-md) + var(--neoverse-control-surface-scale-lg)) /
-    2
+  /* Flatten the preview's translucent surface tint over an opaque canvas.
+     Nested Glass otherwise blends the sharp backdrop through its filtered copy. */
+  --neoverse-playground-stage-underlay: linear-gradient(
+    var(--neoverse-color-surface-subtle),
+    var(--neoverse-color-surface-subtle)
   );
-  /* Every preview stage samples the same controlled color field so material
-     differences come from the component, not from its backdrop position. */
-  --neoverse-playground-stage-gradient:
+  /* Structural containers keep a quiet field when they wrap decorated stages. */
+  --neoverse-playground-stage-color-field:
     radial-gradient(
       ellipse at 12% 12%,
       color-mix(in srgb, var(--neoverse-color-accent-primary) 24%, transparent),
@@ -56,4 +56,38 @@
       color-mix(in srgb, var(--neoverse-color-accent-secondary) 20%, transparent),
       transparent 67%
     );
+  /* Sharp circles, a ring, and grid lines belong to the actual material stage. */
+  --neoverse-playground-stage-gradient:
+    radial-gradient(
+      circle at 24% 46%,
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 55%, transparent)
+        var(--neoverse-space-4),
+      transparent calc(var(--neoverse-space-4) + var(--neoverse-border-width-thin))
+    ),
+    radial-gradient(
+      circle at 72% 64%,
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 45%, transparent)
+        var(--neoverse-space-10),
+      transparent calc(var(--neoverse-space-10) + var(--neoverse-border-width-thin))
+    ),
+    radial-gradient(
+      circle at 62% 28%,
+      transparent var(--neoverse-space-6),
+      color-mix(in srgb, var(--neoverse-color-accent-tertiary) 55%, transparent)
+        calc(var(--neoverse-space-6) + var(--neoverse-border-width-thin)) var(--neoverse-space-7),
+      transparent calc(var(--neoverse-space-7) + var(--neoverse-border-width-thin))
+    ),
+    repeating-linear-gradient(
+      0deg,
+      color-mix(in srgb, var(--neoverse-color-text-primary) 9%, transparent) 0
+        var(--neoverse-border-width-thin),
+      transparent var(--neoverse-border-width-thin) var(--neoverse-space-8)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      color-mix(in srgb, var(--neoverse-color-text-primary) 9%, transparent) 0
+        var(--neoverse-border-width-thin),
+      transparent var(--neoverse-border-width-thin) var(--neoverse-space-8)
+    ),
+    var(--neoverse-playground-stage-color-field);
 }

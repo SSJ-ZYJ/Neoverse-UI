@@ -470,6 +470,44 @@ function ReactFixture() {
           </form>
         </>
       ) : null}
+      {contractMode && (
+        <div data-material-tier-fixtures className="flex flex-wrap gap-3">
+          {(['glass-subtle', 'glass-elevated', 'glass-immersive'] as const).map((surface) => (
+            <div key={surface} className="grid gap-2">
+              <p className="text-caption text-muted">{surface}</p>
+              <UiButton
+                surface={surface}
+                onClick={() => setCount((value) => value + 1)}
+                data-tier-button={surface}
+              >
+                {surface}
+              </UiButton>
+              <UiAction
+                surface={surface}
+                href="#react-runtime-fixture"
+                onClick={(event) => event.preventDefault()}
+                data-tier-action={surface}
+              >
+                Action
+              </UiAction>
+              <UiCard surface={surface} data-tier-card={surface}>
+                Card
+              </UiCard>
+            </div>
+          ))}
+          <UiAction
+            disabled
+            href="#react-runtime-fixture"
+            data-disabled-action
+            onClick={() => setCount((value) => value + 1)}
+          >
+            Disabled action
+          </UiAction>
+        </div>
+      )}
+      {contractMode && (
+        <UiInput readOnly value="readonly@neoverse.dev" aria-label="Readonly material specimen" />
+      )}
     </main>
   );
 }

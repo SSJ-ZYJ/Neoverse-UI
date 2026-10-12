@@ -84,13 +84,18 @@
   }
 
   @media (hover: hover) {
-    .ui-dropdown-menu__item:not(:disabled):hover {
+    .ui-dropdown-menu__item:not(:disabled):not([aria-disabled='true']):hover:not(:active) {
       color: var(--neoverse-color-text-primary);
       background: var(--neoverse-overlay-item-hover-background);
     }
   }
 
-  .ui-dropdown-menu__item:focus-visible {
+  .ui-dropdown-menu__item:active:not(:disabled):not([aria-disabled='true']) {
+    background: var(--neoverse-effect-press-wash);
+    box-shadow: var(--neoverse-effect-press-shadow);
+  }
+
+  .ui-dropdown-menu__item:focus-visible:not(:active) {
     color: var(--neoverse-color-text-primary);
     background: var(--neoverse-overlay-item-active-background);
     outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);

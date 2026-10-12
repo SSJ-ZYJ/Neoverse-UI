@@ -11,7 +11,7 @@
     "通用性不足时保留在 XCA Presentation Controller，UI 库只记录设计决策，不新增产品专属动画 API。"
   ],
   "impact": "low",
-  "status": "reported",
+  "status": "rejected",
   "consumers": [
     {
       "project": "XCA-Portal",
@@ -21,5 +21,6 @@
     }
   ],
   "createdAt": "2026-10-10T07:43:54.106Z",
-  "updatedAt": "2026-10-10T07:43:54.106Z"
+  "updatedAt": "2026-10-10T13:19:57.694Z",
+  "resolution": "Single XCA Boot to Dock presentation does not justify a shared FLIP API. Keep animation lifecycle in XCA presentation controller until another consumer provides a matching contract. See docs/terminal-composition.md."
 }

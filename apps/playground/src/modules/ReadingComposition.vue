@@ -200,10 +200,7 @@ function onTabKey(event: KeyboardEvent) {
           </template>
         </dl>
 
-        <UiSurface
-          surface="glass-elevated"
-          class="playground-data-table-surface my-5 rounded-card p-4"
-        >
+        <UiSurface surface="none" class="playground-data-table-surface my-5 rounded-card p-4">
           <UiTable :caption="copy.tableCaption" :aria-label="copy.tableCaption" data-reading-table>
             <thead>
               <tr>
@@ -221,9 +218,7 @@ function onTabKey(event: KeyboardEvent) {
         </UiSurface>
 
         <UiDisclosure
-          class="material-glass-elevated playground-data-disclosure"
-          data-surface="glass-elevated"
-          data-neoverse-surface-overflow="visible"
+          class="playground-data-disclosure"
           :summary="copy.details"
           data-reading-disclosure
         >

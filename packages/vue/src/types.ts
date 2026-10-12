@@ -17,7 +17,10 @@ export type SurfacePreset =
   | 'glass-elevated'
   | 'glass-immersive';
 
-export type ControlSurfacePreset = Extract<SurfacePreset, 'none' | 'glass-subtle'>;
+export type ControlSurfacePreset = Extract<
+  SurfacePreset,
+  'none' | 'glass-subtle' | 'glass-elevated' | 'glass-immersive'
+>;
 export type GlassNestingMode = 'inherit' | 'local';
 export type SurfaceOverflowMode = 'clip' | 'visible';
 
@@ -197,6 +200,49 @@ export interface FormControlStateProps {
 
 export interface InputProps extends FormControlStateProps {
   modelValue?: FormControlValue;
+}
+
+export type TerminalPromptTone = 'host' | 'path' | 'branch' | 'runtime' | 'time';
+
+export interface TerminalPromptSegment {
+  id: string;
+  label: string;
+  tone?: TerminalPromptTone;
+}
+
+export interface TerminalPromptProps {
+  id?: string;
+  label: string;
+  modelValue?: string;
+  /** Full suggested value. Only the suffix is displayed; acceptance belongs to the consumer. */
+  suggestion?: string;
+  type?: 'text' | 'password' | 'search';
+  symbol?: string;
+  segments?: readonly TerminalPromptSegment[];
+  disabled?: boolean;
+  readonly?: boolean;
+  error?: boolean;
+}
+
+export interface TerminalSurfaceProps {
+  title: string;
+  ariaLabel?: string;
+  density?: 'compact' | 'expanded';
+  surface?: SurfacePreset;
+}
+
+export interface TerminalLineProps {
+  kind?: 'command' | 'text' | 'status';
+  tone?: 'normal' | 'muted' | 'success' | 'error';
+  preformatted?: boolean;
+  text?: string;
+}
+
+export interface TerminalTranscriptProps {
+  label?: string;
+  followTail?: boolean;
+  density?: 'compact' | 'comfortable';
+  live?: 'polite' | 'off';
 }
 
 export interface TextareaProps extends FormControlStateProps {

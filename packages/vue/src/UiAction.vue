@@ -84,6 +84,7 @@ function handlePointerdown(event: PointerEvent): void {
     @click.capture="handleDisabledClick"
     @pointerdown="handlePointerdown"
   >
+    <span class="ui-button__tone-field" aria-hidden="true" />
     <span class="ui-button__edge-field" aria-hidden="true" />
     <span v-if="$slots.leading" class="ui-action__leading" aria-hidden="true">
       <slot name="leading" />

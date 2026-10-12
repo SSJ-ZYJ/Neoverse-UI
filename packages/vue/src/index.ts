@@ -68,6 +68,12 @@ export type {
   SurfaceProps,
   SwitchProps,
   TableProps,
+  TerminalLineProps,
+  TerminalPromptProps,
+  TerminalPromptSegment,
+  TerminalPromptTone,
+  TerminalSurfaceProps,
+  TerminalTranscriptProps,
   TextareaProps,
   TooltipSurfaceProps,
   TooltipSurfaceVariant,
@@ -98,5 +104,9 @@ export { default as UiStatusIndicator } from './UiStatusIndicator.vue';
 export { default as UiSurface } from './UiSurface.vue';
 export { default as UiSwitch } from './UiSwitch.vue';
 export { default as UiTable } from './UiTable.vue';
+export { default as UiTerminalLine } from './UiTerminalLine.vue';
+export { default as UiTerminalPrompt } from './UiTerminalPrompt.vue';
+export { default as UiTerminalSurface } from './UiTerminalSurface.vue';
+export { default as UiTerminalTranscript } from './UiTerminalTranscript.vue';
 export { default as UiTextarea } from './UiTextarea.vue';
 export { default as UiTooltipSurface } from './UiTooltipSurface.vue';

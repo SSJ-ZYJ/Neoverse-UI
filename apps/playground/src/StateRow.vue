@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { UiSurface } from '@neoverse-ui/vue';
 import type { ContractStateId } from './contract-lab';
+import MaterialLegend from './MaterialLegend.vue';
 import type { Locale, LocalizedText } from './playground-content';
 import { localize } from './playground-content';
 
@@ -35,6 +36,7 @@ const props = defineProps<StateRowProps>();
       <div class="playground-specimen-preview__content flex flex-wrap items-center gap-3">
         <slot />
       </div>
+      <MaterialLegend :locale="props.locale" />
     </div>
   </UiSurface>
 </template>

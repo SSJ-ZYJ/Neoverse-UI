@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261012-4F439537",
+  "kind": "new-component",
+  "target": "UiTimeline",
+  "summary": "时间线组件：轴线、节点与条目的垂直时间线",
+  "expected": "垂直时间线容器，含主题化轴线、渐变节点，条目支持标题与描述两级排版，可扩展横向变体",
+  "acceptanceCriteria": [
+    "节点与轴线对齐且在深浅主题下均正确呈现",
+    "条目支持标题、描述与可选时间标签",
+    "2-10 个条目时轴线连续不间断"
+  ],
+  "impact": "normal",
+  "status": "reported",
+  "consumers": [
+    {
+      "project": "Neoverse-Slides",
+      "location": "packages/slidev-theme-neoverse/layouts/timeline.vue",
+      "framework": "vue",
+      "scenario": "技术分享中的演进路线/里程碑展示"
+    }
+  ],
+  "createdAt": "2026-10-12T08:43:05.559Z",
+  "updatedAt": "2026-10-12T08:43:05.559Z"
+}

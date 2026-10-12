@@ -98,6 +98,7 @@ watch(resolvedTheme, () => {
 
 <template>
   <div
+    :data-token-preview="props.preview"
     class="min-w-0 gap-x-3 gap-y-1 border-b border-subtle px-1 py-2 last:border-b-0"
     :class="props.preview === 'shadow' ? 'playground-shadow-token grid' : 'flex flex-wrap items-center'"
   >

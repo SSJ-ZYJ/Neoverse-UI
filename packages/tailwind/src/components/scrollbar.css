@@ -34,9 +34,11 @@
       var(--neoverse-scrollbar-immersive-thumb-edge), var(--neoverse-scrollbar-immersive-thumb-glow);
   }
 
-  .scrollbar-immersive::-webkit-scrollbar-thumb:hover,
-  .scrollbar-immersive *::-webkit-scrollbar-thumb:hover {
-    background: var(--neoverse-scrollbar-immersive-thumb-hover-background);
+  @media (hover: hover) {
+    .scrollbar-immersive::-webkit-scrollbar-thumb:hover,
+    .scrollbar-immersive *::-webkit-scrollbar-thumb:hover {
+      background: var(--neoverse-scrollbar-immersive-thumb-hover-background);
+    }
   }
 
   .scrollbar-immersive::-webkit-scrollbar-thumb:active,
@@ -103,7 +105,6 @@
       background var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
   }
 
-  .ui-scrollbar:hover,
   .ui-scrollbar--dragging {
     background: var(--neoverse-scrollbar-immersive-track);
   }
@@ -125,13 +126,25 @@
       box-shadow var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
   }
 
-  .ui-scrollbar:hover .ui-scrollbar__thumb,
   .ui-scrollbar--dragging .ui-scrollbar__thumb {
     width: var(--neoverse-scrollbar-overlay-thumb-width-hover);
     background: var(--neoverse-scrollbar-immersive-thumb-hover-background);
     box-shadow:
       var(--neoverse-scrollbar-immersive-thumb-edge),
       var(--neoverse-scrollbar-overlay-thumb-hover-shadow);
+  }
+
+  @media (hover: hover) {
+    .ui-scrollbar:hover {
+      background: var(--neoverse-scrollbar-immersive-track);
+    }
+    .ui-scrollbar:hover:not(.ui-scrollbar--dragging) .ui-scrollbar__thumb {
+      width: var(--neoverse-scrollbar-overlay-thumb-width-hover);
+      background: var(--neoverse-scrollbar-immersive-thumb-hover-background);
+      box-shadow:
+        var(--neoverse-scrollbar-immersive-thumb-edge),
+        var(--neoverse-scrollbar-overlay-thumb-hover-shadow);
+    }
   }
 
   .ui-scrollbar--dragging .ui-scrollbar__thumb {

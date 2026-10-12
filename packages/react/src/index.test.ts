@@ -243,7 +243,9 @@ test('loading disables native activation without losing the label or submit sema
   expect(element.props['aria-busy']).toBe(true);
   expect(element.props.type).toBe('submit');
   const children = Children.toArray(element.props.children) as TestElement[];
-  expect(children[2]?.props.children).toBe('Save');
+  expect(
+    children.find((child) => child.props.className === 'ui-button__content')?.props.children,
+  ).toBe('Save');
   expect(UiButton({ disabled: true }).props.disabled).toBe(true);
 });
 
@@ -354,7 +356,11 @@ test('icon button preserves its native attributes and requires an accessible lab
   expect(button.props.className).toContain('ui-button--ghost');
   const buttonContent = (button.props as unknown as { children: ReactElement }).children;
   const children = (buttonContent.props as unknown as { children: ReactElement[] }).children;
-  expect(children[1]?.props).toEqual({
+  expect(
+    children.find(
+      (child) => (child.props as { className?: string }).className === 'ui-icon-button__content',
+    )?.props,
+  ).toEqual({
     className: 'ui-icon-button__content',
     'aria-hidden': 'true',
     children: 'gear',

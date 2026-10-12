@@ -58,8 +58,15 @@
       outline-color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
   }
 
-  .ui-breadcrumb__link:hover {
-    color: var(--neoverse-breadcrumb-link-hover-foreground);
+  @media (hover: hover) {
+    .ui-breadcrumb__link:hover:not([aria-disabled='true']) {
+      color: var(--neoverse-breadcrumb-link-hover-foreground);
+    }
+  }
+
+  .ui-breadcrumb__link:active:not([aria-disabled='true']) {
+    color: var(--neoverse-color-accent-secondary);
+    box-shadow: var(--neoverse-effect-press-shadow);
   }
 
   .ui-breadcrumb__link:focus-visible {

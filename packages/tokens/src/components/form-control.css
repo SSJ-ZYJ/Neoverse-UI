@@ -9,7 +9,7 @@
     --neoverse-form-control-line-height: var(--neoverse-typography-body-sm-line-height);
     --neoverse-form-control-foreground: var(--neoverse-color-text-primary);
     --neoverse-form-control-placeholder: var(--neoverse-color-text-muted);
-    --neoverse-form-control-disabled-foreground: var(--neoverse-color-text-disabled);
+    --neoverse-form-control-disabled-foreground: var(--neoverse-effect-disabled-foreground);
     --neoverse-form-control-readonly-foreground: var(--neoverse-color-text-secondary);
     --neoverse-form-control-background: var(--neoverse-surface-inset-rest-background);
     --neoverse-form-control-hover-background: var(--neoverse-surface-inset-hover-background);
@@ -43,7 +43,7 @@
     --neoverse-choice-control-active-foreground: var(--neoverse-control-primary-foreground);
     --neoverse-choice-control-shadow: var(--neoverse-shadow-inset);
     --neoverse-choice-control-active-shadow: var(--neoverse-control-primary-shadow);
-    --neoverse-choice-control-disabled-opacity: 0.58;
+    --neoverse-choice-control-disabled-opacity: var(--neoverse-effect-disabled-content-opacity);
     --neoverse-choice-control-label-gap: var(--neoverse-space-2);
     --neoverse-choice-control-group-gap: var(--neoverse-space-3);
     --neoverse-switch-inline-size: var(--neoverse-space-11);
@@ -69,7 +69,7 @@
     --neoverse-select-popover-background: var(--neoverse-material-glass-elevated-background);
     --neoverse-select-popover-shadow:
       var(--neoverse-material-glass-elevated-shadow), var(--neoverse-shadow-inset);
-    --neoverse-select-popover-filter: var(--neoverse-material-glass-subtle-filter);
+    --neoverse-select-popover-filter: var(--neoverse-material-glass-elevated-filter);
     --neoverse-select-option-radius: var(--neoverse-radius-control-inner);
     --neoverse-select-option-padding-block: var(--neoverse-space-2);
     --neoverse-select-option-padding-inline: var(--neoverse-space-3);
@@ -78,7 +78,7 @@
     --neoverse-select-option-selected-foreground: var(
       --neoverse-control-segmented-active-foreground
     );
-    --neoverse-select-option-disabled-opacity: 0.5;
+    --neoverse-select-option-disabled-opacity: var(--neoverse-effect-disabled-content-opacity);
     --neoverse-select-check-size: var(--neoverse-icon-size-sm);
     --neoverse-select-check-stroke-width: var(--neoverse-border-width-strong);
     --neoverse-select-check-color: var(--neoverse-color-text-muted);

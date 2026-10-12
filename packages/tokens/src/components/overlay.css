@@ -20,6 +20,6 @@
     --neoverse-overlay-item-hover-background: var(--neoverse-control-hover-background);
     --neoverse-overlay-item-active-background: var(--neoverse-control-active-background);
     --neoverse-overlay-item-danger-foreground: var(--neoverse-color-status-danger);
-    --neoverse-overlay-item-disabled-opacity: 0.5;
+    --neoverse-overlay-item-disabled-opacity: var(--neoverse-effect-disabled-content-opacity);
   }
 }
