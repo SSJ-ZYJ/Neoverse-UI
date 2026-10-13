@@ -4,6 +4,7 @@ import { join, resolve } from 'node:path';
 import { readSubmissionFile, submitRequest, withRegistryLock } from './component-request-intake';
 
 export const REQUESTS_DIR = resolve(import.meta.dir, '../contracts/component-requests');
+const ARCHIVE_DIRNAME = 'archive';
 const MATRIX_PATH = resolve(import.meta.dir, '../contracts/component-matrix.json');
 
 export const kinds = ['new-component', 'enhancement', 'framework-gap'] as const;
@@ -145,23 +146,38 @@ export function validateRequest(value: unknown): string[] {
 
 export async function loadRequests(directory = REQUESTS_DIR): Promise<ComponentRequest[]> {
   await mkdir(directory, { recursive: true });
-  const files = (await readdir(directory)).filter((name) => name.endsWith('.json')).sort();
   const requests: ComponentRequest[] = [];
   const ids = new Set<string>();
-  for (const filename of files) {
-    let data: unknown;
-    try {
-      data = JSON.parse(await readFile(join(directory, filename), 'utf8'));
-    } catch (error) {
-      throw new Error(`${filename}: invalid JSON: ${String(error)}`);
+  for (const [folder, archived] of [
+    [directory, false],
+    [join(directory, ARCHIVE_DIRNAME), true],
+  ] as const) {
+    const files = (
+      await readdir(folder).catch((error: NodeJS.ErrnoException) => {
+        if (archived && error.code === 'ENOENT') return [];
+        throw error;
+      })
+    )
+      .filter((name) => name.endsWith('.json'))
+      .sort();
+    for (const filename of files) {
+      let data: unknown;
+      try {
+        data = JSON.parse(await readFile(join(folder, filename), 'utf8'));
+      } catch (error) {
+        throw new Error(`${filename}: invalid JSON: ${String(error)}`);
+      }
+      const errors = validateRequest(data);
+      if (errors.length > 0) throw new Error(`${filename}: ${errors.join('; ')}`);
+      const item = data as ComponentRequest;
+      if (`${item.id}.json` !== filename) throw new Error(`${filename}: id must equal filename`);
+      if (ids.has(item.id)) throw new Error(`duplicate request ID: ${item.id}`);
+      if (archived && !['delivered', 'rejected'].includes(item.status)) {
+        throw new Error(`${filename}: archived requests must be closed`);
+      }
+      ids.add(item.id);
+      requests.push(item);
     }
-    const errors = validateRequest(data);
-    if (errors.length > 0) throw new Error(`${filename}: ${errors.join('; ')}`);
-    const item = data as ComponentRequest;
-    if (`${item.id}.json` !== filename) throw new Error(`${filename}: id must equal filename`);
-    if (ids.has(item.id)) throw new Error(`duplicate request ID: ${item.id}`);
-    ids.add(item.id);
-    requests.push(item);
   }
   return requests;
 }
@@ -172,12 +188,19 @@ export async function saveRequest(
 ): Promise<void> {
   const errors = validateRequest(request);
   if (errors.length > 0) throw new Error(errors.join('; '));
-  await mkdir(directory, { recursive: true });
-  const filename = join(directory, `${request.id}.json`);
-  const temporary = join(directory, `.${request.id}.${randomUUID()}.tmp`);
+  const closed = request.status === 'delivered' || request.status === 'rejected';
+  const targetDirectory = closed ? join(directory, ARCHIVE_DIRNAME) : directory;
+  await mkdir(targetDirectory, { recursive: true });
+  const filename = join(targetDirectory, `${request.id}.json`);
+  const temporary = join(targetDirectory, `.${request.id}.${randomUUID()}.tmp`);
   try {
     await writeFile(temporary, `${JSON.stringify(request, null, 2)}\n`, { flag: 'wx' });
     await rename(temporary, filename);
+    if (closed) {
+      await unlink(join(directory, `${request.id}.json`)).catch((error: NodeJS.ErrnoException) => {
+        if (error.code !== 'ENOENT') throw error;
+      });
+    }
   } finally {
     await unlink(temporary).catch(() => undefined);
   }
@@ -287,7 +310,8 @@ async function runUnlocked(argv: string[], directory: string): Promise<string> {
       '  --location src/pages/settings.vue --framework vue --scenario "..." --impact blocking',
       'bun run requests link --id CR-YYYYMMDD-XXXXXXXX --project ... --location ... --framework ... --scenario ...',
       'bun run requests status --id ... --to accepted|implementing|blocked|delivered|rejected [--resolution "..."]',
-      'bun run requests list [--status reported|accepted|implementing|blocked|delivered|rejected]',
+      'bun run requests list  # open requests by default; closed requests are archived',
+      'bun run requests list --status reported|accepted|implementing|blocked|delivered|rejected',
       'bun run requests agent [--queue triage|implementation|all]  # JSON for agents',
       'bun run requests check',
     ].join('\n');
@@ -349,8 +373,10 @@ async function runUnlocked(argv: string[], directory: string): Promise<string> {
     return `Created ${item.id} (reported): ${item.summary}`;
   }
   if (command === 'list') {
-    const selection = requests.filter(
-      (request) => !optional(flags, 'status') || request.status === optional(flags, 'status'),
+    const status = optional(flags, 'status');
+    if (status && !oneOf(status, statuses)) throw new Error('invalid --status');
+    const selection = requests.filter((request) =>
+      status ? request.status === status : !['delivered', 'rejected'].includes(request.status),
     );
     return selection.length
       ? selection

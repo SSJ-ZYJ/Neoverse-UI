@@ -753,8 +753,10 @@ test('playground shows the Neoverse wordmark and site icon', async ({ page }) =>
     const match = getComputedStyle(element).maskImage.match(/url\(["']?(.*?)["']?\)/);
     return match?.[1] === undefined ? null : new URL(match[1], window.location.href).href;
   });
-  expect(wordmarkUrl).not.toBeNull();
-  expect((await page.request.get(wordmarkUrl!)).status()).toBe(200);
+  if (wordmarkUrl === null) {
+    throw new Error('Neoverse wordmark mask did not resolve to an asset URL');
+  }
+  expect((await page.request.get(wordmarkUrl)).status()).toBe(200);
 
   const favicon = page.locator('link[rel~="icon"]');
   await expect(favicon).toHaveAttribute('type', 'image/svg+xml');

@@ -1,0 +1,148 @@
+@layer components {
+  .ui-step-flow {
+    --ui-step-flow-marker-size: var(--neoverse-space-10);
+    --ui-step-flow-gap: var(--neoverse-space-6);
+    --ui-step-flow-connector-width: var(--neoverse-border-width-strong);
+
+    container-type: inline-size;
+    container-name: ui-step-flow;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--ui-step-flow-gap);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    color: var(--neoverse-color-text-primary);
+  }
+
+  .ui-step-flow__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--ui-step-flow-marker-size) minmax(0, 1fr);
+    align-items: start;
+    gap: var(--neoverse-space-4);
+    flex: 0 0 100%;
+    min-width: 0;
+    min-height: var(--ui-step-flow-marker-size);
+    overflow-wrap: anywhere;
+  }
+
+  .ui-step-flow__item:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: calc(
+      (var(--ui-step-flow-marker-size) - var(--ui-step-flow-connector-width)) /
+      2
+    );
+    inset-block-start: calc(var(--ui-step-flow-marker-size) + var(--neoverse-space-2));
+    inset-block-end: calc(var(--neoverse-space-2) - var(--ui-step-flow-gap));
+    width: var(--ui-step-flow-connector-width);
+    border-radius: var(--neoverse-radius-pill);
+    background: var(--neoverse-color-border-strong);
+    pointer-events: none;
+  }
+
+  .ui-step-flow__marker {
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--ui-step-flow-marker-size);
+    height: var(--ui-step-flow-marker-size);
+    min-width: 0;
+    border-radius: var(--neoverse-radius-pill);
+    color: var(--neoverse-color-text-primary);
+    background: var(--neoverse-color-accent-soft);
+    font-family: var(--neoverse-typography-label-font-family);
+    font-size: var(--neoverse-typography-label-lg-size);
+    font-weight: var(--neoverse-typography-label-lg-weight);
+    line-height: var(--neoverse-typography-label-lg-line-height);
+    letter-spacing: var(--neoverse-typography-label-lg-letter-spacing);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ui-step-flow__item--current .ui-step-flow__marker {
+    color: var(--neoverse-color-accent-primary-foreground);
+    background: var(--neoverse-color-accent-primary);
+    outline: var(--neoverse-border-width-strong) solid var(--neoverse-color-accent-primary);
+    outline-offset: var(--neoverse-space-1);
+  }
+
+  .ui-step-flow__content {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .ui-step-flow__title {
+    margin: 0;
+    font-family: var(--neoverse-typography-title-font-family);
+    font-size: var(--neoverse-typography-title-sm-size);
+    font-weight: var(--neoverse-typography-title-sm-weight);
+    line-height: var(--neoverse-typography-title-sm-line-height);
+    letter-spacing: var(--neoverse-typography-title-sm-letter-spacing);
+  }
+
+  .ui-step-flow__description {
+    margin: var(--neoverse-space-2) 0 0;
+    color: var(--neoverse-color-text-secondary);
+    font-family: var(--neoverse-typography-body-font-family);
+    font-size: var(--neoverse-typography-body-sm-size);
+    font-weight: var(--neoverse-typography-body-sm-weight);
+    line-height: var(--neoverse-typography-body-sm-line-height);
+    letter-spacing: var(--neoverse-typography-body-sm-letter-spacing);
+  }
+
+  .ui-step-flow__status {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--neoverse-space-2);
+    max-width: 100%;
+    min-width: 0;
+    margin-block-start: var(--neoverse-space-2);
+    color: var(--neoverse-color-text-secondary);
+    overflow-wrap: anywhere;
+    font-family: var(--neoverse-typography-label-font-family);
+    font-size: var(--neoverse-typography-label-sm-size);
+    font-weight: var(--neoverse-typography-label-sm-weight);
+    line-height: var(--neoverse-typography-label-sm-line-height);
+    letter-spacing: var(--neoverse-typography-label-sm-letter-spacing);
+  }
+
+  .ui-step-flow__item--current .ui-step-flow__status {
+    color: var(--neoverse-color-text-primary);
+  }
+
+  .ui-step-flow__item--complete .ui-step-flow__status {
+    color: var(--neoverse-color-status-success);
+  }
+
+  .ui-step-flow__status-icon {
+    display: block;
+    flex: 0 0 auto;
+    width: var(--neoverse-space-4);
+    height: var(--neoverse-space-4);
+  }
+
+  @container ui-step-flow (min-width: --theme(--breakpoint-md)) {
+    .ui-step-flow__item {
+      flex: 1 1 0%;
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: var(--ui-step-flow-marker-size) auto;
+      align-content: start;
+    }
+
+    .ui-step-flow__item:not(:last-child)::after {
+      inset-inline-start: calc(var(--ui-step-flow-marker-size) + var(--neoverse-space-2));
+      inset-inline-end: calc(var(--neoverse-space-2) - var(--ui-step-flow-gap));
+      inset-block-start: calc(
+        (var(--ui-step-flow-marker-size) - var(--ui-step-flow-connector-width)) /
+        2
+      );
+      inset-block-end: auto;
+      width: auto;
+      height: var(--ui-step-flow-connector-width);
+    }
+  }
+}

@@ -11,7 +11,7 @@
     "键盘选择/复制与屏幕阅读器输出区域配合正常，Vue 与其他框架适配遵循同一视觉语义。"
   ],
   "impact": "normal",
-  "status": "implementing",
+  "status": "delivered",
   "consumers": [
     {
       "project": "XCA-Portal",
@@ -21,5 +21,6 @@
     }
   ],
   "createdAt": "2026-10-10T07:43:53.803Z",
-  "updatedAt": "2026-10-10T13:19:57.529Z"
+  "updatedAt": "2026-10-13T07:46:16.442Z",
+  "resolution": "Accepted 2026-10-13. UiTerminalLine uses shared themed semantic roles, safe text rendering, wrapping and preformatted ASCII. Vue tests 70/70; shared terminal release screenshots pass; real XCA TerminalTranscript.vue, TerminalInteraction.vue and TerminalHost.vue reuse it for output/banner/status. UI acceptance suite 24/24; XCA production sync/build, 17 unit tests and full E2E 71/71 including font, mobile, native editing/output and theme checks. luna/max reviewed 5 real XCA snapshots. See docs/acceptance-2026-10-13.md. No publication."
 }

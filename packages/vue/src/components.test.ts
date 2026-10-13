@@ -24,11 +24,14 @@ import UiScrollbar from './UiScrollbar.vue';
 import UiSegmentedControl from './UiSegmentedControl.vue';
 import UiSelect from './UiSelect.vue';
 import UiSkeleton from './UiSkeleton.vue';
+import UiStatCard from './UiStatCard.vue';
 import UiStatusIndicator from './UiStatusIndicator.vue';
+import UiStepFlow from './UiStepFlow.vue';
 import UiSurface from './UiSurface.vue';
 import UiSwitch from './UiSwitch.vue';
 import UiTable from './UiTable.vue';
 import UiTextarea from './UiTextarea.vue';
+import UiTimeline from './UiTimeline.vue';
 import UiTooltipSurface from './UiTooltipSurface.vue';
 
 const options = [
@@ -1267,5 +1270,65 @@ describe('Overlay primitives', () => {
     expect(items[0]?.attributes('role')).toBe('menuitem');
     expect(items[1]?.attributes('disabled')).toBeDefined();
     expect(items[2]?.attributes('data-tone')).toBe('danger');
+  });
+});
+
+describe('Presentation data', () => {
+  it('keeps a zero metric and renders untrusted metric text without HTML', async () => {
+    const payload = '<img src=x onerror=alert(1)>';
+    const wrapper = mount(UiStatCard, {
+      props: { label: payload, value: 0, unit: 'ms', footnote: payload },
+    });
+    expect(wrapper.get('dt').text()).toBe(payload);
+    expect(wrapper.get('dd').text()).toBe('0ms');
+    expect(wrapper.find('img').exists()).toBe(false);
+    await wrapper.setProps({ value: payload });
+    expect(wrapper.get('dd').text()).toBe(`${payload}ms`);
+    expect(wrapper.find('img').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('updates timeline order and optional dates without interpreting titles as HTML', async () => {
+    const payload = '<script>alert(1)</script>';
+    const first = { id: 'first', title: payload, time: 'October', dateTime: '2026-10' };
+    const second = { id: 'second', title: 'Release', description: 'Ready' };
+    const wrapper = mount(UiTimeline, { props: { items: [first, second] } });
+    expect(wrapper.get('time').attributes('datetime')).toBe('2026-10');
+    expect(wrapper.find('script').exists()).toBe(false);
+    await wrapper.setProps({
+      items: [second, { id: first.id, title: first.title }],
+    });
+    expect(wrapper.findAll('li').map((item) => item.get('p').text())).toEqual(['Release', payload]);
+    expect(wrapper.find('time').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('moves current-step semantics when consumer state advances or resets', async () => {
+    const wrapper = mount(UiStepFlow, {
+      props: {
+        items: [
+          { id: 'plan', title: 'Plan', status: 'current' },
+          { id: 'ship', title: '<img src=x>', status: 'pending' },
+        ],
+      },
+    });
+    expect(wrapper.get('[aria-current="step"]').text()).toContain('Plan');
+    expect(wrapper.find('img').exists()).toBe(false);
+    await wrapper.setProps({
+      items: [
+        { id: 'plan', title: 'Plan', status: 'complete', statusLabel: '已完成' },
+        { id: 'ship', title: 'Ship', status: 'current' },
+      ],
+    });
+    expect(wrapper.get('[aria-current="step"]').text()).toContain('Ship');
+    expect(wrapper.findAll('[aria-current="step"]')).toHaveLength(1);
+    await wrapper.setProps({
+      items: [
+        { id: 'plan', title: 'Plan' },
+        { id: 'ship', title: 'Ship' },
+      ],
+    });
+    expect(wrapper.find('[aria-current]').exists()).toBe(false);
+    wrapper.unmount();
   });
 });

@@ -185,6 +185,10 @@ try {
         '.ui-field__message',
         '.ui-overlay-panel--fallback-open',
         '.ui-dropdown-menu__item',
+        '.ui-stat-card',
+        '.ui-stat-grid',
+        '.ui-timeline',
+        '.ui-step-flow',
       ]) {
         assert(
           consumerCss.includes(fragment),
@@ -259,6 +263,7 @@ try {
       `import { UiCheckbox as ReactUiCheckbox, UiRadioGroup as ReactUiRadioGroup, UiSwitch as ReactUiSwitch, UiField as ReactUiField, UiPopover as ReactUiPopover, UiDropdownMenu as ReactUiDropdownMenu, type UiFieldControlAttrs } from '@neoverse-ui/react';\n` +
       `import { UiButton, UiNotice, UiTooltipSurface, UiPresence as VueUiPresence, presence, staggerStyle } from '@neoverse-ui/vue';\n` +
       `import { UiTerminalSurface, UiTerminalLine, UiTerminalTranscript, UiTerminalPrompt, type TerminalSurfaceProps, type TerminalLineProps, type TerminalTranscriptProps, type TerminalPromptProps } from '@neoverse-ui/vue';\n` +
+      `import { UiStatCard, UiTimeline, UiStepFlow, type StatCardProps, type TimelineProps, type StepFlowProps } from '@neoverse-ui/vue';\n` +
       `import { UiCheckbox as VueUiCheckbox, UiRadioGroup as VueUiRadioGroup, UiSwitch as VueUiSwitch, UiField as VueUiField, UiPopover as VueUiPopover, UiDropdownMenu as VueUiDropdownMenu, type FieldControlAttrs } from '@neoverse-ui/vue';\n` +
       `import { showAnchoredOverlay, hideAnchoredOverlay, stopOverlayTracking, positionAnchoredOverlay, resolveAnchoredPosition, type AnchoredOverlayOptions } from '@neoverse-ui/overlay-runtime';\n` +
       `import { cssVariables } from '@neoverse-ui/tokens';\n` +
@@ -267,6 +272,11 @@ try {
       `if (!ReactUiAction || !UiButton || !UiNotice || !UiTooltipSurface || !cssVariables || !createGlassRenderer) throw new Error('public JS exports are incomplete');\n` +
       `if (![ReactUiCheckbox, ReactUiRadioGroup, ReactUiSwitch, ReactUiField, ReactUiPopover, ReactUiDropdownMenu, VueUiCheckbox, VueUiRadioGroup, VueUiSwitch, VueUiField, VueUiPopover, VueUiDropdownMenu].every(Boolean)) throw new Error('public form/overlay exports are incomplete');\n` +
       `if (![UiTerminalSurface, UiTerminalLine, UiTerminalTranscript, UiTerminalPrompt].every(Boolean)) throw new Error('public terminal exports are incomplete');\n` +
+      `const statCardProps: StatCardProps = { label: 'Latency', value: 0, unit: 'ms' };\n` +
+      `const timelineProps: TimelineProps = { items: [{ id: 'release', title: 'Release', time: 'October', dateTime: '2026-10' }] };\n` +
+      `const stepFlowProps: StepFlowProps = { items: [{ id: 'build', title: 'Build', status: 'current', statusLabel: 'In progress' }] };\n` +
+      `if (![UiStatCard, UiTimeline, UiStepFlow].every(Boolean)) throw new Error('public presentation exports are incomplete');\n` +
+      `void [statCardProps, timelineProps, stepFlowProps];\n` +
       `const terminalSurfaceProps: TerminalSurfaceProps = { title: 'Smoke terminal', density: 'compact' };\n` +
       `const terminalLineProps: TerminalLineProps = { text: 'Ready', tone: 'normal' };\n` +
       `const terminalTranscriptProps: TerminalTranscriptProps = { followTail: true };\n` +

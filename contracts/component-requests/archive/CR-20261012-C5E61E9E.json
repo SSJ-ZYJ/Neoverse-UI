@@ -11,7 +11,7 @@
     "步骤数量 2-6 时布局自适应不溢出"
   ],
   "impact": "normal",
-  "status": "reported",
+  "status": "delivered",
   "consumers": [
     {
       "project": "Neoverse-Slides",
@@ -21,5 +21,6 @@
     }
   ],
   "createdAt": "2026-10-12T08:42:40.263Z",
-  "updatedAt": "2026-10-12T08:42:40.263Z"
+  "updatedAt": "2026-10-13T07:32:14.018Z",
+  "resolution": "Accepted 2026-10-13. UiStepFlow, shared responsive connectors and public item/state types are implemented; Vue unit tests 70/70 passed. tests/visual/presentation-data.spec.ts passes desktop/mobile light/dark/system snapshots, 2/6 steps, long text and horizontal/vertical connector geometry. Real consumer: Neoverse-Slides/packages/slidev-theme-neoverse/layouts/steps.vue and slides/tech-share-template/slides.md slide 7. Dev and production consumer checks passed 12/12 each; full Slides build/output validation passed; luna/max reviewed real screenshots. See docs/acceptance-2026-10-13.md. Publication is separate."
 }

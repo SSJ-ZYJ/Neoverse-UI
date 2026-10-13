@@ -26,6 +26,8 @@ Bun is the package manager, workspace manager, and script runner for this reposi
 
 The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch`, `UiField`, `UiPopover`, `UiDropdownMenu`, `UiTable`, `UiDisclosure`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, `UiTooltipSurface`, and `UiPresence`. `UiDock` is the reusable floating-navigation shell; routing data, active destination state, and trailing controls remain consumer-owned. `UiSurface` is the canonical material primitive. React exposes the same Canonical Shared set, plus the consumer-driven `UiBreadcrumb`, `UiDock`, and `UiNotice`; see the [component contract matrix](docs/component-contract-matrix.md) for per-component maturity and consumer evidence. Vue and React share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
 
+Vue also exports the terminal presentation primitives `UiTerminalSurface`, `UiTerminalLine`, `UiTerminalTranscript`, and `UiTerminalPrompt`, plus `UiStatCard`, `UiTimeline`, and `UiStepFlow`. The latter three are Vue Consumer Driven display components built on existing material and typography roles; their [API and composition examples](packages/vue/README.md#metrics-milestones-and-steps) and Design Lab specimens are available, while release visual and real Slides consumer validation remain pending.
+
 ## Architecture at a glance
 
 ```text

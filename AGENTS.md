@@ -3,6 +3,7 @@
 For work originating in consumer projects (Neoverse, Neoverse-Docs, Neoverse-Slides, etc.), consult [docs/component-requests.md](docs/component-requests.md).
 
 - New component needs, reusable behavior gaps, and missing Vue/React adapters are tracked as individual `contracts/component-requests/CR-*.json` records, **not** as speculative rows in `contracts/component-matrix.json`.
+- Closed requests move to `contracts/component-requests/archive/` automatically; use `bun run requests list` for open work and `bun run requests list --status delivered` or `--status rejected` for historical evidence. Do not reimplement archived requests.
 - Start with `bun run requests agent --queue triage` for unreviewed reports or `bun run requests agent --queue implementation` for accepted work. The output is machine-readable JSON with consumer source locations and acceptance criteria.
 - **Preferred local intake from any consumer repository:** call `bun <NEOVERSE_UI_ROOT>/scripts/component-requests.ts submit --file <local JSON>` from the consumer's working directory. The JSON contract and PowerShell/Linux examples live in `docs/component-requests.md`. This writes directly to the UI repository, with schema validation, idempotency and cross-process locking.
 - This public `submit` entrypoint records a `reported` need only; it cannot authorize implementation or change maturity. Avoid direct editing of `CR-*.json` from consumer agents.

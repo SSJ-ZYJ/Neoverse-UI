@@ -31,6 +31,43 @@ export interface SurfaceProps {
   contentOverflow?: SurfaceOverflowMode;
 }
 
+export interface StatCardProps {
+  label: string;
+  value: string | number;
+  unit?: string;
+  trend?: string;
+  footnote?: string;
+  surface?: SurfacePreset;
+}
+
+export interface TimelineItem {
+  id: string;
+  title: string;
+  description?: string;
+  time?: string;
+  dateTime?: string;
+}
+
+export interface TimelineProps {
+  items: readonly TimelineItem[];
+  ariaLabel?: string;
+}
+
+export type StepFlowStatus = 'pending' | 'current' | 'complete';
+
+export interface StepFlowItem {
+  id: string;
+  title: string;
+  description?: string;
+  status?: StepFlowStatus;
+  statusLabel?: string;
+}
+
+export interface StepFlowProps {
+  items: readonly StepFlowItem[];
+  ariaLabel?: string;
+}
+
 export interface ButtonProps {
   variant?: ButtonVariant;
   size?: ButtonSize;

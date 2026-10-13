@@ -13,13 +13,26 @@ let mutationObserver: MutationObserver | undefined;
 let resizeObserver: ResizeObserver | undefined;
 let shouldFollow = true;
 let pending = false;
+let measuredWidth = 0;
+let measuredHeight = 0;
 
 function atBottom(element: HTMLElement) {
   return element.scrollHeight - element.clientHeight - element.scrollTop <= 3;
 }
 
 function onScroll() {
-  if (scroller.value) shouldFollow = atBottom(scroller.value);
+  const element = scroller.value;
+  if (!element) return;
+  const resized = element.clientWidth !== measuredWidth || element.clientHeight !== measuredHeight;
+  measuredWidth = element.clientWidth;
+  measuredHeight = element.clientHeight;
+  // Native scroll anchoring can fire before ResizeObserver during reflow.
+  // Preserve an existing tail follower; readers still keep their scroll position.
+  if (resized && shouldFollow) {
+    syncTail();
+    return;
+  }
+  shouldFollow = atBottom(element);
 }
 
 function syncTail() {
@@ -43,6 +56,8 @@ watch(
 onMounted(() => {
   const element = scroller.value;
   if (!element) return;
+  measuredWidth = element.clientWidth;
+  measuredHeight = element.clientHeight;
   if (props.followTail) element.scrollTop = element.scrollHeight;
   shouldFollow = atBottom(element);
   if (typeof MutationObserver !== 'undefined') {

@@ -11,7 +11,7 @@
     "若 UiScrollbar + 消费端逻辑即可满足，应给出复用方案而不是新增冗余组件。"
   ],
   "impact": "low",
-  "status": "implementing",
+  "status": "delivered",
   "consumers": [
     {
       "project": "XCA-Portal",
@@ -21,5 +21,6 @@
     }
   ],
   "createdAt": "2026-10-10T07:43:53.885Z",
-  "updatedAt": "2026-10-10T13:19:57.375Z"
+  "updatedAt": "2026-10-13T07:46:16.530Z",
+  "resolution": "Accepted 2026-10-13. UiTerminalTranscript native scroll/log and tail-following are consumed in real XCA TerminalHost.vue. Fixed native layout scroll incorrectly disabling following before ResizeObserver; minimal XCA terminal-resize.spec.ts failed at 72px before the fix and passes after synced production build, retaining draft and preserving history readers. UI terminal-resize/terminal-composition and full acceptance suite 24/24; Vue 70/70; XCA full E2E 71/71 including scroll/clear/intro/resize/reduced-motion. Shared release snapshots and 5 real XCA snapshots reviewed by luna/max. See docs/acceptance-2026-10-13.md and .changeset/terminal-resize-following.md. No publication."
 }

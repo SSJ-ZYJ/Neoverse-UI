@@ -19,3 +19,6 @@
 @import './components/overlay.css';
 @import './components/prose.css';
 @import './components/terminal.css';
+@import './components/stat-card.css';
+@import './components/timeline.css';
+@import './components/step-flow.css';

@@ -11,7 +11,7 @@
     "2-10 个条目时轴线连续不间断"
   ],
   "impact": "normal",
-  "status": "reported",
+  "status": "delivered",
   "consumers": [
     {
       "project": "Neoverse-Slides",
@@ -21,5 +21,6 @@
     }
   ],
   "createdAt": "2026-10-12T08:43:05.559Z",
-  "updatedAt": "2026-10-12T08:43:05.559Z"
+  "updatedAt": "2026-10-13T07:32:13.907Z",
+  "resolution": "Accepted 2026-10-13. UiTimeline, shared continuous-axis CSS and public item types are implemented; Vue unit tests 70/70 passed. tests/visual/presentation-data.spec.ts passes desktop/mobile light/dark/system snapshots, 2/10 entries and node/connector geometry. Real consumer: Neoverse-Slides/packages/slidev-theme-neoverse/layouts/timeline.vue and slides/tech-share-template/slides.md slide 14. Sequence labels moved into titles to prevent footer overlap without component size overrides; dev and production consumer checks 12/12 each; full Slides build/output validation passed; luna/max reviewed real screenshots. See docs/acceptance-2026-10-13.md. Publication is separate."
 }

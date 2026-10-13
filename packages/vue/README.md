@@ -22,9 +22,45 @@ Vue `>=3.5 <4` is required as a peer dependency. Field and choice-control IDs us
 
 ## Public components
 
-`UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch`, `UiField`, `UiPopover`, `UiDropdownMenu`, `UiTable`, `UiDisclosure`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, `UiTooltipSurface`, `UiPresence`, `UiTerminalSurface`, `UiTerminalLine`, `UiTerminalTranscript`, and `UiTerminalPrompt` are exported from the package root.
+`UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch`, `UiField`, `UiPopover`, `UiDropdownMenu`, `UiTable`, `UiDisclosure`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, `UiTooltipSurface`, `UiPresence`, `UiTerminalSurface`, `UiTerminalLine`, `UiTerminalTranscript`, `UiTerminalPrompt`, `UiStatCard`, `UiTimeline`, and `UiStepFlow` are exported from the package root.
 
 Terminal composition (Glass window, output lines, scrollback, and native terminal input) is documented in [Terminal composition](../../docs/terminal-composition.md). The embedded transcript uses `scrollbar-immersive`; `UiScrollbar` is reserved for document scrolling.
+
+## Metrics, milestones, and steps
+
+```vue
+<script setup lang="ts">
+import { UiStatCard, UiStepFlow, UiTimeline, type StepFlowItem, type TimelineItem } from '@neoverse-ui/vue';
+
+const milestones: readonly TimelineItem[] = [
+  { id: 'design', title: 'Design', description: 'Shared contract', time: 'October 1', dateTime: '2026-10-01' },
+  { id: 'release', title: 'Release', description: 'Consumer validation', time: 'October 12', dateTime: '2026-10-12' },
+];
+const steps: readonly StepFlowItem[] = [
+  { id: 'plan', title: 'Plan', status: 'complete', statusLabel: 'Completed' },
+  { id: 'build', title: 'Build', description: 'Implement the contract', status: 'current', statusLabel: 'Current' },
+  { id: 'verify', title: 'Verify', status: 'pending', statusLabel: 'Pending' },
+];
+</script>
+
+<template>
+  <div class="ui-stat-grid">
+    <UiStatCard label="Latency" :value="0" unit="ms" footnote="Includes zero-valued metrics" />
+    <UiStatCard label="Coverage" :value="98.6" unit="%" trend="+2.4% this month" />
+  </div>
+  <UiTimeline :items="milestones" aria-label="Milestones" />
+  <UiStepFlow :items="steps" aria-label="Delivery steps" />
+</template>
+```
+
+- `UiStatCard` uses `UiSurface` (`surface="glass-elevated"` by default) and a native definition list. `value` is a string or number, including zero. `unit`, `trend`, and `footnote` are optional text; `label`, `value`, `trend`, and `footnote` named slots customize content. Trend meaning, formatting, and localization belong to the consumer. `.ui-stat-grid` fits two to four cards within the available width and stacks on narrow containers.
+- `UiTimeline` is a vertical ordered list; items require a stable unique `id` and `title`, with optional `description`, `time`, and machine-readable `dateTime`. The `#item="{ item, index }"` slot replaces the body without replacing the list or decorative axis. No horizontal variant is exported.
+- `UiStepFlow` is a static ordered list, not a stepper controller. Items require a stable unique `id` and `title`, with optional `description`, `status` (`pending`, `current`, `complete`), and localized `statusLabel`. The consumer owns progression and should mark at most one item current. Current items expose `aria-current="step"`; status shapes are distinct and use `statusLabel` as their accessible name when supplied. `#item="{ item, index }"` and `#status="{ item, index }"` customize the body and localized state. Containers below 48rem use vertical steps; wider containers use an equal-width horizontal layout.
+- String props are rendered as text, never HTML. All three components reuse existing theme/typography Tokens and introduce no motion. They are Vue Consumer Driven components; React adapters, release visual approval, and real Neoverse-Slides adoption are not claimed.
+- Design Lab deep links: `#data-display-stat-card`, `#data-display-timeline`, and `#data-display-step-flow`. Import the packaged stylesheet above for the component selectors and `.ui-stat-grid`.
+
+The responsive step threshold is resolved from the shared Tailwind `--breakpoint-md` at build time (48rem by default); metric minimum width derives from `--neoverse-layout-container-md`. The zero-config `index.css` entry is already compiled. Consumers using the `components.css` / `theme.css` source facades must compile them through Tailwind rather than load the facades as plain browser stylesheets.
+
 
 ## Forms and overlays
 

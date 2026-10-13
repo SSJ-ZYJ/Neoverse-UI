@@ -1,11 +1,67 @@
 <script setup lang="ts">
-import { UiDisclosure, UiSurface, UiTable } from '@neoverse-ui/vue';
+import {
+  UiDisclosure,
+  UiStatCard,
+  UiStepFlow,
+  UiSurface,
+  UiTable,
+  UiTimeline,
+} from '@neoverse-ui/vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, localized } from '../playground-content';
+import DataDisplayVisualFixture from './DataDisplayVisualFixture.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const visualFixtureEnabled =
+  new URLSearchParams(window.location.search).get('visual-fixture') === '1';
+const milestones = [
+  {
+    id: 'design',
+    title: 'Design / 设计',
+    description: 'Shared visual contracts',
+    time: '2026-10-01',
+    dateTime: '2026-10-01',
+  },
+  {
+    id: 'implementation',
+    title: 'Implementation / 实现',
+    description: 'Tokens → CSS → Vue adapters',
+    time: '2026-10-09',
+    dateTime: '2026-10-09',
+  },
+  {
+    id: 'validation',
+    title: 'Validation / 验收',
+    description: 'Consumer and release evidence',
+    time: '2026-10-12',
+    dateTime: '2026-10-12',
+  },
+] as const;
+const steps = [
+  {
+    id: 'plan',
+    title: 'Plan / 规划',
+    description: 'Define the contract',
+    status: 'complete',
+    statusLabel: 'Completed / 已完成',
+  },
+  {
+    id: 'build',
+    title: 'Build / 实现',
+    description: 'Reuse the shared material',
+    status: 'current',
+    statusLabel: 'Current / 当前步骤',
+  },
+  {
+    id: 'verify',
+    title: 'Verify / 验证',
+    description: 'Review real consumer evidence',
+    status: 'pending',
+    statusLabel: 'Pending / 待完成',
+  },
+] as const;
 const copy = {
   table: {
     label: localized('Table', '表格'),
@@ -46,7 +102,8 @@ const copy = {
 </script>
 
 <template>
-  <div class="grid gap-grid">
+  <DataDisplayVisualFixture v-if="visualFixtureEnabled" :locale="props.locale" />
+  <div v-else class="grid gap-grid">
     <LabSpecimenSection
       id="data-display-table"
       :title="localize(copy.table.label, props.locale)"
@@ -105,6 +162,52 @@ const copy = {
             </p>
           </UiDisclosure>
         </div>
+      </MaterialBackdrop>
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="data-display-stat-card"
+      :title="localize(localized('Metric cards', '指标卡'), props.locale)"
+      :description="localize(localized('Display typography on shared Glass surfaces; resize to compare two to four metrics.', '展示字体与共享 Glass 材质；调整宽度查看 2–4 个指标的布局。'), props.locale)"
+    >
+      <MaterialBackdrop edge="inset">
+        <div class="ui-stat-grid">
+          <UiStatCard
+            label="Latency / 延迟"
+            :value="0"
+            unit="ms"
+            footnote="Native value, including zero"
+          />
+          <UiStatCard label="Coverage / 覆盖率" :value="98.6" unit="%" trend="+2.4% this month" />
+          <UiStatCard label="Packages / 包" :value="8" footnote="Shared design system" />
+          <UiStatCard label="Consumers / 消费项目" :value="4" trend="Vue presentation primitives" />
+        </div>
+      </MaterialBackdrop>
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="data-display-timeline"
+      :title="localize(localized('Timeline', '时间线'), props.locale)"
+      :description="localize(localized('Continuous vertical milestones with native list and date semantics.', '连续垂直里程碑，保留原生列表和日期语义。'), props.locale)"
+    >
+      <MaterialBackdrop edge="inset">
+        <UiTimeline
+          :items="milestones"
+          :aria-label="localize(localized('Milestones', '里程碑'), props.locale)"
+        />
+      </MaterialBackdrop>
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="data-display-step-flow"
+      :title="localize(localized('Step flow', '步骤流'), props.locale)"
+      :description="localize(localized('Numbered steps with consumer-owned state and container-responsive layout.', '编号步骤由消费端管理状态，并随容器宽度自适应。'), props.locale)"
+    >
+      <MaterialBackdrop edge="inset">
+        <UiStepFlow
+          :items="steps"
+          :aria-label="localize(localized('Delivery steps', '交付步骤'), props.locale)"
+        />
       </MaterialBackdrop>
     </LabSpecimenSection>
   </div>

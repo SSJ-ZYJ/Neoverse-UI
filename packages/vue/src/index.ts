@@ -58,9 +58,13 @@ export type {
   SelectProps,
   SkeletonEffect,
   SkeletonProps,
+  StatCardProps,
   StatusIndicatorProps,
   StatusIndicatorSize,
   StatusIndicatorStatus,
+  StepFlowItem,
+  StepFlowProps,
+  StepFlowStatus,
   SurfaceEdgeMode,
   SurfaceHoverMode,
   SurfaceOverflowMode,
@@ -75,6 +79,8 @@ export type {
   TerminalSurfaceProps,
   TerminalTranscriptProps,
   TextareaProps,
+  TimelineItem,
+  TimelineProps,
   TooltipSurfaceProps,
   TooltipSurfaceVariant,
 } from './types';
@@ -100,7 +106,9 @@ export { default as UiScrollbar } from './UiScrollbar.vue';
 export { default as UiSegmentedControl } from './UiSegmentedControl.vue';
 export { default as UiSelect } from './UiSelect.vue';
 export { default as UiSkeleton } from './UiSkeleton.vue';
+export { default as UiStatCard } from './UiStatCard.vue';
 export { default as UiStatusIndicator } from './UiStatusIndicator.vue';
+export { default as UiStepFlow } from './UiStepFlow.vue';
 export { default as UiSurface } from './UiSurface.vue';
 export { default as UiSwitch } from './UiSwitch.vue';
 export { default as UiTable } from './UiTable.vue';
@@ -109,4 +117,5 @@ export { default as UiTerminalPrompt } from './UiTerminalPrompt.vue';
 export { default as UiTerminalSurface } from './UiTerminalSurface.vue';
 export { default as UiTerminalTranscript } from './UiTerminalTranscript.vue';
 export { default as UiTextarea } from './UiTextarea.vue';
+export { default as UiTimeline } from './UiTimeline.vue';
 export { default as UiTooltipSurface } from './UiTooltipSurface.vue';

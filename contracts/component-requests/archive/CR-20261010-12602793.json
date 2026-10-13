@@ -11,7 +11,7 @@
     "提供 Vue 消费示例和真实 XCA 终端宿主视觉回归；若既有 UiSurface 组合足够则记录不新增的结论。"
   ],
   "impact": "normal",
-  "status": "implementing",
+  "status": "delivered",
   "consumers": [
     {
       "project": "XCA-Portal",
@@ -21,5 +21,6 @@
     }
   ],
   "createdAt": "2026-10-10T07:43:53.624Z",
-  "updatedAt": "2026-10-10T13:19:57.059Z"
+  "updatedAt": "2026-10-13T07:46:16.342Z",
+  "resolution": "Accepted 2026-10-13. UiTerminalSurface composes existing Glass with title/status/actions and native accessibility; Vue unit tests 70/70, shared terminal release screenshots desktop/mobile light/dark pass, and real XCA TerminalHost.vue consumes one shared shell. UI acceptance suite 24/24; XCA typecheck/build and full E2E 71/71, including intro/expand/resize and theme behavior. luna/max reviewed shared terminal and 5 real XCA snapshots. See docs/acceptance-2026-10-13.md. No publication."
 }

@@ -9,7 +9,8 @@ Neoverse-UI 的组件供 Neoverse、Neoverse-Docs、Neoverse-Slides 等项目消
 | 数据源 | 用途 |
 | --- | --- |
 | GitHub Component Request issue | 消费项目的远程提交入口；**尚未审核**的报告 |
-| `contracts/component-requests/CR-*.json` | Neoverse-UI 经登记的结构化需求与生命周期；Agent 可直接读取 |
+| `contracts/component-requests/CR-*.json` | 尚未关闭的结构化需求；Agent 的活动工作队列 |
+| `contracts/component-requests/archive/CR-*.json` | 已交付或已拒绝需求的只读历史及验收依据；CLI 仍可查询、校验 |
 | `contracts/component-matrix.json` | **已经存在的公开组件**、框架适配、测试和成熟度证据 |
 
 Playground 展示已实现的设计契约，不充当持久化需求数据库。此功能不新增后端、组件包依赖或远程写入 API，也不让消费者在运行时提交应用内容。Git 记录每次需求变更，CI 负责基础校验。
@@ -116,7 +117,7 @@ bun run requests status --id CR-YYYYMMDD-XXXXXXXX --to implementing
 bun run requests status --id CR-YYYYMMDD-XXXXXXXX --to delivered --resolution "PR #123；组件契约与消费测试已验证"
 ```
 
-已关闭需求不会直接重开；新缺陷用新的需求记录，保留历史。请求 ID 与 JSON 文件名固定一致，每个需求可以记录多个消费项目和使用位置。
+已关闭需求不会直接重开；新缺陷用新的需求记录，保留历史。请求 ID 与 JSON 文件名固定一致，每个需求可以记录多个消费项目和使用位置。**CLI 关闭需求后会自动将 JSON 移入 `archive/`，不再占用活动清单**；归档文件不需要消费方 Agent 手动挪动或编辑。
 
 ## Agent 工作流
 
@@ -127,14 +128,16 @@ bun run requests status --id CR-YYYYMMDD-XXXXXXXX --to delivered --resolution "P
 5. **完成记录**：填写明确的 `resolution`，再标 `delivered`。如需新版本对外发布，另行创建 Changeset，遵守现有发布机制，不能让需求登记脚本自动发版。
 
 ```sh
-bun run requests list
+bun run requests list                  # 默认仅未关闭需求
+bun run requests list --status delivered  # 查询已交付历史
+bun run requests list --status rejected   # 查询被拒绝历史
 bun run requests agent --queue triage
 bun run requests agent --queue implementation
 bun run requests agent --queue all
 bun run requests check
 ```
 
-`agent` 是只读、稳定 JSON 输出（包含消费者位置、验收条件以及目标组件当前的矩阵条目）；`check` 校验结构、时间、重复消费位置、文件名、已交付公共组件矩阵登记，以及 framework-gap 目标是否存在。`bun run check:contracts` 已接入校验，`bun run test` 会执行该功能的单测。运行这些命令不会提交代码，也不会触发组件实现或 GitHub 同步。
+`agent` 是只读、稳定 JSON 输出（包含消费者位置、验收条件以及目标组件当前的矩阵条目）；`--queue all` 会包含归档历史。`check` 同时扫描活动与归档目录，校验结构、时间、跨目录重复 ID、文件名、已交付公共组件矩阵登记，以及 framework-gap 目标是否存在。`bun run check:contracts` 已接入校验，`bun run test` 会执行该功能的单测。运行这些命令不会提交代码，也不会触发组件实现或 GitHub 同步。
 
 ## 后续扩展
 

@@ -201,6 +201,30 @@ export interface LabSpecimen {
 
 export const labSpecimens = [
   {
+    id: 'data-display-stat-card',
+    moduleId: 'data-display',
+    label: localized('Metric cards', '指标卡'),
+    apiNames: ['UiStatCard'],
+    tags: ['data', 'metric', 'card', 'glass'],
+    kind: 'component',
+  },
+  {
+    id: 'data-display-timeline',
+    moduleId: 'data-display',
+    label: localized('Timeline', '时间线'),
+    apiNames: ['UiTimeline'],
+    tags: ['data', 'timeline', 'milestone'],
+    kind: 'component',
+  },
+  {
+    id: 'data-display-step-flow',
+    moduleId: 'data-display',
+    label: localized('Step flow', '步骤流'),
+    apiNames: ['UiStepFlow'],
+    tags: ['data', 'steps', 'flow'],
+    kind: 'component',
+  },
+  {
     id: 'foundation-colors',
     moduleId: 'colors',
     label: moduleCopy.colors.label,

@@ -189,4 +189,44 @@ describe('component request registry', () => {
     );
     await expect(run(['check'], directory)).rejects.toThrow('absent from matrix');
   });
+
+  test('archives delivered requests without losing evidence or history lookup', async () => {
+    const directory = await temporaryDirectory();
+    await saveRequest({ ...initial, kind: 'enhancement' }, directory);
+    await run(['status', '--id', initial.id, '--to', 'accepted'], directory);
+    await run(['status', '--id', initial.id, '--to', 'implementing'], directory);
+    await run(
+      [
+        'status',
+        '--id',
+        initial.id,
+        '--to',
+        'delivered',
+        '--resolution',
+        'Validated in a real consumer and recorded the test evidence',
+      ],
+      directory,
+    );
+
+    await expect(readFile(join(directory, `${initial.id}.json`), 'utf8')).rejects.toThrow();
+    const archived = JSON.parse(
+      await readFile(join(directory, 'archive', `${initial.id}.json`), 'utf8'),
+    );
+    expect(archived.status).toBe('delivered');
+    expect(archived.resolution).toContain('real consumer');
+    expect(await run(['list'], directory)).toBe('No matching component requests.');
+    expect(await run(['list', '--status', 'delivered'], directory)).toContain(initial.id);
+    expect(JSON.parse(await run(['agent', '--queue', 'all'], directory)).requests).toHaveLength(1);
+    expect(await run(['check'], directory)).toContain('valid (1 requests)');
+  });
+
+  test('rejects duplicate request IDs across active and archived registries', async () => {
+    const directory = await temporaryDirectory();
+    await saveRequest(
+      { ...initial, status: 'rejected', resolution: 'Product-specific behavior' },
+      directory,
+    );
+    await saveRequest(initial, directory);
+    await expect(loadRequests(directory)).rejects.toThrow('duplicate request ID');
+  });
 });

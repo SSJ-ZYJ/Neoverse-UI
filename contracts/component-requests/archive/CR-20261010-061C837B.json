@@ -11,7 +11,7 @@
     "可组合提示符、自动补全建议区域，不能在公共输入组件中放 XCA 专属命令解析或历史管理。"
   ],
   "impact": "normal",
-  "status": "implementing",
+  "status": "delivered",
   "consumers": [
     {
       "project": "XCA-Portal",
@@ -21,5 +21,6 @@
     }
   ],
   "createdAt": "2026-10-10T07:43:53.708Z",
-  "updatedAt": "2026-10-10T13:19:56.903Z"
+  "updatedAt": "2026-10-13T07:46:16.254Z",
+  "resolution": "Accepted 2026-10-13 under the current terminal composition contract. The old UiInput terminal appearance was intentionally replaced by UiTerminalPrompt; ordinary UiInput remains a form input. Native text/password attributes, IME, focus, suggestion visibility and safe input are covered by packages/vue/src/terminal.test.ts and XCA tests/e2e/terminal-shared-ui.spec.ts, terminal-completion.spec.ts and terminal-extensions.spec.ts. Vue unit tests 70/70; UI acceptance browser suite 24/24; XCA full E2E 71/71 after production sync/build. XCA TerminalCommandInput.vue uses UiTerminalPrompt; luna/max reviewed shared and real XCA theme/mobile screenshots. See docs/acceptance-2026-10-13.md. No publication."
 }

@@ -51,9 +51,9 @@ Column values:
 | `UiPresence` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiPopover` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiDropdownMenu` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
-| `UiBreadcrumb` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Pending | Playground | Pending |
+| `UiBreadcrumb` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
 | `UiControlSurface` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
-| `UiDock` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Pending | Release | Validated |
+| `UiDock` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiNavigationItem` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
 | `UiSegmentedControl` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
 | `UiBadge` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
@@ -62,10 +62,13 @@ Column values:
 | `UiTooltipSurface` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | — | Stable | — | Release | Pending |
 | `UiSkeleton` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
 | `UiScrollbar` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
-| `UiTerminalPrompt` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | — | Stable | — | Playground | Validated |
-| `UiTerminalSurface` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | — | Stable | — | Playground | Pending |
-| `UiTerminalLine` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | — | Stable | — | Playground | Pending |
-| `UiTerminalTranscript` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | — | Stable | — | Playground | Pending |
+| `UiTerminalPrompt` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
+| `UiTerminalSurface` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
+| `UiTerminalLine` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
+| `UiTerminalTranscript` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
+| `UiStatCard` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
+| `UiTimeline` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
+| `UiStepFlow` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
 
 ## Change policy
 

@@ -1,9 +1,11 @@
 import {
   UiAction,
+  UiBreadcrumb,
   UiButton,
   UiCard,
   UiCheckbox,
   UiDisclosure,
+  UiDock,
   UiDropdownMenu,
   UiField,
   UiIconButton,
@@ -69,6 +71,15 @@ const copy =
         menuOpen: '打开',
         menuArchive: '归档',
         menuRemove: '移除',
+        navigation: '导航组合',
+        home: '首页',
+        docs: '文档',
+        currentPage: '当前章节',
+        breadcrumb: '页面路径',
+        dock: '快捷导航',
+        compact: '切换紧凑布局',
+        trailing: '切换尾部控件',
+        nextPage: '切换当前页面',
       }
     : {
         eyebrow: 'React Adapter Fixture',
@@ -112,6 +123,15 @@ const copy =
         menuOpen: 'Open',
         menuArchive: 'Archive',
         menuRemove: 'Remove',
+        navigation: 'Navigation composition',
+        home: 'Home',
+        docs: 'Documentation',
+        currentPage: 'Current chapter',
+        breadcrumb: 'Page path',
+        dock: 'Quick navigation',
+        compact: 'Toggle compact layout',
+        trailing: 'Toggle trailing control',
+        nextPage: 'Change current page',
       };
 
 const runtimeOptions = [
@@ -144,6 +164,24 @@ function ReactFixture() {
   const [autoSync, setAutoSync] = useState(true);
   const [presenceVisible, setPresenceVisible] = useState(true);
   const [menuSelection, setMenuSelection] = useState('');
+  const [compactDock, setCompactDock] = useState(false);
+  const [showTrailing, setShowTrailing] = useState(true);
+  const [breadcrumbCurrent, setBreadcrumbCurrent] = useState(2);
+  const breadcrumbItems = [
+    {
+      id: 'home',
+      label: copy.home,
+      href: '#react-navigation-home',
+      current: breadcrumbCurrent === 0,
+    },
+    {
+      id: 'docs',
+      label: copy.docs,
+      href: '#react-navigation-docs',
+      current: breadcrumbCurrent === 1,
+    },
+    { id: 'chapter', label: copy.currentPage, current: breadcrumbCurrent === 2 },
+  ];
 
   return (
     <main
@@ -356,6 +394,87 @@ function ReactFixture() {
           >
             {copy.presence}
           </UiPresence>
+        </div>
+      </UiSurface>
+      <UiSurface
+        surface="glass-subtle"
+        className="grid gap-4 rounded-card p-4"
+        data-react-navigation-fixture
+      >
+        <h2 className="text-subtitle font-heading tracking-heading text-primary">
+          {copy.navigation}
+        </h2>
+        <UiBreadcrumb
+          items={breadcrumbItems}
+          ariaLabel={copy.breadcrumb}
+          data-react-adapter="UiBreadcrumb"
+          data-navigation="default"
+        />
+        <UiBreadcrumb
+          items={breadcrumbItems}
+          ariaLabel={copy.breadcrumb}
+          separator={<span>/</span>}
+          data-navigation="custom"
+          renderItem={({ item, index, current }) => (
+            <a
+              href={item.href ?? '#react-navigation-chapter'}
+              aria-current={current ? 'page' : undefined}
+              data-breadcrumb-index={index}
+            >
+              {item.label}
+            </a>
+          )}
+        />
+        <div className="flex flex-wrap items-center gap-2">
+          <UiDock
+            aria-label={copy.dock}
+            scale="md"
+            compact={compactDock}
+            edgeMode="local"
+            data-react-adapter="UiDock"
+            trailing={
+              showTrailing ? (
+                <UiButton size="sm" surface="none" onClick={() => setCount((value) => value + 1)}>
+                  {copy.count} {count}
+                </UiButton>
+              ) : null
+            }
+          >
+            <UiAction href="#react-navigation-home" size="sm" surface="none">
+              {copy.home}
+            </UiAction>
+            <UiAction href="#react-navigation-docs" size="sm" surface="none">
+              {copy.docs}
+            </UiAction>
+          </UiDock>
+          <UiDock as="div" scale="md" surface="none" data-dock-div>
+            <UiAction href="#react-navigation-home" size="sm" surface="none">
+              {copy.home}
+            </UiAction>
+          </UiDock>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <UiButton
+            size="sm"
+            data-dock-compact-toggle
+            onClick={() => setCompactDock((value) => !value)}
+          >
+            {copy.compact}
+          </UiButton>
+          <UiButton
+            size="sm"
+            data-dock-trailing-toggle
+            onClick={() => setShowTrailing((value) => !value)}
+          >
+            {copy.trailing}
+          </UiButton>
+          <UiButton
+            size="sm"
+            data-breadcrumb-toggle
+            onClick={() => setBreadcrumbCurrent((value) => (value + 1) % 3)}
+          >
+            {copy.nextPage}
+          </UiButton>
         </div>
       </UiSurface>
       {contractMode ? (
