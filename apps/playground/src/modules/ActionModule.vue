@@ -87,12 +87,29 @@ const contractCopy = {
     >
   </StateRow>
 
-  <StateRow :label="contractCopy.label" :hint="contractCopy.hint" :locale="props.locale">
-    <div class="grid w-full gap-2 md:grid-cols-3">
-      <UiAction href="#controls-action" @click.prevent surface="none" variant="ghost">
+  <StateRow
+    :label="contractCopy.label"
+    :hint="contractCopy.hint"
+    :locale="props.locale"
+    layout="wide"
+  >
+    <div class="playground-preview-columns">
+      <UiAction
+        href="#controls-action"
+        @click.prevent
+        surface="none"
+        variant="ghost"
+        class="justify-self-start"
+      >
         surface="none"
       </UiAction>
-      <UiAction href="#controls-action" @click.prevent scale="lg" variant="secondary">
+      <UiAction
+        href="#controls-action"
+        @click.prevent
+        scale="lg"
+        variant="secondary"
+        class="justify-self-start"
+      >
         scale="lg"
       </UiAction>
       <UiAction href="#controls-action" @click.prevent stretch> stretch </UiAction>

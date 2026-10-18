@@ -504,14 +504,14 @@ describe('UiDock', () => {
 
     expect(wrapper.element.tagName).toBe('NAV');
     expect(wrapper.attributes('aria-label')).toBe('Primary navigation');
-    expect(wrapper.attributes('data-surface')).toBe('chrome');
+    expect(wrapper.attributes('data-surface')).toBe('glass-elevated');
     expect(wrapper.classes()).toEqual(
       expect.arrayContaining([
         'ui-dock',
         'ui-dock--compact',
         'ui-control-surface',
         'ui-control-surface--scale-lg',
-        'ui-surface-chrome',
+        'material-glass-elevated',
       ]),
     );
     expect(wrapper.classes()).toContain('ui-control-surface--shared-indicator');
@@ -643,7 +643,7 @@ describe('display components', () => {
       slots: { default: 'Error' },
     });
     expect(badge.classes()).toEqual(
-      expect.arrayContaining(['ui-badge', 'ui-badge--danger', 'text-label']),
+      expect.arrayContaining(['ui-badge', 'ui-badge--danger', 'ui-badge--md']),
     );
 
     const card = mount(UiCard, { attrs: { class: 'max-w-container-sm' } });
@@ -711,6 +711,8 @@ describe('display components', () => {
     expect(tooltip.attributes('data-surface')).toBe('glass-subtle');
     expect(tooltip.attributes('data-neoverse-surface-hover')).toBe('static');
     expect(tooltip.attributes()).toHaveProperty('data-neoverse-tooltip-surface');
+    expect(tooltip.get('.ui-tooltip-surface__content').text()).toBe('12 contributions');
+    expect(tooltip.get('.ui-tooltip-surface__content').classes()).toContain('nv-appear');
 
     const skeleton = mount(UiSkeleton, { props: { variant: 'circle' } });
     expect(skeleton.attributes('aria-hidden')).toBe('true');
@@ -881,6 +883,24 @@ describe('UiDisclosure', () => {
 });
 
 describe('form controls', () => {
+  it('renders themed number steps while forwarding native attributes and localized labels', async () => {
+    const wrapper = mount(UiInput, {
+      attrs: { type: 'number', id: 'amount', name: 'amount', min: '0', max: '2', step: '0.5' },
+      props: { modelValue: '1.5', incrementLabel: '增加', decrementLabel: '减少' },
+    });
+    const input = wrapper.get('input');
+    expect(wrapper.classes()).toContain('ui-input-number');
+    expect(input.attributes('id')).toBe('amount');
+    expect(input.attributes('step')).toBe('0.5');
+    const buttons = wrapper.findAll('button');
+    expect(buttons.map((button) => button.attributes('aria-label'))).toEqual(['增加', '减少']);
+    expect(buttons.every((button) => button.attributes('type') === 'button')).toBe(true);
+    await input.setValue('1');
+    expect(wrapper.emitted('update:modelValue')).toEqual([['1']]);
+    await wrapper.setProps({ readonly: true });
+    expect(buttons.every((button) => button.attributes('disabled') !== undefined)).toBe(true);
+  });
+
   it('keeps input attributes and v-model updates native', async () => {
     const wrapper = mount(UiInput, {
       attrs: { type: 'email', name: 'email', 'aria-label': 'Email' },
@@ -1294,6 +1314,9 @@ describe('Presentation data', () => {
     const second = { id: 'second', title: 'Release', description: 'Ready' };
     const wrapper = mount(UiTimeline, { props: { items: [first, second] } });
     expect(wrapper.get('time').attributes('datetime')).toBe('2026-10');
+    expect(wrapper.get('.ui-timeline__content').element.firstElementChild?.tagName).toBe('TIME');
+    expect(wrapper.get('.ui-timeline__content').attributes('data-surface')).toBe('glass-subtle');
+    expect(wrapper.get('.ui-timeline__node').attributes('aria-hidden')).toBe('true');
     expect(wrapper.find('script').exists()).toBe(false);
     await wrapper.setProps({
       items: [second, { id: first.id, title: first.title }],
@@ -1317,11 +1340,16 @@ describe('Presentation data', () => {
     await wrapper.setProps({
       items: [
         { id: 'plan', title: 'Plan', status: 'complete', statusLabel: '已完成' },
-        { id: 'ship', title: 'Ship', status: 'current' },
+        { id: 'ship', title: 'Ship', status: 'current', statusLabel: '当前步骤' },
       ],
     });
     expect(wrapper.get('[aria-current="step"]').text()).toContain('Ship');
     expect(wrapper.findAll('[aria-current="step"]')).toHaveLength(1);
+    expect(wrapper.get('[aria-current="step"] .ui-badge--info').text()).toBe('当前步骤');
+    const completed = wrapper.get('.ui-step-flow__item--complete');
+    expect(completed.find('.ui-step-flow__marker svg').exists()).toBe(true);
+    expect(completed.get('.ui-step-flow__status').text()).toBe('已完成');
+    expect(completed.get('.ui-step-flow__content').attributes('data-surface')).toBe('glass-subtle');
     await wrapper.setProps({
       items: [
         { id: 'plan', title: 'Plan' },
@@ -1329,6 +1357,11 @@ describe('Presentation data', () => {
       ],
     });
     expect(wrapper.find('[aria-current]').exists()).toBe(false);
+    expect(wrapper.findAll('.ui-step-flow__marker').map((marker) => marker.text())).toEqual([
+      '1',
+      '2',
+    ]);
+    expect(wrapper.find('.ui-step-flow__status').exists()).toBe(false);
     wrapper.unmount();
   });
 });

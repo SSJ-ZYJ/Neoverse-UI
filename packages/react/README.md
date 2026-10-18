@@ -26,6 +26,8 @@ Field function children receive `UiFieldControlAttrs`: supplied control ID, `ari
 
 Checkbox/Switch accept native `checked/defaultChecked/onChange` plus `onCheckedChange`; RadioGroup uses `value/defaultValue/onValueChange`. Controlled form resets must synchronize consumer state; uncontrolled native choice inputs preserve their browser reset behavior. `readOnly` prevents value changes while retaining focusability.
 
+`UiInput type="number"` renders themed up/down buttons while retaining the native numeric input, keyboard arrows, and `min`/`max`/`step` constraints. `incrementLabel` and `decrementLabel` localize their accessible names (defaults: `Increase value` / `Decrease value`). Button changes trigger native input/change events and controlled `onChange` updates. With `step="any"`, buttons change the value by 1 and retain its fractional part. Disabled and readOnly inputs disable both buttons; forwarded refs still target the input.
+
 Popover is non-modal; DropdownMenu supplies menu keyboard navigation. Both accept `open/defaultOpen/onOpenChange`, disabled state and placement, and share the Overlay Runtime with Select.
 
 ```tsx

@@ -395,6 +395,7 @@
 
 .playground-specimen-grid {
   display: grid;
+  align-items: start;
   grid-template-columns: repeat(
       auto-fit,
       minmax(min(100%, var(--neoverse-playground-specimen-card-min-width)), 1fr)
@@ -413,7 +414,7 @@
       auto-fit,
       minmax(min(100%, var(--neoverse-playground-specimen-card-min-width)), 1fr)
     );
-  align-items: stretch;
+  align-items: start;
   gap: var(--neoverse-space-3);
 }
 
@@ -428,11 +429,22 @@
 }
 
 .playground-specimen-row {
+  min-width: 0;
+  align-content: start;
+  grid-template-rows: auto auto;
   border-radius: var(--neoverse-radius-card);
   padding: var(--neoverse-space-3);
   border: 0;
   background-color: var(--neoverse-color-surface-subtle);
   box-shadow: var(--neoverse-shadow-inset);
+}
+
+/* Complex comparisons need the available section width, including nested QA
+   contexts. Simple one-control states can continue to share a row. */
+.playground-specimen-row[data-specimen-layout='wide'],
+.playground-specimen-row:has(.playground-qa-matrix),
+.playground-specimen-section > .grid > :has(> .playground-qa-matrix) {
+  grid-column: 1 / -1;
 }
 
 .playground-specimen-row__heading {
@@ -446,7 +458,9 @@
   min-width: 0;
   min-height: var(--neoverse-playground-preview-stage-height);
   display: grid;
-  align-items: center;
+  align-items: start;
+  align-content: start;
+  gap: var(--neoverse-space-3);
   overflow-x: auto;
   border: 0;
   border-radius: var(--neoverse-radius-control);
@@ -462,6 +476,47 @@
   background:
     var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);
+}
+
+/* Scene content belongs to the specimen; all control optics remain shared. */
+.playground-refraction-preview {
+  grid-column: 1 / -1;
+}
+
+.playground-refraction-scene {
+  /* Accent colours are tuned for foreground emphasis. Mix them into the
+     themed canvas so the observation field stays pale in light mode and
+     subdued in dark mode instead of reversing the surrounding contrast. */
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 39px,
+      var(--neoverse-color-border-subtle) 39px 40px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent 0 39px,
+      var(--neoverse-color-border-subtle) 39px 40px
+    ),
+    linear-gradient(
+      115deg,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-primary) 28%,
+        var(--neoverse-color-surface-canvas)
+      ),
+      color-mix(
+          in srgb,
+          var(--neoverse-color-accent-secondary) 28%,
+          var(--neoverse-color-surface-canvas)
+        )
+        45%,
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-tertiary) 28%,
+        var(--neoverse-color-surface-canvas)
+      )
+    );
 }
 
 /* Paint observation shapes once, inside the stage rather than behind its headings. */
@@ -535,9 +590,32 @@
 }
 
 .playground-specimen-preview__content {
-  width: max-content;
-  min-width: 100%;
+  width: 100%;
+  min-width: 0;
   justify-content: center;
+}
+
+.playground-specimen-preview__content > :is(.grid, .flex) {
+  min-width: 0;
+  max-width: 100%;
+}
+
+.playground-preview-columns {
+  display: grid;
+  grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--neoverse-playground-preview-column-min-width)), 1fr)
+    );
+  align-items: start;
+  width: 100%;
+  min-width: 0;
+  gap: var(--neoverse-space-3);
+}
+
+.playground-preview-columns > *,
+[data-material-legend] {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 
 .playground-qa-matrix {
@@ -567,7 +645,9 @@
   display: grid;
   min-width: 0;
   min-height: var(--neoverse-playground-preview-stage-height);
-  align-items: center;
+  align-items: start;
+  align-content: start;
+  gap: var(--neoverse-space-3);
   overflow-x: auto;
   border: 0;
   border-radius: var(--neoverse-radius-control);
@@ -712,12 +792,30 @@
   backdrop-filter: none;
 }
 
+@supports (clip-path: shape(from 0 0, line to 100% 100%, close)) {
+  .playground-reduced-transparency-preview
+    .ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface][data-surface] {
+    background-color: transparent;
+    box-shadow: none;
+  }
+
+  .playground-reduced-transparency-preview
+    .ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface][data-surface]::before {
+    display: block;
+    background-color: var(--neoverse-material-background-fallback);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
 .playground-reduced-transparency-preview
   :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
     .ui-button
   )::before,
 .playground-reduced-transparency-preview
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)::after {
+  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    .ui-tooltip-surface
+  )::after {
   display: none;
 }
 

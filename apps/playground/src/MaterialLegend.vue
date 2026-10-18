@@ -18,16 +18,22 @@ function refresh() {
   if (!region) return;
   const result: { id: number; text: string }[] = [];
   const elements = region.querySelectorAll<HTMLElement>(
-    '[data-surface], .ui-input, .ui-textarea, .ui-select, .ui-disclosure, .ui-table, .ui-badge, .ui-notice, .ui-skeleton, .ui-overlay-panel, .ui-select__popover, .ui-surface-chrome, .ui-choice__control, .ui-status-indicator, .ui-scrollbar, .neoverse-prose table, .neoverse-prose details, .neoverse-prose blockquote, .neoverse-prose pre, .neoverse-prose kbd',
+    '[data-surface], .ui-input, .ui-textarea, .ui-select, .ui-disclosure, .ui-table, .ui-badge, .ui-notice, .ui-skeleton, .ui-overlay-panel, .ui-select__popover, .ui-choice__control, .ui-status-indicator, .ui-scrollbar, .neoverse-prose table, .neoverse-prose details, .neoverse-prose blockquote, .neoverse-prose pre, .neoverse-prose kbd',
   );
   for (const element of elements) {
     if (element.closest('[data-material-legend]')) continue;
+    if (element.getAttribute('aria-hidden') === 'true') continue;
     // Tables own a grid of cell planes rather than a plate underneath them.
     const plane = element.matches('.ui-table, .neoverse-prose table')
       ? (element.querySelector('td, th') ?? element)
       : element;
-    const style = getComputedStyle(plane);
-    if (style.display === 'none') continue;
+    const surfaceStyle = getComputedStyle(plane);
+    if (surfaceStyle.display === 'none') continue;
+    // Tooltip's rounded body and pointer share a sampled pseudo-element.
+    const tooltipPlate = element.matches('.ui-tooltip-surface')
+      ? getComputedStyle(element, '::before')
+      : null;
+    const style = tooltipPlate?.clipPath.startsWith('shape(') ? tooltipPlate : surfaceStyle;
     const name =
       element.getAttribute('aria-label') ||
       element.textContent?.trim().slice(0, 32) ||
@@ -45,7 +51,7 @@ function refresh() {
     const tier =
       surface && surface in tiers
         ? (surface as keyof typeof tiers)
-        : surface === 'chrome' || !surface
+        : !surface
           ? 'glass-subtle'
           : null;
     let detail: string;
@@ -58,7 +64,13 @@ function refresh() {
           : inherited || (none && hasGlassParent)
             ? 'Inherited; no local plate'
             : 'No surface';
-    } else if (element.matches('.ui-badge, .ui-status-indicator, .ui-scrollbar')) {
+    } else if (element.matches('.ui-badge')) {
+      const blur = style.backdropFilter.match(/blur\(([^)]+)\)/)?.[1];
+      detail =
+        props.locale === 'zh'
+          ? `语义色背景 · ${blur ? `${blur} 模糊` : '无背景模糊'}`
+          : `Semantic tint · ${blur ? `${blur} blur` : 'No backdrop blur'}`;
+    } else if (element.matches('.ui-status-indicator, .ui-scrollbar')) {
       detail =
         props.locale === 'zh'
           ? '共享语义效果（不独立采样玻璃）'
@@ -66,7 +78,14 @@ function refresh() {
     } else if (tier) {
       const preset = tiers[tier];
       const filter = style.backdropFilter;
-      const blur = filter.match(/blur\(([^)]+)\)/)?.[1] ?? '0px';
+      const nativeId = plane.getAttribute('data-neoverse-glass-native-filter');
+      const nativeBlur = nativeId
+        ? document
+            .getElementById(nativeId)
+            ?.querySelector('feGaussianBlur')
+            ?.getAttribute('stdDeviation')
+        : null;
+      const blur = filter.match(/blur\(([^)]+)\)/)?.[1] ?? (nativeBlur ? `${nativeBlur}px` : '0px');
       // CSSOM may serialize alpha in rgb(), color() or oklab().
       const alpha = Number(
         style.backgroundColor.match(/\/\s*([\d.]+)\s*\)/)?.[1] ??
@@ -74,7 +93,11 @@ function refresh() {
           1,
       );
       const fallback = filter === 'none' && alpha >= 0.99;
-      const custom = !fallback && (blur !== preset.blur || Math.abs(alpha - preset.alpha) > 0.005);
+      const blurScale = element.matches('.ui-button')
+        ? Number(style.getPropertyValue('--neoverse-control-button-blur-scale').trim() || '1')
+        : 1;
+      const expectedBlur = `${parseFloat(preset.blur) * blurScale}px`;
+      const custom = !fallback && (blur !== expectedBlur || Math.abs(alpha - preset.alpha) > 0.005);
       detail = `${element.matches('.ui-notice') ? (props.locale === 'zh' ? '语义状态色 · ' : 'Semantic status tint · ') : ''}${props.locale === 'zh' ? preset.zh : preset.en} · ${tier} · ${blur} / ${Math.round(alpha * 100)}%${fallback ? (props.locale === 'zh' ? ' · 不透明回退' : ' · Opaque fallback') : custom ? (props.locale === 'zh' ? ' · 自定义' : ' · Custom') : ''}`;
     } else {
       detail = `${surface} · ${props.locale === 'zh' ? '语义表面' : 'Semantic surface'}`;
@@ -85,8 +108,11 @@ function refresh() {
 }
 
 function schedule() {
-  cancelAnimationFrame(frame);
-  frame = requestAnimationFrame(refresh);
+  if (frame !== 0) return;
+  frame = requestAnimationFrame(() => {
+    frame = 0;
+    refresh();
+  });
 }
 
 onMounted(() => {

@@ -20,17 +20,42 @@ import {
   UiTable,
   UiTextarea,
 } from '@neoverse-ui/react';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
+import { mountPlaygroundGlass } from './glass-runtime';
+import { appCopy, localize } from './playground-content';
+import type { ThemeMode } from './playground-types';
+import {
+  applyThemeMode,
+  isThemeMode,
+  observeSystemTheme,
+  persistThemeMode,
+  resolveInitialThemeMode,
+  syncThemeModeToQuery,
+  themeModes,
+} from './theme-runtime';
 
 const locale = new URLSearchParams(window.location.search).get('lang') === 'zh' ? 'zh' : 'en';
 const contractMode = new URLSearchParams(window.location.search).has('contract-fixtures');
 document.documentElement.lang = locale === 'zh' ? 'zh-CN' : 'en';
 
+/* The fixture resolves its theme with the same engine as the Design Lab shell:
+   query parameter, then the shared preference record, then the system default.
+   The server already renders the matching `data-theme`, so this first
+   application is a no-op for deep links and only matters for stored modes. */
+const initialThemeMode = resolveInitialThemeMode();
+applyThemeMode(initialThemeMode, false);
+
+const themeOptions = themeModes.map((mode) => ({
+  value: mode,
+  label: localize(appCopy.theme.options[mode], locale),
+}));
+
 const copy =
   locale === 'zh'
     ? {
         eyebrow: 'React Adapter Fixture',
+        back: '返回设计实验室',
         title: 'React 运行态校验',
         description:
           '直接渲染 Canonical Shared React Adapter，校验真实 DOM、状态更新、原生语义与共享视觉契约。',
@@ -83,6 +108,7 @@ const copy =
       }
     : {
         eyebrow: 'React Adapter Fixture',
+        back: 'Back to Design Lab',
         title: 'React runtime validation',
         description:
           'Canonical Shared React adapters are rendered directly to validate real DOM, state updates, native semantics, and the shared visual contract.',
@@ -145,6 +171,18 @@ const channelOptions = [
 ] as const;
 
 function ReactFixture() {
+  const [themeMode, setThemeMode] = useState<ThemeMode>(initialThemeMode);
+  const selectedThemeMode = useCallback((value: string | number) => {
+    if (!isThemeMode(value)) {
+      return;
+    }
+
+    setThemeMode(value);
+    applyThemeMode(value);
+    persistThemeMode(value);
+    syncThemeModeToQuery(value);
+  }, []);
+  useEffect(() => observeSystemTheme(), []);
   const [controlledOpen, setControlledOpen] = useState(false);
   const [controlledMounted, setControlledMounted] = useState(true);
   const [dismissAttempts, setDismissAttempts] = useState(0);
@@ -157,6 +195,7 @@ function ReactFixture() {
   const [formSync, setFormSync] = useState(true);
   const [count, setCount] = useState(0);
   const [email, setEmail] = useState('runtime@neoverse.dev');
+  const [numberValue, setNumberValue] = useState('1.5');
   const [notes, setNotes] = useState('Shared React runtime fixture');
   const [runtime, setRuntime] = useState<string | number>('native');
   const [notifications, setNotifications] = useState(true);
@@ -190,6 +229,15 @@ function ReactFixture() {
       className="mx-auto grid min-h-screen w-full max-w-container-xl gap-grid px-gutter-inline py-gutter-block"
     >
       <header className="grid max-w-container-lg gap-2">
+        <UiAction
+          className="justify-self-start"
+          href={`/?lang=${locale}#consumer-parity`}
+          size="sm"
+          variant="ghost"
+          data-react-runtime-return
+        >
+          {copy.back}
+        </UiAction>
         <p className="text-label font-label text-accent-primary">{copy.eyebrow}</p>
         <h1 className="text-heading font-heading tracking-heading text-primary">{copy.title}</h1>
         <p className="text-body text-secondary">{copy.description}</p>
@@ -309,6 +357,25 @@ function ReactFixture() {
             )}
           </UiField>
 
+          {contractMode && (
+            <div data-number-fixtures>
+              <UiInput
+                type="number"
+                name="amount"
+                aria-label="Amount"
+                min="0"
+                max="2"
+                step="0.5"
+                value={numberValue}
+                onChange={(event) => setNumberValue(event.currentTarget.value)}
+              />
+              <output data-number-value>{numberValue}</output>
+              <UiInput type="number" aria-label="Any step" step="any" defaultValue="1.25" />
+              <UiInput type="number" aria-label="Disabled number" disabled defaultValue="4" />
+              <UiInput type="number" aria-label="Readonly number" readOnly value="5" />
+            </div>
+          )}
+
           <UiField label={copy.runtime}>
             <UiSelect
               value={runtime}
@@ -398,7 +465,7 @@ function ReactFixture() {
       </UiSurface>
       <UiSurface
         surface="glass-subtle"
-        className="grid gap-4 rounded-card p-4"
+        className="grid min-w-0 gap-4 rounded-card p-4"
         data-react-navigation-fixture
       >
         <h2 className="text-subtitle font-heading tracking-heading text-primary">
@@ -425,12 +492,13 @@ function ReactFixture() {
             </a>
           )}
         />
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex min-w-0 flex-wrap items-center gap-2 overflow-x-auto">
           <UiDock
             aria-label={copy.dock}
             scale="md"
             compact={compactDock}
             edgeMode="local"
+            className="max-w-none flex-none"
             data-react-adapter="UiDock"
             trailing={
               showTrailing ? (
@@ -440,15 +508,15 @@ function ReactFixture() {
               ) : null
             }
           >
-            <UiAction href="#react-navigation-home" size="sm" surface="none">
+            <UiAction href="#react-navigation-home" size="sm" surface="none" variant="ghost">
               {copy.home}
             </UiAction>
-            <UiAction href="#react-navigation-docs" size="sm" surface="none">
+            <UiAction href="#react-navigation-docs" size="sm" surface="none" variant="ghost">
               {copy.docs}
             </UiAction>
           </UiDock>
           <UiDock as="div" scale="md" surface="none" data-dock-div>
-            <UiAction href="#react-navigation-home" size="sm" surface="none">
+            <UiAction href="#react-navigation-home" size="sm" surface="none" variant="ghost">
               {copy.home}
             </UiAction>
           </UiDock>
@@ -476,6 +544,18 @@ function ReactFixture() {
             {copy.nextPage}
           </UiButton>
         </div>
+      </UiSurface>
+      <UiSurface surface="glass-subtle" className="grid min-w-0 gap-3 rounded-card p-4">
+        <UiField label={localize(appCopy.theme.label, locale)} className="w-fit">
+          <UiRadioGroup
+            name="theme"
+            value={themeMode}
+            options={themeOptions}
+            aria-label={localize(appCopy.theme.label, locale)}
+            onValueChange={selectedThemeMode}
+            data-react-theme-control
+          />
+        </UiField>
       </UiSurface>
       {contractMode ? (
         <>
@@ -637,3 +717,4 @@ if (root === null) {
 }
 
 createRoot(root).render(<ReactFixture />);
+mountPlaygroundGlass();

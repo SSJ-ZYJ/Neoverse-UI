@@ -14,6 +14,10 @@
     color: var(--neoverse-table-foreground);
     background: transparent;
     box-shadow: var(--neoverse-table-shadow);
+    /* Sample one continuous backdrop. Per-cell filters create hundreds of
+       compositing layers and clip the blur at every grid line. */
+    -webkit-backdrop-filter: var(--neoverse-table-filter);
+    backdrop-filter: var(--neoverse-table-filter);
     font-size: var(--neoverse-table-font-size);
     line-height: var(--neoverse-table-line-height);
   }
@@ -24,8 +28,6 @@
     text-align: start;
     vertical-align: top;
     overflow-wrap: anywhere;
-    -webkit-backdrop-filter: var(--neoverse-table-filter);
-    backdrop-filter: var(--neoverse-table-filter);
     transition:
       background-color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
       color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),

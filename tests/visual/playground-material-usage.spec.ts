@@ -54,7 +54,7 @@ for (const theme of ['light', 'dark'] as const) {
             errors.push('Table wrapper adds an independent Glass plate');
         }
         for (const element of root.querySelectorAll(
-          '[data-surface^="glass-"], .ui-surface-inset, .ui-surface-chrome',
+          '[data-surface^="glass-"], .ui-surface-inset',
         )) {
           if (
             element.matches('.ui-button--ghost, [data-neoverse-glass-nesting="inherit"]') ||
@@ -69,8 +69,7 @@ for (const theme of ['light', 'dark'] as const) {
             'glass-elevated': [18, 0.2],
             'glass-immersive': [24, 0.3],
           };
-          const expected =
-            tiers[tier === 'inset' || tier === 'chrome' ? 'glass-subtle' : (tier ?? '')];
+          const expected = tiers[tier === 'inset' ? 'glass-subtle' : (tier ?? '')];
           if (!expected) continue;
           const style = getComputedStyle(element);
           const blur = Number(style.backdropFilter.match(/blur\(([\d.]+)px\)/)?.[1]);

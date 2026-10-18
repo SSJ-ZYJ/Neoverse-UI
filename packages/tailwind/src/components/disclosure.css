@@ -73,7 +73,7 @@
   :where(.ui-disclosure, .neoverse-prose details):has(
     > :is(.ui-disclosure__summary, summary):active
   ) {
-    box-shadow: var(--neoverse-effect-press-shadow);
+    box-shadow: var(--neoverse-disclosure-edge-active), var(--neoverse-effect-press-shadow);
   }
 
   :where(.ui-disclosure__summary, .neoverse-prose summary):focus-visible {

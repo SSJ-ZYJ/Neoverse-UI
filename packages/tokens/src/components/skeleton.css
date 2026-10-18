@@ -1,8 +1,8 @@
 @layer neoverse.tokens {
   :root {
-    /* Neutral translucent frost; the opaque plate is only an accessibility fallback. */
+    /* Foreground tint keeps placeholders visible on pale Glass surfaces. */
     --neoverse-skeleton-base-fill: var(--neoverse-effect-loading-base);
-    --neoverse-skeleton-fill: var(--neoverse-material-glass-subtle-background);
+    --neoverse-skeleton-fill: var(--neoverse-effect-highlight-color);
     --neoverse-skeleton-backdrop-filter: var(--neoverse-material-glass-subtle-filter);
     --neoverse-skeleton-highlight: var(--neoverse-effect-placeholder-highlight);
     --neoverse-skeleton-edge: var(--neoverse-effect-placeholder-edge);

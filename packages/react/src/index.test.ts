@@ -25,6 +25,28 @@ import {
 
 type TestElement = ReactElement<{ children?: ReactNode; [key: string]: unknown }>;
 
+test('number inputs expose themed steps with native constraints and localized labels', () => {
+  const html = renderToStaticMarkup(
+    createElement(UiInput, {
+      type: 'number',
+      name: 'amount',
+      defaultValue: '1.5',
+      min: 0,
+      max: 2,
+      step: 0.5,
+      incrementLabel: '增加',
+      decrementLabel: '减少',
+      readOnly: true,
+    }),
+  );
+  expect(html).toContain('class="ui-input-number"');
+  expect(html).toContain('step="0.5"');
+  expect(html).toContain('name="amount"');
+  expect(html).toContain('aria-label="增加"');
+  expect(html).toContain('aria-label="减少"');
+  expect(html.match(/disabled=""/g)).toHaveLength(2);
+});
+
 test('form controls preserve native props and compose canonical classes', () => {
   const input = UiInput({
     type: 'email',
@@ -211,7 +233,8 @@ test('dock exposes the shared shell without owning product navigation data', () 
 
   expect(dock.type).toBe('nav');
   expect(dock.props['aria-label']).toBe('Primary navigation');
-  expect(dock.props['data-surface']).toBe('chrome');
+  expect(dock.props['data-surface']).toBe('glass-elevated');
+  expect(dock.props.className).toContain('material-glass-elevated');
   expect(dock.props['data-neoverse-surface-hover']).toBe('static');
   expect(dock.props.className).toContain('ui-dock');
   expect(dock.props.className).toContain('ui-dock--compact');

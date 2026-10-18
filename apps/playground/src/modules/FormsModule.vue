@@ -108,7 +108,7 @@ const releaseChannelOptions = computed(() => [
     >
       <div class="grid gap-3">
         <MaterialBackdrop edge="inset">
-          <div class="grid gap-3 md:grid-cols-3">
+          <div class="playground-preview-columns">
             <label for="forms-email" class="grid gap-2 text-body-sm text-secondary">
               <span class="text-label-sm text-muted"
                 >{{ localize(copy.states.rest, props.locale) }}</span
@@ -187,7 +187,7 @@ const releaseChannelOptions = computed(() => [
       :description="localize(copy.textareaDescription, props.locale)"
     >
       <MaterialBackdrop edge="inset">
-        <div class="grid gap-3 md:grid-cols-3">
+        <div class="playground-preview-columns">
           <label for="forms-notes" class="grid gap-2 text-body-sm text-secondary">
             <span class="text-label-sm text-muted"
               >{{ localize(copy.states.rest, props.locale) }}</span
@@ -235,7 +235,7 @@ const releaseChannelOptions = computed(() => [
       :description="localize(copy.selectDescription, props.locale)"
     >
       <MaterialBackdrop edge="inset">
-        <div class="grid gap-3 md:grid-cols-3">
+        <div class="playground-preview-columns">
           <div class="grid gap-2 text-body-sm text-secondary">
             <span class="text-label-sm text-muted"
               >{{ localize(copy.states.rest, props.locale) }}</span
@@ -283,7 +283,7 @@ const releaseChannelOptions = computed(() => [
       :description="localize(copy.choicesDescription, props.locale)"
     >
       <MaterialBackdrop edge="inset">
-        <div class="grid gap-5 md:grid-cols-3">
+        <div class="playground-preview-columns">
           <UiCheckbox
             v-model="releaseNotifications"
             data-form-checkbox
@@ -314,7 +314,7 @@ const releaseChannelOptions = computed(() => [
       :description="localize(copy.fieldStatesDescription, props.locale)"
     >
       <MaterialBackdrop edge="inset">
-        <div class="grid gap-5 md:grid-cols-2">
+        <div class="playground-preview-columns">
           <UiField
             v-slot="{ controlAttrs }"
             control-id="forms-validation-error"

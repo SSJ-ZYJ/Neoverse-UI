@@ -80,12 +80,10 @@ for (const framework of ['vue', 'react'] as const) {
     await page.goto(
       framework === 'vue'
         ? '/frame?theme=dark&lang=en#controls'
-        : '/react-fixture?lang=en&contract-fixtures',
+        : '/react-fixture?theme=dark&lang=en&contract-fixtures',
       { waitUntil: 'domcontentloaded' },
     );
-    await page.evaluate(() => {
-      document.documentElement.dataset.theme = 'dark';
-    });
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     const prefix = framework === 'vue' ? '#controls-button ' : '';
     for (const variant of ['secondary', 'primary'] as const) {
       const button = page
@@ -128,7 +126,7 @@ for (const framework of ['vue', 'react'] as const) {
         ),
       );
       expect(rest.fieldFilter).toBe('none');
-      expect(rest.filter).toContain('blur(12px)');
+      expect(rest.filter).toContain('blur(6px)');
       if (variant === 'primary') expect(rest.tone.match(/linear-gradient/g)).toHaveLength(2);
       else expect(rest.tone.match(/linear-gradient/g)).toHaveLength(1);
       if (testInfo.project.name === 'desktop') {
@@ -155,7 +153,7 @@ for (const framework of ['vue', 'react'] as const) {
 }
 
 for (const theme of ['light', 'dark'] as const) {
-  test(`${theme}: Dock retains floating depth, trailing grouping and persistent selection`, async ({
+  test(`${theme}: Dock uses shared Glass depth, trailing grouping and persistent selection`, async ({
     page,
   }) => {
     await page.goto(`/frame?theme=${theme}&lang=en#consumer-parity`, {
@@ -170,18 +168,21 @@ for (const theme of ['light', 'dark'] as const) {
     ).not.toBe('none');
     if (theme === 'dark')
       await expect(trailing).toHaveCSS('background-color', 'rgba(255, 255, 255, 0.03)');
-    const shadow =
-      theme === 'dark'
-        ? '0 18px 42px -20px rgb(0 0 0 / 48%), 0 6px 18px -12px rgb(0 0 0 / 58%)'
-        : '0 18px 42px -20px rgb(14 34 44 / 20%), 0 6px 18px -12px rgb(14 34 44 / 14%)';
-    const expected = await dock.evaluate((element, shadow) => {
+    const expected = await dock.evaluate((element) => {
       const probe = document.createElement('span');
-      probe.style.boxShadow = `var(--neoverse-control-chrome-edge-highlight), ${shadow}`;
+      const webgl = element.closest('[data-neoverse-glass-renderer="webgl"]');
+      const localEdge = element.getAttribute('data-neoverse-glass-edge-pass') === 'css';
+      probe.style.boxShadow =
+        webgl && !localEdge
+          ? 'var(--neoverse-material-glass-subtle-shadow)'
+          : 'var(--neoverse-material-glass-subtle-bloom), var(--neoverse-material-glass-subtle-shadow)';
       element.append(probe);
       const result = getComputedStyle(probe).boxShadow;
       probe.remove();
       return result;
-    }, shadow);
+    });
+    await expect(dock).toHaveAttribute('data-surface', 'glass-subtle');
+    await expect(dock).toHaveClass(/material-glass-subtle/);
     await expect(dock).toHaveCSS('box-shadow', expected);
     await expect(trailing).toHaveCSS('backdrop-filter', 'none');
     await expect(dock).toHaveCSS('background-image', 'none');
@@ -225,10 +226,7 @@ for (const theme of ['light', 'dark'] as const) {
           : `/react-fixture?theme=${theme}&lang=en&contract-fixtures`,
         { waitUntil: 'domcontentloaded' },
       );
-      // The React fixture defaults to system theme; select the actual test theme.
-      await page.evaluate((theme) => {
-        document.documentElement.dataset.theme = theme;
-      }, theme);
+      // Both surfaces resolve the same `theme` query through the shared runner.
       await expect(page.locator('html')).toHaveCSS('color-scheme', theme);
       const button =
         framework === 'vue'

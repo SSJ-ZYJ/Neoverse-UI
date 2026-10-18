@@ -87,7 +87,8 @@
       "unit": "stable",
       "visual": "playground",
       "consumer": "pending",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": ["tests/visual/choice-indicator-colour.spec.ts"]
     },
     {
       "name": "UiRadioGroup",
@@ -100,7 +101,8 @@
       "unit": "stable",
       "visual": "playground",
       "consumer": "pending",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": ["tests/visual/choice-indicator-colour.spec.ts"]
     },
     {
       "name": "UiSwitch",
@@ -113,7 +115,8 @@
       "unit": "stable",
       "visual": "playground",
       "consumer": "pending",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": ["tests/visual/choice-indicator-colour.spec.ts"]
     },
     {
       "name": "UiField",
@@ -139,7 +142,8 @@
       "unit": "stable",
       "visual": "release",
       "consumer": "pending",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": ["tests/visual/number-input.spec.ts"]
     },
     {
       "name": "UiTextarea",
@@ -308,7 +312,8 @@
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "not-applicable",
+      "evidence": ["tests/visual/component-size.spec.ts", "tests/visual/badge-theme.spec.ts"]
     },
     {
       "name": "UiStatusIndicator",

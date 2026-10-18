@@ -1,3 +1,4 @@
+import { NativeGlassRenderer, supportsNativeRefraction } from './native';
 import { glassFragmentShader, glassVertexShader } from './shader';
 
 export const glassRendererAttribute = 'data-neoverse-glass-renderer';
@@ -26,6 +27,13 @@ const maxOccluders = 6;
 const occlusionSampleInset = 2;
 const quadPositions = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
 const motionEvents = [
+  'pointerdown',
+  'pointerup',
+  'pointercancel',
+  'keydown',
+  'keyup',
+  'focusin',
+  'focusout',
   'transitionrun',
   'transitionend',
   'transitioncancel',
@@ -45,6 +53,7 @@ type GlassStyle = {
   edgeWidth: number;
   softness: number;
   opacity: number;
+  chroma: number;
   carrier: Color;
 };
 
@@ -94,17 +103,22 @@ type ProgramLocations = {
   softness: WebGLUniformLocation | null;
   opacity: WebGLUniformLocation | null;
   lightSurface: WebGLUniformLocation | null;
-  carrier: WebGLUniformLocation | null;
-  edgeLight: WebGLUniformLocation | null;
-  primary: WebGLUniformLocation | null;
-  secondary: WebGLUniformLocation | null;
+  cornerFocus: WebGLUniformLocation | null;
+  chroma: WebGLUniformLocation | null;
+  gain: WebGLUniformLocation | null;
   tertiary: WebGLUniformLocation | null;
+  secondary: WebGLUniformLocation | null;
+  primary: WebGLUniformLocation | null;
+  edgeLight: WebGLUniformLocation | null;
+  carrier: WebGLUniformLocation | null;
   occluders: WebGLUniformLocation | null;
   occluderRadii: WebGLUniformLocation | null;
   occluderCount: WebGLUniformLocation | null;
 };
 
 export interface GlassRendererOptions {
+  /** Auto preserves the released directional Glass edge. Native displacement is opt-in. */
+  backend?: 'auto' | 'webgl' | 'native';
   document?: Document;
   maxDevicePixelRatio?: number;
 }
@@ -115,7 +129,7 @@ export interface GlassRenderer {
   destroy(): void;
 }
 
-const activeRenderers = new WeakMap<Document, GlassRendererImpl>();
+const activeRenderers = new WeakMap<Document, GlassRenderer>();
 
 const getDocument = (candidate?: Document): Document | undefined => {
   if (candidate !== undefined) {
@@ -257,9 +271,6 @@ const inheritsParentGlassEdge = (element: Element): boolean => {
   if (element.classList.contains('ui-segmented-control')) {
     return true;
   }
-  if (element.classList.contains('ui-button')) {
-    return element.getAttribute('data-neoverse-glass-edge-pass-active') !== 'webgl';
-  }
   if (element.getAttribute('data-neoverse-glass-nesting') !== 'inherit') {
     return false;
   }
@@ -364,6 +375,56 @@ const getScissorRect = (
     width: Math.max(right - left, 0),
     height: Math.max(bottom - top, 0),
   };
+};
+
+const getEdgeScissors = (
+  style: GlassStyle,
+  scissor: ReturnType<typeof getScissorRect>,
+  viewport: CanvasViewport,
+  pixelRatio: number,
+  drawingWidth: number,
+  drawingHeight: number,
+): ReturnType<typeof getScissorRect>[] => {
+  // Small controls need one draw. Large panels should not evaluate five SDFs
+  // for every transparent interior pixel on each scroll frame.
+  if (scissor.width * scissor.height < 128_000) return [scissor];
+  const padding = Math.ceil(
+    Math.max(
+      ...style.radii,
+      style.pointer[2],
+      style.edgeWidth + Math.min(Math.max(style.softness * 0.65, 0.75), 1.5),
+    ) + 2,
+  );
+  const width = style.rect.width - padding * 2;
+  const height = style.rect.height - padding * 2;
+  if (width <= 0 || height <= 0) return [scissor];
+  const inner = getScissorRect(
+    {
+      left: style.rect.left + padding,
+      top: style.rect.top + padding,
+      right: style.rect.right - padding,
+      bottom: style.rect.bottom - padding,
+      width,
+      height,
+    },
+    viewport,
+    pixelRatio,
+    drawingWidth,
+    drawingHeight,
+  );
+  const left = Math.max(scissor.x, inner.x);
+  const bottom = Math.max(scissor.y, inner.y);
+  const right = Math.min(scissor.x + scissor.width, inner.x + inner.width);
+  const top = Math.min(scissor.y + scissor.height, inner.y + inner.height);
+  if (left >= right || bottom >= top) return [scissor];
+  // Split in integer device pixels, so fractional positions and DPR cannot
+  // double-blend a row or leave a seam between adjacent perimeter strips.
+  return [
+    { x: scissor.x, y: scissor.y, width: scissor.width, height: bottom - scissor.y },
+    { x: scissor.x, y: top, width: scissor.width, height: scissor.y + scissor.height - top },
+    { x: scissor.x, y: bottom, width: left - scissor.x, height: top - bottom },
+    { x: right, y: bottom, width: scissor.x + scissor.width - right, height: top - bottom },
+  ].filter((strip) => strip.width > 0 && strip.height > 0);
 };
 
 const clipsOverflowAxis = (value: string): boolean =>
@@ -709,6 +770,16 @@ const readStyle = (
     edgeWidth,
     softness,
     opacity: opacity * surfaceOpacity,
+    chroma: Math.min(
+      Math.max(
+        parseFirstNumber(
+          firstPropertyValue(style, ['--neoverse-material-edge-refraction-chroma']) ?? '',
+          1,
+        ),
+        0,
+      ),
+      1,
+    ),
     carrier: carrierColor,
   };
 };
@@ -729,6 +800,7 @@ class GlassRendererImpl implements GlassRenderer {
   private mutationObserver: MutationObserver | undefined;
   private transparencyQuery: MediaQueryList | undefined;
   private animationFrame: number | undefined;
+  private paintedEdges = false;
   private contextLost = false;
   private readonly animatedElements = new Set<Element>();
   private readonly handleMotion = (event: Event): void => {
@@ -748,7 +820,14 @@ class GlassRendererImpl implements GlassRenderer {
   private readonly handleScroll = (): void => this.scheduleRefresh();
   private readonly handleToggle = (): void => this.scheduleRefresh();
   private readonly handleMutations = (records: MutationRecord[]): void => {
-    if (records.every((record) => record.target === this.colorProbe)) {
+    if (
+      records.every(
+        (record) =>
+          record.target === this.colorProbe ||
+          (record.target.nodeType === 1 &&
+            (record.target as Element).closest('[data-neoverse-particle-capture]')),
+      )
+    ) {
       return;
     }
 
@@ -893,11 +972,14 @@ class GlassRendererImpl implements GlassRenderer {
       softness: gl.getUniformLocation(program, 'u_softness'),
       opacity: gl.getUniformLocation(program, 'u_opacity'),
       lightSurface: gl.getUniformLocation(program, 'u_light_surface'),
-      carrier: gl.getUniformLocation(program, 'u_carrier'),
-      edgeLight: gl.getUniformLocation(program, 'u_edge_light'),
-      primary: gl.getUniformLocation(program, 'u_primary'),
-      secondary: gl.getUniformLocation(program, 'u_secondary'),
+      cornerFocus: gl.getUniformLocation(program, 'u_corner_focus'),
+      chroma: gl.getUniformLocation(program, 'u_chroma'),
+      gain: gl.getUniformLocation(program, 'u_gain'),
       tertiary: gl.getUniformLocation(program, 'u_tertiary'),
+      secondary: gl.getUniformLocation(program, 'u_secondary'),
+      primary: gl.getUniformLocation(program, 'u_primary'),
+      edgeLight: gl.getUniformLocation(program, 'u_edge_light'),
+      carrier: gl.getUniformLocation(program, 'u_carrier'),
       occluders: gl.getUniformLocation(program, 'u_occluders'),
       occluderRadii: gl.getUniformLocation(program, 'u_occluder_radii'),
       occluderCount: gl.getUniformLocation(program, 'u_occluder_count'),
@@ -922,12 +1004,15 @@ class GlassRendererImpl implements GlassRenderer {
     colorProbe.style.pointerEvents = 'none';
     this.ownerDocument.body.append(colorProbe);
     this.colorProbe = colorProbe;
+
     canvas.addEventListener('webglcontextlost', this.handleContextLoss);
     canvas.addEventListener('webglcontextrestored', this.handleContextRestore);
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, quadPositions, gl.STATIC_DRAW);
     gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    // Preserve the mask's coverage independently of RGB. The browser then
+    // applies its gain to the actual composited pixels beneath the canvas.
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     this.observe();
     this.active = true;
     this.refresh();
@@ -987,8 +1072,8 @@ class GlassRendererImpl implements GlassRenderer {
       this.canvas.removeEventListener('webglcontextrestored', this.handleContextRestore);
       this.canvas.remove();
     }
-    this.colorProbe?.remove();
     this.canvas = undefined;
+    this.colorProbe?.remove();
     this.colorProbe = undefined;
     this.gl = undefined;
     this.program = undefined;
@@ -1008,7 +1093,6 @@ class GlassRendererImpl implements GlassRenderer {
       this.canvas.removeEventListener('webglcontextrestored', this.handleContextRestore);
       this.canvas.remove();
     }
-    this.colorProbe?.remove();
 
     if (!this.contextLost && this.gl !== undefined && this.program !== undefined) {
       this.gl.deleteProgram(this.program);
@@ -1020,6 +1104,7 @@ class GlassRendererImpl implements GlassRenderer {
     this.restoreRendererAttribute();
 
     this.canvas = undefined;
+    this.colorProbe?.remove();
     this.colorProbe = undefined;
     this.gl = undefined;
     this.program = undefined;
@@ -1053,9 +1138,7 @@ class GlassRendererImpl implements GlassRenderer {
   }
 
   private observe(): void {
-    if (this.ownerDocument === undefined || this.canvas === undefined) {
-      return;
-    }
+    if (this.ownerDocument === undefined || this.canvas === undefined) return;
 
     const view = getWindow(this.ownerDocument);
     const ResizeObserverConstructor = view?.ResizeObserver;
@@ -1116,6 +1199,7 @@ class GlassRendererImpl implements GlassRenderer {
   }
 
   private render(): void {
+    const elements = this.getGlassElements();
     if (
       !this.active ||
       this.ownerDocument === undefined ||
@@ -1128,6 +1212,8 @@ class GlassRendererImpl implements GlassRenderer {
     ) {
       return;
     }
+
+    if (elements.length === 0 && !this.paintedEdges) return;
 
     const view = getWindow(this.ownerDocument);
     if (view === undefined) {
@@ -1151,6 +1237,8 @@ class GlassRendererImpl implements GlassRenderer {
     gl.disable(gl.SCISSOR_TEST);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
+    this.paintedEdges = elements.length > 0;
+    if (!this.paintedEdges) return;
     gl.useProgram(this.program);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     gl.enableVertexAttribArray(locations.position);
@@ -1159,6 +1247,14 @@ class GlassRendererImpl implements GlassRenderer {
     gl.uniform1f(locations.pixelRatio, pixelRatio);
 
     const rootStyle = view.getComputedStyle(this.ownerDocument.documentElement);
+    gl.uniform1f(
+      locations.gain,
+      Math.max(
+        parseFirstNumber(rootStyle.getPropertyValue('--neoverse-material-edge-refraction-gain'), 1),
+        0,
+      ),
+    );
+    if (this.canvas.style.mixBlendMode !== 'overlay') this.canvas.style.mixBlendMode = 'overlay';
     // Theme appearance must not depend on how bright a consumer's edge tint is.
     // Keep the luminance fallback for integrations without an explicit scheme.
     const lightSurface =
@@ -1210,10 +1306,11 @@ class GlassRendererImpl implements GlassRenderer {
       this.colorProbe,
       [0.48, 0.43, 0.9],
     );
+
     gl.enable(gl.SCISSOR_TEST);
     const occluderRects = new Float32Array(maxOccluders * 4);
     const occluderRadii = new Float32Array(maxOccluders);
-    for (const element of this.getGlassElements()) {
+    for (const element of elements) {
       const style = readStyle(element, view, this.colorProbe, viewport);
       if (style === undefined) {
         continue;
@@ -1230,8 +1327,6 @@ class GlassRendererImpl implements GlassRenderer {
         continue;
       }
 
-      gl.scissor(scissor.x, scissor.y, scissor.width, scissor.height);
-
       gl.uniform4f(
         locations.rect,
         style.rect.left - viewport.left,
@@ -1245,6 +1340,8 @@ class GlassRendererImpl implements GlassRenderer {
       gl.uniform1f(locations.edgeWidth, style.edgeWidth);
       gl.uniform1f(locations.softness, style.softness);
       gl.uniform1f(locations.opacity, style.opacity);
+      gl.uniform1f(locations.cornerFocus, element.classList.contains('ui-button') ? 1 : 0);
+      gl.uniform1f(locations.chroma, style.chroma);
       gl.uniform3f(locations.carrier, ...style.carrier);
       gl.uniform3f(locations.edgeLight, ...edgeLight);
       gl.uniform3f(locations.primary, ...primary);
@@ -1271,7 +1368,17 @@ class GlassRendererImpl implements GlassRenderer {
         }
         gl.uniform1f(locations.occluderCount, occluderCount);
       }
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      for (const strip of getEdgeScissors(
+        style,
+        scissor,
+        viewport,
+        pixelRatio,
+        drawingWidth,
+        drawingHeight,
+      )) {
+        gl.scissor(strip.x, strip.y, strip.width, strip.height);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
     }
     gl.disable(gl.SCISSOR_TEST);
   }
@@ -1285,6 +1392,7 @@ class GlassRendererImpl implements GlassRenderer {
     const currentElements: HTMLElement[] = [];
 
     for (const element of elements) {
+      if (element.closest('[data-neoverse-particle-capture]')) continue;
       if (element.matches(cssEdgePassSelector)) {
         continue;
       }
@@ -1324,7 +1432,24 @@ class GlassRendererImpl implements GlassRenderer {
   }
 }
 
-export const createGlassRenderer = (options: GlassRendererOptions = {}): GlassRenderer =>
-  new GlassRendererImpl(options);
+export const createGlassRenderer = (options: GlassRendererOptions = {}): GlassRenderer => {
+  const document = getDocument(options.document);
+  if (options.backend === 'native' && document && supportsNativeRefraction(document)) {
+    return new NativeGlassRenderer(
+      document,
+      (element) => !inheritsParentGlassEdge(element),
+      (renderer) => {
+        const existing = activeRenderers.get(document);
+        if (existing && existing !== renderer) return false;
+        activeRenderers.set(document, renderer);
+        return true;
+      },
+      (renderer) => {
+        if (activeRenderers.get(document) === renderer) activeRenderers.delete(document);
+      },
+    );
+  }
+  return new GlassRendererImpl(options);
+};
 
 export type { Color as GlassRendererColor };

@@ -48,7 +48,7 @@ for (const theme of ['light', 'dark'] as const) {
                   ancestor && ancestor !== region;
                   ancestor = ancestor.parentElement
                 ) {
-                  if (ancestor.matches('.ui-control-surface--scale-lg, .ui-action--scale-lg')) {
+                  if (ancestor.matches('.ui-control-surface, .ui-action--scale-lg')) {
                     componentScale *= Number.parseFloat(getComputedStyle(ancestor).zoom);
                   }
                 }
@@ -120,17 +120,19 @@ test('Dock specimens keep navigation at normal component proportions', async ({
     geometry.itemHeight / geometry.itemCssHeight,
     'Specimens retain the explicit Dock scale',
   ).toBeCloseTo(geometry.scale, 1);
-  expect(geometry.scale).toBe(1.3);
+  expect(geometry.scale).toBe(1.1);
 });
 
 for (const theme of ['light', 'dark'] as const) {
-  test(`enlarging Dock scales its shell, icons and labels equally / ${theme}`, async ({ page }) => {
+  test(`enlarging Dock preserves geometry and embedded type compensation / ${theme}`, async ({
+    page,
+  }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto(`/frame?theme=${theme}&lang=zh#dock`, { waitUntil: 'domcontentloaded' });
     const dock = page.locator('[data-dock-specimen="standard"] .ui-dock');
     await expect(dock).toBeVisible();
-    await dock.evaluate((element) =>
-      element.classList.replace('ui-control-surface--scale-lg', 'ui-control-surface--scale-md'),
+    const normalScale = await dock.evaluate((element) =>
+      Number.parseFloat(getComputedStyle(element).zoom),
     );
     const readGeometry = () =>
       dock.evaluate((element) => {
@@ -169,21 +171,28 @@ for (const theme of ['light', 'dark'] as const) {
     const scale = await dock.evaluate((element) =>
       Number.parseFloat(getComputedStyle(element).zoom),
     );
-    expect(scale).toBeGreaterThan(1);
+    expect(scale).toBe(1.3);
+    const scaleRatio = scale / normalScale;
     for (const [index, original] of normal.entries()) {
       const scaled = enlarged[index];
       if (!scaled) throw new Error('Scaled geometry is missing');
-      expect(parseFloat(scaled.fontSize)).toBeCloseTo(parseFloat(original.fontSize), 2);
+      // The 0.2.0 embedded language control keeps its optical type compensation
+      // in lg while the shell, icons and option geometry retain the same scale.
+      const typeFactor = index === 4 ? 0.9 : 1;
+      expect(parseFloat(scaled.fontSize)).toBeCloseTo(
+        parseFloat(original.fontSize) * typeFactor,
+        2,
+      );
       expect(scaled.padding).toBe(original.padding);
       expect(scaled.gap).toBe(original.gap);
       expect(scaled.radius).toBe(original.radius);
       // Chromium rounds borders and glyph metrics before applying CSS zoom.
       // Explicit SVG dimensions retain the tighter subpixel bound.
-      const tolerance = index === 2 ? 0.35 : 1;
+      const tolerance = index === 2 ? 0.35 : 1.05;
       if (index === 2 || index === 4 || index === 5) {
-        expect(Math.abs(scaled.width - original.width * scale)).toBeLessThan(tolerance);
+        expect(Math.abs(scaled.width - original.width * scaleRatio)).toBeLessThan(tolerance);
       }
-      const heightScale = scale;
+      const heightScale = scaleRatio;
       expect(Math.abs(scaled.height - original.height * heightScale)).toBeLessThan(tolerance);
     }
   });

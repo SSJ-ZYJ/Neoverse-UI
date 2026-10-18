@@ -10,6 +10,7 @@ interface StateRowProps {
   locale: Locale;
   hint?: LocalizedText;
   contractState?: ContractStateId;
+  layout?: 'auto' | 'wide';
 }
 
 const props = defineProps<StateRowProps>();
@@ -22,6 +23,7 @@ const props = defineProps<StateRowProps>();
     data-specimen-state-row
     :data-specimen-label="localize(props.label, props.locale)"
     :data-contract-state="props.contractState"
+    :data-specimen-layout="props.layout ?? 'auto'"
     :aria-label="localize(props.label, props.locale)"
   >
     <div class="playground-specimen-row__heading min-w-0" data-specimen-copy>

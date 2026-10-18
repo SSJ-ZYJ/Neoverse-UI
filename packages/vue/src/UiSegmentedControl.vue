@@ -39,6 +39,8 @@ const focusedIndex = ref<number | null>(null);
 const optionRefs = ref<Array<HTMLButtonElement | null>>([]);
 const optionsElement = ref<HTMLElement | null>(null);
 const sliderBounds = ref<{ offset: number; width: number } | null>(null);
+const sliderReady = ref(false);
+let sliderReadyFrame = 0;
 let optionResizeObserver: ResizeObserver | undefined;
 
 const selectedOptionClasses = 'ui-segmented-control__option--active';
@@ -81,9 +83,17 @@ onMounted(() => {
     optionResizeObserver.observe(optionsElement.value);
   }
   measureSlider();
+  void nextTick(() => {
+    sliderReadyFrame = requestAnimationFrame(() => {
+      sliderReady.value = true;
+    });
+  });
 });
 
-onBeforeUnmount(() => optionResizeObserver?.disconnect());
+onBeforeUnmount(() => {
+  optionResizeObserver?.disconnect();
+  cancelAnimationFrame(sliderReadyFrame);
+});
 watch([activeIndex, () => props.options], () => void nextTick(measureSlider), { flush: 'post' });
 const enabledIndexes = computed(() =>
   props.options.flatMap((option, index) => (option.disabled ? [] : [index])),
@@ -263,7 +273,12 @@ function optionClasses(option: SegmentOption): string[] {
     :aria-busy="ariaBusy"
   >
     <span ref="optionsElement" class="ui-segmented-control__options">
-      <span v-if="activeIndex >= 0" class="ui-segmented-control__slider" aria-hidden="true" />
+      <span
+        v-if="activeIndex >= 0"
+        class="ui-segmented-control__slider"
+        :data-ready="sliderReady"
+        aria-hidden="true"
+      />
       <!-- biome-ignore lint/a11y/useSemanticElements: Custom radio widget needs button keyboard behavior. -->
       <button
         v-for="(option, index) in props.options"

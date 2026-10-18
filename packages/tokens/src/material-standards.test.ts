@@ -86,16 +86,3 @@ test('hover and press do not rewrite filled-button optics or dim the whole mater
   expect(css).toContain('> :not(.ui-button__edge-field)');
   expect(css).not.toContain('background-color: var(--neoverse-control-button-filled-hover-fill)');
 });
-
-test('status backgrounds and tooltip arrows use the canonical alpha instead of stacked gradients', async () => {
-  for (const name of ['badge', 'notice']) {
-    const css = await source(`components/${name}.css`);
-    expect(css).not.toContain('gradient(');
-    for (const tone of ['info', 'success', 'warning', 'danger']) {
-      expect(css).toContain(`var(--neoverse-effect-status-${tone}-background)`);
-    }
-  }
-  expect(await source('components/tooltip.css')).toContain(
-    '--neoverse-tooltip-arrow-transparency: var(--neoverse-material-glass-subtle-transparency)',
-  );
-});

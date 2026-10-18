@@ -65,63 +65,77 @@ const qaCopy = {
     :label="localized('Three material tiers', '三档材质')"
     :hint="localized('Identical backdrop; each preset can be overridden through CSS tokens.', '同一背景对比；每档支持 CSS token 覆盖。')"
     :locale="props.locale"
+    layout="wide"
   >
-    <div v-for="tier in tiers" :key="tier" class="grid gap-3">
-      <UiButton :surface="tier" @click="clicks += 1">{{ tier }}</UiButton>
-      <UiButton :surface="tier" variant="secondary">Secondary</UiButton>
-      <UiSegmentedControl
-        v-model="selection"
-        :surface="tier"
-        :options="options"
-        :aria-label="tier"
-      />
-      <UiCard :surface="tier"><span>{{ tier }}</span></UiCard>
+    <div class="playground-preview-columns">
+      <div v-for="tier in tiers" :key="tier" class="grid gap-3 min-w-0">
+        <UiButton :surface="tier" class="justify-self-start" @click="clicks += 1"
+          >{{ tier }}</UiButton
+        >
+        <UiButton :surface="tier" variant="secondary" class="justify-self-start"
+          >Secondary</UiButton
+        >
+        <UiSegmentedControl
+          v-model="selection"
+          :surface="tier"
+          :options="options"
+          :aria-label="tier"
+        />
+        <UiCard :surface="tier"><span>{{ tier }}</span></UiCard>
+      </div>
     </div>
   </StateRow>
   <StateRow
     :label="localized('Customize a tier', '自定义档位')"
     :hint="localized('Only this region changes; all children share the selected tier tokens.', '仅修改本区域；内部组件复用所选档位 token。')"
     :locale="props.locale"
+    layout="wide"
   >
-    <div class="grid gap-3" data-material-custom-controls>
-      <UiSelect
-        v-model="customTier"
-        :options="customOptions"
-        :aria-label="props.locale === 'zh' ? '自定义档位' : 'Custom tier'"
-      />
-      <label for="material-custom-blur" class="grid gap-1 text-caption text-secondary"
-        >{{ props.locale === 'zh' ? '模糊（px）' : 'Blur (px)' }}
-        <UiInput
-          id="material-custom-blur"
-          v-model="customBlur"
-          type="number"
-          min="0"
-          max="64"
-          data-custom-blur
-        /></label
-      >
-      <label for="material-custom-alpha" class="grid gap-1 text-caption text-secondary"
-        >{{ props.locale === 'zh' ? '背景不透明度（%）' : 'Background opacity (%)' }}
-        <UiInput
-          id="material-custom-alpha"
-          v-model="customAlpha"
-          type="number"
-          min="0"
-          max="100"
-          data-custom-alpha
-        /></label
-      >
-      <UiButton surface="none" @click="resetCustom"
-        >{{ props.locale === 'zh' ? '恢复规范值' : 'Reset to standard' }}</UiButton
-      >
-    </div>
-    <div class="grid gap-3" :style="customStyle" data-material-custom-preview>
-      <UiButton :surface="customTier as typeof tiers[number]"
-        >{{ props.locale === 'zh' ? '自定义按钮' : 'Custom button' }}</UiButton
-      >
-      <UiCard :surface="customTier as typeof tiers[number]"
-        >{{ props.locale === 'zh' ? '自定义卡片' : 'Custom card' }}</UiCard
-      >
+    <div class="playground-preview-columns">
+      <div class="grid gap-3" data-material-custom-controls>
+        <UiSelect
+          v-model="customTier"
+          :options="customOptions"
+          :aria-label="props.locale === 'zh' ? '自定义档位' : 'Custom tier'"
+        />
+        <label for="material-custom-blur" class="grid gap-1 text-caption text-secondary"
+          >{{ props.locale === 'zh' ? '模糊（px）' : 'Blur (px)' }}
+          <UiInput
+            id="material-custom-blur"
+            v-model="customBlur"
+            type="number"
+            min="0"
+            max="64"
+            :increment-label="props.locale === 'zh' ? '增加模糊' : 'Increase blur'"
+            :decrement-label="props.locale === 'zh' ? '减少模糊' : 'Decrease blur'"
+            data-custom-blur
+          /></label
+        >
+        <label for="material-custom-alpha" class="grid gap-1 text-caption text-secondary"
+          >{{ props.locale === 'zh' ? '背景不透明度（%）' : 'Background opacity (%)' }}
+          <UiInput
+            id="material-custom-alpha"
+            v-model="customAlpha"
+            type="number"
+            min="0"
+            max="100"
+            :increment-label="props.locale === 'zh' ? '增加不透明度' : 'Increase opacity'"
+            :decrement-label="props.locale === 'zh' ? '减少不透明度' : 'Decrease opacity'"
+            data-custom-alpha
+          /></label
+        >
+        <UiButton surface="none" class="justify-self-start" @click="resetCustom" variant="ghost"
+          >{{ props.locale === 'zh' ? '恢复规范值' : 'Reset to standard' }}</UiButton
+        >
+      </div>
+      <div class="grid gap-3" :style="customStyle" data-material-custom-preview>
+        <UiButton :surface="customTier as typeof tiers[number]" class="justify-self-start"
+          >{{ props.locale === 'zh' ? '自定义按钮' : 'Custom button' }}</UiButton
+        >
+        <UiCard :surface="customTier as typeof tiers[number]"
+          >{{ props.locale === 'zh' ? '自定义卡片' : 'Custom card' }}</UiCard
+        >
+      </div>
     </div>
   </StateRow>
   <StateRow
@@ -135,6 +149,24 @@ const qaCopy = {
     >
     <UiButton disabled>{{ props.locale === 'zh' ? '禁用' : 'Disabled' }}</UiButton>
     <UiButton loading>{{ props.locale === 'zh' ? '加载中' : 'Loading' }}</UiButton>
+  </StateRow>
+  <StateRow
+    :label="copy.states.circular.label"
+    :hint="copy.states.circular.hint"
+    :locale="props.locale"
+  >
+    <UiIconButton
+      v-for="size in ['sm', 'md', 'lg'] as const"
+      :key="size"
+      :size="size"
+      variant="secondary"
+      class="rounded-pill"
+      data-button-shape="circle"
+      :label="localize(moduleCopy.iconButton.controls.addItem, props.locale)"
+      @click="clicks += 1"
+    >
+      <LabIcon name="plus" />
+    </UiIconButton>
   </StateRow>
   <StateRow
     :label="copy.states.default.label"
@@ -186,7 +218,7 @@ const qaCopy = {
     :hint="copy.states.stretch.hint"
     :locale="props.locale"
   >
-    <div class="flex h-8 w-full items-stretch gap-2">
+    <div class="flex h-8 max-w-full items-stretch gap-2">
       <UiButton stretch>{{ localize(copy.controls.stretchPrimary, props.locale) }}</UiButton>
       <UiButton variant="ghost" stretch>
         {{ localize(copy.controls.stretchSecondary, props.locale) }}

@@ -72,6 +72,8 @@ Column values:
 
 ## Change policy
 
+`UiInput type="number"` includes shared token-driven increment/decrement buttons in Vue and React. `tests/visual/number-input.spec.ts` covers the Design Lab material controls and React runtime fixture at desktop/mobile sizes, including both themes for the material controls. This is Playground/runtime evidence; real consumer validation remains pending.
+
 A new public component must be added to the matrix in the same change that exports it. Canonical Shared components cannot be marked complete while either Vue or React is missing, and every Canonical Shared React adapter must appear in the browser runtime fixture. A component cannot be promoted to Stable without release visual coverage and real consumer validation.
 
 `bun run check:contracts` validates matrix schema invariants, public Vue/React export coverage, Canonical Shared parity, React runtime fixture markers, Stable maturity requirements, and the presence of a documentation row for every registered component.

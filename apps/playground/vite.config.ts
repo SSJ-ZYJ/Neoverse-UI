@@ -16,6 +16,9 @@ export default defineConfig(({ mode }) => ({
       '@neoverse-ui/motion': fileURLToPath(
         new URL('../../packages/motion/src/index.ts', import.meta.url),
       ),
+      '@neoverse-ui/overlay-runtime': fileURLToPath(
+        new URL('../../packages/overlay-runtime/src/index.ts', import.meta.url),
+      ),
       '@neoverse-ui/react': fileURLToPath(
         new URL('../../packages/react/src/index.tsx', import.meta.url),
       ),

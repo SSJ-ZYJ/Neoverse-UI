@@ -7,6 +7,16 @@
 /* biome-ignore lint/suspicious/noUnknownAtRules: build-only source marker is stripped by copy-css.ts */
 @neoverse-dark-tokens {
   color-scheme: dark;
+  /* Restore the existing luminous outline when System resolves to Dark;
+     the default Light mapping intentionally uses directional catches alone. */
+  --neoverse-disclosure-edge-rest:
+    var(--neoverse-surface-inset-outline-rest), var(--neoverse-surface-inset-edge-rest);
+  --neoverse-disclosure-edge-active:
+    var(--neoverse-surface-inset-outline-active), var(--neoverse-surface-inset-edge-active);
+  --neoverse-material-edge-refraction-gain: 1;
+  --neoverse-material-edge-filter-subtle: brightness(125%);
+  --neoverse-material-edge-filter-elevated: brightness(135%);
+  --neoverse-material-edge-filter-immersive: brightness(145%);
   --neoverse-effect-grouped-inset-field: var(--neoverse-effect-grouped-inset-field-dark);
   --neoverse-effect-grouped-inset-border: var(--neoverse-effect-grouped-inset-border-dark);
   /* Effect identity is theme-specific; Glass blur and alpha remain tier-owned. */
@@ -24,11 +34,15 @@
   --neoverse-effect-choice-selected-fill: var(--neoverse-effect-choice-selected-fill-dark);
   --neoverse-effect-choice-selected-border: var(--neoverse-effect-choice-selected-border-dark);
   --neoverse-effect-choice-selected-shadow: var(--neoverse-effect-choice-selected-shadow-dark);
+  --neoverse-effect-choice-filled-field: var(--neoverse-effect-choice-filled-field-dark);
+  --neoverse-effect-choice-filled-field-opaque: var(
+    --neoverse-effect-choice-filled-field-dark-opaque
+  );
+  --neoverse-effect-choice-filled-shadow: var(--neoverse-effect-choice-filled-shadow-dark);
+  --neoverse-effect-choice-filled-foreground: var(--neoverse-color-white);
   --neoverse-effect-command-edge-field: var(--neoverse-effect-command-edge-field-dark);
   --neoverse-effect-command-edge-carrier: var(--neoverse-effect-command-edge-carrier-dark);
   --neoverse-effect-command-press-light: var(--neoverse-effect-command-press-light-dark);
-  --neoverse-effect-floating-chrome-shadow: var(--neoverse-effect-floating-chrome-shadow-dark);
-  --neoverse-effect-floating-chrome-border: var(--neoverse-effect-floating-chrome-border-dark);
   --neoverse-effect-hover-field: var(--neoverse-effect-hover-field-dark);
   --neoverse-effect-command-edge-opacity: var(--neoverse-effect-command-edge-opacity-dark);
 
@@ -93,6 +107,8 @@
     var(--neoverse-color-text-secondary)
   );
   --neoverse-color-edge-light: rgb(255 255 255 / 13%);
+  --neoverse-material-backdrop-brightness: 1;
+  --neoverse-material-backdrop-contrast: 1;
   --neoverse-color-border-subtle: rgb(219 234 254 / 13%);
   --neoverse-color-border-default: rgb(219 234 254 / 18%);
   --neoverse-color-border-strong: rgb(219 234 254 / 22%);
@@ -133,14 +149,12 @@
   --neoverse-shadow-inset:
     var(--neoverse-material-edge-highlight-subtle), inset 0 -1px 2px rgb(0 0 0 / 18%);
 
-  /* Floating chrome mirrors the currently deployed Neoverse dock. Keep it
-     intentionally quieter than the general Glass surfaces. */
-  --neoverse-control-chrome-border: var(--neoverse-effect-floating-chrome-border);
-  --neoverse-control-chrome-shadow: var(--neoverse-effect-floating-chrome-shadow);
-  --neoverse-control-chrome-trailing-border: var(--neoverse-effect-grouped-inset-border);
-  --neoverse-control-chrome-trailing-background: var(--neoverse-effect-grouped-inset-field);
-
   --neoverse-control-button-filled-background: var(--neoverse-effect-command-rest-field-dark);
+  --neoverse-control-button-tone-fill: transparent;
+  /* Dark controls shade the sampled scene neutrally; no navy body or white veil. */
+  --neoverse-control-button-glass-tint: var(--neoverse-color-black);
+  /* Full panel blur erases the fine scene detail beneath a compact control. */
+  --neoverse-control-button-blur-scale: 0.5;
   --neoverse-control-button-filled-hover-background: var(
     --neoverse-effect-command-hover-field-dark
   );
@@ -167,17 +181,11 @@
   --neoverse-control-segmented-active-shadow: var(--neoverse-effect-choice-selected-shadow);
   --neoverse-control-segmented-shell-hover-border: var(--neoverse-control-segmented-border);
   --neoverse-control-segmented-shell-hover-shadow: var(--neoverse-control-segmented-shadow);
-  /* Dark buttons mirror the product glass button: the site sheen reads as a
-     145° neutral wash and the plate behind it stays translucent so the
-     blurred backdrop reads through the control. A partial surface-glass
-     grounding fill keeps the button legible when the backdrop is a flat
-     canvas with no detail to blur; hover densifies it slightly for
-     feedback without returning to an opaque block. */
+  /* Dark buttons keep the tier-owned translucent plate. Broad white/grey
+     washes make that plate look milky; interaction uses the shared state field. */
   --neoverse-control-secondary-shadow: var(--neoverse-effect-compact-rest-shadow);
   --neoverse-control-secondary-hover-shadow: var(--neoverse-effect-compact-hover-shadow);
-  /* Deployed Neoverse CTA recipe. Keep this independent from the generic
-     segmented/navigation plane: the button is a very light aurora sheen over
-     the sampled backdrop, not an opaque navy tile. */
+  /* Command depth remains independent of the segmented/navigation plane. */
   --neoverse-control-button-filled-shadow: var(--neoverse-effect-command-rest-shadow);
   --neoverse-control-button-filled-hover-shadow: var(--neoverse-effect-command-hover-shadow);
   --neoverse-control-active-background: var(--neoverse-effect-selection-field);
@@ -189,8 +197,8 @@
   --neoverse-navigation-item-active-border: var(--neoverse-control-active-border);
   --neoverse-navigation-item-active-foreground: var(--neoverse-color-accent-secondary);
   --neoverse-navigation-item-active-shadow: var(--neoverse-control-active-highlight);
-  /* Primary stays on the same sampled Glass plane as secondary, but owns
-     a restrained accent field and stronger depth so hierarchy is visible. */
+  /* Primary shares secondary's sampled plane; foreground and stronger depth
+     retain hierarchy while the broad resting tone field stays transparent. */
   --neoverse-control-primary-foreground: var(--neoverse-color-text-primary);
   --neoverse-control-primary-border: transparent;
   --neoverse-control-primary-shadow: var(--neoverse-effect-primary-rest-shadow);
@@ -203,12 +211,12 @@
   --neoverse-control-button-edge: var(--neoverse-control-button-filled-shadow);
   --neoverse-control-button-edge-active: var(--neoverse-effect-command-hover-shadow);
   --neoverse-control-button-edge-hover: var(--neoverse-effect-command-hover-shadow);
-  --neoverse-control-button-edge-refraction-opacity: var(--neoverse-effect-command-edge-opacity);
+  --neoverse-control-button-edge-refraction-opacity: 0.46;
   --neoverse-control-primary-hover-shadow: var(--neoverse-effect-primary-hover-shadow);
   --neoverse-control-secondary-hover-foreground: var(--neoverse-color-text-primary);
 
   --neoverse-control-button-edge-carrier: var(--neoverse-effect-command-edge-carrier);
-  --neoverse-control-button-refraction-gradient: var(--neoverse-effect-command-edge-field);
+  --neoverse-control-button-refraction-gradient: var(--neoverse-effect-button-edge-field);
   --neoverse-control-button-press-glow: var(--neoverse-effect-command-press-light);
   --neoverse-control-button-hover-background: var(--neoverse-control-hover-background);
   --neoverse-control-button-active-background: var(--neoverse-control-active-background);
@@ -254,9 +262,23 @@
       var(--neoverse-color-accent-tertiary) 4%,
       var(--neoverse-color-edge-light) 7%
     );
-  --neoverse-material-edge-refraction-opacity-subtle: 0.3;
-  --neoverse-material-edge-refraction-opacity-elevated: 0.24;
-  --neoverse-material-edge-refraction-opacity-immersive: 0.32;
+  /* Retain visible neutral catches without the accent-coloured spectrum. */
+  --neoverse-material-edge-refraction-opacity-subtle: 0.5;
+  --neoverse-material-edge-refraction-opacity-elevated: 0.54;
+  --neoverse-material-edge-refraction-opacity-immersive: 0.58;
+  --neoverse-material-edge-refraction-chroma-subtle: 0.12;
+  --neoverse-material-edge-refraction-chroma-elevated: 0.12;
+  --neoverse-material-edge-refraction-chroma-immersive: 0.14464;
+  /* Reset the light catches in both explicit and system-dark wrappers. */
+  --neoverse-surface-glass-subtle-edge-opacity: var(
+    --neoverse-material-glass-subtle-edge-refraction-opacity
+  );
+  --neoverse-surface-glass-elevated-edge-opacity: var(
+    --neoverse-material-glass-elevated-edge-refraction-opacity
+  );
+  --neoverse-surface-glass-immersive-edge-opacity: var(
+    --neoverse-material-glass-immersive-edge-refraction-opacity
+  );
   --neoverse-material-edge-refraction-carrier-subtle: color-mix(
     in srgb,
     var(--neoverse-color-edge-light) 45%,
@@ -313,75 +335,27 @@
     color-mix(in srgb, var(--neoverse-color-accent-secondary) 8%, transparent);
 
   --neoverse-material-refraction-gradient-subtle:
-    radial-gradient(
-      72% 84% at 0% 0%,
-      color-mix(in srgb, var(--neoverse-color-text-secondary) 5%, transparent),
-      transparent 72%
-    ),
-    radial-gradient(
-      76% 82% at 100% 100%,
-      color-mix(in srgb, var(--neoverse-color-text-primary) 2%, transparent),
-      transparent 74%
-    ),
-    radial-gradient(
-      52% 110% at 100% 0%,
-      color-mix(in srgb, var(--neoverse-color-text-secondary) 4%, transparent),
-      transparent 78%
-    ),
-    radial-gradient(
-      52% 110% at 0% 100%,
-      color-mix(in srgb, var(--neoverse-color-text-primary) 3%, transparent),
-      transparent 78%
-    );
+    radial-gradient(72% 84% at 0% 0%, rgb(128 128 128 / 5%), transparent 72%),
+    radial-gradient(76% 82% at 100% 100%, rgb(128 128 128 / 2%), transparent 74%),
+    radial-gradient(52% 110% at 100% 0%, rgb(128 128 128 / 4%), transparent 78%),
+    radial-gradient(52% 110% at 0% 100%, rgb(128 128 128 / 3%), transparent 78%);
   --neoverse-material-refraction-gradient-elevated:
     linear-gradient(
       125deg,
-      color-mix(in srgb, var(--neoverse-color-accent-soft) 8%, transparent),
+      rgb(128 128 128 / 8%),
       transparent 30%,
       transparent 68%,
-      color-mix(in srgb, var(--neoverse-color-accent-soft) 8%, transparent)
+      rgb(128 128 128 / 8%)
     ),
-    radial-gradient(
-      72% 84% at 0% 0%,
-      color-mix(in srgb, var(--neoverse-color-text-secondary) 6%, transparent),
-      transparent 72%
-    ),
-    radial-gradient(
-      76% 82% at 100% 100%,
-      color-mix(in srgb, var(--neoverse-color-text-primary) 3%, transparent),
-      transparent 74%
-    ),
-    radial-gradient(
-      52% 110% at 100% 0%,
-      color-mix(in srgb, var(--neoverse-color-text-secondary) 5%, transparent),
-      transparent 78%
-    ),
-    radial-gradient(
-      52% 110% at 0% 100%,
-      color-mix(in srgb, var(--neoverse-color-text-primary) 3%, transparent),
-      transparent 78%
-    );
+    radial-gradient(72% 84% at 0% 0%, rgb(128 128 128 / 6%), transparent 72%),
+    radial-gradient(76% 82% at 100% 100%, rgb(128 128 128 / 3%), transparent 74%),
+    radial-gradient(52% 110% at 100% 0%, rgb(128 128 128 / 5%), transparent 78%),
+    radial-gradient(52% 110% at 0% 100%, rgb(128 128 128 / 3%), transparent 78%);
   --neoverse-material-refraction-gradient-immersive:
-    radial-gradient(
-      72% 84% at 0% 0%,
-      color-mix(in srgb, var(--neoverse-color-text-secondary) 10%, transparent),
-      transparent 72%
-    ),
-    radial-gradient(
-      76% 82% at 100% 100%,
-      color-mix(in srgb, var(--neoverse-color-accent-soft) 18%, transparent),
-      transparent 74%
-    ),
-    radial-gradient(
-      52% 110% at 100% 0%,
-      color-mix(in srgb, var(--neoverse-color-accent-primary) 10%, transparent),
-      transparent 78%
-    ),
-    radial-gradient(
-      52% 110% at 0% 100%,
-      color-mix(in srgb, var(--neoverse-color-accent-tertiary) 12%, transparent),
-      transparent 78%
-    );
+    radial-gradient(72% 84% at 0% 0%, rgb(128 128 128 / 10%), transparent 72%),
+    radial-gradient(76% 82% at 100% 100%, rgb(128 128 128 / 18%), transparent 74%),
+    radial-gradient(52% 110% at 100% 0%, rgb(128 128 128 / 10%), transparent 78%),
+    radial-gradient(52% 110% at 0% 100%, rgb(128 128 128 / 12%), transparent 78%);
 
   --neoverse-material-glass-subtle-hover-transparency: var(
     --neoverse-material-glass-subtle-transparency

@@ -10,6 +10,11 @@
     --neoverse-effect-alpha-intense: 60%;
     --neoverse-effect-alpha-dominant: 80%;
     --neoverse-effect-alpha-full: 100%;
+    /* Text-only feedback stays readable when the status field is pastel. */
+    --neoverse-effect-status-info-text: var(--neoverse-color-status-info);
+    --neoverse-effect-status-success-text: var(--neoverse-color-status-success);
+    --neoverse-effect-status-warning-text: var(--neoverse-color-status-warning);
+    --neoverse-effect-status-danger-text: var(--neoverse-color-status-danger);
     --neoverse-effect-disabled-content-opacity: 0.6;
     --neoverse-effect-disabled-foreground: color-mix(
       in srgb,
@@ -82,7 +87,6 @@
     .material-glass-subtle,
     .material-glass-elevated,
     .material-glass-immersive,
-    .ui-surface-chrome,
     .ui-surface-inset,
     .ui-input,
     .ui-textarea,
@@ -105,11 +109,30 @@
     .neoverse-prose :not(pre) > code
   ) {
     --neoverse-material-glass-subtle-filter: blur(var(--neoverse-material-glass-subtle-blur))
-      saturate(var(--neoverse-material-glass-subtle-saturation));
+      saturate(var(--neoverse-material-glass-subtle-saturation))
+      contrast(var(--neoverse-material-backdrop-contrast))
+      brightness(var(--neoverse-material-backdrop-brightness));
     --neoverse-material-glass-elevated-filter: blur(var(--neoverse-material-glass-elevated-blur))
-      saturate(var(--neoverse-material-glass-elevated-saturation));
+      saturate(var(--neoverse-material-glass-elevated-saturation))
+      contrast(var(--neoverse-material-backdrop-contrast))
+      brightness(var(--neoverse-material-backdrop-brightness));
     --neoverse-material-glass-immersive-filter: blur(var(--neoverse-material-glass-immersive-blur))
-      saturate(var(--neoverse-material-glass-immersive-saturation));
+      saturate(var(--neoverse-material-glass-immersive-saturation))
+      contrast(var(--neoverse-material-backdrop-contrast))
+      brightness(var(--neoverse-material-backdrop-brightness));
+    /* Preserve scene detail under compact buttons while retaining the tier's optics. */
+    --neoverse-material-control-filter: blur(
+        calc(
+          var(--neoverse-material-blur, var(--neoverse-material-glass-subtle-blur)) *
+          var(--neoverse-control-button-blur-scale, 1)
+        )
+      )
+      saturate(
+        var(--neoverse-material-saturation, var(--neoverse-material-glass-subtle-saturation))
+      )
+      contrast(var(--neoverse-material-backdrop-contrast))
+      brightness(var(--neoverse-material-backdrop-brightness));
+    --neoverse-control-button-filter: var(--neoverse-material-control-filter);
     --neoverse-material-glass-subtle-background: color-mix(
       in srgb,
       var(--neoverse-material-glass-subtle-tint) var(--neoverse-material-glass-subtle-transparency),
@@ -154,23 +177,55 @@
     --neoverse-overlay-filter: var(--neoverse-material-glass-elevated-filter);
     --neoverse-select-popover-background: var(--neoverse-material-glass-elevated-background);
     --neoverse-select-popover-filter: var(--neoverse-material-glass-elevated-filter);
-    --neoverse-control-chrome-background: var(--neoverse-material-glass-subtle-background);
-    --neoverse-control-chrome-filter: var(--neoverse-material-glass-subtle-filter);
     --neoverse-prose-quote-background: var(--neoverse-material-glass-subtle-background);
     --neoverse-prose-quote-filter: var(--neoverse-material-glass-subtle-filter);
     --neoverse-prose-code-block-background: var(--neoverse-material-glass-subtle-background);
     --neoverse-prose-code-block-filter: var(--neoverse-material-glass-subtle-filter);
     --neoverse-prose-kbd-background: var(--neoverse-material-glass-subtle-background);
     --neoverse-prose-inline-code-background: var(--neoverse-material-glass-subtle-background);
-    --neoverse-badge-background: var(--neoverse-material-glass-subtle-background);
+    --neoverse-effect-label-neutral-background: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) var(--neoverse-effect-label-fill-strength),
+      var(--neoverse-effect-label-fill-base)
+    );
+    --neoverse-badge-background: var(--neoverse-effect-label-neutral-background);
+    --neoverse-badge-backdrop-filter: var(--neoverse-material-glass-subtle-filter);
     --neoverse-notice-neutral-background: var(--neoverse-material-glass-subtle-background);
     --neoverse-choice-control-background: var(--neoverse-material-glass-subtle-background);
     --neoverse-choice-control-hover-background: var(--neoverse-material-glass-subtle-background);
-    --neoverse-choice-control-active-background: var(--neoverse-material-glass-subtle-background);
-    --neoverse-badge-info-background: var(--neoverse-effect-status-info-background);
-    --neoverse-badge-success-background: var(--neoverse-effect-status-success-background);
-    --neoverse-badge-warning-background: var(--neoverse-effect-status-warning-background);
-    --neoverse-badge-danger-background: var(--neoverse-effect-status-danger-background);
+    --neoverse-effect-label-info-background: color-mix(
+      in srgb,
+      var(--neoverse-color-status-info) var(--neoverse-effect-label-fill-strength),
+      var(--neoverse-effect-label-fill-base)
+    );
+    --neoverse-effect-label-success-background: color-mix(
+      in srgb,
+      var(--neoverse-color-status-success) var(--neoverse-effect-label-fill-strength),
+      var(--neoverse-effect-label-fill-base)
+    );
+    --neoverse-effect-label-warning-background: color-mix(
+      in srgb,
+      var(--neoverse-color-status-warning) var(--neoverse-effect-label-fill-strength),
+      var(--neoverse-effect-label-fill-base)
+    );
+    --neoverse-effect-label-danger-background: color-mix(
+      in srgb,
+      var(--neoverse-color-status-danger) var(--neoverse-effect-label-fill-strength),
+      var(--neoverse-effect-label-fill-base)
+    );
+    --neoverse-effect-label-status-border: color-mix(
+      in srgb,
+      var(--ui-badge-status) var(--neoverse-effect-alpha-medium),
+      var(--neoverse-color-border-subtle)
+    );
+    --neoverse-badge-info-background: var(--neoverse-effect-label-info-background);
+    --neoverse-badge-success-background: var(--neoverse-effect-label-success-background);
+    --neoverse-badge-warning-background: var(--neoverse-effect-label-warning-background);
+    --neoverse-badge-danger-background: var(--neoverse-effect-label-danger-background);
+    --neoverse-badge-info-foreground: var(--neoverse-effect-label-info-foreground);
+    --neoverse-badge-success-foreground: var(--neoverse-effect-label-success-foreground);
+    --neoverse-badge-warning-foreground: var(--neoverse-effect-label-warning-foreground);
+    --neoverse-badge-danger-foreground: var(--neoverse-effect-label-danger-foreground);
     --neoverse-notice-info-background: var(--neoverse-effect-status-info-background);
     --neoverse-notice-success-background: var(--neoverse-effect-status-success-background);
     --neoverse-notice-warning-background: var(--neoverse-effect-status-warning-background);
@@ -182,7 +237,7 @@
     --neoverse-surface-inset-alternate-fill: var(--neoverse-surface-inset-fill);
     --neoverse-surface-inset-disabled-fill: var(--neoverse-surface-inset-fill);
     --neoverse-surface-inset-strong-hover-fill: var(--neoverse-surface-inset-fill);
-    --neoverse-skeleton-fill: var(--neoverse-material-glass-subtle-background);
+    --neoverse-skeleton-fill: var(--neoverse-effect-highlight-color);
     --neoverse-skeleton-backdrop-filter: var(--neoverse-material-glass-subtle-filter);
     --neoverse-effect-accent-tint: color-mix(
       in srgb,
@@ -345,6 +400,11 @@
   }
 
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    :where(.ui-badge) {
+      --neoverse-badge-backdrop-filter: none;
+      --neoverse-effect-label-fill-base: var(--neoverse-color-surface-canvas);
+    }
+
     :where(
         .ui-surface-inset,
         .ui-input,
@@ -374,6 +434,11 @@
   }
 
   @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    :where(.ui-badge) {
+      --neoverse-badge-backdrop-filter: none;
+      --neoverse-effect-label-fill-base: var(--neoverse-color-surface-canvas);
+    }
+
     :where(
         .ui-surface-inset,
         .ui-input,
@@ -399,6 +464,12 @@
       --neoverse-notice-success-background: var(--neoverse-material-glass-base-tint);
       --neoverse-notice-warning-background: var(--neoverse-material-glass-base-tint);
       --neoverse-notice-danger-background: var(--neoverse-material-glass-base-tint);
+    }
+
+    :where(.ui-choice__control) {
+      --neoverse-choice-control-active-background: var(
+        --neoverse-effect-choice-filled-field-opaque
+      );
     }
 
     :where(.ui-skeleton, .skeleton-surface) {

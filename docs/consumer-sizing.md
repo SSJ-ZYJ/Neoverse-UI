@@ -14,12 +14,23 @@
 | NavigationItem lg | 40px | 16px |
 | SegmentedControl 选项 | 32px | 14px |
 | Input / Select | 最小 40px | 14px |
+| Badge sm / md / lg | 随原有行高和内边距计算 | 13 / 14 / 16px |
+
+徽章三档统一使用 `--neoverse-badge-font-family` 与 `--neoverse-badge-font-weight`，分别映射共享 Label 字体族和字重。字号随尺寸递增，行高与内边距保持原有尺寸；消费项目可通过同一组徽章 Token 调整三档字体和字重。
 
 这些值由 `rem` 计算，会随用户字体设置变化，不需要消费项目设置更大的 `html` 字号或逐个覆盖 `.ui-*`。小型状态标签、辅助说明仍使用较小的语义字号。Playground shell 与 `/frame` 都使用普通根字号。
 
 Dock 尾部的嵌入式语言切换保持 0.2.0 的独立几何：外层高 30px、选项高 24px、字号
 11.2px、左右留白 6px，桌面最小宽度 32px；紧凑模式按内容宽度排布。
-`lg` 档保留语言字号的 0.9 补偿，Dock 整体仍按原来的 1.3 缩放。
+尾部分组背景到首尾选项的左右留白复用独立分段控件的 inset 与边界之和，默认各 5px；
+该间距由 `--neoverse-control-surface-trailing-padding-inline` 统一控制，不改变上下留白。
+`lg` 档保留语言字号的 0.9 补偿。Dock 通过独立的
+`--neoverse-dock-scale-md` / `--neoverse-dock-scale-lg` 将整体缩放设为 1.1 / 1.3；
+外壳、图标、间距及语言控件一起放大，导航文字另用
+`--neoverse-dock-navigation-type-factor: 0.95` 收敛字号，通用 ControlSurface 仍为 1 / 1.3。
+在 16px 根字号下，md 导航项实际高约 35.2px，文字约 14.6px，Dock 外壳约 49px。
+Neoverse 当前显式使用 `scale="md"`，Playground 标准、紧凑及消费一致性示例均使用同档，
+组件省略 `scale` 时仍使用 lg。
 嵌入项不随独立分段控件的 32px / 14px 基线放大，背景和交互继续使用共享材质。
 
 ## 本地 file: 包同步
@@ -39,9 +50,16 @@ Neoverse-Slides 已接入 `bun run ui:sync`；门户的开发、构建、生成�
 ## 验证
 
 - `tests/visual/component-size.spec.ts` 测量真实 Vue 控件的宽高、字号。
+- `tests/visual/dock-consumer-size.spec.ts` 比较 Playground shell/frame 和预编译消费 CSS 的 Dock 几何，覆盖深浅主题、中英文及桌面/手机。
 - `tests/visual/playground-shell.spec.ts` 检查桌面各宽度的根字号一致。
 - `scripts/sync-consumer.test.ts` 覆盖旧 CSS、嵌套副本、硬链接和根 overrides。
 - Neoverse-Slides 的 `bun run test:ui-size` 检查真实 `/slides` 页面在桌面/手机、深浅主题下的导航、按钮、输入框、选择框尺寸和横向溢出。
+
+### 2026-10-16 Dock 尺寸验证
+
+- Dock 尺寸一致性、语言切换、md/lg 缩放和 React 交互检查共 25 项通过；1 项仅桌面展示检查在手机跳过。预编译消费 CSS 与 Playground shell/frame 的标准、紧凑示例几何一致，覆盖中英文及深浅主题。
+- 全量构建、UI 类型检查、共享契约检查、相关 Biome/Stylelint 检查通过；Tokens 单测 32 项通过。
+- 核对 Neoverse 的 `BottomDock.vue` 继续使用现有 `scale="md"`，本地包通过 link 指向本仓库，已确认安装路径可读取新尺寸 Token；Neoverse 类型检查通过。消费源码保持原样，本次未启动消费项目服务或进行产品截图验收。
 
 ### 2026-10-12 消费验证记录
 

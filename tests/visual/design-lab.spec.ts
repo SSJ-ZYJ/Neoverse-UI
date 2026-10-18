@@ -463,7 +463,7 @@ for (const theme of themes) {
   });
 }
 
-test('chrome edge refraction is removed when reduced transparency is requested', async ({
+test('Dock Glass edge refraction is removed when reduced transparency is requested', async ({
   page,
 }) => {
   const cdp = await page.context().newCDPSession(page);
@@ -533,7 +533,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(typography.labelFlex).toBe('0 1 auto');
   const edgeMaterial = await navigation.evaluate((element) => {
     const style = getComputedStyle(element);
-    const chromeEdgeStyle = getComputedStyle(element, '::before');
+    const glassEdgeStyle = getComputedStyle(element, '::before');
     const button = element.querySelector('.consumer-parity-dock__item') as HTMLElement | null;
     const activeButton = element.querySelector(
       '.consumer-parity-dock__item.ui-navigation-item--active',
@@ -668,22 +668,28 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       sliderRect.bottom <= languageRect.bottom;
     const materialProbe = document.createElement('span');
     materialProbe.style.background = 'var(--neoverse-material-glass-subtle-background)';
+    materialProbe.style.borderColor = 'var(--neoverse-material-glass-subtle-border)';
     element.append(materialProbe);
-    const expectedDockBackground = getComputedStyle(materialProbe).background;
+    const expectedDockBackground = getComputedStyle(materialProbe).backgroundColor;
+    const expectedDockBorder = getComputedStyle(materialProbe).borderColor;
     materialProbe.remove();
     return {
       surface: element.getAttribute('data-surface'),
       presentationScale: Number.parseFloat(getComputedStyle(element).zoom),
-      chromeClass: element.classList.contains('ui-surface-chrome'),
-      dockBackground: style.background,
+      glassClass: element.classList.contains('material-glass-subtle'),
+      dockBackground: style.backgroundColor,
       expectedDockBackground,
+      expectedDockBorder,
       dockFilter: style.backdropFilter,
       dockBorder: style.borderColor,
-      dockEdgeBackgroundImage: chromeEdgeStyle.backgroundImage,
-      dockEdgeOpacity: chromeEdgeStyle.opacity,
-      dockEdgeFilter: chromeEdgeStyle.filter,
-      dockEdgeBackdropFilter: chromeEdgeStyle.backdropFilter,
-      dockEdgeDisplay: chromeEdgeStyle.display,
+      dockEdgeBackgroundImage: glassEdgeStyle.backgroundImage,
+      dockEdgeOpacity: glassEdgeStyle.opacity,
+      dockEdgeFilter: glassEdgeStyle.filter,
+      dockEdgeBackdropFilter: glassEdgeStyle.backdropFilter,
+      dockEdgeDisplay: glassEdgeStyle.display,
+      webglEdge:
+        Boolean(element.closest('[data-neoverse-glass-renderer="webgl"]')) &&
+        element.getAttribute('data-neoverse-glass-edge-pass') !== 'css',
       buttonSurface: button.getAttribute('data-surface'),
       buttonHasMaterialClass: [...button.classList].some((className) =>
         className.startsWith('material-'),
@@ -736,10 +742,8 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       compactNavigationGapToken: resolveLength('--neoverse-navigation-item-compact-gap'),
       trailingPaddingInline: Number.parseFloat(trailingStyle.paddingInline),
       trailingPaddingBlock: Number.parseFloat(trailingStyle.paddingBlock),
-      trailingPaddingInlineToken: resolveLength(
-        '--neoverse-control-chrome-trailing-padding-inline',
-      ),
-      trailingPaddingBlockToken: resolveLength('--neoverse-control-chrome-trailing-padding'),
+      optionHeightToken: resolveLength('--neoverse-space-5'),
+      segmentedTrailingInset: resolveLength('--neoverse-space-1'),
       trailingBorderInline: Number.parseFloat(trailingStyle.borderLeftWidth),
       trailingContentInsetInline:
         languageRect.left - trailingRect.left - Number.parseFloat(trailingStyle.borderLeftWidth),
@@ -821,16 +825,18 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       hoverMode: element.getAttribute('data-neoverse-surface-hover'),
     };
   });
-  expect(edgeMaterial.surface).toBe('chrome');
-  expect(edgeMaterial.chromeClass).toBe(true);
+  expect(edgeMaterial.surface).toBe('glass-subtle');
+  expect(edgeMaterial.glassClass).toBe(true);
   expect(edgeMaterial.dockBackground).toBe(edgeMaterial.expectedDockBackground);
   expect(edgeMaterial.dockFilter).toContain('blur(12px)');
-  expect(edgeMaterial.dockBorder).toBe('rgba(219, 234, 254, 0.08)');
+  expect(edgeMaterial.dockBorder).toBe(edgeMaterial.expectedDockBorder);
   expect(edgeMaterial.dockEdgeBackgroundImage).not.toBe('none');
   expect(Number.parseFloat(edgeMaterial.dockEdgeOpacity)).toBeGreaterThan(0);
   expect(edgeMaterial.dockEdgeFilter).not.toBe('none');
-  expect(edgeMaterial.dockEdgeBackdropFilter).not.toBe('none');
-  expect(edgeMaterial.dockEdgeDisplay).not.toBe('none');
+  // The shared masked edge uses the parent Glass sample rather than a second blur.
+  expect(edgeMaterial.dockEdgeBackdropFilter).toBe('none');
+  if (edgeMaterial.webglEdge) expect(edgeMaterial.dockEdgeDisplay).toBe('none');
+  else expect(edgeMaterial.dockEdgeDisplay).not.toBe('none');
   expect(edgeMaterial.buttonSurface).toBe('none');
   expect(edgeMaterial.buttonHasMaterialClass).toBe(false);
   expect(edgeMaterial.languageSurface).toBe('none');
@@ -840,7 +846,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(edgeMaterial.languagePaddingInline).toBe('0px');
   expect(edgeMaterial.languagePaddingBlock).toBe('0px');
   expect(edgeMaterial.languageOverflow).toBe('visible');
-  // Chrome trailing groups are intentionally borderless; their separation is
+  // Dock trailing groups are intentionally borderless; their separation is
   // carried by the inset fill/shadow instead of a single-color hairline.
   expect(edgeMaterial.trailingBorderInline).toBe(0);
   expect(edgeMaterial.trailingBackground).toBe('rgba(255, 255, 255, 0.03)');
@@ -861,8 +867,8 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     edgeMaterial.navigationSurfaceHeight * edgeMaterial.presentationScale,
     2,
   );
-  expect(edgeMaterial.optionHeight).toBeCloseTo(edgeMaterial.segmentedSurfaceHeight, 2);
-  expect(edgeMaterial.sliderHeight).toBeCloseTo(edgeMaterial.segmentedSurfaceHeight, 2);
+  expect(edgeMaterial.optionHeight).toBeCloseTo(edgeMaterial.optionHeightToken, 2);
+  expect(edgeMaterial.sliderHeight).toBeCloseTo(edgeMaterial.optionHeight, 2);
   expect(edgeMaterial.optionHeight).toBeLessThan(edgeMaterial.navigationHeight);
   expect(edgeMaterial.iconIndicatorGap / edgeMaterial.navigationHeight).toBeGreaterThanOrEqual(
     0.13,
@@ -890,16 +896,13 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     expect(edgeMaterial.primaryGap).toBeCloseTo(edgeMaterial.compactNavigationGapToken, 2);
     expect(edgeMaterial.primaryGap).toBeGreaterThan(0);
   }
-  expect(edgeMaterial.trailingPaddingInline).toBeCloseTo(
-    edgeMaterial.trailingPaddingInlineToken,
-    1,
-  );
+  expect(edgeMaterial.trailingPaddingInline).toBeCloseTo(edgeMaterial.segmentedTrailingInset, 1);
   expect(edgeMaterial.trailingContentInsetInline).toBeCloseTo(
     edgeMaterial.trailingPaddingInline * edgeMaterial.presentationScale +
       edgeMaterial.trailingBorderInline * (edgeMaterial.presentationScale - 1),
     1,
   );
-  expect(edgeMaterial.trailingPaddingBlock).toBeCloseTo(edgeMaterial.trailingPaddingBlockToken, 1);
+  expect(edgeMaterial.trailingPaddingBlock).toBeCloseTo(edgeMaterial.segmentedTrailingInset, 1);
   expect(edgeMaterial.primaryWidth).toBeCloseTo(
     edgeMaterial.itemRects.reduce((total, { width }) => total + width, 0) +
       edgeMaterial.itemGaps.reduce((total, gap) => total + gap, 0),
@@ -958,8 +961,8 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     edgeMaterial.groupHeight * edgeMaterial.presentationScale,
     2,
   );
-  expect(edgeMaterial.optionPaddingBlock).toBeCloseTo(edgeMaterial.rootFontSize * 0.2, 1);
-  expect(edgeMaterial.optionPaddingInline).toBeCloseTo(edgeMaterial.rootFontSize * 0.375, 1);
+  expect(edgeMaterial.optionPaddingBlock).toBeCloseTo(edgeMaterial.rootFontSize * 0.125, 1);
+  expect(edgeMaterial.optionPaddingInline).toBeCloseTo(edgeMaterial.rootFontSize * 0.25, 1);
   expect(edgeMaterial.optionFontSize).toBeCloseTo(edgeMaterial.expectedOptionFontSize, 1);
   expect(edgeMaterial.optionFontWeight).toBe('750');
   expect(edgeMaterial.optionLineHeight).toBe('normal');

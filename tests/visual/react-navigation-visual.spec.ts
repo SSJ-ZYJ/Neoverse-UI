@@ -17,10 +17,7 @@ async function expectNoHorizontalOverflow(locator: Locator, name: string) {
 for (const theme of themes) {
   test(`React Breadcrumb and Dock visual states / ${theme}`, async ({ page }) => {
     await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' });
-    await page.goto('/react-fixture?lang=en', { waitUntil: 'domcontentloaded' });
-    await page.locator('html').evaluate((element, selectedTheme) => {
-      element.dataset.theme = selectedTheme;
-    }, theme);
+    await page.goto(`/react-fixture?theme=${theme}&lang=en`, { waitUntil: 'domcontentloaded' });
 
     const fixture = page.locator('[data-react-navigation-fixture]');
     await expect(fixture).toBeVisible();
@@ -44,6 +41,37 @@ for (const theme of themes) {
     await expect(dock.getByRole('link')).toHaveCount(2);
     await expect(dockTrailing.getByRole('button')).toHaveText('Count 0');
     await expect(dock.locator('.ui-control-surface__divider')).toHaveCount(1);
+    const ghostStyle = await page
+      .getByRole('button', { name: 'Acknowledge', exact: true })
+      .evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          color: style.color,
+          backgroundColor: style.backgroundColor,
+          borderColor: style.borderColor,
+          boxShadow: style.boxShadow,
+          backdropFilter: style.backdropFilter,
+        };
+      });
+    const quietNavigationActions = [
+      page.getByRole('link', { name: 'Back to Design Lab', exact: true }),
+      dock.getByRole('link', { name: 'Home', exact: true }),
+      dock.getByRole('link', { name: 'Documentation', exact: true }),
+      fixture.locator('[data-dock-div]').getByRole('link', { name: 'Home', exact: true }),
+    ];
+    for (const action of quietNavigationActions) {
+      const actualStyle = await action.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          color: style.color,
+          backgroundColor: style.backgroundColor,
+          borderColor: style.borderColor,
+          boxShadow: style.boxShadow,
+          backdropFilter: style.backdropFilter,
+        };
+      });
+      expect(actualStyle).toEqual(ghostStyle);
+    }
 
     for (const [locator, name] of [
       [fixture, 'navigation fixture'],

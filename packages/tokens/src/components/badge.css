@@ -4,22 +4,34 @@
        the line box itself is mathematically centered. Keep that correction
        component-owned instead of nudging each consumer. */
     --neoverse-badge-label-optical-offset: 0.035em;
+    --neoverse-badge-font-family: var(--neoverse-typography-label-font-family);
+    --neoverse-badge-font-weight: var(--neoverse-typography-label-md-weight);
+    --neoverse-badge-font-size-sm: var(--neoverse-typography-label-sm-size);
+    --neoverse-badge-font-size-md: var(--neoverse-typography-label-md-size);
+    --neoverse-badge-font-size-lg: var(--neoverse-typography-label-lg-size);
+    --neoverse-badge-line-height-sm: var(--neoverse-typography-caption-line-height);
+    --neoverse-badge-line-height-md: var(--neoverse-typography-label-md-line-height);
+    --neoverse-badge-line-height-lg: var(--neoverse-typography-label-lg-line-height);
 
-    /* Badge status is carried by the material itself, not only by the label.
-       Every semantic variant uses the same four-sided ambient geometry while
-       keeping its own resolved status color in the token layer. */
-    --neoverse-badge-background: var(--neoverse-material-glass-subtle-background);
+    /* Shared status optics and Glass shadow composition in both themes. */
+    --neoverse-badge-background: var(--neoverse-effect-label-neutral-background);
     --neoverse-badge-foreground: var(--neoverse-color-text-secondary);
     --neoverse-badge-shadow: var(--neoverse-effect-label-edge);
+    --neoverse-badge-backdrop-filter: var(--neoverse-material-glass-subtle-filter);
 
-    --neoverse-badge-info-background: var(--neoverse-effect-status-info-background);
-    --neoverse-badge-success-background: var(--neoverse-effect-status-success-background);
-    --neoverse-badge-warning-background: var(--neoverse-effect-status-warning-background);
-    --neoverse-badge-danger-background: var(--neoverse-effect-status-danger-background);
+    --neoverse-badge-info-background: var(--neoverse-effect-label-info-background);
+    --neoverse-badge-success-background: var(--neoverse-effect-label-success-background);
+    --neoverse-badge-warning-background: var(--neoverse-effect-label-warning-background);
+    --neoverse-badge-danger-background: var(--neoverse-effect-label-danger-background);
 
-    --neoverse-badge-info-shadow: var(--neoverse-effect-status-info-shadow);
-    --neoverse-badge-success-shadow: var(--neoverse-effect-status-success-shadow);
-    --neoverse-badge-warning-shadow: var(--neoverse-effect-status-warning-shadow);
-    --neoverse-badge-danger-shadow: var(--neoverse-effect-status-danger-shadow);
+    --neoverse-badge-info-foreground: var(--neoverse-effect-label-info-foreground);
+    --neoverse-badge-success-foreground: var(--neoverse-effect-label-success-foreground);
+    --neoverse-badge-warning-foreground: var(--neoverse-effect-label-warning-foreground);
+    --neoverse-badge-danger-foreground: var(--neoverse-effect-label-danger-foreground);
+
+    --neoverse-badge-info-shadow: var(--neoverse-effect-label-edge);
+    --neoverse-badge-success-shadow: var(--neoverse-effect-label-edge);
+    --neoverse-badge-warning-shadow: var(--neoverse-effect-label-edge);
+    --neoverse-badge-danger-shadow: var(--neoverse-effect-label-edge);
   }
 }

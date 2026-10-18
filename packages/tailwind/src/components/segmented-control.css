@@ -60,10 +60,13 @@
         calc(var(--segment-index) * (100% + var(--neoverse-control-segmented-gap)))
       )
     );
+    transition: none;
+    will-change: transform;
+  }
+  .ui-segmented-control__slider[data-ready='true'] {
     transition:
       transform var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
       width var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
-    will-change: transform;
   }
 
   .ui-segmented-control .ui-segmented-control__option {
@@ -170,7 +173,7 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ui-segmented-control__slider {
+    .ui-segmented-control__slider[data-ready='true'] {
       transition: none;
     }
   }

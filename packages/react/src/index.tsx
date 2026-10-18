@@ -46,7 +46,6 @@ export type SurfacePreset =
   | 'subtle'
   | 'elevated'
   | 'inset'
-  | 'chrome'
   | 'glass-subtle'
   | 'glass-elevated'
   | 'glass-immersive';
@@ -100,7 +99,6 @@ const surfaceClasses: Record<SurfacePreset, string> = {
   subtle: 'ui-surface-subtle',
   elevated: 'ui-surface-elevated',
   inset: 'ui-surface-inset',
-  chrome: 'ui-surface-chrome',
   'glass-subtle': 'material-glass-subtle',
   'glass-elevated': 'material-glass-elevated',
   'glass-immersive': 'material-glass-immersive',
@@ -328,7 +326,7 @@ export interface UiDockProps extends Omit<HTMLAttributes<HTMLElement>, 'children
 /** Reusable Dock shell. Product routing, navigation semantics, and trailing controls stay caller-owned. */
 export function UiDock({
   as = 'nav',
-  surface = 'chrome',
+  surface = 'glass-elevated',
   scale = 'lg',
   compact = false,
   hoverMode = 'static',
@@ -498,17 +496,43 @@ export function UiCard<T extends ElementType = 'div'>(props: UiCardProps<T>) {
 
 export interface UiInputProps extends ComponentPropsWithRef<'input'> {
   validation?: FormControlValidation;
+  incrementLabel?: string;
+  decrementLabel?: string;
+}
+
+function stepNumberInput(input: HTMLInputElement | null, direction: number) {
+  if (!input || input.disabled || input.readOnly) return;
+  const previous = input.value;
+  if (input.step === 'any') {
+    const next = Number(((input.valueAsNumber || 0) + direction).toPrecision(12));
+    input.valueAsNumber = Math.min(
+      input.max === '' ? Infinity : Number(input.max),
+      Math.max(input.min === '' ? -Infinity : Number(input.min), next),
+    );
+  } else if (direction > 0) {
+    input.stepUp();
+  } else {
+    input.stepDown();
+  }
+  input.dataset.neoverseFocusOrigin = 'pointer';
+  input.focus({ preventScroll: true });
+  if (input.value !== previous) {
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
 }
 
 export function UiInput({
   validation = 'none',
+  incrementLabel = 'Increase value',
+  decrementLabel = 'Decrease value',
   className,
   onPointerDown,
   onBlur,
   'aria-invalid': ariaInvalid,
   ...props
 }: UiInputProps) {
-  return (
+  const control = (
     <input
       {...props}
       className={['ui-input', className].filter(Boolean).join(' ')}
@@ -523,6 +547,37 @@ export function UiInput({
         onBlur?.(event);
       }}
     />
+  );
+  if (props.type !== 'number') return control;
+  return (
+    <span className="ui-input-number">
+      {control}
+      <span className="ui-input-number__steps">
+        {[1, -1].map((direction) => (
+          <button
+            key={direction}
+            className="ui-input-number__step"
+            type="button"
+            tabIndex={-1}
+            aria-label={direction > 0 ? incrementLabel : decrementLabel}
+            title={direction > 0 ? incrementLabel : decrementLabel}
+            disabled={props.disabled || props.readOnly}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={(event) => {
+              event.preventDefault();
+              stepNumberInput(
+                event.currentTarget.closest('.ui-input-number')?.querySelector('input') ?? null,
+                direction,
+              );
+            }}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="ui-input-number__indicator">
+              <path d={direction > 0 ? 'm6 15 6-6 6 6' : 'm6 9 6 6 6-6'} />
+            </svg>
+          </button>
+        ))}
+      </span>
+    </span>
   );
 }
 

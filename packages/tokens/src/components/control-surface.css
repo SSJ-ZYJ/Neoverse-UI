@@ -23,6 +23,12 @@
     --neoverse-control-surface-inner-radius: var(--neoverse-control-segmented-option-radius);
     --neoverse-control-surface-trailing-radius: var(--neoverse-control-segmented-corner-radius);
     --neoverse-control-surface-trailing-padding: var(--neoverse-border-width-strong);
+    /* Embedded choices have no border of their own. Match the standalone
+       segmented shell's visible side clearance, including its boundary. */
+    --neoverse-control-surface-trailing-padding-inline: calc(
+      var(--neoverse-control-segmented-inset) +
+      var(--neoverse-control-segmented-boundary-width)
+    );
     --neoverse-control-surface-trailing-background: var(--neoverse-effect-grouped-inset-field);
     --neoverse-control-surface-trailing-shadow: var(--neoverse-shadow-inset);
     /* Navigation chrome aligns its leading/trailing edge with the visible
@@ -40,6 +46,11 @@
     /* Scale the complete composition as one unit so every existing proportion remains intact. */
     --neoverse-control-surface-scale-md: 1;
     --neoverse-control-surface-scale-lg: 1.3;
+    /* Dock navigation needs a larger baseline than generic grouped controls. */
+    --neoverse-dock-scale-md: 1.1;
+    --neoverse-dock-scale-lg: 1.3;
+    /* Dense navigation labels need less magnification than the shell and icons. */
+    --neoverse-dock-navigation-type-factor: 0.95;
     /* Scaling keeps labels, icons and the shell on the same ratio. */
     --neoverse-control-surface-scale-lg-type-factor: 1;
     --neoverse-control-surface-divider-color: var(--neoverse-color-border-default);
@@ -48,33 +59,5 @@
        deliberately share the same spatial timing contract. */
     --neoverse-control-surface-indicator-duration: var(--neoverse-motion-spatial-duration);
     --neoverse-control-surface-indicator-easing: var(--neoverse-motion-spatial-easing);
-    --neoverse-control-chrome-border: var(--neoverse-effect-floating-chrome-border);
-    --neoverse-control-chrome-background: var(--neoverse-material-glass-subtle-background);
-    --neoverse-control-chrome-shadow: var(--neoverse-effect-floating-chrome-shadow);
-    --neoverse-control-chrome-filter: var(--neoverse-material-glass-subtle-filter);
-    /* Chrome keeps its quieter fill while reusing the material system's
-       directional edge-refraction contract. */
-    --neoverse-control-chrome-edge-refraction-width: var(
-      --neoverse-material-edge-refraction-width-subtle
-    );
-    --neoverse-control-chrome-edge-refraction-softness: var(
-      --neoverse-material-edge-refraction-softness-subtle
-    );
-    --neoverse-control-chrome-edge-filter: var(--neoverse-material-edge-filter-subtle);
-    --neoverse-control-chrome-refraction-gradient: var(
-      --neoverse-material-refraction-gradient-subtle
-    );
-    --neoverse-control-chrome-edge-refraction-opacity: var(
-      --neoverse-material-edge-refraction-opacity-subtle
-    );
-    --neoverse-control-chrome-edge-highlight: var(--neoverse-material-edge-highlight-elevated);
-    --neoverse-control-chrome-trailing-border: var(--neoverse-effect-grouped-inset-border);
-    --neoverse-control-chrome-trailing-background: var(
-      --neoverse-control-surface-trailing-background
-    );
-    --neoverse-control-chrome-trailing-padding: var(--neoverse-control-surface-trailing-padding);
-    --neoverse-control-chrome-trailing-padding-inline: var(
-      --neoverse-control-surface-trailing-padding
-    );
   }
 }

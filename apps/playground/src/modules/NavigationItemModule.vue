@@ -105,8 +105,13 @@ const contractCopy = {
     </UiNavigationItem>
   </StateRow>
 
-  <StateRow :label="contractCopy.label" :hint="contractCopy.hint" :locale="props.locale">
-    <div class="grid w-full gap-2 md:grid-cols-2">
+  <StateRow
+    :label="contractCopy.label"
+    :hint="contractCopy.hint"
+    :locale="props.locale"
+    layout="wide"
+  >
+    <div class="playground-preview-columns">
       <UiNavigationItem
         href="#controls-navigation-item"
         @click.prevent

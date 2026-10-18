@@ -1,11 +1,7 @@
 @layer components {
   .ui-timeline {
-    --neoverse-timeline-node-size: var(--neoverse-space-3);
-    --neoverse-timeline-node-center: calc(
-      var(--neoverse-typography-title-sm-size) *
-      var(--neoverse-typography-title-sm-line-height) /
-      2
-    );
+    --neoverse-timeline-node-size: var(--neoverse-space-8);
+    --neoverse-timeline-node-center: var(--neoverse-space-6);
 
     min-width: 0;
     margin: 0;
@@ -18,9 +14,9 @@
     position: relative;
     display: grid;
     grid-template-columns: var(--neoverse-timeline-node-size) minmax(0, 1fr);
-    column-gap: var(--neoverse-space-4);
+    column-gap: var(--neoverse-space-3);
     min-width: 0;
-    padding-block-end: var(--neoverse-space-6);
+    padding-block-end: var(--neoverse-space-4);
   }
 
   .ui-timeline__item:last-child {
@@ -53,13 +49,20 @@
       var(--neoverse-timeline-node-size) /
       2
     );
-    border-radius: var(--neoverse-radius-pill);
-    background: linear-gradient(
-      135deg,
-      var(--neoverse-color-accent-primary),
-      var(--neoverse-color-accent-secondary)
-    );
+    box-sizing: border-box;
+    border-radius: var(--neoverse-radius-control-inner);
     pointer-events: none;
+  }
+
+  .ui-timeline__node::after {
+    position: absolute;
+    inset: 0;
+    width: var(--neoverse-space-2);
+    height: var(--neoverse-space-2);
+    margin: auto;
+    border-radius: var(--neoverse-radius-pill);
+    background: var(--neoverse-color-accent-secondary);
+    content: '';
   }
 
   .ui-timeline__content {
@@ -67,6 +70,8 @@
     align-content: start;
     gap: var(--neoverse-space-2);
     min-width: 0;
+    padding: var(--neoverse-space-3) var(--neoverse-space-4);
+    border-radius: var(--neoverse-radius-control);
     overflow-wrap: anywhere;
     font-family: var(--neoverse-typography-body-font-family);
     font-size: var(--neoverse-typography-body-md-size);
@@ -95,7 +100,9 @@
   }
 
   .ui-timeline__time {
+    width: fit-content;
     color: var(--neoverse-color-text-muted);
+    font-variant-numeric: tabular-nums;
     font-family: var(--neoverse-typography-label-font-family);
     font-size: var(--neoverse-typography-label-sm-size);
     font-weight: var(--neoverse-typography-label-sm-weight);

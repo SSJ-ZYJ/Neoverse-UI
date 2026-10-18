@@ -1,8 +1,8 @@
 @layer components {
   .ui-step-flow {
-    --ui-step-flow-marker-size: var(--neoverse-space-10);
-    --ui-step-flow-gap: var(--neoverse-space-6);
-    --ui-step-flow-connector-width: var(--neoverse-border-width-strong);
+    --ui-step-flow-marker-size: var(--neoverse-space-8);
+    --ui-step-flow-gap: var(--neoverse-space-4);
+    --ui-step-flow-connector-width: var(--neoverse-border-width-thin);
 
     container-type: inline-size;
     container-name: ui-step-flow;
@@ -21,7 +21,7 @@
     display: grid;
     grid-template-columns: var(--ui-step-flow-marker-size) minmax(0, 1fr);
     align-items: start;
-    gap: var(--neoverse-space-4);
+    gap: var(--neoverse-space-3);
     flex: 0 0 100%;
     min-width: 0;
     min-height: var(--ui-step-flow-marker-size);
@@ -39,7 +39,7 @@
     inset-block-end: calc(var(--neoverse-space-2) - var(--ui-step-flow-gap));
     width: var(--ui-step-flow-connector-width);
     border-radius: var(--neoverse-radius-pill);
-    background: var(--neoverse-color-border-strong);
+    background: var(--neoverse-color-border-default);
     pointer-events: none;
   }
 
@@ -52,8 +52,7 @@
     height: var(--ui-step-flow-marker-size);
     min-width: 0;
     border-radius: var(--neoverse-radius-pill);
-    color: var(--neoverse-color-text-primary);
-    background: var(--neoverse-color-accent-soft);
+    color: var(--neoverse-color-text-secondary);
     font-family: var(--neoverse-typography-label-font-family);
     font-size: var(--neoverse-typography-label-lg-size);
     font-weight: var(--neoverse-typography-label-lg-weight);
@@ -63,14 +62,26 @@
   }
 
   .ui-step-flow__item--current .ui-step-flow__marker {
-    color: var(--neoverse-color-accent-primary-foreground);
-    background: var(--neoverse-color-accent-primary);
-    outline: var(--neoverse-border-width-strong) solid var(--neoverse-color-accent-primary);
-    outline-offset: var(--neoverse-space-1);
+    color: var(--neoverse-color-accent-primary);
+    outline: var(--neoverse-border-width-thin) solid var(--neoverse-color-accent-primary);
+    outline-offset: var(--neoverse-border-width-strong);
+  }
+
+  .ui-step-flow__item--complete .ui-step-flow__marker {
+    color: var(--neoverse-color-accent-secondary);
+  }
+
+  .ui-step-flow__item--complete::after {
+    background: var(--neoverse-color-accent-secondary);
   }
 
   .ui-step-flow__content {
+    position: relative;
+    display: grid;
+    align-content: start;
     min-width: 0;
+    padding: var(--neoverse-space-3) var(--neoverse-space-4);
+    border-radius: var(--neoverse-radius-control);
     overflow-wrap: anywhere;
   }
 
@@ -95,6 +106,7 @@
 
   .ui-step-flow__status {
     display: inline-flex;
+    justify-self: start;
     align-items: center;
     flex-wrap: wrap;
     gap: var(--neoverse-space-2);
@@ -115,7 +127,7 @@
   }
 
   .ui-step-flow__item--complete .ui-step-flow__status {
-    color: var(--neoverse-color-status-success);
+    color: var(--neoverse-color-accent-secondary);
   }
 
   .ui-step-flow__status-icon {

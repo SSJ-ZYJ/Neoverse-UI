@@ -1,6 +1,7 @@
 import { motionDistances, motionDurations, motionEasings } from '@neoverse-ui/motion';
 import { cssVariables } from '@neoverse-ui/tokens';
 import { type LocalizedText, localized, tokenCopy } from './playground-content';
+import type { LayoutPreviewRole } from './playground-types';
 
 export interface ColorToken {
   label: LocalizedText;
@@ -22,6 +23,11 @@ export interface TypographyToken {
 export interface NamedToken {
   label: LocalizedText;
   variable: string;
+}
+
+export interface LayoutRoleToken extends NamedToken {
+  className: string;
+  layoutRole: LayoutPreviewRole;
 }
 
 const color = cssVariables.color;
@@ -389,51 +395,60 @@ export const semanticSpacingTokens = [
   },
 ];
 
-export const layoutRoleTokens = [
+export const layoutRoleTokens: LayoutRoleToken[] = [
   {
     label: localized('Page max width', '页面最大宽度'),
     className: 'max-w-page',
     variable: cssVariables.layout.page.maxWidth,
+    layoutRole: 'page',
   },
   {
     label: localized('Content max width', '内容最大宽度'),
     className: 'max-w-content',
     variable: cssVariables.layout.contentMaxWidth,
+    layoutRole: 'content',
   },
   {
     label: localized('Reading width', '阅读宽度'),
     className: 'max-w-reading',
     variable: cssVariables.layout.reading.width,
+    layoutRole: 'reading',
   },
   {
     label: localized('Wide reading width', '宽阅读宽度'),
     className: 'max-w-reading-wide',
     variable: cssVariables.layout.reading.wideWidth,
+    layoutRole: 'reading-wide',
   },
   {
     label: localized('Page inline padding', '页面横向留白'),
     className: 'px-page-inline',
     variable: cssVariables.layout.page.paddingInline,
+    layoutRole: 'padding-inline',
   },
   {
     label: localized('Page block padding', '页面纵向留白'),
     className: 'py-page-block',
     variable: cssVariables.layout.page.paddingBlock,
+    layoutRole: 'padding-block',
   },
   {
     label: localized('Sidebar width', '侧栏宽度'),
     className: 'w-sidebar',
     variable: cssVariables.layout.sidebar.width,
+    layoutRole: 'sidebar',
   },
   {
     label: localized('Sidebar drawer width', '侧栏抽屉宽度'),
     className: 'w-sidebar-drawer',
     variable: cssVariables.layout.sidebar.drawerWidth,
+    layoutRole: 'sidebar-drawer',
   },
   {
     label: localized('Header minimum height', '顶栏最小高度'),
     className: 'min-h-header',
     variable: cssVariables.layout.headerMinHeight,
+    layoutRole: 'header',
   },
 ];
 

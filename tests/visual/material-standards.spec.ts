@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { readMaterialFilter } from './material-observation';
 
 const tiers = [
   { surface: 'glass-subtle', blur: '12px', alpha: 0.15 },
@@ -8,7 +9,7 @@ const tiers = [
 
 for (const framework of ['vue', 'react'] as const) {
   for (const theme of ['light', 'dark'] as const) {
-    test(`${framework} ${theme}: same tier shares actual optics and supports isolated overrides`, async ({
+    test(`${framework} ${theme}: tier fill and compact button sampling support isolated overrides`, async ({
       page,
     }) => {
       await page.goto(
@@ -18,9 +19,7 @@ for (const framework of ['vue', 'react'] as const) {
         { waitUntil: 'domcontentloaded' },
       );
       if (framework === 'react') {
-        await page.evaluate((theme) => {
-          document.documentElement.dataset.theme = theme;
-        }, theme);
+        await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
         await expect(page.locator('html')).toHaveCSS('color-scheme', theme);
       }
       for (const tier of tiers) {
@@ -43,17 +42,15 @@ for (const framework of ['vue', 'react'] as const) {
               opacity: s.opacity,
             };
           });
-          expect(optics.filter).toContain(`blur(${tier.blur})`);
+          const blurScale = element === button && theme === 'dark' ? 0.5 : 1;
+          expect(await element.evaluate(readMaterialFilter)).toContain(
+            `blur(${parseFloat(tier.blur) * blurScale}px)`,
+          );
           expect(optics.image).toBe('none');
           expect(optics.opacity).toBe('1');
           expect(alpha(optics.color)).toBeCloseTo(tier.alpha, 3);
         }
-        const initialFilter = await button.evaluate(
-          (element) => getComputedStyle(element).backdropFilter,
-        );
-        expect(await card.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe(
-          initialFilter,
-        );
+        const initialCardFilter = await card.evaluate(readMaterialFilter);
         await button.evaluate((element, surface) => {
           (element as HTMLElement).style.setProperty(`--neoverse-material-${surface}-blur`, '16px');
           (element as HTMLElement).style.setProperty(
@@ -61,17 +58,15 @@ for (const framework of ['vue', 'react'] as const) {
             '18%',
           );
         }, tier.surface);
-        expect(
-          await button.evaluate((element) => getComputedStyle(element).backdropFilter),
-        ).toContain('blur(16px)');
+        await expect
+          .poll(() => button.evaluate(readMaterialFilter))
+          .toContain(`blur(${theme === 'dark' ? 8 : 16}px)`);
         await expect
           .poll(async () =>
             alpha(await button.evaluate((element) => getComputedStyle(element).backgroundColor)),
           )
           .toBeCloseTo(0.18, 3);
-        expect(await card.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe(
-          initialFilter,
-        );
+        expect(await card.evaluate(readMaterialFilter)).toBe(initialCardFilter);
         await button.evaluate((element) => element.removeAttribute('style'));
       }
       if (framework === 'vue') {
@@ -79,7 +74,7 @@ for (const framework of ['vue', 'react'] as const) {
           'glass-subtle',
         );
         await expect(page.locator('#controls-button [data-material-legend]').first()).toContainText(
-          '12px / 15%',
+          `${theme === 'dark' ? 6 : 12}px / 15%`,
         );
       }
     });
@@ -100,8 +95,8 @@ test('hover and press differ, keep base optics, restore, and activate once', asy
   const button = page.getByRole('button', { name: /Interaction ·/ });
   await button.scrollIntoViewIfNeeded();
   await page.mouse.move(0, 0);
-  const read = () =>
-    button.evaluate((element) => {
+  const read = async () => {
+    const optics = await button.evaluate((element) => {
       const s = getComputedStyle(element);
       return {
         fill: s.backgroundColor,
@@ -109,6 +104,8 @@ test('hover and press differ, keep base optics, restore, and activate once', asy
         glow: getComputedStyle(element, '::after').opacity,
       };
     });
+    return { ...optics, filter: await button.evaluate(readMaterialFilter) };
+  };
   const rest = await read();
   await button.hover();
   await expect.poll(async () => (await read()).glow).toBe('0.3');
@@ -355,12 +352,17 @@ test('Playground customization updates real optics and computed annotations, the
 }) => {
   await page.goto('/frame?theme=light&lang=en#controls');
   const preview = page.locator('[data-material-custom-preview]');
+  const resetButton = page.getByRole('button', { name: 'Reset to standard' });
+  const referenceGhost = page
+    .getByRole('article', { name: 'Surface ownership' })
+    .getByRole('button', { name: 'Ghost', exact: true });
+  const resetForeground = await resetButton.evaluate((button) => getComputedStyle(button).color);
+  const ghostForeground = await referenceGhost.evaluate((button) => getComputedStyle(button).color);
+  expect(resetForeground).toBe(ghostForeground);
   await page.locator('[data-custom-blur]').fill('21');
   await page.locator('[data-custom-alpha]').fill('27');
   for (const plane of [preview.locator('.ui-button'), preview.locator('.ui-card')]) {
-    expect(await plane.evaluate((element) => getComputedStyle(element).backdropFilter)).toContain(
-      'blur(21px)',
-    );
+    await expect.poll(() => plane.evaluate(readMaterialFilter)).toContain('blur(21px)');
     await expect
       .poll(async () =>
         alpha(await plane.evaluate((element) => getComputedStyle(element).backgroundColor)),
@@ -380,11 +382,9 @@ test('Playground customization updates real optics and computed annotations, the
       .locator('[data-material-legend]'),
   ).toContainText('Custom');
   await page.getByRole('button', { name: 'Reset to standard' }).click();
-  expect(
-    await preview
-      .locator('.ui-card')
-      .evaluate((element) => getComputedStyle(element).backdropFilter),
-  ).toContain('blur(18px)');
+  await expect
+    .poll(() => preview.locator('.ui-card').evaluate(readMaterialFilter))
+    .toContain('blur(18px)');
   await expect
     .poll(async () =>
       alpha(
@@ -417,7 +417,7 @@ for (const framework of ['vue', 'react'] as const) {
         filter: getComputedStyle(element).backdropFilter,
       }));
     const rest = await read();
-    expect(rest.filter).toContain('blur(18px)');
+    expect(await panel.evaluate(readMaterialFilter)).toContain('blur(18px)');
     expect(alpha(rest.fill)).toBeCloseTo(0.2, 3);
     if (testInfo.project.name === 'desktop') {
       const selected = panel.locator('.ui-select__option[aria-selected="true"]');
@@ -474,7 +474,9 @@ test('choice and Notice retain Light optics, state tint and opaque accessibility
   page,
 }) => {
   await page.goto('/frame?theme=dark&lang=en#forms');
-  const choice = page.locator('.ui-choice__control').first();
+  const choice = page.locator('.ui-radio input:not(:checked) + .ui-choice__control').first();
+  const selected = page.locator('.ui-checkbox input:checked + .ui-choice__control').first();
+  await expect(selected).toHaveCSS('background-image', /linear-gradient/);
   expect(await choice.evaluate((element) => getComputedStyle(element).backdropFilter)).toContain(
     'blur(12px)',
   );
@@ -486,6 +488,7 @@ test('choice and Notice retain Light optics, state tint and opaque accessibility
     features: [{ name: 'prefers-reduced-transparency', value: 'reduce' }],
   });
   expect(await choice.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe('none');
+  await expect(selected).toHaveCSS('background-image', /linear-gradient/);
   await expect
     .poll(async () =>
       alpha(await choice.evaluate((element) => getComputedStyle(element).backgroundColor)),

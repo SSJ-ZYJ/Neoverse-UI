@@ -334,6 +334,9 @@
   --neoverse-material-edge-refraction-carrier: var(
     --neoverse-material-glass-subtle-edge-refraction-carrier
   );
+  --neoverse-material-edge-refraction-chroma: var(
+    --neoverse-material-edge-refraction-chroma-subtle
+  );
 }
 
 @utility material-glass-elevated {
@@ -374,6 +377,9 @@
   --neoverse-material-edge-refraction-carrier: var(
     --neoverse-material-glass-elevated-edge-refraction-carrier
   );
+  --neoverse-material-edge-refraction-chroma: var(
+    --neoverse-material-edge-refraction-chroma-elevated
+  );
 }
 
 @utility material-glass-immersive {
@@ -413,6 +419,9 @@
   );
   --neoverse-material-edge-refraction-carrier: var(
     --neoverse-material-glass-immersive-edge-refraction-carrier
+  );
+  --neoverse-material-edge-refraction-chroma: var(
+    --neoverse-material-edge-refraction-chroma-immersive
   );
 }
 
@@ -532,7 +541,9 @@
       border-radius: inherit;
       display: var(--neoverse-material-edge-display, block);
       background-color: transparent;
-      background-image: var(--neoverse-material-refraction-gradient);
+      /* Coverage only: the filter brightens real backdrop pixels. */
+      mask-image: var(--neoverse-material-refraction-gradient);
+      mask-mode: alpha;
       content: '';
       opacity: var(--neoverse-material-edge-refraction-opacity);
       pointer-events: none;
@@ -543,6 +554,27 @@
     }
   }
 
+  :is(.ui-card, .ui-surface).material-glass-subtle {
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-surface-glass-subtle-edge-opacity,
+      var(--neoverse-material-glass-subtle-edge-refraction-opacity)
+    );
+  }
+
+  :is(.ui-card, .ui-surface).material-glass-elevated {
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-surface-glass-elevated-edge-opacity,
+      var(--neoverse-material-glass-elevated-edge-refraction-opacity)
+    );
+  }
+
+  :is(.ui-card, .ui-surface).material-glass-immersive {
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-surface-glass-immersive-edge-opacity,
+      var(--neoverse-material-glass-immersive-edge-refraction-opacity)
+    );
+  }
+
   :is(.ui-card, .ui-surface):is(
     .material-glass-subtle,
     .material-glass-elevated,
@@ -551,10 +583,9 @@
     --neoverse-material-hover-transparency: var(--neoverse-material-transparency);
   }
 
-  /* The optional WebGL renderer paints one edge per independent Glass
-     surface on its shared Canvas. Keep the CSS field as fallback and hide
-     only the duplicate while the WebGL renderer owns the surface's edge. */
-  [data-neoverse-glass-renderer='webgl']
+  /* Native displacement or the shared WebGL canvas owns refraction.
+     Hide duplicate decorative edge fields while either backend is active. */
+  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
   :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
     .ui-button
   )::before {
@@ -563,10 +594,19 @@
 
   /* An explicitly CSS-backed surface keeps the complete library edge field
      even while the shared renderer paints other Glass surfaces. */
-  [data-neoverse-glass-renderer='webgl']
+  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
   :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
     .ui-button
   )[data-neoverse-glass-edge-pass='css']::before {
+    display: block;
+  }
+
+  /* A sibling cannot paint in the owner's native top layer. Keep a local
+     edge on the popover/dialog itself; surfaces inside it can still sample. */
+  [data-neoverse-glass-renderer='webgl']
+  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    .ui-button
+  ):is(:popover-open, :modal)::before {
     display: block;
   }
 
@@ -584,11 +624,11 @@
     }
   }
 
-  [data-neoverse-glass-renderer='webgl']
+  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
       :focus-visible
     ) {
-    /* The WebGL edge field owns the directional silhouette. Keep the normal
+    /* The runtime owns refraction. Keep the normal
        material shadow and backdrop filter so the DOM surface still carries
        the same depth and sampling as the CSS fallback. Focus rings stay
        outside this selector so the shared keyboard affordance remains visible. */
@@ -598,7 +638,7 @@
     backdrop-filter: var(--neoverse-material-filter);
   }
 
-  [data-neoverse-glass-renderer='webgl']
+  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
       .ui-button
     )[data-neoverse-glass-edge-pass='css']:not(:focus-visible) {
@@ -609,7 +649,7 @@
   }
 
   @media (hover: hover) {
-    [data-neoverse-glass-renderer='webgl']
+    :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
       :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
         .ui-button
       ):not(.ui-card):not(.ui-surface):not(.ui-segmented-control):not(
@@ -657,7 +697,9 @@
       display: none;
     }
 
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)::after {
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+        .ui-tooltip-surface
+      )::after {
       display: none;
     }
   }
@@ -710,7 +752,7 @@
   /* A child that deliberately inherits the parent plane must never acquire
      a separate material merely because the pointer enters it. The WebGL
      hover selector otherwise outranks the resting inherit contract. */
-  [data-neoverse-glass-renderer='webgl']
+  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
       .ui-button

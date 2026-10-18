@@ -33,57 +33,41 @@ import {
   localize,
   localized,
 } from './playground-content';
-import type { FrameTheme, ThemeMode } from './playground-types';
-import { applyThemeMode, observeSystemTheme } from './theme-state';
+import { readPreferences, writePreferences } from './playground-preferences';
+import type { ThemeMode } from './playground-types';
+import { restoreScrollPosition, saveScrollPosition } from './scroll-restoration';
+import {
+  applyThemeMode,
+  defaultThemeMode,
+  isThemeMode,
+  observeSystemTheme,
+  persistThemeMode,
+  resolveInitialThemeMode,
+  syncThemeModeToQuery,
+  themeModes,
+} from './theme-runtime';
 
 const isFrame = window.location.pathname === '/frame';
-const preferencesStorageKey = 'neoverse-design-lab.preferences';
 const persistentNavigationMediaQuery = `(min-width: ${layoutBreakpoints.xl}px)`;
 
 type SavedState = {
-  theme?: ThemeMode;
   module?: ModuleId;
   locale?: Locale;
 };
 
 type LabModule = (typeof labModules)[number];
 
-function isFrameTheme(value: unknown): value is FrameTheme {
-  return value === 'light' || value === 'dark';
-}
-
-function isThemeMode(value: unknown): value is ThemeMode {
-  return value === 'system' || isFrameTheme(value);
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === 'object' && value !== null;
-}
-
 function readSavedState(): SavedState {
   if (isFrame) {
     return {};
   }
 
-  try {
-    const raw = window.localStorage.getItem(preferencesStorageKey);
-    if (raw === null) {
-      return {};
-    }
+  const parsed = readPreferences();
 
-    const parsed: unknown = JSON.parse(raw);
-    if (!isRecord(parsed)) {
-      return {};
-    }
-
-    return {
-      ...(isThemeMode(parsed.theme) ? { theme: parsed.theme } : {}),
-      ...(isModuleId(parsed.module) ? { module: parsed.module } : {}),
-      ...(isLocale(parsed.locale) ? { locale: parsed.locale } : {}),
-    };
-  } catch {
-    return {};
-  }
+  return {
+    ...(isModuleId(parsed.module) ? { module: parsed.module } : {}),
+    ...(isLocale(parsed.locale) ? { locale: parsed.locale } : {}),
+  };
 }
 
 function readHash(): string {
@@ -110,11 +94,8 @@ function detectBrowserLocale(): Locale {
 
 const savedState = readSavedState();
 const queryParameters = new URLSearchParams(window.location.search);
-const queryTheme = queryParameters.get('theme');
 const queryLocale = queryParameters.get('lang');
-const themeMode = ref<ThemeMode>(
-  isThemeMode(queryTheme) ? queryTheme : (savedState.theme ?? 'system'),
-);
+const themeMode = ref<ThemeMode>(resolveInitialThemeMode());
 const locale = ref<Locale>(
   isLocale(queryLocale) ? queryLocale : (savedState.locale ?? detectBrowserLocale()),
 );
@@ -284,17 +265,12 @@ const compactControlsCopy = {
 } as const;
 
 function cycleTheme(): void {
-  const modes: readonly ThemeMode[] = ['system', 'light', 'dark'];
-  const current = modes.indexOf(themeMode.value);
-  setTheme(modes[(current + 1) % modes.length] ?? 'system');
+  const current = themeModes.indexOf(themeMode.value);
+  setTheme(themeModes[(current + 1) % themeModes.length] ?? defaultThemeMode);
 }
 
 function toggleLanguage(): void {
   setLocale(locale.value === 'zh' ? 'en' : 'zh');
-}
-
-function applyTheme(value: ThemeMode): void {
-  applyThemeMode(value);
 }
 
 function replaceQueryParameter(name: string, value: string): void {
@@ -309,11 +285,7 @@ function persistState(next: Partial<SavedState>): void {
   }
 
   Object.assign(savedState, next);
-  try {
-    window.localStorage.setItem(preferencesStorageKey, JSON.stringify(savedState));
-  } catch {
-    // Storage can be unavailable in private or restricted browsing contexts.
-  }
+  writePreferences(savedState);
 }
 
 function setTheme(value: string): void {
@@ -322,9 +294,9 @@ function setTheme(value: string): void {
   }
 
   themeMode.value = value;
-  applyTheme(value);
-  persistState({ theme: value });
-  replaceQueryParameter('theme', value);
+  applyThemeMode(value);
+  persistThemeMode(value);
+  syncThemeModeToQuery(value);
 }
 
 function setLocale(value: string): void {
@@ -341,6 +313,10 @@ function setLocale(value: string): void {
 function resetScrollPositions(): void {
   shellElement.value?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   workspaceElement.value?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+}
+
+function saveWorkspaceScrollPosition(): void {
+  saveScrollPosition(workspaceElement.value);
 }
 
 function focusSpecimen(specimenId: SpecimenId): void {
@@ -530,6 +506,7 @@ onMounted(() => {
   stopSystemThemeObservation = observeSystemTheme();
   window.addEventListener('popstate', handleLocationChange);
   window.addEventListener('hashchange', handleLocationChange);
+  window.addEventListener('pagehide', saveWorkspaceScrollPosition);
   /* Build the WebGL particle resources while idle so the first navigation
      pays no context-creation cost. */
   const prewarm = (): void => {
@@ -540,7 +517,9 @@ onMounted(() => {
   } else {
     window.setTimeout(prewarm, 1200);
   }
-  if (pendingSpecimenId.value !== null) {
+  // The nested workspace is recreated on reload, so native document scroll
+  // restoration cannot preserve it. A reload also takes priority over anchors.
+  if (!restoreScrollPosition(workspaceElement.value) && pendingSpecimenId.value !== null) {
     focusCurrentView(pendingSpecimenId.value);
   }
 });
@@ -556,6 +535,7 @@ onBeforeUnmount(() => {
   }
   window.removeEventListener('popstate', handleLocationChange);
   window.removeEventListener('hashchange', handleLocationChange);
+  window.removeEventListener('pagehide', saveWorkspaceScrollPosition);
 });
 </script>
 

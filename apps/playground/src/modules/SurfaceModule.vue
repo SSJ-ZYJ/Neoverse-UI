@@ -11,7 +11,6 @@ const presets: readonly SurfacePreset[] = [
   'subtle',
   'elevated',
   'inset',
-  'chrome',
   'glass-subtle',
   'glass-elevated',
   'glass-immersive',

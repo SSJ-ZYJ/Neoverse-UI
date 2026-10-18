@@ -2,19 +2,10 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import type { Locale, LocalizedText } from './playground-content';
 import { localize } from './playground-content';
+import type { LayoutPreviewRole } from './playground-types';
 import { resolvedTheme } from './theme-state';
 
 type TokenPreview = 'color' | 'space' | 'layout' | 'radius' | 'border' | 'border-style' | 'shadow';
-type LayoutPreviewRole =
-  | 'page'
-  | 'content'
-  | 'reading'
-  | 'reading-wide'
-  | 'padding-inline'
-  | 'padding-block'
-  | 'sidebar'
-  | 'sidebar-drawer'
-  | 'header';
 
 interface TokenRowProps {
   label: LocalizedText;

@@ -88,11 +88,11 @@
   }
 
   .ui-terminal-line[data-tone='success'] {
-    color: var(--neoverse-color-status-success);
+    color: var(--neoverse-effect-status-success-text);
   }
 
   .ui-terminal-line[data-tone='error'] {
-    color: var(--neoverse-color-status-danger);
+    color: var(--neoverse-effect-status-danger-text);
   }
 
   .ui-terminal-line[data-preformatted='true'] {
@@ -340,7 +340,7 @@
   }
 
   .ui-terminal-prompt[data-error='true'] .ui-terminal-prompt__symbol {
-    color: var(--neoverse-color-status-danger);
+    color: var(--neoverse-effect-status-danger-text);
   }
 
   @media (forced-colors: active) {

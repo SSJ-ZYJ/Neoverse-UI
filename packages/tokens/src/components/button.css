@@ -14,6 +14,8 @@
     --neoverse-icon-button-icon-size-md: var(--neoverse-icon-size-md);
     --neoverse-icon-button-icon-size-lg: var(--neoverse-icon-size-lg);
     /* Compatibility aliases use the Light tier; actual owners select their surface preset. */
+    --neoverse-control-button-glass-tint: var(--neoverse-material-glass-base-tint);
+    --neoverse-control-button-blur-scale: 1;
     --neoverse-control-button-filled-background: none;
     --neoverse-control-button-filled-fill: var(--neoverse-material-glass-subtle-background);
     --neoverse-control-button-filled-hover-background: none;
@@ -36,10 +38,10 @@
     --neoverse-control-button-edge: var(--neoverse-control-button-filled-shadow);
     --neoverse-control-button-edge-active: var(--neoverse-control-active-shadow);
     --neoverse-control-button-edge-hover: var(--neoverse-control-button-filled-hover-shadow);
-    /* The selected shared preset owns backdrop sampling. */
-    --neoverse-control-button-filter: var(--neoverse-material-glass-subtle-filter);
+    /* Compact sampling composes from the selected shared preset at its owner. */
+    --neoverse-control-button-filter: var(--neoverse-material-control-filter);
     --neoverse-control-button-edge-carrier: var(--neoverse-effect-command-edge-carrier);
-    --neoverse-control-button-refraction-gradient: var(--neoverse-effect-command-edge-field);
+    --neoverse-control-button-refraction-gradient: var(--neoverse-effect-button-edge-field);
     --neoverse-control-button-press-glow: var(--neoverse-effect-command-press-light);
     /* Keep the refraction field theme-owned and restrained. Dark and light
        can tune its opacity independently without painting a geometric border. */

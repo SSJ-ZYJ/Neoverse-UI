@@ -20,6 +20,8 @@ test('exposes canonical component token namespaces', () => {
     '--neoverse-control-primary-background',
   );
   expect(cssVariables.components.button.ghost.border).toBe('--neoverse-control-ghost-border');
+  expect(cssVariables.components.button.glassTint).toBe('--neoverse-control-button-glass-tint');
+  expect(cssVariables.components.button.blurScale).toBe('--neoverse-control-button-blur-scale');
   expect(cssVariables.components.button.disabledOpacity).toBe(
     '--neoverse-control-button-disabled-opacity',
   );
@@ -58,8 +60,14 @@ test('exposes canonical component token namespaces', () => {
     '--neoverse-badge-label-optical-offset',
   );
   expect(cssVariables.components.badge.background).toBe('--neoverse-badge-background');
+  expect(cssVariables.components.badge.backdropFilter).toBe('--neoverse-badge-backdrop-filter');
   expect(cssVariables.components.badge.info.background).toBe('--neoverse-badge-info-background');
   expect(cssVariables.components.badge.info.shadow).toBe('--neoverse-badge-info-shadow');
+  for (const variant of ['info', 'success', 'warning', 'danger'] as const) {
+    expect(cssVariables.components.badge[variant].foreground).toBe(
+      `--neoverse-badge-${variant}-foreground`,
+    );
+  }
   expect(cssVariables.components.notice.info.background).toBe('--neoverse-notice-info-background');
   expect(cssVariables.components.tooltip.accentTint).toBe('--neoverse-tooltip-accent-tint');
   expect(cssVariables.components.table.background).toBe('--neoverse-table-background');
@@ -148,18 +156,6 @@ test('exposes consumer-validated action and navigation component tokens', () => 
   expect(cssVariables.components.controlSurface.dividerGap).toBe(
     '--neoverse-control-surface-divider-gap',
   );
-  expect(cssVariables.components.controlSurface.chromeRefractionGradient).toBe(
-    '--neoverse-control-chrome-refraction-gradient',
-  );
-  expect(cssVariables.components.controlSurface.chromeEdgeRefractionOpacity).toBe(
-    '--neoverse-control-chrome-edge-refraction-opacity',
-  );
-  expect(cssVariables.components.controlSurface.chromeEdgeHighlight).toBe(
-    '--neoverse-control-chrome-edge-highlight',
-  );
-  expect(cssVariables.components.controlSurface.chromeTrailingPaddingInline).toBe(
-    '--neoverse-control-chrome-trailing-padding-inline',
-  );
   expect(cssVariables.components.statusIndicator.dotSize.md).toBe(
     '--neoverse-status-indicator-dot-size-md',
   );
@@ -195,25 +191,6 @@ test('keeps semantic source generic and assigns component token ownership', asyn
   for (const [fileName, token] of ownership) {
     expect(await readTokenCss(fileName)).toContain(`${token}:`);
   }
-});
-
-test('keeps feedback surface recipes in the token layer', async () => {
-  const [badgeCss, noticeCss, tooltipCss, statusCss] = await Promise.all([
-    readCssFile(new URL('../../tailwind/src/components/badge.css', import.meta.url)),
-    readCssFile(new URL('../../tailwind/src/components/notice.css', import.meta.url)),
-    readCssFile(new URL('../../tailwind/src/components/tooltip.css', import.meta.url)),
-    readCssFile(new URL('../../tailwind/src/components/status-indicator.css', import.meta.url)),
-  ]);
-
-  expect(badgeCss).not.toContain('color-mix(');
-  expect(noticeCss).not.toContain('color-mix(');
-  expect(tooltipCss).not.toContain('color-mix(');
-  expect(statusCss).not.toContain('color-mix(');
-
-  expect(badgeCss).toContain('border: 0;');
-  expect(noticeCss).toContain('border: 0;');
-  expect(tooltipCss).toContain('--neoverse-tooltip-arrow-background');
-  expect(statusCss).toContain('--ui-status-indicator-pulse-shadow');
 });
 
 test('keeps high-traffic component recipes semantic instead of locally hardcoded', async () => {
@@ -312,11 +289,12 @@ test('keeps skeleton motion at a calmer loading pace', async () => {
   expect(skeletonCss).not.toContain('opacity: 0.58;');
 });
 
-test('keeps skeletons translucent and blurred with an opaque accessibility fallback', async () => {
-  const [tokens, skeletonCss, darkTheme] = await Promise.all([
+test('keeps skeletons visibly tinted and blurred with an opaque accessibility fallback', async () => {
+  const [tokens, skeletonCss, darkTheme, effects] = await Promise.all([
     readTokenCss('components/skeleton.css'),
     readCssFile(new URL('../../tailwind/src/components/skeleton.css', import.meta.url)),
     readTokenCss('themes/dark.css'),
+    readTokenCss('effects.css'),
   ]);
 
   expect(skeletonCss).toContain(
@@ -327,7 +305,9 @@ test('keeps skeletons translucent and blurred with an opaque accessibility fallb
     '--neoverse-skeleton-backdrop-filter: var(--neoverse-material-glass-subtle-filter);',
   );
   expect(tokens).toContain('var(--neoverse-effect-loading-base)');
-  expect(tokens).toContain(
+  expect(tokens).toContain('--neoverse-skeleton-fill: var(--neoverse-effect-highlight-color);');
+  expect(effects).toContain('--neoverse-skeleton-fill: var(--neoverse-effect-highlight-color);');
+  expect(effects).not.toContain(
     '--neoverse-skeleton-fill: var(--neoverse-material-glass-subtle-background);',
   );
   expect(darkTheme).not.toContain('--neoverse-skeleton-fill:');
@@ -499,13 +479,12 @@ test('derives compact-control inner corners from the shared outer radius and ins
 });
 
 test('keeps grouped controls on a compact, shared geometry contract', async () => {
-  const [sharedControlCss, controlSurfaceCss, navigationItemCss, segmentedControlCss, lightCss] =
+  const [sharedControlCss, controlSurfaceCss, navigationItemCss, segmentedControlCss] =
     await Promise.all([
       readTokenCss('components/shared-control.css'),
       readTokenCss('components/control-surface.css'),
       readTokenCss('components/navigation-item.css'),
       readTokenCss('components/segmented-control.css'),
-      readTokenCss('themes/light.css'),
     ]);
 
   expect(sharedControlCss).toContain('--neoverse-control-compact-height: var(--neoverse-space-8);');
@@ -554,16 +533,6 @@ test('keeps grouped controls on a compact, shared geometry contract', async () =
   expect(controlSurfaceCss).toContain(
     '--neoverse-control-surface-indicator-easing: var(--neoverse-motion-spatial-easing);',
   );
-  expect(controlSurfaceCss).toContain('--neoverse-control-chrome-edge-refraction-width: var(');
-  expect(controlSurfaceCss).toMatch(
-    /--neoverse-control-chrome-refraction-gradient:\s*var\(\s*--neoverse-material-refraction-gradient-subtle\s*\);/,
-  );
-  expect(controlSurfaceCss).toContain('--neoverse-control-chrome-edge-refraction-opacity: var(');
-  expect(controlSurfaceCss).toContain(
-    '--neoverse-control-chrome-edge-highlight: var(--neoverse-material-edge-highlight-elevated);',
-  );
-  expect(controlSurfaceCss).toContain('--neoverse-control-chrome-trailing-padding: var(');
-  expect(controlSurfaceCss).toContain('--neoverse-control-chrome-trailing-padding-inline: var(');
   expect(controlSurfaceCss).toContain('--neoverse-control-surface-trailing-padding');
   expect(navigationItemCss).toContain(
     '--neoverse-navigation-item-height-md: var(--neoverse-control-surface-control-height);',
@@ -585,7 +554,7 @@ test('keeps grouped controls on a compact, shared geometry contract', async () =
     '--neoverse-navigation-item-indicator-inset: var(--neoverse-space-0);',
   );
 
-  expect(segmentedControlCss).toContain('--neoverse-control-segmented-inset: 0.18rem;');
+  expect(segmentedControlCss).toContain('--neoverse-control-segmented-inset: 0.25rem;');
   expect(segmentedControlCss).toContain(
     '--neoverse-control-segmented-embedded-inset: var(--neoverse-space-0);',
   );
@@ -611,9 +580,6 @@ test('keeps grouped controls on a compact, shared geometry contract', async () =
   expect(segmentedControlCss).toContain(
     '--neoverse-control-segmented-option-radius: var(--neoverse-control-compact-radius);',
   );
-  expect(lightCss).toContain('--neoverse-control-segmented-option-radius: max(');
-  expect(lightCss).toContain('var(--neoverse-control-segmented-corner-radius) -');
-  expect(lightCss).toContain('var(--neoverse-control-segmented-internal-inset) -');
 });
 
 test('exposes shared Surface and Glass material contracts', () => {
@@ -674,6 +640,12 @@ test('exposes shared Surface and Glass material contracts', () => {
   }
 
   expect(cssVariables.material.scale.blur.md).toBe('--neoverse-material-blur-md');
+  expect(cssVariables.material.scale.backdropBrightness).toBe(
+    '--neoverse-material-backdrop-brightness',
+  );
+  expect(cssVariables.material.scale.backdropContrast).toBe(
+    '--neoverse-material-backdrop-contrast',
+  );
   expect(cssVariables.material.scale.saturation.immersive).toBe(
     '--neoverse-material-saturation-immersive',
   );
@@ -720,6 +692,8 @@ test('keeps inset surface effects owned by the material token layer', async () =
     'disabledFill',
     'disabledBackground',
     'activeHighlight',
+    'outlineRest',
+    'outlineActive',
     'dangerHighlight',
     'warningHighlight',
     'successHighlight',

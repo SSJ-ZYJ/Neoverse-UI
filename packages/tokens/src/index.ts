@@ -35,6 +35,8 @@ const componentCssVariables = {
       md: '--neoverse-button-font-size-md',
       lg: '--neoverse-button-font-size-lg',
     },
+    glassTint: '--neoverse-control-button-glass-tint',
+    blurScale: '--neoverse-control-button-blur-scale',
     filled: {
       background: '--neoverse-control-button-filled-background',
       fill: '--neoverse-control-button-filled-fill',
@@ -161,6 +163,13 @@ const componentCssVariables = {
     focusOffset: '--neoverse-breadcrumb-focus-offset',
     focusRadius: '--neoverse-breadcrumb-focus-radius',
   },
+  dock: {
+    navigationTypeFactor: '--neoverse-dock-navigation-type-factor',
+    scale: {
+      md: '--neoverse-dock-scale-md',
+      lg: '--neoverse-dock-scale-lg',
+    },
+  },
   controlSurface: {
     gap: '--neoverse-control-surface-gap',
     itemGap: '--neoverse-control-surface-item-gap',
@@ -172,20 +181,13 @@ const componentCssVariables = {
     padding: '--neoverse-control-surface-padding',
     paddingBlock: '--neoverse-control-surface-padding-block',
     paddingInline: '--neoverse-control-surface-padding-inline',
+    trailingPaddingInline: '--neoverse-control-surface-trailing-padding-inline',
     navigationEdgeInset: '--neoverse-control-surface-navigation-edge-inset',
     dividerHeight: '--neoverse-control-surface-divider-height',
     dividerGap: '--neoverse-control-surface-divider-gap',
     dividerColor: '--neoverse-control-surface-divider-color',
     indicatorDuration: '--neoverse-control-surface-indicator-duration',
     indicatorEasing: '--neoverse-control-surface-indicator-easing',
-    chromeEdgeRefractionWidth: '--neoverse-control-chrome-edge-refraction-width',
-    chromeEdgeRefractionSoftness: '--neoverse-control-chrome-edge-refraction-softness',
-    chromeEdgeFilter: '--neoverse-control-chrome-edge-filter',
-    chromeRefractionGradient: '--neoverse-control-chrome-refraction-gradient',
-    chromeEdgeRefractionOpacity: '--neoverse-control-chrome-edge-refraction-opacity',
-    chromeEdgeHighlight: '--neoverse-control-chrome-edge-highlight',
-    chromeTrailingPadding: '--neoverse-control-chrome-trailing-padding',
-    chromeTrailingPaddingInline: '--neoverse-control-chrome-trailing-padding-inline',
   },
   statusIndicator: {
     gap: {
@@ -275,23 +277,40 @@ const componentCssVariables = {
   },
   badge: {
     labelOpticalOffset: '--neoverse-badge-label-optical-offset',
+    fontFamily: '--neoverse-badge-font-family',
+    fontWeight: '--neoverse-badge-font-weight',
+    fontSize: {
+      sm: '--neoverse-badge-font-size-sm',
+      md: '--neoverse-badge-font-size-md',
+      lg: '--neoverse-badge-font-size-lg',
+    },
+    lineHeight: {
+      sm: '--neoverse-badge-line-height-sm',
+      md: '--neoverse-badge-line-height-md',
+      lg: '--neoverse-badge-line-height-lg',
+    },
     background: '--neoverse-badge-background',
+    backdropFilter: '--neoverse-badge-backdrop-filter',
     foreground: '--neoverse-badge-foreground',
     shadow: '--neoverse-badge-shadow',
     info: {
       background: '--neoverse-badge-info-background',
+      foreground: '--neoverse-badge-info-foreground',
       shadow: '--neoverse-badge-info-shadow',
     },
     success: {
       background: '--neoverse-badge-success-background',
+      foreground: '--neoverse-badge-success-foreground',
       shadow: '--neoverse-badge-success-shadow',
     },
     warning: {
       background: '--neoverse-badge-warning-background',
+      foreground: '--neoverse-badge-warning-foreground',
       shadow: '--neoverse-badge-warning-shadow',
     },
     danger: {
       background: '--neoverse-badge-danger-background',
+      foreground: '--neoverse-badge-danger-foreground',
       shadow: '--neoverse-badge-danger-shadow',
     },
   },
@@ -490,6 +509,13 @@ const componentCssVariables = {
     hoverShadow: '--neoverse-form-control-hover-shadow',
     focusShadow: '--neoverse-form-control-focus-shadow',
     filter: '--neoverse-form-control-filter',
+    stepInlineSize: '--neoverse-input-step-inline-size',
+    stepInset: '--neoverse-input-step-inset',
+    stepRadius: '--neoverse-input-step-radius',
+    stepForeground: '--neoverse-input-step-foreground',
+    stepHoverBackground: '--neoverse-input-step-hover-background',
+    stepActiveBackground: '--neoverse-input-step-active-background',
+    stepIconSize: '--neoverse-input-step-icon-size',
     validationError: '--neoverse-form-control-validation-error',
     validationWarning: '--neoverse-form-control-validation-warning',
     validationSuccess: '--neoverse-form-control-validation-success',
@@ -497,7 +523,12 @@ const componentCssVariables = {
     validationWarningShadow: '--neoverse-form-control-validation-warning-shadow',
     validationSuccessShadow: '--neoverse-form-control-validation-success-shadow',
     choiceSize: '--neoverse-choice-control-size',
+    choiceAccent: '--neoverse-choice-control-accent',
+    radioIndicatorSize: '--neoverse-radio-indicator-size',
     choiceActiveBackground: '--neoverse-choice-control-active-background',
+    choiceActiveForeground: '--neoverse-choice-control-active-foreground',
+    switchThumbBackground: '--neoverse-switch-thumb-background',
+    switchThumbActiveBackground: '--neoverse-switch-thumb-active-background',
     switchInlineSize: '--neoverse-switch-inline-size',
     switchBlockSize: '--neoverse-switch-block-size',
     fieldGap: '--neoverse-field-gap',
@@ -906,9 +937,13 @@ export const cssVariables = {
       selectedChoiceFill: '--neoverse-effect-choice-selected-fill',
       selectedChoiceBorder: '--neoverse-effect-choice-selected-border',
       selectedChoiceShadow: '--neoverse-effect-choice-selected-shadow',
+      filledChoiceAccent: '--neoverse-effect-choice-filled-accent',
+      filledChoiceField: '--neoverse-effect-choice-filled-field',
+      filledChoiceOpaqueField: '--neoverse-effect-choice-filled-field-opaque',
+      filledChoiceForeground: '--neoverse-effect-choice-filled-foreground',
+      filledChoiceShadow: '--neoverse-effect-choice-filled-shadow',
       commandEdgeField: '--neoverse-effect-command-edge-field',
       commandPressLight: '--neoverse-effect-command-press-light',
-      chromeShadow: '--neoverse-effect-floating-chrome-shadow',
     },
     disabledContentOpacity: '--neoverse-effect-disabled-content-opacity',
     hoverOpacity: '--neoverse-effect-hover-opacity',
@@ -921,6 +956,9 @@ export const cssVariables = {
   },
   material: {
     scale: {
+      backdropBrightness: '--neoverse-material-backdrop-brightness',
+      backdropContrast: '--neoverse-material-backdrop-contrast',
+      refractionStrength: '--neoverse-material-refraction-strength',
       transparency: {
         opaque: '--neoverse-material-transparency-opaque',
         subtle: '--neoverse-material-transparency-subtle',
@@ -1018,6 +1056,8 @@ export const cssVariables = {
         disabledFill: '--neoverse-surface-inset-disabled-fill',
         disabledBackground: '--neoverse-surface-inset-disabled-background',
         activeHighlight: '--neoverse-surface-inset-active-highlight',
+        outlineRest: '--neoverse-surface-inset-outline-rest',
+        outlineActive: '--neoverse-surface-inset-outline-active',
         dangerHighlight: '--neoverse-surface-inset-danger-highlight',
         warningHighlight: '--neoverse-surface-inset-warning-highlight',
         successHighlight: '--neoverse-surface-inset-success-highlight',
@@ -1226,6 +1266,7 @@ export type ActionToken = keyof CssVariables['components']['action'];
 export type NavigationItemToken = keyof CssVariables['components']['navigationItem'];
 export type BreadcrumbToken = keyof CssVariables['components']['breadcrumb'];
 export type ControlSurfaceToken = keyof CssVariables['components']['controlSurface'];
+export type DockToken = keyof CssVariables['components']['dock'];
 export type StatusIndicatorToken = keyof CssVariables['components']['statusIndicator'];
 export type SegmentedControlToken = keyof CssVariables['components']['segmentedControl'];
 export type BadgeToken = keyof CssVariables['components']['badge'];

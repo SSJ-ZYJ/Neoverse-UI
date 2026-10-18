@@ -141,7 +141,7 @@ const copy = {
       :description="localize(copy.disclosure.description, props.locale)"
     >
       <MaterialBackdrop edge="inset">
-        <div class="grid items-start gap-3 md:grid-cols-2">
+        <div class="playground-preview-columns">
           <UiDisclosure
             :summary="localize(copy.disclosure.closed, props.locale)"
             data-data-display-disclosure="closed"
@@ -188,7 +188,7 @@ const copy = {
     <LabSpecimenSection
       id="data-display-timeline"
       :title="localize(localized('Timeline', '时间线'), props.locale)"
-      :description="localize(localized('Continuous vertical milestones with native list and date semantics.', '连续垂直里程碑，保留原生列表和日期语义。'), props.locale)"
+      :description="localize(localized('Glass milestones with a continuous rail and dates leading each entry.', '玻璃节点沿连续轨道排列，日期先于标题呈现。'), props.locale)"
     >
       <MaterialBackdrop edge="inset">
         <UiTimeline
@@ -201,7 +201,7 @@ const copy = {
     <LabSpecimenSection
       id="data-display-step-flow"
       :title="localize(localized('Step flow', '步骤流'), props.locale)"
-      :description="localize(localized('Numbered steps with consumer-owned state and container-responsive layout.', '编号步骤由消费端管理状态，并随容器宽度自适应。'), props.locale)"
+      :description="localize(localized('Glass steps distinguish completed, current and upcoming stages, adapting to the available width.', '玻璃步骤区分已完成、当前与待完成阶段，并随可用宽度调整排列。'), props.locale)"
     >
       <MaterialBackdrop edge="inset">
         <UiStepFlow

@@ -3,7 +3,6 @@ import { fileURLToPath } from 'node:url';
 
 const output = new URL('../dist/contract.css', import.meta.url);
 const buttonSource = new URL('../src/components/button.css', import.meta.url);
-const badgeSource = new URL('../src/components/badge.css', import.meta.url);
 const navigationItemSource = new URL('../src/components/navigation-item.css', import.meta.url);
 const tooltipSource = new URL('../src/components/tooltip.css', import.meta.url);
 const componentsOutput = new URL('../dist/components.css', import.meta.url);
@@ -16,7 +15,6 @@ try {
   const [
     css,
     buttonCss,
-    badgeCss,
     navigationItemCss,
     tooltipCss,
     flattenedComponentsCss,
@@ -27,7 +25,6 @@ try {
   ] = await Promise.all([
     Bun.file(output).text(),
     Bun.file(buttonSource).text(),
-    Bun.file(badgeSource).text(),
     Bun.file(navigationItemSource).text(),
     Bun.file(tooltipSource).text(),
     Bun.file(componentsOutput).text(),
@@ -363,15 +360,20 @@ try {
     '--neoverse-control-segmented-filter',
     '--neoverse-control-active-border',
     '--neoverse-badge-background',
+    '--neoverse-badge-backdrop-filter',
     '--neoverse-badge-foreground',
     '--neoverse-badge-shadow',
     '--neoverse-badge-info-background',
+    '--neoverse-badge-info-foreground',
     '--neoverse-badge-info-shadow',
     '--neoverse-badge-success-background',
+    '--neoverse-badge-success-foreground',
     '--neoverse-badge-success-shadow',
     '--neoverse-badge-warning-background',
+    '--neoverse-badge-warning-foreground',
     '--neoverse-badge-warning-shadow',
     '--neoverse-badge-danger-background',
+    '--neoverse-badge-danger-foreground',
     '--neoverse-badge-danger-shadow',
     '--neoverse-notice-neutral-background',
     '--neoverse-notice-neutral-shadow',
@@ -421,17 +423,18 @@ try {
   const missingValues = expectedValues.filter((value) => !css.includes(value));
   const expectedFragments = [
     'background-color:color-mix(in srgb',
-    'background-image:var(--neoverse-material-refraction-gradient)',
+    'mask-image:var(--neoverse-material-refraction-gradient)',
     'backdrop-filter:var(--neoverse-material-filter)',
-    'backdrop-filter:var(--neoverse-material-edge-filter)',
+    'mix-blend-mode:normal',
     'filter:var(--neoverse-material-edge-refraction-softness)',
     'opacity:var(--neoverse-material-edge-refraction-opacity)',
     'data-neoverse-glass-renderer=webgl',
+    'data-neoverse-glass-renderer=native',
     '[data-neoverse-glass-renderer=webgl]',
     'data-neoverse-glass-edge-pass=css',
     'data-neoverse-surface-hover=static',
-    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow)',
-    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow);-webkit-backdrop-filter:var(--neoverse-material-filter);backdrop-filter:var(--neoverse-material-filter);background-clip:padding-box',
+    ':is([data-neoverse-glass-renderer=webgl],[data-neoverse-glass-renderer=native]) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow)',
+    ':is([data-neoverse-glass-renderer=webgl],[data-neoverse-glass-renderer=native]) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow);-webkit-backdrop-filter:var(--neoverse-material-filter);backdrop-filter:var(--neoverse-material-filter);background-clip:padding-box',
     'var(--neoverse-material-inner-glow)',
     'var(--neoverse-material-seam-glow)',
     'var(--neoverse-material-bloom)',
@@ -465,9 +468,6 @@ try {
     '.ui-button{',
     '.ui-button--primary{',
     '.ui-button--secondary{',
-    'background:var(--neoverse-badge-background)',
-    'box-shadow:var(--neoverse-badge-shadow)',
-    'color:var(--neoverse-badge-foreground)',
     'border:0',
   ];
   const missingFragments = expectedFragments.filter((fragment) => !css.includes(fragment));
@@ -497,7 +497,7 @@ try {
     '.ui-icon-button--stretch {',
     '.ui-icon-button__content {',
     'border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)',
-    'var(--neoverse-control-button-border);',
+    'var(--neoverse-material-border);',
     'background-clip: padding-box;',
     'overflow: hidden;',
     '.ui-button > .ui-button__edge-field',
@@ -505,24 +505,6 @@ try {
   ];
   const missingButtonFragments = expectedButtonFragments.filter(
     (fragment) => !buttonCss.includes(fragment),
-  );
-  const expectedBadgeFragments = [
-    '--neoverse-badge-background',
-    '--neoverse-badge-foreground',
-    '--neoverse-badge-shadow',
-    '--neoverse-badge-info-background',
-    '--neoverse-badge-info-shadow',
-    '--neoverse-badge-success-background',
-    '--neoverse-badge-success-shadow',
-    '--neoverse-badge-warning-background',
-    '--neoverse-badge-warning-shadow',
-    '--neoverse-badge-danger-background',
-    '--neoverse-badge-danger-shadow',
-    'border: 0;',
-    'color: var(--neoverse-color-status-info);',
-  ];
-  const missingBadgeFragments = expectedBadgeFragments.filter(
-    (fragment) => !badgeCss.includes(fragment),
   );
   const ghostActiveCss =
     buttonCss.match(
@@ -571,7 +553,8 @@ try {
     '.ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface]',
     '--neoverse-material-border: transparent;',
     '--neoverse-material-hover-border: transparent;',
-    'backdrop-filter: var(--neoverse-material-glass-subtle-filter);',
+    'backdrop-filter: var(--neoverse-material-filter);',
+    'clip-path: shape(',
   ];
   const missingTooltipFragments = expectedTooltipFragments.filter(
     (fragment) => !tooltipCss.includes(fragment),
@@ -587,7 +570,6 @@ try {
     missingButtonFragments.length > 0 ||
     missingGhostActiveFragments.length > 0 ||
     emittedForbiddenButtonFragments.length > 0 ||
-    missingBadgeFragments.length > 0 ||
     missingProseFragments.length > 0 ||
     missingNavigationMotionFragments.length > 0 ||
     missingTooltipFragments.length > 0 ||
@@ -619,9 +601,6 @@ try {
         : '',
       emittedForbiddenButtonFragments.length > 0
         ? `Forbidden button edge fragments: ${emittedForbiddenButtonFragments.join(', ')}`
-        : '',
-      missingBadgeFragments.length > 0
-        ? `Missing badge token fragments: ${missingBadgeFragments.join(', ')}`
         : '',
       missingProseFragments.length > 0
         ? `Missing prose semantic fragments: ${missingProseFragments.join(', ')}`

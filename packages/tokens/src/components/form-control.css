@@ -24,6 +24,13 @@
       var(--neoverse-shadow-control);
     --neoverse-form-control-focus-shadow: var(--neoverse-form-control-focus-depth-shadow);
     --neoverse-form-control-filter: var(--neoverse-surface-inset-filter);
+    --neoverse-input-step-inline-size: var(--neoverse-space-7);
+    --neoverse-input-step-inset: var(--neoverse-space-1);
+    --neoverse-input-step-radius: var(--neoverse-radius-control-inner);
+    --neoverse-input-step-foreground: var(--neoverse-color-text-secondary);
+    --neoverse-input-step-hover-background: var(--neoverse-control-hover-background);
+    --neoverse-input-step-active-background: var(--neoverse-effect-press-wash);
+    --neoverse-input-step-icon-size: var(--neoverse-icon-size-sm);
     --neoverse-form-control-validation-error: var(--neoverse-color-status-danger);
     --neoverse-form-control-validation-warning: var(--neoverse-color-status-warning);
     --neoverse-form-control-validation-success: var(--neoverse-color-status-success);
@@ -35,22 +42,31 @@
       --neoverse-surface-inset-success-highlight
     );
     --neoverse-choice-control-size: var(--neoverse-space-5);
-    --neoverse-choice-control-radius: var(--neoverse-radius-sm);
+    --neoverse-choice-control-radius: var(--neoverse-radius-xs);
     --neoverse-choice-control-indicator-size: var(--neoverse-space-3);
+    --neoverse-radio-indicator-size: var(--neoverse-space-2);
+    --neoverse-choice-control-accent: var(--neoverse-effect-choice-filled-accent);
     --neoverse-choice-control-background: var(--neoverse-surface-inset-rest-background);
     --neoverse-choice-control-hover-background: var(--neoverse-surface-inset-hover-background);
-    --neoverse-choice-control-active-background: var(--neoverse-control-primary-background);
-    --neoverse-choice-control-active-foreground: var(--neoverse-control-primary-foreground);
+    --neoverse-choice-control-active-background: var(--neoverse-effect-choice-filled-field);
+    --neoverse-choice-control-active-foreground: var(--neoverse-effect-choice-filled-foreground);
     --neoverse-choice-control-shadow: var(--neoverse-shadow-inset);
-    --neoverse-choice-control-active-shadow: var(--neoverse-control-primary-shadow);
+    --neoverse-choice-control-active-shadow: var(--neoverse-effect-choice-filled-shadow);
     --neoverse-choice-control-disabled-opacity: var(--neoverse-effect-disabled-content-opacity);
     --neoverse-choice-control-label-gap: var(--neoverse-space-2);
     --neoverse-choice-control-group-gap: var(--neoverse-space-3);
     --neoverse-switch-inline-size: var(--neoverse-space-11);
     --neoverse-switch-block-size: var(--neoverse-space-6);
-    --neoverse-switch-thumb-size: var(--neoverse-space-5);
-    --neoverse-switch-thumb-inset: var(--neoverse-border-width-strong);
-    --neoverse-switch-thumb-background: var(--neoverse-color-text-primary);
+    --neoverse-switch-thumb-size: calc(
+      var(--neoverse-space-5) -
+      var(--neoverse-border-width-strong)
+    );
+    --neoverse-switch-thumb-inset: calc(
+      (var(--neoverse-switch-block-size) - var(--neoverse-switch-thumb-size)) /
+      2
+    );
+    --neoverse-switch-thumb-background: var(--neoverse-color-neutral-50);
+    --neoverse-switch-thumb-active-background: var(--neoverse-color-white);
     --neoverse-switch-thumb-shadow: var(--neoverse-shadow-control);
     --neoverse-field-gap: var(--neoverse-space-2);
     --neoverse-field-label-gap: var(--neoverse-space-1);

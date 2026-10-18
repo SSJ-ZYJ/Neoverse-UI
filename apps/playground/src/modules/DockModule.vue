@@ -46,7 +46,7 @@ const languageOptions = computed(() => [
           </header>
           <div class="playground-dock-preview scrollbar-immersive" data-dock-preview>
             <div class="playground-dock-preview__content">
-              <UiDock :aria-label="localize(copy.ariaLabel, props.locale)">
+              <UiDock scale="md" :aria-label="localize(copy.ariaLabel, props.locale)">
                 <UiNavigationItem
                   v-for="item in navigationItems"
                   :key="item.id"

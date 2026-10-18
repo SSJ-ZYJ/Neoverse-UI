@@ -82,7 +82,7 @@
       "name": "UiInput",
       "vueType": "InputProps",
       "reactType": "UiInputProps",
-      "props": ["validation", "disabled"],
+      "props": ["validation", "disabled", "incrementLabel", "decrementLabel"],
       "aliases": {
         "value": ["modelValue", "value"],
         "readonly": ["readonly", "readOnly"]

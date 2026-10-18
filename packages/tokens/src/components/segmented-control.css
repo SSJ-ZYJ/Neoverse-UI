@@ -21,9 +21,9 @@
     /* Compatibility edge hooks; the selected shared tier owns the plate. */
     --neoverse-control-segmented-edge-refraction-opacity: 0;
     --neoverse-control-segmented-edge-display: none;
-    /* Geometry mirrors the deployed Neoverse segmented control. Embedded
-       controls do not add a second inset; their parent chrome owns spacing. */
-    --neoverse-control-segmented-inset: 0.18rem;
+    /* Standalone controls keep a deliberate inset around their active plates.
+       Embedded controls rely on parent chrome for edge spacing. */
+    --neoverse-control-segmented-inset: 0.25rem;
     --neoverse-control-segmented-embedded-inset: var(--neoverse-space-0);
     --neoverse-control-segmented-corner-radius: var(--neoverse-control-corner-radius);
     --neoverse-control-segmented-internal-inset: var(--neoverse-control-segmented-inset);

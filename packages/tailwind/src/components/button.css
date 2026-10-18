@@ -3,6 +3,9 @@
      sampled plane and depth without painting extra rings. Ghost is deliberately
      borderless so the surrounding surface remains visible in both themes. */
   .ui-button {
+    /* Native button chrome can paint a platform face underneath a translucent
+       authored background. Only the shared material may paint this control. */
+    appearance: none;
     position: relative;
     display: inline-flex;
     flex-shrink: 0;
@@ -13,6 +16,7 @@
     padding-inline: var(--neoverse-button-padding-inline-md);
     font-family: var(--neoverse-font-family-sans);
     font-weight: var(--neoverse-font-weight-medium);
+    background: transparent;
     touch-action: manipulation;
     transform: none;
     cursor: pointer;
@@ -151,9 +155,8 @@
 
   .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      var(--neoverse-control-button-border);
-    background-color: var(--neoverse-material-background);
-    background-image: none;
+      var(--neoverse-material-border);
+    background: var(--neoverse-material-background);
     background-clip: padding-box;
     box-shadow: var(--neoverse-material-shadow);
     overflow: hidden;
@@ -187,6 +190,7 @@
     z-index: 0;
     inset: 0;
     border-radius: inherit;
+    background-color: var(--neoverse-control-button-tone-fill);
     background-image: var(--neoverse-control-button-filled-background);
     pointer-events: none;
   }
@@ -223,7 +227,9 @@
     z-index: 0;
     inset: 0;
     border-radius: inherit;
-    background-image: var(--neoverse-material-refraction-gradient);
+    /* Coverage only: RGB in the gradient never paints an edge colour. */
+    mask-image: var(--neoverse-material-refraction-gradient);
+    mask-mode: alpha;
     opacity: var(--neoverse-material-edge-refraction-opacity);
     pointer-events: none;
     filter: var(--neoverse-material-edge-refraction-softness);
@@ -234,6 +240,20 @@
   .ui-button--ghost > .ui-button__edge-field,
   .ui-button[data-surface='none'] > .ui-button__edge-field {
     display: none;
+  }
+
+  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
+    .ui-button:not([data-neoverse-glass-edge-pass='css'])
+    > .ui-button__edge-field {
+    display: none;
+  }
+
+  /* The document canvas cannot paint inside the browser's native top layer. */
+  [data-neoverse-glass-renderer='webgl']
+    :is(:popover-open, :modal)
+    .ui-button
+    > .ui-button__edge-field {
+    display: block;
   }
 
   .ui-button--primary {
@@ -331,6 +351,12 @@
   .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
     .ui-button--ghost
   ) {
+    /* Shared recipes retain tier alpha and apply compact, theme-owned sampling. */
+    --neoverse-material-filter: var(--neoverse-control-button-filter);
+    --neoverse-material-glass-subtle-tint: var(--neoverse-control-button-glass-tint);
+    --neoverse-material-glass-elevated-tint: var(--neoverse-control-button-glass-tint);
+    --neoverse-material-glass-immersive-tint: var(--neoverse-control-button-glass-tint);
+    --neoverse-material-background-fallback: var(--neoverse-control-button-glass-tint);
     --neoverse-material-refraction-gradient: var(--neoverse-control-button-refraction-gradient);
     --neoverse-material-edge-refraction-opacity: var(
       --neoverse-control-button-edge-refraction-opacity

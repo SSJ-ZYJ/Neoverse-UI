@@ -306,7 +306,7 @@ const languageOptions = computed(
         >
           <UiDock
             :compact="compactNavigation"
-            :scale="compactNavigation ? 'md' : 'lg'"
+            scale="md"
             class="consumer-parity-dock"
             :aria-label="localize(copy.navigation.ariaLabel, props.locale)"
             data-consumer-parity="floating-navigation"

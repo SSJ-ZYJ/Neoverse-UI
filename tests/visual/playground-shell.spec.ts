@@ -759,12 +759,12 @@ test('playground shows the Neoverse wordmark and site icon', async ({ page }) =>
   expect((await page.request.get(wordmarkUrl)).status()).toBe(200);
 
   const favicon = page.locator('link[rel~="icon"]');
-  await expect(favicon).toHaveAttribute('type', 'image/svg+xml');
-  await expect(favicon).toHaveAttribute('href', /\/assets\/neoverse-site-icon\.svg/);
+  await expect(favicon).toHaveAttribute('type', 'image/png');
+  await expect(favicon).toHaveAttribute('href', /\/assets\/neoverse-site-icon\.png/);
   const siteIconUrl = await favicon.evaluate((link: HTMLLinkElement) => link.href);
   const siteIconResponse = await page.request.get(siteIconUrl);
   expect(siteIconResponse.status()).toBe(200);
-  expect(siteIconResponse.headers()['content-type']).toContain('image/svg+xml');
+  expect(siteIconResponse.headers()['content-type']).toContain('image/png');
 });
 
 test('main playground renders the selected module directly instead of through an adaptive iframe', async ({
@@ -870,6 +870,20 @@ test('playground demo actions keep intentional navigation without placeholder ju
   await expect(page).toHaveURL(/\/react-fixture\?lang=en$/);
 
   expect(await page.locator('a[href^="https://github.com/"]').count()).toBe(0);
+});
+
+test('React runtime validation returns to the consumer parity section', async ({ page }) => {
+  for (const locale of ['en', 'zh'] as const) {
+    await page.goto(`/react-fixture?lang=${locale}`, { waitUntil: 'domcontentloaded' });
+    const returnLink = page.getByRole('link', {
+      name: locale === 'zh' ? '返回设计实验室' : 'Back to Design Lab',
+    });
+
+    await expect(returnLink).toHaveAttribute('href', `/?lang=${locale}#consumer-parity`);
+    await returnLink.click();
+    await expect(page).toHaveURL(new RegExp(`\\?lang=${locale}#consumer-parity$`));
+    await expect(page.locator('[data-contract-runtime-entry]')).toBeVisible();
+  }
 });
 
 test('reading composition consumes the prose foundation with an independent reading width role', async ({
@@ -1017,7 +1031,7 @@ for (const theme of ['light', 'dark'] as const) {
     expect(tableMaterial.borderWidth).toBe('0px');
     expect(tableMaterial.backgroundImage).toBe('none');
     expect(tableMaterial.boxShadow).not.toBe('none');
-    expect(tableMaterial.backdropFilter).toBe('none');
+    expect(tableMaterial.backdropFilter).toContain('blur(12px)');
     expect(
       await table.locator('..').evaluate((element) => getComputedStyle(element).borderRadius),
     ).toBe('0px');
@@ -1078,7 +1092,7 @@ for (const theme of ['light', 'dark'] as const) {
       });
     expect(cellMaterial.backgroundImage).toBe('none');
     expect(cellMaterial.boxShadow).not.toBe('none');
-    expect(cellMaterial.backdropFilter).toContain('blur(12px)');
+    expect(cellMaterial.backdropFilter).toBe('none');
 
     const headerMaterial = await table
       .locator('thead th')
@@ -1242,7 +1256,6 @@ for (const theme of ['light', 'dark'] as const) {
       waitUntil: 'domcontentloaded',
     });
 
-    const badge = page.locator('#status-feedback-badge .ui-badge--info');
     const statusDot = page.locator('#status-feedback-indicator .ui-status-indicator__dot').first();
     const notice = page.locator('#status-feedback-notice .ui-notice--info');
     const tooltip = page.locator(
@@ -1252,36 +1265,10 @@ for (const theme of ['light', 'dark'] as const) {
       '#status-feedback-tooltip [data-qa-context="gradient"] .ui-tooltip-surface--neutral',
     );
 
-    await expect(badge).toBeVisible();
     await expect(statusDot).toBeVisible();
     await expect(notice).toBeVisible();
     await expect(tooltip).toBeVisible();
     await expect(neutralTooltip).toBeVisible();
-
-    const badgeStyle = await badge.evaluate((element) => {
-      const style = getComputedStyle(element);
-      return {
-        borderWidth: style.borderTopWidth,
-        backgroundImage: style.backgroundImage,
-        boxShadow: style.boxShadow,
-      };
-    });
-    expect(badgeStyle.borderWidth).toBe('0px');
-    expect(badgeStyle.backgroundImage).not.toBe('none');
-    expect(badgeStyle.boxShadow).not.toBe('none');
-    expect(
-      badgeStyle.backgroundImage.match(/radial-gradient/g)?.length ?? 0,
-    ).toBeGreaterThanOrEqual(4);
-
-    const semanticBadgeBackgrounds = await page
-      .locator(
-        '#status-feedback-badge :is(.ui-badge--info, .ui-badge--success, .ui-badge--warning, .ui-badge--danger)',
-      )
-      .evaluateAll((elements) =>
-        elements.map((element) => getComputedStyle(element).backgroundImage),
-      );
-    expect(semanticBadgeBackgrounds).toHaveLength(4);
-    expect(new Set(semanticBadgeBackgrounds).size).toBe(4);
 
     const noticeStyle = await notice.evaluate((element) => {
       const style = getComputedStyle(element);
@@ -1306,7 +1293,9 @@ for (const theme of ['light', 'dark'] as const) {
         borderWidth: style.borderTopWidth,
         boxShadow: style.boxShadow,
         backdropFilter: style.backdropFilter,
-        edgeBackgroundImage: edge.backgroundImage,
+        plateBackground: edge.backgroundColor,
+        plateFilter: edge.backdropFilter,
+        plateClip: edge.clipPath,
         edgeOpacity: Number(edge.opacity),
         arrowBorderWidth: arrow.borderTopWidth,
         arrowBoxShadow: arrow.boxShadow,
@@ -1314,19 +1303,23 @@ for (const theme of ['light', 'dark'] as const) {
     });
     expect(tooltipStyle.borderColor).toBe('rgba(0, 0, 0, 0)');
     expect(tooltipStyle.borderWidth).toBe('0px');
-    expect(tooltipStyle.boxShadow).not.toBe('none');
+    expect(tooltipStyle.boxShadow, 'A rectangular shadow must not cross the pointer join').toBe(
+      'none',
+    );
     expect(
       tooltipStyle.boxShadow.includes('inset'),
       'accent Tooltip must not render a continuous inset top stroke',
     ).toBe(false);
-    expect(tooltipStyle.edgeBackgroundImage).not.toBe('none');
+    expect(tooltipStyle.plateBackground).not.toBe('rgba(0, 0, 0, 0)');
+    expect(tooltipStyle.plateFilter).toContain('blur(');
+    expect(tooltipStyle.plateClip).toContain('shape(');
     expect(tooltipStyle.edgeOpacity).toBeGreaterThan(0);
     expect(tooltipStyle.arrowBorderWidth).toBe('0px');
     expect(tooltipStyle.arrowBoxShadow.includes('inset')).toBe(false);
-    expect(tooltipStyle.backdropFilter).not.toBe('none');
+    expect(tooltipStyle.backdropFilter, 'The complete plate owns backdrop sampling').toBe('none');
 
     const neutralArrowContrast = await neutralTooltip.evaluate((element) => {
-      const body = getComputedStyle(element).backgroundColor;
+      const body = getComputedStyle(element, '::before').backgroundColor;
       const arrow = getComputedStyle(element, '::after').backgroundColor;
       const alphaOf = (value: string): number => {
         const modern = value.match(/\/\s*([\d.]+)\)/);
@@ -1344,12 +1337,12 @@ for (const theme of ['light', 'dark'] as const) {
     });
     expect(
       neutralArrowContrast.arrow,
-      'neutral Tooltip pointer must carry a visible fill',
-    ).not.toBe('rgba(0, 0, 0, 0)');
+      'The pointer marker must not paint a separate material',
+    ).toBe('rgba(0, 0, 0, 0)');
     expect(
-      neutralArrowContrast.arrowAlpha,
-      'small neutral Tooltip pointer needs denser fill than the broad body plane',
-    ).toBeGreaterThan(neutralArrowContrast.bodyAlpha);
+      neutralArrowContrast.bodyAlpha,
+      'The unified tooltip plate must retain its translucent fill',
+    ).toBeGreaterThan(0);
 
     expect(await statusDot.evaluate((element) => getComputedStyle(element).boxShadow)).not.toBe(
       'none',
@@ -2542,7 +2535,7 @@ test('dock is discoverable as a standalone component specimen', async ({ page },
   await expect(specimen).toBeVisible();
   const docks = specimen.locator('.ui-dock');
   await expect(docks).toHaveCount(2);
-  await expect(docks.first()).toHaveAttribute('data-surface', 'chrome');
+  await expect(docks.first()).toHaveAttribute('data-surface', 'glass-subtle');
   await expect(docks.first()).toHaveClass(/ui-control-surface--scale-md/);
   await expect(docks.nth(1)).toHaveClass(/ui-dock--compact/);
   await expect(docks.nth(1)).toHaveClass(/ui-control-surface--scale-md/);
@@ -2735,6 +2728,29 @@ test('shared navigation indicator stays aligned inside the specimen stage', asyn
   expect(moved.width).toBeLessThanOrEqual(0.2);
   expect(moved.height).toBeLessThanOrEqual(0.2);
 });
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`buttons match segmented option corner radius / ${theme}`, async ({ page }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop', 'Desktop control corner geometry.');
+    await page.goto(`/?theme=${theme}&lang=en#controls-button`, {
+      waitUntil: 'domcontentloaded',
+    });
+    const radii = await page.locator('#controls-button').evaluate((section) => {
+      const button = section.querySelector<HTMLElement>(
+        '.ui-button:not(.ui-icon-button):not(.ui-action)',
+      );
+      const option = section.querySelector<HTMLElement>('.ui-segmented-control__option');
+      if (button === null || option === null) {
+        throw new Error('Button and segmented option examples are required');
+      }
+      return {
+        button: getComputedStyle(button).borderTopLeftRadius,
+        option: getComputedStyle(option).borderTopLeftRadius,
+      };
+    });
+    expect(radii.option).toBe(radii.button);
+  });
+}
 
 for (const theme of ['light', 'dark'] as const) {
   test(`grouped controls preserve concentric corners at both scales / ${theme}`, async ({
@@ -3162,8 +3178,8 @@ for (const theme of ['light', 'dark'] as const) {
       };
     });
     expect(metrics.surfaceFilter).toBe('none');
-    expect(metrics.cellFilter).toContain('blur(12px)');
-    expect(metrics.filter).toBe('none');
+    expect(metrics.cellFilter).toBe('none');
+    expect(metrics.filter).toContain('blur(12px)');
     expect(metrics.background).toBe('none');
     expect(metrics.border).toBe('0px');
     expect(metrics.cellBorder).not.toBe('0px');
@@ -3256,7 +3272,7 @@ test('Glass preview stages reuse one controlled gradient without raster backdrop
   expect(darkStages.every(({ backgroundImage }) => !backgroundImage.includes('url('))).toBe(true);
 });
 
-test('shell segmented controls keep their own Glass surface inside the Glass header', async ({
+test('shell segmented controls keep their Glass surface and outer inset in the header', async ({
   page,
 }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'Pointer hover regression is desktop-specific.');
@@ -3270,6 +3286,28 @@ test('shell segmented controls keep their own Glass surface inside the Glass hea
     .first();
   await expect(control).toHaveAttribute('data-surface', 'glass-subtle');
   await expect(inactive).toBeVisible();
+  const controls = page.locator('[data-playground-page] > header .ui-segmented-control');
+  await expect(controls).toHaveCount(2);
+  const insets = await controls.evaluateAll((elements) =>
+    elements.map((element) => {
+      const options = element.querySelector<HTMLElement>('.ui-segmented-control__options');
+      if (!options) throw new Error('Segmented-control options are missing');
+      const root = element.getBoundingClientRect();
+      const inner = options.getBoundingClientRect();
+      return {
+        blockStart: inner.top - root.top,
+        blockEnd: root.bottom - inner.bottom,
+        inlineStart: inner.left - root.left,
+        inlineEnd: root.right - inner.right,
+      };
+    }),
+  );
+  for (const [index, inset] of insets.entries()) {
+    expect(inset.blockStart, `control ${index} top inset`).toBeGreaterThanOrEqual(4);
+    expect(inset.blockEnd, `control ${index} bottom inset`).toBeGreaterThanOrEqual(4);
+    expect(inset.inlineStart, `control ${index} start inset`).toBeGreaterThanOrEqual(4);
+    expect(inset.inlineEnd, `control ${index} end inset`).toBeGreaterThanOrEqual(4);
+  }
 
   const controlSurface = await control.evaluate((element) => {
     const style = getComputedStyle(element);
@@ -3317,6 +3355,72 @@ test('shell segmented controls keep their own Glass surface inside the Glass hea
       (hovered.borderStyle !== 'none' && hovered.borderColor !== 'rgba(0, 0, 0, 0)') ||
       hovered.boxShadow !== 'none',
   ).toBe(true);
+});
+test('segmented header plates stay still on refresh and animate on selection', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.name !== 'desktop', 'Header segmented controls are desktop-only.');
+  await page.setViewportSize({ width: 1920, height: 1080 });
+  await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'no-preference' });
+  await page.addInitScript(() => {
+    const transitions: string[] = [];
+    (
+      window as Window & {
+        __segmentedPlateTransitions?: string[];
+      }
+    ).__segmentedPlateTransitions = transitions;
+    document.addEventListener(
+      'transitionrun',
+      (event) => {
+        const target = event.target;
+        if (
+          target instanceof Element &&
+          target.matches('.ui-segmented-control__slider') &&
+          target.closest('[data-playground-page] > header') !== null
+        ) {
+          transitions.push((event as TransitionEvent).propertyName);
+        }
+      },
+      true,
+    );
+  });
+
+  async function readTransitions(): Promise<string[]> {
+    const transitions = await page.evaluate(() => {
+      const windowState = window as Window & {
+        __segmentedPlateTransitions?: string[];
+      };
+      return windowState.__segmentedPlateTransitions ?? [];
+    });
+    return transitions;
+  }
+
+  for (let refresh = 0; refresh < 3; refresh += 1) {
+    if (refresh === 0) {
+      await page.goto('/?theme=dark&lang=zh#controls', { waitUntil: 'domcontentloaded' });
+    } else {
+      await page.reload({ waitUntil: 'domcontentloaded' });
+    }
+    await expect(page.locator('[data-playground-page] > header .ui-segmented-control')).toHaveCount(
+      2,
+    );
+    await page.waitForTimeout(500);
+    expect(await readTransitions(), `slider transitions after refresh ${refresh + 1}`).toEqual([]);
+  }
+
+  const themeOptions = page
+    .locator('[data-playground-page] > header .ui-segmented-control')
+    .first()
+    .getByRole('radio');
+  const currentIndex = await themeOptions.evaluateAll((elements) =>
+    elements.findIndex((element) => element.getAttribute('aria-checked') === 'true'),
+  );
+  expect(currentIndex).toBeGreaterThanOrEqual(0);
+  const optionCount = await themeOptions.count();
+  const nextOption = themeOptions.nth((currentIndex + 1) % optionCount);
+  await nextOption.click();
+  await expect(nextOption).toHaveAttribute('aria-checked', 'true');
+  await expect.poll(readTransitions).toContain('transform');
 });
 
 test('system theme keeps the gradient preview backdrop synchronized with the preferred color scheme', async ({

@@ -12,7 +12,6 @@ export type SurfacePreset =
   | 'subtle'
   | 'elevated'
   | 'inset'
-  | 'chrome'
   | 'glass-subtle'
   | 'glass-elevated'
   | 'glass-immersive';
@@ -134,7 +133,7 @@ export interface IconButtonProps {
 }
 
 export type BadgeVariant = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
-export type BadgeSize = 'sm' | 'md';
+export type BadgeSize = 'sm' | 'md' | 'lg';
 
 export interface BadgeProps {
   variant?: BadgeVariant;
@@ -237,6 +236,8 @@ export interface FormControlStateProps {
 
 export interface InputProps extends FormControlStateProps {
   modelValue?: FormControlValue;
+  incrementLabel?: string;
+  decrementLabel?: string;
 }
 
 export type TerminalPromptTone = 'host' | 'path' | 'branch' | 'runtime' | 'time';

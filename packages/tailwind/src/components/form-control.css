@@ -102,6 +102,86 @@
     color: var(--neoverse-form-control-disabled-foreground);
   }
 
+  .ui-input-number {
+    position: relative;
+    display: inline-grid;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ui-input-number > .ui-input {
+    appearance: textfield;
+    padding-inline-end: calc(
+      var(--neoverse-input-step-inline-size) +
+      var(--neoverse-input-step-inset) *
+      2
+    );
+  }
+
+  .ui-input-number > .ui-input::-webkit-inner-spin-button,
+  .ui-input-number > .ui-input::-webkit-outer-spin-button {
+    margin: 0;
+    appearance: none;
+  }
+
+  .ui-input-number__steps {
+    position: absolute;
+    inset-block: var(--neoverse-input-step-inset);
+    inset-inline-end: var(--neoverse-input-step-inset);
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    width: var(--neoverse-input-step-inline-size);
+  }
+
+  .ui-input-number__step {
+    display: grid;
+    min-height: 0;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: var(--neoverse-input-step-radius);
+    color: var(--neoverse-input-step-foreground);
+    background: transparent;
+    cursor: pointer;
+    touch-action: manipulation;
+    transition:
+      background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  @media (hover: hover) {
+    .ui-input-number__step:not(:disabled):hover {
+      color: var(--neoverse-form-control-foreground);
+      background: var(--neoverse-input-step-hover-background);
+    }
+  }
+
+  .ui-input-number__step:not(:disabled):active {
+    background: var(--neoverse-input-step-active-background);
+    box-shadow: var(--neoverse-effect-press-shadow);
+  }
+
+  .ui-input-number__step:focus-visible {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: calc(var(--neoverse-focus-ring-offset) * -1);
+  }
+
+  .ui-input-number__step:disabled {
+    color: var(--neoverse-form-control-disabled-foreground);
+    cursor: default;
+  }
+
+  .ui-input-number__indicator {
+    width: var(--neoverse-input-step-icon-size);
+    height: var(--neoverse-input-step-icon-size);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--neoverse-border-width-strong);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+  }
+
   .ui-textarea {
     min-block-size: 100%;
     block-size: 100%;
@@ -371,7 +451,7 @@
   }
 
   .ui-choice__native:focus-visible + .ui-choice__control {
-    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-choice-control-accent);
     outline-offset: var(--neoverse-focus-ring-offset);
   }
 
@@ -391,6 +471,12 @@
   .ui-choice[data-disabled='true'] {
     cursor: not-allowed;
     color: var(--neoverse-form-control-disabled-foreground);
+  }
+
+  .ui-choice[data-disabled='true'] .ui-choice__control {
+    color: var(--neoverse-form-control-disabled-foreground);
+    background: var(--neoverse-form-control-disabled-background);
+    box-shadow: var(--neoverse-choice-control-shadow), var(--neoverse-choice-validation-shadow);
   }
 
   :where(.ui-choice[data-disabled='true'])
@@ -451,6 +537,8 @@
   }
 
   .ui-radio .ui-choice__indicator {
+    width: var(--neoverse-radio-indicator-size);
+    height: var(--neoverse-radio-indicator-size);
     border-radius: var(--neoverse-radius-pill);
     background: currentColor;
     stroke: none;
@@ -471,10 +559,13 @@
     border-radius: var(--neoverse-radius-pill);
     background: var(--neoverse-switch-thumb-background);
     box-shadow: var(--neoverse-switch-thumb-shadow);
-    transition: transform var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+    transition:
+      transform var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
   }
 
   .ui-switch__native:checked + .ui-switch__control .ui-switch__thumb {
+    background: var(--neoverse-switch-thumb-active-background);
     transform: translateX(
       calc(
         var(--neoverse-switch-inline-size) -
@@ -482,6 +573,10 @@
         (var(--neoverse-switch-thumb-inset) * 2)
       )
     );
+  }
+
+  .ui-switch[data-disabled='true'] .ui-switch__control .ui-switch__thumb {
+    background: var(--neoverse-form-control-disabled-foreground);
   }
 
   .ui-field {
@@ -523,20 +618,21 @@
   }
 
   .ui-field[data-validation='error'] :where(.ui-field__required, .ui-field__message) {
-    color: var(--neoverse-form-control-validation-error);
+    color: var(--neoverse-effect-status-danger-text);
   }
 
   .ui-field[data-validation='warning'] .ui-field__message {
-    color: var(--neoverse-form-control-validation-warning);
+    color: var(--neoverse-effect-status-warning-text);
   }
 
   .ui-field[data-validation='success'] .ui-field__message {
-    color: var(--neoverse-form-control-validation-success);
+    color: var(--neoverse-effect-status-success-text);
   }
 
   @media (prefers-reduced-motion: reduce) {
     :where(.ui-input, .ui-textarea, .ui-select),
     .ui-select__option,
+    .ui-input-number__step,
     .ui-choice__control,
     .ui-choice__indicator,
     .ui-switch__thumb {

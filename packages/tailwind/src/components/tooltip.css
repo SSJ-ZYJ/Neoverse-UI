@@ -10,24 +10,24 @@
     line-height: var(--neoverse-tooltip-line-height);
   }
 
-  /* The pointer begins at the outer bottom edge. A shallow triangle avoids
-     sampling a second diamond-shaped plane over the tooltip body. */
+  /* Keep one material treatment for the surface and its pointer. The pointer's
+     base meets the surface's outer bottom edge; only its tip extends outward. */
   .ui-tooltip-surface::after {
     position: absolute;
     z-index: 0;
     bottom: calc(var(--neoverse-tooltip-arrow-offset) - var(--neoverse-material-border-width));
     left: var(--ui-tooltip-arrow-left);
     width: calc(var(--neoverse-tooltip-arrow-size) * 2);
-    height: calc(var(--neoverse-tooltip-arrow-size) * 0.75);
+    height: calc(var(--neoverse-border-width-none) - var(--neoverse-tooltip-arrow-offset));
     border: 0;
-    background: var(--neoverse-tooltip-arrow-background);
-    box-shadow: var(--neoverse-tooltip-arrow-shadow);
+    background: inherit;
+    filter: drop-shadow(var(--neoverse-tooltip-arrow-shadow));
     content: '';
     pointer-events: none;
     transform: translateX(-50%);
     clip-path: polygon(0 0, 100% 0, 50% 100%);
-    -webkit-backdrop-filter: var(--neoverse-material-glass-subtle-filter);
-    backdrop-filter: var(--neoverse-material-glass-subtle-filter);
+    -webkit-backdrop-filter: inherit;
+    backdrop-filter: inherit;
   }
 }
 
@@ -47,7 +47,148 @@
     /* Emphasis comes from tint, refraction and ambient depth. Avoid an inset
        top stroke: on a wide tooltip it collapses into a bright painted line. */
     --neoverse-material-shadow: var(--neoverse-tooltip-accent-shadow);
-    --neoverse-tooltip-arrow-background: var(--neoverse-tooltip-accent-arrow-background);
     color: var(--neoverse-tooltip-accent-foreground);
+  }
+
+  @supports (clip-path: shape(from 0 0, line to 100% 100%, close)) {
+    /* One sampled plate follows the complete silhouette. Separate body and
+       pointer filters sample different backdrop roots, and a rectangular
+       shadow darkens the pointer at the join. Keep ::after as the geometry
+       marker consumed by the shared refractive contour renderer. */
+    .ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface][data-surface] {
+      background-color: transparent;
+      background-image: none;
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    .ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface][data-surface]::before {
+      --ui-tooltip-arrow-height: calc(
+        var(--neoverse-border-width-none) -
+        var(--neoverse-tooltip-arrow-offset)
+      );
+      --ui-tooltip-arrow-half-angle: atan2(
+        var(--neoverse-tooltip-arrow-size),
+        var(--ui-tooltip-arrow-height)
+      );
+      display: block;
+      z-index: -1;
+      inset: 0 0 var(--neoverse-tooltip-arrow-offset);
+      border-radius: 0;
+      background-color: var(--neoverse-material-background);
+      /* Clip the filtered output as well as the fill. The two centre strips
+         and four quarter circles form the rounded body; the final wedge
+         contributes only the pointer, not the empty strip beside it. */
+      mask-image:
+        linear-gradient(var(--neoverse-color-white), var(--neoverse-color-white)),
+        linear-gradient(var(--neoverse-color-white), var(--neoverse-color-white)),
+        radial-gradient(
+          circle var(--neoverse-tooltip-radius) at right bottom,
+          var(--neoverse-color-white) var(--neoverse-material-transparency-opaque),
+          transparent 0
+        ),
+        radial-gradient(
+          circle var(--neoverse-tooltip-radius) at left bottom,
+          var(--neoverse-color-white) var(--neoverse-material-transparency-opaque),
+          transparent 0
+        ),
+        radial-gradient(
+          circle var(--neoverse-tooltip-radius) at right top,
+          var(--neoverse-color-white) var(--neoverse-material-transparency-opaque),
+          transparent 0
+        ),
+        radial-gradient(
+          circle var(--neoverse-tooltip-radius) at left top,
+          var(--neoverse-color-white) var(--neoverse-material-transparency-opaque),
+          transparent 0
+        ),
+        conic-gradient(
+          from calc(0deg - var(--ui-tooltip-arrow-half-angle)) at var(--ui-tooltip-arrow-left) 100%,
+          var(--neoverse-color-white) 0deg calc(var(--ui-tooltip-arrow-half-angle) * 2),
+          transparent 0deg
+        );
+      mask-size:
+        calc(100% - var(--neoverse-tooltip-radius) * 2)
+        calc(100% + var(--neoverse-tooltip-arrow-offset)),
+        100% calc(100% + var(--neoverse-tooltip-arrow-offset) - var(--neoverse-tooltip-radius) * 2),
+        var(--neoverse-tooltip-radius) var(--neoverse-tooltip-radius),
+        var(--neoverse-tooltip-radius) var(--neoverse-tooltip-radius),
+        var(--neoverse-tooltip-radius) var(--neoverse-tooltip-radius),
+        var(--neoverse-tooltip-radius) var(--neoverse-tooltip-radius),
+        100% var(--ui-tooltip-arrow-height);
+      mask-position:
+        50% 0,
+        0 var(--neoverse-tooltip-radius),
+        0 0,
+        100% 0,
+        0 calc(100% - var(--ui-tooltip-arrow-height)),
+        100% calc(100% - var(--ui-tooltip-arrow-height)),
+        0 100%;
+      mask-repeat: no-repeat;
+      mask-mode: alpha;
+      mask-composite: add;
+      opacity: 1;
+      filter: none;
+      -webkit-backdrop-filter: var(--neoverse-material-filter);
+      backdrop-filter: var(--neoverse-material-filter);
+      clip-path: shape(
+        from var(--neoverse-tooltip-radius) 0,
+        hline to calc(100% - var(--neoverse-tooltip-radius)),
+        arc to 100% var(--neoverse-tooltip-radius) of var(--neoverse-tooltip-radius) cw,
+        vline to calc(100% + var(--neoverse-tooltip-arrow-offset) - var(--neoverse-tooltip-radius)),
+        arc to calc(100% - var(--neoverse-tooltip-radius))
+          calc(100% + var(--neoverse-tooltip-arrow-offset)) of var(--neoverse-tooltip-radius) cw,
+        hline to calc(var(--ui-tooltip-arrow-left) + var(--neoverse-tooltip-arrow-size)),
+        line to var(--ui-tooltip-arrow-left) 100%,
+        line to calc(var(--ui-tooltip-arrow-left) - var(--neoverse-tooltip-arrow-size))
+          calc(100% + var(--neoverse-tooltip-arrow-offset)),
+        hline to var(--neoverse-tooltip-radius),
+        arc to 0 calc(100% + var(--neoverse-tooltip-arrow-offset) - var(--neoverse-tooltip-radius))
+          of var(--neoverse-tooltip-radius) cw,
+        vline to var(--neoverse-tooltip-radius),
+        arc to var(--neoverse-tooltip-radius) 0 of var(--neoverse-tooltip-radius) cw,
+        close
+      );
+    }
+
+    .ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface][data-surface]::after {
+      background: none;
+      filter: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      .ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface][data-surface]::before {
+        background-color: var(--neoverse-material-background-fallback);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+    }
+
+    @supports not (
+        (backdrop-filter: var(--neoverse-material-filter)) or
+        (-webkit-backdrop-filter: var(--neoverse-material-filter))
+      ) {
+      .ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface][data-surface]::before {
+        background-color: var(--neoverse-material-background-fallback);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+    }
+  }
+}
+
+@layer neoverse.motion {
+  /* Root opacity/filter would isolate the sampled plate during entrance,
+     making backdrop blur pop in only after the animation ends. Animate the
+     label separately; keep the complete material plate stable from frame one. */
+  .ui-tooltip-surface.nv-appear {
+    animation: none;
+  }
+
+  .ui-tooltip-surface__content.nv-appear {
+    animation-fill-mode: backwards;
   }
 }
