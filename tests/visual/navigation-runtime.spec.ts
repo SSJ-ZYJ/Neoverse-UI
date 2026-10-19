@@ -41,7 +41,7 @@ for (const theme of ['light', 'dark'] as const) {
     await page.goto(`/react-fixture?theme=${theme}&lang=zh`);
     const dock = page.locator('[data-react-adapter="UiDock"]');
     await expect(dock).toHaveAttribute('aria-label', '快捷导航');
-    await expect(dock).toHaveAttribute('data-surface', 'glass-subtle');
+    await expect(dock).toHaveAttribute('data-surface', 'glass-elevated');
     await expect(dock).toHaveAttribute('data-neoverse-surface-hover', 'static');
     await expect(dock).toHaveAttribute('data-neoverse-glass-edge-pass', 'css');
     await expect(dock).toHaveClass(/ui-control-surface--scale-md/);

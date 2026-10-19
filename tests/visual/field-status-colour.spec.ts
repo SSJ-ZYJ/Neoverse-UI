@@ -4,7 +4,11 @@ for (const theme of ['light', 'dark']) {
   test(`field feedback stays softly colored and readable / ${theme}`, async ({
     page,
   }, testInfo) => {
-    await page.goto(`/frame?theme=${theme}&lang=zh#forms`);
+    // Field state assertions need the mounted form, not every image/network
+    // resource to finish loading. Avoid unrelated load-event stalls.
+    await page.goto(`/frame?theme=${theme}&lang=zh#forms`, {
+      waitUntil: 'domcontentloaded',
+    });
     const section = page.locator('#forms-field-states');
     const error = section.locator('.ui-field[data-validation="error"] .ui-field__message');
     const success = section.locator('.ui-field[data-validation="success"] .ui-field__message');

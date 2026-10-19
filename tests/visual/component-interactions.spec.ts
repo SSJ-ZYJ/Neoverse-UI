@@ -111,17 +111,16 @@ async function reactSelectAnchorGeometry(page: Page) {
 
     const triggerRect = trigger.getBoundingClientRect();
     const side = panel.dataset.neoverseOverlaySide;
-    const top = Number.parseFloat(panel.style.getPropertyValue('--neoverse-select-popover-top'));
-    const left = Number.parseFloat(panel.style.getPropertyValue('--neoverse-select-popover-left'));
-    const height = panel.offsetHeight;
+    const panelRect = panel.getBoundingClientRect();
     return {
       side,
       triggerTop: triggerRect.top,
       triggerWidth: triggerRect.width,
-      overlayTop: top,
-      overlayWidth: panel.offsetWidth,
-      verticalGap: side === 'top' ? triggerRect.top - top - height : top - triggerRect.bottom,
-      leftOffset: left - triggerRect.left,
+      overlayTop: panelRect.top,
+      overlayWidth: panelRect.width,
+      verticalGap:
+        side === 'top' ? triggerRect.top - panelRect.bottom : panelRect.top - triggerRect.bottom,
+      leftOffset: panelRect.left - triggerRect.left,
     };
   });
 }
@@ -341,6 +340,7 @@ for (const theme of themes) {
 
   test(`React Select fallback tracks scroll and responsive resize / ${theme}`, async ({ page }) => {
     await disablePopoverApi(page);
+    await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/react-fixture?lang=en&contract-fixtures=1', {
       waitUntil: 'domcontentloaded',
     });
@@ -349,6 +349,8 @@ for (const theme of themes) {
     await trigger.click();
     await expectFallbackPanel(panel, 'ui-select__popover--fallback-open');
     const initial = await reactSelectAnchorGeometry(page);
+    expect(Math.abs(initial.verticalGap)).toBeLessThan(20);
+    expect(Math.abs(initial.leftOffset)).toBeLessThan(2);
     const initialViewportWidth = await page.evaluate(() => window.innerWidth);
     const scrollBounds = await page.evaluate(() => ({
       scrollY: window.scrollY,
@@ -386,15 +388,25 @@ for (const theme of themes) {
 
     const resizedViewportWidth = initialViewportWidth <= 390 ? 640 : 390;
     await page.setViewportSize({ width: resizedViewportWidth, height: 844 });
+    // The responsive fixture moves the trigger below the viewport. Restore it
+    // before testing anchored geometry; an offscreen anchor is viewport-clamped.
+    await trigger.scrollIntoViewIfNeeded();
     await expect
       .poll(async () => {
         const current = await reactSelectAnchorGeometry(page);
         return Math.abs(current.overlayWidth - current.triggerWidth);
       })
       .toBeLessThan(2);
+    await expect
+      .poll(async () => {
+        const current = await reactSelectAnchorGeometry(page);
+        return Math.abs(current.verticalGap - afterScroll.verticalGap);
+      })
+      .toBeLessThan(2);
     const afterResize = await reactSelectAnchorGeometry(page);
     expect(Math.abs(afterResize.triggerWidth - afterScroll.triggerWidth)).toBeGreaterThan(2);
     expect(Math.abs(afterResize.verticalGap - afterScroll.verticalGap)).toBeLessThan(2);
+    expect(Math.abs(afterResize.verticalGap)).toBeLessThan(20);
     expect(Math.abs(afterResize.leftOffset - afterScroll.leftOffset)).toBeLessThan(2);
     expect(Math.abs(afterResize.overlayWidth - afterResize.triggerWidth)).toBeLessThan(2);
   });

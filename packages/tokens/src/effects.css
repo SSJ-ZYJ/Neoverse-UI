@@ -215,7 +215,7 @@
     );
     --neoverse-effect-label-status-border: color-mix(
       in srgb,
-      var(--ui-badge-status) var(--neoverse-effect-alpha-medium),
+      var(--ui-badge-status) var(--neoverse-effect-alpha-quiet),
       var(--neoverse-color-border-subtle)
     );
     --neoverse-badge-info-background: var(--neoverse-effect-label-info-background);

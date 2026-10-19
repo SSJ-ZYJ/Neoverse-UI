@@ -31,7 +31,12 @@ for (const theme of ['light', 'dark'] as const) {
         });
       };
       for (const route of ['/', '/frame']) {
-        await page.goto(`${route}?theme=${theme}&lang=${locale}#dock`);
+        // The test measures rendered DOM and CSS, not image completion.
+        // Waiting for load can stall on unrelated remote assets under parallel runs.
+        await page.goto(`${route}?theme=${theme}&lang=${locale}#dock`, {
+          waitUntil: 'domcontentloaded',
+        });
+        await page.evaluate(() => document.fonts.ready);
         for (const specimen of ['standard', 'compact']) {
           const dock = page.locator(`[data-dock-specimen="${specimen}"] .ui-dock`);
           await expect(dock).toBeVisible();
@@ -41,6 +46,9 @@ for (const theme of ['light', 'dark'] as const) {
           await consumer.setContent(
             `<!doctype html><html data-theme="${theme}"><head><style>${consumerCss}</style></head><body>${markup}</body></html>`,
           );
+          // Font loading is separate from DOM readiness; both documents must
+          // measure with the same final typefaces before comparing geometry.
+          await consumer.evaluate(() => document.fonts.ready);
           const standalone = consumer.locator('.ui-dock');
           await expect(consumer.locator('html')).toHaveCSS('font-size', '16px');
           const actual = await standalone.evaluate(measure);
@@ -62,7 +70,9 @@ for (const theme of ['light', 'dark'] as const) {
             ).toBeLessThanOrEqual(await consumer.evaluate(() => innerWidth));
           }
         }
-        await page.goto(`${route}?theme=${theme}&lang=${locale}#consumer-parity`);
+        await page.goto(`${route}?theme=${theme}&lang=${locale}#consumer-parity`, {
+          waitUntil: 'domcontentloaded',
+        });
         const parity = page.locator('[data-consumer-parity="floating-navigation"]');
         await expect(parity).toHaveCSS('zoom', '1.1');
         await expect(parity).toHaveClass(/ui-control-surface--scale-md/);

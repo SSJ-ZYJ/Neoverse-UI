@@ -70,7 +70,12 @@ for (const variant of ['subtle', 'elevated', 'immersive'] as const) {
           edgeOpacity: edge.opacity,
           edgeGradient: edge.backgroundImage,
           edgeFilter: edge.filter,
-          carrier: style.getPropertyValue('--neoverse-material-edge-refraction-carrier').trim(),
+          // CSS custom properties may retain different source indentation after a theme toggle.
+          // Whitespace is not part of the optical value being compared.
+          carrier: style
+            .getPropertyValue('--neoverse-material-edge-refraction-carrier')
+            .replace(/\s+/g, ' ')
+            .trim(),
         };
       });
     const themeSwitch = page.getByRole('radiogroup', { name: '实验室主题' });

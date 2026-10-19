@@ -44,15 +44,17 @@ for (const theme of ['light', 'dark'] as const) {
           await page.locator('[data-playground-nav-trigger]').click();
           await page.getByRole('link', { name: 'Overview', exact: true }).click();
         }
+      }
+      const card = page.locator(fixture.selector).first();
+      await expect(card).toBeVisible();
+      if ('navigate' in fixture) {
         await expect
           .poll(() => page.locator('html').getAttribute('data-neoverse-particle-transitioning'))
           .toBeNull();
         await expect
-          .poll(() => page.locator('html').getAttribute('data-neoverse-transitioning'))
+          .poll(() => page.locator('html').getAttribute('data-neoverse-view-transitioning'))
           .toBeNull();
       }
-      const card = page.locator(fixture.selector).first();
-      await expect(card).toBeVisible();
       await card.evaluate((element, backdrop) => {
         // A high-frequency backdrop makes blur observable independently of tint or edges.
         const stage = element.closest<HTMLElement>(backdrop);

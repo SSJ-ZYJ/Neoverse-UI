@@ -28,6 +28,14 @@ test('explicit dark and system dark retain identical glass refraction', async ({
         segmentedOpacity: Number.parseFloat(segmentedEdge.opacity),
         buttonDisplay: buttonEdge.display,
         buttonOpacity: Number.parseFloat(buttonEdge.opacity),
+        renderer: document.documentElement.dataset.neoverseGlassRenderer ?? 'css',
+        localEdge: button.dataset.neoverseGlassEdgePass === 'css',
+        canvasVisible: (() => {
+          const canvas = document.querySelector<HTMLElement>(
+            '[data-neoverse-glass-renderer-canvas]',
+          );
+          return canvas !== null && getComputedStyle(canvas).display !== 'none';
+        })(),
       };
     });
 
@@ -35,7 +43,17 @@ test('explicit dark and system dark retain identical glass refraction', async ({
   expect(systemDark.resolvedScheme).toBe('dark');
   expect(systemDark.segmentedDisplay).toBe('block');
   expect(systemDark.segmentedOpacity).toBeGreaterThan(0.1);
-  expect(systemDark.buttonDisplay).not.toBe('none');
+  // WebGL/native paints the edge on a separate layer. Its CSS fallback
+  // intentionally has display:none; requiring it to paint would double the edge.
+  if (
+    (systemDark.renderer === 'webgl' || systemDark.renderer === 'native') &&
+    !systemDark.localEdge
+  ) {
+    expect(systemDark.buttonDisplay).toBe('none');
+    if (systemDark.renderer === 'webgl') expect(systemDark.canvasVisible).toBe(true);
+  } else {
+    expect(systemDark.buttonDisplay).not.toBe('none');
+  }
   expect(systemDark.buttonOpacity).toBeGreaterThan(0.08);
 
   await themeSwitch.getByRole('radio', { name: '深色' }).click();

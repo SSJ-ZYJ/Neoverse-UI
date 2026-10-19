@@ -316,10 +316,15 @@ test('table cell and disclosure share the inset tier without stacking or densify
   const table = page.locator('.ui-table').first();
   const cell = table.locator('tbody td').first();
   const disclosure = page.locator('.ui-disclosure').first();
-  for (const plane of [cell, disclosure]) {
+  // The table samples a single backdrop on its root; cells do not each create
+  // a separate compositing layer. The disclosure owns its own inset sample.
+  for (const plane of [table, disclosure]) {
     expect(await plane.evaluate((element) => getComputedStyle(element).backdropFilter)).toContain(
       'blur(12px)',
     );
+  }
+  expect(await cell.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe('none');
+  for (const plane of [cell, disclosure]) {
     expect(
       alpha(await plane.evaluate((element) => getComputedStyle(element).backgroundColor)),
     ).toBeCloseTo(0.15, 3);
@@ -335,9 +340,12 @@ test('table cell and disclosure share the inset tier without stacking or densify
       '18%',
     );
   });
+  await expect
+    .poll(() => table.evaluate((element) => getComputedStyle(element).backdropFilter))
+    .toContain('blur(16px)');
   for (const plane of [table.locator('th').first(), cell]) {
-    expect(await plane.evaluate((element) => getComputedStyle(element).backdropFilter)).toContain(
-      'blur(16px)',
+    expect(await plane.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe(
+      'none',
     );
     await expect
       .poll(async () =>

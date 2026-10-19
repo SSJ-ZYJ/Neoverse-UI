@@ -148,6 +148,20 @@ export function positionAnchoredOverlay({
 
   overlay.style.setProperty(leftVariable, `${position.left / effectiveZoom}px`);
   overlay.style.setProperty(topVariable, `${position.top / effectiveZoom}px`);
+
+  // A filtered/transformed ancestor establishes a containing block for fixed
+  // fallback overlays. Correct from the *rendered* viewport rect rather than
+  // assuming that fixed CSS coordinates are viewport-relative. Native popovers
+  // in the top layer need no adjustment.
+  if (!supportsPopover(overlay)) {
+    const rect = overlay.getBoundingClientRect();
+    const deltaX = position.left - rect.left;
+    const deltaY = position.top - rect.top;
+    if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
+      overlay.style.setProperty(leftVariable, `${(position.left + deltaX) / effectiveZoom}px`);
+      overlay.style.setProperty(topVariable, `${(position.top + deltaY) / effectiveZoom}px`);
+    }
+  }
   overlay.dataset.neoverseOverlaySide = position.opensAbove ? 'top' : 'bottom';
 }
 

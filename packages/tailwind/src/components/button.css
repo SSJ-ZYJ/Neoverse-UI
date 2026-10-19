@@ -314,6 +314,12 @@
       --neoverse-control-hit-area: var(--neoverse-control-touch-hit-area);
       overflow: visible;
     }
+    /* Glass buttons set overflow:hidden with a more specific selector above.
+       Match that specificity so the expanded touch target remains hittable
+       outside the visual button bounds without changing its rendered size. */
+    .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+      overflow: visible;
+    }
     .ui-button::before {
       position: absolute;
       inset: calc(var(--neoverse-control-hit-area) * -1);

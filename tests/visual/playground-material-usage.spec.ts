@@ -63,6 +63,18 @@ for (const theme of ['light', 'dark'] as const) {
             )
           )
             continue;
+          // Tooltip keeps its sampling root transparent; the unified pointer/body
+          // plate is rendered by ::before, not by the root's backdrop-filter.
+          if (element.matches('.ui-tooltip-surface')) {
+            const plate = getComputedStyle(element, '::before');
+            if (
+              !plate.backdropFilter.includes('blur(') ||
+              plate.backgroundColor === 'rgba(0, 0, 0, 0)'
+            ) {
+              errors.push(`Tooltip unified plate lost its material: ${element.className}`);
+            }
+            continue;
+          }
           const tier = element.getAttribute('data-surface');
           const tiers: Record<string, readonly [number, number]> = {
             'glass-subtle': [12, 0.15],
@@ -73,12 +85,20 @@ for (const theme of ['light', 'dark'] as const) {
           if (!expected) continue;
           const style = getComputedStyle(element);
           const blur = Number(style.backdropFilter.match(/blur\(([\d.]+)px\)/)?.[1]);
+          // Dark buttons intentionally halve blur to keep their colored fill legible;
+          // other Glass owners retain the canonical tier blur.
+          const blurScale = element.matches('.ui-button')
+            ? Number(style.getPropertyValue('--neoverse-control-button-blur-scale')) || 1
+            : 1;
           const alpha = Number(
             style.backgroundColor.match(/\/\s*([\d.]+)\s*\)/)?.[1] ??
               style.backgroundColor.match(/rgba\([^)]*,\s*([\d.]+)\)/)?.[1] ??
               1,
           );
-          if (blur !== expected[0] || Math.abs(alpha - (expected[1] ?? 1)) > 0.005)
+          if (
+            Math.abs(blur - expected[0] * blurScale) > 0.01 ||
+            Math.abs(alpha - (expected[1] ?? 1)) > 0.005
+          )
             errors.push(
               `nonstandard ${tier} optics: ${element.className} (${style.backdropFilter}, ${style.backgroundColor})`,
             );

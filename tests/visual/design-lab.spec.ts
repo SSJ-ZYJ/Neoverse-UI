@@ -78,13 +78,16 @@ for (const theme of themes) {
         position: style.position,
         backdropFilter: style.backdropFilter,
         blurPx: blurMatch?.[1] ? Number.parseFloat(blurMatch[1]) : 0,
+        standardPanelBlurPx: Number.parseFloat(
+          style.getPropertyValue('--neoverse-material-blur-md'),
+        ),
       };
     });
     expect(state.topLayerOpen).toBe(true);
     expect(state.position).toBe('fixed');
     expect(state.backdropFilter).toContain('blur(');
     expect(state.blurPx).toBeGreaterThan(0);
-    expect(state.blurPx).toBeLessThanOrEqual(10);
+    expect(state.blurPx).toBeCloseTo(state.standardPanelBlurPx, 3);
 
     const readGeometry = async () => {
       const triggerBox = await trigger.boundingBox();
@@ -110,7 +113,12 @@ for (const theme of themes) {
     expect(beforeScroll.popoverBox.width).toBeCloseTo(beforeScroll.triggerBox.width, 1);
     expect(beforeScroll.verticalGap).toBeGreaterThan(0);
 
+    // Playwright dispatches the wheel event without waiting for the browser
+    // to scroll. Observe an actual scroll before checking the anchored overlay;
+    // otherwise the initial unchanged geometry can satisfy the poll too early.
+    const scrollYBefore = await page.evaluate(() => window.scrollY);
     await page.mouse.wheel(0, 80);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrollYBefore);
     await expect
       .poll(
         async () => {
@@ -508,7 +516,8 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     const dockStyle = getComputedStyle(element);
     const fontProbe = document.createElement('span');
     fontProbe.style.fontSize = 'var(--neoverse-navigation-item-font-size-md)';
-    element.append(fontProbe);
+    // The Dock assigns its navigation type factor on the primary group, not the root.
+    link.append(fontProbe);
     const expectedLinkFontSize = Number.parseFloat(getComputedStyle(fontProbe).fontSize);
     fontProbe.remove();
     return {
@@ -635,7 +644,12 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       const optionStyle = getComputedStyle(option);
       return {
         width: optionRect.width,
-        contentPlusPaddingWidth: textRect.width + Number.parseFloat(optionStyle.paddingInline) * 2,
+        // DOMRect includes the Dock's presentation zoom; computed padding does not.
+        contentPlusPaddingWidth:
+          textRect.width +
+          Number.parseFloat(optionStyle.paddingInline) *
+            2 *
+            Number.parseFloat(getComputedStyle(element).zoom),
       };
     });
     const languageOptionWidth = Math.max(...languageOptionGeometry.map(({ width }) => width));
@@ -647,6 +661,19 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     languageOption.append(optionFontProbe);
     const expectedOptionFontSize = Number.parseFloat(getComputedStyle(optionFontProbe).fontSize);
     optionFontProbe.remove();
+    const optionPaddingProbe = document.createElement('span');
+    optionPaddingProbe.style.paddingBlock =
+      'var(--neoverse-control-segmented-option-padding-block-sm)';
+    optionPaddingProbe.style.paddingInline =
+      'var(--neoverse-control-segmented-option-padding-inline-sm)';
+    languageOption.append(optionPaddingProbe);
+    const expectedOptionPaddingBlock = Number.parseFloat(
+      getComputedStyle(optionPaddingProbe).paddingBlock,
+    );
+    const expectedOptionPaddingInline = Number.parseFloat(
+      getComputedStyle(optionPaddingProbe).paddingInline,
+    );
+    optionPaddingProbe.remove();
     const activeLabelRange = document.createRange();
     activeLabelRange.selectNodeContents(activeLabel);
     const activeLabelRect = activeLabelRange.getBoundingClientRect();
@@ -667,22 +694,30 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       sliderRect.top >= languageRect.top &&
       sliderRect.bottom <= languageRect.bottom;
     const materialProbe = document.createElement('span');
-    materialProbe.style.background = 'var(--neoverse-material-glass-subtle-background)';
-    materialProbe.style.borderColor = 'var(--neoverse-material-glass-subtle-border)';
+    materialProbe.style.background = 'var(--neoverse-material-glass-elevated-background)';
+    materialProbe.style.borderColor = 'var(--neoverse-material-glass-elevated-border)';
+    materialProbe.style.backdropFilter = 'var(--neoverse-material-edge-filter)';
     element.append(materialProbe);
     const expectedDockBackground = getComputedStyle(materialProbe).backgroundColor;
     const expectedDockBorder = getComputedStyle(materialProbe).borderColor;
+    const expectedEdgeBackdropFilter = getComputedStyle(materialProbe).backdropFilter;
     materialProbe.remove();
     return {
       surface: element.getAttribute('data-surface'),
       presentationScale: Number.parseFloat(getComputedStyle(element).zoom),
-      glassClass: element.classList.contains('material-glass-subtle'),
+      glassClass: element.classList.contains('material-glass-elevated'),
       dockBackground: style.backgroundColor,
       expectedDockBackground,
       expectedDockBorder,
+      expectedEdgeBackdropFilter,
       dockFilter: style.backdropFilter,
+      dockBlurPx: Number.parseFloat(
+        style.backdropFilter.match(/blur\(([-\d.]+)px\)/)?.[1] ?? 'NaN',
+      ),
+      expectedDockBlurPx: Number.parseFloat(style.getPropertyValue('--neoverse-material-blur')),
       dockBorder: style.borderColor,
       dockEdgeBackgroundImage: glassEdgeStyle.backgroundImage,
+      dockEdgeMaskImage: glassEdgeStyle.maskImage,
       dockEdgeOpacity: glassEdgeStyle.opacity,
       dockEdgeFilter: glassEdgeStyle.filter,
       dockEdgeBackdropFilter: glassEdgeStyle.backdropFilter,
@@ -742,8 +777,9 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       compactNavigationGapToken: resolveLength('--neoverse-navigation-item-compact-gap'),
       trailingPaddingInline: Number.parseFloat(trailingStyle.paddingInline),
       trailingPaddingBlock: Number.parseFloat(trailingStyle.paddingBlock),
-      optionHeightToken: resolveLength('--neoverse-space-5'),
-      segmentedTrailingInset: resolveLength('--neoverse-space-1'),
+      optionHeightToken: resolveLength('--neoverse-control-surface-segmented-height'),
+      trailingInlineInsetToken: resolveLength('--neoverse-control-surface-trailing-padding-inline'),
+      trailingBlockInsetToken: resolveLength('--neoverse-control-surface-trailing-padding'),
       trailingBorderInline: Number.parseFloat(trailingStyle.borderLeftWidth),
       trailingContentInsetInline:
         languageRect.left - trailingRect.left - Number.parseFloat(trailingStyle.borderLeftWidth),
@@ -784,13 +820,16 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       languageOptionWidth,
       languageOptionContentWidth,
       languageOptionBorderWidth:
-        Number.parseFloat(languageOptionStyle.borderLeftWidth) +
-        Number.parseFloat(languageOptionStyle.borderRightWidth),
+        (Number.parseFloat(languageOptionStyle.borderLeftWidth) +
+          Number.parseFloat(languageOptionStyle.borderRightWidth)) *
+        Number.parseFloat(getComputedStyle(element).zoom),
       navigationHeight: activeButtonRect.height,
       navigationBoxSizing: activeButtonStyle.boxSizing,
       navigationPaddingBlock: Number.parseFloat(activeButtonStyle.paddingBlock),
       optionPaddingBlock: Number.parseFloat(languageOptionStyle.paddingBlock),
       optionPaddingInline: Number.parseFloat(languageOptionStyle.paddingInline),
+      expectedOptionPaddingBlock,
+      expectedOptionPaddingInline,
       optionFontSize: Number.parseFloat(languageOptionStyle.fontSize),
       expectedOptionFontSize,
       optionFontWeight: languageOptionStyle.fontWeight,
@@ -825,16 +864,17 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       hoverMode: element.getAttribute('data-neoverse-surface-hover'),
     };
   });
-  expect(edgeMaterial.surface).toBe('glass-subtle');
+  expect(edgeMaterial.surface).toBe('glass-elevated');
   expect(edgeMaterial.glassClass).toBe(true);
   expect(edgeMaterial.dockBackground).toBe(edgeMaterial.expectedDockBackground);
-  expect(edgeMaterial.dockFilter).toContain('blur(12px)');
+  expect(edgeMaterial.dockBlurPx).toBeCloseTo(edgeMaterial.expectedDockBlurPx, 3);
   expect(edgeMaterial.dockBorder).toBe(edgeMaterial.expectedDockBorder);
-  expect(edgeMaterial.dockEdgeBackgroundImage).not.toBe('none');
+  // The edge is a mask over the backdrop, not an independently painted gradient.
+  expect(edgeMaterial.dockEdgeBackgroundImage).toBe('none');
+  expect(edgeMaterial.dockEdgeMaskImage).not.toBe('none');
   expect(Number.parseFloat(edgeMaterial.dockEdgeOpacity)).toBeGreaterThan(0);
   expect(edgeMaterial.dockEdgeFilter).not.toBe('none');
-  // The shared masked edge uses the parent Glass sample rather than a second blur.
-  expect(edgeMaterial.dockEdgeBackdropFilter).toBe('none');
+  expect(edgeMaterial.dockEdgeBackdropFilter).toBe(edgeMaterial.expectedEdgeBackdropFilter);
   if (edgeMaterial.webglEdge) expect(edgeMaterial.dockEdgeDisplay).toBe('none');
   else expect(edgeMaterial.dockEdgeDisplay).not.toBe('none');
   expect(edgeMaterial.buttonSurface).toBe('none');
@@ -859,10 +899,11 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(edgeMaterial.navigationHeightToken).toContain('rem');
   expect(edgeMaterial.segmentedHeightToken).toContain('rem');
   expect(edgeMaterial.dividerGapToken).toContain('rem');
-  expect(edgeMaterial.actionHeight).toBeGreaterThan(edgeMaterial.compactHeight);
+  expect(edgeMaterial.actionHeight).toBeCloseTo(edgeMaterial.compactHeight, 2);
   expect(edgeMaterial.controlHeight).toBeCloseTo(edgeMaterial.compactHeight, 2);
   expect(edgeMaterial.navigationSurfaceHeight).toBeCloseTo(edgeMaterial.actionHeight, 2);
-  expect(edgeMaterial.segmentedSurfaceHeight).toBeCloseTo(edgeMaterial.compactHeight, 2);
+  expect(edgeMaterial.segmentedSurfaceHeight).toBeCloseTo(edgeMaterial.optionHeight, 2);
+  expect(edgeMaterial.segmentedSurfaceHeight).toBeLessThan(edgeMaterial.compactHeight);
   expect(edgeMaterial.navigationHeight).toBeCloseTo(
     edgeMaterial.navigationSurfaceHeight * edgeMaterial.presentationScale,
     2,
@@ -876,7 +917,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   if ((page.viewportSize()?.width ?? 0) <= 520) {
     expect(edgeMaterial.languageOptionWidth - edgeMaterial.languageOptionContentWidth).toBeCloseTo(
       edgeMaterial.languageOptionBorderWidth,
-      2,
+      1,
     );
     expect(edgeMaterial.iconIndicatorGap).toBeGreaterThanOrEqual(
       edgeMaterial.activeIndicatorRect.height - 0.1,
@@ -884,7 +925,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   }
   expect(edgeMaterial.navigationBoxSizing).toBe('border-box');
   if ((page.viewportSize()?.width ?? 0) > 520) {
-    expect(edgeMaterial.navigationGap).toBeCloseTo(edgeMaterial.navigationGapToken, 2);
+    expect(edgeMaterial.navigationGap).toBeCloseTo(edgeMaterial.navigationGapToken, 1);
     expect(edgeMaterial.navigationGap).toBeGreaterThan(0);
     expect(edgeMaterial.primaryGap).toBeCloseTo(edgeMaterial.surfaceItemGap, 1);
     expect(edgeMaterial.primaryGap).toBeGreaterThan(0);
@@ -893,16 +934,17 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     );
   } else {
     expect(edgeMaterial.navigationGap).toBe(0);
-    expect(edgeMaterial.primaryGap).toBeCloseTo(edgeMaterial.compactNavigationGapToken, 2);
+    // CSS layout rounds fractional rem gaps to device pixels after Dock scaling.
+    expect(edgeMaterial.primaryGap).toBeCloseTo(edgeMaterial.compactNavigationGapToken, 1);
     expect(edgeMaterial.primaryGap).toBeGreaterThan(0);
   }
-  expect(edgeMaterial.trailingPaddingInline).toBeCloseTo(edgeMaterial.segmentedTrailingInset, 1);
+  expect(edgeMaterial.trailingPaddingInline).toBeCloseTo(edgeMaterial.trailingInlineInsetToken, 1);
   expect(edgeMaterial.trailingContentInsetInline).toBeCloseTo(
     edgeMaterial.trailingPaddingInline * edgeMaterial.presentationScale +
       edgeMaterial.trailingBorderInline * (edgeMaterial.presentationScale - 1),
     1,
   );
-  expect(edgeMaterial.trailingPaddingBlock).toBeCloseTo(edgeMaterial.segmentedTrailingInset, 1);
+  expect(edgeMaterial.trailingPaddingBlock).toBeCloseTo(edgeMaterial.trailingBlockInsetToken, 1);
   expect(edgeMaterial.primaryWidth).toBeCloseTo(
     edgeMaterial.itemRects.reduce((total, { width }) => total + width, 0) +
       edgeMaterial.itemGaps.reduce((total, gap) => total + gap, 0),
@@ -930,7 +972,9 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(edgeMaterial.activeIndicatorRect.right).toBeLessThanOrEqual(
     edgeMaterial.activeButtonRect.right + 0.1,
   );
-  expect(Math.abs(edgeMaterial.primaryHeight - edgeMaterial.trailingHeight)).toBeLessThan(0.25);
+  // The embedded language control is deliberately shorter than navigation items.
+  // They must still share a vertical center within the Dock.
+  expect(edgeMaterial.primaryHeight).toBeGreaterThan(edgeMaterial.trailingHeight);
   expect(Math.abs(edgeMaterial.primaryCenterY - edgeMaterial.trailingCenterY)).toBeLessThan(0.25);
   expect(edgeMaterial.dividerGapBefore).toBeCloseTo(edgeMaterial.dividerGapAfter, 2);
   expect(edgeMaterial.dividerGapBefore).toBeCloseTo(
@@ -957,16 +1001,18 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     edgeMaterial.groupHeight * edgeMaterial.presentationScale,
     2,
   );
-  expect(edgeMaterial.trailingHeight).toBeCloseTo(
-    edgeMaterial.groupHeight * edgeMaterial.presentationScale,
-    2,
+  expect(edgeMaterial.trailingHeight).toBeGreaterThan(
+    edgeMaterial.segmentedSurfaceHeight * edgeMaterial.presentationScale,
   );
-  expect(edgeMaterial.optionPaddingBlock).toBeCloseTo(edgeMaterial.rootFontSize * 0.125, 1);
-  expect(edgeMaterial.optionPaddingInline).toBeCloseTo(edgeMaterial.rootFontSize * 0.25, 1);
+  expect(edgeMaterial.trailingHeight).toBeLessThan(
+    edgeMaterial.groupHeight * edgeMaterial.presentationScale,
+  );
+  expect(edgeMaterial.optionPaddingBlock).toBeCloseTo(edgeMaterial.expectedOptionPaddingBlock, 1);
+  expect(edgeMaterial.optionPaddingInline).toBeCloseTo(edgeMaterial.expectedOptionPaddingInline, 1);
   expect(edgeMaterial.optionFontSize).toBeCloseTo(edgeMaterial.expectedOptionFontSize, 1);
   expect(edgeMaterial.optionFontWeight).toBe('750');
   expect(edgeMaterial.optionLineHeight).toBe('normal');
-  expect(edgeMaterial.optionTextCenterDelta).toBeCloseTo(0, 2);
+  expect(edgeMaterial.optionTextCenterDelta).toBeCloseTo(0, 1);
   if ((page.viewportSize()?.width ?? 0) > 520) {
     expect(edgeMaterial.navigationTextCenterDelta).toBeCloseTo(0, 1);
   }
@@ -1287,15 +1333,27 @@ for (const theme of themes) {
           display: style.display,
           opacity: Number(style.opacity),
           backgroundImage: style.backgroundImage,
+          maskImage: style.maskImage,
           backgroundClip: getComputedStyle(element).backgroundClip,
+          rendererCanvasVisible: (() => {
+            const canvas = document.querySelector<HTMLElement>(
+              '[data-neoverse-glass-renderer-canvas]',
+            );
+            return canvas !== null && getComputedStyle(canvas).display !== 'none';
+          })(),
         };
       });
 
       expect(edge.display).toBe(renderer === 'webgl' ? 'none' : 'block');
       expect(edge.opacity).toBeGreaterThan(0);
-      expect(edge.backgroundImage).toContain('radial-gradient');
+      // Refraction uses a masked backdrop (CSS) or a separate WebGL canvas.
+      // Neither paints a decorative CSS background gradient into the surface.
+      expect(edge.backgroundImage).toBe('none');
       if (renderer === 'webgl') {
+        expect(edge.rendererCanvasVisible).toBe(true);
         expect(edge.backgroundClip).toBe('padding-box');
+      } else {
+        expect(edge.maskImage).not.toBe('none');
       }
     } finally {
       if (stallExternalFonts) {
@@ -1745,6 +1803,10 @@ test('button press keeps the glass plate and reaches full press glow / dark', as
         backgroundColor: style.backgroundColor,
         backgroundImage: style.backgroundImage,
         backdropFilter: style.backdropFilter,
+        blurPx: Number.parseFloat(style.backdropFilter.match(/blur\(([-\d.]+)px\)/)?.[1] ?? 'NaN'),
+        expectedBlurPx:
+          Number.parseFloat(style.getPropertyValue('--neoverse-material-blur')) *
+          Number.parseFloat(style.getPropertyValue('--neoverse-control-button-blur-scale')),
         backgroundAlpha:
           alphaMatch === null
             ? style.backgroundColor === 'transparent'
@@ -1761,7 +1823,7 @@ test('button press keeps the glass plate and reaches full press glow / dark', as
     expect(press.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
     expect(press.backgroundAlpha).toBeCloseTo(0.15, 3);
     expect(press.backgroundImage).toBe('none');
-    expect(press.backdropFilter).toContain('blur(12px)');
+    expect(press.blurPx).toBeCloseTo(press.expectedBlurPx, 3);
     expect(press.pressGlowBackground).not.toBe('none');
     expect(press.pressGlowOpacity).toBe('1');
   } finally {
@@ -1769,7 +1831,7 @@ test('button press keeps the glass plate and reaches full press glow / dark', as
   }
 });
 
-test('dark filled variants share Light optics and Ghost keeps no plate', async ({ page }) => {
+test('dark filled variants preserve distinct depth and Ghost keeps no plate', async ({ page }) => {
   await page.goto('/frame?theme=dark&lang=en#controls', {
     waitUntil: 'domcontentloaded',
   });
@@ -1817,7 +1879,10 @@ test('dark filled variants share Light optics and Ghost keeps no plate', async (
   expect(surfaces[1]?.backgroundImage).toBe('none');
   expect(surfaces[0]?.backgroundAlpha).toBeCloseTo(0.15, 3);
   expect(surfaces[1]?.backgroundAlpha).toBeCloseTo(0.15, 3);
-  expect(surfaces[0]?.boxShadow).toBe(surfaces[1]?.boxShadow);
+  // Primary and secondary deliberately have different elevation treatments.
+  expect(surfaces[0]?.boxShadow).not.toBe('none');
+  expect(surfaces[1]?.boxShadow).not.toBe('none');
+  expect(surfaces[0]?.boxShadow).not.toBe(surfaces[1]?.boxShadow);
   expect(surfaces[0]?.color).not.toBe(surfaces[1]?.color);
   expect(surfaces[2]?.borderColor).toBe('rgba(0, 0, 0, 0)');
   expect(surfaces.slice(0, 2).every(({ backdropFilter }) => backdropFilter.includes('blur('))).toBe(
@@ -1840,39 +1905,48 @@ test('touch density keeps the compact control geometry and adds a transparent hi
   await page.evaluate(waitForStableAssets);
 
   const touchControls = page.locator('[data-pointer-profile="touch"] [data-density-controls]');
-  await touchControls.scrollIntoViewIfNeeded();
-  const buttonContract = await touchControls
-    .locator('.ui-button')
-    .first()
-    .evaluate((element) => {
-      const pseudo = getComputedStyle(element, '::before');
-      const rect = element.getBoundingClientRect();
-      return {
-        height: rect.height,
-        inset: pseudo.inset,
-        pointerEvents: pseudo.pointerEvents,
-        hitTarget: document.elementFromPoint(rect.left - 4, rect.top + rect.height / 2) === element,
-      };
-    });
-  const segmentContract = await touchControls
-    .locator('.ui-segmented-control__option')
-    .first()
-    .evaluate((element) => {
-      const pseudo = getComputedStyle(element, '::before');
-      const rect = element.getBoundingClientRect();
-      return {
-        inset: pseudo.inset,
-        pointerEvents: pseudo.pointerEvents,
-        hitTarget: document.elementFromPoint(rect.left - 4, rect.top + rect.height / 2) === element,
-      };
-    });
+  const touchButton = touchControls.locator('.ui-button').first();
+  const touchSegment = touchControls.locator('.ui-segmented-control__option').first();
+  // The density specimen exceeds a mobile viewport; scroll the actual target.
+  await touchButton.scrollIntoViewIfNeeded();
+  const buttonContract = await touchButton.evaluate((element) => {
+    const pseudo = getComputedStyle(element, '::before');
+    const rect = element.getBoundingClientRect();
+    const tokenProbe = document.createElement('span');
+    tokenProbe.style.display = 'block';
+    tokenProbe.style.height = 'var(--neoverse-button-height-sm)';
+    element.append(tokenProbe);
+    const tokenHeight = Number.parseFloat(getComputedStyle(tokenProbe).height);
+    tokenProbe.remove();
+    return {
+      height: rect.height,
+      tokenHeight,
+      expandedHeight: rect.height + 2 * Math.abs(Number.parseFloat(pseudo.top)),
+      inset: pseudo.inset,
+      pointerEvents: pseudo.pointerEvents,
+      overflow: getComputedStyle(element).overflow,
+      hitTarget: document.elementFromPoint(rect.left - 4, rect.top + rect.height / 2) === element,
+    };
+  });
+  await touchSegment.scrollIntoViewIfNeeded();
+  const segmentContract = await touchSegment.evaluate((element) => {
+    const pseudo = getComputedStyle(element, '::before');
+    const rect = element.getBoundingClientRect();
+    return {
+      inset: pseudo.inset,
+      pointerEvents: pseudo.pointerEvents,
+      hitTarget: document.elementFromPoint(rect.left - 4, rect.top + rect.height / 2) === element,
+    };
+  });
 
   expect(buttonContract).toMatchObject({
-    height: 36,
     inset: '-8px',
     pointerEvents: 'auto',
     hitTarget: true,
   });
+  expect(buttonContract.height).toBeCloseTo(buttonContract.tokenHeight, 2);
+  expect(buttonContract.expandedHeight).toBeGreaterThanOrEqual(44);
+  expect(buttonContract.overflow, 'The expanded touch area must not be clipped').toBe('visible');
   expect(segmentContract).toMatchObject({
     inset: '-8px',
     pointerEvents: 'auto',

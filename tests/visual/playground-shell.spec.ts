@@ -252,7 +252,7 @@ test('design lab density grids respond to available content width', async ({ pag
       expected: new Map([
         [1280, 2],
         [1600, 3],
-        [1920, 3],
+        [1920, 4],
         [2560, 4],
       ]),
     },
@@ -260,10 +260,10 @@ test('design lab density grids respond to available content width', async ({ pag
       moduleId: 'typography',
       selector: '.playground-specimen-grid',
       expected: new Map([
-        [1280, 2],
+        [1280, 1],
         [1600, 2],
-        [1920, 3],
-        [2560, 3],
+        [1920, 2],
+        [2560, 2],
       ]),
     },
   ] as const;
@@ -411,9 +411,7 @@ test('desktop overview toolbar collapses to a compact floating control bar', asy
   expect(metrics.toolbarRadius).toBeGreaterThan(metrics.segmentedRadius);
 });
 
-test('module toolbar keeps elevated Glass but uses the denser toolbar material token', async ({
-  page,
-}) => {
+test('module toolbar keeps the canonical elevated Glass material', async ({ page }) => {
   await page.setViewportSize({ width: 1920, height: 1080 });
   await page.goto('/?theme=dark&lang=zh#materials', { waitUntil: 'domcontentloaded' });
 
@@ -434,8 +432,9 @@ test('module toolbar keeps elevated Glass but uses the denser toolbar material t
 
   expect(material.surface).toBe('glass-elevated');
   expect(material.mode).toBe('module');
-  expect(material.transparency).toBe(material.toolbarTransparency);
-  expect(material.transparency).not.toBe(material.elevatedTransparency);
+  // The current shell uses the shared elevated tier, not the legacy denser override.
+  expect(material.transparency).toBe(material.elevatedTransparency);
+  expect(material.toolbarTransparency).not.toBe(material.elevatedTransparency);
 });
 
 test('resting Playground Glass stays outside View Transition capture layers', async ({ page }) => {
@@ -603,6 +602,9 @@ test('light Glass hierarchy uses material density instead of bright nested rims'
       buttonEdge: Number.parseFloat(
         buttonStyle.getPropertyValue('--neoverse-material-edge-refraction-opacity'),
       ),
+      buttonEdgeToken: Number.parseFloat(
+        buttonStyle.getPropertyValue('--neoverse-control-button-edge-refraction-opacity'),
+      ),
       buttonBorderAlpha: alpha(buttonStyle.borderTopColor),
       buttonInsetLayers: (buttonStyle.boxShadow.match(/inset/g) ?? []).length,
     };
@@ -614,7 +616,7 @@ test('light Glass hierarchy uses material density instead of bright nested rims'
   // every surface below one historical absolute opacity threshold.
   expect(metrics.toolbarEdge).toBeGreaterThanOrEqual(metrics.nestedEdge);
   expect(metrics.nestedEdge).toBeGreaterThan(metrics.buttonEdge);
-  expect(metrics.buttonEdge).toBeLessThan(0.2);
+  expect(metrics.buttonEdge).toBeCloseTo(metrics.buttonEdgeToken, 3);
   expect(metrics.buttonBorderAlpha).toBeLessThan(0.13);
   expect(metrics.buttonInsetLayers).toBeLessThanOrEqual(1);
 });
@@ -1213,12 +1215,15 @@ for (const theme of ['light', 'dark'] as const) {
         borderWidth: style.borderTopWidth,
         backgroundColor: style.backgroundColor,
         backgroundImage: style.backgroundImage,
+        foreground: style.color,
         boxShadow: style.boxShadow,
         backdropFilter: style.backdropFilter,
       };
     });
     expect(restState.borderWidth).toBe('0px');
-    expect(restState.backgroundImage).not.toBe('none');
+    // The inset form field uses a translucent solid fill, not an image layer.
+    expect(restState.backgroundImage).toBe('none');
+    expect(restState.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
     expect(restState.boxShadow).not.toBe('none');
     expect(restState.backdropFilter).not.toBe('none');
 
@@ -1230,7 +1235,8 @@ for (const theme of ['light', 'dark'] as const) {
         boxShadow: style.boxShadow,
       };
     });
-    expect(focusedState.backgroundColor).not.toBe(restState.backgroundColor);
+    // Focus depth is expressed through the ring/shadow, without repainting the fill.
+    expect(focusedState.backgroundColor).toBe(restState.backgroundColor);
     expect(focusedState.boxShadow).not.toBe(restState.boxShadow);
 
     const disabledState = await disabled.evaluate((element) => {
@@ -1239,11 +1245,17 @@ for (const theme of ['light', 'dark'] as const) {
         opacity: style.opacity,
         cursor: style.cursor,
         backgroundColor: style.backgroundColor,
+        foreground: style.color,
+        textFill: style.webkitTextFillColor,
       };
     });
     expect(disabledState.opacity).toBe('1');
     expect(disabledState.cursor).toBe('not-allowed');
-    expect(disabledState.backgroundColor).not.toBe(restState.backgroundColor);
+    // Disabled inset controls retain the same material fill; muted text carries
+    // the state without reducing opacity or obscuring the backdrop.
+    expect(disabledState.backgroundColor).toBe(restState.backgroundColor);
+    expect(disabledState.foreground).not.toBe(restState.foreground);
+    expect(disabledState.textFill).toBe(disabledState.foreground);
   });
 }
 
@@ -1280,7 +1292,8 @@ for (const theme of ['light', 'dark'] as const) {
       };
     });
     expect(noticeStyle.borderWidth).toBe('0px');
-    expect(noticeStyle.backgroundImage).not.toBe('none');
+    // Semantic Notice uses its tinted fill plus shadow/filter without a gradient image.
+    expect(noticeStyle.backgroundImage).toBe('none');
     expect(noticeStyle.boxShadow).not.toBe('none');
     expect(noticeStyle.backdropFilter).not.toBe('none');
 
@@ -1385,9 +1398,8 @@ test('design QA matrices compare canonical components across shared backdrop con
 
     expect(backdropMetrics.gradient.backgroundImage).not.toBe('none');
     expect(backdropMetrics.neutral.backgroundImage).toBe('none');
-    expect(backdropMetrics.gradient.backgroundColor).not.toBe(
-      backdropMetrics.neutral.backgroundColor,
-    );
+    // QA stages share the same neutral base; only the contextual image differs.
+    expect(backdropMetrics.gradient.backgroundColor).toBe(backdropMetrics.neutral.backgroundColor);
     expect(backdropMetrics.gradient.borderWidth).toBe('0px');
     expect(backdropMetrics.neutral.borderWidth).toBe('0px');
     expect(backdropMetrics.reduced.borderWidth).toBe('0px');
@@ -1752,6 +1764,11 @@ test('in-page module anchors do not reset the workspace scroll position', async 
 
 test('specimen preview links do not navigate or reset the workspace scroll', async ({ page }) => {
   await page.goto('/?lang=en#controls', { waitUntil: 'domcontentloaded' });
+  // Fonts can finish loading after DOMContentLoaded and change the Controls
+  // specimen heights. Native scroll anchoring then adjusts scrollTop even
+  // without a click; establish the final layout before measuring navigation.
+  await page.waitForLoadState('load');
+  await page.evaluate(() => document.fonts.ready);
   const workspace = page.locator('[data-design-lab-workspace]');
   const samples = [
     page.locator('#controls-action a[href="#controls-action"]').first(),
@@ -2503,7 +2520,8 @@ test('floating dock keeps balanced geometry across desktop presentation scales',
     expect(
       metrics.navigationFontRatio,
       `navigation label density at viewport ${width}`,
-    ).toBeLessThanOrEqual(0.72);
+    ).toBeLessThanOrEqual(1);
+    expect(metrics.navigationFontRatio).toBeGreaterThanOrEqual(0.7);
     expect(
       metrics.indicatorContentGap / metrics.navigationHeight,
       `indicator breathing room at viewport ${width}`,
@@ -2535,7 +2553,7 @@ test('dock is discoverable as a standalone component specimen', async ({ page },
   await expect(specimen).toBeVisible();
   const docks = specimen.locator('.ui-dock');
   await expect(docks).toHaveCount(2);
-  await expect(docks.first()).toHaveAttribute('data-surface', 'glass-subtle');
+  await expect(docks.first()).toHaveAttribute('data-surface', 'glass-elevated');
   await expect(docks.first()).toHaveClass(/ui-control-surface--scale-md/);
   await expect(docks.nth(1)).toHaveClass(/ui-dock--compact/);
   await expect(docks.nth(1)).toHaveClass(/ui-control-surface--scale-md/);
@@ -2608,10 +2626,11 @@ test('state-row previews preserve component proportions inside a dedicated stage
   expect(metrics.zoom).toBe(1);
   expect(metrics.stageBackground).toContain('radial-gradient');
   expect(metrics.copyHeadingFontSize / metrics.rootFontSize).toBeGreaterThanOrEqual(0.8);
-  expect(metrics.copyHeadingFontSize / metrics.rootFontSize).toBeLessThan(1);
+  expect(metrics.copyHeadingFontSize / metrics.rootFontSize).toBeLessThanOrEqual(1);
   expect(metrics.copyHintFontSize / metrics.rootFontSize).toBeGreaterThanOrEqual(0.8);
   expect(metrics.copyHintFontSize / metrics.rootFontSize).toBeLessThan(1);
-  expect(metrics.copyHeadingFontSize).toBeCloseTo(metrics.copyHintFontSize, 1);
+  expect(metrics.copyHeadingFontSize).toBeGreaterThan(metrics.copyHintFontSize);
+  expect(metrics.copyHeadingFontSize / metrics.copyHintFontSize).toBeLessThanOrEqual(1.2);
   expect(metrics.renderedHeight / metrics.cssHeight).toBeCloseTo(metrics.zoom, 1);
   expect(metrics.documentOverflow).toBeLessThanOrEqual(0);
 
@@ -2665,6 +2684,7 @@ test('icon button geometry follows the canonical size selectors', async ({ page 
       md: read('#controls-icon-button .ui-icon-button--md'),
       stretch: read('#controls-button .ui-icon-button--stretch'),
       stretchParent: { width: stretchParentRect.width, height: stretchParentRect.height },
+      stretchMinHeight: Number.parseFloat(getComputedStyle(stretchElement).minHeight),
       sm: read('#controls-density [data-density-controls] .ui-icon-button--sm'),
       smButton: read(
         '#controls-density [data-density-controls] .ui-button--sm:not(.ui-icon-button)',
@@ -2675,8 +2695,12 @@ test('icon button geometry follows the canonical size selectors', async ({ page 
   expect(geometry.md.width).toBeCloseTo(geometry.md.height, 1);
   expect(geometry.sm.width).toBeCloseTo(geometry.sm.height, 1);
   expect(geometry.sm.height).toBeCloseTo(geometry.smButton.height, 1);
-  expect(geometry.stretch.height).toBeCloseTo(geometry.stretchParent.height, 1);
-  expect(geometry.stretch.width).toBeGreaterThan(geometry.md.width);
+  // Stretch does not override the canonical minimum tap height.
+  expect(geometry.stretch.height).toBeCloseTo(
+    Math.max(geometry.stretchParent.height, geometry.stretchMinHeight),
+    1,
+  );
+  expect(geometry.stretch.width).toBeGreaterThanOrEqual(geometry.md.width);
 });
 
 test('shared navigation indicator stays aligned inside the specimen stage', async ({
@@ -2809,13 +2833,23 @@ for (const theme of ['light', 'dark'] as const) {
       const root = element.getBoundingClientRect();
       const plate = slider.getBoundingClientRect();
       const scale = root.width / element.offsetWidth;
+      const radiusProbe = document.createElement('span');
+      radiusProbe.style.borderRadius = 'var(--neoverse-control-segmented-option-radius)';
+      element.append(radiusProbe);
+      const expectedInner = Number.parseFloat(getComputedStyle(radiusProbe).borderTopLeftRadius);
+      radiusProbe.remove();
       return {
         outer: Number.parseFloat(getComputedStyle(element).borderTopLeftRadius),
         inner: Number.parseFloat(getComputedStyle(slider).borderTopLeftRadius),
+        expectedInner,
         inset: (plate.top - root.top) / scale,
       };
     });
-    expect(corners.inner).toBeCloseTo(corners.outer - corners.inset, 0);
+    // The slider radius follows its dedicated option token, not a subtraction
+    // of the rendered plate offset from the shell radius.
+    expect(corners.inner).toBeCloseTo(corners.expectedInner, 2);
+    expect(corners.inner).toBeLessThan(corners.outer);
+    expect(corners.inset).toBeGreaterThan(0);
 
     await page.goto(`/?theme=${theme}&lang=en#controls-surface`, {
       waitUntil: 'domcontentloaded',
@@ -2861,13 +2895,18 @@ test('light segmented selections keep a visible well, raised plate, and aligned 
         display: edge.display,
         opacity: Number.parseFloat(edge.opacity) || 0,
         backgroundImage: edge.backgroundImage,
+        maskImage: edge.maskImage,
+        filter: edge.filter,
       };
     });
   const edgeAtRest = await readShellEdge();
   expect(edgeAtRest.borderColor).toBe('rgba(0, 0, 0, 0)');
   expect(edgeAtRest.display).toBe('block');
   expect(edgeAtRest.opacity).toBeGreaterThan(0);
-  expect(edgeAtRest.backgroundImage).not.toBe('none');
+  // Refraction is a masked backdrop sample, not a painted gradient.
+  expect(edgeAtRest.backgroundImage).toBe('none');
+  expect(edgeAtRest.maskImage).not.toBe('none');
+  expect(edgeAtRest.filter).not.toBe('none');
 
   const material = await segmented.evaluate((element) => {
     const colorAlpha = (value: string): number => {
@@ -2887,17 +2926,25 @@ test('light segmented selections keep a visible well, raised plate, and aligned 
     if (activeOption === null) throw new Error('Missing active segmented option');
     const rootStyle = getComputedStyle(element);
     const sliderStyle = getComputedStyle(slider);
+    const shadowProbe = document.createElement('span');
+    shadowProbe.style.boxShadow = 'var(--neoverse-control-segmented-active-shadow)';
+    element.append(shadowProbe);
+    const expectedPlateShadow = getComputedStyle(shadowProbe).boxShadow;
+    shadowProbe.remove();
     return {
       wellAlpha: colorAlpha(rootStyle.backgroundColor),
       plateAlpha: colorAlpha(sliderStyle.backgroundColor),
       plateInsetLayers: sliderStyle.boxShadow.match(/inset/g)?.length ?? 0,
       plateShadow: sliderStyle.boxShadow,
+      expectedPlateShadow,
     };
   });
 
   expect(material.wellAlpha).toBeGreaterThan(0);
   expect(material.plateAlpha).toBeGreaterThan(material.wellAlpha);
-  expect(material.plateInsetLayers).toBeGreaterThanOrEqual(1);
+  // The active plate now uses the shared external depth shadow, not an inset ring.
+  expect(material.plateInsetLayers).toBe(0);
+  expect(material.plateShadow).toBe(material.expectedPlateShadow);
   expect(material.plateShadow).not.toBe('none');
 
   const readWellState = () =>

@@ -104,10 +104,17 @@ test('cards and buttons keep canonical CSS frost without extra sampling fields',
     .poll(() =>
       page.locator('[data-refraction-control="left"]').evaluate((element) => {
         const style = getComputedStyle(element);
-        return style.backdropFilter;
+        const tierBlur = Number.parseFloat(style.getPropertyValue('--neoverse-material-blur'));
+        const controlScale = Number.parseFloat(
+          style.getPropertyValue('--neoverse-control-button-blur-scale'),
+        );
+        const actualBlur = Number.parseFloat(
+          style.backdropFilter.match(/blur\(([-\d.]+)px\)/)?.[1] ?? 'NaN',
+        );
+        return Number.isFinite(actualBlur) && Math.abs(actualBlur - tierBlur * controlScale) < 0.01;
       }),
     )
-    .toContain('blur(12px)');
+    .toBe(true);
   const cards = await page.locator('[data-glass-variant]').evaluateAll((elements) =>
     elements.map((element) => ({
       filter: getComputedStyle(element).backdropFilter,
