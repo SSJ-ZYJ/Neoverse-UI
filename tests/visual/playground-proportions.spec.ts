@@ -131,6 +131,7 @@ for (const theme of ['light', 'dark'] as const) {
     await page.goto(`/frame?theme=${theme}&lang=zh#dock`, { waitUntil: 'domcontentloaded' });
     const dock = page.locator('[data-dock-specimen="standard"] .ui-dock');
     await expect(dock).toBeVisible();
+    await page.evaluate(() => document.fonts.ready);
     const normalScale = await dock.evaluate((element) =>
       Number.parseFloat(getComputedStyle(element).zoom),
     );

@@ -68,6 +68,72 @@ bun changeset status
 
 The repository and all public packages use the MIT license. `scripts/verify-packages.ts` verifies the public package metadata and package contents before release.
 
+### CI and visual baselines
+
+The Linux release-quality job runs `release:check` once and uploads the built
+Playground JS/CSS. Three Ubuntu 24.04 visual jobs download that same build and run
+the complete Playwright suite with `--shard=1/3`, `2/3`, or `3/3`, two workers each.
+`Verify workspace (Linux)` remains the aggregate required-check name: it succeeds
+only when release quality and every visual shard pass. Windows keeps its separate
+`release:check` and four-file keyboard/overlay/theme interaction gate.
+
+These OS jobs do not run equivalent browser workloads. In failed run
+[39412200952](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/39412200952),
+Linux ran 718 browser cases while Windows ran 62. Release quality took 68 seconds
+on Linux versus 107 seconds on Windows; the Linux bottleneck was its 21m35s full
+browser step, including two retries of deterministic screenshot mismatches.
+
+Playwright stores native baselines in
+`tests/visual/snapshots/{platform}/{projectName}/`. Preserve `win32` images when
+updating `linux` images, and vice versa. Both desktop/mobile and light/dark remain
+covered, without relaxing pixel-difference thresholds.
+
+The 2026-10-20 repair also corrects Maple Mono's invalid double `format()`
+descriptor: browsers previously discarded its source, so Linux machines without
+Maple Mono NF CN rendered terminal text in the Chinese sans fallback. Native font
+loading and equal narrow/wide glyph advances must pass before accepting terminal
+baselines. Controls screenshots cover the module header, navigation and every
+component specimen separately: the old mobile image exceeded 21,000 pixels in
+height, producing a blank tail beyond Chromium's compositor limit as well as
+slow captures. Bounded images retain complete specimen coverage with the default
+5-second screenshot assertion and 30-second test timeouts. Motion checks await
+real transitions; geometry checks wait for loaded fonts; responsive overflow
+permutations run as separate bounded cases.
+
+For a baseline update, use the pinned Playwright dependency and Chromium build in
+the target OS, build once, then select only the intentionally changed specs:
+
+```sh
+bun install --frozen-lockfile
+bun run build
+bunx playwright install chromium
+bunx playwright test <affected-specs> --update-snapshots
+bunx playwright test <affected-specs>
+```
+
+On Ubuntu, use `playwright install --with-deps chromium` to include native browser
+libraries and fonts. Review the old/new/diff images before accepting a changed
+baseline. Never use snapshot updates as the CI test command. Failed Linux shards
+and Windows browser checks upload `test-results/` and the HTML report with
+shard/attempt-specific artifact names.
+
+Local CI repair verification on 2026-10-20:
+
+- `bun run release:check` passed, including all eight clean-consumer package smokes.
+- Native Ubuntu 24.04.5 / Playwright 1.60.0 Chromium ran all three non-update
+  shards: 744 passed, 4 flaky (passed on the existing CI retry), 68 conditional
+  skips, zero failures. The four remaining flakes were navigation/action
+  timeouts; this does not establish a flake-free suite.
+- Windows passed the 62-case interaction gate and all 86 screenshot cases without
+  retries or snapshot updates. Both platforms' bounded Controls images were
+  reviewed; no baseline exceeds 16,384 pixels in height.
+- The final 816-case suite partitions into 272 cases per shard with no missing or
+  duplicated cases. The count increase comes from splitting existing Controls
+  screenshots and responsive overflow permutations, not reducing coverage.
+  Actionlint accepted the workflow.
+
+These are local CLI/browser results, not a successful remote GitHub Actions run.
+
 ### 2026-10-20 local preparation evidence
 
 - `bun run verify:packages`: all eight packages passed the clean-consumer JS/CSS/type smoke.

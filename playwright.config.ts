@@ -12,7 +12,7 @@ export default defineConfig({
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,
   reporter: 'list',
-  snapshotPathTemplate: '{testDir}/snapshots/{projectName}/{arg}{ext}',
+  snapshotPathTemplate: '{testDir}/snapshots/{platform}/{projectName}/{arg}{ext}',
   expect: {
     toHaveScreenshot: {
       animations: 'disabled',

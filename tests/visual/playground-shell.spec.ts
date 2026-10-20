@@ -3529,24 +3529,22 @@ test('Playground keeps the 100% zoom presentation baseline across responsive wid
   }
 });
 
-test('high-risk Playground surfaces stay inside local overflow regions across themes and widths', async ({
-  page,
-}, testInfo) => {
-  test.skip(
-    testInfo.project.name !== 'desktop',
-    'Responsive coverage runs once from the desktop project.',
-  );
+for (const theme of ['light', 'dark'] as const) {
+  for (const viewport of presentationViewports) {
+    for (const route of [
+      { moduleId: 'controls', selector: '[data-design-lab-region="module"]' },
+      { moduleId: 'composition', selector: '[data-design-lab-region="module"]' },
+      { moduleId: 'consumer-parity', selector: '[data-consumer-parity="floating-navigation"]' },
+    ] as const) {
+      test(`high-risk Playground surfaces stay inside local overflow regions across themes and widths / ${theme} / ${viewport.label} / ${route.moduleId}`, async ({
+        page,
+      }, testInfo) => {
+        test.skip(
+          testInfo.project.name !== 'desktop',
+          'Responsive coverage runs once from the desktop project.',
+        );
 
-  const routes = [
-    { moduleId: 'controls', selector: '[data-design-lab-region="module"]' },
-    { moduleId: 'composition', selector: '[data-design-lab-region="module"]' },
-    { moduleId: 'consumer-parity', selector: '[data-consumer-parity="floating-navigation"]' },
-  ] as const;
-
-  for (const theme of ['light', 'dark'] as const) {
-    for (const viewport of presentationViewports) {
-      await page.setViewportSize({ width: viewport.width, height: viewport.height });
-      for (const route of routes) {
+        await page.setViewportSize({ width: viewport.width, height: viewport.height });
         await page.goto(`/?theme=${theme}&lang=en#${route.moduleId}`, {
           waitUntil: 'domcontentloaded',
         });
@@ -3592,10 +3590,10 @@ test('high-risk Playground surfaces stay inside local overflow regions across th
           metrics.targetRight,
           `${theme} ${viewport.label} ${route.moduleId}`,
         ).toBeLessThanOrEqual(metrics.viewportWidth + 1);
-      }
+      });
     }
   }
-});
+}
 
 test('keyboard focus remains visible on representative Playground controls in both themes', async ({
   page,

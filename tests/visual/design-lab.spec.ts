@@ -12,6 +12,22 @@ const modules = [
   'consumer-parity',
 ] as const;
 
+const controlSnapshots = [
+  { name: 'controls-header', selector: '#controls > header' },
+  { name: 'controls-nav', selector: '#controls nav[aria-label="Core Controls"]' },
+  ...[
+    'button',
+    'icon-button',
+    'action',
+    'breadcrumb',
+    'overlays',
+    'navigation-item',
+    'segmented-control',
+    'surface',
+    'density',
+  ].map((name) => ({ name: `controls-${name}`, selector: `#controls-${name}` })),
+];
+
 const freezeMotion = `
   *, *::before, *::after {
     animation-delay: 0s !important;
@@ -40,19 +56,27 @@ const waitForStableAssets = async (): Promise<void> => {
 
 for (const theme of themes) {
   for (const moduleId of modules) {
-    test(`${moduleId} / ${theme}`, async ({ page }) => {
-      await page.emulateMedia({ reducedMotion: 'reduce' });
-      await page.goto(`/frame?theme=${theme}&lang=en#${moduleId}`, {
-        waitUntil: 'domcontentloaded',
-      });
-      await page.addStyleTag({ content: freezeMotion });
-      await page.evaluate(waitForStableAssets);
-      await page.evaluate(() => window.scrollTo(0, 0));
+    // The mobile Controls module exceeds Chromium's compositor texture limit.
+    // Independent specimens preserve its complete coverage without blank tails.
+    const snapshots =
+      moduleId === 'controls'
+        ? controlSnapshots
+        : [{ name: moduleId, selector: '[data-design-lab-region="module"]' }];
+    for (const snapshot of snapshots) {
+      test(`${snapshot.name} / ${theme}`, async ({ page }) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.goto(`/frame?theme=${theme}&lang=en#${moduleId}`, {
+          waitUntil: 'domcontentloaded',
+        });
+        await page.addStyleTag({ content: freezeMotion });
 
-      const region = page.locator('[data-design-lab-region="module"]');
-      await expect(region).toBeVisible();
-      await expect(region).toHaveScreenshot(`${moduleId}-${theme}.png`);
-    });
+        const region = page.locator(snapshot.selector);
+        await expect(region).toBeVisible();
+        await page.evaluate(waitForStableAssets);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await expect(region).toHaveScreenshot(`${snapshot.name}-${theme}.png`);
+      });
+    }
   }
 }
 
@@ -1064,18 +1088,33 @@ test('dock indicator travels between unequal items and respects reduced motion',
         (item) => item.textContent?.trim() === label,
       );
       if (!bar || !target) throw new Error('Navigation geometry missing');
+      for (const animation of bar.getAnimations()) animation.finish();
       const start = bar.getBoundingClientRect().x;
-      target.click();
-      await new Promise(requestAnimationFrame);
-      await new Promise(requestAnimationFrame);
-      const motion = bar
-        .getAnimations()
-        .find(
-          (animation) =>
-            animation instanceof CSSTransition && animation.transitionProperty === 'left',
-        );
-      if (!motion) throw new Error('No horizontal indicator transition');
-      motion.pause();
+      const initialLeft = bar.style.left;
+      const motion = await new Promise<CSSTransition>((resolve, reject) => {
+        // Vue updates the indicator after measuring the selected item. Flush
+        // that style change in its mutation microtask and pause the resulting
+        // transition before a rendering frame can advance it.
+        const observer = new MutationObserver(() => {
+          if (bar.style.left === initialLeft) return;
+          const transition = bar
+            .getAnimations()
+            .find(
+              (animation): animation is CSSTransition =>
+                animation instanceof CSSTransition && animation.transitionProperty === 'left',
+            );
+          observer.disconnect();
+          if (!transition) {
+            reject(new Error('No horizontal indicator transition'));
+            return;
+          }
+          transition.pause();
+          resolve(transition);
+        });
+        observer.observe(bar, { attributes: true, attributeFilter: ['style'] });
+        target.click();
+      });
+      await motion.ready;
       motion.currentTime = Number(motion.effect?.getTiming().duration) / 2;
       const middle = bar.getBoundingClientRect().x;
       for (const animation of bar.getAnimations()) animation.finish();
@@ -1121,8 +1160,11 @@ test('consumer parity dock keeps parent Glass stable on item hover', async ({ pa
   const item = navigation.getByRole('link', { name: 'Home' });
   await expect(item).toBeVisible();
   await page.mouse.move(0, 0);
-  await page.waitForTimeout(80);
-  const before = await navigation.evaluate((element) => {
+  const readMaterial = async (element: Element) => {
+    // Resolve pending hover/theme styles, then observe their actual completion
+    // rather than sampling an interpolated shadow after a fixed delay.
+    getComputedStyle(element).boxShadow;
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
     const style = getComputedStyle(element);
     return {
       background: style.backgroundColor,
@@ -1130,7 +1172,8 @@ test('consumer parity dock keeps parent Glass stable on item hover', async ({ pa
       shadow: style.boxShadow,
       edgeDisplay: getComputedStyle(element, '::before').display,
     };
-  });
+  };
+  const before = await navigation.evaluate(readMaterial);
   const box = await item.boundingBox();
   expect(box).not.toBeNull();
   if (box === null) {
@@ -1138,16 +1181,7 @@ test('consumer parity dock keeps parent Glass stable on item hover', async ({ pa
   }
 
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.waitForTimeout(260);
-  const after = await navigation.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return {
-      background: style.backgroundColor,
-      border: style.borderColor,
-      shadow: style.boxShadow,
-      edgeDisplay: getComputedStyle(element, '::before').display,
-    };
-  });
+  const after = await navigation.evaluate(readMaterial);
 
   expect(after).toEqual(before);
 });

@@ -181,7 +181,7 @@ The non-interactive FPS overlay also uses `UiSurface` with the shared `glass-ele
 
 Visual tests use the stable `/frame` route and `[data-design-lab-region="module"]` region, covering representative Foundation, Material, control, feedback, card, and consumer-parity scenarios in both themes. Playwright uses a 1920×1080 desktop viewport at 100% CSS-pixel scaling and a 390px touch viewport; shell regressions additionally exercise 1280 / 1600 / 1920 responsive geometry and the complete control state matrix. Animations are disabled and assets are awaited before each screenshot.
 
-Baselines live under `tests/visual/snapshots/`. A screenshot change should correspond to an intentional token, Material, component, or specimen-composition change and be reviewed with the generated diff.
+Baselines live under `tests/visual/snapshots/{platform}/{projectName}/`: `win32` and `linux` keep native Chromium font metrics and rasterization separate. Linux CI uses Ubuntu 24.04; regenerate Linux baselines in that environment rather than copying Windows PNGs. A screenshot change should correspond to an intentional token, Material, component, specimen-composition, or rendering-environment change and be reviewed with the generated diff. See [the CI and visual baseline workflow](docs/releasing.md#ci-and-visual-baselines).
 
 ## Changesets
 
