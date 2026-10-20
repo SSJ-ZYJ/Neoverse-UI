@@ -26,6 +26,7 @@ type PackageJson = {
   homepage?: string;
   bugs?: { url?: string };
   exports?: unknown;
+  dependencies?: Record<string, string>;
   publishConfig?: { access?: string; registry?: string };
 };
 
@@ -84,6 +85,14 @@ await mkdir(packDir, { recursive: true });
 
 try {
   const packedPackages = new Map<string, string>();
+  const publicVersions = new Map<string, string>();
+  for (const dirName of packageDirs) {
+    const manifest = JSON.parse(
+      await readFile(join(repositoryRoot, 'packages', dirName, 'package.json'), 'utf8'),
+    ) as PackageJson;
+    assert(manifest.name && manifest.version, `${dirName}: package name and version are required`);
+    publicVersions.set(manifest.name, manifest.version);
+  }
 
   for (const dirName of packageDirs) {
     const packageDir = join(repositoryRoot, 'packages', dirName);
@@ -146,6 +155,15 @@ try {
       packedJson.version === sourcePackage.version,
       `${sourcePackage.name}: packed version mismatch`,
     );
+    for (const [name, range] of Object.entries(packedJson.dependencies ?? {})) {
+      if (!name.startsWith('@neoverse-ui/')) continue;
+      const version = publicVersions.get(name);
+      assert(version, `${sourcePackage.name}: unknown public dependency ${name}`);
+      assert(
+        Bun.semver.satisfies(version, range),
+        `${sourcePackage.name}: dependency ${name}@${range} excludes release version ${version}`,
+      );
+    }
 
     const entries = (await run(['tar', '-tzf', tarballPath], repositoryRoot)).split(/\r?\n/);
     assert(

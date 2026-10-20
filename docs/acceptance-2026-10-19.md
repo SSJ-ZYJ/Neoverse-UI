@@ -20,6 +20,18 @@
 - 实际辅助技术体验：Windows NVDA / Linux Orca 人工验收未做，本机通过不等于 AT 验收。
 - React `UiBreadcrumb` 真实产品消费仍为 Pending；Checkbox / RadioGroup / Switch / Field / Popover / DropdownMenu / Presence 等状态视觉与消费证据按矩阵逐项推进。
 
+## 2026-10-19 晚间：0.3.0 候选版浏览器稳定性复核
+
+以已经提交的 `dev` HEAD `dd5f374` 为基准；验证开始时工作区干净，分支比 `origin/dev` 超前一个提交。
+
+- 历史异常：同日早些时候某次第二轮全量测试进行到 424 项通过、13 项失败、9 项跳过后中止；失败包括大型控件截图等待元素稳定、Dock 水平指示器动画检查和后续连续的页面重载/导航超时。该运行并非完整通过。
+- 高并发复测：独立端口 `3161`，代表性失败测试重复 15 轮、3 workers，得到 **165 通过、0 失败、15 按设备条件跳过**。
+- 首轮全量：独立端口 `3162`，2 workers，`bunx playwright test --workers=2 --reporter=list`，**675 通过、0 失败、39 跳过**，约 10.7 分钟。
+- 第二轮全量：同一端口编号，但由 Playwright 重新启动本地 webServer 和浏览器 Worker；相同命令，**675 通过、0 失败、39 跳过**，约 10.4 分钟。两轮都未使用 `--update-snapshots`、重试或调宽像素阈值。
+- `bun run release:check` 再次通过，包括 8 个公开包的本地消费验证；本轮未修改任何组件样式、Token、图片或测试断言。
+
+以上证据表明当前 HEAD 在**没有并行 watch 构建、没有预存 Playground 服务、由 Playwright 管理服务生命周期**的环境下可连续通过完整门禁。历史间歇性超时在本次未复现；既不能证明旧问题根因已完全确定，也不应为消除旧记录而随意改动 Dock 动画或截图阈值。发布候选阶段建议继续使用独立端口，禁止同时执行会修改 Playground 构建产物的 watch 任务，并在远端 CI 保留失败日志、截图和 Trace 供真正复现时诊断。
+
 ## 交付边界
 
-以上仍属未提交工作区改动。Changeset 是候选发布记录，不代表授权执行 `changeset version`、`npm publish` 或 Git 提交；远端 CI 与辅助技术验收完成前，不宣称跨平台验收通过。
+上述修复已经由用户提交在本地 `dev` 的 `dd5f374`；本次只进行复核与文档记录，**未提交、推送、升级版本或发布**。Changeset 仍为候选发布记录，不代表授权执行 `changeset version` 或 `npm publish`；最新远端 CI、真实消费者和辅助技术验收尚未完成，不能由本地绿灯推定正式 0.3.0 可发布。

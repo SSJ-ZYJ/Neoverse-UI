@@ -26,7 +26,7 @@ Bun is the package manager, workspace manager, and script runner for this reposi
 
 The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch`, `UiField`, `UiPopover`, `UiDropdownMenu`, `UiTable`, `UiDisclosure`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, `UiTooltipSurface`, and `UiPresence`. `UiDock` is the reusable floating-navigation shell; routing data, active destination state, and trailing controls remain consumer-owned. `UiSurface` is the canonical material primitive. React exposes the same Canonical Shared set, plus the consumer-driven `UiBreadcrumb`, `UiDock`, and `UiNotice`; see the [component contract matrix](docs/component-contract-matrix.md) for per-component maturity and consumer evidence. Vue and React share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
 
-Vue also exports the terminal presentation primitives `UiTerminalSurface`, `UiTerminalLine`, `UiTerminalTranscript`, and `UiTerminalPrompt`, plus `UiStatCard`, `UiTimeline`, and `UiStepFlow`. The latter three are Vue Consumer Driven display components built on existing material and typography roles; their [API and composition examples](packages/vue/README.md#metrics-milestones-and-steps) and Design Lab specimens are available, while release visual and real Slides consumer validation remain pending.
+Vue also exports the terminal presentation primitives `UiTerminalSurface`, `UiTerminalLine`, `UiTerminalTranscript`, and `UiTerminalPrompt`, plus `UiStatCard`, `UiTimeline`, and `UiStepFlow`. The latter three are Vue Consumer Driven display components built on existing material and typography roles; their [API and composition examples](packages/vue/README.md#metrics-milestones-and-steps), Design Lab specimens, and [archived release visual / real Slides consumer evidence](contracts/component-requests/archive/) are available. These seven components are Stable in the component matrix; npm publication is a separate approval step.
 
 ## Architecture at a glance
 
@@ -52,7 +52,7 @@ bun add @neoverse-ui/vue
 
 The package dependency graph installs the shared Tailwind, Motion, and Tokens layers. Lower-level packages can also be installed directly when a consumer only needs a specific layer.
 
-Packages are versioned with Changesets. The 0.1.x → 0.2.0 breaking-change migration is documented in [docs/migration-0.2.0.md](docs/migration-0.2.0.md); release preparation and npm Trusted Publishing are documented in [docs/releasing.md](docs/releasing.md).
+Packages are versioned with Changesets. See the [0.1.x → 0.2.0 migration](docs/migration-0.2.0.md) and the [0.2.x → planned 0.3.x consumer cutover](docs/migration-0.3.0.md). The latter is preparation guidance, not a publication announcement; release preparation and npm Trusted Publishing are documented in [docs/releasing.md](docs/releasing.md).
 
 Default controls use a normal 16px root: Button/Action `sm` / `md` / `lg` heights are 32 / 40 / 48px, navigation and segmented options are 32px, and common control labels are 14px. Components remain `rem` based and follow the user's font settings. See [consumer sizing and local synchronization](docs/consumer-sizing.md).
 
@@ -76,6 +76,8 @@ bun run test:visual:update
 ```
 
 `bun run dev` starts the playground server at `http://localhost:3000`, a Vite client watcher, and source rebuilds for the generated token, motion, and Tailwind stylesheets. `bun run check` is the full pre-commit gate: it auto-fixes Biome lint/format/imports, verifies text encoding integrity, runs the style and Tailwind-usage lints, typechecks every workspace, and runs all unit and contract tests. Visual regression is opt-in via `test:visual` because it rebuilds the workspace and drives a browser; use `test:visual:update` only when a reviewed visual change is intentional.
+
+`bun check` reports progress and a final PASS/FAIL table with per-check durations. All ten checks run sequentially even when an earlier check fails; any failure makes the command exit nonzero. Detailed stdout/stderr is written to numbered files in the temporary log directory printed at the start and end, rather than flooding the terminal. Failed checks include their exit codes, log paths, and standalone rerun commands. Biome auto-fixes are unchanged.
 
 ## Tokens and Tailwind Foundation
 

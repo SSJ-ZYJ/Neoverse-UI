@@ -242,5 +242,7 @@ bun run test:visual
 
 `bun run check` auto-fixes Biome lint/format/imports, verifies UTF-8 text integrity, runs the style and Tailwind-usage lints, typechecks every workspace, and runs all unit and contract tests. `bun run test:visual:update` is the explicit baseline-update command. Generated package CSS and TypeScript declarations are rebuilt before the visual server starts.
 
+The `scripts/check.ts` runner executes all ten check stages sequentially without stopping at the first failure, then prints a PASS/FAIL summary with durations and totals. Full stdout/stderr goes to per-stage files in the printed temporary log directory; failed stages include exit codes and standalone rerun commands. Any failed stage produces a nonzero overall exit code. The individual check scripts and `release:check` remain independently callable and retain their existing behavior.
+
 
 Material tiers, customization, component audit and hover/press policy: [Material standards](material-standards.md).

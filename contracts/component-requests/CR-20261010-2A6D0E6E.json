@@ -11,15 +11,15 @@
     "语义变量进入 Tokens、消费端 CSS 与设计实验室证据，XCA 可以只依赖正式发布的变量；未发布前不得在消费应用引用。"
   ],
   "impact": "normal",
-  "status": "implementing",
+  "status": "blocked",
   "consumers": [
     {
       "project": "XCA-Portal",
-      "location": "app/assets/css/home.css",
+      "location": "app/assets/css/terminal.css",
       "framework": "vue",
       "scenario": "XCA Terminal 的浅深色终端需要可复用的主题角色而非每个项目自行造一套"
     }
   ],
   "createdAt": "2026-10-10T07:43:54.029Z",
-  "updatedAt": "2026-10-10T13:19:57.220Z"
+  "updatedAt": "2026-10-20T06:47:05.254Z"
 }

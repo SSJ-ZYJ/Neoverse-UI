@@ -1,21 +1,23 @@
 # Neoverse-UI 当前工作计划
 
-更新：2026-10-19。以本地 `dev` 工作区及 `contracts/component-matrix.json`、需求登记为准。**本页只记录未完成事项**，已完成验收不再复制进待办正文。
+更新：2026-10-20。以本地 `dev` 工作区及 `contracts/component-matrix.json`、需求登记为准。**本页只记录未完成事项**，已完成验收不再复制进待办正文。
 
 ## 当前基线
 
 - 组件矩阵：35 个公开组件，21 个 Stable、14 个 Consumer Validation。成熟度必须以组件矩阵及其测试/真实消费证据为准。
-- 2026-10-13 已完成：`UiStatCard`、`UiTimeline`、`UiStepFlow`、`UiTerminalPrompt`、`UiTerminalSurface`、`UiTerminalLine`、`UiTerminalTranscript` 的真实消费与视觉验收；React Breadcrumb / Dock 浏览器运行态补齐。详情见 [2026-10-13 验收记录](acceptance-2026-10-13.md)。
+- 2026-10-13 已完成：`UiStatCard`、`UiTimeline`、`UiStepFlow`、`UiTerminalPrompt`、`UiTerminalSurface`、`UiTerminalLine`、`UiTerminalTranscript` 的真实消费与视觉验收；React Breadcrumb / Dock 浏览器运行态补齐。交付依据见[归档需求的 resolution](../contracts/component-requests/archive/)；旧的独立验收文档当前不在工作区。
 - 2026-10-18 用户明确批准以当前页面视觉为新基准：有效截图基线为桌面/移动各 30 张，46 项截图测试在更新后与非更新模式下均通过；已移除 12 张无测试引用的历史快照。详见 [2026-10-18 验收记录](acceptance-2026-10-18.md)。
 - 2026-10-19 本地浏览器门禁已通过：Playwright 714 项，675 通过、0 失败、39 跳过，`bun run release:check` 通过；移动端触控、浮层定位、预览锚点以及桌面字体/加载时序已收口。详见 [2026-10-19 验收记录](acceptance-2026-10-19.md)。
 - 活动需求登记仅剩 `CR-20261010-2A6D0E6E`。已交付或拒绝的请求放在 `contracts/component-requests/archive/`，仍由 CLI 校验和提供历史查询，**不得作为待实现事项再次分派**。
-- 上述交付仍属于未发布的工作区改动；通过本地验证不表示已经执行版本落盘或 npm 发布。
+- 相关修复已由用户提交至本地 `dev` 的 `dd5f374`（当前比 `origin/dev` 超前一个提交），但尚未推送、执行版本落盘或 npm 发布。
+- 2026-10-19 晚间补充浏览器稳定性复核：在不复用既有 Playground 服务的受控环境中，高并发专项 165 通过/0 失败/15 条件跳过，完整 714 项连续两轮各 **675 通过、0 失败、39 跳过**。历史间歇性超时的确切根因尚未证实，远端 CI 仍是发布前必要门禁，见[验收记录](acceptance-2026-10-19.md)。
 
 ## 尚待完成
 
 | 优先级 | 工作 | 完成条件 / 当前边界 |
 | --- | --- | --- |
-| P0 | 终端语义色 Token 请求 `CR-20261010-2A6D0E6E` 收尾 | 实现及本地消费已有证据，但验收包含正式发布；只能在明确获批的发布流程完成后关闭，不能因代码存在就标 delivered |
+| P0 | 0.3.x 公开包版本与首次发布执行 | 首发 Registry 门禁、包内依赖范围检查及 [0.3.x 迁移说明](migration-0.3.0.md) 已补齐；官方 Registry 实测 7 包存在、`@neoverse-ui/overlay-runtime` 仍需首发，Vue/React 依赖它。尚待明确授权后的版本落盘、首发与 Trusted Publisher 身份核查；不能仅依赖本地包验证，见[发布流程](releasing.md) |
+| P0 | 终端语义色 Token 请求 `CR-20261010-2A6D0E6E` 发布后关闭 | 代码/主题映射、Light 对比度修复、Desktop/Mobile + System 动态测试与 XCA 本地消费已验收；当前为 `blocked`，只待正式 npm 发布及 XCA 已发布版本验证后标记 delivered。见 [2026-10-20 终端 Token 验收](acceptance-2026-10-20-terminal-tokens.md) |
 | P1 | Windows / Linux 远端 CI 与实际辅助技术体验 | CI 已配置 `dev` + 手动触发、Linux 全量视觉与 Windows Chromium 交互；待推送后的真实 CI 记录与 Windows NVDA / Linux Orca 人工验收，本机通过不等于远端和 AT 验收 |
 | P1 | `UiBreadcrumb` 的 React 真实产品消费 | Runtime/Release Visual 已验证；Consumer 仍 Pending，按真实消费验收再修改矩阵 |
 | P1 | Checkbox / RadioGroup / Switch / Field / Popover / DropdownMenu / Presence 等状态视觉与消费证据 | 完成目标组件的浅深/系统主题、焦点、禁用、只读、校验/浮层打开态等 release visual 以及真实消费，逐项记录 |
@@ -33,7 +35,7 @@
 - [架构与组件职责](architecture.md)
 - [组件矩阵及晋升规则](component-contract-matrix.md)
 - [跨项目需求生命周期与本地写入](component-requests.md)
-- [2026-10-13 验收记录](acceptance-2026-10-13.md)
+- [已关闭需求与交付证据](../contracts/component-requests/archive/)
 - [2026-10-18 回归、跨平台与消费验收记录](acceptance-2026-10-18.md)
 - [2026-10-19 全量浏览器回归与剩余阻塞](acceptance-2026-10-19.md)
 - [终端组合边界](terminal-composition.md)
