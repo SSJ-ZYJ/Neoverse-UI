@@ -2,11 +2,38 @@ name: CI
 
 on:
   pull_request:
+    # Documentation-only edits do not change sources, contracts or packed
+    # artifacts, so skip the whole matrix for them. The last matching pattern
+    # wins, which is why the validated matrix document is re-included after
+    # the markdown exclusion. biome does not parse markdown and lint:text
+    # re-scans every tracked file on the next tracked-code run.
+    paths:
+      - '**'
+      # Workflow edits must always be validated, and an explicit positive
+      # pattern keeps that true even where dot-paths need one.
+      - '.github/workflows/**'
+      - '!**/*.md'
+      - '!.github/ISSUE_TEMPLATE/**'
+      - 'docs/component-contract-matrix.md'
   push:
     branches:
       - main
       - dev
+    paths:
+      - '**'
+      - '.github/workflows/**'
+      - '!**/*.md'
+      - '!.github/ISSUE_TEMPLATE/**'
+      - 'docs/component-contract-matrix.md'
   workflow_dispatch:
+
+# A push to a branch and the pull_request it opens or synchronizes both target
+# the same commit (dev -> main is exactly such a pair), so key the group by the
+# head branch and repository. The second event cancels the first instead of
+# running the whole quality/visual/Windows matrix twice for one commit.
+concurrency:
+  group: ci-${{ github.event.pull_request.head.repo.full_name || github.repository }}:${{ github.event.pull_request.head_ref || github.ref_name }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
