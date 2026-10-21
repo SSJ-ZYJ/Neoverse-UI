@@ -51,7 +51,9 @@ Changeset parsing uses the Changesets parser; private-only targets, unknown work
 packages and malformed records fail before release mode selection and in PR quality checks.
 
 After publication, `bun run verify:published` checks every exact version and `latest`
-tag, published internal ranges and official tarball origins. It installs all eight
+tag, published internal ranges and official tarball origins. It waits up to five
+minutes for registry metadata and tarballs to propagate, polling every 10 seconds.
+Authentication and package-content failures still fail immediately. It installs all eight
 packages from npm without local overrides, then reuses the package JS/CSS/TypeScript
 smokes and verifies resolved internal dependency versions. Consumer-project upgrades
 and their acceptance records are separate follow-up work.
