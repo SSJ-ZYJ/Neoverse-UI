@@ -4,20 +4,46 @@ on:
   pull_request:
   push:
     branches:
-      - main
       - dev
   workflow_dispatch:
 
-# Keep PR merge-commit checks distinct from branch-head checks.
-# Only superseded runs of the same event and branch cancel one another.
 concurrency:
   group: ci-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
+  scope:
+    name: Select CI scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      verify: ${{ steps.scope.outputs.verify }}
+      full-checks: ${{ steps.scope.outputs.full-checks }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select checks
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          BRANCH_NAME: ${{ github.ref_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: bash .github/scripts/ci-scope.sh
+
   verify:
     name: Verify workspace
+    needs: scope
+    if: needs.scope.outputs.verify == 'true'
     uses: ./.github/workflows/verify.yml
+    with:
+      full-checks: ${{ needs.scope.outputs.full-checks == 'true' }}

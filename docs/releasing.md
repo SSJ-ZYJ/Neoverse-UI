@@ -77,6 +77,10 @@ The repository and all public packages use the MIT license. `scripts/verify-pack
 ### CI and visual baselines
 
 CI and Release call `.github/workflows/verify.yml` on their exact checked-out commit.
+CI handles PRs and `dev` pushes without an open PR; Release verifies every `main`
+push, even when publication automation is disabled. This avoids running the full
+matrix twice. Documentation-only PRs keep completed required checks while skipping
+the source/browser matrix; workflow and contract-matrix edits still run it.
 The Linux release-quality job runs `release:check` once and uploads the built
 public packages and Playground JS/CSS. Three Ubuntu 24.04 visual jobs download that same build and run
 the complete Playwright suite with `--shard=1/3`, `2/3`, or `3/3`, two workers each.
@@ -246,7 +250,9 @@ caller (`Verify workspace / Verify workspace (Linux)` and
 latest PR check runs before configuring them. CI runs on documentation PRs as well,
 so required contexts cannot remain pending because the entire workflow was filtered.
 
-The release workflow stays dormant until `RELEASE_AUTOMATION_ENABLED` is enabled. In publish mode it always runs package verification first. The publication job additionally requires `NPM_TRUSTED_PUBLISHING_ENABLED=true` and uses OIDC instead of a long-lived `NPM_TOKEN`.
+Versioning and publication stay dormant until `RELEASE_AUTOMATION_ENABLED` is enabled;
+verification still runs on every `main` push. The publication job additionally requires
+`NPM_TRUSTED_PUBLISHING_ENABLED=true` and uses OIDC instead of a long-lived `NPM_TOKEN`.
 
 For a new package, keep publication gated by the `npm` Environment and do not merge
 a publish-ready change to `main` before bootstrap is approved and complete. Existing

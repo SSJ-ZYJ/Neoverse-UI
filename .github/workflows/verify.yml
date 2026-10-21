@@ -2,6 +2,11 @@ name: Verify workspace
 
 on:
   workflow_call:
+    inputs:
+      full-checks:
+        description: Run source and browser checks; false preserves documentation-only gates.
+        type: boolean
+        default: true
 
 permissions:
   contents: read
@@ -9,6 +14,7 @@ permissions:
 jobs:
   quality-linux:
     name: Validate release quality (Linux)
+    if: inputs.full-checks
     runs-on: ubuntu-latest
     timeout-minutes: 30
 
@@ -95,12 +101,17 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Require all Linux checks to pass
+        if: inputs.full-checks
         run: |
           test "${{ needs.quality-linux.result }}" = "success"
           test "${{ needs.visual-linux.result }}" = "success"
+      - name: Complete documentation-only check
+        if: ${{ !inputs.full-checks }}
+        run: echo 'No source or contract changes to verify.'
 
   verify-windows:
     name: Verify workspace (Windows)
+    if: inputs.full-checks
     runs-on: windows-latest
     timeout-minutes: 30
 
