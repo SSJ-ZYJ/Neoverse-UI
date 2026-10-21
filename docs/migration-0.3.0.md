@@ -1,27 +1,27 @@
 # Migrating from 0.2.x to the planned 0.3.x contract line
 
-This is a preparation guide for the pending release, **not an announcement that packages are published**. All eight public workspace manifests still declare `0.2.0`. Versioning and publication require explicit release approval; do not upgrade consumer dependencies to unavailable versions or run release commands merely to try this migration. The previous [0.1.x → 0.2.0 guide](migration-0.2.0.md) remains applicable to older consumers.
+This is the migration guide for the versioned 0.3.0 release candidate, **not an announcement that packages are published**. The Version Packages PR has been merged; the exact manifest versions are listed below. Do not upgrade consumer dependencies until these versions exist on npm. The previous [0.1.x → 0.2.0 guide](migration-0.2.0.md) remains applicable to older consumers.
 
 ## Package coordination and availability
 
-Packages have independent versions: `.changeset/config.json` has no fixed or linked version group. The pending Changesets request the following maximum direct bumps:
+Packages have independent versions: `.changeset/config.json` has no fixed or linked version group. The merged version plan is:
 
-| Package | Pending direct bump | Consumer impact |
+| Package | Release version | Consumer impact |
 | --- | --- | --- |
-| `@neoverse-ui/tokens` | minor | Form/overlay and terminal roles; chrome removal; shared visual and sizing updates |
-| `@neoverse-ui/tailwind` | minor | Matching compiled CSS and component styles |
-| `@neoverse-ui/vue` | minor | Vue 3.5 requirement, forms/overlays, terminal and presentation adapters |
-| `@neoverse-ui/react` | minor | Shared form/overlay contracts and surface cutover |
-| `@neoverse-ui/overlay-runtime` | minor | Newly introduced shared anchored-overlay runtime |
-| `@neoverse-ui/glass-runtime` | patch | Glass recovery and observer cleanup |
-| `@neoverse-ui/motion` | patch | Vue list-reorder FLIP motion fix |
-| `@neoverse-ui/giscus-theme` | none | No direct pending Changeset |
+| `@neoverse-ui/tokens` | 0.3.0 | Form/overlay and terminal roles; chrome removal; shared visual and sizing updates |
+| `@neoverse-ui/tailwind` | 0.3.0 | Matching compiled CSS and component styles |
+| `@neoverse-ui/vue` | 0.3.0 | Vue 3.5 requirement, forms/overlays, terminal and presentation adapters |
+| `@neoverse-ui/react` | 0.3.0 | Shared form/overlay contracts and surface cutover |
+| `@neoverse-ui/overlay-runtime` | 0.3.0 | Shared anchored-overlay runtime |
+| `@neoverse-ui/glass-runtime` | 0.2.1 | Live backdrop edges, optional native backend, recovery and cleanup |
+| `@neoverse-ui/motion` | 0.2.1 | Vue list-reorder FLIP motion fix |
+| `@neoverse-ui/giscus-theme` | 0.2.0 (unchanged) | No new publication required |
 
-These are requested bumps, not an approved exact version set. Do not assign `0.3.0` to every package: Motion and Glass Runtime have patch records and Giscus Theme has no direct change. Changesets also resolves internal dependency updates; review `bun changeset status` and the approved Version Packages result for the final versions and ranges. Current `^0.2.0` dependency ranges do not admit `0.3.x`, so changing only a top-level adapter while retaining old overrides is not a coordinated upgrade.
+Do not assign `0.3.0` to every package. The versioned manifests already contain the coordinated internal ranges. A `^0.2.0` range does not admit `0.3.x`, so changing only a top-level adapter while retaining old overrides is not a coordinated upgrade. See [the release notes](release-0.3.0.md) and run `bun run verify:published` after publication to verify the exact registry versions and installation.
 
 Vue and React now depend on Overlay Runtime alongside Motion and Tailwind; Tailwind brings Tokens and Motion. Ordinary adapter consumers do not need to import the runtime themselves. Direct runtime consumers should use its [public guide](../packages/overlay-runtime/README.md).
 
-**Publication prerequisite:** Overlay Runtime needs an authorized first npm publication and its own npm Trusted Publisher configuration before ordinary automated OIDC publication can include it and its dependents. Repository code and a pending Changeset do not satisfy that prerequisite. Follow [release preparation and publishing](releasing.md): `bun run check:release-registry` checks package-name availability only; authenticated publisher settings still require separate review.
+**Publication prerequisite:** All eight package names, including Overlay Runtime, were registered on npm when checked on 2026-10-21. Follow [release preparation and publishing](releasing.md): `bun run check:release-registry` checks package-name availability only; each package's Trusted Publisher identity still requires separate review.
 
 ## Required source cutover
 
@@ -61,7 +61,7 @@ The terminal primitives and semantic roles are already implemented in this works
 
 For shell-style command entry previously built around `UiInput`, cut over to `UiTerminalPrompt`: the editor is a borderless native input within the outer terminal Glass surface. `UiInput` remains the canonical form input, not a terminal compatibility wrapper. Command execution, Enter handling, and history remain consumer-owned. React does **not** currently export these Vue terminal adapters. Follow [terminal composition](terminal-composition.md) for examples, transcript following, theme roles, and the Maple font fallback contract; fonts are not bundled by this addition.
 
-**XCA publication gate:** [CR-20261010-2A6D0E6E](../contracts/component-requests/CR-20261010-2A6D0E6E.json) remains `implementing`. Its acceptance criteria require formally published variables and forbid referencing them in XCA before publication. Do not reimplement the tokens, mark the request delivered, or change XCA dependencies merely because local implementation exists. After authorized publication, verify the real XCA consumer against those criteria and record the delivery evidence through the [request workflow](component-requests.md).
+**XCA publication gate:** [CR-20261010-2A6D0E6E](../contracts/component-requests/CR-20261010-2A6D0E6E.json) remains `blocked` on formal publication and subsequent consumer verification. Its acceptance criteria require formally published variables and forbid referencing them in XCA before publication. Do not reimplement the tokens, mark the request delivered, or change XCA dependencies merely because local implementation exists. After authorized publication, verify the real XCA consumer against those criteria and record the delivery evidence through the [request workflow](component-requests.md).
 
 Vue also adds `UiStatCard`, `UiTimeline`, and `UiStepFlow`. They are additive, consumer-driven presentation components, not React parity promises. Their [archived delivery resolutions](../contracts/component-requests/archive/) record completed release visual and real Slides consumer validation on 2026-10-13; the component matrix records them as Stable. That evidence does not authorize publication or add missing framework adapters.
 

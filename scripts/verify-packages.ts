@@ -2,9 +2,16 @@ import { existsSync } from 'node:fs';
 import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join, relative } from 'node:path';
+import {
+  type RegistryMetadata,
+  type ReleasePackage,
+  validatePublishedPackage,
+  verifyInstalledPackages,
+} from './verify-published';
 
 const repositoryRoot = join(import.meta.dir, '..');
 const npmRegistry = 'https://registry.npmjs.org/';
+const published = process.argv.includes('--published');
 const packageDirs = [
   'tokens',
   'motion',
@@ -86,15 +93,33 @@ await mkdir(packDir, { recursive: true });
 try {
   const packedPackages = new Map<string, string>();
   const publicVersions = new Map<string, string>();
+  const releasePackages: ReleasePackage[] = [];
   for (const dirName of packageDirs) {
     const manifest = JSON.parse(
       await readFile(join(repositoryRoot, 'packages', dirName, 'package.json'), 'utf8'),
     ) as PackageJson;
     assert(manifest.name && manifest.version, `${dirName}: package name and version are required`);
     publicVersions.set(manifest.name, manifest.version);
+    releasePackages.push(manifest as ReleasePackage);
   }
 
-  for (const dirName of packageDirs) {
+  if (published) {
+    for (const expected of releasePackages) {
+      const response = await fetch(new URL(encodeURIComponent(expected.name), npmRegistry), {
+        redirect: 'error',
+        signal: AbortSignal.timeout(15_000),
+      });
+      assert(response.ok, `${expected.name}: registry returned HTTP ${response.status}`);
+      validatePublishedPackage(
+        expected,
+        (await response.json()) as RegistryMetadata,
+        publicVersions,
+      );
+      console.log(`Registry verified: ${expected.name}@${expected.version}`);
+    }
+  }
+
+  for (const dirName of published ? [] : packageDirs) {
     const packageDir = join(repositoryRoot, 'packages', dirName);
     const sourcePackage = JSON.parse(
       await readFile(join(packageDir, 'package.json'), 'utf8'),
@@ -248,6 +273,9 @@ try {
   await mkdir(localTarballsDir, { recursive: true });
 
   const dependencies: Record<string, string> = { react: '^19.2.0', vue: '^3.5.0' };
+  if (published) {
+    for (const expected of releasePackages) dependencies[expected.name] = expected.version;
+  }
   const overrides: Record<string, string> = {};
   for (const [name, tarball] of packedPackages) {
     const destination = join(localTarballsDir, basename(tarball));
@@ -265,7 +293,7 @@ try {
         private: true,
         type: 'module',
         dependencies,
-        overrides,
+        ...(published ? {} : { overrides }),
         devDependencies: { '@types/node': '^22.0.0', typescript: '^5.6.0' },
       },
       null,
@@ -334,11 +362,23 @@ try {
     )}\n`,
   );
 
-  await run(['bun', 'install'], consumerDir);
+  const registryArgs = published
+    ? ['--registry', npmRegistry, '--no-cache', '--ignore-scripts']
+    : [];
+  if (published) {
+    await writeFile(
+      join(consumerDir, '.npmrc'),
+      `registry=${npmRegistry}\n@neoverse-ui:registry=${npmRegistry}\n`,
+    );
+  }
+  await run(['bun', 'install', ...registryArgs], consumerDir);
+  if (published) await verifyInstalledPackages(consumerDir, releasePackages);
   await run(['bun', 'smoke.ts'], consumerDir);
   await run(['bunx', 'tsc', '--project', 'tsconfig.json'], consumerDir);
 
-  console.log(`Release package verification passed for ${packageDirs.length} package(s).`);
+  console.log(
+    `${published ? 'Published registry' : 'Release'} package verification passed for ${packageDirs.length} package(s).`,
+  );
 } finally {
   await rm(tempRoot, { recursive: true, force: true });
 }
