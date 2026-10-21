@@ -25,6 +25,7 @@ const filledEmail = ref('studio@neoverse.dev');
 const notes = ref('');
 const filledNotes = ref('Review the 0.2.0 visual contract before release.');
 const runtime = ref('native');
+const selectBlockedState = ref<'none' | 'disabled' | 'readonly'>('none');
 const remoteRuntime = ref('remote');
 const releaseNotifications = ref(true);
 const releaseChannel = ref('stable');
@@ -245,6 +246,8 @@ const releaseChannelOptions = computed(() => [
               v-model="runtime"
               :options="runtimeOptions"
               data-form-select
+              :disabled="selectBlockedState === 'disabled'"
+              :readonly="selectBlockedState === 'readonly'"
               data-contract-state="default"
               :aria-label="localize(copy.runtime, props.locale)"
             />
@@ -273,6 +276,22 @@ const releaseChannelOptions = computed(() => [
               data-contract-state="disabled"
             />
           </div>
+        </div>
+        <div v-if="contractMode" data-select-block-controls class="flex flex-wrap gap-2">
+          <button
+            type="button"
+            data-select-block-disabled
+            @click="selectBlockedState = selectBlockedState === 'disabled' ? 'none' : 'disabled'"
+          >
+            Toggle disabled
+          </button>
+          <button
+            type="button"
+            data-select-block-readonly
+            @click="selectBlockedState = selectBlockedState === 'readonly' ? 'none' : 'readonly'"
+          >
+            Toggle readonly
+          </button>
         </div>
       </MaterialBackdrop>
     </LabSpecimenSection>

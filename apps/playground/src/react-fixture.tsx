@@ -200,6 +200,9 @@ function ReactFixture() {
   const [numberValue, setNumberValue] = useState('1.5');
   const [notes, setNotes] = useState('Shared React runtime fixture');
   const [runtime, setRuntime] = useState<string | number>('native');
+  const [selectBlockedState, setSelectBlockedState] = useState<'none' | 'disabled' | 'readonly'>(
+    'none',
+  );
   const [notifications, setNotifications] = useState(true);
   const [channel, setChannel] = useState<string | number>('stable');
   const [autoSync, setAutoSync] = useState(true);
@@ -386,7 +389,31 @@ function ReactFixture() {
               name="runtime"
               onValueChange={setRuntime}
               data-react-adapter="UiSelect"
+              disabled={selectBlockedState === 'disabled'}
+              readOnly={selectBlockedState === 'readonly'}
             />
+            {contractMode ? (
+              <div data-select-block-controls>
+                <button
+                  type="button"
+                  data-select-block-disabled
+                  onClick={() =>
+                    setSelectBlockedState((value) => (value === 'disabled' ? 'none' : 'disabled'))
+                  }
+                >
+                  Toggle disabled
+                </button>
+                <button
+                  type="button"
+                  data-select-block-readonly
+                  onClick={() =>
+                    setSelectBlockedState((value) => (value === 'readonly' ? 'none' : 'readonly'))
+                  }
+                >
+                  Toggle readonly
+                </button>
+              </div>
+            ) : null}
           </UiField>
 
           <UiField label={copy.channel}>

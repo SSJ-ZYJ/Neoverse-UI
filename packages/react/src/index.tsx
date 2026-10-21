@@ -680,6 +680,17 @@ export function UiSelect({
   ...props
 }: UiSelectProps) {
   const [open, setOpen] = useState(false);
+  const detailsRef = useRef<HTMLDetailsElement | null>(null);
+  const blocked = disabled || readOnly;
+  useEffect(() => {
+    if (!blocked) return;
+    const details = detailsRef.current;
+    if (details !== null) {
+      details.open = false;
+      closeSelectPopover(details);
+    }
+    setOpen(false);
+  }, [blocked]);
   const selected = options.find((option) => String(option.value) === String(value ?? ''));
 
   const focusRelativeOption = (current: HTMLButtonElement, direction: 1 | -1) => {
@@ -725,6 +736,7 @@ export function UiSelect({
 
   return (
     <details
+      ref={detailsRef}
       className={[
         'ui-select-shell',
         disabled && 'ui-select-shell--disabled',
@@ -749,8 +761,8 @@ export function UiSelect({
         className={['ui-select', className].filter(Boolean).join(' ')}
         role="combobox"
         aria-haspopup="listbox"
-        aria-expanded={open}
-        aria-disabled={disabled || readOnly || undefined}
+        aria-expanded={open && !blocked}
+        aria-disabled={blocked || undefined}
         aria-invalid={ariaInvalid ?? (validation === 'error' || undefined)}
         data-validation={validation}
         onClick={(event) => {

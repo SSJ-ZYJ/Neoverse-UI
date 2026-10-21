@@ -6,7 +6,7 @@ import {
   showAnchoredOverlay,
   stopOverlayTracking,
 } from '@neoverse-ui/overlay-runtime';
-import { computed, nextTick, onBeforeUnmount, ref, useAttrs } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, useAttrs, watch } from 'vue';
 import { resolveAriaInvalid } from './form-control';
 import { presence } from './presence';
 import type { FormControlValue, SelectOption, SelectProps } from './types';
@@ -82,9 +82,17 @@ function closePopover() {
 async function openPopover() {
   if (blocked.value) return;
   await nextTick();
+  if (blocked.value) return;
   const options = overlayOptions();
   if (options !== undefined) showAnchoredOverlay(options);
 }
+
+watch(blocked, (isBlocked) => {
+  if (!isBlocked) return;
+  if (detailsRef.value) detailsRef.value.open = false;
+  open.value = false;
+  closePopover();
+});
 
 function onToggle(event: Event) {
   const details = event.currentTarget as HTMLDetailsElement;
@@ -198,7 +206,7 @@ onBeforeUnmount(() => {
       :style="attrs.style"
       role="combobox"
       aria-haspopup="listbox"
-      :aria-expanded="open"
+      :aria-expanded="open && !blocked"
       :aria-disabled="blocked || undefined"
       :aria-invalid="ariaInvalid"
       :data-validation="props.validation"
