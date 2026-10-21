@@ -1,22 +1,22 @@
 @layer neoverse.tokens {
   :root {
-    /* Skeletons use the same neutral loading material in both themes. */
-    --neoverse-skeleton-fill: color-mix(
-      in srgb,
-      var(--neoverse-color-text-secondary) 16%,
-      transparent
-    );
-    --neoverse-skeleton-highlight: color-mix(
-      in srgb,
-      var(--neoverse-color-text-primary) 14%,
-      transparent
-    );
-    --neoverse-skeleton-edge: inset 0 1px 0
-      color-mix(in srgb, var(--neoverse-color-text-primary) 8%, transparent);
+    /* Foreground tint keeps placeholders visible on pale Glass surfaces. */
+    --neoverse-skeleton-base-fill: var(--neoverse-effect-loading-base);
+    --neoverse-skeleton-fill: var(--neoverse-effect-highlight-color);
+    --neoverse-skeleton-backdrop-filter: var(--neoverse-material-glass-subtle-filter);
+    --neoverse-skeleton-highlight: var(--neoverse-effect-placeholder-highlight);
+    --neoverse-skeleton-edge: var(--neoverse-effect-placeholder-edge);
     --neoverse-skeleton-text-min-height: var(--neoverse-font-size-md);
     --neoverse-skeleton-title-min-height: 1.15rem;
     --neoverse-skeleton-shimmer-duration: 1.25s;
     --neoverse-skeleton-shimmer-easing: var(--neoverse-motion-easing-standard);
-    --neoverse-skeleton-pulse-mid-opacity: 0.58;
+    --neoverse-skeleton-pulse-mid-opacity: var(--neoverse-effect-pulse-mid-opacity);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    :root {
+      --neoverse-skeleton-fill: var(--neoverse-skeleton-base-fill);
+      --neoverse-skeleton-backdrop-filter: none;
+    }
   }
 }

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261010-31DAF8DC",
+  "kind": "new-component",
+  "target": "UiTerminalTranscript",
+  "summary": "可访问的流式终端输出容器",
+  "expected": "提供可组合的长输出容器、跟随底部/手动滚动策略、更新通知的 aria-live 区域与输出密度；基于 UiScrollbar 和标准 DOM，不保存命令历史、不调度异步任务。",
+  "acceptanceCriteria": [
+    "仅当视图已位于底部时自动跟随新增输出；向上查看历史时不会抢滚，内容可选中复制。",
+    "长列表、流式状态更新和重置时不引发滚动抖动或无限尺寸扩张，移动端和 reduced-motion 均能正常使用。",
+    "若 UiScrollbar + 消费端逻辑即可满足，应给出复用方案而不是新增冗余组件。"
+  ],
+  "impact": "low",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/components/home/HeroSection.vue",
+      "framework": "vue",
+      "scenario": "首页将显示启动日志、命令历史和后端返回的流式终端输出"
+    }
+  ],
+  "createdAt": "2026-10-10T07:43:53.885Z",
+  "updatedAt": "2026-10-13T07:46:16.530Z",
+  "resolution": "Accepted 2026-10-13. UiTerminalTranscript native scroll/log and tail-following are consumed in real XCA TerminalHost.vue. Fixed native layout scroll incorrectly disabling following before ResizeObserver; minimal XCA terminal-resize.spec.ts failed at 72px before the fix and passes after synced production build, retaining draft and preserving history readers. UI terminal-resize/terminal-composition and full acceptance suite 24/24; Vue 70/70; XCA full E2E 71/71 including scroll/clear/intro/resize/reduced-motion. Shared release snapshots and 5 real XCA snapshots reviewed by luna/max. See docs/acceptance-2026-10-13.md and .changeset/terminal-resize-following.md. No publication."
+}

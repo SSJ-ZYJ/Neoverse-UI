@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261010-2A6D0E6E",
+  "kind": "enhancement",
+  "target": "@neoverse-ui/tokens",
+  "summary": "终端专用语义色 Token 的深浅主题映射",
+  "expected": "评估新增 terminal background/foreground/prompt/muted/command/selection/cursor 等语义 Token（建议命名 --neoverse-terminal-*，最终由 Tokens 包规范决定），复用已有 status-success/danger、space、radius、code font 和 Motion 角色，不新增品牌硬编码色表。",
+  "acceptanceCriteria": [
+    "Light、Dark、System 及系统动态切换映射完整，终端容器与输出在两种模式下保持足够文本/状态对比度。",
+    "不重复定义现有 --neoverse-color-status-*、--neoverse-font-family-code、Glass 预设或语义 Motion Token。",
+    "语义变量进入 Tokens、消费端 CSS 与设计实验室证据，XCA 可以只依赖正式发布的变量；未发布前不得在消费应用引用。"
+  ],
+  "impact": "normal",
+  "status": "blocked",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/assets/css/terminal.css",
+      "framework": "vue",
+      "scenario": "XCA Terminal 的浅深色终端需要可复用的主题角色而非每个项目自行造一套"
+    }
+  ],
+  "createdAt": "2026-10-10T07:43:54.029Z",
+  "updatedAt": "2026-10-20T06:47:05.254Z"
+}

@@ -1,0 +1,91 @@
+name: Component request / 组件需求
+description: Report a missing component, framework adapter, or reusable behavior needed by a Neoverse-UI consumer.
+title: "[Component Request]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe a real consumer use case. This issue is an intake report, not an approved component contract. Maintainers will reconcile it with the component matrix and component-request registry.
+  - type: input
+    id: project
+    attributes:
+      label: Consumer project / 消费项目
+      description: Repository or project name
+      placeholder: Neoverse-Slides
+    validations:
+      required: true
+  - type: input
+    id: location
+    attributes:
+      label: Component usage location / 使用位置
+      description: Repo-relative source path, route, or both
+      placeholder: src/pages/settings.vue
+    validations:
+      required: true
+  - type: dropdown
+    id: framework
+    attributes:
+      label: Framework / 框架
+      options:
+        - vue
+        - react
+        - agnostic
+    validations:
+      required: true
+  - type: dropdown
+    id: kind
+    attributes:
+      label: Request kind / 需求类型
+      options:
+        - new-component
+        - enhancement
+        - framework-gap
+    validations:
+      required: true
+  - type: input
+    id: target
+    attributes:
+      label: Target component or suggested name / 目标组件
+      description: For a new component the proposed name is provisional
+      placeholder: UiDialog
+    validations:
+      required: true
+  - type: dropdown
+    id: impact
+    attributes:
+      label: Impact / 影响程度
+      options:
+        - blocking
+        - normal
+        - low
+    validations:
+      required: true
+  - type: textarea
+    id: scenario
+    attributes:
+      label: Consumer scenario / 使用场景
+      description: What user action is currently blocked or duplicated? Why can't an existing component cover it?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Desired reusable contract / 期望能力
+      description: Describe behavior and states, not a one-off page implementation
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria / 验收条件
+      description: Include expected interactions, light/dark, accessibility, responsive constraints where relevant
+      placeholder: |
+        - Escape closes and restores focus
+        - Renders correctly in light/dark modes
+    validations:
+      required: true
+  - type: input
+    id: evidence
+    attributes:
+      label: Related code, issue or screenshot URL / 参考链接
+      description: Optional

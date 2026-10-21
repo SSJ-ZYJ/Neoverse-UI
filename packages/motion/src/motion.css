@@ -154,10 +154,11 @@
     filter: var(--neoverse-motion-from-filter, blur(0));
   }
 
-  /* Vue <TransitionGroup> FLIP continuity: repositioned siblings glide to
-     their new coordinates instead of teleporting. */
+  /* Vue detects FLIP support and writes its inverse offset using transform.
+     The individual translate/scale properties alone cannot animate a reorder. */
   .nv-move {
     transition:
+      transform var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
       translate var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
       scale var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
   }
@@ -338,17 +339,13 @@
   transition: none !important;
 }
 
-/* The opacity entrance creates a Backdrop Root. Keep that boundary at rest
-   so descendant glass samples the same backdrop after the animation is
-   removed, instead of repainting against the surrounding page. */
-[data-neoverse-dissolve] {
-  will-change: opacity;
-}
-
 /* The incoming region is tagged by the engine after a page swap. A normal
    transition uses the token delay; an interrupted transition uses the
    remaining duration of its active particle dissolve. */
 :root[data-neoverse-particle-transitioning] [data-neoverse-motion-incoming] {
+  /* Opacity promotion creates a Backdrop Root. Release it with the incoming
+     animation so descendant Glass can sample the surrounding page at rest. */
+  will-change: opacity;
   animation: neoverse-motion-particle-enter var(--neoverse-motion-particle-enter-duration) linear
     var(--neoverse-motion-particle-enter-delay) both;
 }

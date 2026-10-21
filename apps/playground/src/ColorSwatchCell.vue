@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { UiSurface } from '@neoverse-ui/vue';
 import type { Locale, LocalizedText } from './playground-content';
 import { localize } from './playground-content';
 
@@ -13,9 +14,11 @@ const props = defineProps<ColorSwatchCellProps>();
 </script>
 
 <template>
-  <article
+  <UiSurface
+    as="article"
+    surface="glass-subtle"
     data-color-swatch-cell
-    class="w-32 shrink-0 overflow-hidden rounded-control border border-subtle bg-surface-subtle"
+    class="w-32 shrink-0 overflow-hidden rounded-control"
   >
     <div
       class="h-12 w-full border-b border-subtle"
@@ -42,5 +45,5 @@ const props = defineProps<ColorSwatchCellProps>();
         {{ props.className }}
       </code>
     </div>
-  </article>
+  </UiSurface>
 </template>

@@ -29,7 +29,7 @@
   "scripts": {
     "build": "rm -rf dist tsconfig.build.tsbuildinfo && bun run scripts/copy-css.ts && tsc --project tsconfig.build.json",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "test": "bun run build && bun test src/index.test.ts"
+    "test": "bun run build && bun test src/index.test.ts src/material-standards.test.ts"
   },
   "publishConfig": {
     "access": "public",

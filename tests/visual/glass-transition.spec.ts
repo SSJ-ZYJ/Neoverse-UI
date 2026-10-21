@@ -240,6 +240,6 @@ test('particle transition keeps the card Glass color stable through cleanup', as
   ).toBe('opacity');
   expect(
     after.state.sourceWillChange,
-    'the dissolve source must keep that boundary after the particle state is removed',
-  ).toBe('opacity');
+    'the temporary opacity layer must be released after the particle transition finishes',
+  ).toBe('auto');
 });

@@ -2,6 +2,14 @@ import { expect, test } from 'bun:test';
 
 import { cssVariables } from '@neoverse-ui/tokens';
 import {
+  componentContracts,
+  contractCheckIds,
+  contractLabSummary,
+  contractStateIds,
+  frameworkParityNames,
+  interactionContracts,
+} from './contract-lab';
+import {
   layoutRoleTokens,
   primitiveRadiusTokens,
   semanticRadiusTokens,
@@ -10,7 +18,6 @@ import {
 import {
   labModules,
   labSpecimens,
-  moduleGroups,
   resolveLabHash,
   specimenById,
   specimenKinds,
@@ -90,37 +97,6 @@ test('registers consolidated controls, the reusable dock, and the parity composi
   expect(moduleIds).not.toEqual(
     expect.arrayContaining(['action', 'navigation-item', 'status-indicator', 'control-surface']),
   );
-});
-
-test('keeps the top-level lab information architecture compact and purpose-driven', () => {
-  expect(labModules.map((module) => module.id)).toEqual([
-    'colors',
-    'typography',
-    'layout-shape',
-    'motion',
-    'materials',
-    'shadow',
-    'controls',
-    'dock',
-    'status-feedback',
-    'forms',
-    'data-display',
-    'card',
-    'scrollbar',
-    'composition',
-    'consumer-parity',
-  ]);
-
-  expect(moduleGroups.map((group) => [group.id, [...group.moduleIds]])).toEqual([
-    ['foundations', ['colors', 'typography', 'layout-shape', 'motion']],
-    ['materials', ['materials', 'shadow']],
-    [
-      'components',
-      ['controls', 'dock', 'status-feedback', 'forms', 'data-display', 'card', 'scrollbar'],
-    ],
-    ['patterns', ['composition']],
-    ['validation', ['consumer-parity']],
-  ]);
 });
 
 test('keeps every composition scene localized in both supported locales', () => {
@@ -226,5 +202,53 @@ test('keeps every registered specimen backed by a stable module fixture id', asy
 
   for (const specimen of labSpecimens) {
     expect(source.includes(`id="${specimen.id}"`), specimen.id).toBe(true);
+  }
+});
+
+test('maps every component contract to at least one stable catalogue specimen', () => {
+  for (const component of componentContracts) {
+    const specimens = labSpecimens.filter((specimen) =>
+      specimen.apiNames.some((apiName) => apiName === component.name),
+    );
+    expect(specimens.length, component.name).toBeGreaterThan(0);
+  }
+});
+
+test('keeps release visual and Canonical Shared coverage derived from the component contracts', () => {
+  const releaseVisual = componentContracts.filter((component) => component.visual === 'release');
+  const canonicalShared = componentContracts.filter(
+    (component) => component.track === 'canonical-shared',
+  );
+
+  expect(releaseVisual).toHaveLength(contractLabSummary.releaseVisual);
+  expect(canonicalShared).toHaveLength(contractLabSummary.canonicalShared);
+  expect(frameworkParityNames.size).toBe(contractLabSummary.frameworkParity);
+
+  for (const component of [...releaseVisual, ...canonicalShared]) {
+    expect(
+      labSpecimens.some((specimen) =>
+        specimen.apiNames.some((apiName) => apiName === component.name),
+      ),
+      component.name,
+    ).toBe(true);
+  }
+});
+
+test('keeps interaction contracts attached to real specimens and stable state/check ids', () => {
+  const knownStates = new Set(contractStateIds);
+  const knownChecks = new Set(contractCheckIds);
+  const specimenIds = new Set(labSpecimens.map((specimen) => specimen.id));
+
+  for (const contract of interactionContracts) {
+    expect(specimenIds.has(contract.specimenId), contract.specimenId).toBe(true);
+    const specimen = specimenById(contract.specimenId);
+    expect(specimen).toBeDefined();
+    for (const apiName of contract.apiNames) {
+      expect(specimen?.apiNames.includes(apiName), `${contract.specimenId}:${apiName}`).toBe(true);
+    }
+    expect(new Set(contract.states).size).toBe(contract.states.length);
+    expect(new Set(contract.checks).size).toBe(contract.checks.length);
+    for (const state of contract.states) expect(knownStates.has(state), state).toBe(true);
+    for (const check of contract.checks) expect(knownChecks.has(check), check).toBe(true);
   }
 });

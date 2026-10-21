@@ -50,7 +50,9 @@
   }
 
   @media (hover: hover) {
-    :where(.ui-disclosure, .neoverse-prose details):not([open]):hover {
+    :where(.ui-disclosure, .neoverse-prose details):not([open]):has(
+        > :is(.ui-disclosure__summary, summary):hover:not(:active)
+      ) {
       background-color: var(--neoverse-disclosure-hover-fill);
       box-shadow: var(--neoverse-disclosure-hover-shadow);
     }
@@ -60,10 +62,18 @@
       background: transparent;
     }
 
-    :where(.ui-disclosure, .neoverse-prose details)[open]:hover {
+    :where(.ui-disclosure, .neoverse-prose details)[open]:has(
+        > :is(.ui-disclosure__summary, summary):hover:not(:active)
+      ) {
       background-color: var(--neoverse-disclosure-open-hover-fill);
       box-shadow: var(--neoverse-disclosure-hover-shadow);
     }
+  }
+
+  :where(.ui-disclosure, .neoverse-prose details):has(
+    > :is(.ui-disclosure__summary, summary):active
+  ) {
+    box-shadow: var(--neoverse-disclosure-edge-active), var(--neoverse-effect-press-shadow);
   }
 
   :where(.ui-disclosure__summary, .neoverse-prose summary):focus-visible {

@@ -1,5 +1,12 @@
 # @neoverse-ui/tailwind
 
+## Unreleased
+
+- Restore the 0.1.0 Badge border, quiet tint and shared Glass shadow composition,
+  with uniform geometry across variants and pastel light-mode fields.
+- Keep text-only validation, terminal feedback and destructive menu items readable
+  with the lighter semantic status palette.
+
 ## 0.2.0
 
 ### Minor Changes

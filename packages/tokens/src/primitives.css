@@ -123,16 +123,17 @@
       'Fira Code Variable', 'Fira Code', ui-monospace, sfmono-regular, menlo, monaco, consolas,
       'Liberation Mono', 'Courier New', monospace;
     --neoverse-font-family-code-maple:
-      'Maple Mono', ui-monospace, sfmono-regular, menlo, monaco, consolas, 'Liberation Mono',
-      'Courier New', monospace;
+      'Maple Mono NF CN', 'Maple Mono', 'Noto Sans SC Variable', 'Noto Sans SC',
+      'Microsoft YaHei', ui-monospace, sfmono-regular, menlo, monaco, consolas,
+      'Liberation Mono', 'Courier New', monospace;
     --neoverse-font-family-code: var(--neoverse-font-family-code-default);
     --neoverse-font-family-mono:
       ui-monospace, sfmono-regular, menlo, monaco, consolas, 'Liberation Mono', 'Courier New',
       monospace;
-    --neoverse-font-size-2xs: 0.7rem;
-    --neoverse-font-size-xs: 0.75rem;
-    --neoverse-font-size-sm: 0.78rem;
-    --neoverse-font-size-md: 0.86rem;
+    --neoverse-font-size-2xs: 0.75rem;
+    --neoverse-font-size-xs: 0.8125rem;
+    --neoverse-font-size-sm: 0.875rem;
+    --neoverse-font-size-md: 1rem;
     --neoverse-font-size-lg: 1.125rem;
     --neoverse-font-size-xl: 1.25rem;
     --neoverse-font-size-2xl: 1.5rem;

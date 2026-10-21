@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261012-E860AD93",
+  "kind": "enhancement",
+  "target": "UiTerminalPrompt",
+  "summary": "Inline ghost completion for native terminal input",
+  "expected": "Render a caller-provided suggestion suffix with shared terminal tokens while preserving native editing and horizontal scrolling.",
+  "acceptanceCriteria": [
+    "Only show a matching suffix while focused at the end of a text input, without selection or IME composition.",
+    "Hide suggestions for password, disabled and readonly inputs; never write suggestions into the native value.",
+    "XCA reuses session completions and history, accepts with ArrowRight and retains Tab cycling."
+  ],
+  "impact": "normal",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/features/terminal/components/TerminalCommandInput.vue",
+      "framework": "vue",
+      "scenario": "User requested terminal ghost completion with a screenshot reference."
+    }
+  ],
+  "createdAt": "2026-10-12T00:26:48.895Z",
+  "updatedAt": "2026-10-12T00:31:49.995Z",
+  "resolution": "Implemented suggestion in UiTerminalPrompt and shared terminal CSS, wired XCA TerminalSession.suggest and ArrowRight acceptance. Vue terminal unit tests: 7 passed; XCA core tests: 14 passed; XCA terminal-completion Playwright: 6 passed, including light/dark and 390/1440px horizontal scrolling. XCA typecheck, production build, terminal boundary, shared stylelint and contracts passed. Evidence: packages/vue/src/terminal.test.ts; XCA-Portal/tests/e2e/terminal-completion.spec.ts; docs/terminal-composition.md. Visual approval and publication remain pending."
+}

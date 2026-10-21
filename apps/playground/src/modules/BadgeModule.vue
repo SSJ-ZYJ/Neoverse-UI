@@ -19,5 +19,6 @@ const copy = moduleCopy.badge;
   <StateRow :label="copy.sizes" :locale="props.locale">
     <UiBadge size="sm">{{ localize(copy.controls.small, props.locale) }}</UiBadge>
     <UiBadge size="md">{{ localize(copy.controls.medium, props.locale) }}</UiBadge>
+    <UiBadge size="lg">{{ localize(copy.controls.large, props.locale) }}</UiBadge>
   </StateRow>
 </template>

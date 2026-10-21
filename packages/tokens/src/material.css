@@ -1,60 +1,45 @@
 @layer neoverse.tokens {
   :root {
     --neoverse-material-transparency-opaque: 100%;
-    --neoverse-material-transparency-subtle: 30%;
+    --neoverse-material-transparency-subtle: 15%;
     --neoverse-material-transparency-elevated: 20%;
-    --neoverse-material-transparency-immersive: 12%;
+    --neoverse-material-transparency-immersive: 30%;
 
     --neoverse-material-blur-none: 0px;
-    /* Glass stays readable at the same restrained blur steps as the product
-       surfaces: soft controls, standard panels, and deeper card material. */
-    --neoverse-material-blur-sm: 8px;
-    --neoverse-material-blur-md: 14px;
-    --neoverse-material-blur-lg: 28px;
+    /* Three canonical tiers: light controls, standard panels, and immersive surfaces. */
+    --neoverse-material-blur-sm: 12px;
+    --neoverse-material-blur-md: 18px;
+    --neoverse-material-blur-lg: 24px;
 
     --neoverse-material-saturation-normal: 100%;
     --neoverse-material-saturation-subtle: 132%;
     --neoverse-material-saturation-elevated: 145%;
     --neoverse-material-saturation-immersive: 165%;
+    --neoverse-material-backdrop-brightness: 1;
+    --neoverse-material-backdrop-contrast: 1;
+    --neoverse-material-refraction-strength: 1;
+    --neoverse-material-edge-refraction-gain: 1;
 
     /* Soft Glass is a composed material rather than a single white overlay:
        the fill keeps the canvas visible, while the edge gets a stronger
        filtered sample of that same canvas. */
-    --neoverse-material-filter-subtle: blur(var(--neoverse-material-blur-sm))
-      saturate(var(--neoverse-material-saturation-subtle)) brightness(103%) contrast(102%);
-    --neoverse-material-filter-elevated: blur(var(--neoverse-material-blur-md))
-      saturate(var(--neoverse-material-saturation-elevated)) brightness(105%) contrast(104%);
-    --neoverse-material-filter-immersive: blur(var(--neoverse-material-blur-lg))
-      saturate(var(--neoverse-material-saturation-immersive)) brightness(106%) contrast(106%);
-    --neoverse-material-edge-filter-subtle: blur(var(--neoverse-material-blur-sm)) saturate(146%)
-      brightness(102%) contrast(105%);
-    --neoverse-material-edge-filter-elevated: blur(var(--neoverse-material-blur-md)) saturate(153%)
-      brightness(103%) contrast(107%);
-    --neoverse-material-edge-filter-immersive: blur(var(--neoverse-material-blur-lg)) saturate(160%)
-      brightness(104%) contrast(109%);
-    /* Keep the environmental field close to the silhouette: a fine edge
-       catches light without becoming a bright painted band. */
+    --neoverse-material-filter-subtle: var(--neoverse-material-glass-subtle-filter);
+    --neoverse-material-filter-elevated: var(--neoverse-material-glass-elevated-filter);
+    --neoverse-material-filter-immersive: var(--neoverse-material-glass-immersive-filter);
+    /* Local edge gain uses live backdrop channels; central frost stays tier-owned. */
+    --neoverse-material-edge-filter-subtle: brightness(125%);
+    --neoverse-material-edge-filter-elevated: brightness(135%);
+    --neoverse-material-edge-filter-immersive: brightness(145%);
+    /* Keep the directional silhouette narrow; softness only smooths its edge. */
     --neoverse-material-edge-refraction-width-subtle: 1px;
     --neoverse-material-edge-refraction-width-elevated: 1.25px;
     --neoverse-material-edge-refraction-width-immersive: 1.25px;
     --neoverse-material-edge-refraction-softness-subtle: blur(3px);
     --neoverse-material-edge-refraction-softness-elevated: blur(4px);
     --neoverse-material-edge-refraction-softness-immersive: blur(5px);
-    --neoverse-material-tint-subtle: color-mix(
-      in srgb,
-      var(--neoverse-color-surface-subtle) 86%,
-      var(--neoverse-color-accent-primary) 14%
-    );
-    --neoverse-material-tint-elevated: color-mix(
-      in srgb,
-      var(--neoverse-color-surface-glass) 88%,
-      var(--neoverse-color-accent-primary) 12%
-    );
-    --neoverse-material-tint-immersive: color-mix(
-      in srgb,
-      var(--neoverse-color-surface-glass) 82%,
-      var(--neoverse-color-accent-tertiary) 18%
-    );
+    --neoverse-material-tint-subtle: var(--neoverse-material-glass-base-tint);
+    --neoverse-material-tint-elevated: var(--neoverse-material-glass-base-tint);
+    --neoverse-material-tint-immersive: var(--neoverse-material-glass-base-tint);
     --neoverse-material-inner-glow-subtle:
       inset 0 1px 3px color-mix(in srgb, var(--neoverse-color-edge-light) 20%, transparent),
       inset 0 -1px 3px color-mix(in srgb, var(--neoverse-color-accent-secondary) 6%, transparent);
@@ -92,6 +77,10 @@
     --neoverse-material-edge-refraction-opacity-subtle: 0.46;
     --neoverse-material-edge-refraction-opacity-elevated: 0.5;
     --neoverse-material-edge-refraction-opacity-immersive: 0.34;
+    /* Released 0.2.0 chroma response, kept separate from lighting intensity. */
+    --neoverse-material-edge-refraction-chroma-subtle: 0.90848;
+    --neoverse-material-edge-refraction-chroma-elevated: 1;
+    --neoverse-material-edge-refraction-chroma-immersive: 1;
     --neoverse-material-edge-refraction-carrier-subtle: color-mix(
       in srgb,
       var(--neoverse-color-edge-light) 30%,
@@ -187,58 +176,40 @@
       );
 
     --neoverse-material-refraction-gradient-none: none;
-    /* The edge field is directional and low alpha. backdrop-filter supplies
-       the local canvas colour; these gradients only shape where the reflected
-       light catches instead of painting a uniform contour. */
+    /* Match the 0.2.0 directional catches when the optional renderer is absent. */
     --neoverse-material-refraction-gradient-subtle:
       radial-gradient(
         110% 38% at 50% -4%,
-        color-mix(in srgb, var(--neoverse-color-edge-light) 26%, transparent),
-        color-mix(in srgb, var(--neoverse-color-accent-secondary) 10%, transparent) 42%,
+        rgb(128 128 128 / 26%),
+        rgb(128 128 128 / 10%) 42%,
         transparent 72%
       ),
       radial-gradient(
         110% 38% at 50% 104%,
-        color-mix(in srgb, var(--neoverse-color-accent-primary) 13%, transparent),
-        color-mix(in srgb, var(--neoverse-color-accent-tertiary) 8%, transparent) 44%,
+        rgb(128 128 128 / 13%),
+        rgb(128 128 128 / 8%) 44%,
         transparent 72%
       ),
-      radial-gradient(
-        38% 82% at -4% 50%,
-        color-mix(in srgb, var(--neoverse-color-accent-secondary) 10%, transparent),
-        transparent 70%
-      ),
-      radial-gradient(
-        38% 82% at 104% 50%,
-        color-mix(in srgb, var(--neoverse-color-accent-tertiary) 10%, transparent),
-        transparent 70%
-      );
+      radial-gradient(38% 82% at -4% 50%, rgb(128 128 128 / 10%), transparent 70%),
+      radial-gradient(38% 82% at 104% 50%, rgb(128 128 128 / 10%), transparent 70%);
     --neoverse-material-refraction-gradient-elevated: var(
       --neoverse-material-refraction-gradient-subtle
     );
     --neoverse-material-refraction-gradient-immersive:
       radial-gradient(
         110% 42% at 50% -4%,
-        color-mix(in srgb, var(--neoverse-color-edge-light) 19%, transparent),
-        color-mix(in srgb, var(--neoverse-color-accent-secondary) 8%, transparent) 42%,
+        rgb(128 128 128 / 19%),
+        rgb(128 128 128 / 8%) 42%,
         transparent 72%
       ),
       radial-gradient(
         110% 42% at 50% 104%,
-        color-mix(in srgb, var(--neoverse-color-accent-primary) 10%, transparent),
-        color-mix(in srgb, var(--neoverse-color-accent-tertiary) 7%, transparent) 44%,
+        rgb(128 128 128 / 10%),
+        rgb(128 128 128 / 7%) 44%,
         transparent 72%
       ),
-      radial-gradient(
-        42% 86% at -4% 50%,
-        color-mix(in srgb, var(--neoverse-color-accent-secondary) 7%, transparent),
-        transparent 70%
-      ),
-      radial-gradient(
-        42% 86% at 104% 50%,
-        color-mix(in srgb, var(--neoverse-color-accent-tertiary) 8%, transparent),
-        transparent 70%
-      );
+      radial-gradient(42% 86% at -4% 50%, rgb(128 128 128 / 7%), transparent 70%),
+      radial-gradient(42% 86% at 104% 50%, rgb(128 128 128 / 8%), transparent 70%);
 
     --neoverse-material-surface-solid-background: var(--neoverse-color-surface-canvas);
     --neoverse-material-surface-solid-background-fallback: var(--neoverse-color-surface-canvas);
@@ -288,79 +259,43 @@
       var(--neoverse-color-edge-light) 52%,
       transparent
     );
-    --neoverse-surface-inset-refraction: linear-gradient(
-      145deg,
-      color-mix(in srgb, var(--neoverse-color-edge-light) 7%, transparent),
-      transparent 42%,
-      color-mix(in srgb, var(--neoverse-color-accent-soft) 12%, transparent)
-    );
-    --neoverse-surface-inset-dense-fill: color-mix(
-      in srgb,
-      var(--neoverse-color-surface-raised) 72%,
-      transparent
-    );
-    --neoverse-surface-inset-fill: color-mix(
-      in srgb,
-      var(--neoverse-color-surface-glass) 18%,
-      transparent
-    );
-    --neoverse-surface-inset-sheen: linear-gradient(
-      125deg,
-      color-mix(in srgb, var(--neoverse-color-edge-light) 10%, transparent),
-      transparent 30%,
-      transparent 68%,
-      color-mix(in srgb, var(--neoverse-color-accent-soft) 10%, transparent)
-    );
+    --neoverse-surface-inset-refraction: none;
+    --neoverse-surface-inset-dense-fill: var(--neoverse-material-glass-subtle-background);
+    --neoverse-surface-inset-fill: var(--neoverse-material-glass-subtle-background);
+    --neoverse-surface-inset-sheen: none;
     /* Shared inset state roles keep form controls, disclosure panels, tables,
        and reading surfaces on one material ladder. Components alias these
        roles instead of inventing local color-mix recipes. */
-    --neoverse-surface-inset-rest-background:
-      var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-fill);
-    --neoverse-surface-inset-hover-fill: color-mix(
-      in srgb,
-      var(--neoverse-surface-inset-dense-fill) 58%,
-      var(--neoverse-surface-inset-fill)
-    );
-    --neoverse-surface-inset-hover-background:
-      var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-hover-fill);
-    --neoverse-surface-inset-strong-fill: color-mix(
-      in srgb,
-      var(--neoverse-surface-inset-dense-fill) 82%,
-      var(--neoverse-color-accent-soft)
-    );
-    --neoverse-surface-inset-strong-background:
-      var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-strong-fill);
-    --neoverse-surface-inset-header-fill: color-mix(
-      in srgb,
-      var(--neoverse-surface-inset-dense-fill) 90%,
-      var(--neoverse-color-text-primary) 6%
-    );
-    --neoverse-surface-inset-header-background:
-      var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-header-fill);
-    --neoverse-surface-inset-alternate-fill: color-mix(
-      in srgb,
-      var(--neoverse-surface-inset-fill) 70%,
-      var(--neoverse-surface-inset-dense-fill)
-    );
-    --neoverse-surface-inset-disabled-fill: color-mix(
-      in srgb,
-      var(--neoverse-surface-inset-fill) 56%,
-      transparent
-    );
-    --neoverse-surface-inset-disabled-background:
-      var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-disabled-fill);
+    --neoverse-surface-inset-rest-background: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-hover-fill: var(--neoverse-material-glass-subtle-background);
+    --neoverse-surface-inset-hover-background: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-strong-fill: var(--neoverse-material-glass-subtle-background);
+    --neoverse-surface-inset-strong-background: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-header-fill: var(--neoverse-material-glass-subtle-background);
+    --neoverse-surface-inset-header-background: var(--neoverse-surface-inset-fill);
+    --neoverse-surface-inset-alternate-fill: var(--neoverse-material-glass-subtle-background);
+    --neoverse-surface-inset-disabled-fill: var(--neoverse-material-glass-subtle-background);
+    --neoverse-surface-inset-disabled-background: var(--neoverse-surface-inset-fill);
     --neoverse-surface-inset-active-highlight: inset 0 var(--neoverse-border-width-thin) 0
       color-mix(in srgb, var(--neoverse-color-edge-light) 16%, transparent);
-    --neoverse-surface-inset-strong-hover-fill: color-mix(
-      in srgb,
-      var(--neoverse-surface-inset-strong-fill) 72%,
-      var(--neoverse-surface-inset-hover-fill)
-    );
+    --neoverse-surface-inset-danger-highlight: 0 0 0 var(--neoverse-border-width-thin)
+      color-mix(in srgb, var(--neoverse-color-status-danger) 42%, transparent);
+    --neoverse-surface-inset-warning-highlight: 0 0 0 var(--neoverse-border-width-thin)
+      color-mix(in srgb, var(--neoverse-color-status-warning) 42%, transparent);
+    --neoverse-surface-inset-success-highlight: 0 0 0 var(--neoverse-border-width-thin)
+      color-mix(in srgb, var(--neoverse-color-status-success) 42%, transparent);
+    --neoverse-surface-inset-strong-hover-fill: var(--neoverse-material-glass-subtle-background);
     /* Prominent inset surfaces need a visible refractive silhouette without
        falling back to a dark hairline. These roles are shared by data surfaces
        and progressive controls so their depth reads consistently. */
     --neoverse-surface-inset-edge-rest: var(--neoverse-material-glass-subtle-edge-highlight);
     --neoverse-surface-inset-edge-active: var(--neoverse-material-glass-elevated-edge-highlight);
+    /* Progressive inset panels need a continuous silhouette as well as their
+       directional light catches. Inset strokes preserve the existing geometry. */
+    --neoverse-surface-inset-outline-rest: inset 0 0 0 var(--neoverse-border-width-thin)
+      var(--neoverse-color-border-default);
+    --neoverse-surface-inset-outline-active: inset 0 0 0 var(--neoverse-border-width-thin)
+      var(--neoverse-color-border-strong);
     --neoverse-surface-inset-separator: inset 0 calc(var(--neoverse-border-width-thin) * -1) 0
       color-mix(
         in srgb,
@@ -379,11 +314,15 @@
     );
     --neoverse-surface-inset-bloom-rest: var(--neoverse-material-bloom-subtle);
     --neoverse-surface-inset-bloom-active: var(--neoverse-material-bloom-elevated);
-    --neoverse-surface-inset-filter: var(--neoverse-material-filter-subtle);
+    --neoverse-surface-inset-filter: var(--neoverse-material-glass-subtle-filter);
     --neoverse-surface-interactive-active-scale: 0.99;
 
-    --neoverse-material-glass-subtle-background: var(--neoverse-color-surface-subtle);
-    --neoverse-material-glass-subtle-background-fallback: var(--neoverse-color-surface-raised);
+    --neoverse-material-glass-subtle-background: color-mix(
+      in srgb,
+      var(--neoverse-material-glass-subtle-tint) var(--neoverse-material-glass-subtle-transparency),
+      transparent
+    );
+    --neoverse-material-glass-subtle-background-fallback: var(--neoverse-material-glass-base-tint);
     --neoverse-material-glass-subtle-transparency: var(--neoverse-material-transparency-subtle);
     --neoverse-material-glass-subtle-blur: var(--neoverse-material-blur-sm);
     --neoverse-material-glass-subtle-saturation: var(--neoverse-material-saturation-subtle);
@@ -394,9 +333,12 @@
     --neoverse-material-glass-subtle-border-width: var(--neoverse-border-width-thin);
     --neoverse-material-glass-subtle-edge-highlight: var(--neoverse-material-edge-highlight-subtle);
     --neoverse-material-glass-subtle-shadow: var(--neoverse-shadow-raised);
-    --neoverse-material-glass-subtle-filter: var(--neoverse-material-filter-subtle);
+    --neoverse-material-glass-subtle-filter: blur(var(--neoverse-material-glass-subtle-blur))
+      saturate(var(--neoverse-material-glass-subtle-saturation))
+      contrast(var(--neoverse-material-backdrop-contrast))
+      brightness(var(--neoverse-material-backdrop-brightness));
     --neoverse-material-glass-subtle-edge-filter: var(--neoverse-material-edge-filter-subtle);
-    --neoverse-material-glass-subtle-tint: var(--neoverse-material-tint-subtle);
+    --neoverse-material-glass-subtle-tint: var(--neoverse-material-glass-base-tint);
     --neoverse-material-glass-subtle-inner-glow: var(--neoverse-material-inner-glow-subtle);
     --neoverse-material-glass-subtle-seam-glow: var(--neoverse-material-seam-glow-subtle);
     --neoverse-material-glass-subtle-hover-transparency: var(
@@ -421,8 +363,15 @@
       --neoverse-material-refraction-gradient-subtle
     );
 
-    --neoverse-material-glass-elevated-background: var(--neoverse-color-surface-glass);
-    --neoverse-material-glass-elevated-background-fallback: var(--neoverse-color-surface-raised);
+    --neoverse-material-glass-elevated-background: color-mix(
+      in srgb,
+      var(--neoverse-material-glass-elevated-tint)
+        var(--neoverse-material-glass-elevated-transparency),
+      transparent
+    );
+    --neoverse-material-glass-elevated-background-fallback: var(
+      --neoverse-material-glass-base-tint
+    );
     --neoverse-material-glass-elevated-transparency: var(--neoverse-material-transparency-elevated);
     --neoverse-material-glass-elevated-blur: var(--neoverse-material-blur-md);
     --neoverse-material-glass-elevated-saturation: var(--neoverse-material-saturation-elevated);
@@ -432,9 +381,12 @@
       --neoverse-material-edge-highlight-elevated
     );
     --neoverse-material-glass-elevated-shadow: var(--neoverse-shadow-card);
-    --neoverse-material-glass-elevated-filter: var(--neoverse-material-filter-elevated);
+    --neoverse-material-glass-elevated-filter: blur(var(--neoverse-material-glass-elevated-blur))
+      saturate(var(--neoverse-material-glass-elevated-saturation))
+      contrast(var(--neoverse-material-backdrop-contrast))
+      brightness(var(--neoverse-material-backdrop-brightness));
     --neoverse-material-glass-elevated-edge-filter: var(--neoverse-material-edge-filter-elevated);
-    --neoverse-material-glass-elevated-tint: var(--neoverse-material-tint-elevated);
+    --neoverse-material-glass-elevated-tint: var(--neoverse-material-glass-base-tint);
     --neoverse-material-glass-elevated-inner-glow: var(--neoverse-material-inner-glow-elevated);
     --neoverse-material-glass-elevated-seam-glow: var(--neoverse-material-seam-glow-elevated);
     --neoverse-material-glass-elevated-bloom: var(--neoverse-material-bloom-elevated);
@@ -460,8 +412,15 @@
     --neoverse-material-glass-elevated-hover-border: var(--neoverse-material-glass-elevated-border);
     --neoverse-material-glass-elevated-hover-shadow: var(--neoverse-material-glass-elevated-shadow);
 
-    --neoverse-material-glass-immersive-background: var(--neoverse-color-surface-glass);
-    --neoverse-material-glass-immersive-background-fallback: var(--neoverse-color-surface-raised);
+    --neoverse-material-glass-immersive-background: color-mix(
+      in srgb,
+      var(--neoverse-material-glass-immersive-tint)
+        var(--neoverse-material-glass-immersive-transparency),
+      transparent
+    );
+    --neoverse-material-glass-immersive-background-fallback: var(
+      --neoverse-material-glass-base-tint
+    );
     --neoverse-material-glass-immersive-transparency: var(
       --neoverse-material-transparency-immersive
     );
@@ -473,9 +432,12 @@
       --neoverse-material-edge-highlight-immersive
     );
     --neoverse-material-glass-immersive-shadow: var(--neoverse-shadow-overlay);
-    --neoverse-material-glass-immersive-filter: var(--neoverse-material-filter-immersive);
+    --neoverse-material-glass-immersive-filter: blur(var(--neoverse-material-glass-immersive-blur))
+      saturate(var(--neoverse-material-glass-immersive-saturation))
+      contrast(var(--neoverse-material-backdrop-contrast))
+      brightness(var(--neoverse-material-backdrop-brightness));
     --neoverse-material-glass-immersive-edge-filter: var(--neoverse-material-edge-filter-immersive);
-    --neoverse-material-glass-immersive-tint: var(--neoverse-material-tint-immersive);
+    --neoverse-material-glass-immersive-tint: var(--neoverse-material-glass-base-tint);
     --neoverse-material-glass-immersive-inner-glow: var(--neoverse-material-inner-glow-immersive);
     --neoverse-material-glass-immersive-seam-glow: var(--neoverse-material-seam-glow-immersive);
     --neoverse-material-glass-immersive-bloom: var(--neoverse-material-bloom-immersive);

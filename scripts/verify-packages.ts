@@ -8,6 +8,7 @@ const npmRegistry = 'https://registry.npmjs.org/';
 const packageDirs = [
   'tokens',
   'motion',
+  'overlay-runtime',
   'giscus-theme',
   'glass-runtime',
   'tailwind',
@@ -25,6 +26,7 @@ type PackageJson = {
   homepage?: string;
   bugs?: { url?: string };
   exports?: unknown;
+  dependencies?: Record<string, string>;
   publishConfig?: { access?: string; registry?: string };
 };
 
@@ -83,6 +85,14 @@ await mkdir(packDir, { recursive: true });
 
 try {
   const packedPackages = new Map<string, string>();
+  const publicVersions = new Map<string, string>();
+  for (const dirName of packageDirs) {
+    const manifest = JSON.parse(
+      await readFile(join(repositoryRoot, 'packages', dirName, 'package.json'), 'utf8'),
+    ) as PackageJson;
+    assert(manifest.name && manifest.version, `${dirName}: package name and version are required`);
+    publicVersions.set(manifest.name, manifest.version);
+  }
 
   for (const dirName of packageDirs) {
     const packageDir = join(repositoryRoot, 'packages', dirName);
@@ -145,6 +155,15 @@ try {
       packedJson.version === sourcePackage.version,
       `${sourcePackage.name}: packed version mismatch`,
     );
+    for (const [name, range] of Object.entries(packedJson.dependencies ?? {})) {
+      if (!name.startsWith('@neoverse-ui/')) continue;
+      const version = publicVersions.get(name);
+      assert(version, `${sourcePackage.name}: unknown public dependency ${name}`);
+      assert(
+        Bun.semver.satisfies(version, range),
+        `${sourcePackage.name}: dependency ${name}@${range} excludes release version ${version}`,
+      );
+    }
 
     const entries = (await run(['tar', '-tzf', tarballPath], repositoryRoot)).split(/\r?\n/);
     assert(
@@ -179,6 +198,15 @@ try {
         '.ui-table-region{',
         '.ui-disclosure__content{',
         ':where(.ui-input,.ui-textarea,.ui-select){',
+        '.ui-choice__native',
+        '.ui-switch__native',
+        '.ui-field__message',
+        '.ui-overlay-panel--fallback-open',
+        '.ui-dropdown-menu__item',
+        '.ui-stat-card',
+        '.ui-stat-grid',
+        '.ui-timeline',
+        '.ui-step-flow',
       ]) {
         assert(
           consumerCss.includes(fragment),
@@ -250,11 +278,34 @@ try {
     `import { existsSync } from 'node:fs';\n` +
       `import { fileURLToPath } from 'node:url';\n` +
       `import { UiAction as ReactUiAction, UiPresence as ReactUiPresence, useUiPresence } from '@neoverse-ui/react';\n` +
+      `import { UiCheckbox as ReactUiCheckbox, UiRadioGroup as ReactUiRadioGroup, UiSwitch as ReactUiSwitch, UiField as ReactUiField, UiPopover as ReactUiPopover, UiDropdownMenu as ReactUiDropdownMenu, type UiFieldControlAttrs } from '@neoverse-ui/react';\n` +
       `import { UiButton, UiNotice, UiTooltipSurface, UiPresence as VueUiPresence, presence, staggerStyle } from '@neoverse-ui/vue';\n` +
+      `import { UiTerminalSurface, UiTerminalLine, UiTerminalTranscript, UiTerminalPrompt, type TerminalSurfaceProps, type TerminalLineProps, type TerminalTranscriptProps, type TerminalPromptProps } from '@neoverse-ui/vue';\n` +
+      `import { UiStatCard, UiTimeline, UiStepFlow, type StatCardProps, type TimelineProps, type StepFlowProps } from '@neoverse-ui/vue';\n` +
+      `import { UiCheckbox as VueUiCheckbox, UiRadioGroup as VueUiRadioGroup, UiSwitch as VueUiSwitch, UiField as VueUiField, UiPopover as VueUiPopover, UiDropdownMenu as VueUiDropdownMenu, type FieldControlAttrs } from '@neoverse-ui/vue';\n` +
+      `import { showAnchoredOverlay, hideAnchoredOverlay, stopOverlayTracking, positionAnchoredOverlay, resolveAnchoredPosition, type AnchoredOverlayOptions } from '@neoverse-ui/overlay-runtime';\n` +
       `import { cssVariables } from '@neoverse-ui/tokens';\n` +
       `import { createGlassRenderer } from '@neoverse-ui/glass-runtime';\n` +
       `import { startViewTransition, createParticleDissolve, particleDissolvePresets, presenceVariants } from '@neoverse-ui/motion';\n` +
       `if (!ReactUiAction || !UiButton || !UiNotice || !UiTooltipSurface || !cssVariables || !createGlassRenderer) throw new Error('public JS exports are incomplete');\n` +
+      `if (![ReactUiCheckbox, ReactUiRadioGroup, ReactUiSwitch, ReactUiField, ReactUiPopover, ReactUiDropdownMenu, VueUiCheckbox, VueUiRadioGroup, VueUiSwitch, VueUiField, VueUiPopover, VueUiDropdownMenu].every(Boolean)) throw new Error('public form/overlay exports are incomplete');\n` +
+      `if (![UiTerminalSurface, UiTerminalLine, UiTerminalTranscript, UiTerminalPrompt].every(Boolean)) throw new Error('public terminal exports are incomplete');\n` +
+      `const statCardProps: StatCardProps = { label: 'Latency', value: 0, unit: 'ms' };\n` +
+      `const timelineProps: TimelineProps = { items: [{ id: 'release', title: 'Release', time: 'October', dateTime: '2026-10' }] };\n` +
+      `const stepFlowProps: StepFlowProps = { items: [{ id: 'build', title: 'Build', status: 'current', statusLabel: 'In progress' }] };\n` +
+      `if (![UiStatCard, UiTimeline, UiStepFlow].every(Boolean)) throw new Error('public presentation exports are incomplete');\n` +
+      `void [statCardProps, timelineProps, stepFlowProps];\n` +
+      `const terminalSurfaceProps: TerminalSurfaceProps = { title: 'Smoke terminal', density: 'compact' };\n` +
+      `const terminalLineProps: TerminalLineProps = { text: 'Ready', tone: 'normal' };\n` +
+      `const terminalTranscriptProps: TerminalTranscriptProps = { followTail: true };\n` +
+      `const terminalPromptProps: TerminalPromptProps = { label: 'Smoke input', segments: [{ id: 'host', label: 'neoverse', tone: 'host' }] };\n` +
+      `if (terminalSurfaceProps.title !== 'Smoke terminal' || terminalLineProps.text !== 'Ready' || !terminalTranscriptProps.followTail || terminalPromptProps.label !== 'Smoke input' || cssVariables.components.terminal.cursor !== '--neoverse-terminal-cursor') throw new Error('public terminal types/tokens are incomplete');\n` +
+      `if (![showAnchoredOverlay, hideAnchoredOverlay, stopOverlayTracking, positionAnchoredOverlay, resolveAnchoredPosition].every((entry) => typeof entry === 'function')) throw new Error('public Overlay Runtime exports are incomplete');\n` +
+      `const vueFieldAttrs: FieldControlAttrs = { id: 'email', 'aria-describedby': 'email-help', required: true };\n` +
+      `const reactFieldAttrs: UiFieldControlAttrs = vueFieldAttrs;\n` +
+      `const overlayPlacement: AnchoredOverlayOptions['placement'] = 'auto';\n` +
+      `const position = resolveAnchoredPosition({ trigger: { top: 10, right: 110, bottom: 50, left: 10, width: 100, height: 40 }, overlayWidth: 200, overlayHeight: 100, viewport: { width: 800, height: 600 }, gap: 8, placement: overlayPlacement });\n` +
+      `if (reactFieldAttrs['aria-describedby'] !== 'email-help' || position.top !== 58) throw new Error('public form/overlay contracts are incomplete');\n` +
       `if (!ReactUiPresence || !VueUiPresence || typeof useUiPresence !== 'function' || typeof startViewTransition !== 'function' || typeof createParticleDissolve !== 'function') throw new Error('public Motion/Presence exports are incomplete');\n` +
       `if (presence('pop', 'top')['data-neoverse-motion'] !== 'pop' || !('--neoverse-motion-enter-delay' in staggerStyle(1)) || !presenceVariants.includes('rise') || !particleDissolvePresets.medium) throw new Error('public Motion/Presence contracts are incomplete');\n` +
       `for (const specifier of ['@neoverse-ui/tokens/css', '@neoverse-ui/motion/css', '@neoverse-ui/giscus-theme/light.css', '@neoverse-ui/giscus-theme/dark.css', '@neoverse-ui/tailwind/index.css', '@neoverse-ui/tailwind/theme.css', '@neoverse-ui/tailwind/components.css', '@neoverse-ui/tailwind/prose.css', '@neoverse-ui/vue/index.css', '@neoverse-ui/react/index.css']) {\n` +

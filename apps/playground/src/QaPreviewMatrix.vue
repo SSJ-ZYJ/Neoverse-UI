@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import MaterialLegend from './MaterialLegend.vue';
 import type { Locale } from './playground-content';
 import { localize, localized } from './playground-content';
 
@@ -56,6 +57,7 @@ const contexts = [
         <div class="playground-qa-stage__content">
           <slot :context="context.id" />
         </div>
+        <MaterialLegend :locale="props.locale" />
       </div>
     </article>
   </div>

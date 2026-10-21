@@ -9,6 +9,7 @@ import ControlSurfaceModule from './ControlSurfaceModule.vue';
 import DensityModule from './DensityModule.vue';
 import IconButtonModule from './IconButtonModule.vue';
 import NavigationItemModule from './NavigationItemModule.vue';
+import OverlayModule from './OverlayModule.vue';
 import SegmentedControlModule from './SegmentedControlModule.vue';
 import type { LabModuleProps } from './types';
 
@@ -21,11 +22,19 @@ const breadcrumbCopy = {
     '路径层级、当前页语义与局部溢出的共享导航组件。',
   ),
 } as const;
+const overlayCopy = {
+  label: localized('Overlay primitives', '弹层控件'),
+  description: localized(
+    'Popover and dropdown menu share one top-layer positioning, dismiss, focus, and Motion runtime.',
+    'Popover 与下拉菜单共享同一套顶层定位、关闭、焦点与 Motion Runtime。',
+  ),
+} as const;
 const sections = [
   { id: 'controls-button', label: moduleCopy.button.label },
   { id: 'controls-icon-button', label: moduleCopy.iconButton.label },
   { id: 'controls-action', label: moduleCopy.action.label },
   { id: 'controls-breadcrumb', label: breadcrumbCopy.label },
+  { id: 'controls-overlays', label: overlayCopy.label },
   { id: 'controls-navigation-item', label: moduleCopy.navigationItem.label },
   { id: 'controls-segmented-control', label: moduleCopy.segmentedControl.label },
   { id: 'controls-surface', label: moduleCopy.controlSurface.label },
@@ -82,6 +91,14 @@ const sections = [
       :description="localize(breadcrumbCopy.description, props.locale)"
     >
       <BreadcrumbModule :locale="props.locale" />
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="controls-overlays"
+      :title="localize(overlayCopy.label, props.locale)"
+      :description="localize(overlayCopy.description, props.locale)"
+    >
+      <OverlayModule :locale="props.locale" />
     </LabSpecimenSection>
 
     <LabSpecimenSection

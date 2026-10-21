@@ -6,7 +6,6 @@ export const surfaceClasses: Record<SurfacePreset, string> = {
   subtle: 'ui-surface-subtle',
   elevated: 'ui-surface-elevated',
   inset: 'ui-surface-inset',
-  chrome: 'ui-surface-chrome',
   'glass-subtle': 'material-glass-subtle',
   'glass-elevated': 'material-glass-elevated',
   'glass-immersive': 'material-glass-immersive',

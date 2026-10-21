@@ -1,24 +1,51 @@
 import { expect, test } from 'bun:test';
 import { Children, createElement, type ReactElement, type ReactNode } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 
 import {
   UiAction,
   UiBreadcrumb,
   UiButton,
   UiCard,
+  UiCheckbox,
   UiDisclosure,
   UiDock,
+  UiField,
   UiIconButton,
   UiInput,
   UiNotice,
+  UiRadioGroup,
   UiSelect,
   UiSurface,
+  UiSwitch,
   UiTable,
   UiTextarea,
   uiActionClassName,
 } from './index.js';
 
 type TestElement = ReactElement<{ children?: ReactNode; [key: string]: unknown }>;
+
+test('number inputs expose themed steps with native constraints and localized labels', () => {
+  const html = renderToStaticMarkup(
+    createElement(UiInput, {
+      type: 'number',
+      name: 'amount',
+      defaultValue: '1.5',
+      min: 0,
+      max: 2,
+      step: 0.5,
+      incrementLabel: '增加',
+      decrementLabel: '减少',
+      readOnly: true,
+    }),
+  );
+  expect(html).toContain('class="ui-input-number"');
+  expect(html).toContain('step="0.5"');
+  expect(html).toContain('name="amount"');
+  expect(html).toContain('aria-label="增加"');
+  expect(html).toContain('aria-label="减少"');
+  expect(html.match(/disabled=""/g)).toHaveLength(2);
+});
 
 test('form controls preserve native props and compose canonical classes', () => {
   const input = UiInput({
@@ -43,28 +70,120 @@ test('form controls preserve native props and compose canonical classes', () => 
   expect(typeof textareaControl.props.onPointerDown).toBe('function');
   expect(typeof textareaControl.props.onBlur).toBe('function');
 
-  const select = UiSelect({
+  const selectHtml = renderToStaticMarkup(
+    createElement(UiSelect, {
+      name: 'runtime',
+      value: 'native',
+      options: [
+        { value: 'native', label: 'Native' },
+        { value: 'remote', label: 'Remote' },
+      ],
+    }),
+  );
+  expect(selectHtml).toContain('<details class="ui-select-shell">');
+  expect(selectHtml).toContain('class="ui-select"');
+  expect(selectHtml).toContain('role="combobox"');
+  expect(selectHtml).toContain('aria-haspopup="listbox"');
+  expect(selectHtml).toContain('aria-expanded="false"');
+  expect(selectHtml).toContain('class="ui-select__indicator"');
+  expect(selectHtml).toContain('role="listbox"');
+  expect(selectHtml).toContain('popover="auto"');
+  expect(selectHtml).toContain('type="hidden" name="runtime" value="native"');
+});
+
+test('form controls expose validation and readonly semantics', () => {
+  const input = UiInput({ validation: 'error', readOnly: true }) as TestElement;
+  expect(input.props['data-validation']).toBe('error');
+  expect(input.props['aria-invalid']).toBe(true);
+  expect(input.props.readOnly).toBe(true);
+
+  const selectHtml = renderToStaticMarkup(
+    createElement(UiSelect, {
+      value: 'native',
+      readOnly: true,
+      validation: 'warning',
+      options: [{ value: 'native', label: 'Native' }],
+    }),
+  );
+  expect(selectHtml).toContain('ui-select-shell--readonly');
+  expect(selectHtml).toContain('aria-disabled="true"');
+  expect(selectHtml).toContain('data-validation="warning"');
+});
+
+test('choice controls preserve native input semantics and state callbacks', () => {
+  let checkboxValue = false;
+  const checkbox = UiCheckbox({
+    children: 'Release notifications',
+    onCheckedChange: (value) => {
+      checkboxValue = value;
+    },
+  }) as TestElement;
+  expect(checkbox.type).toBe('label');
+  expect(checkbox.props.className).toBe('ui-choice ui-checkbox');
+  const checkboxInput = Children.toArray(checkbox.props.children)[0] as TestElement;
+  expect(checkboxInput.props.type).toBe('checkbox');
+  (checkboxInput.props.onChange as (event: { currentTarget: { checked: boolean } }) => void)({
+    currentTarget: { checked: true },
+  });
+  expect(checkboxValue).toBe(true);
+
+  const toggle = UiSwitch({ children: 'Sync automatically', validation: 'success' }) as TestElement;
+  const switchInput = Children.toArray(toggle.props.children)[0] as TestElement;
+  expect(switchInput.props.role).toBe('switch');
+  expect(toggle.props['data-validation']).toBe('success');
+});
+
+test('Switch uses native checked state without a competing ARIA state', () => {
+  const html = renderToStaticMarkup(
+    createElement(UiSwitch, { name: 'sync', defaultChecked: true }, 'Sync automatically'),
+  );
+  expect(html).toContain('type="checkbox"');
+  expect(html).toContain('role="switch"');
+  expect(html).toContain('checked=""');
+  expect(html).not.toContain('aria-checked');
+});
+
+test('radio group and field expose composable semantic contracts', () => {
+  let selectedValue: string | number | undefined;
+  const group = UiRadioGroup({
     name: 'runtime',
     value: 'native',
+    'aria-label': 'Runtime',
     options: [
       { value: 'native', label: 'Native' },
-      { value: 'remote', label: 'Remote' },
+      { value: 'remote', label: 'Remote', description: 'Hosted runtime' },
     ],
+    onValueChange: (value) => {
+      selectedValue = value;
+    },
   }) as TestElement;
-  expect(select.type).toBe('details');
-  expect(select.props.className).toBe('ui-select-shell');
-  const selectChildren = Children.toArray(select.props.children) as TestElement[];
-  expect(selectChildren[0]?.type).toBe('summary');
-  expect(selectChildren[0]?.props.className).toBe('ui-select');
-  expect(typeof selectChildren[0]?.props.onPointerDown).toBe('function');
-  expect(typeof selectChildren[0]?.props.onBlur).toBe('function');
-  const triggerChildren = Children.toArray(selectChildren[0]?.props.children) as TestElement[];
-  expect(triggerChildren[1]?.type).toBe('svg');
-  expect(triggerChildren[1]?.props.className).toBe('ui-select__indicator');
-  expect(selectChildren[1]?.props.role).toBe('listbox');
-  expect(selectChildren[1]?.props.popover).toBe('auto');
-  expect(selectChildren[2]?.type).toBe('input');
-  expect(selectChildren[2]?.props.name).toBe('runtime');
+  expect(group.props.role).toBe('radiogroup');
+  const radioLabels = Children.toArray(group.props.children) as TestElement[];
+  const secondInput = Children.toArray(radioLabels[1]?.props.children)[0] as TestElement;
+  expect(secondInput.props.type).toBe('radio');
+  expect(secondInput.props.name).toBe('runtime');
+  (secondInput.props.onChange as (event: { currentTarget: { checked: boolean } }) => void)({
+    currentTarget: { checked: true },
+  });
+  expect(selectedValue).toBe('remote');
+
+  const fieldHtml = renderToStaticMarkup(
+    createElement(
+      UiField,
+      {
+        controlId: 'email',
+        label: 'Email',
+        description: 'Release notifications',
+        message: 'Enter a valid email.',
+        validation: 'error',
+        required: true,
+      },
+      createElement('input', { id: 'email' }),
+    ),
+  );
+  expect(fieldHtml).toContain('data-validation="error"');
+  expect(fieldHtml).toContain('class="ui-field__label-row"');
+  expect(fieldHtml).toContain('id="email-message" class="ui-field__message"');
 });
 
 test('builds the canonical secondary action contract', () => {
@@ -114,7 +233,8 @@ test('dock exposes the shared shell without owning product navigation data', () 
 
   expect(dock.type).toBe('nav');
   expect(dock.props['aria-label']).toBe('Primary navigation');
-  expect(dock.props['data-surface']).toBe('chrome');
+  expect(dock.props['data-surface']).toBe('glass-elevated');
+  expect(dock.props.className).toContain('material-glass-elevated');
   expect(dock.props['data-neoverse-surface-hover']).toBe('static');
   expect(dock.props.className).toContain('ui-dock');
   expect(dock.props.className).toContain('ui-dock--compact');
@@ -146,7 +266,9 @@ test('loading disables native activation without losing the label or submit sema
   expect(element.props['aria-busy']).toBe(true);
   expect(element.props.type).toBe('submit');
   const children = Children.toArray(element.props.children) as TestElement[];
-  expect(children[2]?.props.children).toBe('Save');
+  expect(
+    children.find((child) => child.props.className === 'ui-button__content')?.props.children,
+  ).toBe('Save');
   expect(UiButton({ disabled: true }).props.disabled).toBe(true);
 });
 
@@ -257,7 +379,11 @@ test('icon button preserves its native attributes and requires an accessible lab
   expect(button.props.className).toContain('ui-button--ghost');
   const buttonContent = (button.props as unknown as { children: ReactElement }).children;
   const children = (buttonContent.props as unknown as { children: ReactElement[] }).children;
-  expect(children[1]?.props).toEqual({
+  expect(
+    children.find(
+      (child) => (child.props as { className?: string }).className === 'ui-icon-button__content',
+    )?.props,
+  ).toEqual({
     className: 'ui-icon-button__content',
     'aria-hidden': 'true',
     children: 'gear',

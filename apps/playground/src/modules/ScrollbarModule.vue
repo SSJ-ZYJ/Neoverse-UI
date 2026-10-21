@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { cssVariables } from '@neoverse-ui/tokens';
-import { UiScrollbar, UiSurface } from '@neoverse-ui/vue';
+import { UiCard, UiScrollbar, UiSurface } from '@neoverse-ui/vue';
 import { localize, localized, moduleCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
 
@@ -111,7 +111,7 @@ const tokenRows = [
       </header>
 
       <div class="grid gap-grid lg:grid-cols-2">
-        <article class="grid min-h-0 gap-3 rounded-card bg-surface-raised p-5 shadow-card">
+        <UiCard as="article" class="grid min-h-0 gap-3 p-5" data-scrollbar-preview-card>
           <div class="flex flex-wrap items-start justify-between gap-3">
             <div class="min-w-0">
               <h3 class="text-label font-label text-primary">
@@ -124,8 +124,10 @@ const tokenRows = [
             <code class="text-code text-muted"> scrollbar-immersive </code>
           </div>
 
-          <div
-            class="scrollbar-immersive max-h-72 overflow-y-auto rounded-control bg-accent-soft p-2"
+          <UiSurface
+            surface="inset"
+            class="scrollbar-immersive max-h-72 overflow-y-auto rounded-control p-2"
+            data-scrollbar-preview-viewport
             :aria-label="localize(copy.preview.viewportLabel, props.locale)"
           >
             <ol class="grid divide-y divide-subtle">
@@ -145,10 +147,10 @@ const tokenRows = [
                 </div>
               </li>
             </ol>
-          </div>
-        </article>
+          </UiSurface>
+        </UiCard>
 
-        <article class="grid gap-3 rounded-card bg-surface-raised p-5 shadow-card">
+        <UiCard as="article" class="grid gap-3 p-5" data-scrollbar-preview-card>
           <header class="grid gap-1">
             <h3 class="text-label font-label text-primary">
               {{ localize(copy.tokens.label, props.locale) }}
@@ -172,7 +174,7 @@ const tokenRows = [
               </dd>
             </div>
           </dl>
-        </article>
+        </UiCard>
       </div>
     </section>
 
@@ -189,15 +191,21 @@ const tokenRows = [
           {{ localize(fixtureCopy.description, props.locale) }}
         </p>
       </header>
-      <UiSurface surface="subtle" class="grid gap-3 rounded-card p-4">
+      <UiSurface
+        surface="glass-subtle"
+        class="grid gap-3 rounded-card p-4"
+        data-scrollbar-fixture-surface
+      >
         <p class="text-body text-secondary">
           {{ localize(fixtureCopy.hint, props.locale) }}
         </p>
         <ol class="grid gap-2">
-          <li
+          <UiSurface
+            as="li"
+            surface="inset"
             v-for="item in previewItems"
             :key="`fixture-${item.number}`"
-            class="flex items-center gap-3 rounded-control bg-surface-raised px-3 py-3"
+            class="flex items-center gap-3 rounded-control px-3 py-3"
           >
             <span class="shrink-0 text-code text-accent-primary">{{ item.number }}</span>
             <div class="min-w-0">
@@ -208,7 +216,7 @@ const tokenRows = [
                 {{ localize(item.detail, props.locale) }}
               </p>
             </div>
-          </li>
+          </UiSurface>
         </ol>
       </UiSurface>
     </section>

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261012-C5E61E9E",
+  "kind": "new-component",
+  "target": "UiStepFlow",
+  "summary": "编号步骤流组件：带序号的步骤条目、连接线与可选状态",
+  "expected": "可复用的步骤流容器，步骤项含序号徽标、标题与描述，步骤之间有主题化的连接线，2-6 步自适应布局",
+  "acceptanceCriteria": [
+    "序号与连接线在深浅主题下均正确呈现",
+    "步骤项支持标题与描述两级排版",
+    "步骤数量 2-6 时布局自适应不溢出"
+  ],
+  "impact": "normal",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "Neoverse-Slides",
+      "location": "packages/slidev-theme-neoverse/layouts/steps.vue",
+      "framework": "vue",
+      "scenario": "技术分享演示中的流程/工作流展示"
+    }
+  ],
+  "createdAt": "2026-10-12T08:42:40.263Z",
+  "updatedAt": "2026-10-13T07:32:14.018Z",
+  "resolution": "Accepted 2026-10-13. UiStepFlow, shared responsive connectors and public item/state types are implemented; Vue unit tests 70/70 passed. tests/visual/presentation-data.spec.ts passes desktop/mobile light/dark/system snapshots, 2/6 steps, long text and horizontal/vertical connector geometry. Real consumer: Neoverse-Slides/packages/slidev-theme-neoverse/layouts/steps.vue and slides/tech-share-template/slides.md slide 7. Dev and production consumer checks passed 12/12 each; full Slides build/output validation passed; luna/max reviewed real screenshots. See docs/acceptance-2026-10-13.md. Publication is separate."
+}

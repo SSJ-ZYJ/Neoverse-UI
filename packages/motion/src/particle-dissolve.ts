@@ -21,8 +21,8 @@ export interface ParticleDissolvePreset {
 }
 
 /** The shared choreography: a fine dust layer that follows content edges.
- * 1.75px sampling keeps text silhouettes readable without carpeting the
- * whole surface in dots. */
+ * The high preset's 1.75px base spacing keeps text silhouettes readable;
+ * the shared spacing scale adds breathing room between particles. */
 export const particleDissolvePresets = {
   high: {
     density: 1.75,
@@ -42,7 +42,7 @@ export const particleDissolvePresets = {
 
 /* One shared spacing adjustment keeps capture and synthetic textures at the
    same reduced particle density across every preset and viewport size. */
-const PARTICLE_SPACING_SCALE = 1.1;
+const PARTICLE_SPACING_SCALE = 1.8;
 
 export type ParticleDissolvePresetName = keyof typeof particleDissolvePresets;
 

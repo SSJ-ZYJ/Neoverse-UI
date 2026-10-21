@@ -1,11 +1,67 @@
 <script setup lang="ts">
-import { UiDisclosure, UiSurface, UiTable } from '@neoverse-ui/vue';
+import {
+  UiDisclosure,
+  UiStatCard,
+  UiStepFlow,
+  UiSurface,
+  UiTable,
+  UiTimeline,
+} from '@neoverse-ui/vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, localized } from '../playground-content';
+import DataDisplayVisualFixture from './DataDisplayVisualFixture.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const visualFixtureEnabled =
+  new URLSearchParams(window.location.search).get('visual-fixture') === '1';
+const milestones = [
+  {
+    id: 'design',
+    title: 'Design / 设计',
+    description: 'Shared visual contracts',
+    time: '2026-10-01',
+    dateTime: '2026-10-01',
+  },
+  {
+    id: 'implementation',
+    title: 'Implementation / 实现',
+    description: 'Tokens → CSS → Vue adapters',
+    time: '2026-10-09',
+    dateTime: '2026-10-09',
+  },
+  {
+    id: 'validation',
+    title: 'Validation / 验收',
+    description: 'Consumer and release evidence',
+    time: '2026-10-12',
+    dateTime: '2026-10-12',
+  },
+] as const;
+const steps = [
+  {
+    id: 'plan',
+    title: 'Plan / 规划',
+    description: 'Define the contract',
+    status: 'complete',
+    statusLabel: 'Completed / 已完成',
+  },
+  {
+    id: 'build',
+    title: 'Build / 实现',
+    description: 'Reuse the shared material',
+    status: 'current',
+    statusLabel: 'Current / 当前步骤',
+  },
+  {
+    id: 'verify',
+    title: 'Verify / 验证',
+    description: 'Review real consumer evidence',
+    status: 'pending',
+    statusLabel: 'Pending / 待完成',
+  },
+] as const;
 const copy = {
   table: {
     label: localized('Table', '表格'),
@@ -38,22 +94,23 @@ const copy = {
       '消费端负责内容，共享组件负责摘要几何、焦点反馈与状态表现。',
     ),
     openBody: localized(
-      'Opening increases material density and rotates the indicator using the shared spatial motion role.',
-      '展开后提升材质密度，并使用共享空间动效角色旋转状态指示器。',
+      'Opening retains the Light material and rotates the indicator using shared spatial motion.',
+      '展开后保持轻薄档材质，并使用共享空间动效旋转状态指示器。',
     ),
   },
 } as const;
 </script>
 
 <template>
-  <div class="grid gap-grid">
+  <DataDisplayVisualFixture v-if="visualFixtureEnabled" :locale="props.locale" />
+  <div v-else class="grid gap-grid">
     <LabSpecimenSection
       id="data-display-table"
       :title="localize(copy.table.label, props.locale)"
       :description="localize(copy.table.description, props.locale)"
     >
       <MaterialBackdrop edge="inset">
-        <UiSurface surface="glass-elevated" class="playground-data-table-surface rounded-card p-4">
+        <UiSurface surface="none" class="playground-data-table-surface rounded-card p-4">
           <UiTable
             :caption="localize(copy.table.caption, props.locale)"
             :aria-label="localize(copy.table.caption, props.locale)"
@@ -84,31 +141,73 @@ const copy = {
       :description="localize(copy.disclosure.description, props.locale)"
     >
       <MaterialBackdrop edge="inset">
-        <div class="grid items-start gap-3 md:grid-cols-2">
+        <div class="playground-preview-columns">
           <UiDisclosure
-            class="material-glass-elevated playground-data-disclosure"
-            data-surface="glass-elevated"
-            data-neoverse-surface-overflow="visible"
             :summary="localize(copy.disclosure.closed, props.locale)"
             data-data-display-disclosure="closed"
+            data-contract-state="default"
           >
             <p class="text-body-sm text-secondary">
               {{ localize(copy.disclosure.closedBody, props.locale) }}
             </p>
           </UiDisclosure>
           <UiDisclosure
-            class="material-glass-elevated playground-data-disclosure"
-            data-surface="glass-elevated"
-            data-neoverse-surface-overflow="visible"
             :summary="localize(copy.disclosure.open, props.locale)"
             open
             data-data-display-disclosure="open"
+            data-contract-state="open"
           >
             <p class="text-body-sm text-secondary">
               {{ localize(copy.disclosure.openBody, props.locale) }}
             </p>
           </UiDisclosure>
         </div>
+      </MaterialBackdrop>
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="data-display-stat-card"
+      :title="localize(localized('Metric cards', '指标卡'), props.locale)"
+      :description="localize(localized('Display typography on shared Glass surfaces; resize to compare two to four metrics.', '展示字体与共享 Glass 材质；调整宽度查看 2–4 个指标的布局。'), props.locale)"
+    >
+      <MaterialBackdrop edge="inset">
+        <div class="ui-stat-grid">
+          <UiStatCard
+            label="Latency / 延迟"
+            :value="0"
+            unit="ms"
+            footnote="Native value, including zero"
+          />
+          <UiStatCard label="Coverage / 覆盖率" :value="98.6" unit="%" trend="+2.4% this month" />
+          <UiStatCard label="Packages / 包" :value="8" footnote="Shared design system" />
+          <UiStatCard label="Consumers / 消费项目" :value="4" trend="Vue presentation primitives" />
+        </div>
+      </MaterialBackdrop>
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="data-display-timeline"
+      :title="localize(localized('Timeline', '时间线'), props.locale)"
+      :description="localize(localized('Glass milestones with a continuous rail and dates leading each entry.', '玻璃节点沿连续轨道排列，日期先于标题呈现。'), props.locale)"
+    >
+      <MaterialBackdrop edge="inset">
+        <UiTimeline
+          :items="milestones"
+          :aria-label="localize(localized('Milestones', '里程碑'), props.locale)"
+        />
+      </MaterialBackdrop>
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="data-display-step-flow"
+      :title="localize(localized('Step flow', '步骤流'), props.locale)"
+      :description="localize(localized('Glass steps distinguish completed, current and upcoming stages, adapting to the available width.', '玻璃步骤区分已完成、当前与待完成阶段，并随可用宽度调整排列。'), props.locale)"
+    >
+      <MaterialBackdrop edge="inset">
+        <UiStepFlow
+          :items="steps"
+          :aria-label="localize(localized('Delivery steps', '交付步骤'), props.locale)"
+        />
       </MaterialBackdrop>
     </LabSpecimenSection>
   </div>

@@ -1,32 +1,44 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, ref, useAttrs } from 'vue';
+import {
+  type AnchoredOverlayOptions,
+  hideAnchoredOverlay,
+  isOverlayOpen,
+  showAnchoredOverlay,
+  stopOverlayTracking,
+} from '@neoverse-ui/overlay-runtime';
+import { computed, nextTick, onBeforeUnmount, ref, useAttrs, watch } from 'vue';
+import { resolveAriaInvalid } from './form-control';
 import { presence } from './presence';
 import type { FormControlValue, SelectOption, SelectProps } from './types';
 
 defineOptions({ inheritAttrs: false });
 
-const props = defineProps<SelectProps>();
+const props = withDefaults(defineProps<SelectProps>(), {
+  validation: 'none',
+  disabled: false,
+  readonly: false,
+});
 const emit = defineEmits<{ 'update:modelValue': [value: FormControlValue] }>();
 const attrs = useAttrs();
 const detailsRef = ref<HTMLDetailsElement | null>(null);
 const popoverRef = ref<HTMLElement | null>(null);
 const open = ref(false);
-let stopPopoverTracking: (() => void) | undefined;
 
-const disabled = computed(
-  () => attrs.disabled === '' || attrs.disabled === true || attrs.disabled === 'disabled',
-);
+const disabled = computed(() => props.disabled);
+const readonlyState = computed(() => props.readonly);
+const blocked = computed(() => disabled.value || readonlyState.value);
 const name = computed(() => (typeof attrs.name === 'string' ? attrs.name : undefined));
 const selectedOption = computed(() =>
   props.options.find((option) => String(option.value) === String(props.modelValue ?? '')),
 );
+const ariaInvalid = computed(() => resolveAriaInvalid(attrs['aria-invalid'], props.validation));
 const forwardedAttrs = computed(() => {
   const {
     class: _class,
     style: _style,
     value: _value,
-    disabled: _disabled,
     name: _name,
+    'aria-invalid': _ariaInvalid,
     ...rest
   } = attrs;
   return rest;
@@ -38,130 +50,53 @@ function focusTrigger() {
   });
 }
 
-function supportsPopover(element: HTMLElement): boolean {
-  return typeof element.showPopover === 'function' && typeof element.hidePopover === 'function';
-}
-
-function isPopoverOpen(element: HTMLElement): boolean {
-  if (!supportsPopover(element)) {
-    return element.classList.contains('ui-select__popover--fallback-open');
-  }
-
-  return element.matches(':popover-open');
-}
-
-function stopTrackingPopover() {
-  stopPopoverTracking?.();
-  stopPopoverTracking = undefined;
-}
-
-function resolveCssLength(element: HTMLElement, value: string): number {
-  const parsed = Number.parseFloat(value);
-  if (!Number.isFinite(parsed)) return 0;
-
-  const normalized = value.trim().toLowerCase();
-  if (normalized.endsWith('rem')) {
-    return parsed * Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
-  }
-  if (normalized.endsWith('em')) {
-    return parsed * Number.parseFloat(getComputedStyle(element).fontSize);
-  }
-  return parsed;
-}
-
-function resolveEffectiveZoom(element: HTMLElement): number {
-  let zoom = 1;
-  let node: HTMLElement | null = element;
-  while (node !== null) {
-    const value = Number.parseFloat(getComputedStyle(node).zoom);
-    if (Number.isFinite(value) && value > 0) zoom *= value;
-    node = node.parentElement;
-  }
-  return zoom;
-}
-
-function updatePopoverPosition() {
+function overlayOptions(): AnchoredOverlayOptions | undefined {
   const details = detailsRef.value;
   const popover = popoverRef.value;
   const trigger = details?.querySelector<HTMLElement>('.ui-select');
-  if (details === null || popover === null || trigger === null || trigger === undefined) return;
-  if (!details.open || !isPopoverOpen(popover)) return;
+  if (details === null || popover === null || trigger === null || trigger === undefined) {
+    return undefined;
+  }
 
-  const triggerRect = trigger.getBoundingClientRect();
-  const popoverStyle = getComputedStyle(popover);
-  const effectiveZoom = resolveEffectiveZoom(popover);
-  const gap =
-    Math.max(
-      0,
-      resolveCssLength(popover, popoverStyle.getPropertyValue('--neoverse-select-popover-gap')),
-    ) * effectiveZoom;
-
-  popover.style.setProperty(
-    '--neoverse-select-popover-inline-size',
-    `${triggerRect.width / effectiveZoom}px`,
-  );
-
-  /* Layout sizes instead of getBoundingClientRect: the presence transform
-     scales the popover while it enters, and transform-skewed rects would
-     clamp the popover to the wrong coordinates on its first open frame. */
-  const popoverWidth = popover.offsetWidth;
-  const popoverHeight = popover.offsetHeight;
-  const maxLeft = Math.max(gap, window.innerWidth - popoverWidth - gap);
-  const left = Math.min(Math.max(triggerRect.left, gap), maxLeft);
-  const spaceBelow = window.innerHeight - triggerRect.bottom - gap;
-  const spaceAbove = triggerRect.top - gap;
-  const shouldOpenAbove = popoverHeight > spaceBelow && spaceAbove >= popoverHeight;
-  const unclampedTop = shouldOpenAbove
-    ? triggerRect.top - popoverHeight - gap
-    : triggerRect.bottom + gap;
-  const maxTop = Math.max(gap, window.innerHeight - popoverHeight - gap);
-  const top = Math.min(Math.max(unclampedTop, gap), maxTop);
-
-  popover.style.setProperty('--neoverse-select-popover-left', `${left / effectiveZoom}px`);
-  popover.style.setProperty('--neoverse-select-popover-top', `${top / effectiveZoom}px`);
-}
-
-function startTrackingPopover() {
-  stopTrackingPopover();
-  const update = () => updatePopoverPosition();
-  window.addEventListener('resize', update);
-  window.addEventListener('scroll', update, true);
-  stopPopoverTracking = () => {
-    window.removeEventListener('resize', update);
-    window.removeEventListener('scroll', update, true);
+  return {
+    trigger,
+    overlay: popover,
+    gapVariable: '--neoverse-select-popover-gap',
+    leftVariable: '--neoverse-select-popover-left',
+    topVariable: '--neoverse-select-popover-top',
+    inlineSizeVariable: '--neoverse-select-popover-inline-size',
+    matchTriggerWidth: true,
+    fallbackOpenClass: 'ui-select__popover--fallback-open',
+    onDismiss: () => {
+      details.open = false;
+      open.value = false;
+    },
   };
 }
 
 function closePopover() {
-  const popover = popoverRef.value;
-  if (popover === null) return;
-
-  if (supportsPopover(popover)) {
-    if (popover.matches(':popover-open')) popover.hidePopover();
-  } else {
-    popover.classList.remove('ui-select__popover--fallback-open');
-  }
-  stopTrackingPopover();
+  const options = overlayOptions();
+  if (options !== undefined) hideAnchoredOverlay(options);
 }
 
 async function openPopover() {
-  const popover = popoverRef.value;
-  if (popover === null || disabled.value) return;
-
-  if (supportsPopover(popover)) {
-    if (!popover.matches(':popover-open')) popover.showPopover();
-  } else {
-    popover.classList.add('ui-select__popover--fallback-open');
-  }
-
+  if (blocked.value) return;
   await nextTick();
-  updatePopoverPosition();
-  startTrackingPopover();
+  if (blocked.value) return;
+  const options = overlayOptions();
+  if (options !== undefined) showAnchoredOverlay(options);
 }
+
+watch(blocked, (isBlocked) => {
+  if (!isBlocked) return;
+  if (detailsRef.value) detailsRef.value.open = false;
+  open.value = false;
+  closePopover();
+});
 
 function onToggle(event: Event) {
   const details = event.currentTarget as HTMLDetailsElement;
-  const nextOpen = details.open && !disabled.value;
+  const nextOpen = details.open && !blocked.value;
   open.value = nextOpen;
 
   if (nextOpen) {
@@ -173,7 +108,7 @@ function onToggle(event: Event) {
 }
 
 function onTriggerClick(event: MouseEvent) {
-  if (!disabled.value) return;
+  if (!blocked.value) return;
   event.preventDefault();
 }
 
@@ -189,7 +124,7 @@ function clearTriggerFocusOrigin(event: FocusEvent) {
 }
 
 function selectOption(option: SelectOption) {
-  if (disabled.value || option.disabled) return;
+  if (blocked.value || option.disabled) return;
   emit('update:modelValue', option.value);
   if (detailsRef.value) detailsRef.value.open = false;
   open.value = false;
@@ -199,9 +134,9 @@ function selectOption(option: SelectOption) {
 
 function onPopoverToggle(event: Event) {
   const popover = event.currentTarget as HTMLElement;
-  if (isPopoverOpen(popover)) return;
+  if (isOverlayOpen(popover, 'ui-select__popover--fallback-open')) return;
 
-  stopTrackingPopover();
+  stopOverlayTracking(popover);
   if (detailsRef.value?.open) detailsRef.value.open = false;
   open.value = false;
 }
@@ -258,7 +193,10 @@ onBeforeUnmount(() => {
   <details
     ref="detailsRef"
     class="ui-select-shell"
-    :class="{ 'ui-select-shell--disabled': disabled }"
+    :class="{
+      'ui-select-shell--disabled': disabled,
+      'ui-select-shell--readonly': readonlyState,
+    }"
     @toggle="onToggle"
   >
     <summary
@@ -268,8 +206,10 @@ onBeforeUnmount(() => {
       :style="attrs.style"
       role="combobox"
       aria-haspopup="listbox"
-      :aria-expanded="open"
-      :aria-disabled="disabled || undefined"
+      :aria-expanded="open && !blocked"
+      :aria-disabled="blocked || undefined"
+      :aria-invalid="ariaInvalid"
+      :data-validation="props.validation"
       @click="onTriggerClick"
       @pointerdown="markTriggerPointerFocus"
       @blur="clearTriggerFocusOrigin"

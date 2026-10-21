@@ -20,7 +20,7 @@ const qaCopy = {
 <template>
   <div id="card-card" class="scroll-mt-24">
     <MaterialBackdrop>
-      <div class="grid gap-grid md:grid-cols-2">
+      <div class="playground-preview-columns">
         <UiCard data-card-default>
           <div class="grid gap-3">
             <div class="flex items-center justify-between gap-3">

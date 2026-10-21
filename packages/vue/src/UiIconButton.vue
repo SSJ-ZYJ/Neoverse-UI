@@ -92,6 +92,7 @@ function handlePointerdown(event: PointerEvent): void {
     @click.capture="handleDisabledClick"
     @pointerdown="handlePointerdown"
   >
+    <span class="ui-button__tone-field" aria-hidden="true" />
     <span class="ui-button__edge-field" aria-hidden="true" />
     <span class="ui-icon-button__content" aria-hidden="true">
       <Transition name="nv" mode="out-in">

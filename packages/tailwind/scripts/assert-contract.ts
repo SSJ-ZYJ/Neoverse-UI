@@ -3,7 +3,6 @@ import { fileURLToPath } from 'node:url';
 
 const output = new URL('../dist/contract.css', import.meta.url);
 const buttonSource = new URL('../src/components/button.css', import.meta.url);
-const badgeSource = new URL('../src/components/badge.css', import.meta.url);
 const navigationItemSource = new URL('../src/components/navigation-item.css', import.meta.url);
 const tooltipSource = new URL('../src/components/tooltip.css', import.meta.url);
 const componentsOutput = new URL('../dist/components.css', import.meta.url);
@@ -16,7 +15,6 @@ try {
   const [
     css,
     buttonCss,
-    badgeCss,
     navigationItemCss,
     tooltipCss,
     flattenedComponentsCss,
@@ -27,7 +25,6 @@ try {
   ] = await Promise.all([
     Bun.file(output).text(),
     Bun.file(buttonSource).text(),
-    Bun.file(badgeSource).text(),
     Bun.file(navigationItemSource).text(),
     Bun.file(tooltipSource).text(),
     Bun.file(componentsOutput).text(),
@@ -241,6 +238,10 @@ try {
     '.ui-input',
     '.ui-textarea',
     '.ui-select',
+    '.ui-checkbox',
+    '.ui-radio-group',
+    '.ui-switch',
+    '.ui-field',
     '.material-glass-subtle',
     '.material-glass-elevated',
     '.material-glass-immersive',
@@ -295,10 +296,10 @@ try {
     '--neoverse-material-refraction-gradient-immersive',
     '--neoverse-material-glass-subtle-background',
     '--neoverse-material-glass-immersive-background',
-    '--neoverse-material-transparency-subtle:30%',
+    '--neoverse-material-transparency-subtle:15%',
     '--neoverse-material-transparency-elevated:20%',
-    '--neoverse-material-transparency-immersive:12%',
-    '--neoverse-material-glass-elevated-background:var(--neoverse-color-surface-glass)',
+    '--neoverse-material-transparency-immersive:30%',
+    '--neoverse-material-glass-elevated-transparency:var(--neoverse-material-transparency-elevated)',
     '--neoverse-motion-duration-fast',
     '--neoverse-motion-duration-standard',
     '--neoverse-motion-duration-expressive',
@@ -359,15 +360,20 @@ try {
     '--neoverse-control-segmented-filter',
     '--neoverse-control-active-border',
     '--neoverse-badge-background',
+    '--neoverse-badge-backdrop-filter',
     '--neoverse-badge-foreground',
     '--neoverse-badge-shadow',
     '--neoverse-badge-info-background',
+    '--neoverse-badge-info-foreground',
     '--neoverse-badge-info-shadow',
     '--neoverse-badge-success-background',
+    '--neoverse-badge-success-foreground',
     '--neoverse-badge-success-shadow',
     '--neoverse-badge-warning-background',
+    '--neoverse-badge-warning-foreground',
     '--neoverse-badge-warning-shadow',
     '--neoverse-badge-danger-background',
+    '--neoverse-badge-danger-foreground',
     '--neoverse-badge-danger-shadow',
     '--neoverse-notice-neutral-background',
     '--neoverse-notice-neutral-shadow',
@@ -417,17 +423,18 @@ try {
   const missingValues = expectedValues.filter((value) => !css.includes(value));
   const expectedFragments = [
     'background-color:color-mix(in srgb',
-    'background-image:var(--neoverse-material-refraction-gradient)',
+    'mask-image:var(--neoverse-material-refraction-gradient)',
     'backdrop-filter:var(--neoverse-material-filter)',
-    'backdrop-filter:var(--neoverse-material-edge-filter)',
+    'mix-blend-mode:normal',
     'filter:var(--neoverse-material-edge-refraction-softness)',
     'opacity:var(--neoverse-material-edge-refraction-opacity)',
     'data-neoverse-glass-renderer=webgl',
+    'data-neoverse-glass-renderer=native',
     '[data-neoverse-glass-renderer=webgl]',
     'data-neoverse-glass-edge-pass=css',
     'data-neoverse-surface-hover=static',
-    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow)',
-    '[data-neoverse-glass-renderer=webgl] :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow);-webkit-backdrop-filter:var(--neoverse-material-filter);backdrop-filter:var(--neoverse-material-filter);background-clip:padding-box',
+    ':is([data-neoverse-glass-renderer=webgl],[data-neoverse-glass-renderer=native]) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow)',
+    ':is([data-neoverse-glass-renderer=webgl],[data-neoverse-glass-renderer=native]) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow);-webkit-backdrop-filter:var(--neoverse-material-filter);backdrop-filter:var(--neoverse-material-filter);background-clip:padding-box',
     'var(--neoverse-material-inner-glow)',
     'var(--neoverse-material-seam-glow)',
     'var(--neoverse-material-bloom)',
@@ -446,33 +453,22 @@ try {
     'transition-duration:var(--tw-duration)',
     'transition-timing-function:var(--tw-ease)',
     '@keyframes ui-skeleton-shimmer',
-    'transform:translateX(calc(var(--segment-index)',
+    'transform:translateX(var(--segment-active-offset,calc(var(--segment-index)',
     'box-shadow:var(--neoverse-control-segmented-active-shadow)',
     'background-image:var(--neoverse-control-segmented-background-image)',
     'background-color:var(--neoverse-control-segmented-background-color)',
     'color:var(--neoverse-control-segmented-foreground)',
     'color:var(--neoverse-control-segmented-active-foreground)',
-    'border:var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) var(--neoverse-control-segmented-border)',
     'border:var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) var(--neoverse-control-segmented-active-border)',
-    'backdrop-filter:var(--neoverse-control-segmented-filter)',
     'scrollbar-color:var(--neoverse-scrollbar-immersive-thumb) var(--neoverse-scrollbar-immersive-track)',
     'scrollbar-width:thin',
     '::-webkit-scrollbar',
     'background-clip:padding-box',
     '@media (forced-colors:active)',
     '.ui-button{',
-    '.ui-button.material-glass-subtle{',
     '.ui-button--primary{',
     '.ui-button--secondary{',
-    '.ui-button--ghost.material-glass-subtle{',
-    'background-image:var(--neoverse-control-primary-background)',
-    'background-color:var(--neoverse-control-secondary-fill)',
-    'background-image:var(--neoverse-control-secondary-background)',
-    'background:var(--neoverse-badge-background)',
-    'box-shadow:var(--neoverse-badge-shadow)',
-    'color:var(--neoverse-badge-foreground)',
     'border:0',
-    'backdrop-filter:var(--neoverse-control-button-filter)',
   ];
   const missingFragments = expectedFragments.filter((fragment) => !css.includes(fragment));
   const forbiddenNestedGlassFragments = [
@@ -493,59 +489,28 @@ try {
   );
   const expectedButtonFragments = [
     '.ui-icon-button--sm {',
-    'width: var(--neoverse-space-7);',
+    'width: var(--neoverse-button-height-sm);',
     '.ui-icon-button--md {',
-    'width: var(--neoverse-space-8);',
+    'width: var(--neoverse-button-height-md);',
     '.ui-icon-button--lg {',
-    'width: var(--neoverse-space-9);',
+    'width: var(--neoverse-button-height-lg);',
     '.ui-icon-button--stretch {',
     '.ui-icon-button__content {',
-    '--neoverse-material-shadow: var(--neoverse-control-button-edge);',
-    '--neoverse-material-edge-refraction-carrier: var(--neoverse-control-button-edge-carrier);',
     'border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)',
-    'var(--neoverse-control-button-border);',
+    'var(--neoverse-material-border);',
     'background-clip: padding-box;',
     'overflow: hidden;',
-    '--neoverse-material-edge-highlight: 0 0 0 0 transparent;',
-    '.ui-button.material-glass-subtle:hover:not(:disabled)::after',
-    '.ui-button--primary.material-glass-subtle {',
-    '--neoverse-material-shadow: var(--neoverse-control-primary-shadow);',
-    '--neoverse-material-shadow: var(--neoverse-control-primary-hover-shadow);',
-    'background: var(--neoverse-control-ghost-background);',
-    'border-color: var(--neoverse-control-ghost-border);',
-    '--neoverse-material-edge-refraction-opacity: var(',
     '.ui-button > .ui-button__edge-field',
     'position: absolute;',
   ];
   const missingButtonFragments = expectedButtonFragments.filter(
     (fragment) => !buttonCss.includes(fragment),
   );
-  const expectedBadgeFragments = [
-    '--neoverse-badge-background',
-    '--neoverse-badge-foreground',
-    '--neoverse-badge-shadow',
-    '--neoverse-badge-info-background',
-    '--neoverse-badge-info-shadow',
-    '--neoverse-badge-success-background',
-    '--neoverse-badge-success-shadow',
-    '--neoverse-badge-warning-background',
-    '--neoverse-badge-warning-shadow',
-    '--neoverse-badge-danger-background',
-    '--neoverse-badge-danger-shadow',
-    'border: 0;',
-    'color: var(--neoverse-color-status-info);',
-  ];
-  const missingBadgeFragments = expectedBadgeFragments.filter(
-    (fragment) => !badgeCss.includes(fragment),
-  );
   const ghostActiveCss =
     buttonCss.match(
       /\.ui-button--ghost:active:not\(:disabled\):not\(\[aria-disabled='true'\]\) \{([\s\S]*?)\n {2}\}/,
     )?.[1] ?? '';
-  const expectedGhostActiveFragments = [
-    'background: var(--neoverse-control-ghost-active-background);',
-    'transform: none;',
-  ];
+  const expectedGhostActiveFragments = ['background: var(--neoverse-effect-press-wash);'];
   const missingGhostActiveFragments = expectedGhostActiveFragments.filter(
     (fragment) => !ghostActiveCss.includes(fragment),
   );
@@ -588,7 +553,8 @@ try {
     '.ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface]',
     '--neoverse-material-border: transparent;',
     '--neoverse-material-hover-border: transparent;',
-    'backdrop-filter: var(--neoverse-material-glass-subtle-filter);',
+    'backdrop-filter: var(--neoverse-material-filter);',
+    'clip-path: shape(',
   ];
   const missingTooltipFragments = expectedTooltipFragments.filter(
     (fragment) => !tooltipCss.includes(fragment),
@@ -604,7 +570,6 @@ try {
     missingButtonFragments.length > 0 ||
     missingGhostActiveFragments.length > 0 ||
     emittedForbiddenButtonFragments.length > 0 ||
-    missingBadgeFragments.length > 0 ||
     missingProseFragments.length > 0 ||
     missingNavigationMotionFragments.length > 0 ||
     missingTooltipFragments.length > 0 ||
@@ -636,9 +601,6 @@ try {
         : '',
       emittedForbiddenButtonFragments.length > 0
         ? `Forbidden button edge fragments: ${emittedForbiddenButtonFragments.join(', ')}`
-        : '',
-      missingBadgeFragments.length > 0
-        ? `Missing badge token fragments: ${missingBadgeFragments.join(', ')}`
         : '',
       missingProseFragments.length > 0
         ? `Missing prose semantic fragments: ${missingProseFragments.join(', ')}`

@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261010-061C837B",
+  "kind": "enhancement",
+  "target": "UiInput",
+  "summary": "终端提示符输入外观和安全输入变体",
+  "expected": "评估对现有 UiInput 增加 terminal/monospace 外观与 prompt 前缀组合的能力，保留原生文本、password、OTP 类型、IME 合成与焦点，光标通过现有输入样式适配；不处理命令历史及登录认证。",
+  "acceptanceCriteria": [
+    "Enter 与中文输入法 composition 互不冲突，终端样式不覆盖浏览器原生输入、选择、复制与焦点语义。",
+    "Light/Dark/System、disabled、readonly、error、password 等状态均可读且与现有 UiField/UiInput 契约兼容。",
+    "可组合提示符、自动补全建议区域，不能在公共输入组件中放 XCA 专属命令解析或历史管理。"
+  ],
+  "impact": "normal",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/components/home/HeroSection.vue",
+      "framework": "vue",
+      "scenario": "终端主页需真实命令编辑器；未来登录需要安全输入但不得使用自制 contenteditable"
+    }
+  ],
+  "createdAt": "2026-10-10T07:43:53.708Z",
+  "updatedAt": "2026-10-13T07:46:16.254Z",
+  "resolution": "Accepted 2026-10-13 under the current terminal composition contract. The old UiInput terminal appearance was intentionally replaced by UiTerminalPrompt; ordinary UiInput remains a form input. Native text/password attributes, IME, focus, suggestion visibility and safe input are covered by packages/vue/src/terminal.test.ts and XCA tests/e2e/terminal-shared-ui.spec.ts, terminal-completion.spec.ts and terminal-extensions.spec.ts. Vue unit tests 70/70; UI acceptance browser suite 24/24; XCA full E2E 71/71 after production sync/build. XCA TerminalCommandInput.vue uses UiTerminalPrompt; luna/max reviewed shared and real XCA theme/mobile screenshots. See docs/acceptance-2026-10-13.md. No publication."
+}

@@ -30,7 +30,7 @@
     position: relative;
     display: grid;
     min-width: 0;
-    grid-template-columns: repeat(var(--segment-count), minmax(0, 1fr));
+    grid-template-columns: repeat(var(--segment-count), max-content);
     align-items: stretch;
     gap: var(--neoverse-control-segmented-gap);
   }
@@ -40,9 +40,12 @@
     z-index: 0;
     inset-block: 0;
     inset-inline-start: 0;
-    width: calc(
-      (100% - (var(--segment-count) - 1) * var(--neoverse-control-segmented-gap)) /
-      var(--segment-count)
+    width: var(
+      --segment-active-width,
+      calc(
+        (100% - (var(--segment-count) - 1) * var(--neoverse-control-segmented-gap)) /
+        var(--segment-count)
+      )
     );
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
       var(--neoverse-control-segmented-active-border);
@@ -52,11 +55,18 @@
     box-shadow: var(--neoverse-control-segmented-active-shadow);
     pointer-events: none;
     transform: translateX(
-      calc(var(--segment-index) * (100% + var(--neoverse-control-segmented-gap)))
+      var(
+        --segment-active-offset,
+        calc(var(--segment-index) * (100% + var(--neoverse-control-segmented-gap)))
+      )
     );
-    transition: transform var(--neoverse-motion-spatial-duration)
-      var(--neoverse-motion-spatial-easing);
+    transition: none;
     will-change: transform;
+  }
+  .ui-segmented-control__slider[data-ready='true'] {
+    transition:
+      transform var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
+      width var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
   }
 
   .ui-segmented-control .ui-segmented-control__option {
@@ -100,7 +110,9 @@
   }
 
   @media (hover: hover) {
-    .ui-segmented-control__option:not(.ui-segmented-control__option--active):hover:not(:disabled) {
+    .ui-segmented-control__option:not(.ui-segmented-control__option--active):hover:not(
+        :disabled
+      ):not(:active) {
       background-color: var(--neoverse-control-hover-background);
       color: var(--neoverse-control-segmented-active-foreground);
     }
@@ -108,14 +120,21 @@
 
   .ui-segmented-control__option:active:not(:disabled) {
     transform: scale(var(--neoverse-control-segmented-option-press-scale));
+    box-shadow: var(--neoverse-effect-press-shadow);
+    background: var(--neoverse-effect-press-wash);
   }
 
   .ui-segmented-control__option:disabled {
     cursor: not-allowed;
   }
 
-  .ui-segmented-control[aria-disabled='true'] {
+  :where(.ui-segmented-control[aria-disabled='true'])
+    :where(.ui-segmented-control__option, .ui-segmented-control__loading) {
     opacity: var(--neoverse-control-segmented-disabled-opacity);
+  }
+
+  .ui-segmented-control[aria-disabled='true'] {
+    color: var(--neoverse-color-text-disabled);
   }
 
   @media (pointer: coarse) {
@@ -154,52 +173,33 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ui-segmented-control__slider {
+    .ui-segmented-control__slider[data-ready='true'] {
       transition: none;
     }
   }
 }
 
 @layer utilities {
-  /* Glass material utilities live in this cascade layer, so the component's
-     explicit surface ownership belongs here as well. The data-surface
-     contract makes this recipe outrank the generic Glass plane without
-     resorting to !important or consumer overrides. */
-  .ui-segmented-control.material-glass-subtle[data-surface='glass-subtle'] {
-    --neoverse-material-edge-refraction-opacity: var(
-      --neoverse-control-segmented-edge-refraction-opacity
-    );
-    --neoverse-material-edge-display: var(--neoverse-control-segmented-edge-display);
-    /* Segmented controls own their depth in both themes. The generic Glass
-       compositor may win the final box-shadow declaration, so feed it the
-       segmented shadow instead of letting the general card bloom leak in. */
-    --neoverse-material-edge-highlight: 0 0 0 0 transparent;
-    --neoverse-material-inner-glow: 0 0 0 0 transparent;
-    --neoverse-material-seam-glow: 0 0 0 0 transparent;
-    --neoverse-material-bloom: 0 0 0 0 transparent;
+  /* Tier optics describe the well. Its original compact edge and the moving
+     selection field are semantic effects, shared with other controls. */
+  .ui-segmented-control:is(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive
+  ) {
     --neoverse-material-shadow: var(--neoverse-control-segmented-shadow);
-    --neoverse-material-hover-shadow: var(--neoverse-control-segmented-shell-hover-shadow);
-    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      var(--neoverse-control-segmented-border);
-    background-image: var(--neoverse-control-segmented-background-image);
-    background-color: var(--neoverse-control-segmented-background-color);
-    -webkit-backdrop-filter: var(--neoverse-control-segmented-filter);
-    backdrop-filter: var(--neoverse-control-segmented-filter);
+    border-color: var(--neoverse-control-segmented-border);
+    box-shadow: var(--neoverse-control-segmented-shadow);
   }
+}
 
-  @media (hover: hover) {
-    .ui-segmented-control.material-glass-subtle[data-surface='glass-subtle']:hover {
-      border-color: var(--neoverse-control-segmented-shell-hover-border);
-      background-image: var(--neoverse-control-segmented-shell-hover-background-image);
-      background-color: var(--neoverse-control-segmented-shell-hover-background-color);
-    }
-  }
-
+@layer utilities {
   @media (pointer: coarse) {
-    /* The shared Glass plane clips by default. Touch options own a transparent
-       expanded target, so the default surfaced control must let that target
-       extend beyond the painted shell. */
-    .ui-segmented-control.material-glass-subtle[data-surface='glass-subtle'] {
+    .ui-segmented-control:is(
+        .material-glass-subtle,
+        .material-glass-elevated,
+        .material-glass-immersive
+      ) {
       overflow: visible;
     }
   }

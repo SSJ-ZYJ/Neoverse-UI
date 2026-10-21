@@ -22,7 +22,9 @@ test('all Glass specimens render their own material at rest, after hover and in 
   page,
 }) => {
   for (const theme of ['light', 'dark'] as const) {
-    await page.goto(`/?theme=${theme}&lang=en#materials`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`/?glass=webgl&theme=${theme}&lang=en#materials`, {
+      waitUntil: 'domcontentloaded',
+    });
     const samples = page.locator('[data-glass-variant], [data-surface-preset^="glass-"]');
     await expect(samples).toHaveCount(6);
 
@@ -41,7 +43,7 @@ test('all Glass specimens render their own material at rest, after hover and in 
       expect(isTransparent(hover.background), `${theme}/${label} hover background`).toBe(false);
     }
 
-    await page.goto(`/?theme=${theme}&lang=en#card`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`/?glass=webgl&theme=${theme}&lang=en#card`, { waitUntil: 'domcontentloaded' });
     const card = page.locator('[data-card-default]');
     const cardStyle = await card.evaluate(readGlassMaterial);
     expect(isTransparent(cardStyle.background), `${theme}/UiCard rest background`).toBe(false);
@@ -49,11 +51,11 @@ test('all Glass specimens render their own material at rest, after hover and in 
   }
 });
 
-test('UiCard shares the Glass hairline and clips only its CSS refraction band', async ({
-  page,
-}) => {
+test('UiCard shares the elevated Glass hairline and CSS refraction field', async ({ page }) => {
   for (const theme of ['light', 'dark'] as const) {
-    await page.goto(`/?theme=${theme}&lang=en#materials`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`/?glass=webgl&theme=${theme}&lang=en#materials`, {
+      waitUntil: 'domcontentloaded',
+    });
     const elevated = page.locator('[data-glass-variant="elevated"]');
     const elevatedBorder = await elevated.evaluate((element) => {
       const style = getComputedStyle(element);
@@ -62,11 +64,12 @@ test('UiCard shares the Glass hairline and clips only its CSS refraction band', 
         width: Number.parseFloat(style.borderTopWidth),
         color: style.borderTopColor,
         edgePadding: Number.parseFloat(edge.paddingTop),
+        maskImage: edge.maskImage,
+        maskComposite: edge.maskComposite,
       };
     });
-    expect(elevatedBorder.edgePadding, 'Card edge clipping must not affect Glass itself').toBe(0);
 
-    await page.goto(`/?theme=${theme}&lang=en#card`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`/?glass=webgl&theme=${theme}&lang=en#card`, { waitUntil: 'domcontentloaded' });
     const cardEdge = await page.locator('[data-card-default]').evaluate((element) => {
       const style = getComputedStyle(element);
       const edge = getComputedStyle(element, '::before');
@@ -74,9 +77,8 @@ test('UiCard shares the Glass hairline and clips only its CSS refraction band', 
         width: Number.parseFloat(style.borderTopWidth),
         color: style.borderTopColor,
         edgePadding: Number.parseFloat(edge.paddingTop),
+        maskImage: edge.maskImage,
         maskComposite: edge.maskComposite,
-        webkitMaskComposite: (edge as CSSStyleDeclaration & { webkitMaskComposite?: string })
-          .webkitMaskComposite,
       };
     });
     expect(cardEdge.color).toBe(elevatedBorder.color);
@@ -84,18 +86,12 @@ test('UiCard shares the Glass hairline and clips only its CSS refraction band', 
       cardEdge.width,
       `${theme}: UiCard keeps the shared Glass hairline so its refractive edge matches Glass`,
     ).toBe(elevatedBorder.width);
-    expect(cardEdge.edgePadding, 'UiCard keeps a token-sized refractive edge band').toBeGreaterThan(
-      0,
-    );
-    expect(
-      [cardEdge.maskComposite, cardEdge.webkitMaskComposite].some((value) =>
-        value?.includes('exclude'),
-      ),
-      'UiCard clips the shared refraction field to its edge band',
-    ).toBe(true);
+    expect(cardEdge.edgePadding).toBe(elevatedBorder.edgePadding);
+    expect(cardEdge.maskImage).toBe(elevatedBorder.maskImage);
+    expect(cardEdge.maskComposite).toBe(elevatedBorder.maskComposite);
   }
 
-  await page.goto('/?theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
+  await page.goto('/?glass=webgl&theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
   const lightHairline = await page
     .locator('[data-glass-variant="elevated"]')
     .evaluate((element) => getComputedStyle(element).borderTopColor);
@@ -108,7 +104,7 @@ test('UiCard reuses the glass-elevated CSS refraction field without a card-speci
   page,
 }) => {
   for (const theme of ['light', 'dark'] as const) {
-    await page.goto(`/?theme=${theme}&lang=en#card`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`/?glass=webgl&theme=${theme}&lang=en#card`, { waitUntil: 'domcontentloaded' });
 
     const fields = await page.evaluate(() => {
       const card = document.querySelector<HTMLElement>('[data-card-default]');
@@ -125,8 +121,8 @@ test('UiCard reuses the glass-elevated CSS refraction field without a card-speci
       document.body.append(reference);
 
       const result = {
-        card: getComputedStyle(card, '::before').backgroundImage,
-        reference: getComputedStyle(reference, '::before').backgroundImage,
+        card: getComputedStyle(card, '::before').maskImage,
+        reference: getComputedStyle(reference, '::before').maskImage,
       };
       reference.remove();
       return result;
@@ -139,7 +135,7 @@ test('UiCard reuses the glass-elevated CSS refraction field without a card-speci
 test('only an explicitly inherited Glass grouping is transparent, including on hover', async ({
   page,
 }) => {
-  await page.goto('/?theme=dark&lang=en#materials', { waitUntil: 'domcontentloaded' });
+  await page.goto('/?glass=webgl&theme=dark&lang=en#materials', { waitUntil: 'domcontentloaded' });
   await page.evaluate(() => {
     const host = document.querySelector('#materials-glass');
     if (host === null) throw new Error('Glass specimen host is missing');
@@ -186,7 +182,7 @@ test('reduced transparency keeps independent nested Glass visible without blur',
   await cdp.send('Emulation.setEmulatedMedia', {
     features: [{ name: 'prefers-reduced-transparency', value: 'reduce' }],
   });
-  await page.goto('/?theme=dark&lang=en#materials', { waitUntil: 'domcontentloaded' });
+  await page.goto('/?glass=webgl&theme=dark&lang=en#materials', { waitUntil: 'domcontentloaded' });
 
   const samples = page.locator('[data-glass-variant]');
   await expect(samples).toHaveCount(3);
@@ -204,7 +200,9 @@ test('independent nested Glass uses the WebGL edge pass without duplicate CSS ou
   page,
 }) => {
   for (const theme of ['light', 'dark'] as const) {
-    await page.goto(`/?theme=${theme}&lang=en#materials`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`/?glass=webgl&theme=${theme}&lang=en#materials`, {
+      waitUntil: 'domcontentloaded',
+    });
     await expect
       .poll(() => page.evaluate(() => document.documentElement.dataset.neoverseGlassRenderer))
       .toBe('webgl');
@@ -239,14 +237,14 @@ test('independent nested Glass uses the WebGL edge pass without duplicate CSS ou
     expect(metrics.specimens).toHaveLength(3);
     for (const specimen of metrics.specimens) {
       expect(specimen.display, `${theme}/nested WebGL edge`).toBe('none');
-      expect(specimen.opacity, `${theme}/edge token`).toBeGreaterThan(0);
+      expect(specimen.opacity, `${theme}/CSS fallback stays available`).toBeGreaterThan(0);
     }
     expect(metrics.inherited.display, `${theme}/inherited group edge`).toBe('none');
   }
 });
 
-test('Glass CSS edge remains visible when WebGL is unavailable', async ({ page }) => {
-  await page.goto('/?theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
+test('CSS fallback retains the established directional refraction', async ({ page }) => {
+  await page.goto('/?glass=webgl&theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
   await page.evaluate(() => {
     document.documentElement.removeAttribute('data-neoverse-glass-renderer');
   });
@@ -259,10 +257,68 @@ test('Glass CSS edge remains visible when WebGL is unavailable', async ({ page }
   expect(edge.opacity).toBeGreaterThan(0);
 });
 
+test('Glass renderer falls back to CSS and rebuilds after a real WebGL context restore', async ({
+  page,
+}) => {
+  await page.goto('/?glass=webgl&theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.dataset.neoverseGlassRenderer))
+    .toBe('webgl');
+
+  const canLoseContext = await page.evaluate(() => {
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    if (canvas === null) throw new Error('The shared Glass renderer canvas is missing');
+    const gl = canvas.getContext('webgl2') ?? canvas.getContext('webgl');
+    if (gl === null) return false;
+    const extension = gl.getExtension('WEBGL_lose_context');
+    if (extension === null) return false;
+    const state = window as typeof window & {
+      __neoverseGlassLoseContext?: { loseContext(): void; restoreContext(): void };
+    };
+    state.__neoverseGlassLoseContext = extension;
+    extension.loseContext();
+    return true;
+  });
+  test.skip(!canLoseContext, 'Chromium does not expose WEBGL_lose_context in this environment.');
+
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.dataset.neoverseGlassRenderer))
+    .toBeUndefined();
+  const fallback = await page.locator('[data-glass-variant="elevated"]').evaluate((element) => {
+    const edge = getComputedStyle(element, '::before');
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    return {
+      edgeDisplay: edge.display,
+      edgeOpacity: Number(edge.opacity),
+      canvasDisplay: canvas?.style.display,
+    };
+  });
+  expect(fallback.edgeDisplay).toBe('block');
+  expect(fallback.edgeOpacity).toBeGreaterThan(0);
+  expect(fallback.canvasDisplay).toBe('none');
+
+  await page.evaluate(() => {
+    const state = window as typeof window & {
+      __neoverseGlassLoseContext?: { loseContext(): void; restoreContext(): void };
+    };
+    state.__neoverseGlassLoseContext?.restoreContext();
+  });
+
+  await expect
+    .poll(() => page.evaluate(() => document.documentElement.dataset.neoverseGlassRenderer))
+    .toBe('webgl');
+  await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCount(1);
+  await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCSS('display', 'block');
+});
+
 test('masked scrolling navigation retains its CSS edge independently of WebGL', async ({
   page,
 }) => {
-  await page.goto('/?theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
+  await page.goto('/?glass=webgl&theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
   const navigation = page.locator('.playground-navigation-group').first();
   const edge = await navigation.evaluate((element) => {
     const style = getComputedStyle(element, '::before');
@@ -277,24 +333,112 @@ test('masked scrolling navigation retains its CSS edge independently of WebGL', 
   expect(edge.opacity).toBeGreaterThan(0);
 });
 
-test('WebGL actually paints the nested elevated silhouette in light and dark modes', async ({
+for (const renderer of ['webgl', 'css'] as const) {
+  test(`${renderer}: the released palette response stays confined to the edge`, async ({
+    page,
+  }) => {
+    await page.goto('/frame?glass=webgl&theme=dark&lang=en#materials', {
+      waitUntil: 'domcontentloaded',
+    });
+    await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
+    await page.evaluate((renderer) => {
+      const app = document.querySelector<HTMLElement>('#app');
+      if (app === null) throw new Error('The Playground root is missing');
+      app.style.display = 'none';
+      document.body.style.background = 'rgb(16 16 16)';
+      const surface = document.createElement('article');
+      surface.className = 'material-glass-subtle';
+      surface.dataset.neutralGlass = 'true';
+      if (renderer === 'css') surface.dataset.neoverseGlassEdgePass = 'css';
+      surface.style.cssText =
+        'position:fixed;left:40px;top:40px;width:240px;height:120px;border-radius:24px';
+      document.body.append(surface);
+    }, renderer);
+    const surface = page.locator('[data-neutral-glass]');
+    const capture = async (colour: string) => {
+      await page.evaluate((colour) => {
+        for (const role of ['primary', 'secondary', 'tertiary']) {
+          document.documentElement.style.setProperty(`--neoverse-color-accent-${role}`, colour);
+        }
+      }, colour);
+      await page.waitForTimeout(100);
+      return surface.screenshot({ animations: 'disabled' });
+    };
+    const red = await capture('rgb(255 0 0)');
+    const green = await capture('rgb(0 255 0)');
+    const delta = await page.evaluate(
+      async ({ red, green }) => {
+        const pixels = async (base64: string) => {
+          const image = await createImageBitmap(
+            await (await fetch(`data:image/png;base64,${base64}`)).blob(),
+          );
+          const canvas = document.createElement('canvas');
+          canvas.width = image.width;
+          canvas.height = image.height;
+          const context = canvas.getContext('2d');
+          if (context === null) throw new Error('Cannot decode neutral Glass pixels');
+          context.drawImage(image, 0, 0);
+          image.close();
+          return context.getImageData(0, 0, canvas.width, canvas.height);
+        };
+        const a = await pixels(red);
+        const b = await pixels(green);
+        let edge = 0;
+        let centre = 0;
+        for (let y = 24; y < a.height - 24; y++) {
+          for (let x = 0; x < a.width; x++) {
+            for (let channel = 0; channel < 3; channel++) {
+              const offset = (y * a.width + x) * 4 + channel;
+              const change = Math.abs((a.data[offset] ?? 0) - (b.data[offset] ?? 0));
+              if (x < 4 || x >= a.width - 4) edge = Math.max(edge, change);
+              else if (x > 24 && x < a.width - 24) centre = Math.max(centre, change);
+            }
+          }
+        }
+        return { edge, centre };
+      },
+      { red: red.toString('base64'), green: green.toString('base64') },
+    );
+    expect(delta.centre, 'the neutral backdrop and plate stay unchanged').toBeLessThanOrEqual(1);
+    if (renderer === 'webgl')
+      expect(
+        delta.edge,
+        'the released directional spectrum responds to its palette',
+      ).toBeGreaterThan(1);
+  });
+}
+
+test('WebGL visibly paints the nested elevated silhouette in light and dark modes', async ({
   page,
-}) => {
+}, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.route('**/*', (route) =>
+    route.request().resourceType() === 'font' ? route.abort() : route.continue(),
+  );
   for (const theme of ['light', 'dark'] as const) {
-    await page.goto(`/?theme=${theme}&lang=en#materials`, { waitUntil: 'domcontentloaded' });
+    await page.goto(`/?glass=webgl&theme=${theme}&lang=en#materials`, {
+      waitUntil: 'domcontentloaded',
+    });
     const surface = page.locator('[data-glass-variant="elevated"]');
     await surface.scrollIntoViewIfNeeded();
     await page.waitForTimeout(220);
-    const withEdge = await surface.screenshot({ animations: 'disabled' });
-    await page.evaluate(() => {
-      const canvas = document.querySelector<HTMLElement>('[data-neoverse-glass-renderer-canvas]');
-      if (canvas === null) throw new Error('The shared Glass renderer canvas is missing');
-      canvas.style.visibility = 'hidden';
+    const radius = await surface.evaluate((element) =>
+      Number.parseFloat(getComputedStyle(element).borderTopRightRadius),
+    );
+    const withEdge = await surface.screenshot({
+      animations: 'disabled',
+      path: testInfo.outputPath(`${theme}-edge.png`),
     });
-    const withoutEdge = await surface.screenshot({ animations: 'disabled' });
+    await page
+      .locator('[data-neoverse-glass-renderer-canvas]')
+      .evaluate((element) => (element as HTMLElement).style.setProperty('visibility', 'hidden'));
+    const withoutEdge = await surface.screenshot({
+      animations: 'disabled',
+      path: testInfo.outputPath(`${theme}-body.png`),
+    });
 
     const difference = await page.evaluate(
-      async ({ withEdge, withoutEdge }) => {
+      async ({ withEdge, withoutEdge, radius }) => {
         const decode = async (base64: string) => {
           const image = await createImageBitmap(
             await (await fetch(`data:image/png;base64,${base64}`)).blob(),
@@ -313,6 +457,28 @@ test('WebGL actually paints the nested elevated silhouette in light and dark mod
         let centerDelta = 0;
         let edgeCount = 0;
         let centerCount = 0;
+        const corners = [0, 0];
+        const cornerCounts = [0, 0];
+        for (let y = 0; y < front.height; y++)
+          for (let x = 0; x < front.width; x++) {
+            const corner =
+              x > front.width - radius && y < radius
+                ? 0
+                : x < radius && y > front.height - radius
+                  ? 1
+                  : -1;
+            if (corner < 0) continue;
+            const cx = corner === 0 ? front.width - radius : radius;
+            const cy = corner === 0 ? radius : front.height - radius;
+            const distance = Math.hypot(x + 0.5 - cx, y + 0.5 - cy) - radius;
+            if (distance > 0 || distance < -2.5) continue;
+            const offset = (y * front.width + x) * 4;
+            for (let c = 0; c < 3; c++)
+              corners[corner] =
+                (corners[corner] ?? 0) +
+                Math.abs((front.data[offset + c] ?? 0) - (back.data[offset + c] ?? 0)) / 3;
+            cornerCounts[corner] = (cornerCounts[corner] ?? 0) + 1;
+          }
         for (let y = 14; y < front.height - 14; y++) {
           for (let x = 0; x < front.width; x++) {
             const offset = (y * front.width + x) * 4;
@@ -321,8 +487,7 @@ test('WebGL actually paints the nested elevated silhouette in light and dark mod
                 Math.abs((front.data[offset + 1] ?? 0) - (back.data[offset + 1] ?? 0)) +
                 Math.abs((front.data[offset + 2] ?? 0) - (back.data[offset + 2] ?? 0))) /
               3;
-            // The material edge is 1.25px, plus anti-aliasing. Measure that
-            // silhouette rather than diluting it with untouched interior pixels.
+            // Measure the outer catch rather than untouched body pixels.
             if (x < 2 || x >= front.width - 2) {
               edgeDelta += delta;
               edgeCount++;
@@ -332,12 +497,24 @@ test('WebGL actually paints the nested elevated silhouette in light and dark mod
             }
           }
         }
-        return { edge: edgeDelta / edgeCount, center: centerDelta / centerCount };
+        return {
+          edge: edgeDelta / edgeCount,
+          center: centerDelta / centerCount,
+          corners: corners.map((sum, i) => sum / (cornerCounts[i] ?? 1)),
+        };
       },
-      { withEdge: withEdge.toString('base64'), withoutEdge: withoutEdge.toString('base64') },
+      {
+        withEdge: withEdge.toString('base64'),
+        withoutEdge: withoutEdge.toString('base64'),
+        radius,
+      },
     );
 
     expect(difference.edge, `${theme}/painted directional edge`).toBeGreaterThan(1);
     expect(difference.center, `${theme}/no extra interior wash`).toBeLessThan(0.5);
+    for (const corner of difference.corners)
+      expect(corner, `${theme}/opposing corners must keep a visible curved catch`).toBeGreaterThan(
+        0.5,
+      );
   }
 });

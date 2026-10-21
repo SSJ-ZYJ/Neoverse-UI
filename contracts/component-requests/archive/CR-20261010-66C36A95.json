@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261010-66C36A95",
+  "kind": "new-component",
+  "target": "UiTerminalCursor",
+  "summary": "可选终端光标的主题与动效呈现",
+  "expected": "提供可选的块状/竖线状终端光标视觉与闪烁策略，并在真实输入框场景优先使用 CSS caret-color/native caret；不劫持键盘、文本输入、组合字符或焦点。优先评估作为 UiInput 变体而非独立公开组件。",
+  "acceptanceCriteria": [
+    "Light/Dark/System 均有可见光标，prefers-reduced-motion 时不闪烁，失焦状态不误导。",
+    "与中文输入法、输入框选择和移动键盘兼容；仅在需要独立展示的 Boot 提示符场景使用模拟光标。",
+    "评估后若原生 caret 与局部 CSS 足够，记录拒绝新增独立公开组件的依据。"
+  ],
+  "impact": "low",
+  "status": "rejected",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/components/home/HeroSection.vue",
+      "framework": "vue",
+      "scenario": "XCA 首次 Boot ASCII 演出和普通命令输入需要一致的光标语义"
+    }
+  ],
+  "createdAt": "2026-10-10T07:43:53.959Z",
+  "updatedAt": "2026-10-10T13:19:57.611Z",
+  "resolution": "Standalone cursor rejected: UiInput appearance=terminal uses native caret-color, preserves IME, text selection and reduced-motion semantics; decorative boot cursor remains in the consumer. See docs/terminal-composition.md."
+}

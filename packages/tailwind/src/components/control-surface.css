@@ -27,49 +27,22 @@
 
   .ui-control-surface--scale-lg {
     --neoverse-navigation-item-font-size-sm: calc(
-      var(--neoverse-font-size-2xs) *
+      var(--neoverse-font-size-sm) *
       var(--neoverse-control-surface-scale-lg-type-factor)
     );
     --neoverse-navigation-item-font-size-md: calc(
-      var(--neoverse-font-size-2xs) *
+      var(--neoverse-font-size-sm) *
       var(--neoverse-control-surface-scale-lg-type-factor)
     );
     --neoverse-navigation-item-font-size-lg: calc(
-      var(--neoverse-font-size-xs) *
+      var(--neoverse-font-size-md) *
       var(--neoverse-control-surface-scale-lg-type-factor)
     );
     --neoverse-control-segmented-option-font-size-sm: calc(
-      var(--neoverse-font-size-2xs) *
+      var(--neoverse-font-size-sm) *
       var(--neoverse-control-surface-scale-lg-type-factor)
     );
     zoom: var(--neoverse-control-surface-scale-lg);
-  }
-
-  .ui-surface-chrome {
-    position: relative;
-    isolation: isolate;
-    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      var(--neoverse-control-chrome-border);
-    background: var(--neoverse-control-chrome-background);
-    box-shadow:
-      var(--neoverse-control-chrome-edge-highlight), var(--neoverse-control-chrome-shadow);
-    -webkit-backdrop-filter: var(--neoverse-control-chrome-filter);
-    backdrop-filter: var(--neoverse-control-chrome-filter);
-  }
-
-  .ui-surface-chrome::before {
-    position: absolute;
-    z-index: 0;
-    inset: 0;
-    border-radius: inherit;
-    background-color: transparent;
-    background-image: var(--neoverse-control-chrome-refraction-gradient);
-    content: '';
-    opacity: var(--neoverse-control-chrome-edge-refraction-opacity);
-    pointer-events: none;
-    filter: var(--neoverse-control-chrome-edge-refraction-softness);
-    -webkit-backdrop-filter: var(--neoverse-control-chrome-edge-filter);
-    backdrop-filter: var(--neoverse-control-chrome-edge-filter);
   }
 
   .ui-control-surface:has(.ui-control-surface__group--primary .ui-navigation-item) {
@@ -88,7 +61,7 @@
     align-items: center;
   }
 
-  .ui-surface-chrome .ui-control-surface__group {
+  .ui-dock > .ui-control-surface__group {
     height: var(--neoverse-control-surface-group-height);
   }
 
@@ -153,19 +126,37 @@
     --neoverse-control-segmented-option-padding-inline-sm: var(
       --neoverse-control-segmented-embedded-option-padding-inline-sm
     );
+    --neoverse-control-segmented-option-font-size-sm: var(
+      --neoverse-control-segmented-embedded-option-font-size-sm
+    );
     border-radius: var(--neoverse-control-surface-trailing-radius);
-    padding: var(--neoverse-control-surface-trailing-padding);
+    padding-block: var(--neoverse-control-surface-trailing-padding);
+    padding-inline: var(--neoverse-control-surface-trailing-padding-inline);
     background: var(--neoverse-control-surface-trailing-background);
     box-shadow: var(--neoverse-control-surface-trailing-shadow);
   }
 
-  .ui-surface-chrome .ui-control-surface__group--trailing {
+  .ui-control-surface--scale-lg .ui-control-surface__group--trailing:has(.ui-segmented-control) {
+    --neoverse-control-segmented-option-font-size-sm: calc(
+      var(--neoverse-control-segmented-embedded-option-font-size-sm) *
+      var(--neoverse-control-segmented-embedded-option-scale-lg-type-factor)
+    );
+  }
+
+  .ui-dock > .ui-control-surface__group--trailing {
     border: 0;
     border-radius: var(--neoverse-control-surface-trailing-radius);
-    padding-block: var(--neoverse-control-chrome-trailing-padding);
-    padding-inline: var(--neoverse-control-chrome-trailing-padding-inline);
-    background: var(--neoverse-control-chrome-trailing-background);
+    padding-block: var(--neoverse-control-surface-trailing-padding);
+    padding-inline: var(--neoverse-control-surface-trailing-padding-inline);
+    background: var(--neoverse-control-surface-trailing-background);
     box-shadow: var(--neoverse-control-surface-trailing-shadow);
+  }
+
+  /* Keep embedded height and option geometry independent of standalone
+     controls; the trailing group owns the shared side clearance. */
+  .ui-dock > .ui-control-surface__group--trailing:has(.ui-segmented-control) {
+    height: var(--neoverse-control-surface-segmented-group-height);
+    align-self: center;
   }
 
   .ui-control-surface__divider {
@@ -180,19 +171,8 @@
   }
 
   @media (prefers-reduced-transparency: reduce) {
-    .ui-control-surface:not(.ui-surface-chrome) {
-      background-color: var(--neoverse-color-surface-raised);
-    }
-
-    .ui-surface-chrome {
-      background: var(--neoverse-color-surface-raised);
-      box-shadow: var(--neoverse-control-chrome-shadow);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
-
-    .ui-surface-chrome::before {
-      display: none;
+    .ui-control-surface:not([data-surface='none']) {
+      background-color: var(--neoverse-material-glass-base-tint);
     }
   }
 }

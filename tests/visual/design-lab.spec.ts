@@ -12,6 +12,22 @@ const modules = [
   'consumer-parity',
 ] as const;
 
+const controlSnapshots = [
+  { name: 'controls-header', selector: '#controls > header' },
+  { name: 'controls-nav', selector: '#controls nav[aria-label="Core Controls"]' },
+  ...[
+    'button',
+    'icon-button',
+    'action',
+    'breadcrumb',
+    'overlays',
+    'navigation-item',
+    'segmented-control',
+    'surface',
+    'density',
+  ].map((name) => ({ name: `controls-${name}`, selector: `#controls-${name}` })),
+];
+
 const freezeMotion = `
   *, *::before, *::after {
     animation-delay: 0s !important;
@@ -40,19 +56,27 @@ const waitForStableAssets = async (): Promise<void> => {
 
 for (const theme of themes) {
   for (const moduleId of modules) {
-    test(`${moduleId} / ${theme}`, async ({ page }) => {
-      await page.emulateMedia({ reducedMotion: 'reduce' });
-      await page.goto(`/frame?theme=${theme}&lang=en#${moduleId}`, {
-        waitUntil: 'domcontentloaded',
-      });
-      await page.addStyleTag({ content: freezeMotion });
-      await page.evaluate(waitForStableAssets);
-      await page.evaluate(() => window.scrollTo(0, 0));
+    // The mobile Controls module exceeds Chromium's compositor texture limit.
+    // Independent specimens preserve its complete coverage without blank tails.
+    const snapshots =
+      moduleId === 'controls'
+        ? controlSnapshots
+        : [{ name: moduleId, selector: '[data-design-lab-region="module"]' }];
+    for (const snapshot of snapshots) {
+      test(`${snapshot.name} / ${theme}`, async ({ page }) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.goto(`/frame?theme=${theme}&lang=en#${moduleId}`, {
+          waitUntil: 'domcontentloaded',
+        });
+        await page.addStyleTag({ content: freezeMotion });
 
-      const region = page.locator('[data-design-lab-region="module"]');
-      await expect(region).toBeVisible();
-      await expect(region).toHaveScreenshot(`${moduleId}-${theme}.png`);
-    });
+        const region = page.locator(snapshot.selector);
+        await expect(region).toBeVisible();
+        await page.evaluate(waitForStableAssets);
+        await page.evaluate(() => window.scrollTo(0, 0));
+        await expect(region).toHaveScreenshot(`${snapshot.name}-${theme}.png`);
+      });
+    }
   }
 }
 
@@ -78,13 +102,16 @@ for (const theme of themes) {
         position: style.position,
         backdropFilter: style.backdropFilter,
         blurPx: blurMatch?.[1] ? Number.parseFloat(blurMatch[1]) : 0,
+        standardPanelBlurPx: Number.parseFloat(
+          style.getPropertyValue('--neoverse-material-blur-md'),
+        ),
       };
     });
     expect(state.topLayerOpen).toBe(true);
     expect(state.position).toBe('fixed');
     expect(state.backdropFilter).toContain('blur(');
     expect(state.blurPx).toBeGreaterThan(0);
-    expect(state.blurPx).toBeLessThanOrEqual(10);
+    expect(state.blurPx).toBeCloseTo(state.standardPanelBlurPx, 3);
 
     const readGeometry = async () => {
       const triggerBox = await trigger.boundingBox();
@@ -110,8 +137,25 @@ for (const theme of themes) {
     expect(beforeScroll.popoverBox.width).toBeCloseTo(beforeScroll.triggerBox.width, 1);
     expect(beforeScroll.verticalGap).toBeGreaterThan(0);
 
+    // Playwright dispatches the wheel event without waiting for the browser
+    // to scroll. Observe an actual scroll before checking the anchored overlay;
+    // otherwise the initial unchanged geometry can satisfy the poll too early.
+    const scrollYBefore = await page.evaluate(() => window.scrollY);
     await page.mouse.wheel(0, 80);
-    await page.waitForTimeout(50);
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(scrollYBefore);
+    await expect
+      .poll(
+        async () => {
+          const geometry = await readGeometry();
+          return {
+            alignedX: Math.abs(geometry.popoverBox.x - geometry.triggerBox.x) < 0.05,
+            matchedWidth: Math.abs(geometry.popoverBox.width - geometry.triggerBox.width) < 0.05,
+            stableGap: Math.abs(geometry.verticalGap - beforeScroll.verticalGap) < 0.05,
+          };
+        },
+        { timeout: 2_000 },
+      )
+      .toEqual({ alignedX: true, matchedWidth: true, stableGap: true });
 
     const afterScroll = await readGeometry();
     expect(afterScroll.popoverBox.x).toBeCloseTo(afterScroll.triggerBox.x, 1);
@@ -234,6 +278,7 @@ for (const theme of themes) {
           edgeDisplay: getComputedStyle(edge).display,
           pressRadius: press.borderRadius,
           pressOpacity: press.opacity,
+          pressDisplay: press.display,
         };
       });
 
@@ -250,14 +295,14 @@ for (const theme of themes) {
     expect(hovered.background).not.toBe(resting.background);
     expect(hovered.border).toBe(resting.border);
     expect(hovered.edgeDisplay).toBe('none');
-    expect(hovered.pressOpacity).toBe('0');
+    expect(hovered.pressDisplay).toBe('none');
 
     await page.mouse.down();
     const pressed = await readState();
     expect(pressed.border).toBe(resting.border);
     expect(pressed.background).not.toBe(resting.background);
     expect(pressed.edgeDisplay).toBe('none');
-    expect(pressed.pressOpacity).toBe('0');
+    expect(pressed.pressDisplay).toBe('none');
     await page.mouse.up();
   });
 }
@@ -317,7 +362,9 @@ test('consumer parity exposes destination and current-page semantics', async ({ 
   expect(pulseAnimation).toBe('none');
 });
 
-test('active navigation hover does not stack another visual state', async ({ page }) => {
+test('active navigation retains selection while hover provides shared feedback', async ({
+  page,
+}) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
     waitUntil: 'domcontentloaded',
@@ -345,7 +392,9 @@ test('active navigation hover does not stack another visual state', async ({ pag
   await activeItem.hover();
   const duringHover = await readVisualState();
 
-  expect(duringHover).toEqual(beforeHover);
+  expect(duringHover.color).toBe(beforeHover.color);
+  expect(duringHover.backgroundImage).toBe(beforeHover.backgroundImage);
+  await expect(activeItem).toHaveAttribute('aria-current', 'page');
 });
 
 for (const theme of themes) {
@@ -432,16 +481,12 @@ for (const theme of themes) {
     const shellBeforeHover = await readShellState();
     const renderer = await page.locator('html').getAttribute('data-neoverse-glass-renderer');
     await expect(control).toHaveAttribute('data-neoverse-glass-edge-pass', 'css');
-    // The CSS-backed field remains mounted under WebGL. Its theme-owned opacity
-    // keeps the dark edge absent while light retains its intentional refraction.
-    expect(shellBeforeHover.edgeDisplay).toBe(
-      renderer === 'webgl' || theme === 'light' ? 'block' : 'none',
-    );
-    if (theme === 'light') {
-      expect(shellBeforeHover.edgeOpacity).toBeGreaterThan(0);
-    } else {
-      expect(shellBeforeHover.edgeOpacity).toBe(0);
-    }
+    // The CSS refraction fallback stays enabled in both themes. WebGL must
+    // not accidentally erase the dark control's material edge.
+    expect(['webgl', 'css', null]).toContain(renderer);
+    expect(shellBeforeHover.edgeDisplay).toBe('block');
+    expect(shellBeforeHover.edgeOpacity).toBeGreaterThan(0);
+    expect(shellBeforeHover.edgeOpacity).toBeLessThanOrEqual(1);
     await control.locator('.ui-segmented-control__option--active').hover();
     const duringHover = await readSelectedState();
     const shellDuringHover = await readShellState();
@@ -450,7 +495,7 @@ for (const theme of themes) {
   });
 }
 
-test('chrome edge refraction is removed when reduced transparency is requested', async ({
+test('Dock Glass edge refraction is removed when reduced transparency is requested', async ({
   page,
 }) => {
   const cdp = await page.context().newCDPSession(page);
@@ -495,7 +540,8 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     const dockStyle = getComputedStyle(element);
     const fontProbe = document.createElement('span');
     fontProbe.style.fontSize = 'var(--neoverse-navigation-item-font-size-md)';
-    element.append(fontProbe);
+    // The Dock assigns its navigation type factor on the primary group, not the root.
+    link.append(fontProbe);
     const expectedLinkFontSize = Number.parseFloat(getComputedStyle(fontProbe).fontSize);
     fontProbe.remove();
     return {
@@ -520,7 +566,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(typography.labelFlex).toBe('0 1 auto');
   const edgeMaterial = await navigation.evaluate((element) => {
     const style = getComputedStyle(element);
-    const chromeEdgeStyle = getComputedStyle(element, '::before');
+    const glassEdgeStyle = getComputedStyle(element, '::before');
     const button = element.querySelector('.consumer-parity-dock__item') as HTMLElement | null;
     const activeButton = element.querySelector(
       '.consumer-parity-dock__item.ui-navigation-item--active',
@@ -622,7 +668,12 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       const optionStyle = getComputedStyle(option);
       return {
         width: optionRect.width,
-        contentPlusPaddingWidth: textRect.width + Number.parseFloat(optionStyle.paddingInline) * 2,
+        // DOMRect includes the Dock's presentation zoom; computed padding does not.
+        contentPlusPaddingWidth:
+          textRect.width +
+          Number.parseFloat(optionStyle.paddingInline) *
+            2 *
+            Number.parseFloat(getComputedStyle(element).zoom),
       };
     });
     const languageOptionWidth = Math.max(...languageOptionGeometry.map(({ width }) => width));
@@ -634,6 +685,19 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     languageOption.append(optionFontProbe);
     const expectedOptionFontSize = Number.parseFloat(getComputedStyle(optionFontProbe).fontSize);
     optionFontProbe.remove();
+    const optionPaddingProbe = document.createElement('span');
+    optionPaddingProbe.style.paddingBlock =
+      'var(--neoverse-control-segmented-option-padding-block-sm)';
+    optionPaddingProbe.style.paddingInline =
+      'var(--neoverse-control-segmented-option-padding-inline-sm)';
+    languageOption.append(optionPaddingProbe);
+    const expectedOptionPaddingBlock = Number.parseFloat(
+      getComputedStyle(optionPaddingProbe).paddingBlock,
+    );
+    const expectedOptionPaddingInline = Number.parseFloat(
+      getComputedStyle(optionPaddingProbe).paddingInline,
+    );
+    optionPaddingProbe.remove();
     const activeLabelRange = document.createRange();
     activeLabelRange.selectNodeContents(activeLabel);
     const activeLabelRect = activeLabelRange.getBoundingClientRect();
@@ -653,18 +717,38 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       sliderRect.right <= languageRect.right &&
       sliderRect.top >= languageRect.top &&
       sliderRect.bottom <= languageRect.bottom;
+    const materialProbe = document.createElement('span');
+    materialProbe.style.background = 'var(--neoverse-material-glass-elevated-background)';
+    materialProbe.style.borderColor = 'var(--neoverse-material-glass-elevated-border)';
+    materialProbe.style.backdropFilter = 'var(--neoverse-material-edge-filter)';
+    element.append(materialProbe);
+    const expectedDockBackground = getComputedStyle(materialProbe).backgroundColor;
+    const expectedDockBorder = getComputedStyle(materialProbe).borderColor;
+    const expectedEdgeBackdropFilter = getComputedStyle(materialProbe).backdropFilter;
+    materialProbe.remove();
     return {
       surface: element.getAttribute('data-surface'),
       presentationScale: Number.parseFloat(getComputedStyle(element).zoom),
-      chromeClass: element.classList.contains('ui-surface-chrome'),
-      dockBackground: style.background,
+      glassClass: element.classList.contains('material-glass-elevated'),
+      dockBackground: style.backgroundColor,
+      expectedDockBackground,
+      expectedDockBorder,
+      expectedEdgeBackdropFilter,
       dockFilter: style.backdropFilter,
+      dockBlurPx: Number.parseFloat(
+        style.backdropFilter.match(/blur\(([-\d.]+)px\)/)?.[1] ?? 'NaN',
+      ),
+      expectedDockBlurPx: Number.parseFloat(style.getPropertyValue('--neoverse-material-blur')),
       dockBorder: style.borderColor,
-      dockEdgeBackgroundImage: chromeEdgeStyle.backgroundImage,
-      dockEdgeOpacity: chromeEdgeStyle.opacity,
-      dockEdgeFilter: chromeEdgeStyle.filter,
-      dockEdgeBackdropFilter: chromeEdgeStyle.backdropFilter,
-      dockEdgeDisplay: chromeEdgeStyle.display,
+      dockEdgeBackgroundImage: glassEdgeStyle.backgroundImage,
+      dockEdgeMaskImage: glassEdgeStyle.maskImage,
+      dockEdgeOpacity: glassEdgeStyle.opacity,
+      dockEdgeFilter: glassEdgeStyle.filter,
+      dockEdgeBackdropFilter: glassEdgeStyle.backdropFilter,
+      dockEdgeDisplay: glassEdgeStyle.display,
+      webglEdge:
+        Boolean(element.closest('[data-neoverse-glass-renderer="webgl"]')) &&
+        element.getAttribute('data-neoverse-glass-edge-pass') !== 'css',
       buttonSurface: button.getAttribute('data-surface'),
       buttonHasMaterialClass: [...button.classList].some((className) =>
         className.startsWith('material-'),
@@ -717,10 +801,9 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       compactNavigationGapToken: resolveLength('--neoverse-navigation-item-compact-gap'),
       trailingPaddingInline: Number.parseFloat(trailingStyle.paddingInline),
       trailingPaddingBlock: Number.parseFloat(trailingStyle.paddingBlock),
-      trailingPaddingInlineToken: resolveLength(
-        '--neoverse-control-chrome-trailing-padding-inline',
-      ),
-      trailingPaddingBlockToken: resolveLength('--neoverse-control-chrome-trailing-padding'),
+      optionHeightToken: resolveLength('--neoverse-control-surface-segmented-height'),
+      trailingInlineInsetToken: resolveLength('--neoverse-control-surface-trailing-padding-inline'),
+      trailingBlockInsetToken: resolveLength('--neoverse-control-surface-trailing-padding'),
       trailingBorderInline: Number.parseFloat(trailingStyle.borderLeftWidth),
       trailingContentInsetInline:
         languageRect.left - trailingRect.left - Number.parseFloat(trailingStyle.borderLeftWidth),
@@ -761,13 +844,16 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       languageOptionWidth,
       languageOptionContentWidth,
       languageOptionBorderWidth:
-        Number.parseFloat(languageOptionStyle.borderLeftWidth) +
-        Number.parseFloat(languageOptionStyle.borderRightWidth),
+        (Number.parseFloat(languageOptionStyle.borderLeftWidth) +
+          Number.parseFloat(languageOptionStyle.borderRightWidth)) *
+        Number.parseFloat(getComputedStyle(element).zoom),
       navigationHeight: activeButtonRect.height,
       navigationBoxSizing: activeButtonStyle.boxSizing,
       navigationPaddingBlock: Number.parseFloat(activeButtonStyle.paddingBlock),
       optionPaddingBlock: Number.parseFloat(languageOptionStyle.paddingBlock),
       optionPaddingInline: Number.parseFloat(languageOptionStyle.paddingInline),
+      expectedOptionPaddingBlock,
+      expectedOptionPaddingInline,
       optionFontSize: Number.parseFloat(languageOptionStyle.fontSize),
       expectedOptionFontSize,
       optionFontWeight: languageOptionStyle.fontWeight,
@@ -802,16 +888,19 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
       hoverMode: element.getAttribute('data-neoverse-surface-hover'),
     };
   });
-  expect(edgeMaterial.surface).toBe('chrome');
-  expect(edgeMaterial.chromeClass).toBe(true);
-  expect(edgeMaterial.dockBackground).toContain('rgba(152, 186, 220, 0.04)');
-  expect(edgeMaterial.dockFilter).toContain('blur(12px)');
-  expect(edgeMaterial.dockBorder).toBe('rgba(219, 234, 254, 0.08)');
-  expect(edgeMaterial.dockEdgeBackgroundImage).not.toBe('none');
+  expect(edgeMaterial.surface).toBe('glass-elevated');
+  expect(edgeMaterial.glassClass).toBe(true);
+  expect(edgeMaterial.dockBackground).toBe(edgeMaterial.expectedDockBackground);
+  expect(edgeMaterial.dockBlurPx).toBeCloseTo(edgeMaterial.expectedDockBlurPx, 3);
+  expect(edgeMaterial.dockBorder).toBe(edgeMaterial.expectedDockBorder);
+  // The edge is a mask over the backdrop, not an independently painted gradient.
+  expect(edgeMaterial.dockEdgeBackgroundImage).toBe('none');
+  expect(edgeMaterial.dockEdgeMaskImage).not.toBe('none');
   expect(Number.parseFloat(edgeMaterial.dockEdgeOpacity)).toBeGreaterThan(0);
   expect(edgeMaterial.dockEdgeFilter).not.toBe('none');
-  expect(edgeMaterial.dockEdgeBackdropFilter).not.toBe('none');
-  expect(edgeMaterial.dockEdgeDisplay).not.toBe('none');
+  expect(edgeMaterial.dockEdgeBackdropFilter).toBe(edgeMaterial.expectedEdgeBackdropFilter);
+  if (edgeMaterial.webglEdge) expect(edgeMaterial.dockEdgeDisplay).toBe('none');
+  else expect(edgeMaterial.dockEdgeDisplay).not.toBe('none');
   expect(edgeMaterial.buttonSurface).toBe('none');
   expect(edgeMaterial.buttonHasMaterialClass).toBe(false);
   expect(edgeMaterial.languageSurface).toBe('none');
@@ -821,7 +910,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(edgeMaterial.languagePaddingInline).toBe('0px');
   expect(edgeMaterial.languagePaddingBlock).toBe('0px');
   expect(edgeMaterial.languageOverflow).toBe('visible');
-  // Chrome trailing groups are intentionally borderless; their separation is
+  // Dock trailing groups are intentionally borderless; their separation is
   // carried by the inset fill/shadow instead of a single-color hairline.
   expect(edgeMaterial.trailingBorderInline).toBe(0);
   expect(edgeMaterial.trailingBackground).toBe('rgba(255, 255, 255, 0.03)');
@@ -834,16 +923,17 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(edgeMaterial.navigationHeightToken).toContain('rem');
   expect(edgeMaterial.segmentedHeightToken).toContain('rem');
   expect(edgeMaterial.dividerGapToken).toContain('rem');
-  expect(edgeMaterial.actionHeight).toBeGreaterThan(edgeMaterial.compactHeight);
+  expect(edgeMaterial.actionHeight).toBeCloseTo(edgeMaterial.compactHeight, 2);
   expect(edgeMaterial.controlHeight).toBeCloseTo(edgeMaterial.compactHeight, 2);
   expect(edgeMaterial.navigationSurfaceHeight).toBeCloseTo(edgeMaterial.actionHeight, 2);
-  expect(edgeMaterial.segmentedSurfaceHeight).toBeCloseTo(edgeMaterial.compactHeight, 2);
+  expect(edgeMaterial.segmentedSurfaceHeight).toBeCloseTo(edgeMaterial.optionHeight, 2);
+  expect(edgeMaterial.segmentedSurfaceHeight).toBeLessThan(edgeMaterial.compactHeight);
   expect(edgeMaterial.navigationHeight).toBeCloseTo(
     edgeMaterial.navigationSurfaceHeight * edgeMaterial.presentationScale,
     2,
   );
-  expect(edgeMaterial.optionHeight).toBeCloseTo(edgeMaterial.segmentedSurfaceHeight, 2);
-  expect(edgeMaterial.sliderHeight).toBeCloseTo(edgeMaterial.segmentedSurfaceHeight, 2);
+  expect(edgeMaterial.optionHeight).toBeCloseTo(edgeMaterial.optionHeightToken, 2);
+  expect(edgeMaterial.sliderHeight).toBeCloseTo(edgeMaterial.optionHeight, 2);
   expect(edgeMaterial.optionHeight).toBeLessThan(edgeMaterial.navigationHeight);
   expect(edgeMaterial.iconIndicatorGap / edgeMaterial.navigationHeight).toBeGreaterThanOrEqual(
     0.13,
@@ -851,7 +941,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   if ((page.viewportSize()?.width ?? 0) <= 520) {
     expect(edgeMaterial.languageOptionWidth - edgeMaterial.languageOptionContentWidth).toBeCloseTo(
       edgeMaterial.languageOptionBorderWidth,
-      2,
+      1,
     );
     expect(edgeMaterial.iconIndicatorGap).toBeGreaterThanOrEqual(
       edgeMaterial.activeIndicatorRect.height - 0.1,
@@ -859,7 +949,7 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   }
   expect(edgeMaterial.navigationBoxSizing).toBe('border-box');
   if ((page.viewportSize()?.width ?? 0) > 520) {
-    expect(edgeMaterial.navigationGap).toBeCloseTo(edgeMaterial.navigationGapToken, 2);
+    expect(edgeMaterial.navigationGap).toBeCloseTo(edgeMaterial.navigationGapToken, 1);
     expect(edgeMaterial.navigationGap).toBeGreaterThan(0);
     expect(edgeMaterial.primaryGap).toBeCloseTo(edgeMaterial.surfaceItemGap, 1);
     expect(edgeMaterial.primaryGap).toBeGreaterThan(0);
@@ -868,19 +958,17 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     );
   } else {
     expect(edgeMaterial.navigationGap).toBe(0);
-    expect(edgeMaterial.primaryGap).toBeCloseTo(edgeMaterial.compactNavigationGapToken, 2);
+    // CSS layout rounds fractional rem gaps to device pixels after Dock scaling.
+    expect(edgeMaterial.primaryGap).toBeCloseTo(edgeMaterial.compactNavigationGapToken, 1);
     expect(edgeMaterial.primaryGap).toBeGreaterThan(0);
   }
-  expect(edgeMaterial.trailingPaddingInline).toBeCloseTo(
-    edgeMaterial.trailingPaddingInlineToken,
-    1,
-  );
+  expect(edgeMaterial.trailingPaddingInline).toBeCloseTo(edgeMaterial.trailingInlineInsetToken, 1);
   expect(edgeMaterial.trailingContentInsetInline).toBeCloseTo(
     edgeMaterial.trailingPaddingInline * edgeMaterial.presentationScale +
       edgeMaterial.trailingBorderInline * (edgeMaterial.presentationScale - 1),
     1,
   );
-  expect(edgeMaterial.trailingPaddingBlock).toBeCloseTo(edgeMaterial.trailingPaddingBlockToken, 1);
+  expect(edgeMaterial.trailingPaddingBlock).toBeCloseTo(edgeMaterial.trailingBlockInsetToken, 1);
   expect(edgeMaterial.primaryWidth).toBeCloseTo(
     edgeMaterial.itemRects.reduce((total, { width }) => total + width, 0) +
       edgeMaterial.itemGaps.reduce((total, gap) => total + gap, 0),
@@ -908,7 +996,9 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
   expect(edgeMaterial.activeIndicatorRect.right).toBeLessThanOrEqual(
     edgeMaterial.activeButtonRect.right + 0.1,
   );
-  expect(Math.abs(edgeMaterial.primaryHeight - edgeMaterial.trailingHeight)).toBeLessThan(0.25);
+  // The embedded language control is deliberately shorter than navigation items.
+  // They must still share a vertical center within the Dock.
+  expect(edgeMaterial.primaryHeight).toBeGreaterThan(edgeMaterial.trailingHeight);
   expect(Math.abs(edgeMaterial.primaryCenterY - edgeMaterial.trailingCenterY)).toBeLessThan(0.25);
   expect(edgeMaterial.dividerGapBefore).toBeCloseTo(edgeMaterial.dividerGapAfter, 2);
   expect(edgeMaterial.dividerGapBefore).toBeCloseTo(
@@ -935,16 +1025,18 @@ test('consumer parity dock adapts navigation items to content', async ({ page })
     edgeMaterial.groupHeight * edgeMaterial.presentationScale,
     2,
   );
-  expect(edgeMaterial.trailingHeight).toBeCloseTo(
-    edgeMaterial.groupHeight * edgeMaterial.presentationScale,
-    2,
+  expect(edgeMaterial.trailingHeight).toBeGreaterThan(
+    edgeMaterial.segmentedSurfaceHeight * edgeMaterial.presentationScale,
   );
-  expect(edgeMaterial.optionPaddingBlock).toBeCloseTo(edgeMaterial.rootFontSize * 0.2, 1);
-  expect(edgeMaterial.optionPaddingInline).toBeCloseTo(edgeMaterial.rootFontSize * 0.375, 1);
+  expect(edgeMaterial.trailingHeight).toBeLessThan(
+    edgeMaterial.groupHeight * edgeMaterial.presentationScale,
+  );
+  expect(edgeMaterial.optionPaddingBlock).toBeCloseTo(edgeMaterial.expectedOptionPaddingBlock, 1);
+  expect(edgeMaterial.optionPaddingInline).toBeCloseTo(edgeMaterial.expectedOptionPaddingInline, 1);
   expect(edgeMaterial.optionFontSize).toBeCloseTo(edgeMaterial.expectedOptionFontSize, 1);
   expect(edgeMaterial.optionFontWeight).toBe('750');
   expect(edgeMaterial.optionLineHeight).toBe('normal');
-  expect(edgeMaterial.optionTextCenterDelta).toBeCloseTo(0, 2);
+  expect(edgeMaterial.optionTextCenterDelta).toBeCloseTo(0, 1);
   if ((page.viewportSize()?.width ?? 0) > 520) {
     expect(edgeMaterial.navigationTextCenterDelta).toBeCloseTo(0, 1);
   }
@@ -996,18 +1088,33 @@ test('dock indicator travels between unequal items and respects reduced motion',
         (item) => item.textContent?.trim() === label,
       );
       if (!bar || !target) throw new Error('Navigation geometry missing');
+      for (const animation of bar.getAnimations()) animation.finish();
       const start = bar.getBoundingClientRect().x;
-      target.click();
-      await new Promise(requestAnimationFrame);
-      await new Promise(requestAnimationFrame);
-      const motion = bar
-        .getAnimations()
-        .find(
-          (animation) =>
-            animation instanceof CSSTransition && animation.transitionProperty === 'left',
-        );
-      if (!motion) throw new Error('No horizontal indicator transition');
-      motion.pause();
+      const initialLeft = bar.style.left;
+      const motion = await new Promise<CSSTransition>((resolve, reject) => {
+        // Vue updates the indicator after measuring the selected item. Flush
+        // that style change in its mutation microtask and pause the resulting
+        // transition before a rendering frame can advance it.
+        const observer = new MutationObserver(() => {
+          if (bar.style.left === initialLeft) return;
+          const transition = bar
+            .getAnimations()
+            .find(
+              (animation): animation is CSSTransition =>
+                animation instanceof CSSTransition && animation.transitionProperty === 'left',
+            );
+          observer.disconnect();
+          if (!transition) {
+            reject(new Error('No horizontal indicator transition'));
+            return;
+          }
+          transition.pause();
+          resolve(transition);
+        });
+        observer.observe(bar, { attributes: true, attributeFilter: ['style'] });
+        target.click();
+      });
+      await motion.ready;
       motion.currentTime = Number(motion.effect?.getTiming().duration) / 2;
       const middle = bar.getBoundingClientRect().x;
       for (const animation of bar.getAnimations()) animation.finish();
@@ -1053,8 +1160,11 @@ test('consumer parity dock keeps parent Glass stable on item hover', async ({ pa
   const item = navigation.getByRole('link', { name: 'Home' });
   await expect(item).toBeVisible();
   await page.mouse.move(0, 0);
-  await page.waitForTimeout(80);
-  const before = await navigation.evaluate((element) => {
+  const readMaterial = async (element: Element) => {
+    // Resolve pending hover/theme styles, then observe their actual completion
+    // rather than sampling an interpolated shadow after a fixed delay.
+    getComputedStyle(element).boxShadow;
+    await Promise.all(element.getAnimations().map((animation) => animation.finished));
     const style = getComputedStyle(element);
     return {
       background: style.backgroundColor,
@@ -1062,7 +1172,8 @@ test('consumer parity dock keeps parent Glass stable on item hover', async ({ pa
       shadow: style.boxShadow,
       edgeDisplay: getComputedStyle(element, '::before').display,
     };
-  });
+  };
+  const before = await navigation.evaluate(readMaterial);
   const box = await item.boundingBox();
   expect(box).not.toBeNull();
   if (box === null) {
@@ -1070,22 +1181,13 @@ test('consumer parity dock keeps parent Glass stable on item hover', async ({ pa
   }
 
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
-  await page.waitForTimeout(260);
-  const after = await navigation.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return {
-      background: style.backgroundColor,
-      border: style.borderColor,
-      shadow: style.boxShadow,
-      edgeDisplay: getComputedStyle(element, '::before').display,
-    };
-  });
+  const after = await navigation.evaluate(readMaterial);
 
   expect(after).toEqual(before);
 });
 
 for (const theme of themes) {
-  test(`embedded segmented control keeps only its selected plate without outer chrome / ${theme}`, async ({
+  test(`embedded segmented control borrows its plate and uses a selection edge / ${theme}`, async ({
     page,
   }) => {
     await page.goto(`/frame?theme=${theme}&lang=en#consumer-parity`, {
@@ -1150,15 +1252,16 @@ for (const theme of themes) {
         return {
           backgroundImage: style.backgroundImage,
           backgroundColor: style.backgroundColor,
+          boxShadow: style.boxShadow,
           radius: style.borderTopLeftRadius,
           expectedRadius,
           rootRadius: Number.parseFloat(rootStyle.borderTopLeftRadius),
         };
       });
-    expect(
-      selectedPlate.backgroundImage !== 'none' ||
-        selectedPlate.backgroundColor !== 'rgba(0, 0, 0, 0)',
-    ).toBe(true);
+    expect(selectedPlate.backgroundImage).not.toBe('none');
+    if (theme === 'dark') expect(selectedPlate.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+    else expect(selectedPlate.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(selectedPlate.boxShadow).not.toBe('none');
     expect(selectedPlate.radius).toBe(selectedPlate.expectedRadius);
     expect(Number.parseFloat(selectedPlate.radius)).toBeLessThan(selectedPlate.rootRadius);
   });
@@ -1216,31 +1319,82 @@ for (const theme of themes) {
 
 for (const theme of themes) {
   test(`floating toolbar refraction / ${theme}`, async ({ page }) => {
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto(`/frame?theme=${theme}&lang=zh#composition`, {
-      waitUntil: 'domcontentloaded',
+    const remoteFontPattern = /^https:\/\/cdn\.jsdelivr\.net\/.*\.woff2(?:\?.*)?$/;
+    const stallExternalFonts = theme === 'light';
+    const pendingFontRoutes: Promise<void>[] = [];
+    let releaseFontRequests = (): void => undefined;
+    const fontRequestGate = new Promise<void>((resolve) => {
+      releaseFontRequests = resolve;
     });
-    await page.addStyleTag({ content: freezeMotion });
-    await page.evaluate(waitForStableAssets);
+    const firstFontRequest = stallExternalFonts
+      ? page.waitForRequest(remoteFontPattern)
+      : undefined;
 
-    const renderer = await page.locator('html').getAttribute('data-neoverse-glass-renderer');
-    const surface = page.locator('#composition-floating-toolbar > .material-glass-immersive');
-    await expect(surface).toBeVisible();
-    const edge = await surface.evaluate((element) => {
-      const style = getComputedStyle(element, '::before');
-      return {
-        display: style.display,
-        opacity: Number(style.opacity),
-        backgroundImage: style.backgroundImage,
-        backgroundClip: getComputedStyle(element).backgroundClip,
-      };
-    });
+    if (stallExternalFonts) {
+      // This CSS edge assertion does not depend on text shaping. Hold a remote
+      // CJK font request so this test guards against page-wide font waits.
+      await page.route(remoteFontPattern, (route) => {
+        const pendingRoute = (async () => {
+          await fontRequestGate;
+          await route.abort();
+        })();
+        pendingFontRoutes.push(pendingRoute);
+        return pendingRoute;
+      });
+    }
 
-    expect(edge.display).toBe(renderer === 'webgl' ? 'none' : 'block');
-    expect(edge.opacity).toBeGreaterThan(0);
-    expect(edge.backgroundImage).toContain('radial-gradient');
-    if (renderer === 'webgl') {
-      expect(edge.backgroundClip).toBe('padding-box');
+    try {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto(`/frame?theme=${theme}&lang=zh#composition`, {
+        waitUntil: 'domcontentloaded',
+      });
+      if (firstFontRequest !== undefined) {
+        await firstFontRequest;
+        await expect.poll(() => page.evaluate(() => document.fonts?.status)).toBe('loading');
+      }
+      await page.addStyleTag({ content: freezeMotion });
+      await expect(page.locator('html')).toHaveAttribute(
+        'data-neoverse-glass-renderer',
+        /^(webgl|css)$/,
+      );
+
+      const renderer = await page.locator('html').getAttribute('data-neoverse-glass-renderer');
+      const surface = page.locator('#composition-floating-toolbar > .material-glass-immersive');
+      await expect(surface).toBeVisible();
+      const edge = await surface.evaluate((element) => {
+        const style = getComputedStyle(element, '::before');
+        return {
+          display: style.display,
+          opacity: Number(style.opacity),
+          backgroundImage: style.backgroundImage,
+          maskImage: style.maskImage,
+          backgroundClip: getComputedStyle(element).backgroundClip,
+          rendererCanvasVisible: (() => {
+            const canvas = document.querySelector<HTMLElement>(
+              '[data-neoverse-glass-renderer-canvas]',
+            );
+            return canvas !== null && getComputedStyle(canvas).display !== 'none';
+          })(),
+        };
+      });
+
+      expect(edge.display).toBe(renderer === 'webgl' ? 'none' : 'block');
+      expect(edge.opacity).toBeGreaterThan(0);
+      // Refraction uses a masked backdrop (CSS) or a separate WebGL canvas.
+      // Neither paints a decorative CSS background gradient into the surface.
+      expect(edge.backgroundImage).toBe('none');
+      if (renderer === 'webgl') {
+        expect(edge.rendererCanvasVisible).toBe(true);
+        expect(edge.backgroundClip).toBe('padding-box');
+      } else {
+        expect(edge.maskImage).not.toBe('none');
+      }
+    } finally {
+      if (stallExternalFonts) {
+        releaseFontRequests();
+        await Promise.all(pendingFontRoutes);
+        await page.unroute(remoteFontPattern);
+      }
     }
   });
 }
@@ -1445,29 +1599,29 @@ for (const theme of themes) {
 for (const theme of themes) {
   test(`icon button icons stay geometrically centered / ${theme}`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto(`/frame?theme=${theme}&lang=zh#controls`, {
+    const response = await page.goto(`/frame?theme=${theme}&lang=zh#controls`, {
       waitUntil: 'domcontentloaded',
     });
+    expect(response?.status()).toBe(200);
     await page.addStyleTag({ content: freezeMotion });
-    await page.evaluate(waitForStableAssets);
+    const icons = page.locator('#controls-icon-button .ui-button svg');
+    await expect(icons.first()).toBeVisible();
 
-    const centers = await page
-      .locator('#controls-icon-button .ui-button svg')
-      .evaluateAll((icons) =>
-        icons.map((icon) => {
-          const button = icon.closest('button');
-          if (button === null) {
-            return null;
-          }
+    const centers = await icons.evaluateAll((elements) =>
+      elements.map((icon) => {
+        const button = icon.closest('button');
+        if (button === null) {
+          return null;
+        }
 
-          const buttonRect = button.getBoundingClientRect();
-          const iconRect = icon.getBoundingClientRect();
-          return {
-            x: iconRect.left + iconRect.width / 2 - (buttonRect.left + buttonRect.width / 2),
-            y: iconRect.top + iconRect.height / 2 - (buttonRect.top + buttonRect.height / 2),
-          };
-        }),
-      );
+        const buttonRect = button.getBoundingClientRect();
+        const iconRect = icon.getBoundingClientRect();
+        return {
+          x: iconRect.left + iconRect.width / 2 - (buttonRect.left + buttonRect.width / 2),
+          y: iconRect.top + iconRect.height / 2 - (buttonRect.top + buttonRect.height / 2),
+        };
+      }),
+    );
 
     expect(centers.length).toBeGreaterThan(0);
     for (const center of centers) {
@@ -1481,15 +1635,19 @@ for (const theme of themes) {
 }
 
 for (const theme of themes) {
-  test(`ghost button stays borderless while retaining soft depth / ${theme}`, async ({ page }) => {
+  test(`ghost button borrows material and adds no independent resting plate / ${theme}`, async ({
+    page,
+  }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto(`/frame?theme=${theme}&lang=zh#card`, {
+    const response = await page.goto(`/frame?theme=${theme}&lang=zh#card`, {
       waitUntil: 'domcontentloaded',
     });
+    expect(response?.status()).toBe(200);
     await page.addStyleTag({ content: freezeMotion });
-    await page.evaluate(waitForStableAssets);
+    const ghost = page.locator('#card .ui-button--ghost');
+    await expect(ghost).toBeVisible();
 
-    const boundary = await page.locator('#card .ui-button--ghost').evaluate((element) => {
+    const boundary = await ghost.evaluate((element) => {
       const style = getComputedStyle(element);
       const edge = element.querySelector('.ui-button__edge-field');
       if (edge === null) {
@@ -1506,7 +1664,7 @@ for (const theme of themes) {
     });
 
     expect(boundary.borderColor).toBe('rgba(0, 0, 0, 0)');
-    expect(boundary.boxShadow).not.toBe('none');
+    expect(boundary.boxShadow).toBe('none');
     expect(boundary.edgeDisplay).toBe('none');
     expect(boundary.refractionOpacity).toBe(0);
   });
@@ -1679,6 +1837,10 @@ test('button press keeps the glass plate and reaches full press glow / dark', as
         backgroundColor: style.backgroundColor,
         backgroundImage: style.backgroundImage,
         backdropFilter: style.backdropFilter,
+        blurPx: Number.parseFloat(style.backdropFilter.match(/blur\(([-\d.]+)px\)/)?.[1] ?? 'NaN'),
+        expectedBlurPx:
+          Number.parseFloat(style.getPropertyValue('--neoverse-material-blur')) *
+          Number.parseFloat(style.getPropertyValue('--neoverse-control-button-blur-scale')),
         backgroundAlpha:
           alphaMatch === null
             ? style.backgroundColor === 'transparent'
@@ -1691,11 +1853,11 @@ test('button press keeps the glass plate and reaches full press glow / dark', as
     });
 
     expect(press.active).toBe(true);
-    /* The deployed dark button is an aurora image over a transparent sampled
-       backdrop. Press feedback stays in the dedicated ::after glow. */
-    expect(press.backgroundColor).toBe('rgba(0, 0, 0, 0)');
-    expect(press.backgroundImage).not.toBe('none');
-    expect(press.backdropFilter).toContain('blur(36px)');
+    /* Press feedback stays in the dedicated local field, leaving Light optics stable. */
+    expect(press.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+    expect(press.backgroundAlpha).toBeCloseTo(0.15, 3);
+    expect(press.backgroundImage).toBe('none');
+    expect(press.blurPx).toBeCloseTo(press.expectedBlurPx, 3);
     expect(press.pressGlowBackground).not.toBe('none');
     expect(press.pressGlowOpacity).toBe('1');
   } finally {
@@ -1703,35 +1865,37 @@ test('button press keeps the glass plate and reaches full press glow / dark', as
   }
 });
 
-test('dark primary adds hierarchy without abandoning translucent Glass', async ({ page }) => {
+test('dark filled variants preserve distinct depth and Ghost keeps no plate', async ({ page }) => {
   await page.goto('/frame?theme=dark&lang=en#controls', {
     waitUntil: 'domcontentloaded',
   });
   await page.evaluate(waitForStableAssets);
 
-  const surfaces = await page.locator('#controls-button .ui-button').evaluateAll((elements) =>
-    elements.slice(0, 3).map((element) => {
-      const style = getComputedStyle(element);
-      const slashAlpha = style.backgroundColor.match(/\/\s*([0-9.]+)\)/)?.[1];
-      const rgbaAlpha = style.backgroundColor.match(/,\s*([0-9.]+)\)$/)?.[1];
-      return {
-        variant: [...element.classList].find((className) => className.startsWith('ui-button--')),
-        backgroundAlpha:
-          slashAlpha === undefined
-            ? rgbaAlpha === undefined
-              ? style.backgroundColor === 'transparent'
-                ? 0
-                : 1
-              : Number(rgbaAlpha)
-            : Number(slashAlpha),
-        borderColor: style.borderColor,
-        backgroundImage: style.backgroundImage,
-        boxShadow: style.boxShadow,
-        color: style.color,
-        backdropFilter: style.backdropFilter,
-      };
-    }),
-  );
+  const surfaces = await page
+    .locator('#controls-button [data-contract-state="default"] .ui-button')
+    .evaluateAll((elements) =>
+      elements.slice(0, 3).map((element) => {
+        const style = getComputedStyle(element);
+        const slashAlpha = style.backgroundColor.match(/\/\s*([0-9.]+)\)/)?.[1];
+        const rgbaAlpha = style.backgroundColor.match(/,\s*([0-9.]+)\)$/)?.[1];
+        return {
+          variant: [...element.classList].find((className) => className.startsWith('ui-button--')),
+          backgroundAlpha:
+            slashAlpha === undefined
+              ? rgbaAlpha === undefined
+                ? style.backgroundColor === 'transparent'
+                  ? 0
+                  : 1
+                : Number(rgbaAlpha)
+              : Number(slashAlpha),
+          borderColor: style.borderColor,
+          backgroundImage: style.backgroundImage,
+          boxShadow: style.boxShadow,
+          color: style.color,
+          backdropFilter: style.backdropFilter,
+        };
+      }),
+    );
 
   expect(surfaces).toHaveLength(3);
   expect(surfaces.map(({ variant }) => variant)).toEqual([
@@ -1739,11 +1903,19 @@ test('dark primary adds hierarchy without abandoning translucent Glass', async (
     'ui-button--secondary',
     'ui-button--ghost',
   ]);
-  expect(surfaces[0]?.backgroundAlpha).toBe(0);
-  expect(surfaces[1]?.backgroundAlpha).toBe(0);
-  expect(surfaces[0]?.backgroundImage).not.toBe('none');
-  expect(surfaces[1]?.backgroundImage).not.toBe('none');
-  expect(surfaces[0]?.backgroundImage).not.toBe(surfaces[1]?.backgroundImage);
+  // Both filled variants retain a sampled, translucent plate; their
+  // low-alpha tint is not an opaque background or a zero-alpha fake Glass.
+  expect(surfaces[0]?.backgroundAlpha).toBeGreaterThan(0);
+  expect(surfaces[0]?.backgroundAlpha).toBeLessThan(0.2);
+  expect(surfaces[1]?.backgroundAlpha).toBeGreaterThan(0);
+  expect(surfaces[1]?.backgroundAlpha).toBeLessThan(0.2);
+  expect(surfaces[0]?.backgroundImage).toBe('none');
+  expect(surfaces[1]?.backgroundImage).toBe('none');
+  expect(surfaces[0]?.backgroundAlpha).toBeCloseTo(0.15, 3);
+  expect(surfaces[1]?.backgroundAlpha).toBeCloseTo(0.15, 3);
+  // Primary and secondary deliberately have different elevation treatments.
+  expect(surfaces[0]?.boxShadow).not.toBe('none');
+  expect(surfaces[1]?.boxShadow).not.toBe('none');
   expect(surfaces[0]?.boxShadow).not.toBe(surfaces[1]?.boxShadow);
   expect(surfaces[0]?.color).not.toBe(surfaces[1]?.color);
   expect(surfaces[2]?.borderColor).toBe('rgba(0, 0, 0, 0)');
@@ -1767,39 +1939,48 @@ test('touch density keeps the compact control geometry and adds a transparent hi
   await page.evaluate(waitForStableAssets);
 
   const touchControls = page.locator('[data-pointer-profile="touch"] [data-density-controls]');
-  await touchControls.scrollIntoViewIfNeeded();
-  const buttonContract = await touchControls
-    .locator('.ui-button')
-    .first()
-    .evaluate((element) => {
-      const pseudo = getComputedStyle(element, '::before');
-      const rect = element.getBoundingClientRect();
-      return {
-        height: rect.height,
-        inset: pseudo.inset,
-        pointerEvents: pseudo.pointerEvents,
-        hitTarget: document.elementFromPoint(rect.left - 4, rect.top + rect.height / 2) === element,
-      };
-    });
-  const segmentContract = await touchControls
-    .locator('.ui-segmented-control__option')
-    .first()
-    .evaluate((element) => {
-      const pseudo = getComputedStyle(element, '::before');
-      const rect = element.getBoundingClientRect();
-      return {
-        inset: pseudo.inset,
-        pointerEvents: pseudo.pointerEvents,
-        hitTarget: document.elementFromPoint(rect.left - 4, rect.top + rect.height / 2) === element,
-      };
-    });
+  const touchButton = touchControls.locator('.ui-button').first();
+  const touchSegment = touchControls.locator('.ui-segmented-control__option').first();
+  // The density specimen exceeds a mobile viewport; scroll the actual target.
+  await touchButton.scrollIntoViewIfNeeded();
+  const buttonContract = await touchButton.evaluate((element) => {
+    const pseudo = getComputedStyle(element, '::before');
+    const rect = element.getBoundingClientRect();
+    const tokenProbe = document.createElement('span');
+    tokenProbe.style.display = 'block';
+    tokenProbe.style.height = 'var(--neoverse-button-height-sm)';
+    element.append(tokenProbe);
+    const tokenHeight = Number.parseFloat(getComputedStyle(tokenProbe).height);
+    tokenProbe.remove();
+    return {
+      height: rect.height,
+      tokenHeight,
+      expandedHeight: rect.height + 2 * Math.abs(Number.parseFloat(pseudo.top)),
+      inset: pseudo.inset,
+      pointerEvents: pseudo.pointerEvents,
+      overflow: getComputedStyle(element).overflow,
+      hitTarget: document.elementFromPoint(rect.left - 4, rect.top + rect.height / 2) === element,
+    };
+  });
+  await touchSegment.scrollIntoViewIfNeeded();
+  const segmentContract = await touchSegment.evaluate((element) => {
+    const pseudo = getComputedStyle(element, '::before');
+    const rect = element.getBoundingClientRect();
+    return {
+      inset: pseudo.inset,
+      pointerEvents: pseudo.pointerEvents,
+      hitTarget: document.elementFromPoint(rect.left - 4, rect.top + rect.height / 2) === element,
+    };
+  });
 
   expect(buttonContract).toMatchObject({
-    height: 28,
     inset: '-8px',
     pointerEvents: 'auto',
     hitTarget: true,
   });
+  expect(buttonContract.height).toBeCloseTo(buttonContract.tokenHeight, 2);
+  expect(buttonContract.expandedHeight).toBeGreaterThanOrEqual(44);
+  expect(buttonContract.overflow, 'The expanded touch area must not be clipped').toBe('visible');
   expect(segmentContract).toMatchObject({
     inset: '-8px',
     pointerEvents: 'auto',

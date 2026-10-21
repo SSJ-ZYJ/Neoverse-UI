@@ -78,8 +78,9 @@ Preference order:
    `data-neoverse-dissolve` is rasterized (HTML-in-Canvas capture where
    available, synthetic theme-colored dust otherwise) and erodes into fine
    dust on a pointer-transparent fullscreen canvas; the incoming region fades
-   in late (`--neoverse-motion-particle-enter-delay/-duration`). Tune the dust
-   with the `particleDissolvePresets` (`high` / `medium`).
+   in late (`--neoverse-motion-particle-enter-delay/-duration`). The shared
+   sampling spacing favors a lighter field; tune further with
+   `particleDissolvePresets` (`high` / `medium`).
 2. **Crossfade** — without WebGL2 the View Transition's own crossfade runs,
    timed by the spatial role. A dissolve that cannot be particles simply
    fades.

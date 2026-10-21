@@ -58,6 +58,7 @@ const props = defineProps<LabModuleProps>();
           :locale="props.locale"
           :class-name="token.className"
           :variable="token.variable"
+          :layout-role="token.layoutRole"
           preview="layout"
         />
       </div>

@@ -1,6 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { collectOccluders, createGlassRenderer, glassRendererAttribute } from './index';
-import { glassFragmentShader } from './shader';
 
 type FakeGl = {
   ARRAY_BUFFER: number;
@@ -187,6 +186,7 @@ describe('Glass renderer', () => {
     document.documentElement.removeAttribute(glassRendererAttribute);
     document.documentElement.style.removeProperty('--neoverse-color-edge-light');
     document.documentElement.style.removeProperty('color-scheme');
+    document.documentElement.style.removeProperty('--neoverse-material-edge-refraction-gain');
     document.body.innerHTML = '';
     vi.restoreAllMocks();
   });
@@ -214,12 +214,36 @@ describe('Glass renderer', () => {
     expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
     expect(document.documentElement.getAttribute(glassRendererAttribute)).toBe('webgl');
     expect(webgl2.drawArrays).toHaveBeenCalledTimes(1);
+    // The released edge uses luminous composition rather than ordinary source-over.
+    expect(webgl2.blendFuncSeparate).toHaveBeenCalledWith(
+      webgl2.SRC_ALPHA,
+      webgl2.ONE_MINUS_SRC_ALPHA,
+      webgl2.ONE,
+      webgl2.ONE_MINUS_SRC_ALPHA,
+    );
     expect(webgl2.getUniformLocation).toHaveBeenCalledWith(expect.anything(), 'u_pixel_ratio');
     expect(webgl2.uniform1f).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'u_pixel_ratio' }),
       1,
     );
     renderer.destroy();
+  });
+
+  it('does not treat particle capture clones as independent Glass surfaces', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const source = document.createElement('article');
+    source.className = 'material-glass-elevated';
+    setRect(source, { width: 200, height: 120 });
+    const capture = document.createElement('div');
+    capture.dataset.neoverseParticleCapture = '';
+    const clone = source.cloneNode(true) as HTMLElement;
+    setRect(clone, { width: 200, height: 120 });
+    capture.append(clone);
+    document.body.append(source, capture);
+    createTestRenderer().mount();
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    expect(clone.style.length).toBe(0);
   });
 
   it('falls back to WebGL1 when WebGL2 is unavailable', () => {
@@ -236,6 +260,24 @@ describe('Glass renderer', () => {
     expect(webgl.drawArrays).toHaveBeenCalledTimes(1);
     expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
     renderer.destroy();
+  });
+
+  it('rasterizes only the perimeter of a large Glass panel', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const surface = document.createElement('article');
+    surface.className = 'material-glass-elevated';
+    surface.style.borderRadius = '32px';
+    setRect(surface, { width: 960, height: 640 });
+    document.body.append(surface);
+    const renderer = createTestRenderer({ maxDevicePixelRatio: 1 });
+    renderer.mount();
+    const rasterized = gl.scissor.mock.calls.reduce(
+      (sum, [, , width, height]) => sum + width * height,
+      0,
+    );
+    expect(rasterized).toBeLessThan(960 * 640 * 0.35);
+    expect(gl.drawArrays).toHaveBeenCalledTimes(4);
   });
 
   it('leaves CSS-selected surfaces on the library edge field', () => {
@@ -267,7 +309,7 @@ describe('Glass renderer', () => {
     expect(
       document.querySelector<HTMLCanvasElement>('[data-neoverse-glass-renderer-canvas]')?.style
         .mixBlendMode,
-    ).toBe('');
+    ).toBe('overlay');
   });
 
   it('masks a Glass edge wherever an overlay paints above the surface', () => {
@@ -385,7 +427,7 @@ describe('Glass renderer', () => {
     expect(occluders).toHaveLength(0);
   });
 
-  it('leaves button-owned edge fields out of the shared WebGL pass by default', () => {
+  it('uses the same backdrop-composited WebGL edge for independent buttons', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const button = document.createElement('button');
@@ -396,7 +438,56 @@ describe('Glass renderer', () => {
     const renderer = createTestRenderer();
     renderer.mount();
 
-    expect(gl.drawArrays).not.toHaveBeenCalled();
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+  });
+
+  it('applies light gain to the live composited backdrop in both themes', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const card = document.createElement('div');
+    card.className = 'material-glass-elevated';
+    setRect(card, { width: 100, height: 60 });
+    document.body.append(card);
+    document.documentElement.style.colorScheme = 'light';
+    document.documentElement.style.setProperty('--neoverse-material-edge-refraction-gain', '2.5');
+    const renderer = createTestRenderer();
+    renderer.mount();
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    expect(canvas?.style.mixBlendMode).toBe('overlay');
+    expect(gl.uniform1f).toHaveBeenCalledWith(expect.objectContaining({ name: 'u_gain' }), 2.5);
+    document.documentElement.style.colorScheme = 'dark';
+    document.documentElement.style.setProperty('--neoverse-material-edge-refraction-gain', '1');
+    renderer.refresh();
+    expect(canvas?.style.mixBlendMode).toBe('overlay');
+    expect(
+      gl.uniform1f.mock.calls.filter(([location]) => location?.name === 'u_gain').at(-1)?.[1],
+    ).toBe(1);
+  });
+
+  it('keeps chroma independent of brighter edge opacity and ancestor opacity', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const parent = document.createElement('section');
+    parent.style.opacity = '0.5';
+    const card = document.createElement('article');
+    card.className = 'material-glass-elevated';
+    card.style.setProperty('--neoverse-material-edge-refraction-opacity', '0.54');
+    card.style.setProperty('--neoverse-material-edge-refraction-chroma', '0.12');
+    setRect(card, { width: 100, height: 60 });
+    parent.append(card);
+    document.body.append(parent);
+    const renderer = createTestRenderer();
+    renderer.mount();
+    expect(gl.uniform1f).toHaveBeenCalledWith(expect.objectContaining({ name: 'u_opacity' }), 0.27);
+    expect(gl.uniform1f).toHaveBeenCalledWith(expect.objectContaining({ name: 'u_chroma' }), 0.12);
+    card.style.setProperty('--neoverse-material-edge-refraction-opacity', '0.8');
+    renderer.refresh();
+    expect(gl.uniform1f).toHaveBeenCalledWith(expect.objectContaining({ name: 'u_opacity' }), 0.4);
+    expect(
+      gl.uniform1f.mock.calls.filter(([location]) => location?.name === 'u_chroma').at(-1)?.[1],
+    ).toBe(0.12);
   });
 
   it('allows an explicitly opted-in button to use the shared WebGL edge pass', () => {
@@ -612,7 +703,7 @@ describe('Glass renderer', () => {
     expect(radiiCall).toEqual([expect.objectContaining({ name: 'u_radii' }), 18, 18, 18, 18]);
   });
 
-  it('preserves translucent CSS color tokens in WebGL uniforms', () => {
+  it('resolves the released colour response without losing translucent token strength', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     document.documentElement.style.setProperty(
@@ -631,44 +722,17 @@ describe('Glass renderer', () => {
     const renderer = createTestRenderer();
     renderer.mount();
 
-    const edgeLightCall = gl.uniform3f.mock.calls
-      .filter(([location]) => location?.name === 'u_edge_light')
-      .at(-1);
-    const carrierCall = gl.uniform3f.mock.calls
-      .filter(([location]) => location?.name === 'u_carrier')
-      .at(-1);
-    expect(edgeLightCall?.[1]).toBeCloseTo(0.13, 3);
-    expect(edgeLightCall?.[2]).toBeCloseTo(0.13, 3);
-    expect(edgeLightCall?.[3]).toBeCloseTo(0.13, 3);
-    expect(carrierCall?.[1]).toBeCloseTo(0.0647, 3);
-    expect(carrierCall?.[2]).toBeCloseTo(0.0647, 3);
-    expect(carrierCall?.[3]).toBeCloseTo(0.0647, 3);
-  });
-
-  it.each([
-    ['light', 1],
-    ['dark', 0],
-    ['normal', -1],
-  ] as const)('uses the %s color scheme independently of edge tint', (scheme, expected) => {
-    const gl = createFakeGl();
-    installCanvasContext({ webgl2: gl });
-    document.documentElement.style.setProperty('color-scheme', scheme);
-    document.documentElement.style.setProperty(
-      '--neoverse-color-edge-light',
-      'rgb(116 186 229 / 48%)',
+    expect(gl.uniform3f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_edge_light' }),
+      0.13,
+      0.13,
+      0.13,
     );
-    const glass = document.createElement('article');
-    glass.className = 'material-glass-elevated';
-    glass.style.setProperty('--neoverse-material-edge-refraction-opacity', '0.22');
-    setRect(glass, { width: 100, height: 60 });
-    document.body.append(glass);
-
-    const renderer = createTestRenderer();
-    renderer.mount();
-
-    expect(gl.uniform1f).toHaveBeenCalledWith(
-      expect.objectContaining({ name: 'u_light_surface' }),
-      expected,
+    expect(gl.uniform3f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_carrier' }),
+      0.0647,
+      0.0647,
+      0.0647,
     );
   });
 
@@ -720,9 +784,9 @@ describe('Glass renderer', () => {
     second.mount();
 
     expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
-    // Only independent surface planes use the shared renderer. Segmented
-    // controls and buttons retain their component-owned local edge fields.
-    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+    // Independent buttons and surface planes share the backdrop compositor.
+    // Segmented controls retain their component-owned local edge fields.
+    expect(gl.drawArrays).toHaveBeenCalledTimes(3);
     second.destroy();
     first.destroy();
   });
@@ -757,19 +821,194 @@ describe('Glass renderer', () => {
     expect(gl.deleteBuffer).toHaveBeenCalledTimes(1);
   });
 
-  it('removes the canvas and marker when the WebGL context is lost', () => {
+  it('falls back to CSS on context loss and rebuilds the renderer after context restore', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
     const renderer = createTestRenderer();
     renderer.mount();
 
     const canvas = document.querySelector<HTMLCanvasElement>(
       '[data-neoverse-glass-renderer-canvas]',
     );
-    canvas?.dispatchEvent(new Event('webglcontextlost'));
+    const contextLost = new Event('webglcontextlost', { cancelable: true });
+    canvas?.dispatchEvent(contextLost);
 
-    expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBeNull();
+    expect(contextLost.defaultPrevented).toBe(true);
+    expect(canvas?.isConnected).toBe(true);
+    expect(canvas?.style.display).toBe('none');
     expect(document.documentElement.hasAttribute(glassRendererAttribute)).toBe(false);
+
+    canvas?.dispatchEvent(new Event('webglcontextrestored'));
+
+    const restoredCanvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    expect(restoredCanvas).not.toBeNull();
+    expect(restoredCanvas).not.toBe(canvas);
+    expect(restoredCanvas?.style.display).toBe('block');
+    expect(document.documentElement.getAttribute(glassRendererAttribute)).toBe('webgl');
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+  });
+
+  it('can mount, destroy, and mount the same renderer again without duplicate canvases', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+    const renderer = createTestRenderer();
+
+    renderer.mount();
+    renderer.mount();
+    expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+
+    renderer.destroy();
+    expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBeNull();
+
+    renderer.mount();
+    expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+  });
+
+  it('unobserves Glass elements that are removed from the renderer ownership set', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const observe = vi.fn();
+    const unobserve = vi.fn();
+    const disconnect = vi.fn();
+    const OriginalResizeObserver = window.ResizeObserver;
+    window.ResizeObserver = class {
+      public observe = observe;
+      public unobserve = unobserve;
+      public disconnect = disconnect;
+    } as unknown as typeof ResizeObserver;
+
+    try {
+      const glass = document.createElement('article');
+      glass.className = 'material-glass-subtle';
+      setRect(glass, {});
+      document.body.append(glass);
+      const renderer = createTestRenderer();
+      renderer.mount();
+      expect(observe).toHaveBeenCalledWith(glass);
+
+      glass.dataset.neoverseGlassEdgePass = 'css';
+      renderer.refresh();
+      expect(unobserve).toHaveBeenCalledWith(glass);
+    } finally {
+      window.ResizeObserver = OriginalResizeObserver;
+    }
+  });
+
+  it('reacts to dynamic Glass edge ownership attributes through the mutation observer', async () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      callback(0);
+      return 1;
+    });
+    const renderer = createTestRenderer();
+    renderer.mount();
+    gl.drawArrays.mockClear();
+
+    glass.dataset.neoverseGlassEdgePass = 'css';
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+
+    delete glass.dataset.neoverseGlassEdgePass;
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+  });
+
+  it('reacts when a nested Glass surface switches between local and inherited ownership', async () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const outer = document.createElement('article');
+    outer.className = 'material-glass-elevated';
+    setRect(outer, { width: 320, height: 200 });
+    const nested = document.createElement('div');
+    nested.className = 'material-glass-subtle';
+    setRect(nested, { width: 160, height: 96 });
+    outer.append(nested);
+    document.body.append(outer);
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      callback(0);
+      return 1;
+    });
+    const renderer = createTestRenderer();
+    renderer.mount();
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+
+    gl.drawArrays.mockClear();
+    nested.dataset.neoverseGlassNesting = 'inherit';
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+
+    gl.drawArrays.mockClear();
+    delete nested.dataset.neoverseGlassNesting;
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+  });
+
+  it('coalesces repeated scroll refresh requests into one animation frame', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    const renderer = createTestRenderer();
+    renderer.mount();
+    gl.drawArrays.mockClear();
+
+    window.dispatchEvent(new Event('scroll'));
+    window.dispatchEvent(new Event('scroll'));
+    window.dispatchEvent(new Event('scroll'));
+    expect(frames).toHaveLength(1);
+
+    frames.shift()?.(0);
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+  });
+
+  it('caps device pixel ratio and falls back to the default cap for invalid options', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(3);
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+
+    const capped = createTestRenderer({ maxDevicePixelRatio: 1.5 });
+    capped.mount();
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_pixel_ratio' }),
+      1.5,
+    );
+    capped.destroy();
+
+    gl.uniform1f.mockClear();
+    const defaulted = createTestRenderer({ maxDevicePixelRatio: Number.NaN });
+    defaulted.mount();
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_pixel_ratio' }),
+      2,
+    );
   });
 
   it('discovers the established Aurora Glass surface alias', () => {
@@ -784,28 +1023,6 @@ describe('Glass renderer', () => {
     renderer.mount();
 
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
-  });
-
-  it('preserves the established chromatic edge-refraction field', () => {
-    expect(glassFragmentShader).toContain('uniform vec3 u_primary;');
-    expect(glassFragmentShader).toContain('uniform vec3 u_secondary;');
-    expect(glassFragmentShader).toContain('uniform vec3 u_tertiary;');
-    expect(glassFragmentShader).toContain(
-      'vec3 refractedBase = mix(u_primary, u_secondary, 0.48 + (bottomRightScatter * 0.2));',
-    );
-    expect(glassFragmentShader).toContain(
-      'float chromaticVisibility = mix(1.0, 1.34, lightSurface);',
-    );
-  });
-
-  it('keeps the opposing rounded corners connected in the directional edge field', () => {
-    const directionalAlpha = glassFragmentShader.match(/float directionalAlpha =([\s\S]*?);/)?.[0];
-    const opposingCornerCoefficient = Number.parseFloat(
-      directionalAlpha?.match(/opposingCornerCatch \* ([\d.]+)/)?.[1] ?? '0',
-    );
-
-    expect(directionalAlpha).toContain('opposingCornerCatch');
-    expect(opposingCornerCoefficient).toBeGreaterThanOrEqual(0.24);
   });
 
   it('tracks moving glass during CSS transitions and stops repainting when they finish', () => {

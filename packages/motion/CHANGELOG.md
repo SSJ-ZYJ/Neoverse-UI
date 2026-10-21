@@ -1,5 +1,11 @@
 # @neoverse-ui/motion
 
+## Unreleased
+
+### Patch Changes
+
+- Reduced page-transition particle count using wider shared grid spacing.
+
 ## 0.2.0
 
 ### Minor Changes

@@ -1,5 +1,7 @@
 @layer components {
   .ui-dock {
+    --neoverse-control-surface-scale-md: var(--neoverse-dock-scale-md);
+    --neoverse-control-surface-scale-lg: var(--neoverse-dock-scale-lg);
     box-sizing: border-box;
     width: max-content;
     max-width: 100%;
@@ -11,6 +13,15 @@
   }
 
   .ui-dock > .ui-control-surface__group--primary {
+    --neoverse-navigation-item-font-size-sm: calc(
+      var(--neoverse-font-size-sm) *
+      var(--neoverse-dock-navigation-type-factor)
+    );
+    --neoverse-navigation-item-font-size-md: var(--neoverse-navigation-item-font-size-sm);
+    --neoverse-navigation-item-font-size-lg: calc(
+      var(--neoverse-font-size-md) *
+      var(--neoverse-dock-navigation-type-factor)
+    );
     display: flex;
     width: max-content;
     min-width: 0;

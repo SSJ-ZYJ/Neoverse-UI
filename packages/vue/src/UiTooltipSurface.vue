@@ -34,6 +34,6 @@ const forwardedAttrs = computed(() => {
     data-neoverse-surface-overflow="visible"
     data-neoverse-tooltip-surface
   >
-    <slot />
+    <span class="ui-tooltip-surface__content" :class="presenceAppearClassName"><slot /></span>
   </component>
 </template>

@@ -1,0 +1,112 @@
+@layer components {
+  .ui-timeline {
+    --neoverse-timeline-node-size: var(--neoverse-space-8);
+    --neoverse-timeline-node-center: var(--neoverse-space-6);
+
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    color: var(--neoverse-color-text-primary);
+    list-style: none;
+  }
+
+  .ui-timeline__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: var(--neoverse-timeline-node-size) minmax(0, 1fr);
+    column-gap: var(--neoverse-space-3);
+    min-width: 0;
+    padding-block-end: var(--neoverse-space-4);
+  }
+
+  .ui-timeline__item:last-child {
+    padding-block-end: 0;
+  }
+
+  /* Each segment reaches the next node center, including variable-height
+     content and the item spacing. The last item never owns an outgoing line. */
+  .ui-timeline__item:not(:last-child)::before {
+    position: absolute;
+    inset-inline-start: calc(
+      (var(--neoverse-timeline-node-size) - var(--neoverse-border-width-thin)) /
+      2
+    );
+    inset-block-start: var(--neoverse-timeline-node-center);
+    inset-block-end: calc(var(--neoverse-timeline-node-center) * -1);
+    width: var(--neoverse-border-width-thin);
+    background: var(--neoverse-color-border-default);
+    content: '';
+    pointer-events: none;
+  }
+
+  .ui-timeline__node {
+    position: relative;
+    align-self: start;
+    width: var(--neoverse-timeline-node-size);
+    height: var(--neoverse-timeline-node-size);
+    margin-block-start: calc(
+      var(--neoverse-timeline-node-center) -
+      var(--neoverse-timeline-node-size) /
+      2
+    );
+    box-sizing: border-box;
+    border-radius: var(--neoverse-radius-control-inner);
+    pointer-events: none;
+  }
+
+  .ui-timeline__node::after {
+    position: absolute;
+    inset: 0;
+    width: var(--neoverse-space-2);
+    height: var(--neoverse-space-2);
+    margin: auto;
+    border-radius: var(--neoverse-radius-pill);
+    background: var(--neoverse-color-accent-secondary);
+    content: '';
+  }
+
+  .ui-timeline__content {
+    display: grid;
+    align-content: start;
+    gap: var(--neoverse-space-2);
+    min-width: 0;
+    padding: var(--neoverse-space-3) var(--neoverse-space-4);
+    border-radius: var(--neoverse-radius-control);
+    overflow-wrap: anywhere;
+    font-family: var(--neoverse-typography-body-font-family);
+    font-size: var(--neoverse-typography-body-md-size);
+    font-weight: var(--neoverse-typography-body-md-weight);
+    line-height: var(--neoverse-typography-body-md-line-height);
+    letter-spacing: var(--neoverse-typography-body-md-letter-spacing);
+  }
+
+  .ui-timeline__content > * {
+    min-width: 0;
+  }
+
+  .ui-timeline__title {
+    margin: 0;
+    color: var(--neoverse-color-text-primary);
+    font-family: var(--neoverse-typography-title-font-family);
+    font-size: var(--neoverse-typography-title-sm-size);
+    font-weight: var(--neoverse-typography-title-sm-weight);
+    line-height: var(--neoverse-typography-title-sm-line-height);
+    letter-spacing: var(--neoverse-typography-title-sm-letter-spacing);
+  }
+
+  .ui-timeline__description {
+    margin: 0;
+    color: var(--neoverse-color-text-secondary);
+  }
+
+  .ui-timeline__time {
+    width: fit-content;
+    color: var(--neoverse-color-text-muted);
+    font-variant-numeric: tabular-nums;
+    font-family: var(--neoverse-typography-label-font-family);
+    font-size: var(--neoverse-typography-label-sm-size);
+    font-weight: var(--neoverse-typography-label-sm-weight);
+    line-height: var(--neoverse-typography-label-sm-line-height);
+    letter-spacing: var(--neoverse-typography-label-sm-letter-spacing);
+  }
+}

@@ -1,0 +1,205 @@
+{
+  "schemaVersion": 1,
+  "components": [
+    {
+      "name": "UiButton",
+      "vueType": "ButtonProps",
+      "reactType": "UiButtonProps",
+      "props": ["variant", "size", "type", "disabled", "loading", "stretch", "surface"]
+    },
+    {
+      "name": "UiIconButton",
+      "vueType": "IconButtonProps",
+      "reactType": "UiIconButtonProps",
+      "props": ["as", "label", "variant", "size", "disabled", "loading", "stretch", "surface"]
+    },
+    {
+      "name": "UiAction",
+      "vueType": "ActionProps",
+      "reactType": "UiActionProps",
+      "props": ["as", "href", "variant", "size", "scale", "type", "disabled", "stretch", "surface"]
+    },
+    {
+      "name": "UiSurface",
+      "vueType": "SurfaceProps",
+      "reactType": "UiSurfaceProps",
+      "props": ["as", "surface", "glassNesting", "contentOverflow"]
+    },
+    {
+      "name": "UiCard",
+      "vueType": "CardProps",
+      "reactType": "UiCardProps",
+      "props": ["as", "surface"]
+    },
+    {
+      "name": "UiCheckbox",
+      "vueType": "CheckboxProps",
+      "reactType": "UiCheckboxProps",
+      "props": ["validation", "disabled"],
+      "aliases": {
+        "value": ["modelValue", "checked"],
+        "readonly": ["readonly", "readOnly"]
+      }
+    },
+    {
+      "name": "UiRadioGroup",
+      "vueType": "RadioGroupProps",
+      "reactType": "UiRadioGroupProps",
+      "props": ["options", "name", "disabled", "validation"],
+      "aliases": {
+        "value": ["modelValue", "value"],
+        "readonly": ["readonly", "readOnly"],
+        "accessibleLabel": ["ariaLabel", "aria-label"]
+      }
+    },
+    {
+      "name": "UiSwitch",
+      "vueType": "SwitchProps",
+      "reactType": "UiSwitchProps",
+      "props": ["validation", "disabled"],
+      "aliases": {
+        "value": ["modelValue", "checked"],
+        "readonly": ["readonly", "readOnly"]
+      }
+    },
+    {
+      "name": "UiField",
+      "vueType": "FieldProps",
+      "reactType": "UiFieldProps",
+      "props": [
+        "controlId",
+        "descriptionId",
+        "messageId",
+        "label",
+        "description",
+        "message",
+        "validation",
+        "required",
+        "disabled"
+      ]
+    },
+    {
+      "name": "UiInput",
+      "vueType": "InputProps",
+      "reactType": "UiInputProps",
+      "props": ["validation", "disabled", "incrementLabel", "decrementLabel"],
+      "aliases": {
+        "value": ["modelValue", "value"],
+        "readonly": ["readonly", "readOnly"]
+      }
+    },
+    {
+      "name": "UiTextarea",
+      "vueType": "TextareaProps",
+      "reactType": "UiTextareaProps",
+      "props": ["validation", "disabled"],
+      "aliases": {
+        "value": ["modelValue", "value"],
+        "readonly": ["readonly", "readOnly"]
+      }
+    },
+    {
+      "name": "UiSelect",
+      "vueType": "SelectProps",
+      "reactType": "UiSelectProps",
+      "props": ["options", "placeholder", "disabled", "validation"],
+      "aliases": {
+        "value": ["modelValue", "value"],
+        "readonly": ["readonly", "readOnly"]
+      }
+    },
+    {
+      "name": "UiTable",
+      "vueType": "TableProps",
+      "reactType": "UiTableProps",
+      "props": ["caption", "striped", "hoverable"]
+    },
+    {
+      "name": "UiDisclosure",
+      "vueType": "DisclosureProps",
+      "reactType": "UiDisclosureProps",
+      "props": ["summary", "open"]
+    },
+    {
+      "name": "UiPresence",
+      "vueType": "PresenceProps",
+      "reactType": "UiPresenceProps",
+      "props": ["show", "variant", "origin", "as"]
+    },
+    {
+      "name": "UiPopover",
+      "vueType": "PopoverProps",
+      "reactType": "UiPopoverProps",
+      "props": ["open", "defaultOpen", "disabled", "placement", "matchTriggerWidth", "ariaLabel"]
+    },
+    {
+      "name": "UiDropdownMenu",
+      "vueType": "DropdownMenuProps",
+      "reactType": "UiDropdownMenuProps",
+      "props": ["items", "open", "defaultOpen", "disabled", "placement", "ariaLabel"]
+    }
+  ],
+  "dataContracts": [
+    {
+      "name": "FieldControlAttrs",
+      "vueType": "FieldControlAttrs",
+      "reactType": "UiFieldControlAttrs",
+      "props": ["id", "aria-describedby", "required", "disabled"]
+    },
+    {
+      "name": "SelectOption",
+      "vueType": "SelectOption",
+      "reactType": "UiSelectOption",
+      "props": ["value", "label", "disabled"]
+    },
+    {
+      "name": "RadioOption",
+      "vueType": "RadioOption",
+      "reactType": "UiRadioGroupOption",
+      "props": ["value", "label", "description", "disabled"]
+    },
+    {
+      "name": "DropdownMenuItem",
+      "vueType": "DropdownMenuItem",
+      "reactType": "UiDropdownMenuItem",
+      "props": ["id", "label", "disabled", "tone"]
+    }
+  ],
+  "literalUnions": [
+    {
+      "name": "ButtonVariant",
+      "vueType": "ButtonVariant",
+      "reactType": "ButtonVariant"
+    },
+    {
+      "name": "ActionSize",
+      "vueType": "ActionSize",
+      "reactType": "ActionSize"
+    },
+    {
+      "name": "ActionScale",
+      "vueType": "ActionScale",
+      "reactType": "ActionScale"
+    },
+    {
+      "name": "SurfacePreset",
+      "vueType": "SurfacePreset",
+      "reactType": "SurfacePreset"
+    },
+    {
+      "name": "ControlSurfacePreset",
+      "vueType": "ControlSurfacePreset",
+      "reactType": "ControlSurfacePreset"
+    },
+    {
+      "name": "FormControlValidation",
+      "vueType": "FormControlValidation",
+      "reactType": "FormControlValidation"
+    },
+    {
+      "name": "DropdownMenuItemTone",
+      "vueType": "DropdownMenuItemTone",
+      "reactType": "UiDropdownMenuItemTone"
+    }
+  ]
+}

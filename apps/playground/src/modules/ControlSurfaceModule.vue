@@ -116,8 +116,9 @@ const extraCopy = {
     :label="copy.states.variants.label"
     :hint="copy.states.variants.hint"
     :locale="props.locale"
+    layout="wide"
   >
-    <div class="grid w-full gap-3 md:grid-cols-3">
+    <div class="playground-preview-columns">
       <UiControlSurface
         v-for="variant in surfaceVariants"
         :key="variant.surface"
@@ -159,12 +160,6 @@ const extraCopy = {
         <code class="min-w-0 text-caption text-muted">surface="none"</code>
         <UiControlSurface surface="none">
           <UiButton size="sm" variant="ghost" surface="none">none</UiButton>
-        </UiControlSurface>
-      </div>
-      <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-        <code class="min-w-0 text-caption text-muted">surface="chrome"</code>
-        <UiControlSurface surface="chrome">
-          <UiButton size="sm" variant="ghost" surface="none">chrome</UiButton>
         </UiControlSurface>
       </div>
       <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">

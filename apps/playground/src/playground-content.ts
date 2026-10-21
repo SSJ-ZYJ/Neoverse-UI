@@ -89,39 +89,46 @@ export const appCopy = {
 } as const;
 
 export const groupCopy = {
-  foundations: {
-    label: localized('Foundations', '基础'),
+  tokens: {
+    label: localized('Design Tokens', '设计令牌'),
     description: localized(
-      'Core tokens for color, type, layout geometry, and motion.',
-      '覆盖色彩、字体、布局几何与动效的基础设计令牌。',
+      'Color, typography, layout geometry, and elevation from the shared token package.',
+      '共享令牌包中的色彩、字体、布局几何与阴影层级。',
     ),
   },
   materials: {
-    label: localized('Materials', '材质与层级'),
+    label: localized('Materials & Styles', '材质与样式'),
     description: localized(
-      'Surface materials and elevation rules that establish visual hierarchy.',
-      '用于建立视觉层级的表面材质与阴影规则。',
+      'Tailwind surface styles and the optional Glass runtime enhancement.',
+      'Tailwind 表面样式与可选的 Glass Runtime 增强。',
+    ),
+  },
+  motion: {
+    label: localized('Motion', '动效'),
+    description: localized(
+      'Motion roles, Presence transitions, and page-transition choreography.',
+      '动效角色、Presence 过渡与页面转场编排。',
     ),
   },
   components: {
-    label: localized('Components', '组件'),
+    label: localized('UI Components', 'UI 组件'),
     description: localized(
-      'Interactive, status, content, and scrolling primitives for product UI.',
-      '产品界面使用的交互、状态、内容与滚动基础组件。',
+      'Framework components, ordered from controls and forms to content and navigation.',
+      '框架组件，按控件、表单、反馈、内容与导航的使用顺序排列。',
     ),
   },
   patterns: {
-    label: localized('Patterns', '组合模式'),
+    label: localized('Compositions', '组合场景'),
     description: localized(
-      'Reusable interface compositions that show components working together.',
-      '展示多个组件如何协同工作的可复用界面组合。',
+      'Multi-component interface patterns and the terminal composition, rather than standalone package APIs.',
+      '多组件界面模式与终端组合，而非独立的包级组件 API。',
     ),
   },
   validation: {
-    label: localized('Validation', '产品校验'),
+    label: localized('Contract Lab', '契约实验室'),
     description: localized(
-      'Consumer-facing parity fixtures used to validate the system against real products.',
-      '用于将设计系统与真实消费端产品进行一致性校验的场景。',
+      'Contract coverage, framework parity, runtime behavior, and audited consumer fixtures share one validation area.',
+      '契约覆盖、框架一致性、Runtime 行为与真实消费端校验集中在同一验证区域。',
     ),
   },
 } as const;
@@ -328,9 +335,10 @@ export const moduleCopy = {
       hide: localized('Hide', '隐藏'),
       stagger: localized('Staggered list', '交错列表'),
       staggerDescription: localized(
-        'TransitionGroup glides reordered items (FLIP) and staggers entries; exits stay immediate.',
-        'TransitionGroup 让重排的条目滑行（FLIP）并交错入场；离开保持即时。',
+        'Replay to see items fade and rise in sequence. Reorder to follow the same items as they slide into new positions.',
+        '重播观察条目依次淡入、上移；重排观察同一条目平滑移到新位置。',
       ),
+      replayEntries: localized('Replay entrance', '重播入场'),
       shuffle: localized('Shuffle', '重排'),
     },
     page: {
@@ -371,6 +379,13 @@ export const moduleCopy = {
       '真实的 UiButton 实例；悬停与按下由浏览器状态呈现，禁用与加载由组件属性控制。',
     ),
     states: {
+      circular: {
+        label: localized('Circular buttons', '圆形按钮'),
+        hint: localized(
+          'The same circular icon button used in Surface & Glass, in sm, md, and lg sizes.',
+          '复用“表面与玻璃”中的圆形图标按钮，展示 sm、md、lg 三档尺寸。',
+        ),
+      },
       default: {
         label: localized('Default', '默认'),
         hint: localized('Primary, secondary, and ghost variants.', '主、次与幽灵变体。'),
@@ -453,8 +468,8 @@ export const moduleCopy = {
   badge: {
     label: localized('Badge', '徽章'),
     description: localized(
-      'Non-interactive status markers; variants consume surface and status semantic colors.',
-      '非交互式状态标记；不同变体使用表面与状态语义色。',
+      'Non-interactive status markers with shared background blur and semantic status tints.',
+      '非交互式状态标记；共用背景模糊与语义状态色。',
     ),
     variants: localized('Variants', '变体'),
     sizes: localized('Sizes', '尺寸'),
@@ -466,6 +481,7 @@ export const moduleCopy = {
       danger: localized('Danger', '危险'),
       small: localized('Small', '小'),
       medium: localized('Medium', '中'),
+      large: localized('Large', '大'),
     },
   },
   card: {
@@ -797,8 +813,8 @@ export const moduleCopy = {
       standard: {
         label: localized('Standard', '标准'),
         hint: localized(
-          'The Dock owns shared chrome, grouping, scale, and trailing separation while destinations stay caller-owned.',
-          'Dock 负责共享外壳、分组、缩放与尾部分隔，具体导航目标仍由调用方提供。',
+          'Uses the consumer’s md scale with shared shell, label, icon, and trailing-control sizing. The default lg scale remains available for larger navigation.',
+          '使用消费项目的 md 档，外壳、文字、图标和尾部控件统一缩放；需要更大导航时可使用默认的 lg 档。',
         ),
       },
       compact: {
@@ -819,10 +835,10 @@ export const moduleCopy = {
     },
   },
   consumerParity: {
-    label: localized('Product Parity', '产品一致性校验'),
+    label: localized('Contract Lab', '契约实验室'),
     description: localized(
-      'Validates the public component API against audited Neoverse product patterns using controlled fake data.',
-      '使用可控假数据，将公开组件 API 与经审计的 Neoverse 产品模式进行一致性校验。',
+      'Audits component coverage and framework/runtime contracts, then validates them against controlled Neoverse product patterns.',
+      '审计组件覆盖、框架与 Runtime 契约，并使用可控 Neoverse 产品模式进行实际校验。',
     ),
     hero: {
       label: localized('Hero Actions', 'Hero 操作区'),

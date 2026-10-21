@@ -1,4 +1,12 @@
 import {
+  type AnchoredOverlayOptions,
+  hideAnchoredOverlay,
+  isOverlayOpen,
+  type OverlayPlacement,
+  showAnchoredOverlay,
+  stopOverlayTracking,
+} from '@neoverse-ui/overlay-runtime';
+import {
   type AnchorHTMLAttributes,
   type ButtonHTMLAttributes,
   Children,
@@ -13,6 +21,11 @@ import {
   type ReactElement,
   type ReactNode,
   type Ref,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
 } from 'react';
 
 export type { UiPresenceProps, UiPresenceState } from './presence';
@@ -20,19 +33,19 @@ export { UiPresence, useUiPresence } from './presence';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 export type NoticeVariant = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+export type FormControlValidation = 'none' | 'error' | 'warning' | 'success';
 export type ActionSize = 'sm' | 'md' | 'lg';
 export type ActionScale = 'md' | 'lg';
 export type ControlSurfaceScale = 'md' | 'lg';
 export type SurfaceHoverMode = 'auto' | 'static';
 export type SurfaceEdgeMode = 'auto' | 'local';
-export type ControlSurfacePreset = 'none' | 'glass-subtle';
+export type ControlSurfacePreset = 'none' | 'glass-subtle' | 'glass-elevated' | 'glass-immersive';
 export type SurfacePreset =
   | 'none'
   | 'solid'
   | 'subtle'
   | 'elevated'
   | 'inset'
-  | 'chrome'
   | 'glass-subtle'
   | 'glass-elevated'
   | 'glass-immersive';
@@ -86,7 +99,6 @@ const surfaceClasses: Record<SurfacePreset, string> = {
   subtle: 'ui-surface-subtle',
   elevated: 'ui-surface-elevated',
   inset: 'ui-surface-inset',
-  chrome: 'ui-surface-chrome',
   'glass-subtle': 'material-glass-subtle',
   'glass-elevated': 'material-glass-elevated',
   'glass-immersive': 'material-glass-immersive',
@@ -202,6 +214,7 @@ export function UiAction({
   });
   const renderContent = (content: ReactNode) => (
     <>
+      <span className="ui-button__tone-field" aria-hidden="true" />
       <span className="ui-button__edge-field" aria-hidden="true" />
       {leading ? (
         <span className="ui-action__leading" aria-hidden="true">
@@ -313,7 +326,7 @@ export interface UiDockProps extends Omit<HTMLAttributes<HTMLElement>, 'children
 /** Reusable Dock shell. Product routing, navigation semantics, and trailing controls stay caller-owned. */
 export function UiDock({
   as = 'nav',
-  surface = 'chrome',
+  surface = 'glass-elevated',
   scale = 'lg',
   compact = false,
   hoverMode = 'static',
@@ -481,13 +494,50 @@ export function UiCard<T extends ElementType = 'div'>(props: UiCardProps<T>) {
   });
 }
 
-export type UiInputProps = ComponentPropsWithRef<'input'>;
+export interface UiInputProps extends ComponentPropsWithRef<'input'> {
+  validation?: FormControlValidation;
+  incrementLabel?: string;
+  decrementLabel?: string;
+}
 
-export function UiInput({ className, onPointerDown, onBlur, ...props }: UiInputProps) {
-  return (
+function stepNumberInput(input: HTMLInputElement | null, direction: number) {
+  if (!input || input.disabled || input.readOnly) return;
+  const previous = input.value;
+  if (input.step === 'any') {
+    const next = Number(((input.valueAsNumber || 0) + direction).toPrecision(12));
+    input.valueAsNumber = Math.min(
+      input.max === '' ? Infinity : Number(input.max),
+      Math.max(input.min === '' ? -Infinity : Number(input.min), next),
+    );
+  } else if (direction > 0) {
+    input.stepUp();
+  } else {
+    input.stepDown();
+  }
+  input.dataset.neoverseFocusOrigin = 'pointer';
+  input.focus({ preventScroll: true });
+  if (input.value !== previous) {
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+}
+
+export function UiInput({
+  validation = 'none',
+  incrementLabel = 'Increase value',
+  decrementLabel = 'Decrease value',
+  className,
+  onPointerDown,
+  onBlur,
+  'aria-invalid': ariaInvalid,
+  ...props
+}: UiInputProps) {
+  const control = (
     <input
       {...props}
       className={['ui-input', className].filter(Boolean).join(' ')}
+      data-validation={validation}
+      aria-invalid={ariaInvalid ?? (validation === 'error' || undefined)}
       onPointerDown={(event) => {
         event.currentTarget.dataset.neoverseFocusOrigin = 'pointer';
         onPointerDown?.(event);
@@ -498,16 +548,58 @@ export function UiInput({ className, onPointerDown, onBlur, ...props }: UiInputP
       }}
     />
   );
+  if (props.type !== 'number') return control;
+  return (
+    <span className="ui-input-number">
+      {control}
+      <span className="ui-input-number__steps">
+        {[1, -1].map((direction) => (
+          <button
+            key={direction}
+            className="ui-input-number__step"
+            type="button"
+            tabIndex={-1}
+            aria-label={direction > 0 ? incrementLabel : decrementLabel}
+            title={direction > 0 ? incrementLabel : decrementLabel}
+            disabled={props.disabled || props.readOnly}
+            onMouseDown={(event) => event.preventDefault()}
+            onClick={(event) => {
+              event.preventDefault();
+              stepNumberInput(
+                event.currentTarget.closest('.ui-input-number')?.querySelector('input') ?? null,
+                direction,
+              );
+            }}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true" className="ui-input-number__indicator">
+              <path d={direction > 0 ? 'm6 15 6-6 6 6' : 'm6 9 6 6 6-6'} />
+            </svg>
+          </button>
+        ))}
+      </span>
+    </span>
+  );
 }
 
-export type UiTextareaProps = ComponentPropsWithRef<'textarea'>;
+export interface UiTextareaProps extends ComponentPropsWithRef<'textarea'> {
+  validation?: FormControlValidation;
+}
 
-export function UiTextarea({ className, onPointerDown, onBlur, ...props }: UiTextareaProps) {
+export function UiTextarea({
+  validation = 'none',
+  className,
+  onPointerDown,
+  onBlur,
+  'aria-invalid': ariaInvalid,
+  ...props
+}: UiTextareaProps) {
   return (
     <span className="ui-textarea-shell">
       <textarea
         {...props}
         className={['ui-textarea', className].filter(Boolean).join(' ')}
+        data-validation={validation}
+        aria-invalid={ariaInvalid ?? (validation === 'error' || undefined)}
         onPointerDown={(event) => {
           event.currentTarget.dataset.neoverseFocusOrigin = 'pointer';
           onPointerDown?.(event);
@@ -523,117 +615,34 @@ export function UiTextarea({ className, onPointerDown, onBlur, ...props }: UiTex
 
 export type FormControlValue = string | number;
 
-const selectPopoverCleanup = new WeakMap<HTMLElement, () => void>();
-
-function supportsSelectPopover(element: HTMLElement): boolean {
-  return typeof element.showPopover === 'function' && typeof element.hidePopover === 'function';
-}
-
-function isSelectPopoverOpen(element: HTMLElement): boolean {
-  if (!supportsSelectPopover(element)) {
-    return element.classList.contains('ui-select__popover--fallback-open');
-  }
-  return element.matches(':popover-open');
-}
-
-function stopSelectPopoverTracking(popover: HTMLElement) {
-  selectPopoverCleanup.get(popover)?.();
-  selectPopoverCleanup.delete(popover);
-}
-
-function resolveSelectCssLength(element: HTMLElement, value: string): number {
-  const parsed = Number.parseFloat(value);
-  if (!Number.isFinite(parsed)) return 0;
-
-  const normalized = value.trim().toLowerCase();
-  if (normalized.endsWith('rem')) {
-    return parsed * Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
-  }
-  if (normalized.endsWith('em')) {
-    return parsed * Number.parseFloat(getComputedStyle(element).fontSize);
-  }
-  return parsed;
-}
-
-function resolveSelectEffectiveZoom(element: HTMLElement): number {
-  let zoom = 1;
-  let node: HTMLElement | null = element;
-  while (node !== null) {
-    const value = Number.parseFloat(getComputedStyle(node).zoom);
-    if (Number.isFinite(value) && value > 0) zoom *= value;
-    node = node.parentElement;
-  }
-  return zoom;
-}
-
-function positionSelectPopover(details: HTMLDetailsElement, popover: HTMLElement) {
+function selectOverlayOptions(details: HTMLDetailsElement): AnchoredOverlayOptions | undefined {
+  const popover = details.querySelector<HTMLElement>('.ui-select__popover');
   const trigger = details.querySelector<HTMLElement>('.ui-select');
-  if (trigger === null || !details.open || !isSelectPopoverOpen(popover)) return;
+  if (popover === null || trigger === null) return undefined;
 
-  const triggerRect = trigger.getBoundingClientRect();
-  const popoverStyle = getComputedStyle(popover);
-  const effectiveZoom = resolveSelectEffectiveZoom(popover);
-  const gap =
-    Math.max(
-      0,
-      resolveSelectCssLength(
-        popover,
-        popoverStyle.getPropertyValue('--neoverse-select-popover-gap'),
-      ),
-    ) * effectiveZoom;
-
-  popover.style.setProperty(
-    '--neoverse-select-popover-inline-size',
-    `${triggerRect.width / effectiveZoom}px`,
-  );
-
-  const popoverRect = popover.getBoundingClientRect();
-  const maxLeft = Math.max(gap, window.innerWidth - popoverRect.width - gap);
-  const left = Math.min(Math.max(triggerRect.left, gap), maxLeft);
-  const spaceBelow = window.innerHeight - triggerRect.bottom - gap;
-  const spaceAbove = triggerRect.top - gap;
-  const shouldOpenAbove = popoverRect.height > spaceBelow && spaceAbove >= popoverRect.height;
-  const unclampedTop = shouldOpenAbove
-    ? triggerRect.top - popoverRect.height - gap
-    : triggerRect.bottom + gap;
-  const maxTop = Math.max(gap, window.innerHeight - popoverRect.height - gap);
-  const top = Math.min(Math.max(unclampedTop, gap), maxTop);
-
-  popover.style.setProperty('--neoverse-select-popover-left', `${left / effectiveZoom}px`);
-  popover.style.setProperty('--neoverse-select-popover-top', `${top / effectiveZoom}px`);
+  return {
+    trigger,
+    overlay: popover,
+    gapVariable: '--neoverse-select-popover-gap',
+    leftVariable: '--neoverse-select-popover-left',
+    topVariable: '--neoverse-select-popover-top',
+    inlineSizeVariable: '--neoverse-select-popover-inline-size',
+    matchTriggerWidth: true,
+    fallbackOpenClass: 'ui-select__popover--fallback-open',
+    onDismiss: () => {
+      details.open = false;
+    },
+  };
 }
 
 function openSelectPopover(details: HTMLDetailsElement) {
-  const popover = details.querySelector<HTMLElement>('.ui-select__popover');
-  if (popover === null) return;
-
-  if (supportsSelectPopover(popover)) {
-    if (!popover.matches(':popover-open')) popover.showPopover();
-  } else {
-    popover.classList.add('ui-select__popover--fallback-open');
-  }
-
-  positionSelectPopover(details, popover);
-  stopSelectPopoverTracking(popover);
-  const update = () => positionSelectPopover(details, popover);
-  window.addEventListener('resize', update);
-  window.addEventListener('scroll', update, true);
-  selectPopoverCleanup.set(popover, () => {
-    window.removeEventListener('resize', update);
-    window.removeEventListener('scroll', update, true);
-  });
+  const options = selectOverlayOptions(details);
+  if (options !== undefined) showAnchoredOverlay(options);
 }
 
 function closeSelectPopover(details: HTMLDetailsElement) {
-  const popover = details.querySelector<HTMLElement>('.ui-select__popover');
-  if (popover === null) return;
-
-  if (supportsSelectPopover(popover)) {
-    if (popover.matches(':popover-open')) popover.hidePopover();
-  } else {
-    popover.classList.remove('ui-select__popover--fallback-open');
-  }
-  stopSelectPopoverTracking(popover);
+  const options = selectOverlayOptions(details);
+  if (options !== undefined) hideAnchoredOverlay(options);
 }
 
 export interface UiSelectOption {
@@ -649,6 +658,8 @@ export interface UiSelectProps
   placeholder?: ReactNode;
   name?: string;
   disabled?: boolean;
+  readOnly?: boolean;
+  validation?: FormControlValidation;
   onValueChange?: (value: FormControlValue) => void;
 }
 
@@ -658,38 +669,104 @@ export function UiSelect({
   placeholder,
   name,
   disabled = false,
+  readOnly = false,
+  validation = 'none',
   onValueChange,
   className,
   onClick,
   onPointerDown,
   onBlur,
+  'aria-invalid': ariaInvalid,
   ...props
 }: UiSelectProps) {
+  const [open, setOpen] = useState(false);
+  const detailsRef = useRef<HTMLDetailsElement | null>(null);
+  const blocked = disabled || readOnly;
+  useEffect(() => {
+    if (!blocked) return;
+    const details = detailsRef.current;
+    if (details !== null) {
+      details.open = false;
+      closeSelectPopover(details);
+    }
+    setOpen(false);
+  }, [blocked]);
   const selected = options.find((option) => String(option.value) === String(value ?? ''));
+
+  const focusRelativeOption = (current: HTMLButtonElement, direction: 1 | -1) => {
+    const optionElements = Array.from(
+      current
+        .closest('.ui-select__popover')
+        ?.querySelectorAll<HTMLButtonElement>('.ui-select__option:not(:disabled)') ?? [],
+    );
+    if (optionElements.length === 0) return;
+    const index = optionElements.indexOf(current);
+    optionElements[(index + direction + optionElements.length) % optionElements.length]?.focus();
+  };
+
+  const onOptionKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      focusRelativeOption(event.currentTarget, event.key === 'ArrowDown' ? 1 : -1);
+      return;
+    }
+
+    if (event.key === 'Home' || event.key === 'End') {
+      event.preventDefault();
+      const optionElements = Array.from(
+        event.currentTarget
+          .closest('.ui-select__popover')
+          ?.querySelectorAll<HTMLButtonElement>('.ui-select__option:not(:disabled)') ?? [],
+      );
+      (event.key === 'Home' ? optionElements[0] : optionElements.at(-1))?.focus();
+      return;
+    }
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      const details = event.currentTarget.closest('details');
+      if (details !== null) {
+        details.open = false;
+        closeSelectPopover(details);
+        details.querySelector<HTMLElement>('.ui-select')?.focus();
+      }
+      setOpen(false);
+    }
+  };
 
   return (
     <details
-      className={['ui-select-shell', disabled && 'ui-select-shell--disabled']
+      ref={detailsRef}
+      className={[
+        'ui-select-shell',
+        disabled && 'ui-select-shell--disabled',
+        readOnly && 'ui-select-shell--readonly',
+      ]
         .filter(Boolean)
         .join(' ')}
       onToggle={(event) => {
         const details = event.currentTarget;
-        if (disabled && details.open) {
+        if ((disabled || readOnly) && details.open) {
           details.open = false;
+          setOpen(false);
           return;
         }
+        setOpen(details.open);
         if (details.open) openSelectPopover(details);
         else closeSelectPopover(details);
       }}
     >
-      {/* biome-ignore lint/a11y/noStaticElementInteractions: summary is the native interactive trigger for details. */}
       <summary
         {...props}
         className={['ui-select', className].filter(Boolean).join(' ')}
+        role="combobox"
         aria-haspopup="listbox"
-        aria-disabled={disabled || undefined}
+        aria-expanded={open && !blocked}
+        aria-disabled={blocked || undefined}
+        aria-invalid={ariaInvalid ?? (validation === 'error' || undefined)}
+        data-validation={validation}
         onClick={(event) => {
-          if (disabled) event.preventDefault();
+          if (disabled || readOnly) event.preventDefault();
           onClick?.(event);
         }}
         onPointerDown={(event) => {
@@ -721,11 +798,12 @@ export function UiSelect({
         data-neoverse-motion-origin="top"
         onToggle={(event) => {
           const popover = event.currentTarget;
-          if (isSelectPopoverOpen(popover)) return;
+          if (isOverlayOpen(popover, 'ui-select__popover--fallback-open')) return;
 
-          stopSelectPopoverTracking(popover);
+          stopOverlayTracking(popover);
           const details = popover.closest('details');
           if (details?.open) details.open = false;
+          setOpen(false);
         }}
       >
         {options.map((option) => {
@@ -745,15 +823,17 @@ export function UiSelect({
                 if (trigger) trigger.dataset.neoverseFocusOrigin = 'pointer';
               }}
               onClick={(event) => {
-                if (option.disabled || disabled) return;
+                if (option.disabled || disabled || readOnly) return;
                 onValueChange?.(option.value);
                 const details = event.currentTarget.closest('details');
                 if (details) {
                   details.open = false;
                   closeSelectPopover(details);
                 }
+                setOpen(false);
                 details?.querySelector<HTMLElement>('.ui-select')?.focus();
               }}
+              onKeyDown={onOptionKeyDown}
             >
               <span>{option.label}</span>
               {selectedOption ? (
@@ -773,6 +853,600 @@ export function UiSelect({
 
       {name ? <input type="hidden" name={name} value={value ?? ''} disabled={disabled} /> : null}
     </details>
+  );
+}
+
+interface AnchoredOverlayControllerOptions {
+  open?: boolean;
+  defaultOpen?: boolean;
+  disabled?: boolean;
+  placement?: OverlayPlacement;
+  matchTriggerWidth?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+function useAnchoredOverlayController({
+  open,
+  defaultOpen = false,
+  disabled = false,
+  placement = 'auto',
+  matchTriggerWidth = false,
+  onOpenChange,
+}: AnchoredOverlayControllerOptions) {
+  const triggerRef = useRef<HTMLButtonElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  const ignoreDisabledNativeClose = useRef(false);
+  const [internalOpen, setInternalOpen] = useState(defaultOpen);
+  const [syncRevision, setSyncRevision] = useState(0);
+  const resolvedOpen = open ?? internalOpen;
+  const expandedOpen = resolvedOpen && !disabled;
+
+  const setOpen = useCallback(
+    (value: boolean) => {
+      if (open === undefined) setInternalOpen(value);
+      else setSyncRevision((revision) => revision + 1);
+      onOpenChange?.(value);
+    },
+    [open, onOpenChange],
+  );
+
+  const resolveOptions = useCallback((): AnchoredOverlayOptions | undefined => {
+    const trigger = triggerRef.current;
+    const overlay = panelRef.current;
+    if (trigger === null || overlay === null) return undefined;
+
+    return {
+      trigger,
+      overlay,
+      gapVariable: '--neoverse-overlay-gap',
+      leftVariable: '--neoverse-overlay-left',
+      topVariable: '--neoverse-overlay-top',
+      inlineSizeVariable: '--neoverse-overlay-inline-size',
+      matchTriggerWidth,
+      placement,
+      fallbackOpenClass: 'ui-overlay-panel--fallback-open',
+      onDismiss: () => setOpen(false),
+    };
+  }, [matchTriggerWidth, placement, setOpen]);
+
+  useEffect(() => {
+    // Controlled dismiss requests must resync even when the parent keeps open unchanged.
+    void syncRevision;
+    const options = resolveOptions();
+    if (options === undefined) return;
+    if (expandedOpen) showAnchoredOverlay(options);
+    else {
+      // Native toggle events are asynchronous; a close caused by disabling
+      // must not erase the caller's retained open intent on re-enable.
+      if (disabled && isOverlayOpen(options.overlay, 'ui-overlay-panel--fallback-open')) {
+        ignoreDisabledNativeClose.current = true;
+      }
+      hideAnchoredOverlay(options);
+    }
+    return () => stopOverlayTracking(options.overlay);
+  }, [expandedOpen, disabled, resolveOptions, syncRevision]);
+
+  const onPanelToggle = (event: React.SyntheticEvent<HTMLDivElement>) => {
+    const panel = event.currentTarget;
+    const newState = (event.nativeEvent as Event & { newState?: 'open' | 'closed' }).newState;
+    if (newState === 'open') {
+      ignoreDisabledNativeClose.current = false;
+      return;
+    }
+    if (newState === 'closed' && ignoreDisabledNativeClose.current) {
+      ignoreDisabledNativeClose.current = false;
+      return;
+    }
+    if (isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')) return;
+    stopOverlayTracking(panel);
+    if (expandedOpen) setOpen(false);
+  };
+
+  return {
+    triggerRef,
+    panelRef,
+    resolvedOpen,
+    expandedOpen,
+    setOpen,
+    toggle: () => {
+      if (!disabled) setOpen(!resolvedOpen);
+    },
+    onPanelToggle,
+  };
+}
+
+export interface UiPopoverProps extends Omit<ComponentPropsWithRef<'span'>, 'children' | 'ref'> {
+  trigger: ReactNode;
+  children?: ReactNode;
+  open?: boolean;
+  defaultOpen?: boolean;
+  disabled?: boolean;
+  placement?: OverlayPlacement;
+  matchTriggerWidth?: boolean;
+  ariaLabel?: string;
+  onOpenChange?: (open: boolean) => void;
+}
+
+export function UiPopover({
+  trigger,
+  children,
+  open,
+  defaultOpen = false,
+  disabled = false,
+  placement = 'auto',
+  matchTriggerWidth = false,
+  ariaLabel,
+  onOpenChange,
+  className,
+  ...props
+}: UiPopoverProps) {
+  const controller = useAnchoredOverlayController({
+    ...(open === undefined ? {} : { open }),
+    defaultOpen,
+    disabled,
+    placement,
+    matchTriggerWidth,
+    ...(onOpenChange === undefined ? {} : { onOpenChange }),
+  });
+
+  return (
+    <span {...props} className={mergeClassNames('ui-popover', className)}>
+      <button
+        ref={controller.triggerRef}
+        className="ui-popover__trigger ui-button ui-button--secondary ui-button--md"
+        type="button"
+        disabled={disabled}
+        aria-expanded={controller.expandedOpen}
+        onClick={controller.toggle}
+      >
+        {trigger}
+      </button>
+      <div
+        ref={controller.panelRef}
+        className="ui-overlay-panel ui-popover__content material-glass-elevated nv-presence"
+        popover="auto"
+        role="dialog"
+        aria-label={ariaLabel}
+        data-neoverse-motion="pop"
+        data-neoverse-motion-origin="top"
+        onToggle={controller.onPanelToggle}
+      >
+        {children}
+      </div>
+    </span>
+  );
+}
+
+export type UiDropdownMenuItemTone = 'default' | 'danger';
+
+export interface UiDropdownMenuItem {
+  id: string;
+  label: ReactNode;
+  disabled?: boolean;
+  tone?: UiDropdownMenuItemTone;
+}
+
+export interface UiDropdownMenuProps
+  extends Omit<ComponentPropsWithRef<'span'>, 'children' | 'ref' | 'onSelect'> {
+  trigger: ReactNode;
+  items: readonly UiDropdownMenuItem[];
+  ariaLabel: string;
+  open?: boolean;
+  defaultOpen?: boolean;
+  disabled?: boolean;
+  placement?: OverlayPlacement;
+  onOpenChange?: (open: boolean) => void;
+  onSelect?: (item: UiDropdownMenuItem) => void;
+  renderItem?: (item: UiDropdownMenuItem) => ReactNode;
+}
+
+export function UiDropdownMenu({
+  trigger,
+  items,
+  ariaLabel,
+  open,
+  defaultOpen = false,
+  disabled = false,
+  placement = 'auto',
+  onOpenChange,
+  onSelect,
+  renderItem,
+  className,
+  ...props
+}: UiDropdownMenuProps) {
+  const controller = useAnchoredOverlayController({
+    ...(open === undefined ? {} : { open }),
+    defaultOpen,
+    disabled,
+    placement,
+    ...(onOpenChange === undefined ? {} : { onOpenChange }),
+  });
+
+  const enabledItems = useCallback(
+    () =>
+      Array.from(
+        controller.panelRef.current?.querySelectorAll<HTMLButtonElement>(
+          '.ui-dropdown-menu__item:not(:disabled)',
+        ) ?? [],
+      ),
+    [controller.panelRef],
+  );
+
+  useEffect(() => {
+    if (!controller.expandedOpen) return;
+    const frame = requestAnimationFrame(() => {
+      const panel = controller.panelRef.current;
+      if (
+        panel &&
+        !controller.triggerRef.current?.disabled &&
+        isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')
+      ) {
+        enabledItems()[0]?.focus();
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [controller.expandedOpen, controller.panelRef, controller.triggerRef, enabledItems]);
+
+  const selectItem = (item: UiDropdownMenuItem) => {
+    if (item.disabled) return;
+    onSelect?.(item);
+    controller.setOpen(false);
+    requestAnimationFrame(() => controller.triggerRef.current?.focus());
+  };
+
+  const onMenuKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    const current = event.target;
+    if (!(current instanceof HTMLButtonElement)) return;
+    const menuItems = enabledItems();
+
+    if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      event.preventDefault();
+      const index = menuItems.indexOf(current);
+      const direction = event.key === 'ArrowDown' ? 1 : -1;
+      menuItems[(index + direction + menuItems.length) % menuItems.length]?.focus();
+      return;
+    }
+
+    if (event.key === 'Home' || event.key === 'End') {
+      event.preventDefault();
+      (event.key === 'Home' ? menuItems[0] : menuItems.at(-1))?.focus();
+    }
+  };
+
+  return (
+    <span {...props} className={mergeClassNames('ui-dropdown-menu', className)}>
+      <button
+        ref={controller.triggerRef}
+        className="ui-dropdown-menu__trigger ui-button ui-button--secondary ui-button--md"
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={controller.expandedOpen}
+        disabled={disabled}
+        onClick={controller.toggle}
+      >
+        {trigger}
+      </button>
+      <div
+        ref={controller.panelRef}
+        className="ui-overlay-panel ui-dropdown-menu__panel material-glass-elevated nv-presence"
+        popover="auto"
+        role="menu"
+        aria-label={ariaLabel}
+        data-neoverse-motion="pop"
+        data-neoverse-motion-origin="top"
+        onToggle={controller.onPanelToggle}
+        onKeyDown={onMenuKeyDown}
+      >
+        {items.map((item) => (
+          <button
+            key={item.id}
+            className="ui-dropdown-menu__item"
+            type="button"
+            role="menuitem"
+            disabled={item.disabled}
+            data-tone={item.tone ?? 'default'}
+            onClick={() => selectItem(item)}
+          >
+            {renderItem?.(item) ?? item.label}
+          </button>
+        ))}
+      </div>
+    </span>
+  );
+}
+
+export interface UiCheckboxProps extends Omit<ComponentPropsWithRef<'input'>, 'type' | 'children'> {
+  validation?: FormControlValidation;
+  children?: ReactNode;
+  onCheckedChange?: (checked: boolean) => void;
+}
+
+export function UiCheckbox({
+  validation = 'none',
+  readOnly = false,
+  disabled = false,
+  className,
+  children,
+  onClick,
+  onChange,
+  onCheckedChange,
+  'aria-invalid': ariaInvalid,
+  ...props
+}: UiCheckboxProps) {
+  return (
+    <label
+      className={mergeClassNames('ui-choice ui-checkbox', className)}
+      data-validation={validation}
+      data-disabled={disabled || undefined}
+      data-readonly={readOnly || undefined}
+    >
+      <input
+        {...props}
+        className="ui-choice__native"
+        type="checkbox"
+        disabled={disabled}
+        aria-disabled={disabled || readOnly || undefined}
+        aria-invalid={ariaInvalid ?? (validation === 'error' || undefined)}
+        onClick={(event) => {
+          if (readOnly) event.preventDefault();
+          onClick?.(event);
+        }}
+        onChange={(event) => {
+          if (readOnly) return;
+          onChange?.(event);
+          onCheckedChange?.(event.currentTarget.checked);
+        }}
+      />
+      <span className="ui-choice__control" aria-hidden="true">
+        <svg className="ui-choice__indicator" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m5 12 4 4L19 6" />
+        </svg>
+      </span>
+      <span className="ui-choice__content">{children}</span>
+    </label>
+  );
+}
+
+export interface UiRadioGroupOption {
+  value: FormControlValue;
+  label: ReactNode;
+  description?: ReactNode;
+  disabled?: boolean;
+}
+
+export interface UiRadioGroupProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
+  options: readonly UiRadioGroupOption[];
+  value?: FormControlValue;
+  defaultValue?: FormControlValue;
+  name?: string;
+  disabled?: boolean;
+  readOnly?: boolean;
+  validation?: FormControlValidation;
+  onValueChange?: (value: FormControlValue) => void;
+}
+
+export function UiRadioGroup({
+  options,
+  value,
+  defaultValue,
+  name,
+  disabled = false,
+  readOnly = false,
+  validation = 'none',
+  onValueChange,
+  className,
+  'aria-invalid': ariaInvalid,
+  ...props
+}: UiRadioGroupProps) {
+  const resolvedAriaInvalid = ariaInvalid ?? (validation === 'error' || undefined);
+
+  return (
+    <div
+      {...props}
+      className={mergeClassNames('ui-radio-group', className)}
+      role="radiogroup"
+      aria-disabled={disabled || readOnly || undefined}
+      aria-invalid={resolvedAriaInvalid}
+      data-validation={validation}
+      data-disabled={disabled || undefined}
+      data-readonly={readOnly || undefined}
+    >
+      {options.map((option) => {
+        const selected = value !== undefined && String(option.value) === String(value);
+        const defaultSelected =
+          value === undefined &&
+          defaultValue !== undefined &&
+          String(option.value) === String(defaultValue);
+        const optionDisabled = disabled || option.disabled === true;
+
+        return (
+          <label
+            key={String(option.value)}
+            className="ui-choice ui-radio"
+            data-disabled={optionDisabled || undefined}
+            data-readonly={readOnly || undefined}
+          >
+            <input
+              className="ui-choice__native"
+              type="radio"
+              name={name}
+              value={option.value}
+              checked={value === undefined ? undefined : selected}
+              defaultChecked={defaultSelected}
+              disabled={optionDisabled}
+              aria-disabled={optionDisabled || readOnly || undefined}
+              aria-invalid={resolvedAriaInvalid}
+              onClick={(event) => {
+                if (readOnly) event.preventDefault();
+              }}
+              onChange={(event) => {
+                if (readOnly || !event.currentTarget.checked) return;
+                onValueChange?.(option.value);
+              }}
+            />
+            <span className="ui-choice__control" aria-hidden="true">
+              <span className="ui-choice__indicator" />
+            </span>
+            <span className="ui-choice__content">
+              <span className="ui-choice__label">{option.label}</span>
+              {option.description !== undefined && option.description !== null ? (
+                <span className="ui-choice__description">{option.description}</span>
+              ) : null}
+            </span>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
+export interface UiSwitchProps extends Omit<ComponentPropsWithRef<'input'>, 'type' | 'children'> {
+  validation?: FormControlValidation;
+  children?: ReactNode;
+  onCheckedChange?: (checked: boolean) => void;
+}
+
+export function UiSwitch({
+  validation = 'none',
+  readOnly = false,
+  disabled = false,
+  className,
+  children,
+  onClick,
+  onChange,
+  onCheckedChange,
+  'aria-invalid': ariaInvalid,
+  ...props
+}: UiSwitchProps) {
+  return (
+    <label
+      className={mergeClassNames('ui-choice ui-switch', className)}
+      data-validation={validation}
+      data-disabled={disabled || undefined}
+      data-readonly={readOnly || undefined}
+    >
+      <input
+        {...props}
+        className="ui-choice__native ui-switch__native"
+        type="checkbox"
+        // biome-ignore lint/a11y/useAriaPropsForRole: WAI-ARIA Switch pattern uses native checkbox checked state instead of aria-checked.
+        role="switch"
+        disabled={disabled}
+        aria-disabled={disabled || readOnly || undefined}
+        aria-invalid={ariaInvalid ?? (validation === 'error' || undefined)}
+        onClick={(event) => {
+          if (readOnly) event.preventDefault();
+          onClick?.(event);
+        }}
+        onChange={(event) => {
+          if (readOnly) return;
+          onChange?.(event);
+          onCheckedChange?.(event.currentTarget.checked);
+        }}
+      />
+      <span className="ui-choice__control ui-switch__control" aria-hidden="true">
+        <span className="ui-switch__thumb" />
+      </span>
+      <span className="ui-choice__content">{children}</span>
+    </label>
+  );
+}
+
+export interface UiFieldControlAttrs {
+  id?: string;
+  'aria-describedby'?: string;
+  required?: boolean;
+  disabled?: boolean;
+}
+
+export interface UiFieldProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
+  controlId?: string;
+  descriptionId?: string;
+  messageId?: string;
+  label?: ReactNode;
+  description?: ReactNode;
+  message?: ReactNode;
+  validation?: FormControlValidation;
+  required?: boolean;
+  disabled?: boolean;
+  children?: ReactNode | ((controlAttrs: UiFieldControlAttrs) => ReactNode);
+}
+
+export function UiField({
+  controlId,
+  descriptionId,
+  messageId,
+  label,
+  description,
+  message,
+  validation = 'none',
+  required = false,
+  disabled = false,
+  className,
+  children,
+  ...props
+}: UiFieldProps) {
+  const generatedId = useId();
+  const hasDescription =
+    description !== undefined &&
+    description !== null &&
+    description !== false &&
+    description !== '';
+  const hasMessage =
+    message !== undefined && message !== null && message !== false && message !== '';
+  const resolvedDescriptionId = descriptionId ?? `${controlId ?? generatedId}-description`;
+  const resolvedMessageId = messageId ?? `${controlId ?? generatedId}-message`;
+  const describedBy = [
+    hasDescription ? resolvedDescriptionId : undefined,
+    hasMessage ? resolvedMessageId : undefined,
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const controlAttrs: UiFieldControlAttrs = {
+    ...(controlId ? { id: controlId } : {}),
+    ...(describedBy ? { 'aria-describedby': describedBy } : {}),
+    ...(required ? { required: true } : {}),
+    ...(disabled ? { disabled: true } : {}),
+  };
+  return (
+    <div
+      {...props}
+      className={mergeClassNames('ui-field', className)}
+      data-validation={validation}
+      data-disabled={disabled || undefined}
+      aria-disabled={disabled || undefined}
+    >
+      {(label !== undefined && label !== null) || required ? (
+        <div className="ui-field__label-row">
+          {createElement(
+            controlId ? 'label' : 'span',
+            {
+              className: 'ui-field__label',
+              ...(controlId ? { htmlFor: controlId } : {}),
+            },
+            label,
+          )}
+          {required ? (
+            <span className="ui-field__required" aria-hidden="true">
+              *
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+      {hasDescription ? (
+        <p id={resolvedDescriptionId} className="ui-field__description">
+          {description}
+        </p>
+      ) : null}
+      <div className="ui-field__control">
+        {typeof children === 'function' ? children(controlAttrs) : children}
+      </div>
+      {hasMessage ? (
+        <p id={resolvedMessageId} className="ui-field__message">
+          {message}
+        </p>
+      ) : null}
+    </div>
   );
 }
 
@@ -901,6 +1575,7 @@ export function UiButton({
         onPointerDown?.(event);
       }}
     >
+      <span className="ui-button__tone-field" aria-hidden="true" />
       <span className="ui-button__edge-field" aria-hidden="true" />
       {leading || loading ? (
         <span className="ui-button__leading">
@@ -1020,6 +1695,7 @@ export function UiIconButton(props: UiIconButtonProps) {
   );
   const content = (
     <>
+      <span className="ui-button__tone-field" aria-hidden="true" />
       <span className="ui-button__edge-field" aria-hidden="true" />
       <span className="ui-icon-button__content" aria-hidden="true">
         {icon}

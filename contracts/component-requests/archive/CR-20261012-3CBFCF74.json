@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261012-3CBFCF74",
+  "kind": "new-component",
+  "target": "UiStatCard",
+  "summary": "数据指标卡：大数字指标与标签的展示卡片",
+  "expected": "指标卡组件，展示大号数字（展示字体）、单位后缀与说明标签，可选趋势/脚注，2-4 列自适应",
+  "acceptanceCriteria": [
+    "数字层级用展示字体且深浅主题下均有正确对比度",
+    "标签、脚注与数字的排版层级明确",
+    "卡片材质与 UiSurface Glass 契约一致"
+  ],
+  "impact": "normal",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "Neoverse-Slides",
+      "location": "packages/slidev-theme-neoverse/layouts/stats.vue",
+      "framework": "vue",
+      "scenario": "技术分享中的关键数据/指标展示"
+    }
+  ],
+  "createdAt": "2026-10-12T08:42:54.182Z",
+  "updatedAt": "2026-10-13T07:32:13.800Z",
+  "resolution": "Accepted 2026-10-13. UiStatCard, shared CSS and public Vue types are implemented; Vue unit tests 70/70 passed. tests/visual/presentation-data.spec.ts passes desktop/mobile light/dark/system snapshots with 2-4 metrics and narrow/long-text layouts. Real consumer: Neoverse-Slides/packages/slidev-theme-neoverse/layouts/stats.vue and slides/tech-share-template/slides.md slide 8. Consumer presentation-data checks passed 12/12 in dev and 12/12 in production; full Slides build/output validation passed; luna/max reviewed real consumer screenshots. See docs/acceptance-2026-10-13.md. Publication is separate."
+}

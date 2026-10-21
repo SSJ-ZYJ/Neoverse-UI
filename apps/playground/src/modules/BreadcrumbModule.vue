@@ -35,7 +35,7 @@ const items = computed(() =>
     <p class="text-caption text-secondary">
       {{ localize(copy.description, props.locale) }}
     </p>
-    <UiSurface surface="subtle" class="min-w-0 rounded-control p-4">
+    <UiSurface surface="glass-subtle" class="min-w-0 rounded-control p-4">
       <UiBreadcrumb
         :items="items"
         :aria-label="localize(copy.sampleLabel, props.locale)"

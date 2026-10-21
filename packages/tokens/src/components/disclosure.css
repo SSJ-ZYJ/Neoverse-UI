@@ -22,17 +22,21 @@
     --neoverse-disclosure-open-fill: var(--neoverse-surface-inset-strong-fill);
     --neoverse-disclosure-open-hover-fill: var(--neoverse-surface-inset-strong-hover-fill);
     --neoverse-disclosure-open-summary-background: transparent;
-    --neoverse-disclosure-edge-rest: var(--neoverse-surface-inset-edge-rest);
-    --neoverse-disclosure-edge-active: var(--neoverse-surface-inset-edge-active);
+    --neoverse-disclosure-edge-rest:
+      var(--neoverse-surface-inset-outline-rest), var(--neoverse-surface-inset-edge-rest);
+    --neoverse-disclosure-edge-active:
+      var(--neoverse-surface-inset-outline-active), var(--neoverse-surface-inset-edge-active);
     --neoverse-disclosure-shadow:
       var(--neoverse-disclosure-edge-rest), var(--neoverse-material-inner-glow-subtle),
-      var(--neoverse-surface-inset-bloom-rest);
+      var(--neoverse-shadow-control), var(--neoverse-surface-inset-bloom-rest);
     --neoverse-disclosure-hover-shadow:
       var(--neoverse-disclosure-edge-active), var(--neoverse-material-inner-glow-elevated),
-      var(--neoverse-surface-inset-active-highlight), var(--neoverse-surface-inset-bloom-active);
+      var(--neoverse-surface-inset-active-highlight), var(--neoverse-shadow-control),
+      var(--neoverse-surface-inset-bloom-active);
     --neoverse-disclosure-open-shadow:
       var(--neoverse-disclosure-edge-active), var(--neoverse-material-inner-glow-elevated),
-      var(--neoverse-surface-inset-active-highlight), var(--neoverse-surface-inset-bloom-rest);
+      var(--neoverse-surface-inset-active-highlight), var(--neoverse-shadow-control),
+      var(--neoverse-surface-inset-bloom-rest);
     --neoverse-disclosure-filter: var(--neoverse-surface-inset-filter);
   }
 }

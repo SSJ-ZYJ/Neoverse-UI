@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261010-4FCEE5D5",
+  "kind": "new-component",
+  "target": "UiTerminalLine",
+  "summary": "终端命令、文本和状态输出的语义排版组件",
+  "expected": "可复用的终端输出行视觉基础设施，支持 command/text/status 等语义和 normal/muted/success/error tone、长行换行与复制选择，ASCII Art 可选择预格式化不换行；不负责解析 AST 或执行命令。",
+  "acceptanceCriteria": [
+    "浅深色通过语义 Token 保证命令与错误等状态易区分；不硬编码黑底绿字。",
+    "ASCII Banner 的等宽预格式化、长文本换行及移动端宽度策略有测试；所有不受信任字符串默认按文本渲染而非 HTML。",
+    "键盘选择/复制与屏幕阅读器输出区域配合正常，Vue 与其他框架适配遵循同一视觉语义。"
+  ],
+  "impact": "normal",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/components/home/HeroSection.vue",
+      "framework": "vue",
+      "scenario": "首页启动日志、ASCII XCA 字标与未来命令回显需要一致、可复用的行排版"
+    }
+  ],
+  "createdAt": "2026-10-10T07:43:53.803Z",
+  "updatedAt": "2026-10-13T07:46:16.442Z",
+  "resolution": "Accepted 2026-10-13. UiTerminalLine uses shared themed semantic roles, safe text rendering, wrapping and preformatted ASCII. Vue tests 70/70; shared terminal release screenshots pass; real XCA TerminalTranscript.vue, TerminalInteraction.vue and TerminalHost.vue reuse it for output/banner/status. UI acceptance suite 24/24; XCA production sync/build, 17 unit tests and full E2E 71/71 including font, mobile, native editing/output and theme checks. luna/max reviewed 5 real XCA snapshots. See docs/acceptance-2026-10-13.md. No publication."
+}

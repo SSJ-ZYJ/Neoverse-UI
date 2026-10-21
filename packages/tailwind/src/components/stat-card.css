@@ -1,0 +1,67 @@
+@layer components {
+  .ui-stat-grid {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fit,
+        minmax(min(100%, calc(var(--neoverse-layout-container-md) / 4)), 1fr)
+      );
+    gap: var(--neoverse-space-4);
+    min-width: 0;
+  }
+
+  .ui-stat-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--neoverse-space-2);
+    min-width: 0;
+    padding: var(--neoverse-space-5);
+    color: var(--neoverse-color-text-primary);
+    overflow-wrap: anywhere;
+  }
+
+  .ui-stat-card__metric {
+    display: flex;
+    flex-direction: column;
+    gap: var(--neoverse-space-2);
+    margin: 0;
+  }
+
+  .ui-stat-card__label {
+    color: var(--neoverse-color-text-secondary);
+    font-family: var(--neoverse-typography-label-font-family);
+    font-size: var(--neoverse-typography-label-lg-size);
+    font-weight: var(--neoverse-typography-label-lg-weight);
+    line-height: var(--neoverse-typography-label-lg-line-height);
+  }
+
+  .ui-stat-card__value {
+    margin: 0;
+    font-family: var(--neoverse-typography-display-font-family);
+    font-size: var(--neoverse-typography-display-md-size);
+    font-weight: var(--neoverse-typography-display-md-weight);
+    letter-spacing: var(--neoverse-typography-display-md-letter-spacing);
+    line-height: var(--neoverse-typography-display-md-line-height);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ui-stat-card__unit {
+    margin-inline-start: var(--neoverse-space-1);
+    color: var(--neoverse-color-text-secondary);
+    font-family: var(--neoverse-typography-label-font-family);
+    font-size: var(--neoverse-typography-label-lg-size);
+    font-weight: var(--neoverse-typography-label-lg-weight);
+    letter-spacing: var(--neoverse-letter-spacing-normal);
+  }
+
+  .ui-stat-card__trend,
+  .ui-stat-card__footnote {
+    margin: 0;
+    font-family: var(--neoverse-typography-body-font-family);
+    font-size: var(--neoverse-typography-body-sm-size);
+    line-height: var(--neoverse-typography-body-sm-line-height);
+  }
+
+  .ui-stat-card__footnote {
+    color: var(--neoverse-color-text-secondary);
+  }
+}

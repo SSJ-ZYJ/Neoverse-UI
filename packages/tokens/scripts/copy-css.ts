@@ -27,6 +27,9 @@ const sourceFiles = [
   'components/disclosure.css',
   'components/prose.css',
   'components/form-control.css',
+  'components/overlay.css',
+  'effects.css',
+  'control-effects.css',
 ] as const;
 const lightSource = new URL('themes/light.css', sourceDirectory);
 const darkSource = new URL('themes/dark.css', sourceDirectory);

@@ -1,3 +1,4 @@
+import { NativeGlassRenderer, supportsNativeRefraction } from './native';
 import { glassFragmentShader, glassVertexShader } from './shader';
 
 export const glassRendererAttribute = 'data-neoverse-glass-renderer';
@@ -11,10 +12,28 @@ const glassSelector = glassClassNames.map((className) => `.${className}`).join('
 const cssEdgePassSelector = '[data-neoverse-glass-edge-pass="css"]';
 const reducedTransparencyQuery = '(prefers-reduced-transparency: reduce)';
 const maxDefaultDevicePixelRatio = 2;
+const glassMutationAttributes = [
+  'class',
+  'style',
+  'hidden',
+  'data-theme',
+  glassRendererAttribute,
+  'data-neoverse-glass-edge-pass',
+  'data-neoverse-glass-edge-pass-active',
+  'data-neoverse-glass-nesting',
+  'data-neoverse-tooltip-surface',
+] as const;
 const maxOccluders = 6;
 const occlusionSampleInset = 2;
 const quadPositions = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
 const motionEvents = [
+  'pointerdown',
+  'pointerup',
+  'pointercancel',
+  'keydown',
+  'keyup',
+  'focusin',
+  'focusout',
   'transitionrun',
   'transitionend',
   'transitioncancel',
@@ -34,6 +53,7 @@ type GlassStyle = {
   edgeWidth: number;
   softness: number;
   opacity: number;
+  chroma: number;
   carrier: Color;
 };
 
@@ -83,17 +103,22 @@ type ProgramLocations = {
   softness: WebGLUniformLocation | null;
   opacity: WebGLUniformLocation | null;
   lightSurface: WebGLUniformLocation | null;
-  carrier: WebGLUniformLocation | null;
-  edgeLight: WebGLUniformLocation | null;
-  primary: WebGLUniformLocation | null;
-  secondary: WebGLUniformLocation | null;
+  cornerFocus: WebGLUniformLocation | null;
+  chroma: WebGLUniformLocation | null;
+  gain: WebGLUniformLocation | null;
   tertiary: WebGLUniformLocation | null;
+  secondary: WebGLUniformLocation | null;
+  primary: WebGLUniformLocation | null;
+  edgeLight: WebGLUniformLocation | null;
+  carrier: WebGLUniformLocation | null;
   occluders: WebGLUniformLocation | null;
   occluderRadii: WebGLUniformLocation | null;
   occluderCount: WebGLUniformLocation | null;
 };
 
 export interface GlassRendererOptions {
+  /** Auto preserves the released directional Glass edge. Native displacement is opt-in. */
+  backend?: 'auto' | 'webgl' | 'native';
   document?: Document;
   maxDevicePixelRatio?: number;
 }
@@ -104,7 +129,7 @@ export interface GlassRenderer {
   destroy(): void;
 }
 
-const activeRenderers = new WeakMap<Document, GlassRendererImpl>();
+const activeRenderers = new WeakMap<Document, GlassRenderer>();
 
 const getDocument = (candidate?: Document): Document | undefined => {
   if (candidate !== undefined) {
@@ -116,6 +141,20 @@ const getDocument = (candidate?: Document): Document | undefined => {
 
 const getWindow = (ownerDocument?: Document): GlassWindow | undefined =>
   (ownerDocument?.defaultView as GlassWindow | null | undefined) ?? undefined;
+
+const normalizeMaxDevicePixelRatio = (candidate: number | undefined): number => {
+  if (candidate === undefined || !Number.isFinite(candidate)) {
+    return maxDefaultDevicePixelRatio;
+  }
+
+  return Math.max(candidate, 1);
+};
+
+const resolveDevicePixelRatio = (view: Window, maximum: number): number => {
+  const candidate = view.devicePixelRatio;
+  const ratio = Number.isFinite(candidate) && candidate > 0 ? candidate : 1;
+  return Math.min(Math.max(ratio, 1), maximum);
+};
 
 const parseFirstNumber = (value: string, fallback: number): number => {
   const match = /-?[\d.]+/.exec(value);
@@ -232,9 +271,6 @@ const inheritsParentGlassEdge = (element: Element): boolean => {
   if (element.classList.contains('ui-segmented-control')) {
     return true;
   }
-  if (element.classList.contains('ui-button')) {
-    return element.getAttribute('data-neoverse-glass-edge-pass-active') !== 'webgl';
-  }
   if (element.getAttribute('data-neoverse-glass-nesting') !== 'inherit') {
     return false;
   }
@@ -339,6 +375,56 @@ const getScissorRect = (
     width: Math.max(right - left, 0),
     height: Math.max(bottom - top, 0),
   };
+};
+
+const getEdgeScissors = (
+  style: GlassStyle,
+  scissor: ReturnType<typeof getScissorRect>,
+  viewport: CanvasViewport,
+  pixelRatio: number,
+  drawingWidth: number,
+  drawingHeight: number,
+): ReturnType<typeof getScissorRect>[] => {
+  // Small controls need one draw. Large panels should not evaluate five SDFs
+  // for every transparent interior pixel on each scroll frame.
+  if (scissor.width * scissor.height < 128_000) return [scissor];
+  const padding = Math.ceil(
+    Math.max(
+      ...style.radii,
+      style.pointer[2],
+      style.edgeWidth + Math.min(Math.max(style.softness * 0.65, 0.75), 1.5),
+    ) + 2,
+  );
+  const width = style.rect.width - padding * 2;
+  const height = style.rect.height - padding * 2;
+  if (width <= 0 || height <= 0) return [scissor];
+  const inner = getScissorRect(
+    {
+      left: style.rect.left + padding,
+      top: style.rect.top + padding,
+      right: style.rect.right - padding,
+      bottom: style.rect.bottom - padding,
+      width,
+      height,
+    },
+    viewport,
+    pixelRatio,
+    drawingWidth,
+    drawingHeight,
+  );
+  const left = Math.max(scissor.x, inner.x);
+  const bottom = Math.max(scissor.y, inner.y);
+  const right = Math.min(scissor.x + scissor.width, inner.x + inner.width);
+  const top = Math.min(scissor.y + scissor.height, inner.y + inner.height);
+  if (left >= right || bottom >= top) return [scissor];
+  // Split in integer device pixels, so fractional positions and DPR cannot
+  // double-blend a row or leave a seam between adjacent perimeter strips.
+  return [
+    { x: scissor.x, y: scissor.y, width: scissor.width, height: bottom - scissor.y },
+    { x: scissor.x, y: top, width: scissor.width, height: scissor.y + scissor.height - top },
+    { x: scissor.x, y: bottom, width: left - scissor.x, height: top - bottom },
+    { x: right, y: bottom, width: scissor.x + scissor.width - right, height: top - bottom },
+  ].filter((strip) => strip.width > 0 && strip.height > 0);
 };
 
 const clipsOverflowAxis = (value: string): boolean =>
@@ -684,6 +770,16 @@ const readStyle = (
     edgeWidth,
     softness,
     opacity: opacity * surfaceOpacity,
+    chroma: Math.min(
+      Math.max(
+        parseFirstNumber(
+          firstPropertyValue(style, ['--neoverse-material-edge-refraction-chroma']) ?? '',
+          1,
+        ),
+        0,
+      ),
+      1,
+    ),
     carrier: carrierColor,
   };
 };
@@ -704,6 +800,8 @@ class GlassRendererImpl implements GlassRenderer {
   private mutationObserver: MutationObserver | undefined;
   private transparencyQuery: MediaQueryList | undefined;
   private animationFrame: number | undefined;
+  private paintedEdges = false;
+  private contextLost = false;
   private readonly animatedElements = new Set<Element>();
   private readonly handleMotion = (event: Event): void => {
     const target = event.target as Element | null;
@@ -720,8 +818,16 @@ class GlassRendererImpl implements GlassRenderer {
   private previousRendererAttribute: string | null = null;
   private readonly handleResize = (): void => this.scheduleRefresh();
   private readonly handleScroll = (): void => this.scheduleRefresh();
+  private readonly handleToggle = (): void => this.scheduleRefresh();
   private readonly handleMutations = (records: MutationRecord[]): void => {
-    if (records.every((record) => record.target === this.colorProbe)) {
+    if (
+      records.every(
+        (record) =>
+          record.target === this.colorProbe ||
+          (record.target.nodeType === 1 &&
+            (record.target as Element).closest('[data-neoverse-particle-capture]')),
+      )
+    ) {
       return;
     }
 
@@ -730,18 +836,36 @@ class GlassRendererImpl implements GlassRenderer {
   private readonly handleTransparencyChange = (event: MediaQueryListEvent): void => {
     if (event.matches) {
       this.deactivate();
-    } else if (this.mounted && !this.active) {
+    } else if (this.mounted && !this.active && !this.contextLost) {
       this.activate();
     }
   };
-  private readonly handleContextLoss = (): void => this.deactivate();
+  private readonly handleContextLoss = (event: Event): void => {
+    event.preventDefault();
+    if (!this.active) return;
+
+    this.contextLost = true;
+    this.cancelScheduledRefresh();
+    this.animatedElements.clear();
+    this.disconnectObservers();
+    if (this.canvas !== undefined) {
+      this.canvas.style.display = 'none';
+    }
+    this.restoreRendererAttribute();
+    this.active = false;
+  };
+  private readonly handleContextRestore = (): void => {
+    if (!this.mounted || !this.contextLost) return;
+
+    this.discardLostContext();
+    if (this.transparencyQuery?.matches !== true) {
+      this.activate();
+    }
+  };
 
   public constructor(options: GlassRendererOptions) {
     this.ownerDocument = getDocument(options.document);
-    this.maxDevicePixelRatio = Math.max(
-      options.maxDevicePixelRatio ?? maxDefaultDevicePixelRatio,
-      1,
-    );
+    this.maxDevicePixelRatio = normalizeMaxDevicePixelRatio(options.maxDevicePixelRatio);
   }
 
   public mount(): void {
@@ -760,6 +884,7 @@ class GlassRendererImpl implements GlassRenderer {
     this.transparencyQuery = view?.matchMedia?.(reducedTransparencyQuery);
     this.transparencyQuery?.addEventListener('change', this.handleTransparencyChange);
     this.ownerDocument.addEventListener('scroll', this.handleScroll, true);
+    this.ownerDocument.addEventListener('toggle', this.handleToggle, true);
     for (const event of motionEvents) {
       this.ownerDocument.addEventListener(event, this.handleMotion, true);
     }
@@ -783,6 +908,7 @@ class GlassRendererImpl implements GlassRenderer {
     this.transparencyQuery?.removeEventListener('change', this.handleTransparencyChange);
     this.transparencyQuery = undefined;
     this.ownerDocument?.removeEventListener('scroll', this.handleScroll, true);
+    this.ownerDocument?.removeEventListener('toggle', this.handleToggle, true);
     for (const event of motionEvents) {
       this.ownerDocument?.removeEventListener(event, this.handleMotion, true);
     }
@@ -846,11 +972,14 @@ class GlassRendererImpl implements GlassRenderer {
       softness: gl.getUniformLocation(program, 'u_softness'),
       opacity: gl.getUniformLocation(program, 'u_opacity'),
       lightSurface: gl.getUniformLocation(program, 'u_light_surface'),
-      carrier: gl.getUniformLocation(program, 'u_carrier'),
-      edgeLight: gl.getUniformLocation(program, 'u_edge_light'),
-      primary: gl.getUniformLocation(program, 'u_primary'),
-      secondary: gl.getUniformLocation(program, 'u_secondary'),
+      cornerFocus: gl.getUniformLocation(program, 'u_corner_focus'),
+      chroma: gl.getUniformLocation(program, 'u_chroma'),
+      gain: gl.getUniformLocation(program, 'u_gain'),
       tertiary: gl.getUniformLocation(program, 'u_tertiary'),
+      secondary: gl.getUniformLocation(program, 'u_secondary'),
+      primary: gl.getUniformLocation(program, 'u_primary'),
+      edgeLight: gl.getUniformLocation(program, 'u_edge_light'),
+      carrier: gl.getUniformLocation(program, 'u_carrier'),
       occluders: gl.getUniformLocation(program, 'u_occluders'),
       occluderRadii: gl.getUniformLocation(program, 'u_occluder_radii'),
       occluderCount: gl.getUniformLocation(program, 'u_occluder_count'),
@@ -875,11 +1004,15 @@ class GlassRendererImpl implements GlassRenderer {
     colorProbe.style.pointerEvents = 'none';
     this.ownerDocument.body.append(colorProbe);
     this.colorProbe = colorProbe;
+
     canvas.addEventListener('webglcontextlost', this.handleContextLoss);
+    canvas.addEventListener('webglcontextrestored', this.handleContextRestore);
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, quadPositions, gl.STATIC_DRAW);
     gl.enable(gl.BLEND);
-    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    // Preserve the mask's coverage independently of RGB. The browser then
+    // applies its gain to the actual composited pixels beneath the canvas.
+    gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     this.observe();
     this.active = true;
     this.refresh();
@@ -905,49 +1038,80 @@ class GlassRendererImpl implements GlassRenderer {
     }
   }
 
-  private deactivate(): void {
-    if (this.animationFrame !== undefined) {
-      getWindow(this.ownerDocument)?.cancelAnimationFrame(this.animationFrame);
-      this.animationFrame = undefined;
-    }
-    this.animatedElements.clear();
+  private cancelScheduledRefresh(): void {
+    if (this.animationFrame === undefined) return;
+
+    getWindow(this.ownerDocument)?.cancelAnimationFrame(this.animationFrame);
+    this.animationFrame = undefined;
+  }
+
+  private disconnectObservers(): void {
     this.resizeObserver?.disconnect();
     this.resizeObserver = undefined;
     this.observedGlassElements.clear();
     this.mutationObserver?.disconnect();
     this.mutationObserver = undefined;
+  }
 
+  private restoreRendererAttribute(): void {
+    if (this.ownerDocument === undefined) return;
+
+    if (this.previousRendererAttribute === null) {
+      this.ownerDocument.documentElement.removeAttribute(glassRendererAttribute);
+    } else {
+      this.ownerDocument.documentElement.setAttribute(
+        glassRendererAttribute,
+        this.previousRendererAttribute,
+      );
+    }
+  }
+
+  private discardLostContext(): void {
     if (this.canvas !== undefined) {
       this.canvas.removeEventListener('webglcontextlost', this.handleContextLoss);
+      this.canvas.removeEventListener('webglcontextrestored', this.handleContextRestore);
       this.canvas.remove();
     }
-    this.colorProbe?.remove();
-
-    if (this.gl !== undefined && this.program !== undefined) {
-      this.gl.deleteProgram(this.program);
-    }
-    if (this.gl !== undefined && this.buffer !== undefined) {
-      this.gl.deleteBuffer(this.buffer);
-    }
-
-    if (this.ownerDocument !== undefined) {
-      if (this.previousRendererAttribute === null) {
-        this.ownerDocument.documentElement.removeAttribute(glassRendererAttribute);
-      } else {
-        this.ownerDocument.documentElement.setAttribute(
-          glassRendererAttribute,
-          this.previousRendererAttribute,
-        );
-      }
-    }
-
     this.canvas = undefined;
+    this.colorProbe?.remove();
     this.colorProbe = undefined;
     this.gl = undefined;
     this.program = undefined;
     this.locations = undefined;
     this.buffer = undefined;
     this.previousRendererAttribute = null;
+    this.contextLost = false;
+  }
+
+  private deactivate(): void {
+    this.cancelScheduledRefresh();
+    this.animatedElements.clear();
+    this.disconnectObservers();
+
+    if (this.canvas !== undefined) {
+      this.canvas.removeEventListener('webglcontextlost', this.handleContextLoss);
+      this.canvas.removeEventListener('webglcontextrestored', this.handleContextRestore);
+      this.canvas.remove();
+    }
+
+    if (!this.contextLost && this.gl !== undefined && this.program !== undefined) {
+      this.gl.deleteProgram(this.program);
+    }
+    if (!this.contextLost && this.gl !== undefined && this.buffer !== undefined) {
+      this.gl.deleteBuffer(this.buffer);
+    }
+
+    this.restoreRendererAttribute();
+
+    this.canvas = undefined;
+    this.colorProbe?.remove();
+    this.colorProbe = undefined;
+    this.gl = undefined;
+    this.program = undefined;
+    this.locations = undefined;
+    this.buffer = undefined;
+    this.previousRendererAttribute = null;
+    this.contextLost = false;
     this.active = false;
   }
 
@@ -974,9 +1138,7 @@ class GlassRendererImpl implements GlassRenderer {
   }
 
   private observe(): void {
-    if (this.ownerDocument === undefined || this.canvas === undefined) {
-      return;
-    }
+    if (this.ownerDocument === undefined || this.canvas === undefined) return;
 
     const view = getWindow(this.ownerDocument);
     const ResizeObserverConstructor = view?.ResizeObserver;
@@ -992,7 +1154,7 @@ class GlassRendererImpl implements GlassRenderer {
         subtree: true,
         childList: true,
         attributes: true,
-        attributeFilter: ['class', 'style', 'hidden', 'data-theme', glassRendererAttribute],
+        attributeFilter: [...glassMutationAttributes],
       });
       this.mutationObserver = mutationObserver;
     }
@@ -1009,7 +1171,12 @@ class GlassRendererImpl implements GlassRenderer {
       return;
     }
 
-    this.animationFrame = view.requestAnimationFrame(() => {
+    // Reserve the frame slot before calling requestAnimationFrame so test
+    // realms with a synchronous RAF shim cannot leave a stale frame id.
+    this.animationFrame = -1;
+    let completedSynchronously = false;
+    const frame = view.requestAnimationFrame(() => {
+      completedSynchronously = true;
       this.animationFrame = undefined;
       this.refresh();
       // CSS transforms/opacity do not emit DOM mutations or resize events.
@@ -1026,9 +1193,13 @@ class GlassRendererImpl implements GlassRenderer {
       }
       if (this.animatedElements.size > 0) this.scheduleRefresh();
     });
+    if (!completedSynchronously) {
+      this.animationFrame = frame;
+    }
   }
 
   private render(): void {
+    const elements = this.getGlassElements();
     if (
       !this.active ||
       this.ownerDocument === undefined ||
@@ -1042,6 +1213,8 @@ class GlassRendererImpl implements GlassRenderer {
       return;
     }
 
+    if (elements.length === 0 && !this.paintedEdges) return;
+
     const view = getWindow(this.ownerDocument);
     if (view === undefined) {
       return;
@@ -1050,7 +1223,7 @@ class GlassRendererImpl implements GlassRenderer {
     const viewport = getCanvasViewport(this.canvas, this.ownerDocument, view);
     const width = viewport.width;
     const height = viewport.height;
-    const pixelRatio = Math.min(Math.max(view.devicePixelRatio || 1, 1), this.maxDevicePixelRatio);
+    const pixelRatio = resolveDevicePixelRatio(view, this.maxDevicePixelRatio);
     const drawingWidth = Math.max(Math.round(width * pixelRatio), 1);
     const drawingHeight = Math.max(Math.round(height * pixelRatio), 1);
     if (this.canvas.width !== drawingWidth || this.canvas.height !== drawingHeight) {
@@ -1064,6 +1237,8 @@ class GlassRendererImpl implements GlassRenderer {
     gl.disable(gl.SCISSOR_TEST);
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
+    this.paintedEdges = elements.length > 0;
+    if (!this.paintedEdges) return;
     gl.useProgram(this.program);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     gl.enableVertexAttribArray(locations.position);
@@ -1072,6 +1247,14 @@ class GlassRendererImpl implements GlassRenderer {
     gl.uniform1f(locations.pixelRatio, pixelRatio);
 
     const rootStyle = view.getComputedStyle(this.ownerDocument.documentElement);
+    gl.uniform1f(
+      locations.gain,
+      Math.max(
+        parseFirstNumber(rootStyle.getPropertyValue('--neoverse-material-edge-refraction-gain'), 1),
+        0,
+      ),
+    );
+    if (this.canvas.style.mixBlendMode !== 'overlay') this.canvas.style.mixBlendMode = 'overlay';
     // Theme appearance must not depend on how bright a consumer's edge tint is.
     // Keep the luminance fallback for integrations without an explicit scheme.
     const lightSurface =
@@ -1123,10 +1306,11 @@ class GlassRendererImpl implements GlassRenderer {
       this.colorProbe,
       [0.48, 0.43, 0.9],
     );
+
     gl.enable(gl.SCISSOR_TEST);
     const occluderRects = new Float32Array(maxOccluders * 4);
     const occluderRadii = new Float32Array(maxOccluders);
-    for (const element of this.getGlassElements()) {
+    for (const element of elements) {
       const style = readStyle(element, view, this.colorProbe, viewport);
       if (style === undefined) {
         continue;
@@ -1143,8 +1327,6 @@ class GlassRendererImpl implements GlassRenderer {
         continue;
       }
 
-      gl.scissor(scissor.x, scissor.y, scissor.width, scissor.height);
-
       gl.uniform4f(
         locations.rect,
         style.rect.left - viewport.left,
@@ -1158,6 +1340,8 @@ class GlassRendererImpl implements GlassRenderer {
       gl.uniform1f(locations.edgeWidth, style.edgeWidth);
       gl.uniform1f(locations.softness, style.softness);
       gl.uniform1f(locations.opacity, style.opacity);
+      gl.uniform1f(locations.cornerFocus, element.classList.contains('ui-button') ? 1 : 0);
+      gl.uniform1f(locations.chroma, style.chroma);
       gl.uniform3f(locations.carrier, ...style.carrier);
       gl.uniform3f(locations.edgeLight, ...edgeLight);
       gl.uniform3f(locations.primary, ...primary);
@@ -1184,7 +1368,17 @@ class GlassRendererImpl implements GlassRenderer {
         }
         gl.uniform1f(locations.occluderCount, occluderCount);
       }
-      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      for (const strip of getEdgeScissors(
+        style,
+        scissor,
+        viewport,
+        pixelRatio,
+        drawingWidth,
+        drawingHeight,
+      )) {
+        gl.scissor(strip.x, strip.y, strip.width, strip.height);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
     }
     gl.disable(gl.SCISSOR_TEST);
   }
@@ -1198,6 +1392,7 @@ class GlassRendererImpl implements GlassRenderer {
     const currentElements: HTMLElement[] = [];
 
     for (const element of elements) {
+      if (element.closest('[data-neoverse-particle-capture]')) continue;
       if (element.matches(cssEdgePassSelector)) {
         continue;
       }
@@ -1223,13 +1418,38 @@ class GlassRendererImpl implements GlassRenderer {
           this.resizeObserver.observe(element);
         }
       }
+
+      const currentSet = new Set(currentElements);
+      for (const element of this.observedGlassElements) {
+        if (!currentSet.has(element)) {
+          this.resizeObserver.unobserve(element);
+          this.observedGlassElements.delete(element);
+        }
+      }
     }
 
     return currentElements;
   }
 }
 
-export const createGlassRenderer = (options: GlassRendererOptions = {}): GlassRenderer =>
-  new GlassRendererImpl(options);
+export const createGlassRenderer = (options: GlassRendererOptions = {}): GlassRenderer => {
+  const document = getDocument(options.document);
+  if (options.backend === 'native' && document && supportsNativeRefraction(document)) {
+    return new NativeGlassRenderer(
+      document,
+      (element) => !inheritsParentGlassEdge(element),
+      (renderer) => {
+        const existing = activeRenderers.get(document);
+        if (existing && existing !== renderer) return false;
+        activeRenderers.set(document, renderer);
+        return true;
+      },
+      (renderer) => {
+        if (activeRenderers.get(document) === renderer) activeRenderers.delete(document);
+      },
+    );
+  }
+  return new GlassRendererImpl(options);
+};
 
 export type { Color as GlassRendererColor };

@@ -15,18 +15,18 @@
     --neoverse-navigation-item-indicator-color: var(--neoverse-color-accent-secondary);
     --neoverse-navigation-item-gap: 0.375rem;
     --neoverse-navigation-item-compact-gap: var(--neoverse-space-1);
-    --neoverse-navigation-item-height-sm: 1.5rem;
+    --neoverse-navigation-item-height-sm: var(--neoverse-space-8);
     --neoverse-navigation-item-height-md: var(--neoverse-control-surface-control-height);
-    --neoverse-navigation-item-height-lg: 2rem;
+    --neoverse-navigation-item-height-lg: var(--neoverse-space-10);
     /* Navigation labels are denser than destination actions. Keeping their
        type scale component-owned prevents grouped docks from inheriting the
        larger action-md label used by standalone CTAs. */
-    --neoverse-navigation-item-font-size-sm: var(--neoverse-font-size-2xs);
-    --neoverse-navigation-item-font-size-md: var(--neoverse-font-size-2xs);
-    --neoverse-navigation-item-font-size-lg: var(--neoverse-font-size-xs);
+    --neoverse-navigation-item-font-size-sm: var(--neoverse-font-size-sm);
+    --neoverse-navigation-item-font-size-md: var(--neoverse-font-size-sm);
+    --neoverse-navigation-item-font-size-lg: var(--neoverse-font-size-md);
     /* Navigation icons stay optically quieter than standalone action icons.
        The component owns this size so consumers never need to resize SVGs. */
-    --neoverse-navigation-item-icon-size: var(--neoverse-icon-size-sm);
+    --neoverse-navigation-item-icon-size: var(--neoverse-icon-size-md);
     --neoverse-navigation-item-padding-block-sm: var(--neoverse-space-1);
     --neoverse-navigation-item-padding-block-md: var(--neoverse-space-1);
     --neoverse-navigation-item-padding-block-lg: var(--neoverse-space-1);

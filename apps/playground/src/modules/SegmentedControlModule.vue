@@ -56,7 +56,12 @@ const qaCopy = {
 </script>
 
 <template>
-  <StateRow :label="copy.states.default" :hint="copy.hints.keyboard" :locale="props.locale">
+  <StateRow
+    :label="copy.states.default"
+    :hint="copy.hints.keyboard"
+    :locale="props.locale"
+    contract-state="default"
+  >
     <UiSegmentedControl
       v-model="segmentedValue"
       :aria-label="localize(copy.aria.view, props.locale)"
@@ -73,20 +78,30 @@ const qaCopy = {
       :options="segmentedOptions"
     />
   </StateRow>
-  <StateRow :label="focusCopy.label" :hint="focusCopy.hint" :locale="props.locale">
+  <StateRow
+    :label="focusCopy.label"
+    :hint="focusCopy.hint"
+    :locale="props.locale"
+    contract-state="focus"
+  >
     <UiSegmentedControl
       :aria-label="localize(copy.aria.view, props.locale)"
       :options="segmentedOptions"
     />
   </StateRow>
-  <StateRow :label="copy.states.disabled" :locale="props.locale">
+  <StateRow :label="copy.states.disabled" :locale="props.locale" contract-state="disabled">
     <UiSegmentedControl
       :aria-label="localize(copy.controls.disabled, props.locale)"
       disabled
       :options="segmentedOptions"
     />
   </StateRow>
-  <StateRow :label="copy.states.loading" :hint="copy.hints.loading" :locale="props.locale">
+  <StateRow
+    :label="copy.states.loading"
+    :hint="copy.hints.loading"
+    :locale="props.locale"
+    contract-state="loading"
+  >
     <UiSegmentedControl
       :aria-label="localize(copy.controls.loading, props.locale)"
       loading

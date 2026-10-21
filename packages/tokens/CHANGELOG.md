@@ -1,5 +1,12 @@
 # @neoverse-ui/tokens
 
+## Unreleased
+
+- Restore the released Badge surface/shadow recipes and remove the added outline.
+- Use pastel blue, mint, yellow and pink for light semantic status colours, paired
+  with contrasting foregrounds and shared text-only feedback roles. Dark colours
+  remain unchanged.
+
 ## 0.2.0
 
 ### Minor Changes

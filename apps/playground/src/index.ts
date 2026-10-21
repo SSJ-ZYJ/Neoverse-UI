@@ -1,11 +1,13 @@
 import { createServer as createNetServer } from 'node:net';
 import { readAssetMtime, waitForAssets } from './asset-state';
 import { appCopy, formatLocalized, isLocale, type Locale, localize } from './playground-content';
-import type { FrameTheme } from './playground-types';
+import type { ThemeMode } from './playground-types';
+import { defaultThemeMode, isFrameTheme, readThemeModeFromSearch } from './theme-runtime';
 
 type RenderOptions = {
-  theme?: FrameTheme;
+  frame?: boolean;
   locale: Locale;
+  theme: ThemeMode;
 };
 
 const requestedPort = Number.parseInt(process.env.PORT ?? '3000', 10);
@@ -16,9 +18,6 @@ const reactFixtureBundlePath = new URL('../dist/assets/react-fixture.js', import
 const scopedCssPath = new URL('../dist/assets/playground.css', import.meta.url);
 const assetAvailabilityAttempts = 20;
 const assetAvailabilityRetryDelayMs = 50;
-
-const isFrameTheme = (value: string | null): value is FrameTheme =>
-  value === 'light' || value === 'dark';
 
 const isPortUnavailableError = (error: unknown): boolean =>
   typeof error === 'object' &&
@@ -95,17 +94,17 @@ const liveReloadScript = liveReload
 </script>`
   : '';
 
-const renderDocument = ({ theme, locale }: RenderOptions): string => {
+const renderDocument = ({ frame = false, theme, locale }: RenderOptions): string => {
   const title =
-    theme === undefined
-      ? localize(appCopy.pageTitle, locale)
-      : formatLocalized(appCopy.framePageTitle, locale, {
+    frame && isFrameTheme(theme)
+      ? formatLocalized(appCopy.framePageTitle, locale, {
           title: localize(appCopy.pageTitle, locale),
           theme: localize(appCopy.module.themeNames[theme], locale),
-        });
+        })
+      : localize(appCopy.pageTitle, locale);
 
   return `<!doctype html>
-<html lang="${locale === 'zh' ? 'zh-CN' : 'en'}" data-theme="${theme ?? 'system'}" class="scrollbar-immersive">
+<html lang="${locale === 'zh' ? 'zh-CN' : 'en'}" data-theme="${theme}" class="scrollbar-immersive">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -121,10 +120,10 @@ const renderDocument = ({ theme, locale }: RenderOptions): string => {
 </html>`;
 };
 
-const renderReactFixtureDocument = (locale: Locale): string =>
+const renderReactFixtureDocument = (locale: Locale, theme: ThemeMode): string =>
   [
     '<!doctype html>',
-    `<html lang="${locale === 'zh' ? 'zh-CN' : 'en'}" data-theme="system">`,
+    `<html lang="${locale === 'zh' ? 'zh-CN' : 'en'}" data-theme="${theme}">`,
     '<head>',
     '<meta charset="UTF-8" />',
     '<meta name="viewport" content="width=device-width, initial-scale=1" />',
@@ -137,6 +136,9 @@ const renderReactFixtureDocument = (locale: Locale): string =>
     '</body>',
     '</html>',
   ].join('');
+
+const resolveRequestTheme = (url: URL): ThemeMode =>
+  readThemeModeFromSearch(url.search) ?? defaultThemeMode;
 
 const missingAssetResponse = (asset: string, locale: Locale): Response =>
   new Response(formatLocalized(appCopy.server.assetsUnavailable, locale, { asset }), {
@@ -304,7 +306,7 @@ const server = Bun.serve({
         return assetError;
       }
 
-      return new Response(renderDocument({ theme, locale }), {
+      return new Response(renderDocument({ frame: true, theme, locale }), {
         headers: {
           'content-type': 'text/html; charset=utf-8',
         },
@@ -317,7 +319,7 @@ const server = Bun.serve({
         return assetError;
       }
 
-      return new Response(renderReactFixtureDocument(locale), {
+      return new Response(renderReactFixtureDocument(locale, resolveRequestTheme(url)), {
         headers: {
           'content-type': 'text/html; charset=utf-8',
         },
@@ -330,7 +332,7 @@ const server = Bun.serve({
         return assetError;
       }
 
-      return new Response(renderDocument({ locale }), {
+      return new Response(renderDocument({ theme: resolveRequestTheme(url), locale }), {
         headers: {
           'content-type': 'text/html; charset=utf-8',
         },

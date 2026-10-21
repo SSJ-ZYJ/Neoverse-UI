@@ -3,25 +3,13 @@
     /* The well is split into an image layer and a color layer so themes can
        pick a gradient or a flat tint without invalidating the other slot. */
     --neoverse-control-segmented-background-image: none;
-    --neoverse-control-segmented-background-color: color-mix(
-      in srgb,
-      var(--neoverse-color-accent-primary) 7%,
-      transparent
-    );
-    --neoverse-control-segmented-foreground: color-mix(
-      in srgb,
-      var(--neoverse-color-neutral-500) 84%,
-      var(--neoverse-color-accent-primary) 16%
-    );
-    --neoverse-control-segmented-active-foreground: color-mix(
-      in srgb,
-      var(--neoverse-color-neutral-600) 70%,
-      var(--neoverse-color-accent-secondary) 30%
-    );
-    --neoverse-control-segmented-active-background: var(--neoverse-control-active-background);
-    --neoverse-control-segmented-active-fill: transparent;
-    --neoverse-control-segmented-active-border: var(--neoverse-control-active-border);
-    --neoverse-control-segmented-active-shadow: var(--neoverse-control-active-shadow);
+    --neoverse-control-segmented-background-color: var(--neoverse-material-glass-subtle-background);
+    --neoverse-control-segmented-foreground: var(--neoverse-color-text-secondary);
+    --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
+    --neoverse-control-segmented-active-background: var(--neoverse-effect-choice-selected-field);
+    --neoverse-control-segmented-active-fill: var(--neoverse-effect-choice-selected-fill);
+    --neoverse-control-segmented-active-border: var(--neoverse-effect-choice-selected-border);
+    --neoverse-control-segmented-active-shadow: var(--neoverse-effect-choice-selected-shadow);
     --neoverse-control-segmented-shell-hover-background-image: var(
       --neoverse-control-segmented-background-image
     );
@@ -30,18 +18,19 @@
     );
     --neoverse-control-segmented-shell-hover-border: var(--neoverse-control-segmented-border);
     --neoverse-control-segmented-shell-hover-shadow: var(--neoverse-control-segmented-shadow);
-    /* Dark/default keeps the original segmented-control edge recipe. Light
-       opts into the shared Glass refraction field in its theme mapping. */
+    /* Compatibility edge hooks; the selected shared tier owns the plate. */
     --neoverse-control-segmented-edge-refraction-opacity: 0;
     --neoverse-control-segmented-edge-display: none;
-    /* Geometry mirrors the deployed Neoverse segmented control. Embedded
-       controls do not add a second inset; their parent chrome owns spacing. */
-    --neoverse-control-segmented-inset: 0.18rem;
+    /* Standalone controls keep a deliberate inset around their active plates.
+       Embedded controls rely on parent chrome for edge spacing. */
+    --neoverse-control-segmented-inset: 0.25rem;
     --neoverse-control-segmented-embedded-inset: var(--neoverse-space-0);
     --neoverse-control-segmented-corner-radius: var(--neoverse-control-corner-radius);
     --neoverse-control-segmented-internal-inset: var(--neoverse-control-segmented-inset);
     --neoverse-control-segmented-boundary-width: var(--neoverse-border-width-thin);
     --neoverse-control-segmented-gap: 0.2rem;
+    /* A segmented choice should hug its label rather than inherit the more
+       spacious button footprint. Unequal label lengths keep natural widths. */
     --neoverse-control-segmented-option-min-width: 2.5rem;
     /* Embedded segmented controls use a tighter geometry than standalone
        controls while keeping those defaults untouched. */
@@ -49,17 +38,19 @@
     --neoverse-control-segmented-option-min-width-compact: max-content;
     --neoverse-control-segmented-option-height-sm: var(--neoverse-control-surface-control-height);
     --neoverse-control-segmented-option-padding-block-sm: 0.2rem;
-    --neoverse-control-segmented-option-padding-inline-sm: 0.5rem;
+    --neoverse-control-segmented-option-padding-inline-sm: var(--neoverse-space-2);
     --neoverse-control-segmented-embedded-option-padding-inline-sm: 0.375rem;
-    --neoverse-control-segmented-option-font-size-sm: var(--neoverse-font-size-2xs);
+    --neoverse-control-segmented-embedded-option-font-size-sm: 0.7rem;
+    --neoverse-control-segmented-embedded-option-scale-lg-type-factor: 0.9;
+    --neoverse-control-segmented-option-font-size-sm: var(--neoverse-font-size-sm);
     --neoverse-control-segmented-option-font-weight: var(--neoverse-font-weight-bold);
     --neoverse-control-segmented-option-radius: var(--neoverse-control-compact-radius);
-    --neoverse-control-segmented-option-press-scale: 0.97;
-    --neoverse-control-segmented-disabled-opacity: 0.62;
+    --neoverse-control-segmented-option-press-scale: var(--neoverse-effect-press-scale);
+    --neoverse-control-segmented-disabled-opacity: var(--neoverse-effect-disabled-content-opacity);
     --neoverse-control-segmented-loading-gap: var(--neoverse-space-1);
     --neoverse-control-segmented-loading-size: var(--neoverse-space-4);
     --neoverse-control-segmented-border: var(--neoverse-control-button-border);
-    --neoverse-control-segmented-shadow: var(--neoverse-control-secondary-shadow);
-    --neoverse-control-segmented-filter: blur(6px) saturate(112%) brightness(102%);
+    --neoverse-control-segmented-shadow: var(--neoverse-effect-choice-rest-shadow);
+    --neoverse-control-segmented-filter: var(--neoverse-material-glass-subtle-filter);
   }
 }

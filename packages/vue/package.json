@@ -32,10 +32,11 @@
     "test": "vitest run --environment happy-dom"
   },
   "peerDependencies": {
-    "vue": ">=3.4.0 <4.0.0"
+    "vue": ">=3.5.0 <4.0.0"
   },
   "dependencies": {
     "@neoverse-ui/motion": "^0.2.0",
+    "@neoverse-ui/overlay-runtime": "^0.2.0",
     "@neoverse-ui/tailwind": "^0.2.0"
   },
   "devDependencies": {

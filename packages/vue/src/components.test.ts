@@ -7,22 +7,31 @@ import UiBadge from './UiBadge.vue';
 import UiBreadcrumb from './UiBreadcrumb.vue';
 import UiButton from './UiButton.vue';
 import UiCard from './UiCard.vue';
+import UiCheckbox from './UiCheckbox.vue';
 import UiControlSurface from './UiControlSurface.vue';
 import UiDisclosure from './UiDisclosure.vue';
 import UiDock from './UiDock.vue';
+import UiDropdownMenu from './UiDropdownMenu.vue';
+import UiField from './UiField.vue';
 import UiIconButton from './UiIconButton.vue';
 import UiInput from './UiInput.vue';
 import UiNavigationItem from './UiNavigationItem.vue';
 import UiNotice from './UiNotice.vue';
+import UiPopover from './UiPopover.vue';
 import UiPresence from './UiPresence.vue';
+import UiRadioGroup from './UiRadioGroup.vue';
 import UiScrollbar from './UiScrollbar.vue';
 import UiSegmentedControl from './UiSegmentedControl.vue';
 import UiSelect from './UiSelect.vue';
 import UiSkeleton from './UiSkeleton.vue';
+import UiStatCard from './UiStatCard.vue';
 import UiStatusIndicator from './UiStatusIndicator.vue';
+import UiStepFlow from './UiStepFlow.vue';
 import UiSurface from './UiSurface.vue';
+import UiSwitch from './UiSwitch.vue';
 import UiTable from './UiTable.vue';
 import UiTextarea from './UiTextarea.vue';
+import UiTimeline from './UiTimeline.vue';
 import UiTooltipSurface from './UiTooltipSurface.vue';
 
 const options = [
@@ -495,14 +504,14 @@ describe('UiDock', () => {
 
     expect(wrapper.element.tagName).toBe('NAV');
     expect(wrapper.attributes('aria-label')).toBe('Primary navigation');
-    expect(wrapper.attributes('data-surface')).toBe('chrome');
+    expect(wrapper.attributes('data-surface')).toBe('glass-elevated');
     expect(wrapper.classes()).toEqual(
       expect.arrayContaining([
         'ui-dock',
         'ui-dock--compact',
         'ui-control-surface',
         'ui-control-surface--scale-lg',
-        'ui-surface-chrome',
+        'material-glass-elevated',
       ]),
     );
     expect(wrapper.classes()).toContain('ui-control-surface--shared-indicator');
@@ -634,7 +643,7 @@ describe('display components', () => {
       slots: { default: 'Error' },
     });
     expect(badge.classes()).toEqual(
-      expect.arrayContaining(['ui-badge', 'ui-badge--danger', 'text-label']),
+      expect.arrayContaining(['ui-badge', 'ui-badge--danger', 'ui-badge--md']),
     );
 
     const card = mount(UiCard, { attrs: { class: 'max-w-container-sm' } });
@@ -702,6 +711,8 @@ describe('display components', () => {
     expect(tooltip.attributes('data-surface')).toBe('glass-subtle');
     expect(tooltip.attributes('data-neoverse-surface-hover')).toBe('static');
     expect(tooltip.attributes()).toHaveProperty('data-neoverse-tooltip-surface');
+    expect(tooltip.get('.ui-tooltip-surface__content').text()).toBe('12 contributions');
+    expect(tooltip.get('.ui-tooltip-surface__content').classes()).toContain('nv-appear');
 
     const skeleton = mount(UiSkeleton, { props: { variant: 'circle' } });
     expect(skeleton.attributes('aria-hidden')).toBe('true');
@@ -872,6 +883,24 @@ describe('UiDisclosure', () => {
 });
 
 describe('form controls', () => {
+  it('renders themed number steps while forwarding native attributes and localized labels', async () => {
+    const wrapper = mount(UiInput, {
+      attrs: { type: 'number', id: 'amount', name: 'amount', min: '0', max: '2', step: '0.5' },
+      props: { modelValue: '1.5', incrementLabel: '增加', decrementLabel: '减少' },
+    });
+    const input = wrapper.get('input');
+    expect(wrapper.classes()).toContain('ui-input-number');
+    expect(input.attributes('id')).toBe('amount');
+    expect(input.attributes('step')).toBe('0.5');
+    const buttons = wrapper.findAll('button');
+    expect(buttons.map((button) => button.attributes('aria-label'))).toEqual(['增加', '减少']);
+    expect(buttons.every((button) => button.attributes('type') === 'button')).toBe(true);
+    await input.setValue('1');
+    expect(wrapper.emitted('update:modelValue')).toEqual([['1']]);
+    await wrapper.setProps({ readonly: true });
+    expect(buttons.every((button) => button.attributes('disabled') !== undefined)).toBe(true);
+  });
+
   it('keeps input attributes and v-model updates native', async () => {
     const wrapper = mount(UiInput, {
       attrs: { type: 'email', name: 'email', 'aria-label': 'Email' },
@@ -934,6 +963,119 @@ describe('form controls', () => {
     expect(wrapper.get('.ui-select').attributes('data-neoverse-focus-origin')).toBeUndefined();
     await wrapper.findAll('.ui-select__option')[1]?.trigger('click');
     expect(wrapper.emitted('update:modelValue')).toEqual([['remote']]);
+  });
+
+  it('maps validation and readonly state onto native text controls', () => {
+    const input = mount(UiInput, {
+      props: { modelValue: 'Locked', validation: 'error', readonly: true },
+    });
+    expect(input.attributes('data-validation')).toBe('error');
+    expect(input.attributes('readonly')).toBeDefined();
+    expect(input.attributes('aria-invalid')).toBe('true');
+
+    const explicit = mount(UiTextarea, {
+      attrs: { 'aria-invalid': 'false' },
+      props: { validation: 'error' },
+    });
+    expect(explicit.get('textarea').attributes('aria-invalid')).toBe('false');
+  });
+
+  it('uses native checkbox and switch semantics with v-model updates', async () => {
+    const checkbox = mount(UiCheckbox, {
+      props: { modelValue: false },
+      slots: { default: 'Release notifications' },
+    });
+    const checkboxInput = checkbox.get('input');
+    expect(checkboxInput.attributes('type')).toBe('checkbox');
+    await checkboxInput.setValue(true);
+    expect(checkbox.emitted('update:modelValue')).toEqual([[true]]);
+
+    const toggle = mount(UiSwitch, {
+      props: { modelValue: false, validation: 'success' },
+      slots: { default: 'Sync automatically' },
+    });
+    const switchInput = toggle.get('input');
+    expect(switchInput.attributes('role')).toBe('switch');
+    expect(toggle.attributes('data-validation')).toBe('success');
+    await switchInput.setValue(true);
+    expect(toggle.emitted('update:modelValue')).toEqual([[true]]);
+  });
+
+  it('keeps readonly choice controls focusable without emitting mutations', async () => {
+    const checkbox = mount(UiCheckbox, {
+      props: { modelValue: true, readonly: true },
+    });
+    const input = checkbox.get('input');
+    expect(input.attributes('disabled')).toBeUndefined();
+    expect(input.attributes('aria-disabled')).toBe('true');
+    await input.trigger('change');
+    expect(checkbox.emitted('update:modelValue')).toBeUndefined();
+  });
+
+  it('renders a semantic radio group and emits selected values', async () => {
+    const wrapper = mount(UiRadioGroup, {
+      props: {
+        modelValue: 'native',
+        name: 'runtime',
+        ariaLabel: 'Runtime',
+        options: [
+          { value: 'native', label: 'Native' },
+          { value: 'remote', label: 'Remote', description: 'Hosted runtime' },
+        ],
+      },
+    });
+    expect(wrapper.attributes('role')).toBe('radiogroup');
+    expect(wrapper.attributes('aria-label')).toBe('Runtime');
+    const inputs = wrapper.findAll('input[type="radio"]');
+    expect(inputs).toHaveLength(2);
+    await inputs[1]?.setValue(true);
+    expect(wrapper.emitted('update:modelValue')).toEqual([['remote']]);
+  });
+
+  it('composes labels, descriptions, controls and validation messages with UiField', () => {
+    const wrapper = mount(UiField, {
+      props: {
+        controlId: 'field-email',
+        label: 'Email',
+        description: 'Used for release notifications.',
+        message: 'Enter a valid email address.',
+        validation: 'error',
+        required: true,
+      },
+      slots: { default: '<input id="field-email" />' },
+    });
+    expect(wrapper.attributes('data-validation')).toBe('error');
+    expect(wrapper.get('label').attributes('for')).toBe('field-email');
+    expect(wrapper.get('.ui-field__description').text()).toContain('release notifications');
+    expect(wrapper.get('.ui-field__message').text()).toBe('Enter a valid email address.');
+    expect(wrapper.get('.ui-field__required').text()).toBe('*');
+  });
+
+  it('binds native Field state and updates description associations without dangling ids', async () => {
+    const wrapper = mount(UiField, {
+      props: {
+        controlId: 'release-email',
+        label: 'Email',
+        description: 'Release updates',
+        message: 'Invalid email',
+        descriptionId: 'release-help',
+        messageId: 'release-error',
+        required: true,
+        disabled: true,
+      },
+      slots: { default: ({ controlAttrs }) => h(UiInput, { ...controlAttrs, type: 'email' }) },
+    });
+    const input = wrapper.get('input');
+    expect(input.attributes('id')).toBe('release-email');
+    expect(input.attributes('aria-describedby')).toBe('release-help release-error');
+    expect((input.element as HTMLInputElement).required).toBe(true);
+    expect((input.element as HTMLInputElement).disabled).toBe(true);
+    expect(wrapper.get('#release-help').text()).toBe('Release updates');
+    expect(wrapper.get('#release-error').text()).toBe('Invalid email');
+    await wrapper.setProps({ description: '', message: '', required: false, disabled: false });
+    expect(input.attributes('aria-describedby')).toBeUndefined();
+    expect((input.element as HTMLInputElement).required).toBe(false);
+    expect((input.element as HTMLInputElement).disabled).toBe(false);
   });
 });
 
@@ -1086,5 +1228,183 @@ describe('UiSegmentedControl', () => {
     expect(warn).toHaveBeenCalledWith(
       '[UiSegmentedControl] Duplicate option value "one" makes selection ambiguous.',
     );
+  });
+});
+
+describe('Overlay primitives', () => {
+  it('keeps controlled Popover ARIA closed when disabled and restores the retained open intent', async () => {
+    const wrapper = mount(UiPopover, {
+      props: { open: true, disabled: true, ariaLabel: 'Details' },
+      slots: { trigger: 'Details', default: '<p>Body</p>' },
+    });
+    await nextTick();
+    expect(wrapper.get('.ui-popover__trigger').attributes('aria-expanded')).toBe('false');
+    await wrapper.setProps({ disabled: false });
+    await nextTick();
+    expect(wrapper.get('.ui-popover__trigger').attributes('aria-expanded')).toBe('true');
+    expect(wrapper.get('.ui-popover__content').classes()).toContain(
+      'ui-overlay-panel--fallback-open',
+    );
+    await wrapper.setProps({ disabled: true });
+    await nextTick();
+    expect(wrapper.get('.ui-popover__trigger').attributes('aria-expanded')).toBe('false');
+    wrapper.unmount();
+  });
+
+  it('keeps controlled DropdownMenu ARIA closed when disabled and restores the retained open intent', async () => {
+    const wrapper = mount(UiDropdownMenu, {
+      props: {
+        open: true,
+        disabled: true,
+        ariaLabel: 'Actions',
+        items: [{ id: 'open', label: 'Open' }],
+      },
+      slots: { trigger: 'Actions' },
+    });
+    await nextTick();
+    expect(wrapper.get('.ui-dropdown-menu__trigger').attributes('aria-expanded')).toBe('false');
+    await wrapper.setProps({ disabled: false });
+    await nextTick();
+    expect(wrapper.get('.ui-dropdown-menu__trigger').attributes('aria-expanded')).toBe('true');
+    expect(wrapper.get('.ui-dropdown-menu__panel').classes()).toContain(
+      'ui-overlay-panel--fallback-open',
+    );
+    await wrapper.setProps({ disabled: true });
+    await nextTick();
+    expect(wrapper.get('.ui-dropdown-menu__trigger').attributes('aria-expanded')).toBe('false');
+    wrapper.unmount();
+  });
+
+  it('keeps a controlled Popover open when the parent rejects an Escape request', async () => {
+    const wrapper = mount(UiPopover, {
+      attachTo: document.body,
+      props: { open: true, ariaLabel: 'Controlled details' },
+      slots: { trigger: 'Details', default: '<p>Body</p>' },
+    });
+    await nextTick();
+    const panel = wrapper.get('.ui-popover__content');
+    expect(panel.classes()).toContain('ui-overlay-panel--fallback-open');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await nextTick();
+    await nextTick();
+    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([false]);
+    expect(panel.classes()).toContain('ui-overlay-panel--fallback-open');
+    expect(wrapper.get('button').attributes('aria-expanded')).toBe('true');
+    wrapper.unmount();
+  });
+  it('renders Popover with the shared trigger, top-layer panel, and dialog semantics', () => {
+    const wrapper = mount(UiPopover, {
+      props: { ariaLabel: 'Details' },
+      slots: { trigger: 'Open details', default: '<p>Overlay body</p>' },
+    });
+
+    const trigger = wrapper.get('.ui-popover__trigger');
+    const panel = wrapper.get('.ui-popover__content');
+    expect(trigger.attributes('type')).toBe('button');
+    expect(trigger.attributes('aria-expanded')).toBe('false');
+    expect(panel.attributes('popover')).toBe('auto');
+    expect(panel.attributes('role')).toBe('dialog');
+    expect(panel.attributes('aria-label')).toBe('Details');
+    expect(panel.classes()).toContain('material-glass-elevated');
+  });
+
+  it('renders DropdownMenu with native menu items, disabled state, and danger tone', () => {
+    const wrapper = mount(UiDropdownMenu, {
+      props: {
+        ariaLabel: 'Actions',
+        items: [
+          { id: 'open', label: 'Open' },
+          { id: 'disabled', label: 'Disabled', disabled: true },
+          { id: 'archive', label: 'Archive', tone: 'danger' },
+        ],
+      },
+      slots: { trigger: 'Open menu' },
+    });
+
+    const trigger = wrapper.get('.ui-dropdown-menu__trigger');
+    const panel = wrapper.get('.ui-dropdown-menu__panel');
+    expect(trigger.attributes('aria-haspopup')).toBe('menu');
+    expect(panel.attributes('popover')).toBe('auto');
+    expect(panel.attributes('role')).toBe('menu');
+    expect(panel.attributes('aria-label')).toBe('Actions');
+
+    const items = wrapper.findAll('.ui-dropdown-menu__item');
+    expect(items).toHaveLength(3);
+    expect(items[0]?.attributes('role')).toBe('menuitem');
+    expect(items[1]?.attributes('disabled')).toBeDefined();
+    expect(items[2]?.attributes('data-tone')).toBe('danger');
+  });
+});
+
+describe('Presentation data', () => {
+  it('keeps a zero metric and renders untrusted metric text without HTML', async () => {
+    const payload = '<img src=x onerror=alert(1)>';
+    const wrapper = mount(UiStatCard, {
+      props: { label: payload, value: 0, unit: 'ms', footnote: payload },
+    });
+    expect(wrapper.get('dt').text()).toBe(payload);
+    expect(wrapper.get('dd').text()).toBe('0ms');
+    expect(wrapper.find('img').exists()).toBe(false);
+    await wrapper.setProps({ value: payload });
+    expect(wrapper.get('dd').text()).toBe(`${payload}ms`);
+    expect(wrapper.find('img').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('updates timeline order and optional dates without interpreting titles as HTML', async () => {
+    const payload = '<script>alert(1)</script>';
+    const first = { id: 'first', title: payload, time: 'October', dateTime: '2026-10' };
+    const second = { id: 'second', title: 'Release', description: 'Ready' };
+    const wrapper = mount(UiTimeline, { props: { items: [first, second] } });
+    expect(wrapper.get('time').attributes('datetime')).toBe('2026-10');
+    expect(wrapper.get('.ui-timeline__content').element.firstElementChild?.tagName).toBe('TIME');
+    expect(wrapper.get('.ui-timeline__content').attributes('data-surface')).toBe('glass-subtle');
+    expect(wrapper.get('.ui-timeline__node').attributes('aria-hidden')).toBe('true');
+    expect(wrapper.find('script').exists()).toBe(false);
+    await wrapper.setProps({
+      items: [second, { id: first.id, title: first.title }],
+    });
+    expect(wrapper.findAll('li').map((item) => item.get('p').text())).toEqual(['Release', payload]);
+    expect(wrapper.find('time').exists()).toBe(false);
+    wrapper.unmount();
+  });
+
+  it('moves current-step semantics when consumer state advances or resets', async () => {
+    const wrapper = mount(UiStepFlow, {
+      props: {
+        items: [
+          { id: 'plan', title: 'Plan', status: 'current' },
+          { id: 'ship', title: '<img src=x>', status: 'pending' },
+        ],
+      },
+    });
+    expect(wrapper.get('[aria-current="step"]').text()).toContain('Plan');
+    expect(wrapper.find('img').exists()).toBe(false);
+    await wrapper.setProps({
+      items: [
+        { id: 'plan', title: 'Plan', status: 'complete', statusLabel: '已完成' },
+        { id: 'ship', title: 'Ship', status: 'current', statusLabel: '当前步骤' },
+      ],
+    });
+    expect(wrapper.get('[aria-current="step"]').text()).toContain('Ship');
+    expect(wrapper.findAll('[aria-current="step"]')).toHaveLength(1);
+    expect(wrapper.get('[aria-current="step"] .ui-badge--info').text()).toBe('当前步骤');
+    const completed = wrapper.get('.ui-step-flow__item--complete');
+    expect(completed.find('.ui-step-flow__marker svg').exists()).toBe(true);
+    expect(completed.get('.ui-step-flow__status').text()).toBe('已完成');
+    expect(completed.get('.ui-step-flow__content').attributes('data-surface')).toBe('glass-subtle');
+    await wrapper.setProps({
+      items: [
+        { id: 'plan', title: 'Plan' },
+        { id: 'ship', title: 'Ship' },
+      ],
+    });
+    expect(wrapper.find('[aria-current]').exists()).toBe(false);
+    expect(wrapper.findAll('.ui-step-flow__marker').map((marker) => marker.text())).toEqual([
+      '1',
+      '2',
+    ]);
+    expect(wrapper.find('.ui-step-flow__status').exists()).toBe(false);
+    wrapper.unmount();
   });
 });

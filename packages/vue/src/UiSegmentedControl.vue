@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue';
-import { computed, nextTick, ref, useAttrs, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, watch } from 'vue';
 import { presence } from './presence';
 import { getSurfaceClass, isGlassSurface } from './surface';
 import type { SegmentedControlProps, SegmentOption } from './types';
@@ -37,6 +37,11 @@ const ariaBusy = computed<'true' | 'false' | undefined>(() => {
 const internalValue = ref<string | undefined>(initialValue(props.options, props.defaultValue));
 const focusedIndex = ref<number | null>(null);
 const optionRefs = ref<Array<HTMLButtonElement | null>>([]);
+const optionsElement = ref<HTMLElement | null>(null);
+const sliderBounds = ref<{ offset: number; width: number } | null>(null);
+const sliderReady = ref(false);
+let sliderReadyFrame = 0;
+let optionResizeObserver: ResizeObserver | undefined;
 
 const selectedOptionClasses = 'ui-segmented-control__option--active';
 const unselectedOptionClasses = '';
@@ -49,7 +54,47 @@ const activeIndex = computed(() =>
 const segmentStyle = computed(() => ({
   '--segment-count': Math.max(props.options.length, 1),
   '--segment-index': Math.max(activeIndex.value, 0),
+  ...(sliderBounds.value === null
+    ? {}
+    : {
+        '--segment-active-offset': `${sliderBounds.value.offset}px`,
+        '--segment-active-width': `${sliderBounds.value.width}px`,
+      }),
 }));
+
+function measureSlider(): void {
+  const selected = optionRefs.value[activeIndex.value];
+  if (!selected) {
+    sliderBounds.value = null;
+    return;
+  }
+
+  // Offset geometry is in CSS layout pixels, so it stays correct under
+  // parent zoom and responsive font-size changes.
+  const next = { offset: selected.offsetLeft, width: selected.offsetWidth };
+  if (sliderBounds.value?.offset !== next.offset || sliderBounds.value.width !== next.width) {
+    sliderBounds.value = next;
+  }
+}
+
+onMounted(() => {
+  if (optionsElement.value) {
+    optionResizeObserver = new ResizeObserver(measureSlider);
+    optionResizeObserver.observe(optionsElement.value);
+  }
+  measureSlider();
+  void nextTick(() => {
+    sliderReadyFrame = requestAnimationFrame(() => {
+      sliderReady.value = true;
+    });
+  });
+});
+
+onBeforeUnmount(() => {
+  optionResizeObserver?.disconnect();
+  cancelAnimationFrame(sliderReadyFrame);
+});
+watch([activeIndex, () => props.options], () => void nextTick(measureSlider), { flush: 'post' });
 const enabledIndexes = computed(() =>
   props.options.flatMap((option, index) => (option.disabled ? [] : [index])),
 );
@@ -227,8 +272,13 @@ function optionClasses(option: SegmentOption): string[] {
     :aria-disabled="props.disabled || props.loading || undefined"
     :aria-busy="ariaBusy"
   >
-    <span class="ui-segmented-control__options">
-      <span v-if="activeIndex >= 0" class="ui-segmented-control__slider" aria-hidden="true" />
+    <span ref="optionsElement" class="ui-segmented-control__options">
+      <span
+        v-if="activeIndex >= 0"
+        class="ui-segmented-control__slider"
+        :data-ready="sliderReady"
+        aria-hidden="true"
+      />
       <!-- biome-ignore lint/a11y/useSemanticElements: Custom radio widget needs button keyboard behavior. -->
       <button
         v-for="(option, index) in props.options"

@@ -101,6 +101,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Check first-publication prerequisites
+        run: bun run check:release-registry
+
       - name: Verify workspace and release packages
         run: bun run release:check
 

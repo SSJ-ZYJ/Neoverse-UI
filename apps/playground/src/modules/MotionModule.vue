@@ -8,6 +8,7 @@ import {
 import {
   presence,
   staggerStyle,
+  UiBadge,
   UiButton,
   UiPresence,
   UiSegmentedControl,
@@ -25,6 +26,7 @@ const pageCopy = moduleCopy.motion.page;
 const presenceOn = ref(true);
 const presenceSpecimens = ['Neoverse', 'Motion', 'Presence', 'Glass', 'Edge to Edge'];
 const staggerOrder = ref(presenceSpecimens.map((label, index) => ({ label, seed: index })));
+const staggerReplay = ref(0);
 
 const webglAvailable = supportsParticleDissolve();
 const captureAvailable = supportsParticleCapture();
@@ -80,16 +82,8 @@ async function replayDissolve(): Promise<void> {
 }
 
 function shuffleStagger(): void {
-  const items = [...staggerOrder.value];
-  for (let current = items.length - 1; current > 0; current -= 1) {
-    const next = Math.floor(Math.random() * (current + 1));
-    const held = items[current];
-    const other = items[next];
-    if (held === undefined || other === undefined) continue;
-    items[current] = other;
-    items[next] = held;
-  }
-  staggerOrder.value = items;
+  const [first, ...rest] = staggerOrder.value;
+  if (first) staggerOrder.value = [...rest, first];
 }
 
 const motionBaseEntries = motionBaseGroups.map((group) => ({
@@ -180,32 +174,45 @@ const variantLabels = computed(() =>
       :description="localize(presenceCopy.staggerDescription, props.locale)"
     >
       <template #action>
-        <UiButton
-          data-motion-presence-shuffle
-          size="sm"
-          variant="secondary"
-          @click="shuffleStagger"
-        >
-          {{ localize(presenceCopy.shuffle, props.locale) }}
-        </UiButton>
+        <div class="flex flex-wrap gap-2">
+          <UiButton
+            data-motion-presence-replay
+            size="sm"
+            variant="secondary"
+            @click="staggerReplay += 1"
+          >
+            {{ localize(presenceCopy.replayEntries, props.locale) }}
+          </UiButton>
+          <UiButton
+            data-motion-presence-shuffle
+            size="sm"
+            variant="secondary"
+            @click="shuffleStagger"
+          >
+            {{ localize(presenceCopy.shuffle, props.locale) }}
+          </UiButton>
+        </div>
       </template>
 
       <UiSurface surface="glass-subtle" class="playground-specimen-panel">
         <TransitionGroup
+          :key="staggerReplay"
+          appear
           name="nv"
           tag="div"
           class="flex flex-wrap gap-2"
           data-motion-presence-group
         >
-          <span
+          <UiBadge
+            size="md"
             v-for="(item, index) in staggerOrder"
             :key="item.seed"
+            v-bind="presence('rise')"
             data-motion-presence-group-item
             :style="staggerStyle(index)"
-            class="rounded-control bg-surface-raised px-3 py-1.5 text-label text-secondary"
           >
             {{ item.label }}
-          </span>
+          </UiBadge>
         </TransitionGroup>
       </UiSurface>
     </LabSpecimenSection>

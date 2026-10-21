@@ -21,6 +21,7 @@ const contractCopy = {
     :label="copy.states.default.label"
     :hint="copy.states.default.hint"
     :locale="props.locale"
+    contract-state="default"
   >
     <UiNavigationItem
       href="#controls-navigation-item"
@@ -63,7 +64,12 @@ const contractCopy = {
     </UiNavigationItem>
   </StateRow>
 
-  <StateRow :label="copy.states.hover.label" :hint="copy.states.hover.hint" :locale="props.locale">
+  <StateRow
+    :label="copy.states.hover.label"
+    :hint="copy.states.hover.hint"
+    :locale="props.locale"
+    contract-state="hover"
+  >
     <UiNavigationItem
       href="#controls-navigation-item"
       @click.prevent
@@ -73,7 +79,12 @@ const contractCopy = {
     </UiNavigationItem>
   </StateRow>
 
-  <StateRow :label="copy.states.focus.label" :hint="copy.states.focus.hint" :locale="props.locale">
+  <StateRow
+    :label="copy.states.focus.label"
+    :hint="copy.states.focus.hint"
+    :locale="props.locale"
+    contract-state="focus"
+  >
     <UiNavigationItem
       href="#controls-navigation-item"
       @click.prevent
@@ -83,7 +94,7 @@ const contractCopy = {
     </UiNavigationItem>
   </StateRow>
 
-  <StateRow :label="copy.states.disabled.label" :locale="props.locale">
+  <StateRow :label="copy.states.disabled.label" :locale="props.locale" contract-state="disabled">
     <UiNavigationItem
       href="#controls-navigation-item"
       @click.prevent
@@ -94,8 +105,13 @@ const contractCopy = {
     </UiNavigationItem>
   </StateRow>
 
-  <StateRow :label="contractCopy.label" :hint="contractCopy.hint" :locale="props.locale">
-    <div class="grid w-full gap-2 md:grid-cols-2">
+  <StateRow
+    :label="contractCopy.label"
+    :hint="contractCopy.hint"
+    :locale="props.locale"
+    layout="wide"
+  >
+    <div class="playground-preview-columns">
       <UiNavigationItem
         href="#controls-navigation-item"
         @click.prevent

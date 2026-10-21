@@ -7,7 +7,7 @@ defineOptions({ inheritAttrs: false });
 
 const props = withDefaults(defineProps<DockProps>(), {
   as: 'nav',
-  surface: 'chrome',
+  surface: 'glass-elevated',
   hoverMode: 'static',
   edgeMode: 'auto',
   scale: 'lg',
