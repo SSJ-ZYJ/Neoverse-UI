@@ -13,7 +13,10 @@ Neoverse UI publishes the following public packages under the npm `@neoverse-ui`
 
 `apps/playground` is an internal workspace and is never published.
 
-The current workspace has eight public packages. The new Overlay Runtime must be included in the same release plan as its Vue/React dependents. The pending form/overlay Changeset proposes the 0.3.x contract line; package versions remain 0.2.0 until the approved versioning step. Historical 0.2.0 bootstrap instructions below describe that earlier release sequence; current registry and Trusted Publisher state must be checked at publication time.
+The merged 0.3.0 version plan contains Tokens, Tailwind, Vue, React and Overlay
+Runtime at 0.3.0, Motion and Glass Runtime at 0.2.1, and unchanged Giscus Theme at
+0.2.0. See [release notes](release-0.3.0.md). Versioned manifests are not proof of
+npm publication; verify registry and Trusted Publisher state at publication time.
 
 ## Release preparation versus publishing
 
@@ -48,6 +51,9 @@ It does **not** verify npm permissions, Trusted Publisher configuration, or appr
 
 On 2026-10-20 this check found seven registered packages and
 `@neoverse-ui/overlay-runtime` requiring bootstrap, with Vue and React as dependents.
+On 2026-10-21 all eight names were registered, including Overlay Runtime at 0.2.0;
+its name no longer requires bootstrap for the 0.3.0 release. This does not establish
+that its Trusted Publisher identity is configured correctly.
 The terminal token request has completed its local code and XCA-Portal validation and is
 `blocked` solely on the formal publication criterion. Do not upgrade consumers to
 unpublished variables; see [terminal token acceptance](acceptance-2026-10-20-terminal-tokens.md).
@@ -70,10 +76,15 @@ The repository and all public packages use the MIT license. `scripts/verify-pack
 
 ### CI and visual baselines
 
+CI and Release call `.github/workflows/verify.yml` on their exact checked-out commit.
+CI handles PRs and `dev` pushes without an open PR; Release verifies every `main`
+push, even when publication automation is disabled. This avoids running the full
+matrix twice. Documentation-only PRs keep completed required checks while skipping
+the source/browser matrix; workflow and contract-matrix edits still run it.
 The Linux release-quality job runs `release:check` once and uploads the built
-Playground JS/CSS. Three Ubuntu 24.04 visual jobs download that same build and run
+public packages and Playground JS/CSS. Three Ubuntu 24.04 visual jobs download that same build and run
 the complete Playwright suite with `--shard=1/3`, `2/3`, or `3/3`, two workers each.
-`Verify workspace (Linux)` remains the aggregate required-check name: it succeeds
+`Verify workspace (Linux)` is the aggregate Linux job: it succeeds
 only when release quality and every visual shard pass. Windows keeps its separate
 `release:check` and four-file keyboard/overlay/theme interaction gate.
 
@@ -189,10 +200,10 @@ The version script runs `changeset version` and then refreshes `bun.lock`, so wo
 
 A package that has never existed on npm needs an initial publication before npm Trusted Publisher settings can be attached to it.
 
-For the pending 0.3.x release, `@neoverse-ui/overlay-runtime` needs that bootstrap;
-the other seven package names were present in the official registry on 2026-10-20.
-Vue and React already declare it as a runtime dependency. Do not try to bootstrap
-the whole release through OIDC: a missing package has no Trusted Publisher yet.
+All eight names were registered when checked on 2026-10-21. The following procedure
+is for future missing package names, not a requirement to republish Overlay Runtime
+0.2.0. A missing package has no Trusted Publisher yet; do not try to bootstrap an
+entire dependency graph through OIDC.
 
 During an explicitly approved release:
 
@@ -233,7 +244,15 @@ Then configure GitHub:
 3. Add the repository variable `NPM_TRUSTED_PUBLISHING_ENABLED=true` only after every public package, including newly introduced ones, has its Trusted Publisher configured.
 4. Add `RELEASE_AUTOMATION_ENABLED=true` only after first-publication prerequisites are complete and the version/release plan is approved.
 
-The release workflow stays dormant until `RELEASE_AUTOMATION_ENABLED` is enabled. In publish mode it always runs package verification first. The publication job additionally requires `NPM_TRUSTED_PUBLISHING_ENABLED=true` and uses OIDC instead of a long-lived `NPM_TOKEN`.
+The `main` ruleset must require both Linux and Windows aggregate checks from the CI
+caller (`Verify workspace / Verify workspace (Linux)` and
+`Verify workspace / Verify workspace (Windows)`). Confirm their exact names in the
+latest PR check runs before configuring them. CI runs on documentation PRs as well,
+so required contexts cannot remain pending because the entire workflow was filtered.
+
+Versioning and publication stay dormant until `RELEASE_AUTOMATION_ENABLED` is enabled;
+verification still runs on every `main` push. The publication job additionally requires
+`NPM_TRUSTED_PUBLISHING_ENABLED=true` and uses OIDC instead of a long-lived `NPM_TOKEN`.
 
 For a new package, keep publication gated by the `npm` Environment and do not merge
 a publish-ready change to `main` before bootstrap is approved and complete. Existing
@@ -265,3 +284,31 @@ feature/fix + changeset
 ```
 
 Do not run `npm publish` directly from individual workspace source directories. The release path verifies the exact public package contents first; internal public-package dependencies remain explicit SemVer ranges in the published manifests.
+
+## Changeset validation and release completion
+
+`bun run check:changesets` uses the Changesets parser to validate YAML, bump types
+and workspace package names. Private-only records are rejected because private
+workspace versioning is disabled. Empty records and mixed public/private records
+are accepted. This check runs before mode selection, in `release:check`, and in the
+local `check` command; CLI regression tests run with `bun run test:release-tools`.
+
+In publish mode, Release waits for the reusable Linux/Windows quality and browser
+gates, downloads that verified build, checks registry prerequisites and packs it.
+The `npm` Environment then gates OIDC publication. Version PRs use conventional
+`chore(release): version packages` titles and commits.
+
+After publication, `bun run verify:published` must pass. This is also an automatic
+step after the publish action. It polls the official registry every 10 seconds for
+up to five minutes, allowing exact versions, `latest` tags and tarballs to propagate.
+Missing versions/tarballs, stale tags and transient registry errors are retried;
+authentication failures and incorrect package contents fail immediately.
+It checks official tarball origins and internal runtime ranges, then installs all eight packages from
+the official registry without local overrides. The existing JS/CSS/TypeScript smoke
+is reused, and resolved internal package versions must match the release plan.
+Check the seven new package tags and GitHub Releases as well. Do not rerun versioning
+to retry a failed publication: investigate the failed job and actual registry state.
+
+An npm package name being registered is not proof of publishing authorization, and
+a successful version-mode workflow is not proof that the publish job ran. Consumer
+upgrades and request delivery evidence remain separate from this library release.

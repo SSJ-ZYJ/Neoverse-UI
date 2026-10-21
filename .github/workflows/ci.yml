@@ -2,169 +2,48 @@ name: CI
 
 on:
   pull_request:
-    # Documentation-only edits do not change sources, contracts or packed
-    # artifacts, so skip the whole matrix for them. The last matching pattern
-    # wins, which is why the validated matrix document is re-included after
-    # the markdown exclusion. biome does not parse markdown and lint:text
-    # re-scans every tracked file on the next tracked-code run.
-    paths:
-      - '**'
-      # Workflow edits must always be validated, and an explicit positive
-      # pattern keeps that true even where dot-paths need one.
-      - '.github/workflows/**'
-      - '!**/*.md'
-      - '!.github/ISSUE_TEMPLATE/**'
-      - 'docs/component-contract-matrix.md'
   push:
     branches:
-      - main
       - dev
-    paths:
-      - '**'
-      - '.github/workflows/**'
-      - '!**/*.md'
-      - '!.github/ISSUE_TEMPLATE/**'
-      - 'docs/component-contract-matrix.md'
   workflow_dispatch:
 
-# A push to a branch and the pull_request it opens or synchronizes both target
-# the same commit (dev -> main is exactly such a pair), so key the group by the
-# head branch and repository. The second event cancels the first instead of
-# running the whole quality/visual/Windows matrix twice for one commit.
 concurrency:
-  group: ci-${{ github.event.pull_request.head.repo.full_name || github.repository }}:${{ github.event.pull_request.head_ref || github.ref_name }}
+  group: ci-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
-  quality-linux:
-    name: Validate release quality (Linux)
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.0
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Validate sources, contracts, tests and publishable artifacts
-        run: bun run release:check
-
-      # The Bun playground server serves these built files directly; visual
-      # shards reuse this validated build rather than repeat release:check.
-      - name: Upload playground assets for visual shards
-        uses: actions/upload-artifact@v4
-        with:
-          name: linux-playground-assets
-          path: |
-            apps/playground/dist/assets/
-            packages/tailwind/dist/playground.css
-            packages/tailwind/dist/index.css
-          if-no-files-found: error
-          retention-days: 7
-          overwrite: true
-
-  visual-linux:
-    name: Visual checks (Linux, shard ${{ matrix.shard }}/3)
-    needs: quality-linux
-    runs-on: ubuntu-24.04
-    timeout-minutes: 30
-    strategy:
-      fail-fast: false
-      matrix:
-        shard: [1, 2, 3]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.4.0
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Download validated playground assets
-        uses: actions/download-artifact@v4
-        with:
-          name: linux-playground-assets
-          path: .
-
-      - name: Install Chromium for visual checks
-        run: bunx playwright install --with-deps chromium
-
-      - name: Run visual checks
-        run: bunx playwright test --shard=${{ matrix.shard }}/3 --workers=2 --reporter=list,html
-
-      - name: Upload failed visual check evidence
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-linux-shard-${{ matrix.shard }}-attempt-${{ github.run_attempt }}
-          path: |
-            test-results/
-            playwright-report/
-          if-no-files-found: ignore
-          retention-days: 7
-
-  # Preserve the existing required-check name as a gate for quality AND every
-  # visual shard, including when a dependency fails or is skipped.
-  verify-linux:
-    name: Verify workspace (Linux)
-    needs: [quality-linux, visual-linux]
-    if: ${{ always() }}
+  scope:
+    name: Select CI scope
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    outputs:
+      verify: ${{ steps.scope.outputs.verify }}
+      full-checks: ${{ steps.scope.outputs.full-checks }}
     steps:
-      - name: Require all Linux checks to pass
-        run: |
-          test "${{ needs.quality-linux.result }}" = "success"
-          test "${{ needs.visual-linux.result }}" = "success"
-
-  verify-windows:
-    name: Verify workspace (Windows)
-    runs-on: windows-latest
-    timeout-minutes: 30
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@v6
         with:
-          bun-version: 1.4.0
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Select checks
+        id: scope
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT_NAME: ${{ github.event_name }}
+          REPOSITORY: ${{ github.repository }}
+          REPOSITORY_OWNER: ${{ github.repository_owner }}
+          BRANCH_NAME: ${{ github.ref_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: bash .github/scripts/ci-scope.sh
 
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Validate sources, contracts, tests and publishable artifacts
-        run: bun run release:check
-
-      - name: Install Chromium for browser interaction checks
-        run: bunx playwright install chromium
-
-      - name: Verify browser keyboard, overlay and theme behavior
-        run: bunx playwright test tests/visual/component-interactions.spec.ts tests/visual/control-identity.spec.ts tests/visual/dock-language-proportions.spec.ts tests/visual/react-theme.spec.ts --workers=2 --reporter=list,html
-
-      - name: Upload failed browser check evidence
-        if: ${{ failure() }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: playwright-windows-attempt-${{ github.run_attempt }}
-          path: |
-            test-results/
-            playwright-report/
-          if-no-files-found: ignore
-          retention-days: 7
+  verify:
+    name: Verify workspace
+    needs: scope
+    if: needs.scope.outputs.verify == 'true'
+    uses: ./.github/workflows/verify.yml
+    with:
+      full-checks: ${{ needs.scope.outputs.full-checks == 'true' }}
