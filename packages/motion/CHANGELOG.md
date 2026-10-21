@@ -1,5 +1,30 @@
 # @neoverse-ui/motion
 
+## 0.2.1
+
+### Patch Changes
+
+- c95d08e: Animate Vue TransitionGroup FLIP transforms so reordered list items move continuously instead of jumping to their new positions.
+- Updated dependencies [c95d08e]
+- Updated dependencies [c95d08e]
+- Updated dependencies [c95d08e]
+- Updated dependencies [a2439f4]
+- Updated dependencies [c95d08e]
+- Updated dependencies [c95d08e]
+- Updated dependencies [bf1b739]
+- Updated dependencies [bf1b739]
+- Updated dependencies [c95d08e]
+- Updated dependencies [c95d08e]
+- Updated dependencies [c95d08e]
+- Updated dependencies [c1af554]
+- Updated dependencies [c95d08e]
+- Updated dependencies [bf1b739]
+- Updated dependencies [a2439f4]
+- Updated dependencies [f2500fe]
+- Updated dependencies [c95d08e]
+- Updated dependencies [c95d08e]
+  - @neoverse-ui/tokens@0.3.0
+
 ## Unreleased
 
 ### Patch Changes
