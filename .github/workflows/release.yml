@@ -39,7 +39,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Reject private-only Changesets
-        run: bun scripts/check-changeset-targets.ts
+        run: bun run check:changesets
 
       - name: Select Changesets mode
         id: changesets
@@ -75,15 +75,23 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: bun run version
-          commit-message: Version Packages
-          pr-title: Version Packages
+          commit-message: 'chore(release): version packages'
+          pr-title: 'chore(release): version packages'
+
+  verify:
+    name: Verify release
+    if: needs.select-mode.outputs.mode == 'publish'
+    needs: select-mode
+    uses: ./.github/workflows/verify.yml
+    permissions:
+      contents: read
 
   pack:
     name: Verify and pack release
     if: needs.select-mode.outputs.mode == 'publish'
-    needs: select-mode
+    needs: [select-mode, verify]
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 10
     permissions:
       contents: read
     outputs:
@@ -107,14 +115,11 @@ jobs:
       - name: Check first-publication prerequisites
         run: bun run check:release-registry
 
-      - name: Verify workspace and release packages
-        run: bun run release:check
-
-      - name: Install Chromium for visual release gates
-        run: bunx playwright install --with-deps chromium
-
-      - name: Verify visual release gates
-        run: bun run test:visual
+      - name: Download verified release build
+        uses: actions/download-artifact@v4
+        with:
+          name: verified-workspace-assets
+          path: .
 
       - name: Pack publishable packages
         id: pack
@@ -165,3 +170,6 @@ jobs:
           pack-dir-artifact-id: ${{ needs.pack.outputs.pack-dir-artifact-id }}
           create-github-releases: true
           push-git-tags: true
+
+      - name: Verify official registry installation
+        run: bun run verify:published

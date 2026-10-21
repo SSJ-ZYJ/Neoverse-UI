@@ -4,6 +4,11 @@
 
 ### Patch Changes
 
+- Restore live-backdrop directional RGB edges with theme-aware exposure, clipping and
+  circular-surface coverage. Add the explicit `backend: 'native'` SVG displacement
+  alternative while retaining the default WebGL path and CSS fallback. Preserve
+  live DOM/canvas/video backdrops, reduced-transparency behavior and observer cleanup.
+
 - bf1b739: Add shared Checkbox, RadioGroup, Switch, Field, Popover and DropdownMenu contracts across Vue and React, including validation and readonly states. Field exposes explicit control bindings for accessible descriptions, messages and native required/disabled state.
   
   Require Vue 3.5 or later to match the SSR-stable useId API used by Field and choice controls.

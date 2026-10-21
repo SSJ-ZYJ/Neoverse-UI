@@ -77,7 +77,7 @@ bun run test:visual:update
 
 `bun run dev` starts the playground server at `http://localhost:3000`, a Vite client watcher, and source rebuilds for the generated token, motion, and Tailwind stylesheets. `bun run check` is the full pre-commit gate: it auto-fixes Biome lint/format/imports, verifies text encoding integrity, runs the style and Tailwind-usage lints, typechecks every workspace, and runs all unit and contract tests. Visual regression is opt-in via `test:visual` because it rebuilds the workspace and drives a browser; use `test:visual:update` only when a reviewed visual change is intentional.
 
-`bun check` reports progress and a final PASS/FAIL table with per-check durations. All ten checks run sequentially even when an earlier check fails; any failure makes the command exit nonzero. Detailed stdout/stderr is written to numbered files in the temporary log directory printed at the start and end, rather than flooding the terminal. Failed checks include their exit codes, log paths, and standalone rerun commands. Biome auto-fixes are unchanged.
+`bun check` reports progress and a final PASS/FAIL table with per-check durations. All eleven checks run sequentially even when an earlier check fails; any failure makes the command exit nonzero. Detailed stdout/stderr is written to numbered files in the temporary log directory printed at the start and end, rather than flooding the terminal. Failed checks include their exit codes, log paths, and standalone rerun commands. Biome auto-fixes are unchanged. Changeset targets are validated in both local and release checks. See the [0.3.0 release notes](docs/release-0.3.0.md) for the coordinated versions and publication verification.
 
 ## Tokens and Tailwind Foundation
 
