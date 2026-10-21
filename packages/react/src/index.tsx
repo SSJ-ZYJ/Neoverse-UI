@@ -863,9 +863,11 @@ function useAnchoredOverlayController({
 }: AnchoredOverlayControllerOptions) {
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const ignoreDisabledNativeClose = useRef(false);
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const [syncRevision, setSyncRevision] = useState(0);
   const resolvedOpen = open ?? internalOpen;
+  const expandedOpen = resolvedOpen && !disabled;
 
   const setOpen = useCallback(
     (value: boolean) => {
@@ -900,23 +902,39 @@ function useAnchoredOverlayController({
     void syncRevision;
     const options = resolveOptions();
     if (options === undefined) return;
-    if (resolvedOpen && !disabled) showAnchoredOverlay(options);
-    else hideAnchoredOverlay(options);
+    if (expandedOpen) showAnchoredOverlay(options);
+    else {
+      // Native toggle events are asynchronous; a close caused by disabling
+      // must not erase the caller's retained open intent on re-enable.
+      if (disabled && isOverlayOpen(options.overlay, 'ui-overlay-panel--fallback-open')) {
+        ignoreDisabledNativeClose.current = true;
+      }
+      hideAnchoredOverlay(options);
+    }
     return () => stopOverlayTracking(options.overlay);
-  }, [resolvedOpen, disabled, resolveOptions, syncRevision]);
+  }, [expandedOpen, disabled, resolveOptions, syncRevision]);
 
   const onPanelToggle = (event: React.SyntheticEvent<HTMLDivElement>) => {
     const panel = event.currentTarget;
     const newState = (event.nativeEvent as Event & { newState?: 'open' | 'closed' }).newState;
-    if (newState === 'open' || isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')) return;
+    if (newState === 'open') {
+      ignoreDisabledNativeClose.current = false;
+      return;
+    }
+    if (newState === 'closed' && ignoreDisabledNativeClose.current) {
+      ignoreDisabledNativeClose.current = false;
+      return;
+    }
+    if (isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')) return;
     stopOverlayTracking(panel);
-    if (resolvedOpen) setOpen(false);
+    if (expandedOpen) setOpen(false);
   };
 
   return {
     triggerRef,
     panelRef,
     resolvedOpen,
+    expandedOpen,
     setOpen,
     toggle: () => {
       if (!disabled) setOpen(!resolvedOpen);
@@ -966,7 +984,7 @@ export function UiPopover({
         className="ui-popover__trigger ui-button ui-button--secondary ui-button--md"
         type="button"
         disabled={disabled}
-        aria-expanded={controller.resolvedOpen}
+        aria-expanded={controller.expandedOpen}
         onClick={controller.toggle}
       >
         {trigger}
@@ -1043,9 +1061,19 @@ export function UiDropdownMenu({
   );
 
   useEffect(() => {
-    if (!controller.resolvedOpen) return;
-    requestAnimationFrame(() => enabledItems()[0]?.focus());
-  }, [controller.resolvedOpen, enabledItems]);
+    if (!controller.expandedOpen) return;
+    const frame = requestAnimationFrame(() => {
+      const panel = controller.panelRef.current;
+      if (
+        panel &&
+        !controller.triggerRef.current?.disabled &&
+        isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')
+      ) {
+        enabledItems()[0]?.focus();
+      }
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [controller.expandedOpen, controller.panelRef, controller.triggerRef, enabledItems]);
 
   const selectItem = (item: UiDropdownMenuItem) => {
     if (item.disabled) return;
@@ -1080,7 +1108,7 @@ export function UiDropdownMenu({
         className="ui-dropdown-menu__trigger ui-button ui-button--secondary ui-button--md"
         type="button"
         aria-haspopup="menu"
-        aria-expanded={controller.resolvedOpen}
+        aria-expanded={controller.expandedOpen}
         disabled={disabled}
         onClick={controller.toggle}
       >

@@ -22,6 +22,19 @@ test('UiPopover renders the shared trigger and dialog contract', () => {
   expect(html).toContain('aria-label="Details"');
 });
 
+test('disabled Popover and DropdownMenu never announce expanded even with controlled/default open', () => {
+  for (const openProps of [{ open: true }, { defaultOpen: true }]) {
+    const popover = renderToStaticMarkup(
+      <UiPopover trigger="Details" ariaLabel="Details" disabled {...openProps} />,
+    );
+    const menu = renderToStaticMarkup(
+      <UiDropdownMenu trigger="Actions" ariaLabel="Actions" items={[]} disabled {...openProps} />,
+    );
+    expect(popover).toContain('aria-expanded="false"');
+    expect(menu).toContain('aria-expanded="false"');
+  }
+});
+
 test('UiDropdownMenu renders native button items with menu semantics', () => {
   const html = renderToStaticMarkup(
     <UiDropdownMenu

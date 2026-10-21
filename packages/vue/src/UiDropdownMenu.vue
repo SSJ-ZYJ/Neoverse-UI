@@ -23,8 +23,10 @@ const emit = defineEmits<{
 
 const triggerRef = ref<HTMLButtonElement | null>(null);
 const panelRef = ref<HTMLElement | null>(null);
+const ignoreDisabledNativeClose = ref(false);
 const internalOpen = ref(props.defaultOpen);
 const resolvedOpen = computed(() => props.open ?? internalOpen.value);
+const expandedOpen = computed(() => resolvedOpen.value && !props.disabled);
 
 function setOpen(value: boolean) {
   if (props.open === undefined) internalOpen.value = value;
@@ -56,7 +58,12 @@ function menuItems(): HTMLButtonElement[] {
 }
 
 function focusFirstItem() {
-  requestAnimationFrame(() => menuItems()[0]?.focus());
+  requestAnimationFrame(() => {
+    const panel = panelRef.value;
+    if (expandedOpen.value && panel && isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')) {
+      menuItems()[0]?.focus();
+    }
+  });
 }
 
 async function syncOverlay(value: boolean) {
@@ -67,6 +74,9 @@ async function syncOverlay(value: boolean) {
     showAnchoredOverlay(options);
     focusFirstItem();
   } else {
+    if (props.disabled && isOverlayOpen(options.overlay, options.fallbackOpenClass)) {
+      ignoreDisabledNativeClose.value = true;
+    }
     hideAnchoredOverlay(options);
   }
 }
@@ -90,10 +100,18 @@ function closeAndRestoreFocus() {
 function onPanelToggle(event: Event) {
   const panel = event.currentTarget as HTMLElement;
   const newState = (event as Event & { newState?: 'open' | 'closed' }).newState;
-  if (newState === 'open' || isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')) return;
+  if (newState === 'open') {
+    ignoreDisabledNativeClose.value = false;
+    return;
+  }
+  if (newState === 'closed' && ignoreDisabledNativeClose.value) {
+    ignoreDisabledNativeClose.value = false;
+    return;
+  }
+  if (isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')) return;
 
   stopOverlayTracking(panel);
-  if (resolvedOpen.value) void requestDismiss();
+  if (expandedOpen.value) void requestDismiss();
 }
 
 function selectItem(item: DropdownMenuItem) {
@@ -148,7 +166,7 @@ onBeforeUnmount(() => {
       class="ui-dropdown-menu__trigger ui-button ui-button--secondary ui-button--md"
       type="button"
       aria-haspopup="menu"
-      :aria-expanded="resolvedOpen"
+      :aria-expanded="expandedOpen"
       :disabled="props.disabled"
       @click="toggleOpen"
     >

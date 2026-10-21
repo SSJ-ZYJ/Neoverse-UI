@@ -135,8 +135,9 @@ export function positionAnchoredOverlay({
     overlay.style.setProperty(inlineSizeVariable, `${triggerRect.width / effectiveZoom}px`);
   }
 
-  const overlayWidth = overlay.offsetWidth;
-  const overlayHeight = overlay.offsetHeight;
+  // Layout dimensions do not include CSS zoom, unlike the viewport and trigger rect.
+  const overlayWidth = overlay.offsetWidth * effectiveZoom;
+  const overlayHeight = overlay.offsetHeight * effectiveZoom;
   const position = resolveAnchoredPosition({
     trigger: triggerRect,
     overlayWidth,

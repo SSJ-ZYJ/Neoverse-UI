@@ -185,6 +185,8 @@ function ReactFixture() {
   useEffect(() => observeSystemTheme(), []);
   const [controlledOpen, setControlledOpen] = useState(false);
   const [controlledMounted, setControlledMounted] = useState(true);
+  const [controlledDisabled, setControlledDisabled] = useState(false);
+  const [dropdownDisabled, setDropdownDisabled] = useState(false);
   const [dismissAttempts, setDismissAttempts] = useState(0);
   const requestControlledOpen = useCallback((value: boolean) => {
     if (value) setControlledOpen(true);
@@ -286,6 +288,7 @@ function ReactFixture() {
             <UiDropdownMenu
               trigger={copy.menu}
               ariaLabel={copy.menu}
+              disabled={dropdownDisabled}
               items={[
                 { id: 'open', label: copy.menuOpen },
                 { id: 'archive', label: copy.menuArchive },
@@ -563,6 +566,7 @@ function ReactFixture() {
             {controlledMounted ? (
               <UiPopover
                 open={controlledOpen}
+                disabled={controlledDisabled}
                 trigger="Controlled popover"
                 ariaLabel="Controlled details"
                 data-overlay-controlled-popover
@@ -573,6 +577,20 @@ function ReactFixture() {
             ) : null}
             <button type="button" data-overlay-unmount onClick={() => setControlledMounted(false)}>
               Unmount overlay
+            </button>
+            <button
+              type="button"
+              data-overlay-toggle-disabled
+              onClick={() => setControlledDisabled((value) => !value)}
+            >
+              Toggle controlled disabled
+            </button>
+            <button
+              type="button"
+              data-overlay-toggle-menu-disabled
+              onClick={() => setDropdownDisabled((value) => !value)}
+            >
+              Toggle menu disabled
             </button>
             <output data-overlay-dismiss-attempts>{dismissAttempts}</output>
           </div>

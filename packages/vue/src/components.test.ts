@@ -1232,6 +1232,49 @@ describe('UiSegmentedControl', () => {
 });
 
 describe('Overlay primitives', () => {
+  it('keeps controlled Popover ARIA closed when disabled and restores the retained open intent', async () => {
+    const wrapper = mount(UiPopover, {
+      props: { open: true, disabled: true, ariaLabel: 'Details' },
+      slots: { trigger: 'Details', default: '<p>Body</p>' },
+    });
+    await nextTick();
+    expect(wrapper.get('.ui-popover__trigger').attributes('aria-expanded')).toBe('false');
+    await wrapper.setProps({ disabled: false });
+    await nextTick();
+    expect(wrapper.get('.ui-popover__trigger').attributes('aria-expanded')).toBe('true');
+    expect(wrapper.get('.ui-popover__content').classes()).toContain(
+      'ui-overlay-panel--fallback-open',
+    );
+    await wrapper.setProps({ disabled: true });
+    await nextTick();
+    expect(wrapper.get('.ui-popover__trigger').attributes('aria-expanded')).toBe('false');
+    wrapper.unmount();
+  });
+
+  it('keeps controlled DropdownMenu ARIA closed when disabled and restores the retained open intent', async () => {
+    const wrapper = mount(UiDropdownMenu, {
+      props: {
+        open: true,
+        disabled: true,
+        ariaLabel: 'Actions',
+        items: [{ id: 'open', label: 'Open' }],
+      },
+      slots: { trigger: 'Actions' },
+    });
+    await nextTick();
+    expect(wrapper.get('.ui-dropdown-menu__trigger').attributes('aria-expanded')).toBe('false');
+    await wrapper.setProps({ disabled: false });
+    await nextTick();
+    expect(wrapper.get('.ui-dropdown-menu__trigger').attributes('aria-expanded')).toBe('true');
+    expect(wrapper.get('.ui-dropdown-menu__panel').classes()).toContain(
+      'ui-overlay-panel--fallback-open',
+    );
+    await wrapper.setProps({ disabled: true });
+    await nextTick();
+    expect(wrapper.get('.ui-dropdown-menu__trigger').attributes('aria-expanded')).toBe('false');
+    wrapper.unmount();
+  });
+
   it('keeps a controlled Popover open when the parent rejects an Escape request', async () => {
     const wrapper = mount(UiPopover, {
       attachTo: document.body,

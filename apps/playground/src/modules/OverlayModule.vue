@@ -11,6 +11,8 @@ const selectedAction = ref('');
 const contractMode = new URLSearchParams(window.location.search).has('contract-fixtures');
 const controlledOpen = ref(false);
 const controlledMounted = ref(true);
+const controlledDisabled = ref(false);
+const dropdownDisabled = ref(false);
 const dismissAttempts = ref(0);
 
 function requestControlledOpen(value: boolean) {
@@ -60,6 +62,7 @@ const menuItems = computed(() => [
       <UiDropdownMenu
         v-bind="{ ariaLabel: localize(copy.menuLabel, props.locale) }"
         :items="menuItems"
+        :disabled="dropdownDisabled"
         data-overlay-dropdown
         @select="selectedAction = $event.id"
       >
@@ -75,6 +78,7 @@ const menuItems = computed(() => [
         <UiPopover
           v-if="controlledMounted"
           :open="controlledOpen"
+          :disabled="controlledDisabled"
           aria-label="Controlled details"
           data-overlay-controlled-popover
           @update:open="requestControlledOpen"
@@ -84,6 +88,20 @@ const menuItems = computed(() => [
         </UiPopover>
         <button type="button" data-overlay-unmount @click="controlledMounted = false">
           Unmount overlay
+        </button>
+        <button
+          type="button"
+          data-overlay-toggle-disabled
+          @click="controlledDisabled = !controlledDisabled"
+        >
+          Toggle controlled disabled
+        </button>
+        <button
+          type="button"
+          data-overlay-toggle-menu-disabled
+          @click="dropdownDisabled = !dropdownDisabled"
+        >
+          Toggle menu disabled
         </button>
         <output data-overlay-dismiss-attempts>{{ dismissAttempts }}</output>
       </div>

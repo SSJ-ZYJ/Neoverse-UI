@@ -21,8 +21,10 @@ const emit = defineEmits<{ 'update:open': [value: boolean] }>();
 
 const triggerRef = ref<HTMLButtonElement | null>(null);
 const panelRef = ref<HTMLElement | null>(null);
+const ignoreDisabledNativeClose = ref(false);
 const internalOpen = ref(props.defaultOpen);
 const resolvedOpen = computed(() => props.open ?? internalOpen.value);
+const expandedOpen = computed(() => resolvedOpen.value && !props.disabled);
 
 function setOpen(value: boolean) {
   if (props.open === undefined) internalOpen.value = value;
@@ -53,7 +55,12 @@ async function syncOverlay(value: boolean) {
   const options = overlayOptions();
   if (options === undefined) return;
   if (value && !props.disabled) showAnchoredOverlay(options);
-  else hideAnchoredOverlay(options);
+  else {
+    if (props.disabled && isOverlayOpen(options.overlay, options.fallbackOpenClass)) {
+      ignoreDisabledNativeClose.value = true;
+    }
+    hideAnchoredOverlay(options);
+  }
 }
 
 async function requestDismiss() {
@@ -70,10 +77,18 @@ function toggleOpen() {
 function onPanelToggle(event: Event) {
   const panel = event.currentTarget as HTMLElement;
   const newState = (event as Event & { newState?: 'open' | 'closed' }).newState;
-  if (newState === 'open' || isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')) return;
+  if (newState === 'open') {
+    ignoreDisabledNativeClose.value = false;
+    return;
+  }
+  if (newState === 'closed' && ignoreDisabledNativeClose.value) {
+    ignoreDisabledNativeClose.value = false;
+    return;
+  }
+  if (isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')) return;
 
   stopOverlayTracking(panel);
-  if (resolvedOpen.value) void requestDismiss();
+  if (expandedOpen.value) void requestDismiss();
 }
 
 watch(
@@ -97,7 +112,7 @@ onBeforeUnmount(() => {
       class="ui-popover__trigger ui-button ui-button--secondary ui-button--md"
       type="button"
       :disabled="props.disabled"
-      :aria-expanded="resolvedOpen"
+      :aria-expanded="expandedOpen"
       @click="toggleOpen"
     >
       <slot name="trigger" />
