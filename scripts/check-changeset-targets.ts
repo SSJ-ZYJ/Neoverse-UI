@@ -30,7 +30,9 @@ for (const filename of readdirSync(changesetDir)) {
   if (!frontmatter) continue;
   const targets = [
     ...frontmatter.matchAll(/^\s*['"]?([^'"\s:]+)['"]?\s*:\s*(major|minor|patch)\s*$/gmu),
-  ].map((match) => match[1]);
+  ]
+    .map((match) => match[1])
+    .filter((name): name is string => name !== undefined);
   if (targets.length > 0 && targets.every((target) => packages.get(target) === true)) {
     invalid.push(`${filename}: ${targets.join(', ')}`);
   }
