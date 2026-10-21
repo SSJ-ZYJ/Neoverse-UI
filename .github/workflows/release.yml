@@ -38,6 +38,9 @@ jobs:
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
+      - name: Reject private-only Changesets
+        run: bun scripts/check-changeset-targets.ts
+
       - name: Select Changesets mode
         id: changesets
         uses: changesets/action/select-mode@v2
