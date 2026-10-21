@@ -3,10 +3,9 @@ import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promi
 import { tmpdir } from 'node:os';
 import { basename, join, relative } from 'node:path';
 import {
-  type RegistryMetadata,
   type ReleasePackage,
-  validatePublishedPackage,
   verifyInstalledPackages,
+  waitForPublishedPackages,
 } from './verify-published';
 
 const repositoryRoot = join(import.meta.dir, '..');
@@ -104,19 +103,7 @@ try {
   }
 
   if (published) {
-    for (const expected of releasePackages) {
-      const response = await fetch(new URL(encodeURIComponent(expected.name), npmRegistry), {
-        redirect: 'error',
-        signal: AbortSignal.timeout(15_000),
-      });
-      assert(response.ok, `${expected.name}: registry returned HTTP ${response.status}`);
-      validatePublishedPackage(
-        expected,
-        (await response.json()) as RegistryMetadata,
-        publicVersions,
-      );
-      console.log(`Registry verified: ${expected.name}@${expected.version}`);
-    }
+    await waitForPublishedPackages(releasePackages);
   }
 
   for (const dirName of published ? [] : packageDirs) {

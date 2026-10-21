@@ -293,8 +293,11 @@ The `npm` Environment then gates OIDC publication. Version PRs use conventional
 `chore(release): version packages` titles and commits.
 
 After publication, `bun run verify:published` must pass. This is also an automatic
-step after the publish action. It checks exact versions, `latest` tags, official
-tarball origins and internal runtime ranges, then installs all eight packages from
+step after the publish action. It polls the official registry every 10 seconds for
+up to five minutes, allowing exact versions, `latest` tags and tarballs to propagate.
+Missing versions/tarballs, stale tags and transient registry errors are retried;
+authentication failures and incorrect package contents fail immediately.
+It checks official tarball origins and internal runtime ranges, then installs all eight packages from
 the official registry without local overrides. The existing JS/CSS/TypeScript smoke
 is reused, and resolved internal package versions must match the release plan.
 Check the seven new package tags and GitHub Releases as well. Do not rerun versioning
