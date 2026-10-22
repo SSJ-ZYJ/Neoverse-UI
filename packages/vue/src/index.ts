@@ -58,6 +58,7 @@ export type {
   SelectProps,
   SkeletonEffect,
   SkeletonProps,
+  SkeletonVariant,
   StatCardProps,
   StatusIndicatorProps,
   StatusIndicatorSize,

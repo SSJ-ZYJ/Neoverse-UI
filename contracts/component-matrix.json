@@ -256,11 +256,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiDock",
@@ -282,11 +292,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiSegmentedControl",
@@ -295,11 +315,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiBadge",
@@ -308,12 +338,23 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable",
-      "evidence": ["tests/visual/component-size.spec.ts", "tests/visual/badge-theme.spec.ts"]
+      "runtime": "validated",
+      "evidence": [
+        "tests/visual/component-size.spec.ts",
+        "tests/visual/badge-theme.spec.ts",
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiStatusIndicator",
@@ -322,11 +363,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiNotice",
@@ -348,11 +399,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "pending",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiSkeleton",
@@ -361,11 +422,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiTerminalPrompt",
@@ -374,11 +445,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiTerminalSurface",
@@ -387,11 +468,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiTerminalLine",
@@ -400,11 +491,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiTerminalTranscript",
@@ -413,11 +514,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiStatCard",
@@ -426,11 +537,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiTimeline",
@@ -439,11 +560,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiStepFlow",
@@ -452,11 +583,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiScrollbar",
@@ -465,11 +606,21 @@
       "tokens": "stable",
       "css": "stable",
       "vue": "stable",
-      "react": "none",
+      "react": "stable",
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "not-applicable"
+      "runtime": "validated",
+      "evidence": [
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/react-parity.spec.ts",
+        "docs/framework-parity.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     }
   ]
 }

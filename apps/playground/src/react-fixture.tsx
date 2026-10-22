@@ -1,24 +1,39 @@
 import {
   UiAction,
+  UiBadge,
   UiBreadcrumb,
   UiButton,
   UiCard,
   UiCheckbox,
+  UiControlSurface,
   UiDisclosure,
   UiDock,
   UiDropdownMenu,
   UiField,
   UiIconButton,
   UiInput,
+  UiNavigationItem,
   UiNotice,
   UiPopover,
   UiPresence,
   UiRadioGroup,
+  UiScrollbar,
+  UiSegmentedControl,
   UiSelect,
+  UiSkeleton,
+  UiStatCard,
+  UiStatusIndicator,
+  UiStepFlow,
   UiSurface,
   UiSwitch,
   UiTable,
+  UiTerminalLine,
+  UiTerminalPrompt,
+  UiTerminalSurface,
+  UiTerminalTranscript,
   UiTextarea,
+  UiTimeline,
+  UiTooltipSurface,
 } from '@neoverse-ui/react';
 import { useCallback, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -57,8 +72,7 @@ const copy =
         eyebrow: 'React Adapter Fixture',
         back: '返回设计实验室',
         title: 'React 运行态校验',
-        description:
-          '直接渲染 Canonical Shared React Adapter，校验真实 DOM、状态更新、原生语义与共享视觉契约。',
+        description: '直接使用 React 组件，查看与 Vue 对应的组件能力、交互状态和共享样式。',
         actions: '动作与表面',
         forms: '表单契约',
         data: '数据、披露与 Presence',
@@ -111,7 +125,7 @@ const copy =
         back: 'Back to Design Lab',
         title: 'React runtime validation',
         description:
-          'Canonical Shared React adapters are rendered directly to validate real DOM, state updates, native semantics, and the shared visual contract.',
+          'Explore the React components, their Vue counterparts, interactive states, and shared styles.',
         actions: 'Actions and surfaces',
         forms: 'Form contract',
         data: 'Data, disclosure, and presence',
@@ -169,6 +183,209 @@ const channelOptions = [
   { value: 'stable', label: copy.stable },
   { value: 'preview', label: copy.preview },
 ] as const;
+
+function ParityFixtures() {
+  const [active, setActive] = useState(0);
+  const [segment, setSegment] = useState('en');
+  const [blocked, setBlocked] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [reject, setReject] = useState(false);
+  const [options, setOptions] = useState(true);
+  const [command, setCommand] = useState('');
+  const [lines, setLines] = useState<string[]>([]);
+  const [follow, setFollow] = useState(true);
+  const [scrollbar, setScrollbar] = useState(true);
+  const [hideNative, setHideNative] = useState(false);
+  const [password, setPassword] = useState(false);
+  const [mounted, setMounted] = useState(true);
+  const text = (en: string, zh: string) => (locale === 'zh' ? zh : en);
+  return (
+    <section data-react-parity-fixture className="grid min-w-0 gap-4">
+      <h2 className="text-subtitle font-heading">
+        {text('Shared framework components', '跨框架共享组件')}
+      </h2>
+      <div className="flex flex-wrap gap-3">
+        <UiBadge data-react-adapter="UiBadge" variant="success">
+          {copy.ready}
+        </UiBadge>
+        <UiStatusIndicator data-react-adapter="UiStatusIndicator" loading={loading}>
+          {copy.runtime}
+        </UiStatusIndicator>
+        <UiSkeleton
+          data-react-adapter="UiSkeleton"
+          variant="rect"
+          width={120}
+          height={24}
+          radius="8px"
+        />
+        <UiTooltipSurface data-react-adapter="UiTooltipSurface">{copy.notice}</UiTooltipSurface>
+      </div>
+      <UiStatCard
+        data-react-adapter="UiStatCard"
+        label={copy.count}
+        value={lines.length}
+        unit={text('lines', '行')}
+        trend={copy.ready}
+      />
+      <UiTimeline
+        data-react-adapter="UiTimeline"
+        items={[{ id: 'ready', title: copy.ready, time: '2026', dateTime: '2026' }]}
+      />
+      <UiStepFlow
+        data-react-adapter="UiStepFlow"
+        items={[
+          { id: 'build', title: copy.button, status: 'complete' },
+          { id: 'runtime', title: copy.runtime, status: 'current', statusLabel: copy.ready },
+        ]}
+      />
+      <UiControlSurface
+        data-react-adapter="UiControlSurface"
+        navigationIndicator
+        data-parity-navigation
+      >
+        <UiNavigationItem
+          data-react-adapter="UiNavigationItem"
+          as="button"
+          label={copy.home}
+          active={active === 0}
+          onClick={() => setActive(0)}
+        />
+        <UiNavigationItem
+          as="button"
+          label={copy.docs}
+          active={active === 1}
+          onClick={() => setActive(1)}
+        />
+      </UiControlSurface>
+      <UiDock data-parity-dock>
+        <UiNavigationItem
+          as="button"
+          label={copy.home}
+          active={active === 0}
+          onClick={() => setActive(0)}
+        />
+        <UiNavigationItem
+          as="button"
+          label={copy.docs}
+          active={active === 1}
+          onClick={() => setActive(1)}
+        />
+      </UiDock>
+      <UiSegmentedControl
+        data-react-adapter="UiSegmentedControl"
+        ariaLabel={text('Language', '语言')}
+        options={[
+          { value: 'en', label: 'EN' },
+          { value: 'blocked', label: text('Unavailable', '不可用'), disabled: true },
+          { value: 'zh', label: '中文' },
+        ]}
+        value={segment}
+        onValueChange={(value) => {
+          if (!reject) setSegment(value);
+        }}
+        disabled={blocked}
+        loading={loading}
+      />
+      <UiSegmentedControl
+        data-parity-uncontrolled
+        ariaLabel={text('Uncontrolled language', '非受控语言')}
+        options={
+          options
+            ? [
+                { value: 'a', label: 'A' },
+                { value: 'b', label: 'B' },
+              ]
+            : [{ value: 'c', label: 'C' }]
+        }
+        defaultValue="b"
+      />
+      <div className="flex flex-wrap gap-2">
+        <UiButton data-parity-disabled onClick={() => setBlocked((value) => !value)}>
+          {text('Toggle disabled', '切换禁用')}
+        </UiButton>
+        <UiButton data-parity-loading onClick={() => setLoading((value) => !value)}>
+          {text('Toggle loading', '切换加载')}
+        </UiButton>
+        <UiButton data-parity-reject onClick={() => setReject((value) => !value)}>
+          {text('Reject selection', '拒绝选择更新')}
+        </UiButton>
+        <UiButton data-parity-options onClick={() => setOptions((value) => !value)}>
+          {text('Replace options', '替换选项')}
+        </UiButton>
+        <UiButton data-parity-follow onClick={() => setFollow((value) => !value)}>
+          {text('Toggle tail following', '切换末尾跟随')}
+        </UiButton>
+        <UiButton data-parity-scrollbar onClick={() => setScrollbar((value) => !value)}>
+          {text('Toggle scrollbar', '切换滚动条')}
+        </UiButton>
+        <UiButton data-parity-native onClick={() => setHideNative((value) => !value)}>
+          {text('Toggle native scrollbar', '切换原生滚动条')}
+        </UiButton>
+        <UiButton data-parity-password onClick={() => setPassword((value) => !value)}>
+          {text('Toggle password input', '切换密码输入')}
+        </UiButton>
+        <UiButton data-parity-mount onClick={() => setMounted((value) => !value)}>
+          {text('Toggle terminal', '切换终端')}
+        </UiButton>
+      </div>
+      {mounted ? (
+        <UiTerminalSurface
+          data-react-adapter="UiTerminalSurface"
+          title={text('React terminal', 'React 终端')}
+          status={<UiStatusIndicator status="success">{copy.ready}</UiStatusIndicator>}
+          actions={
+            <>
+              <UiButton
+                data-parity-append
+                onClick={() => setLines((previous) => [...previous, 'Appended output'])}
+              >
+                {text('Append output', '追加输出')}
+              </UiButton>
+              <UiButton onClick={() => setLines([])}>{text('Clear', '清空')}</UiButton>
+            </>
+          }
+        >
+          <UiTerminalTranscript
+            data-react-adapter="UiTerminalTranscript"
+            followTail={follow}
+            style={{ height: 240 }}
+          >
+            <UiTerminalLine data-react-adapter="UiTerminalLine" tone="success" text={copy.ready} />
+            {lines.map((line, index) => (
+              // biome-ignore lint/suspicious/noArrayIndexKey: This transcript only appends lines or clears the whole list.
+              <UiTerminalLine key={`${index}-${line}`} text={line} />
+            ))}
+            <UiTerminalPrompt
+              data-react-adapter="UiTerminalPrompt"
+              label={text('Command', '命令')}
+              value={command}
+              onValueChange={setCommand}
+              suggestion="help --all"
+              disabled={blocked}
+              readOnly={loading}
+              type={password ? 'password' : 'text'}
+              segments={[{ id: 'host', label: 'neoverse', tone: 'host' }]}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+                  setLines((previous) => [...previous, command]);
+                  setCommand('');
+                }
+              }}
+            />
+          </UiTerminalTranscript>
+        </UiTerminalSurface>
+      ) : null}
+      {contractMode && scrollbar ? (
+        <UiScrollbar
+          data-react-adapter="UiScrollbar"
+          hideNative={hideNative}
+          autoHideMs={250}
+          refreshKey={lines.length}
+        />
+      ) : null}
+    </section>
+  );
+}
 
 function ReactFixture() {
   const [themeMode, setThemeMode] = useState<ThemeMode>(initialThemeMode);
@@ -714,6 +931,7 @@ function ReactFixture() {
           </form>
         </>
       ) : null}
+      <ParityFixtures />
       {contractMode && (
         <div data-material-tier-fixtures className="flex flex-wrap gap-3">
           {(['glass-subtle', 'glass-elevated', 'glass-immersive'] as const).map((surface) => (

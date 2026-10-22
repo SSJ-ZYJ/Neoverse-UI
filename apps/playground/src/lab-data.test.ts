@@ -175,14 +175,10 @@ test('keeps public Vue components discoverable from the specimen catalogue', asy
   expect(coveredComponents).toEqual(publicComponents);
 });
 
-test('keeps public React component adapters discoverable from the specimen catalogue', async () => {
-  const source = await Bun.file(
-    new URL('../../../packages/react/src/index.tsx', import.meta.url),
-  ).text();
-  const publicComponents = [...source.matchAll(/export function (Ui[A-Za-z]+)/g)]
-    .map((match) => match[1])
-    .filter((value): value is string => value !== undefined)
-    .sort();
+test('keeps public React component adapters discoverable from the specimen catalogue', () => {
+  const publicComponents = componentContracts
+    .filter((component) => component.react !== 'none')
+    .map((component) => component.name);
   const coveredComponents = new Set<string>(
     labSpecimens.flatMap((specimen) => [...specimen.apiNames]),
   );

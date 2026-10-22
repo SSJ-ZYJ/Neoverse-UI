@@ -11,7 +11,18 @@
       "name": "UiIconButton",
       "vueType": "IconButtonProps",
       "reactType": "UiIconButtonProps",
-      "props": ["as", "label", "variant", "size", "disabled", "loading", "stretch", "surface"]
+      "props": [
+        "as",
+        "href",
+        "label",
+        "variant",
+        "size",
+        "type",
+        "disabled",
+        "loading",
+        "stretch",
+        "surface"
+      ]
     },
     {
       "name": "UiAction",
@@ -45,7 +56,7 @@
       "name": "UiRadioGroup",
       "vueType": "RadioGroupProps",
       "reactType": "UiRadioGroupProps",
-      "props": ["options", "name", "disabled", "validation"],
+      "props": ["validation", "disabled", "options", "name"],
       "aliases": {
         "value": ["modelValue", "value"],
         "readonly": ["readonly", "readOnly"],
@@ -102,7 +113,7 @@
       "name": "UiSelect",
       "vueType": "SelectProps",
       "reactType": "UiSelectProps",
-      "props": ["options", "placeholder", "disabled", "validation"],
+      "props": ["validation", "disabled", "options", "placeholder"],
       "aliases": {
         "value": ["modelValue", "value"],
         "readonly": ["readonly", "readOnly"]
@@ -137,6 +148,132 @@
       "vueType": "DropdownMenuProps",
       "reactType": "UiDropdownMenuProps",
       "props": ["items", "open", "defaultOpen", "disabled", "placement", "ariaLabel"]
+    },
+    {
+      "name": "UiBreadcrumb",
+      "vueType": "BreadcrumbProps",
+      "reactType": "UiBreadcrumbProps",
+      "props": ["items", "ariaLabel", "separator"]
+    },
+    {
+      "name": "UiControlSurface",
+      "vueType": "ControlSurfaceProps",
+      "reactType": "UiControlSurfaceProps",
+      "props": ["navigationIndicator", "as", "surface", "hoverMode", "edgeMode", "scale"]
+    },
+    {
+      "name": "UiDock",
+      "vueType": "DockProps",
+      "reactType": "UiDockProps",
+      "props": ["as", "surface", "hoverMode", "edgeMode", "scale", "compact", "navigationIndicator"]
+    },
+    {
+      "name": "UiNavigationItem",
+      "vueType": "NavigationItemProps",
+      "reactType": "UiNavigationItemProps",
+      "props": [
+        "as",
+        "href",
+        "label",
+        "size",
+        "active",
+        "compact",
+        "disabled",
+        "stretch",
+        "surface",
+        "indicatorPlacement"
+      ]
+    },
+    {
+      "name": "UiSegmentedControl",
+      "vueType": "SegmentedControlProps",
+      "reactType": "UiSegmentedControlProps",
+      "props": ["options", "defaultValue", "size", "disabled", "loading", "ariaLabel", "surface"],
+      "aliases": {
+        "value": ["modelValue", "value"]
+      }
+    },
+    {
+      "name": "UiBadge",
+      "vueType": "BadgeProps",
+      "reactType": "UiBadgeProps",
+      "props": ["variant", "size"]
+    },
+    {
+      "name": "UiStatusIndicator",
+      "vueType": "StatusIndicatorProps",
+      "reactType": "UiStatusIndicatorProps",
+      "props": ["status", "size", "pulse", "loading"]
+    },
+    {
+      "name": "UiNotice",
+      "vueType": "NoticeProps",
+      "reactType": "UiNoticeProps",
+      "props": ["as", "variant"]
+    },
+    {
+      "name": "UiTooltipSurface",
+      "vueType": "TooltipSurfaceProps",
+      "reactType": "UiTooltipSurfaceProps",
+      "props": ["as", "variant"]
+    },
+    {
+      "name": "UiSkeleton",
+      "vueType": "SkeletonProps",
+      "reactType": "UiSkeletonProps",
+      "props": ["variant", "effect", "width", "height", "radius"]
+    },
+    {
+      "name": "UiTerminalPrompt",
+      "vueType": "TerminalPromptProps",
+      "reactType": "UiTerminalPromptProps",
+      "props": ["id", "label", "suggestion", "type", "symbol", "segments", "disabled", "error"],
+      "aliases": {
+        "value": ["modelValue", "value"],
+        "readonly": ["readonly", "readOnly"]
+      }
+    },
+    {
+      "name": "UiTerminalSurface",
+      "vueType": "TerminalSurfaceProps",
+      "reactType": "UiTerminalSurfaceProps",
+      "props": ["title", "ariaLabel", "density", "surface"]
+    },
+    {
+      "name": "UiTerminalLine",
+      "vueType": "TerminalLineProps",
+      "reactType": "UiTerminalLineProps",
+      "props": ["kind", "tone", "preformatted", "text"]
+    },
+    {
+      "name": "UiTerminalTranscript",
+      "vueType": "TerminalTranscriptProps",
+      "reactType": "UiTerminalTranscriptProps",
+      "props": ["label", "followTail", "density", "live"]
+    },
+    {
+      "name": "UiStatCard",
+      "vueType": "StatCardProps",
+      "reactType": "UiStatCardProps",
+      "props": ["label", "value", "unit", "trend", "footnote", "surface"]
+    },
+    {
+      "name": "UiTimeline",
+      "vueType": "TimelineProps",
+      "reactType": "UiTimelineProps",
+      "props": ["items", "ariaLabel"]
+    },
+    {
+      "name": "UiStepFlow",
+      "vueType": "StepFlowProps",
+      "reactType": "UiStepFlowProps",
+      "props": ["items", "ariaLabel"]
+    },
+    {
+      "name": "UiScrollbar",
+      "vueType": "ScrollbarProps",
+      "reactType": "UiScrollbarProps",
+      "props": ["autoHideMs", "minThumbRatio", "refreshKey", "hideNative"]
     }
   ],
   "dataContracts": [
@@ -163,6 +300,36 @@
       "vueType": "DropdownMenuItem",
       "reactType": "UiDropdownMenuItem",
       "props": ["id", "label", "disabled", "tone"]
+    },
+    {
+      "name": "BreadcrumbItem",
+      "vueType": "BreadcrumbItem",
+      "reactType": "BreadcrumbItem",
+      "props": ["id", "label", "href", "current"]
+    },
+    {
+      "name": "TimelineItem",
+      "vueType": "TimelineItem",
+      "reactType": "TimelineItem",
+      "props": ["id", "title", "description", "time", "dateTime"]
+    },
+    {
+      "name": "StepFlowItem",
+      "vueType": "StepFlowItem",
+      "reactType": "StepFlowItem",
+      "props": ["id", "title", "description", "status", "statusLabel"]
+    },
+    {
+      "name": "SegmentOption",
+      "vueType": "SegmentOption",
+      "reactType": "SegmentOption",
+      "props": ["value", "label", "disabled", "ariaLabel"]
+    },
+    {
+      "name": "TerminalPromptSegment",
+      "vueType": "TerminalPromptSegment",
+      "reactType": "TerminalPromptSegment",
+      "props": ["id", "label", "tone"]
     }
   ],
   "literalUnions": [
@@ -200,6 +367,76 @@
       "name": "DropdownMenuItemTone",
       "vueType": "DropdownMenuItemTone",
       "reactType": "UiDropdownMenuItemTone"
+    },
+    {
+      "name": "BadgeVariant",
+      "vueType": "BadgeVariant",
+      "reactType": "BadgeVariant"
+    },
+    {
+      "name": "BadgeSize",
+      "vueType": "BadgeSize",
+      "reactType": "BadgeSize"
+    },
+    {
+      "name": "StatusIndicatorStatus",
+      "vueType": "StatusIndicatorStatus",
+      "reactType": "StatusIndicatorStatus"
+    },
+    {
+      "name": "StatusIndicatorSize",
+      "vueType": "StatusIndicatorSize",
+      "reactType": "StatusIndicatorSize"
+    },
+    {
+      "name": "TooltipSurfaceVariant",
+      "vueType": "TooltipSurfaceVariant",
+      "reactType": "TooltipSurfaceVariant"
+    },
+    {
+      "name": "SkeletonVariant",
+      "vueType": "SkeletonVariant",
+      "reactType": "SkeletonVariant"
+    },
+    {
+      "name": "SkeletonEffect",
+      "vueType": "SkeletonEffect",
+      "reactType": "SkeletonEffect"
+    },
+    {
+      "name": "StepFlowStatus",
+      "vueType": "StepFlowStatus",
+      "reactType": "StepFlowStatus"
+    },
+    {
+      "name": "TerminalPromptTone",
+      "vueType": "TerminalPromptTone",
+      "reactType": "TerminalPromptTone"
+    },
+    {
+      "name": "ControlSurfaceScale",
+      "vueType": "ControlSurfaceScale",
+      "reactType": "ControlSurfaceScale"
+    },
+    {
+      "name": "SurfaceHoverMode",
+      "vueType": "SurfaceHoverMode",
+      "reactType": "SurfaceHoverMode"
+    },
+    {
+      "name": "SurfaceEdgeMode",
+      "vueType": "SurfaceEdgeMode",
+      "reactType": "SurfaceEdgeMode"
+    },
+    {
+      "name": "NavigationIndicatorPlacement",
+      "vueType": "NavigationIndicatorPlacement",
+      "reactType": "NavigationIndicatorPlacement"
+    },
+    {
+      "name": "SegmentedControlSize",
+      "vueType": "SegmentedControlSize",
+      "reactType": "SegmentedControlSize"
     }
   ]
 }

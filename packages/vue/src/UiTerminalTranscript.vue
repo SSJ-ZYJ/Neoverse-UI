@@ -35,6 +35,19 @@ function onScroll() {
   shouldFollow = atBottom(element);
 }
 
+function onWheel(event: WheelEvent) {
+  if (event.deltaY < 0) shouldFollow = false;
+}
+
+function onTouchMove() {
+  shouldFollow = false;
+}
+
+function onKeydown(event: KeyboardEvent) {
+  if ((event.target as HTMLElement).closest('input, textarea, [contenteditable="true"]')) return;
+  if (['ArrowUp', 'PageUp', 'Home'].includes(event.key)) shouldFollow = false;
+}
+
 function syncTail() {
   if (!props.followTail || !shouldFollow || !scroller.value || pending) return;
   pending = true;
@@ -65,7 +78,11 @@ onMounted(() => {
     mutationObserver.observe(element, { childList: true, subtree: true, characterData: true });
   }
   if (typeof ResizeObserver !== 'undefined') {
-    resizeObserver = new ResizeObserver(syncTail);
+    resizeObserver = new ResizeObserver(() => {
+      measuredWidth = element.clientWidth;
+      measuredHeight = element.clientHeight;
+      syncTail();
+    });
     resizeObserver.observe(element);
     for (const child of element.children) resizeObserver.observe(child);
   }
@@ -84,6 +101,9 @@ onBeforeUnmount(() => {
     :data-density="props.density"
     :aria-label="props.label"
     @scroll.passive="onScroll"
+    @wheel.passive="onWheel"
+    @touchmove.passive="onTouchMove"
+    @keydown="onKeydown"
   >
     <div role="log" :aria-live="props.live" aria-relevant="additions text" aria-atomic="false">
       <slot />

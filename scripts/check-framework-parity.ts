@@ -26,6 +26,8 @@ interface ComponentMatrix {
   components: readonly {
     name: string;
     track: 'canonical-shared' | 'consumer-driven';
+    vue: string;
+    react: string;
   }[];
 }
 
@@ -65,10 +67,13 @@ function requireSourceFile(path: string, label: string): ts.SourceFile {
 }
 
 const vueSources: readonly ts.SourceFile[] = [requireSourceFile(vueTypesPath, 'Vue type')];
-const reactSources: readonly ts.SourceFile[] = [
-  requireSourceFile(reactIndexPath, 'React index'),
-  requireSourceFile(reactPresencePath, 'React presence'),
-];
+const reactSources = program
+  .getSourceFiles()
+  .filter((source) =>
+    source.fileName
+      .replaceAll('\\', '/')
+      .startsWith(`${resolve(root, 'packages/react/src').replaceAll('\\', '/')}/`),
+  );
 
 type NamedTypeDeclaration = ts.InterfaceDeclaration | ts.TypeAliasDeclaration;
 
@@ -113,12 +118,21 @@ function getType(framework: 'vue' | 'react', name: string): ts.Type | undefined 
 
 function propertyNames(type: ts.Type | undefined): Set<string> {
   if (type === undefined) return new Set();
+  if (type.isUnion()) return new Set(type.types.flatMap((member) => [...propertyNames(member)]));
   return new Set(checker.getPropertiesOfType(type).map((property) => property.getName()));
 }
 
 function validateProps(contract: PropContract): void {
   const vueProps = propertyNames(getType('vue', contract.vueType));
   const reactProps = propertyNames(getType('react', contract.reactType));
+  const coveredVueProps = new Set([
+    ...contract.props,
+    ...Object.values(contract.aliases ?? {}).map(([vueName]) => vueName),
+  ]);
+  for (const property of vueProps) {
+    if (!coveredVueProps.has(property))
+      errors.push(`${contract.name}: Vue semantic prop ${property} is missing a parity contract`);
+  }
 
   for (const property of contract.props) {
     if (!vueProps.has(property)) {
@@ -203,25 +217,23 @@ if (parity.schemaVersion !== 1) {
   errors.push(`Unsupported framework parity schemaVersion: ${parity.schemaVersion}`);
 }
 
-const canonicalComponents = new Set(
+const sharedComponents = new Set(
   matrix.components
-    .filter((component) => component.track === 'canonical-shared')
+    .filter((component) => component.vue !== 'none' && component.react !== 'none')
     .map((component) => component.name),
 );
 const parityComponents = new Set(parity.components.map((component) => component.name));
 
-const missingParity = [...canonicalComponents].filter((name) => !parityComponents.has(name)).sort();
+const missingParity = [...sharedComponents].filter((name) => !parityComponents.has(name)).sort();
 const unexpectedParity = [...parityComponents]
-  .filter((name) => !canonicalComponents.has(name))
+  .filter((name) => !matrix.components.some((component) => component.name === name))
   .sort();
 
 if (missingParity.length > 0) {
-  errors.push(`Canonical Shared components missing parity contracts: ${missingParity.join(', ')}`);
+  errors.push(`Shared Vue/React components missing parity contracts: ${missingParity.join(', ')}`);
 }
 if (unexpectedParity.length > 0) {
-  errors.push(
-    `Parity contracts exist for non-canonical components: ${unexpectedParity.join(', ')}`,
-  );
+  errors.push(`Parity contracts exist for unregistered components: ${unexpectedParity.join(', ')}`);
 }
 
 for (const contract of parity.components) validateProps(contract);
@@ -237,7 +249,7 @@ if (errors.length > 0) {
 console.log(
   'Framework parity passed for ' +
     parity.components.length +
-    ' Canonical Shared components, ' +
+    ' shared Vue/React components, ' +
     parity.dataContracts.length +
     ' data contracts, and ' +
     parity.literalUnions.length +

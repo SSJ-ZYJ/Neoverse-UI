@@ -68,6 +68,43 @@ Terminal text enables the font's `liga` and `calt` features. The native editor a
 ghost prefix inherit the same settings. Ghost suffixes allow italic synthesis when a
 consumer provides only a regular font face and disables synthesis globally.
 
+## React example
+
+```tsx
+import { useState } from 'react';
+import { UiTerminalSurface, UiTerminalTranscript, UiTerminalLine, UiTerminalPrompt } from '@neoverse-ui/react';
+
+export function Terminal() {
+  const [command, setCommand] = useState('');
+  const [history, setHistory] = useState<string[]>([]);
+  return (
+    <UiTerminalSurface title="Workspace terminal" status="Connected">
+      <UiTerminalTranscript label="Terminal history">
+        {history.map((line, index) => <UiTerminalLine key={index} text={line} />)}
+        <UiTerminalPrompt
+          label="Terminal command"
+          value={command}
+          onValueChange={setCommand}
+          suggestion="help --all"
+          segments={[{ id: 'host', label: 'neoverse', tone: 'host' }]}
+          onKeyDown={event => {
+            if (event.nativeEvent.isComposing || event.key !== 'Enter' || !command.trim()) return;
+            event.preventDefault();
+            setHistory(lines => [...lines, `❯ ${command}`]);
+            setCommand('');
+          }}
+        />
+      </UiTerminalTranscript>
+    </UiTerminalSurface>
+  );
+}
+```
+
+Put interactive React compositions in your application's client boundary. `context` and
+`renderSegment(segment)` correspond to Vue's context and segment slots; `status` and `actions`
+are ReactNode properties on the surface. A prompt ref targets its native input. See
+[framework parity](framework-parity.md) for the new React adapters' validation scope.
+
 ## Visual inspiration and license boundary
 
 The design is **inspired by** the [Starship Tokyo Night preset](https://starship.rs/zh-CN/presets/tokyo-night), especially its compact layered Powerline-like context and separate next-line command marker.
