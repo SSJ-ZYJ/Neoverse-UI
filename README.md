@@ -1,197 +1,185 @@
-# Neoverse UI
+<div align="center">
 
-A lightweight Bun monorepo for the Neoverse design tokens, Tailwind foundation, Material system, Motion system, Vue/React adapters, and Design Lab.
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/images/neoverse-white.svg">
+    <source media="(prefers-color-scheme: light)" srcset="docs/images/neoverse.svg">
+    <img src="docs/images/neoverse.svg" alt="Neoverse" width="320">
+  </picture>
+</h1>
 
-## Requirements
+**Neoverse UI** is a component library for Vue 3 and React, with Glass surfaces, light and dark themes, and shared interactions. Use it for personal sites, documentation, tools, and pages with terminal or data displays.
 
-- Bun 1.4.0
-- TypeScript
-- Tailwind CSS 4
+[Vue guide](packages/vue/README.md) · [React guide](packages/react/README.md) · [Report an issue](https://github.com/SSJ-ZYJ/Neoverse-UI/issues)
 
-Bun is the package manager, workspace manager, and script runner for this repository.
+</div>
 
-## Current workspace
-
-| Package / app | Maturity | Current responsibility |
-| --- | --- | --- |
-| `@neoverse-ui/tokens` | Stable | CSS Variables and TypeScript token-name maps |
-| `@neoverse-ui/tailwind` | Stable | Tailwind v4 semantic theme and component CSS |
-| `@neoverse-ui/motion` | Stable | Framework-agnostic motion scale, semantic roles, Presence engine, and page-transition choreography |
-| `@neoverse-ui/overlay-runtime` | Consumer Validation | Shared anchored positioning, tracking, Popover fallback, and dismiss runtime |
-| `@neoverse-ui/giscus-theme` | Consumer Validation | Standalone light/dark themes for the cross-origin Giscus widget |
-| `@neoverse-ui/glass-runtime` | Consumer Validation | Shared WebGL Glass edge renderer with CSS fallback and context recovery |
-| `@neoverse-ui/vue` | Consumer Validation | Vue 3 SFC components |
-| `@neoverse-ui/react` | Consumer Validation | React adapters for shared actions and surfaces |
-| `apps/playground` | Consumer Validation | Vue-driven Design Lab and visual reference surface |
-
-The current Vue component set is `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch`, `UiField`, `UiPopover`, `UiDropdownMenu`, `UiTable`, `UiDisclosure`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, `UiTooltipSurface`, and `UiPresence`. `UiDock` is the reusable floating-navigation shell; routing data, active destination state, and trailing controls remain consumer-owned. `UiSurface` is the canonical material primitive. React exposes the same Canonical Shared set, plus the consumer-driven `UiBreadcrumb`, `UiDock`, and `UiNotice`; see the [component contract matrix](docs/component-contract-matrix.md) for per-component maturity and consumer evidence. Vue and React share Tokens, Tailwind, Material, Motion, accessibility expectations, and API semantics; they do not share framework component code.
-
-Vue also exports the terminal presentation primitives `UiTerminalSurface`, `UiTerminalLine`, `UiTerminalTranscript`, and `UiTerminalPrompt`, plus `UiStatCard`, `UiTimeline`, and `UiStepFlow`. The latter three are Vue Consumer Driven display components built on existing material and typography roles; their [API and composition examples](packages/vue/README.md#metrics-milestones-and-steps), Design Lab specimens, and [archived release visual / real Slides consumer evidence](contracts/component-requests/archive/) are available. These seven components are Stable in the component matrix; npm publication is a separate approval step.
-
-## Architecture at a glance
-
-```text
-Tokens (CSS Variables + names)
-  -> Tailwind semantic foundation + Motion CSS
-  -> Vue components / React adapters
-  -> Design Lab and consumer validation
-
-Glass Runtime -> one shared WebGL Edge Pass per Document
-             -> CSS remains the material baseline and fallback
-```
-
-See [docs/architecture.md](docs/architecture.md) for package boundaries and runtime rules.
+Vue and React provide the same 35 components, sharing themes, styles, and motion. Use the components directly, or build your own layouts with CSS variables and Tailwind CSS.
 
 ## Installation
 
-Vue consumers normally start with the component package:
+Requires Vue **3.5+** or React **19**. Install the package for your framework:
 
 ```sh
-bun add @neoverse-ui/vue
+# Vue
+npm install @neoverse-ui/vue
+
+# React
+npm install @neoverse-ui/react
 ```
 
-The package dependency graph installs the shared Tailwind, Motion, and Tokens layers. Lower-level packages can also be installed directly when a consumer only needs a specific layer.
+You can also use pnpm, Yarn, or Bun. Shared styling and motion dependencies are installed with the component package.
 
-Packages are versioned with Changesets. See the [0.1.x → 0.2.0 migration](docs/migration-0.2.0.md) and the [0.2.x → planned 0.3.x consumer cutover](docs/migration-0.3.0.md). The latter is preparation guidance, not a publication announcement; release preparation and npm Trusted Publishing are documented in [docs/releasing.md](docs/releasing.md).
+This README describes the current source. For a published release, check the package changelog for the features available in your installed version.
 
-Default controls use a normal 16px root: Button/Action `sm` / `md` / `lg` heights are 32 / 40 / 48px, navigation and segmented options are 32px, and common control labels are 14px. Components remain `rem` based and follow the user's font settings. See [consumer sizing and local synchronization](docs/consumer-sizing.md).
+## Using Vue
 
-## Component requests from consumer projects
+Import the stylesheet once in your application entry:
 
-Use the [component request workflow](docs/component-requests.md) to report missing shared components, framework gaps, or improvements. **Local consumer agents** can write directly into this repository's registry with `bun <NEOVERSE_UI_ROOT>/scripts/component-requests.ts submit --file <consumer-request.json>`, without switching working directories or using GitHub. Submission is validated, deduplicated, serialized across processes, and starts in `reported` state. Remote contributors may alternatively use the [Component Request issue](https://github.com/SSJ-ZYJ/Neoverse-UI/issues/new/choose). Neoverse-UI agents read submitted needs with `bun run requests agent --queue triage`.
-
-## Commands
-
-```sh
-bun install
-bun run dev
-bun run build
-bun run lint
-bun run typecheck
-bun run test
-bun run check
-bun run format
-bun run test:visual
-bun run test:visual:update
+```ts
+import '@neoverse-ui/vue/index.css';
 ```
 
-`bun run dev` starts the playground server at `http://localhost:3000`, a Vite client watcher, and source rebuilds for the generated token, motion, and Tailwind stylesheets. `bun run check` is the full pre-commit gate: it auto-fixes Biome lint/format/imports, verifies text encoding integrity, runs the style and Tailwind-usage lints, typechecks every workspace, and runs all unit and contract tests. Visual regression is opt-in via `test:visual` because it rebuilds the workspace and drives a browser; use `test:visual:update` only when a reviewed visual change is intentional.
+Then use the components:
 
-`bun check` reports progress and a final PASS/FAIL table with per-check durations. All eleven checks run sequentially even when an earlier check fails; any failure makes the command exit nonzero. Detailed stdout/stderr is written to numbered files in the temporary log directory printed at the start and end, rather than flooding the terminal. Failed checks include their exit codes, log paths, and standalone rerun commands. Biome auto-fixes are unchanged. Changeset targets are validated in both local and release checks. See the [0.3.0 release notes](docs/release-0.3.0.md) for the coordinated versions and publication verification.
+```vue
+<script setup lang="ts">
+import { ref } from 'vue';
+import { UiButton, UiCard, UiField, UiInput } from '@neoverse-ui/vue';
 
-## Tokens and Tailwind Foundation
+const name = ref('');
+const saved = ref(false);
+</script>
 
-`@neoverse-ui/tokens` owns the framework-agnostic CSS Variables. Its source layers cover primitives, semantic roles, geometry, typography, layout, Material, Motion, component contracts, and light/dark theme mappings. The organized TypeScript API is exposed through `cssVariables.components`; component-owned tokens have a single canonical namespace and are not duplicated through alternate flat maps.
-
-`@neoverse-ui/tailwind` maps those values into semantic Tailwind utilities such as:
-
-```text
-bg-surface-raised  text-primary  border-subtle
-rounded-control    shadow-card   ring-focus
+<template>
+  <UiCard as="section">
+    <h2>Profile</h2>
+    <UiField control-id="name" label="Display name" description="The name shown on your page">
+      <template #default="{ controlAttrs }">
+        <UiInput v-bind="controlAttrs" v-model="name" placeholder="Enter your name" />
+      </template>
+    </UiField>
+    <UiButton @click="saved = true">{{ saved ? 'Saved' : 'Save' }}</UiButton>
+  </UiCard>
+</template>
 ```
 
-Consumers that compile their own Tailwind CSS should import the shared theme and their own source paths:
+## Using React
 
-```css
-@import 'tailwindcss';
-@import '@neoverse-ui/tailwind/theme.css';
+Import the stylesheet once in your application entry:
 
-@source './src';
+```ts
+import '@neoverse-ui/react/index.css';
 ```
 
-The component selector facade is part of the shared Tailwind layer. It includes the Button, IconButton, Action, NavigationItem, SegmentedControl, ControlSurface, Table, Disclosure, Badge, StatusIndicator, Skeleton, Scrollbar, and Glass material contracts; it does not create project-specific mobile, dock, or docs components.
+Components follow React's prop and event conventions:
 
-### Package entries
+```tsx
+import { useState } from 'react';
+import { UiButton, UiCard, UiField, UiInput } from '@neoverse-ui/react';
 
-`@neoverse-ui/tailwind` exposes:
+export function Profile() {
+  const [name, setName] = useState('');
+  const [saved, setSaved] = useState(false);
 
-| Entry | Contents |
+  return (
+    <UiCard as="section">
+      <h2>Profile</h2>
+      <UiField controlId="name" label="Display name" description="The name shown on your page">
+        {controlAttrs => (
+          <UiInput
+            {...controlAttrs}
+            value={name}
+            onChange={event => setName(event.currentTarget.value)}
+            placeholder="Enter your name"
+          />
+        )}
+      </UiField>
+      <UiButton onClick={() => setSaved(true)}>{saved ? 'Saved' : 'Save'}</UiButton>
+    </UiCard>
+  );
+}
+```
+
+With frameworks such as Next.js, place components that use state or event handlers inside a client boundary. Import global styles through the entry point supported by your framework.
+
+## Components
+
+All of these components are available in both Vue and React:
+
+| Use case | Components |
 | --- | --- |
-| `.` / `./index.css` | Zero-config compiled consumer bundle (Tailwind utilities + theme, scanned over the Vue/React component sources) |
-| `./theme.css` | Semantic theme + Material utilities (needs a Tailwind build that also scans the component sources) |
-| `./components.css` | Component selector CSS (Button, Action, NavigationItem, SegmentedControl, ControlSurface, Table, Disclosure, Badge, StatusIndicator, Skeleton, Scrollbar, Glass contracts) |
-| `./prose.css` | Standalone `.neoverse-prose` reading-content semantics |
+| Buttons and actions | `UiButton`, `UiIconButton`, `UiAction` |
+| Surfaces and containers | `UiSurface`, `UiCard`, `UiControlSurface` |
+| Navigation and selection | `UiDock`, `UiNavigationItem`, `UiBreadcrumb`, `UiSegmentedControl` |
+| Forms | `UiField`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch` |
+| Popovers and menus | `UiPopover`, `UiDropdownMenu` |
+| Status and feedback | `UiBadge`, `UiStatusIndicator`, `UiNotice`, `UiTooltipSurface`, `UiSkeleton` |
+| Data and progress | `UiTable`, `UiDisclosure`, `UiStatCard`, `UiTimeline`, `UiStepFlow` |
+| Terminal interfaces | `UiTerminalSurface`, `UiTerminalTranscript`, `UiTerminalLine`, `UiTerminalPrompt` |
+| Scrolling and transitions | `UiScrollbar`, `UiPresence` |
 
-`dist/playground.css` exists only for this repository's Design Lab and is not part of the Consumer API.
+Buttons offer `primary`, `secondary`, and `ghost` variants, with `sm`, `md`, and `lg` sizes. Icon buttons use `label` for their accessible name. Form controls support disabled, read-only, and validation states. Segmented controls and menus support keyboard navigation.
 
-Consumers running their own Tailwind 4 build should import the theme and scan the component sources:
+`UiDock` groups navigation items and trailing controls; your application manages routing and the current destination. Terminal components provide command entry, suggestions, and output display. Output follows the tail as it grows and preserves your position when you scroll up to read history. Your application supplies command execution and completion candidates.
+
+More examples: [Forms](docs/form-control-contract.md) · [Overlays](docs/overlay-contract.md) · [Terminals](docs/terminal-composition.md) · [Vue / React equivalents](docs/framework-parity.md)
+
+## Themes and materials
+
+Set `data-theme` on the root element to `light`, `dark`, or `system`:
+
+```html
+<html lang="en" data-theme="system">...</html>
+```
+
+The theme also follows the system preference when no value is set.
+
+Components with a `surface` prop can use plain or Glass surfaces:
+
+| `surface` | Use |
+| --- | --- |
+| `none` | Transparent containers |
+| `solid`, `subtle`, `elevated`, `inset` | Content surfaces and layout layers |
+| `glass-subtle` | Lightweight controls and thin Glass layers |
+| `glass-elevated` | Cards, floating navigation, and main content containers |
+| `glass-immersive` | Stronger background blur and material depth |
+
+Some controls accept only the Glass presets and `none`; see their component types for available options. Glass needs visible background content to show its effect. Surfaces remain readable when transparency effects are unavailable or the user prefers reduced transparency.
+
+Components respect the system's reduced-motion preference. Switching themes preserves component dimensions and layout.
+
+## Styling and customization
+
+The `index.css` imports above include the styles needed by the components, so you can use them without a Tailwind build. The bundle includes utilities used by the components; any additional Tailwind utilities in your application need your own build.
+
+If your project already uses **Tailwind CSS 4**, use these imports to share the theme while generating your application utilities:
 
 ```css
 @import 'tailwindcss';
 @import '@neoverse-ui/tokens/css';
 @import '@neoverse-ui/tailwind/theme.css';
 
-@source '../../../node_modules/@neoverse-ui/vue/dist';
+/* Adjust the path relative to this stylesheet. Use react instead of vue for React. */
+@source '../node_modules/@neoverse-ui/vue/dist';
 ```
 
-The explicit `@source` into `node_modules` replaces the vendor-junction workaround. Consumers without their own Tailwind build can import the framework adapter stylesheet, such as `@neoverse-ui/vue/index.css` or `@neoverse-ui/react/index.css`; both forward to the compiled zero-config `@neoverse-ui/tailwind/index.css` consumer bundle.
+With this setup, you can omit the component package's `index.css` import. Use semantic utilities such as `text-primary`, `bg-surface-raised`, and `rounded-control`, or customize the theme through `--neoverse-*` CSS variables.
 
-Local unpublished changes can be consumed through packed tarballs and scoped overrides; `verify:packages` validates those artifacts in a clean temporary consumer. Do not treat workspace linking as evidence that a registry consumer receives the same exports or CSS.
+You can also install individual packages for the features you need:
 
-## Material and Glass
+| Package | Provides |
+| --- | --- |
+| [`@neoverse-ui/tokens`](packages/tokens/README.md) | CSS variables for color, type, spacing, and more, with TypeScript name maps |
+| [`@neoverse-ui/tailwind`](packages/tailwind/README.md) | Tailwind theme, component styles, and reading typography |
+| [`@neoverse-ui/motion`](packages/motion/README.md) | Enter and exit animations, list transitions, and page transitions |
+| [`@neoverse-ui/glass-runtime`](packages/glass-runtime/README.md) | Optional Glass edge rendering enhancement |
+| [`@neoverse-ui/giscus-theme`](packages/giscus-theme/README.md) | Light and dark themes for Giscus comments |
 
-Normal surfaces use semantic Tailwind composition. Glass has exactly three material presets: `material-glass-subtle`, `material-glass-elevated`, and `material-glass-immersive`, each with an opaque CSS fallback, tokenized tint, backdrop filter, and directional edge field.
+## Documentation and feedback
 
-The three Glass variants keep the CSS material baseline and are discovered automatically by a mounted renderer. There is no per-surface `edgePass` flag: the renderer paints the shared directional WebGL edge for every eligible top-level Glass surface in the document.
+- [Vue guide](packages/vue/README.md) and [React guide](packages/react/README.md): component props and composition examples.
+- [Migration guide](docs/migration-0.3.0.md): changes to consider when upgrading an existing project.
+- [Issues](https://github.com/SSJ-ZYJ/Neoverse-UI/issues): report a bug or request a component. Include your framework, component version, and reproduction steps.
 
-Mount the runtime once per Document when the enhancement is wanted:
-
-```ts
-import { createGlassRenderer } from '@neoverse-ui/glass-runtime';
-
-const renderer = createGlassRenderer();
-renderer.mount();
-```
-
-The runtime prefers WebGL2, falls back to WebGL1, and then leaves the CSS path authoritative when WebGL is unavailable. It handles context loss/restore, `prefers-reduced-transparency`, a DPR cap of 2, dynamic Glass ownership changes, frame-coalesced scroll/DOM updates, and invisible/off-screen surfaces. Mount/destroy cycles are repeatable and retain at most one shared Canvas per Document.
-
-For diagnostics, inspect `data-neoverse-glass-renderer` on the Document root and `data-neoverse-glass-renderer-canvas` on the shared canvas.
-
-## Controls and touch density
-
-Button, IconButton, SegmentedControl, and toolbar controls keep their compact painted geometry. Under `pointer: coarse`, the shared component CSS adds a transparent 8px hit-area expansion using pseudo-elements; it does not introduce mobile-only component APIs. Desktop and touch use the same Vue components. Native keyboard behavior, `focus-visible`, and disabled states remain part of the core component contract.
-
-The Design Lab `density` module shows fine-pointer and coarse-pointer profiles side by side. The Playwright mobile project also checks that the visual height stays compact while the transparent hit area is present.
-
-## Forms and anchored overlays
-
-`UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, and `UiSwitch` share `validation="none | error | warning | success"`, disabled, and readonly semantics. `UiField` composes labels, descriptions, and messages; its Vue scoped slot / React function children expose `controlAttrs` so consumers explicitly bind accessible descriptions and native required/disabled state. Validation rules and controlled form resets remain consumer-owned. See [the form contract](docs/form-control-contract.md) and the framework package READMEs for examples.
-
-`UiPopover`, `UiDropdownMenu`, and `UiSelect` reuse `@neoverse-ui/overlay-runtime` for positioning, tracking and dismissal. Popover is non-modal; DropdownMenu owns menu keyboard navigation. Native Popover API behavior is preferred, with a fixed-position fallback. See [the overlay contract](docs/overlay-contract.md).
-
-## Motion and themes
-
-`@neoverse-ui/motion` exposes the shared duration/easing scale and semantic roles `feedback`, `state`, `spatial`, `enter`, and `exit`. The old standalone entrance/emphasis recipe classes were removed. Shared Button, Surface, Navigation, SegmentedControl, Scrollbar, and ControlSurface CSS consumes the role variables directly. The Presence engine supplies `fade`, `rise`, `sink`, `pop`, `veil`, `slide-start`, and `slide-end`; Vue exports `UiPresence`, `presence`, and `staggerStyle`, while React exports `UiPresence` and `useUiPresence`. Reduced-motion collapses durations and removes spatial distance while preserving state correctness.
-
-`startViewTransition(update, options?)` coordinates page changes, including interruptible Particle Dissolve, View Transition crossfade, and direct-update fallbacks. Mark the outgoing region with `data-neoverse-dissolve`; the optional WebGL2 particle pipeline uses capture when supported or synthetic dust otherwise. See the [Motion API and pipeline guide](packages/motion/README.md) for presets, capture support, and lifecycle guarantees.
-
-Set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root element. The Design Lab keeps separate light and dark visual baselines. Theme selection has one canonical root contract: `data-theme`.
-
-## Design Lab and visual regression
-
-The playground serves the real Vue components and built Tailwind CSS. The main shell and isolated `/frame` use the same normal root size (16px with default browser settings), so component defaults match consumer applications. Persistent sidebar navigation begins at 1280px and becomes a drawer below that breakpoint.
-
-The sidebar and overview share a package-oriented catalogue, ordered as **Design Tokens** (`tokens`: color, typography, layout, shadow), **Materials & Styles** (`tailwind`, `glass-runtime`), **Motion** (`motion`), **UI Components** (`vue`, `react`: controls, forms, feedback, cards, data, Dock, scrollbar), **Compositions** (multi-component scenes and terminal), and **Contract Lab** (framework parity and runtime validation, including `overlay-runtime`). Group headers identify the related packages; these are discovery categories, not claims that every specimen has both framework adapters. Overview cards use three columns on wide screens, two on intermediate screens, and one on narrow screens. Search results follow the same group and module order, and existing module/specimen hash links remain unchanged.
-
-Sidebar categories use transparent grouping on the existing outer Glass plane, quiet separators, and module counts rather than nested material cards. This is an appearance-only treatment: sidebar/drawer widths, shell proportions, heading scale, navigation row height, and the original header/fade spacing remain unchanged.
-
-Playground specimens share `LabSpecimenSection` for subsection hierarchy and use content-width-aware `playground-token-grid` / `playground-specimen-grid` layouts. Shared specimen rows and panels consume `UiSurface` material presets instead of duplicating raw Glass implementation classes. These helpers belong to the Design Lab and are not public package API.
-
-The non-interactive FPS overlay also uses `UiSurface` with the shared `glass-elevated` preset; its material background, border, blur, and theme fallback are owned by the shared Glass styles rather than overlay-specific CSS.
-
-Visual tests use the stable `/frame` route and `[data-design-lab-region="module"]` region, covering representative Foundation, Material, control, feedback, card, and consumer-parity scenarios in both themes. Playwright uses a 1920×1080 desktop viewport at 100% CSS-pixel scaling and a 390px touch viewport; shell regressions additionally exercise 1280 / 1600 / 1920 responsive geometry and the complete control state matrix. Animations are disabled and assets are awaited before each screenshot.
-
-Baselines live under `tests/visual/snapshots/{platform}/{projectName}/`: `win32` and `linux` keep native Chromium font metrics and rasterization separate. Linux CI uses Ubuntu 24.04; regenerate Linux baselines in that environment rather than copying Windows PNGs. A screenshot change should correspond to an intentional token, Material, component, specimen-composition, or rendering-environment change and be reviewed with the generated diff. See [the CI and visual baseline workflow](docs/releasing.md#ci-and-visual-baselines).
-
-## Changesets
-
-Create a release note with:
-
-```sh
-bun run changeset
-```
-
-The public packages use independent versions. `apps/playground` is the only internal workspace excluded from package releases.
-
-
-Material tiers, customization, component audit and hover/press policy: [Material standards](docs/material-standards.md).
+Neoverse UI is released under the [MIT license](LICENSE).

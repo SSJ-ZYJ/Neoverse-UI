@@ -37,6 +37,7 @@ export interface ComponentContract {
   readonly name: string;
   readonly track: 'canonical-shared' | 'consumer-driven';
   readonly maturity: 'stable' | 'consumer-validation' | 'partial';
+  readonly react: 'stable' | 'partial' | 'none';
   readonly visual: 'release' | 'playground' | 'none';
   readonly runtime: 'validated' | 'pending' | 'not-applicable';
   readonly consumer: 'validated' | 'pending';

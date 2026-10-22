@@ -224,29 +224,32 @@ test('surface can explicitly own a nested Glass material plane', () => {
 });
 
 test('dock exposes the shared shell without owning product navigation data', () => {
-  const dock = UiDock({
-    'aria-label': 'Primary navigation',
-    compact: true,
-    children: 'Navigation',
-    trailing: 'Language',
-  });
-
-  expect(dock.type).toBe('nav');
-  expect(dock.props['aria-label']).toBe('Primary navigation');
-  expect(dock.props['data-surface']).toBe('glass-elevated');
-  expect(dock.props.className).toContain('material-glass-elevated');
-  expect(dock.props['data-neoverse-surface-hover']).toBe('static');
-  expect(dock.props.className).toContain('ui-dock');
-  expect(dock.props.className).toContain('ui-dock--compact');
-  expect(dock.props.className).toContain('ui-control-surface--scale-lg');
-  const children = Children.toArray(
-    (dock.props as unknown as { children: ReactNode }).children,
-  ) as TestElement[];
-  expect(children[0]?.props.className).toContain('ui-control-surface__group--primary');
-  expect(children[1]?.props.className).toBe('ui-control-surface__divider');
-  expect(children[2]?.props.className).toContain('ui-control-surface__group--trailing');
+  const html = renderToStaticMarkup(
+    createElement(
+      UiDock,
+      {
+        'aria-label': 'Primary navigation',
+        compact: true,
+        trailing: 'Language',
+      },
+      'Navigation',
+    ),
+  );
+  expect(html).toContain('<nav');
+  expect(html).toContain('aria-label="Primary navigation"');
+  for (const value of [
+    'data-surface="glass-elevated"',
+    'material-glass-elevated',
+    'data-neoverse-surface-hover="static"',
+    'ui-dock--compact',
+    'ui-control-surface--scale-lg',
+    'ui-control-surface--shared-indicator',
+    'ui-control-surface__group--primary',
+    'ui-control-surface__divider',
+    'ui-control-surface__group--trailing',
+  ])
+    expect(html).toContain(value);
 });
-
 test('native button preserves refs, events, form attributes and explicit busy state', () => {
   const ref = { current: null };
   const onClick = () => undefined;

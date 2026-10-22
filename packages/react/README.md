@@ -2,9 +2,7 @@
 
 React adapters for Neoverse UI.
 
-The package exposes token-backed React adapters for `UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiDock`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch`, `UiField`, `UiPopover`, `UiDropdownMenu`, `UiTable`, `UiDisclosure`, `UiNotice`, `UiSurface`, and `UiPresence`, plus `useUiPresence` and the `uiActionClassName` helper for consumers that need to style an existing routing component through `asChild` composition.
-
-For shell-style command entry, use the terminal composition pattern rather than turning a form control into a shell prompt. The Vue `UiTerminalPrompt` adapter currently owns this consumer-driven composition. See [terminal composition](../../docs/terminal-composition.md).
+The package provides the same 35 public components as the Vue package, including navigation, forms, feedback, data presentation, terminal composition and document scrollbars. Both adapters use the shared Tokens, Tailwind, Material, Motion and Overlay Runtime. See [framework parity](../../docs/framework-parity.md) for state bindings and validation scope.
 
 ## Forms and overlays
 
@@ -40,7 +38,7 @@ For framework routing components, use `asChild` so the router keeps ownership of
 
 ## Dock
 
-`UiDock` is a reusable floating-navigation shell. Pass navigation content through `children` and optional mode/language controls through `trailing`; route data and active state remain consumer-owned.
+`UiDock` is a reusable floating-navigation shell. Pass navigation content through `children` and optional mode/language controls through `trailing`; route data and active state remain consumer-owned. `navigationIndicator` defaults to `true`, using the same measured shared indicator as `UiControlSurface`. Use `UiNavigationItem` children to supply the active marker.
 
 ```tsx
 <UiDock aria-label="Primary navigation" trailing={<LanguageControl />}>
@@ -116,3 +114,27 @@ import { UiPresence } from '@neoverse-ui/react';
 `UiPresence` retains children during the shared exit animation and unmounts when it finishes, with a token-based timeout fallback. `useUiPresence(open)` exposes `mounted`, `leaving`, and `ref` for consumer-owned markup; bind the Motion `nv-appear` / `nv-vanish` classes and preset attributes when using the hook directly. Presence hooks and interactive consumers belong in a client boundary. The presets and reduced-motion behavior are owned by `@neoverse-ui/motion`.
 
 Consumers without their own Tailwind build can import `@neoverse-ui/react/index.css`; it forwards to the compiled `@neoverse-ui/tailwind/index.css` consumer bundle, including Tokens, Motion, Material, component selectors, and the utilities required by the adapters. No package-source utility scanning is required. Static adapters support server rendering, while Presence hooks and event handlers belong in the consumer's client boundary.
+
+## Navigation and segmented selection
+
+`UiControlSurface` groups arbitrary controls with optional `trailing` content. `UiNavigationItem` supplies accessible `label`, `icon`, `active`, `compact`, `indicatorPlacement`, and disabled link/button semantics. It supports `asChild` with a routed element, like `UiAction`.
+
+`UiSegmentedControl` uses `options` with `value`, `label`, optional `disabled` and `ariaLabel`. Bind `value/onValueChange`, or use `defaultValue` for internal state. ArrowLeft/ArrowRight wrap through enabled choices; Home/End select the endpoints. Loading and disabled states prevent changes. A controlled parent can reject updates without changing the selected value.
+
+## Feedback and presentation
+
+- `UiBadge`: `variant` (neutral/info/success/warning/danger), `size` (sm/md/lg), and label children.
+- `UiStatusIndicator`: `status`, `size` (sm/md), `pulse`, `loading`, and label children.
+- `UiTooltipSurface`: `as`, `variant` (neutral/accent), and content; caller controls tooltip visibility and associations.
+- `UiSkeleton`: `variant` (text/title/avatar/circle/rect), `effect` (shimmer/pulse/none), `width`, `height`, and rectangular `radius`. Numeric dimensions use CSS pixels.
+- `UiStatCard`: `label`, `value`, optional `unit`, `trend`, `footnote` and `surface`; label/value/trend/footnote accept ReactNode content.
+- `UiTimeline`: `items`, `ariaLabel`, and optional `renderItem({ item, index })`.
+- `UiStepFlow`: `items` with pending/current/complete state, `ariaLabel`, `renderItem`, and `renderStatus`.
+
+## Terminal and scrollbars
+
+[Terminal composition](../../docs/terminal-composition.md) includes a React example. `UiTerminalSurface` accepts `status` and `actions` content. `UiTerminalTranscript` follows output only while the reader is at the tail, and retains a nested accessible log. `UiTerminalLine` renders escaped text or children.
+
+`UiTerminalPrompt` uses `value/defaultValue/onValueChange` and preserves native `onChange`, keyboard/composition events and an input ref. `suggestion` displays only a matching ghost suffix while focused at the end. `context` and `renderSegment(segment)` customize context content. Command execution and accepting suggestions belong to the application.
+
+`UiScrollbar` decorates document scrolling with `autoHideMs` (1200), `minThumbRatio` (0.1), `refreshKey`, and `hideNative` (true). Set `autoHideMs={0}` to keep it revealed while the document has overflow. It supports track seeking and pointer dragging, and restores native-scrollbar ownership on unmount. It is decorative and does not replace native document keyboard scrolling.

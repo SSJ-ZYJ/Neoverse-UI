@@ -15,7 +15,7 @@ A Playground specimen is useful evidence, but it does not by itself make a compo
 ## Tracks
 
 - **Canonical Shared**: core framework-shared components. Vue and React adapters are both required and must stay contract-compatible.
-- **Consumer Driven**: framework adapters are added when a real consumer needs them. Vue/React component-count symmetry is not a release requirement.
+- **Consumer Driven**: framework adapters are added when a real consumer needs them. Both adapters are now available for the current public component set; consumer-driven status still records the origin of these components.
 
 ## Maturity
 
@@ -52,23 +52,25 @@ Column values:
 | `UiPopover` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiDropdownMenu` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiBreadcrumb` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
-| `UiControlSurface` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
+| `UiControlSurface` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiDock` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
-| `UiNavigationItem` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
-| `UiSegmentedControl` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
-| `UiBadge` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
-| `UiStatusIndicator` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
+| `UiNavigationItem` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
+| `UiSegmentedControl` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
+| `UiBadge` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
+| `UiStatusIndicator` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiNotice` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
-| `UiTooltipSurface` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | — | Stable | — | Release | Pending |
-| `UiSkeleton` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
-| `UiScrollbar` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
-| `UiTerminalPrompt` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
-| `UiTerminalSurface` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
-| `UiTerminalLine` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
-| `UiTerminalTranscript` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
-| `UiStatCard` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
-| `UiTimeline` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
-| `UiStepFlow` | Consumer Driven | Stable | Stable | Stable | Stable | — | Stable | — | Release | Validated |
+| `UiTooltipSurface` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
+| `UiSkeleton` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
+| `UiScrollbar` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
+| `UiTerminalPrompt` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
+| `UiTerminalSurface` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
+| `UiTerminalLine` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
+| `UiTerminalTranscript` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
+| `UiStatCard` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
+| `UiTimeline` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
+| `UiStepFlow` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
+
+The existing Stable / Release / Consumer statuses above retain previously established Vue or shared-component evidence. They do not certify the newly added React adapters in real products. `reactValidation` in the machine-readable matrix separately records their browser runtime as validated and their release visual / real consumer validation as pending. See [framework parity](framework-parity.md) for scope and evidence.
 
 ## Change policy
 

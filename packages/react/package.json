@@ -29,7 +29,7 @@
   "scripts": {
     "build": "rm -rf dist tsconfig.build.tsbuildinfo && tsc --project tsconfig.build.json && bun ./scripts/copy-css.ts",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "test": "bun test src/index.test.ts src/presence.test.tsx src/overlay.test.tsx src/field.test.tsx"
+    "test": "bun test src"
   },
   "peerDependencies": {
     "react": ">=19.0.0 <20.0.0"

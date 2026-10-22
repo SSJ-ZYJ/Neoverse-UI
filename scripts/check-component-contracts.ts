@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import ts from 'typescript';
 
 type Track = 'canonical-shared' | 'consumer-driven';
 type Maturity = 'stable' | 'consumer-validation' | 'partial';
@@ -19,6 +20,11 @@ interface ComponentContract {
   runtime: RuntimeStatus;
   visual: VisualStatus;
   consumer: ConsumerStatus;
+  reactValidation?: {
+    runtime: 'validated' | 'pending';
+    visual: 'validated' | 'pending';
+    consumer: 'validated' | 'pending';
+  };
 }
 
 interface ComponentMatrix {
@@ -35,7 +41,6 @@ const reactFixturePath = resolve(root, 'apps/playground/src/react-fixture.tsx');
 
 const matrix = (await Bun.file(matrixPath).json()) as ComponentMatrix;
 const vueIndex = await Bun.file(vueIndexPath).text();
-const reactIndex = await Bun.file(reactIndexPath).text();
 const reactFixture = await Bun.file(reactFixturePath).text();
 const docs = await Bun.file(docsPath).text();
 
@@ -59,9 +64,20 @@ const vuePublic = new Set<string>();
 addMatches(vueIndex, /export\s+\{\s*default\s+as\s+(Ui[A-Za-z0-9]+)\s*\}\s+from/g, vuePublic);
 
 const reactPublic = new Set<string>();
-addMatches(reactIndex, /export\s+function\s+(Ui[A-Za-z0-9]+)/g, reactPublic);
-if (/export\s+\{\s*UiPresence\s*,/.test(reactIndex)) {
-  reactPublic.add('UiPresence');
+const program = ts.createProgram([reactIndexPath], {
+  jsx: ts.JsxEmit.ReactJSX,
+  moduleResolution: ts.ModuleResolutionKind.Bundler,
+  module: ts.ModuleKind.ESNext,
+  skipLibCheck: true,
+});
+const checker = program.getTypeChecker();
+const source = program.getSourceFile(reactIndexPath);
+const moduleSymbol = source && checker.getSymbolAtLocation(source);
+if (!moduleSymbol) throw new Error('Cannot resolve React public exports.');
+for (const symbol of checker.getExportsOfModule(moduleSymbol)) {
+  const target = symbol.flags & ts.SymbolFlags.Alias ? checker.getAliasedSymbol(symbol) : symbol;
+  if (/^Ui[A-Z]/.test(symbol.name) && (target.flags & ts.SymbolFlags.Value) !== 0)
+    reactPublic.add(symbol.name);
 }
 
 const reactRuntime = new Set<string>();
@@ -117,6 +133,14 @@ for (const component of matrix.components) {
   }
   if (!runtimeStatuses.has(component.runtime)) {
     errors.push(`${component.name}: invalid runtime status ${component.runtime}`);
+  }
+  if (component.reactValidation) {
+    for (const [layer, status] of Object.entries(component.reactValidation)) {
+      if (status !== 'validated' && status !== 'pending')
+        errors.push(`${component.name}: invalid React ${layer} validation ${status}`);
+    }
+    if (component.react === 'none' || component.reactValidation.runtime !== component.runtime)
+      errors.push(`${component.name}: React validation must match its adapter and runtime status`);
   }
 
   if (component.track === 'canonical-shared') {

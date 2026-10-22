@@ -28,8 +28,17 @@ import {
   useState,
 } from 'react';
 
+export * from './display';
+export * from './navigation';
 export type { UiPresenceProps, UiPresenceState } from './presence';
 export { UiPresence, useUiPresence } from './presence';
+export * from './scrollbar';
+export * from './terminal';
+
+import { UiControlSurface } from './navigation';
+import { type SurfacePreset, surfaceClasses } from './surface';
+
+export type { SurfacePreset } from './surface';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 export type NoticeVariant = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
@@ -40,15 +49,6 @@ export type ControlSurfaceScale = 'md' | 'lg';
 export type SurfaceHoverMode = 'auto' | 'static';
 export type SurfaceEdgeMode = 'auto' | 'local';
 export type ControlSurfacePreset = 'none' | 'glass-subtle' | 'glass-elevated' | 'glass-immersive';
-export type SurfacePreset =
-  | 'none'
-  | 'solid'
-  | 'subtle'
-  | 'elevated'
-  | 'inset'
-  | 'glass-subtle'
-  | 'glass-elevated'
-  | 'glass-immersive';
 
 const buttonVariantClasses: Record<ButtonVariant, string> = {
   primary: 'ui-button--primary',
@@ -92,17 +92,6 @@ const iconButtonStretchSizeClasses: Record<ActionSize, string> = {
 };
 
 const loadingIndicatorClass = 'ui-loading-indicator';
-
-const surfaceClasses: Record<SurfacePreset, string> = {
-  none: '',
-  solid: 'ui-surface-solid',
-  subtle: 'ui-surface-subtle',
-  elevated: 'ui-surface-elevated',
-  inset: 'ui-surface-inset',
-  'glass-subtle': 'material-glass-subtle',
-  'glass-elevated': 'material-glass-elevated',
-  'glass-immersive': 'material-glass-immersive',
-};
 
 const actionBaseClasses = 'ui-button ui-action';
 
@@ -170,6 +159,7 @@ export interface UiActionProps extends Omit<HTMLAttributes<HTMLElement>, 'childr
   target?: AnchorHTMLAttributes<HTMLAnchorElement>['target'];
   leading?: ReactNode;
   trailing?: ReactNode;
+  decoration?: ReactNode;
   children: ReactNode;
 }
 
@@ -198,6 +188,7 @@ export function UiAction({
   type = 'button',
   leading,
   trailing,
+  decoration,
   children,
   className,
   onClick,
@@ -227,6 +218,7 @@ export function UiAction({
           {trailing}
         </span>
       ) : null}
+      {decoration}
     </>
   );
 
@@ -319,8 +311,9 @@ export interface UiDockProps extends Omit<HTMLAttributes<HTMLElement>, 'children
   compact?: boolean;
   hoverMode?: SurfaceHoverMode;
   edgeMode?: SurfaceEdgeMode;
+  navigationIndicator?: boolean;
   trailing?: ReactNode;
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 /** Reusable Dock shell. Product routing, navigation semantics, and trailing controls stay caller-owned. */
@@ -331,45 +324,26 @@ export function UiDock({
   compact = false,
   hoverMode = 'static',
   edgeMode = 'auto',
+  navigationIndicator = true,
   trailing,
   children,
   className,
   ...rest
 }: UiDockProps) {
   return createElement(
-    as,
+    UiControlSurface,
     {
       ...rest,
-      className: mergeClassNames(
-        'ui-control-surface',
-        surfaceClasses[surface],
-        `ui-control-surface--scale-${scale}`,
-        'ui-dock',
-        compact && 'ui-dock--compact',
-        className,
-      ),
-      'data-surface': surface,
-      'data-neoverse-surface-hover': hoverMode === 'static' ? 'static' : undefined,
-      'data-neoverse-glass-edge-pass': edgeMode === 'local' ? 'css' : undefined,
+      as,
+      surface,
+      scale,
+      hoverMode,
+      edgeMode,
+      navigationIndicator,
+      trailing,
+      className: mergeClassNames('ui-dock', compact && 'ui-dock--compact', className),
     },
-    createElement(
-      'div',
-      { className: 'ui-control-surface__group ui-control-surface__group--primary' },
-      children,
-    ),
-    trailing !== undefined && trailing !== null
-      ? createElement('span', {
-          className: 'ui-control-surface__divider',
-          'aria-hidden': true,
-        })
-      : null,
-    trailing !== undefined && trailing !== null
-      ? createElement(
-          'div',
-          { className: 'ui-control-surface__group ui-control-surface__group--trailing' },
-          trailing,
-        )
-      : null,
+    children,
   );
 }
 
@@ -448,7 +422,7 @@ export function UiBreadcrumb({
 }
 
 export interface UiSurfaceProps extends HTMLAttributes<HTMLElement> {
-  as?: 'div' | 'section' | 'article' | 'aside' | 'nav' | 'header' | 'footer';
+  as?: ElementType;
   surface?: SurfacePreset;
   glassNesting?: 'inherit' | 'local';
   contentOverflow?: 'clip' | 'visible';
