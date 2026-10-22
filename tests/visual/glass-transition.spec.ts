@@ -18,6 +18,9 @@ type CardFrame = {
 
 async function captureCardFromViewport(page: Page): Promise<CardFrame> {
   const frame = await page.evaluate(async () => {
+    // Screenshots await fonts too; measure only after the same font layout settles,
+    // otherwise the saved crop can describe the fallback font's smaller card.
+    await document.fonts.ready;
     const card = document.querySelector<HTMLElement>('[data-card-default]');
     if (card === null) throw new Error('Card fixture is missing');
 
@@ -162,6 +165,11 @@ test('particle transition keeps the card Glass color stable through cleanup', as
   );
 
   await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'no-preference' });
+  // Warm the target's fonts before the timed transition. Otherwise font loading
+  // can change the crop geometry or consume the particle observation window.
+  await page.goto('/?theme=light&lang=en#card', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('[data-card-default]')).toBeVisible();
+  await page.evaluate(() => document.fonts.ready);
   await page.goto('/?theme=light&lang=en', { waitUntil: 'domcontentloaded' });
   const webgl2Available = await page.evaluate(() => {
     const canvas = document.createElement('canvas');
