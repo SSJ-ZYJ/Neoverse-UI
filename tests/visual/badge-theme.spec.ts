@@ -4,7 +4,9 @@ for (const theme of ['light', 'dark'] as const) {
   test(`Badge blurs real backdrop pixels with a shared filter / ${theme}`, async ({
     page,
   }, testInfo) => {
-    await page.goto(`/frame?theme=${theme}&lang=zh#status-feedback`);
+    await page.goto(`/frame?theme=${theme}&lang=zh#status-feedback`, {
+      waitUntil: 'domcontentloaded',
+    });
     const row = page.locator('#status-feedback-badge [data-specimen-label="变体"]');
     await expect(row).toBeVisible();
     await page.evaluate(() => document.fonts.ready);

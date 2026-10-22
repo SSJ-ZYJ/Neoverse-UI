@@ -273,6 +273,7 @@ test('design lab density grids respond to available content width', async ({ pag
       await page.setViewportSize({ width, height: 1000 });
       await page.goto(`/?lang=en#${scenario.moduleId}`, { waitUntil: 'domcontentloaded' });
       await expect(page.locator(scenario.selector).first()).toBeVisible();
+      await page.evaluate(() => document.fonts.ready);
 
       const rowCounts = await page.locator(scenario.selector).evaluateAll((grids) =>
         grids.map((grid) => {
@@ -2182,7 +2183,7 @@ test('isolated scrollbar fixture renders the real UiScrollbar overlay', async ({
 test('React runtime fixture renders every runtime-validated adapter and updates real DOM state', async ({
   page,
 }) => {
-  await page.goto('/react-fixture?lang=en', { waitUntil: 'domcontentloaded' });
+  await page.goto('/react-fixture?lang=en&contract-fixtures', { waitUntil: 'domcontentloaded' });
 
   const runtimeValidatedAdapters = componentMatrix.components
     .filter((component) => component.runtime === 'validated')
@@ -2193,8 +2194,21 @@ test('React runtime fixture renders every runtime-validated adapter and updates 
 
   const adapters = page.locator('[data-react-adapter]');
   await expect(adapters).toHaveCount(runtimeValidatedAdapters.length);
+  expect(
+    await adapters.evaluateAll((elements) =>
+      elements.map((element) => element.getAttribute('data-react-adapter')).sort(),
+    ),
+  ).toEqual([...runtimeValidatedAdapters].sort());
   for (const adapter of runtimeValidatedAdapters) {
-    await expect(page.locator(`[data-react-adapter="${adapter}"]`)).toBeVisible();
+    const specimen = page.locator(`[data-react-adapter="${adapter}"]`);
+    if (adapter === 'UiScrollbar') {
+      // Auto-hidden until scroll activity; mounting is the initial runtime contract.
+      await expect(specimen).toBeAttached();
+      await expect(specimen).toHaveAttribute('aria-hidden', 'true');
+      await expect(specimen).toHaveAttribute('data-visible', 'false');
+    } else {
+      await expect(specimen).toBeVisible();
+    }
   }
   expect(runtimeValidatedAdapters).toEqual(expect.arrayContaining(canonicalAdapters));
 
