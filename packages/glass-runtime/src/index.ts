@@ -1,5 +1,6 @@
+import { createProgram, type GlassGl } from './gl-program';
 import { NativeGlassRenderer, supportsNativeRefraction } from './native';
-import { glassFragmentShader, glassVertexShader } from './shader';
+import { type Color, parseColor } from './style-colors';
 
 export const glassRendererAttribute = 'data-neoverse-glass-renderer';
 
@@ -42,7 +43,6 @@ const motionEvents = [
   'animationcancel',
 ] as const;
 type GlassVariant = 'subtle' | 'elevated' | 'immersive';
-type Color = [number, number, number];
 type Radii = [number, number, number, number];
 
 type GlassStyle = {
@@ -75,7 +75,6 @@ type CanvasViewport = {
   height: number;
 };
 
-type GlassGl = WebGLRenderingContext | WebGL2RenderingContext;
 type GlassWindow = Window & {
   ResizeObserver?: typeof ResizeObserver;
   MutationObserver?: typeof MutationObserver;
@@ -173,83 +172,6 @@ const parsePixels = (value: string, fallback: number): number => {
   }
 
   return parseFirstNumber(match[0], fallback);
-};
-
-const parseColorComponent = (value: string, scale: number): number | undefined => {
-  const normalized = value.trim();
-  if (!/^-?[\d.]+%?$/.test(normalized)) {
-    return undefined;
-  }
-
-  const parsed = Number.parseFloat(normalized);
-  if (!Number.isFinite(parsed)) {
-    return undefined;
-  }
-
-  return Math.min(Math.max(parsed / (normalized.endsWith('%') ? 100 : scale), 0), 1);
-};
-
-// Shader color uniforms carry visible RGB contribution, so preserve CSS alpha
-// by premultiplying it instead of silently treating translucent tokens as white.
-const parseColor = (value: string): Color | undefined => {
-  const normalized = value.trim().toLowerCase();
-  const hexMatch = /^#([\da-f]{3,8})$/i.exec(normalized);
-
-  if (hexMatch !== null) {
-    const hex = hexMatch[1];
-    if (hex === undefined) {
-      return undefined;
-    }
-
-    const expanded = hex.length <= 4 ? [...hex].map((digit) => `${digit}${digit}`).join('') : hex;
-    const channels = expanded.slice(0, 6).match(/[\da-f]{2}/gi);
-    if (channels === null || channels.length !== 3) {
-      return undefined;
-    }
-
-    const alpha = expanded.length === 8 ? Number.parseInt(expanded.slice(6, 8), 16) / 255 : 1;
-    return channels.map((channel) => (Number.parseInt(channel, 16) / 255) * alpha) as Color;
-  }
-
-  const rgbMatch = /^(?:rgb|rgba)\((.*)\)$/.exec(normalized);
-  if (rgbMatch !== null) {
-    const components = (rgbMatch[1] ?? '')
-      .trim()
-      .replace(/\s*\/\s*/, ',')
-      .split(/[\s,]+/);
-    if (components.length < 3) {
-      return undefined;
-    }
-
-    const channels = components.slice(0, 3).map((component) => parseColorComponent(component, 255));
-    if (channels.some((channel) => channel === undefined)) {
-      return undefined;
-    }
-
-    const alpha = components[3] === undefined ? 1 : (parseColorComponent(components[3], 1) ?? 1);
-    return channels.map((channel) => (channel ?? 0) * alpha) as Color;
-  }
-
-  const colorFunctionMatch = /^color\(\s*srgb\s+(.+)\)$/.exec(normalized);
-  if (colorFunctionMatch !== null) {
-    const components = (colorFunctionMatch[1] ?? '')
-      .trim()
-      .replace(/\s*\/\s*/, ',')
-      .split(/[\s,]+/);
-    if (components.length < 3) {
-      return undefined;
-    }
-
-    const channels = components.slice(0, 3).map((component) => parseColorComponent(component, 1));
-    if (channels.some((channel) => channel === undefined)) {
-      return undefined;
-    }
-
-    const alpha = components[3] === undefined ? 1 : (parseColorComponent(components[3], 1) ?? 1);
-    return channels.map((channel) => (channel ?? 0) * alpha) as Color;
-  }
-
-  return undefined;
 };
 
 const getVariant = (element: Element): GlassVariant | undefined => {
@@ -555,56 +477,6 @@ const getAncestorClipRect = (element: HTMLElement, rect: ClipRect, view: Window)
     width: Math.max(right - left, 0),
     height: Math.max(bottom - top, 0),
   };
-};
-
-const createShader = (gl: GlassGl, type: number, source: string): WebGLShader | undefined => {
-  const shader = gl.createShader(type);
-  if (shader === null) {
-    return undefined;
-  }
-
-  gl.shaderSource(shader, source);
-  gl.compileShader(shader);
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    gl.deleteShader(shader);
-    return undefined;
-  }
-
-  return shader;
-};
-
-const createProgram = (gl: GlassGl): WebGLProgram | undefined => {
-  const vertexShader = createShader(gl, gl.VERTEX_SHADER, glassVertexShader);
-  const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, glassFragmentShader);
-  if (vertexShader === undefined || fragmentShader === undefined) {
-    if (vertexShader !== undefined) {
-      gl.deleteShader(vertexShader);
-    }
-    if (fragmentShader !== undefined) {
-      gl.deleteShader(fragmentShader);
-    }
-    return undefined;
-  }
-
-  const program = gl.createProgram();
-  if (program === null) {
-    gl.deleteShader(vertexShader);
-    gl.deleteShader(fragmentShader);
-    return undefined;
-  }
-
-  gl.attachShader(program, vertexShader);
-  gl.attachShader(program, fragmentShader);
-  gl.linkProgram(program);
-  gl.deleteShader(vertexShader);
-  gl.deleteShader(fragmentShader);
-
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    gl.deleteProgram(program);
-    return undefined;
-  }
-
-  return program;
 };
 
 const resolveColor = (

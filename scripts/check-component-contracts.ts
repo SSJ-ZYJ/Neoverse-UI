@@ -1,5 +1,6 @@
 import { resolve } from 'node:path';
 import ts from 'typescript';
+import { collectReactRuntimeAdapters } from './react-runtime-fixture';
 
 type Track = 'canonical-shared' | 'consumer-driven';
 type Maturity = 'stable' | 'consumer-validation' | 'partial';
@@ -80,8 +81,9 @@ for (const symbol of checker.getExportsOfModule(moduleSymbol)) {
     reactPublic.add(symbol.name);
 }
 
-const reactRuntime = new Set<string>();
-addMatches(reactFixture, /data-react-adapter=["'](Ui[A-Za-z0-9]+)["']/g, reactRuntime);
+const runtimeFixture = collectReactRuntimeAdapters(reactFixture);
+errors.push(...runtimeFixture.errors);
+const reactRuntime = runtimeFixture.adapters;
 
 const assertSameSet = (label: string, declared: Set<string>, observed: Set<string>): void => {
   const missing = [...declared].filter((name) => !observed.has(name)).sort();
