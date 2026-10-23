@@ -22,7 +22,9 @@ jobs:
     timeout-minutes: 5
     outputs:
       verify: ${{ steps.scope.outputs.verify }}
-      full-checks: ${{ steps.scope.outputs.full-checks }}
+      metadata-checks: ${{ steps.scope.outputs.metadata-checks }}
+      quality-checks: ${{ steps.scope.outputs.quality-checks }}
+      visual-checks: ${{ steps.scope.outputs.visual-checks }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -46,4 +48,6 @@ jobs:
     if: needs.scope.outputs.verify == 'true'
     uses: ./.github/workflows/verify.yml
     with:
-      full-checks: ${{ needs.scope.outputs.full-checks == 'true' }}
+      metadata-checks: ${{ needs.scope.outputs.metadata-checks == 'true' }}
+      quality-checks: ${{ needs.scope.outputs.quality-checks == 'true' }}
+      visual-checks: ${{ needs.scope.outputs.visual-checks == 'true' }}

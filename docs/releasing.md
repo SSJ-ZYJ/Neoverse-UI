@@ -77,16 +77,29 @@ The repository and all public packages use the MIT license. `scripts/verify-pack
 ### CI and visual baselines
 
 CI and Release call `.github/workflows/verify.yml` on their exact checked-out commit.
-CI handles PRs and `dev` pushes without an open PR; Release verifies every `main`
-push, even when publication automation is disabled. This avoids running the full
-matrix twice. Documentation-only PRs keep completed required checks while skipping
-the source/browser matrix; workflow and contract-matrix edits still run it.
-The Linux release-quality job runs `release:check` once and uploads the built
-public packages and Playground JS/CSS. Three Ubuntu 24.04 visual jobs download that same build and run
-the complete Playwright suite with `--shard=1/3`, `2/3`, or `3/3`, two workers each.
-`Verify workspace (Linux)` is the aggregate Linux job: it succeeds
-only when release quality and every visual shard pass. Windows keeps its separate
-`release:check` and four-file keyboard/overlay/theme interaction gate.
+CI handles PRs and `dev` pushes without an open PR. Both workflows classify changed
+paths into documentation, metadata, source quality, and rendered UI impact.
+Ordinary documentation skips build and browsers while retaining the lightweight
+Linux aggregate check. Changesets, archived component requests, and CI config
+changes run metadata checks without visual tests. Contract-matrix documentation
+and non-visual quality scripts run source verification, but not Playwright.
+Unknown file types conservatively select both source and visual gates.
+
+Release also scopes ordinary `main` pushes. When its Changesets mode is
+`publish`, it always runs full source and visual verification before packing,
+even if the triggering commit itself changed only documentation. A `version`
+run continues through the Changesets version workflow without forcing visual tests
+for unrelated changes. Publication automation remains opt-in.
+
+Linux runs `release:check` once for source changes. It uploads built package
+and Playground assets only when visual tests or publishing require them.
+Three Ubuntu 24.04 visual jobs then download that same build and run the complete
+Playwright suite with `--shard=1/3`, `2/3`, or `3/3`, two workers each.
+`Verify workspace (Linux)` remains the required aggregate gate, checking only
+the jobs selected by change scope and rejecting any selected failed job.
+Windows runs its own package build and four-file keyboard/overlay/theme browser
+gate only for visual-impacting changes; it no longer duplicates Linux's
+`release:check` static analysis and unit test matrix.
 
 These OS jobs do not run equivalent browser workloads. In failed run
 [39412200952](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/39412200952),
