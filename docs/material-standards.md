@@ -286,8 +286,6 @@ standard without changing component maturity or claiming consumer delivery.
 - Existing optical source assertions that required denser hover/dark recipes were
   replaced with shared-contract and actual computed-style checks. Screenshot baselines
   were not changed. Visual acceptance and real consumer integration remain separate.
-- One pre-existing Biome warning remains in `tests/visual/playground-shell.spec.ts`
-  (`noNonNullAssertion`); it does not fail lint.
 
 ### Control identity correction
 
