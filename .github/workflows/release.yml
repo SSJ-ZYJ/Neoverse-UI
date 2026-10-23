@@ -12,6 +12,32 @@ concurrency:
 permissions: {}
 
 jobs:
+  scope:
+    name: Select release verification scope
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      metadata-checks: ${{ steps.scope.outputs.metadata-checks }}
+      quality-checks: ${{ steps.scope.outputs.quality-checks }}
+      visual-checks: ${{ steps.scope.outputs.visual-checks }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Classify main branch changes
+        id: scope
+        env:
+          EVENT_NAME: push
+          SKIP_OPEN_PR_CHECK: 'true'
+          BASE_SHA: ${{ github.event.before }}
+          HEAD_SHA: ${{ github.sha }}
+        run: bash .github/scripts/ci-scope.sh
+
   select-mode:
     name: Select release mode
     if: vars.RELEASE_AUTOMATION_ENABLED == 'true'
@@ -80,9 +106,15 @@ jobs:
 
   verify:
     name: Verify release
+    needs: [scope, select-mode]
+    if: ${{ always() && needs.scope.result == 'success' && (needs.scope.outputs.metadata-checks == 'true' || needs.scope.outputs.quality-checks == 'true' || needs.select-mode.outputs.mode == 'publish') }}
     uses: ./.github/workflows/verify.yml
     permissions:
       contents: read
+    with:
+      metadata-checks: ${{ needs.scope.outputs.metadata-checks == 'true' || needs.select-mode.outputs.mode == 'publish' }}
+      quality-checks: ${{ needs.scope.outputs.quality-checks == 'true' || needs.select-mode.outputs.mode == 'publish' }}
+      visual-checks: ${{ needs.scope.outputs.visual-checks == 'true' || needs.select-mode.outputs.mode == 'publish' }}
 
   pack:
     name: Verify and pack release
