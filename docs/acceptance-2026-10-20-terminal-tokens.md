@@ -9,10 +9,14 @@
 - 对比度验收首次发现浅色 `prompt` 与 `cursor` 对画布仅约 **1.99:1**。现仅将 Light 两个角色映射至现有 `--neoverse-color-mint-700`；Dark 映射不变。新测试要求普通/次要/命令文本不低于 4.5:1，提示符不低于 4.5:1，光标不低于 3:1。桌面与移动端均通过。
 - 定向 Playwright：新主题契约与原有 Terminal 截图测试 **8/8 通过**（desktop/mobile）；原有终端组合、表面、滚动测试 **10/10 通过**。
 - XCA-Portal 的真实消费位置已由过期的 `app/assets/css/home.css` 改为 `app/assets/css/terminal.css`；Terminal 使用入口在 `app/features/terminal/components/TerminalHost.vue`，交互输入在 `TerminalCommandInput.vue`，主题覆盖在 `core/appearance.ts`。消费侧 `bun run check:terminal` 和 `bun test app/features/terminal/core/extensions.test.ts` 通过。XCA 当前采用本地 `file:../Neoverse-UI/packages/*` 开发依赖，不代表已验证 npm 正式版本。
-- Neoverse-UI 的 `bun run release:check`、`bun run requests check` 和相关静态检查通过，发布质量门禁没有因为本次 Token 修改被放宽。配套 Changeset：`.changeset/terminal-light-contrast.md`。
+- Neoverse-UI 的 `bun run release:check`、`bun run requests check` 和相关静态检查通过，发布质量门禁没有因为本次 Token 修改被放宽。
 
-## 尚待发布的条件
+## 2026-10-23 验收收口
 
-CR 的第三条验收标准包含 **正式发布之后 XCA 才能只依赖已发布的变量**。本地 `file:` 消费不是 npm 正式发布证据。此次不执行 `changeset version`、发布、推送或提交，因此不得将 CR 归档为 `delivered`。需求暂标 `blocked`，仅等待按既有发布方案完成版本发布与 XCA 的正式包消费升级/验证；届时补充已发布包版本、CI、真实消费者测试，再关闭并归档。
+- npm `@neoverse-ui/tokens@0.3.0` 已发布，检查正式 tarball 确认包含终端语义变量、浅深色及 System 映射。
+- 用户确认当前本地 Token 与 npm 包一致，并明确接受 XCA 保持本地 `file:` 依赖完成验收；同步调整 CR 第三条验收条件，不再要求切换依赖来源。
+- 本次审计的终端主题与 fallback 浏览器回归 **28/28 通过**，其中终端主题契约 **4/4 通过**，覆盖 desktop/mobile 的 Light、Dark、System 动态切换与对比度；Token 单测 **38/38**、Vue 单测 **73/73** 通过。
+- XCA 本地消费补验：`bun run check:terminal` 通过，`bun test app/features/terminal/core/extensions.test.ts` **6/6 通过**。真实入口仍为 `TerminalHost.vue` 和 `TerminalCommandInput.vue`，复用共享终端组件及语义变量。
+- 已满足调整后的验收条件，CR 通过管理 CLI 关闭并归档为 `delivered`。本次没有重跑 XCA 全量 E2E、远程 CI 或完整发布门禁，也没有执行版本变更、提交、推送或发布。
 
-Neoverse-UI 的当前所有修改保留在 `dev` 工作区；没有覆盖 XCA-Portal 的任何未提交文件，也没有修改现有视觉快照。
+本次收口只更新需求与文档记录，保留工作区已有源码改动，没有修改 XCA-Portal 文件或视觉快照。

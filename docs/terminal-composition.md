@@ -120,7 +120,5 @@ The terminal primitives handle presentation only. Shell parsing, authentication,
 
 XCA validates `UiTerminalPrompt` through its real command input, including ghost suggestions,
 native selection/IME and existing Tab cycling (`tests/e2e/terminal-completion.spec.ts`).
-Release screenshots and the real XCA consumer are validated in
-`docs/acceptance-2026-10-13.md`, including native editing, ghost suggestions, output following,
-history reading, and viewport/column reflow. The four terminal primitives are Stable.
+The four terminal primitives are Stable.
 Package versioning and npm publication remain a separate step.

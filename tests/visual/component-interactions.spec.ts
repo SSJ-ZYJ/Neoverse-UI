@@ -13,6 +13,9 @@ async function expectFallbackPanel(panel: Locator, fallbackClass: string) {
   await expect(panel).toBeVisible();
   await expect(panel).toHaveClass(new RegExp(fallbackClass));
   await expect(panel).toHaveCSS('position', 'fixed');
+  await expect(panel).toHaveCSS('opacity', '1');
+  await expect(panel).toHaveCSS('scale', '1');
+  await expect(panel).toHaveCSS('translate', '0px');
   expect(await panel.evaluate((element) => element.matches(':popover-open'))).toBe(false);
 }
 

@@ -22,5 +22,5 @@
   ],
   "createdAt": "2026-10-10T07:43:53.624Z",
   "updatedAt": "2026-10-13T07:46:16.342Z",
-  "resolution": "Accepted 2026-10-13. UiTerminalSurface composes existing Glass with title/status/actions and native accessibility; Vue unit tests 70/70, shared terminal release screenshots desktop/mobile light/dark pass, and real XCA TerminalHost.vue consumes one shared shell. UI acceptance suite 24/24; XCA typecheck/build and full E2E 71/71, including intro/expand/resize and theme behavior. luna/max reviewed shared terminal and 5 real XCA snapshots. See docs/acceptance-2026-10-13.md. No publication."
+  "resolution": "Accepted 2026-10-13. UiTerminalSurface composes existing Glass with title/status/actions and native accessibility; Vue unit tests 70/70, shared terminal release screenshots desktop/mobile light/dark pass, and real XCA TerminalHost.vue consumes one shared shell. UI acceptance suite 24/24; XCA typecheck/build and full E2E 71/71, including intro/expand/resize and theme behavior. luna/max reviewed shared terminal and 5 real XCA snapshots. No publication."
 }
