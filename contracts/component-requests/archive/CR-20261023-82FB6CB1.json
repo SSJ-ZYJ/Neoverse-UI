@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261023-82FB6CB1",
+  "kind": "enhancement",
+  "target": "UiPopover",
+  "summary": "Fallback presence remains transparent when native Popover APIs are unavailable",
+  "expected": "Fallback overlay and Select panels reach the same visible resting motion state as native popovers",
+  "acceptanceCriteria": [
+    "Fallback panels settle at opacity 1, scale 1 and zero translation with normal and reduced motion",
+    "XCA mobile menu supports pointer settings, Escape focus restoration and route navigation without forced clicks",
+    "Shared fallback regression assertions cover Vue and React overlay and Select consumers"
+  ],
+  "impact": "blocking",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/components/site/SiteHeader.vue",
+      "framework": "vue",
+      "scenario": "Mobile menu in browsers without native Popover APIs"
+    }
+  ],
+  "createdAt": "2026-10-23T08:55:49.121Z",
+  "updatedAt": "2026-10-23T09:11:31.229Z",
+  "resolution": "Shared Motion unifies native/fallback resting and starting states with forgiving :is(); CSS contract 59 fragments and Motion 10 unit tests pass. Shared component-interactions fallback regression: 24 passed across Vue/React, light/dark, desktop/mobile, including Select and controlled dismissal. XCA-Portal neoverse-integration: normal and reduced motion pointer settings, Escape focus restore and About navigation passed in the full browser run; header uses public contentOverflow=visible. Local workspace delivery only; no commit/publish. Portal CI pinned shared ref must be updated after this fix is committed."
+}

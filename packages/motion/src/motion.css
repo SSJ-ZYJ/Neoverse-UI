@@ -204,7 +204,8 @@
 
   /* --------------------------------------------------------------------
      Top-layer presence for popover/dialog surfaces. The closed state is the
-     exit destination, :popover-open is the resting state, and @starting-style
+     exit destination, native/fallback open is the resting state. Forgiving :is()
+     keeps fallback selectors valid without :popover-open support. @starting-style
      seeds the enter frame, so opening and closing are both continuous with
      zero JavaScript. display/overlay interpolate via allow-discrete to keep
      the element in the top layer for the whole departure.
@@ -223,7 +224,11 @@
     filter: var(--neoverse-motion-from-filter, blur(0));
   }
 
-  .nv-presence:popover-open {
+  .nv-presence:is(
+    :popover-open,
+    .ui-overlay-panel--fallback-open,
+    .ui-select__popover--fallback-open
+  ) {
     transition:
       opacity var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
       translate var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
@@ -238,7 +243,11 @@
   }
 
   @starting-style {
-    .nv-presence:popover-open {
+    .nv-presence:is(
+        :popover-open,
+        .ui-overlay-panel--fallback-open,
+        .ui-select__popover--fallback-open
+      ) {
       opacity: 0;
       translate: var(--neoverse-motion-from-translate, 0 0);
       scale: var(--neoverse-motion-from-scale, 1);
@@ -251,7 +260,11 @@
     .nv-leave-active,
     .nv-move,
     .nv-presence,
-    .nv-presence:popover-open {
+    .nv-presence:is(
+        :popover-open,
+        .ui-overlay-panel--fallback-open,
+        .ui-select__popover--fallback-open
+      ) {
       transition-duration: 1ms;
     }
 

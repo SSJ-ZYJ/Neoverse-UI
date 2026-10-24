@@ -8,10 +8,10 @@
   "acceptanceCriteria": [
     "Light、Dark、System 及系统动态切换映射完整，终端容器与输出在两种模式下保持足够文本/状态对比度。",
     "不重复定义现有 --neoverse-color-status-*、--neoverse-font-family-code、Glass 预设或语义 Motion Token。",
-    "语义变量进入 Tokens、消费端 CSS 与设计实验室证据，XCA 可以只依赖正式发布的变量；未发布前不得在消费应用引用。"
+    "语义变量进入 Tokens、消费端 CSS 与设计实验室证据；XCA 使用本地 file: 依赖完成消费验收，当前本地 Token 与 npm 0.3.0 一致，无需切换依赖来源。"
   ],
   "impact": "normal",
-  "status": "blocked",
+  "status": "delivered",
   "consumers": [
     {
       "project": "XCA-Portal",
@@ -21,5 +21,6 @@
     }
   ],
   "createdAt": "2026-10-10T07:43:54.029Z",
-  "updatedAt": "2026-10-20T06:47:05.254Z"
+  "updatedAt": "2026-10-23T15:49:42.508Z",
+  "resolution": "Terminal semantic mappings and public variable names are implemented in packages/tokens/src/themes/light.css, dark.css and index.ts, consumed by shared terminal CSS and real XCA TerminalHost.vue/TerminalCommandInput.vue. npm tokens 0.3.0 tarball contains the roles. On 2026-10-23 the user confirmed local/npm token parity and authorized local file: consumer acceptance without switching dependencies. Audit: tokens 38/38, Vue 73/73, terminal theme browser contracts 4/4 (desktop/mobile Light/Dark/live System and contrast), combined theme/fallback browser regression 28/28. XCA local check:terminal passed and extensions.test.ts 6/6 passed. See docs/acceptance-2026-10-20-terminal-tokens.md. No full consumer E2E, remote CI or release gate rerun; no commit/publish."
 }
