@@ -481,6 +481,7 @@ function ReactFixture() {
   const [selectBlockedState, setSelectBlockedState] = useState<'none' | 'disabled' | 'readonly'>(
     'none',
   );
+  const [selectMounted, setSelectMounted] = useState(true);
   const [notifications, setNotifications] = useState(true);
   const [channel, setChannel] = useState<string | number>('stable');
   const [autoSync, setAutoSync] = useState(true);
@@ -661,15 +662,17 @@ function ReactFixture() {
           )}
 
           <UiField label={copy.runtime}>
-            <UiSelect
-              value={runtime}
-              options={runtimeOptions}
-              name="runtime"
-              onValueChange={setRuntime}
-              data-react-adapter="UiSelect"
-              disabled={selectBlockedState === 'disabled'}
-              readOnly={selectBlockedState === 'readonly'}
-            />
+            {selectMounted ? (
+              <UiSelect
+                value={runtime}
+                options={runtimeOptions}
+                name="runtime"
+                onValueChange={setRuntime}
+                data-react-adapter="UiSelect"
+                disabled={selectBlockedState === 'disabled'}
+                readOnly={selectBlockedState === 'readonly'}
+              />
+            ) : null}
             {contractMode ? (
               <div data-select-block-controls>
                 <button
@@ -690,6 +693,9 @@ function ReactFixture() {
                 >
                   Toggle readonly
                 </button>
+                <button type="button" data-select-unmount onClick={() => setSelectMounted(false)}>
+                  Unmount select
+                </button>
               </div>
             ) : null}
           </UiField>
@@ -704,6 +710,18 @@ function ReactFixture() {
               data-react-adapter="UiRadioGroup"
             />
           </UiField>
+
+          {contractMode ? (
+            <div data-unnamed-radio-fixture>
+              <UiRadioGroup
+                options={[
+                  { value: 'first', label: 'Unnamed first' },
+                  { value: 'second', label: 'Unnamed second' },
+                ]}
+                aria-label="Unnamed radio group"
+              />
+            </div>
+          ) : null}
 
           <div data-react-adapter="UiCheckbox">
             <UiCheckbox

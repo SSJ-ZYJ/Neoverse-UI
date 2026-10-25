@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, useAttrs, useId } from 'vue';
-import { resolveAriaInvalid } from './form-control';
+import { resolveAriaInvalid, restoreControlledChecked } from './form-control';
 import type { SwitchProps } from './types';
 
 defineOptions({ inheritAttrs: false });
@@ -42,7 +42,10 @@ function onClick(event: MouseEvent) {
 
 function onChange(event: Event) {
   if (props.readonly) return;
-  emit('update:modelValue', (event.currentTarget as HTMLInputElement).checked);
+  const input = event.currentTarget as HTMLInputElement;
+  emit('update:modelValue', input.checked);
+  // The switch mirrors state into aria-checked, so restore both.
+  restoreControlledChecked(input, () => props.modelValue, true);
 }
 </script>
 

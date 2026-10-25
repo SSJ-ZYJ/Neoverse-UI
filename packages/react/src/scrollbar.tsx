@@ -1,3 +1,4 @@
+import { acquireNativeScrollbarHiding } from '@neoverse-ui/overlay-runtime';
 import { type HTMLAttributes, useEffect, useRef, useState } from 'react';
 
 export interface UiScrollbarProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
@@ -5,29 +6,6 @@ export interface UiScrollbarProps extends Omit<HTMLAttributes<HTMLDivElement>, '
   minThumbRatio?: number;
   refreshKey?: string | number;
   hideNative?: boolean;
-}
-
-// Preserve pre-existing classes and other mounted React scrollbar owners.
-const nativeOwners = new Map<HTMLElement, { count: number; original: boolean }>();
-function acquireNativeScrollbar(): () => void {
-  const targets = [document.documentElement, document.body].filter(Boolean);
-  for (const target of targets) {
-    const owner = nativeOwners.get(target) ?? {
-      count: 0,
-      original: target.classList.contains('ui-scrollbar-target'),
-    };
-    owner.count++;
-    nativeOwners.set(target, owner);
-    target.classList.add('ui-scrollbar-target');
-  }
-  return () => {
-    for (const target of targets) {
-      const owner = nativeOwners.get(target);
-      if (!owner || --owner.count > 0) continue;
-      if (!owner.original) target.classList.remove('ui-scrollbar-target');
-      nativeOwners.delete(target);
-    }
-  };
 }
 
 export function UiScrollbar({
@@ -61,7 +39,7 @@ export function UiScrollbar({
     let refreshTimer: ReturnType<typeof setTimeout> | undefined;
     let frame = 0;
     let visible = false;
-    const releaseNative = hideNative ? acquireNativeScrollbar() : () => undefined;
+    const releaseNative = hideNative ? acquireNativeScrollbarHiding() : () => undefined;
     const metrics = () => {
       const rect = trackNode.getBoundingClientRect();
       const trackHeight = rect.height || window.innerHeight;

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, useAttrs, useId } from 'vue';
-import { resolveAriaInvalid } from './form-control';
+import { resolveAriaInvalid, restoreControlledChecked } from './form-control';
 import type { CheckboxProps } from './types';
 
 defineOptions({ inheritAttrs: false });
@@ -41,7 +41,9 @@ function onClick(event: MouseEvent) {
 
 function onChange(event: Event) {
   if (props.readonly) return;
-  emit('update:modelValue', (event.currentTarget as HTMLInputElement).checked);
+  const input = event.currentTarget as HTMLInputElement;
+  emit('update:modelValue', input.checked);
+  restoreControlledChecked(input, () => props.modelValue, false);
 }
 </script>
 

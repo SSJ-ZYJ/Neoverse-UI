@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { acquireNativeScrollbarHiding } from '@neoverse-ui/overlay-runtime';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, watch } from 'vue';
 import type { ScrollbarProps } from './types';
 
@@ -28,6 +29,7 @@ let layoutObserver: ResizeObserver | undefined;
 let contentObserver: MutationObserver | undefined;
 let refreshNeedsReveal = false;
 let previousScrollBehavior: string | undefined;
+let releaseNativeHiding: (() => void) | undefined;
 
 const normalizedAutoHideMs = computed(() => {
   const value = Number(props.autoHideMs);
@@ -136,8 +138,14 @@ function show() {
 }
 
 function setNativeScrollbarHidden(hidden: boolean) {
-  const targets = [document.documentElement, document.body].filter(Boolean);
-  for (const target of targets) target.classList.toggle('ui-scrollbar-target', hidden);
+  if (hidden && releaseNativeHiding === undefined) {
+    releaseNativeHiding = acquireNativeScrollbarHiding();
+    return;
+  }
+  if (!hidden && releaseNativeHiding !== undefined) {
+    releaseNativeHiding();
+    releaseNativeHiding = undefined;
+  }
 }
 
 function setInstantScroll(instant: boolean) {
