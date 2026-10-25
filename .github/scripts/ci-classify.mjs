@@ -28,7 +28,6 @@ export function classifyPaths(paths) {
       path.startsWith('tests/visual/') ||
       path.startsWith('packages/') ||
       path.startsWith('apps/') ||
-      path.startsWith('themes/') ||
       path.startsWith('contracts/') ||
       path === 'package.json' ||
       path === 'bun.lock' ||

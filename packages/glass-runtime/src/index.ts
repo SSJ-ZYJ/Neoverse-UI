@@ -116,7 +116,12 @@ type ProgramLocations = {
 };
 
 export interface GlassRendererOptions {
-  /** Auto preserves the released directional Glass edge. Native displacement is opt-in. */
+  /**
+   * `native` opts into SVG displacement where supported; every other value
+   * renders with WebGL. `'webgl'` therefore selects the same path as `'auto'`
+   * — it is kept as an explicit, self-documenting alias rather than a
+   * separate engine, so do not read it as a forced-or-fallback switch.
+   */
   backend?: 'auto' | 'webgl' | 'native';
   document?: Document;
   maxDevicePixelRatio?: number;

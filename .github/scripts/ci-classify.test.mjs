@@ -48,6 +48,17 @@ test('runtime, visual tests, contract definitions and dependency changes need fu
   }
 });
 
+test('directories that do not exist cannot silently downgrade coverage', () => {
+  // `themes/` was listed once but has never existed in this repository. A
+  // stale allow-list entry is invisible: nothing fails when the directory is
+  // missing, and a future re-introduction would silently take the listed
+  // branch instead of the conservative default. Unknown top-level paths must
+  // still select both gates.
+  expectChecks(['themes/light.css'], visual);
+  expectChecks(['brand-new-package/src/index.ts'], visual);
+  expectChecks(['.workbuddy/notes.txt'], visual);
+});
+
 test('mixed changes take the union of required checks', () => {
   expectChecks(['docs/README.md', '.changeset/patch.md', 'scripts/check-requests.ts'], {
     metadataChecks: true,

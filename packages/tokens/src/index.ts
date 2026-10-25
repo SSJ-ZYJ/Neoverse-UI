@@ -181,6 +181,7 @@ const componentCssVariables = {
     padding: '--neoverse-control-surface-padding',
     paddingBlock: '--neoverse-control-surface-padding-block',
     paddingInline: '--neoverse-control-surface-padding-inline',
+    trailingPadding: '--neoverse-control-surface-trailing-padding',
     trailingPaddingInline: '--neoverse-control-surface-trailing-padding-inline',
     navigationEdgeInset: '--neoverse-control-surface-navigation-edge-inset',
     dividerHeight: '--neoverse-control-surface-divider-height',

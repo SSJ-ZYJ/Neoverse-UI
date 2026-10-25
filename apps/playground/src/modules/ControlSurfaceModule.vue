@@ -126,7 +126,9 @@ const extraCopy = {
         hover-mode="static"
         edge-mode="local"
       >
-        <span class="px-2 text-caption font-label text-primary">{{ localize(variant.label, props.locale) }}</span>
+        <span class="px-2 text-caption font-label text-primary"
+          >{{ localize(variant.label, props.locale) }}</span
+        >
       </UiControlSurface>
     </div>
   </StateRow>
@@ -165,7 +167,9 @@ const extraCopy = {
       <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <code class="min-w-0 text-caption text-muted">surface="glass-subtle"</code>
         <UiControlSurface surface="glass-subtle" edge-mode="local">
-          <UiButton size="sm" variant="ghost" surface="none">{{ localize(moduleCopy.glass.label, props.locale) }}</UiButton>
+          <UiButton size="sm" variant="ghost" surface="none"
+            >{{ localize(moduleCopy.glass.label, props.locale) }}</UiButton
+          >
         </UiControlSurface>
       </div>
     </div>

@@ -26,7 +26,7 @@ import {
   useState,
 } from 'react';
 
-import { mergeClassNames } from './internal';
+import { mergeClassNames, resolveAriaInvalid } from './internal';
 
 export * from './display';
 export * from './navigation';
@@ -95,6 +95,23 @@ const iconButtonStretchSizeClasses: Record<ActionSize, string> = {
 const loadingIndicatorClass = 'ui-loading-indicator';
 
 const actionBaseClasses = 'ui-button ui-action';
+
+/**
+ * The two decorative layers every button-family surface renders.
+ *
+ * `packages/tailwind/src/components/button.css` selects these classes
+ * directly, so the markup is a public visual contract shared by UiButton,
+ * UiAction and UiIconButton. Keep the elements as direct children: sibling
+ * selectors such as `.ui-button > .ui-button__tone-field` depend on that.
+ */
+function ButtonMaterialShell() {
+  return (
+    <>
+      <span className="ui-button__tone-field" aria-hidden="true" />
+      <span className="ui-button__edge-field" aria-hidden="true" />
+    </>
+  );
+}
 
 const clampPercentage = (value: number): number =>
   Math.round(Math.min(Math.max(value, 0), 100) * 100) / 100;
@@ -203,8 +220,7 @@ export function UiAction({
   });
   const renderContent = (content: ReactNode) => (
     <>
-      <span className="ui-button__tone-field" aria-hidden="true" />
-      <span className="ui-button__edge-field" aria-hidden="true" />
+      <ButtonMaterialShell />
       {leading ? (
         <span className="ui-action__leading" aria-hidden="true">
           {leading}
@@ -507,9 +523,9 @@ export function UiInput({
   const control = (
     <input
       {...props}
-      className={['ui-input', className].filter(Boolean).join(' ')}
+      className={mergeClassNames('ui-input', className)}
       data-validation={validation}
-      aria-invalid={ariaInvalid ?? (validation === 'error' || undefined)}
+      aria-invalid={resolveAriaInvalid(ariaInvalid, validation)}
       onPointerDown={(event) => {
         event.currentTarget.dataset.neoverseFocusOrigin = 'pointer';
         onPointerDown?.(event);
@@ -569,9 +585,9 @@ export function UiTextarea({
     <span className="ui-textarea-shell">
       <textarea
         {...props}
-        className={['ui-textarea', className].filter(Boolean).join(' ')}
+        className={mergeClassNames('ui-textarea', className)}
         data-validation={validation}
-        aria-invalid={ariaInvalid ?? (validation === 'error' || undefined)}
+        aria-invalid={resolveAriaInvalid(ariaInvalid, validation)}
         onPointerDown={(event) => {
           event.currentTarget.dataset.neoverseFocusOrigin = 'pointer';
           onPointerDown?.(event);
@@ -730,13 +746,11 @@ export function UiSelect({
   return (
     <details
       ref={detailsRef}
-      className={[
+      className={mergeClassNames(
         'ui-select-shell',
         disabled && 'ui-select-shell--disabled',
         readOnly && 'ui-select-shell--readonly',
-      ]
-        .filter(Boolean)
-        .join(' ')}
+      )}
       onToggle={(event) => {
         const details = event.currentTarget;
         if ((disabled || readOnly) && details.open) {
@@ -751,13 +765,13 @@ export function UiSelect({
     >
       <summary
         {...props}
-        className={['ui-select', className].filter(Boolean).join(' ')}
+        className={mergeClassNames('ui-select', className)}
         role="combobox"
         aria-haspopup="listbox"
         aria-expanded={open && !blocked}
         aria-controls={listboxId}
         aria-disabled={blocked || undefined}
-        aria-invalid={ariaInvalid ?? (validation === 'error' || undefined)}
+        aria-invalid={resolveAriaInvalid(ariaInvalid, validation)}
         data-validation={validation}
         onClick={(event) => {
           if (disabled || readOnly) event.preventDefault();
@@ -799,9 +813,10 @@ export function UiSelect({
         }}
       >
         <span
-          className={['ui-select__value', !selected && 'ui-select__value--placeholder']
-            .filter(Boolean)
-            .join(' ')}
+          className={mergeClassNames(
+            'ui-select__value',
+            !selected && 'ui-select__value--placeholder',
+          )}
         >
           {selected?.label ?? placeholder ?? ''}
         </span>
@@ -913,7 +928,7 @@ export function UiCheckbox({
         type="checkbox"
         disabled={disabled}
         aria-disabled={disabled || readOnly || undefined}
-        aria-invalid={ariaInvalid ?? (validation === 'error' || undefined)}
+        aria-invalid={resolveAriaInvalid(ariaInvalid, validation)}
         onClick={(event) => {
           if (readOnly) event.preventDefault();
           onClick?.(event);
@@ -965,7 +980,7 @@ export function UiRadioGroup({
   'aria-invalid': ariaInvalid,
   ...props
 }: UiRadioGroupProps) {
-  const resolvedAriaInvalid = ariaInvalid ?? (validation === 'error' || undefined);
+  const resolvedAriaInvalid = resolveAriaInvalid(ariaInvalid, validation);
 
   return (
     <div
@@ -1060,7 +1075,7 @@ export function UiSwitch({
         role="switch"
         disabled={disabled}
         aria-disabled={disabled || readOnly || undefined}
-        aria-invalid={ariaInvalid ?? (validation === 'error' || undefined)}
+        aria-invalid={resolveAriaInvalid(ariaInvalid, validation)}
         onClick={(event) => {
           if (readOnly) event.preventDefault();
           onClick?.(event);
@@ -1302,8 +1317,7 @@ export function UiButton({
         onPointerDown?.(event);
       }}
     >
-      <span className="ui-button__tone-field" aria-hidden="true" />
-      <span className="ui-button__edge-field" aria-hidden="true" />
+      <ButtonMaterialShell />
       {leading || loading ? (
         <span className="ui-button__leading">
           {loading && leading ? (
@@ -1422,8 +1436,7 @@ export function UiIconButton(props: UiIconButtonProps) {
   );
   const content = (
     <>
-      <span className="ui-button__tone-field" aria-hidden="true" />
-      <span className="ui-button__edge-field" aria-hidden="true" />
+      <ButtonMaterialShell />
       <span className="ui-icon-button__content" aria-hidden="true">
         {icon}
       </span>
