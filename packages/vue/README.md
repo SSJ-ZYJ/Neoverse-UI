@@ -22,13 +22,15 @@ Vue `>=3.5 <4` is required as a peer dependency. Field and choice-control IDs us
 
 ## Public components
 
-`UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch`, `UiField`, `UiPopover`, `UiDropdownMenu`, `UiTable`, `UiDisclosure`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, `UiTooltipSurface`, `UiPresence`, `UiTerminalSurface`, `UiTerminalLine`, `UiTerminalTranscript`, `UiTerminalPrompt`, `UiStatCard`, `UiTimeline`, and `UiStepFlow` are exported from the package root.
+`UiButton`, `UiIconButton`, `UiAction`, `UiBreadcrumb`, `UiNavigationItem`, `UiSegmentedControl`, `UiControlSurface`, `UiDock`, `UiSurface`, `UiCard`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch`, `UiField`, `UiPopover`, `UiDropdownMenu`, `UiTable`, `UiDisclosure`, `UiBadge`, `UiStatusIndicator`, `UiSkeleton`, `UiScrollbar`, `UiNotice`, `UiTooltipSurface`, `UiPresence`, `UiTerminalSurface`, `UiTerminalLine`, `UiTerminalTranscript`, `UiTerminalPrompt`, `UiTerminalEcho`, `UiStatCard`, `UiTimeline`, and `UiStepFlow` are exported from the package root.
 
 `UiTooltipSurface` animates its label while keeping the material plate and backdrop blur fully applied from the first frame. Keep opacity and filter animations off its root: they isolate the plate from the real backdrop and make blur appear only after entrance ends. Positioning, trigger state, and disclosure semantics remain consumer-owned.
 
 `UiBadge` sizes `sm` / `md` / `lg` share `--neoverse-badge-font-family` and `--neoverse-badge-font-weight`. Their font sizes follow the shared label scale (13 / 14 / 16px at a 16px root); size-specific line heights and padding retain the existing geometry.
 
 Terminal composition (Glass window, output lines, scrollback, and native terminal input) is documented in [Terminal composition](../../docs/terminal-composition.md). The embedded transcript uses `scrollbar-immersive`; `UiScrollbar` is reserved for document scrolling.
+
+`UiTerminalEcho` displays recorded command `text` with the live prompt's `segments`, `symbol`, `error` state and `#segment` rendering, without an input or tab stop. Capture segment values when committing history; do not bind old commands to the live directory.
 
 ## Metrics, milestones, and steps
 

@@ -15,6 +15,42 @@ export interface TerminalPromptSegment {
   label: string;
   tone?: TerminalPromptTone;
 }
+
+function TerminalPromptContext({
+  segments,
+  context,
+  renderSegment,
+}: {
+  segments: readonly TerminalPromptSegment[];
+  context?: ReactNode;
+  renderSegment: ((segment: TerminalPromptSegment) => ReactNode) | undefined;
+}) {
+  if (segments.length === 0 && context == null) return null;
+  return (
+    <div className="ui-terminal-prompt__context">
+      {context ?? (
+        <>
+          <span className="ui-terminal-prompt__lead" aria-hidden="true">
+            <span />
+            <span />
+            <span />
+          </span>
+          {segments.map((segment) => (
+            <span
+              key={segment.id}
+              className="ui-terminal-prompt__segment"
+              data-tone={segment.tone ?? 'runtime'}
+              title={segment.label}
+            >
+              {renderSegment ? renderSegment(segment) : segment.label}
+            </span>
+          ))}
+        </>
+      )}
+    </div>
+  );
+}
+
 export interface UiTerminalPromptProps
   extends Omit<
     ComponentPropsWithRef<'input'>,
@@ -107,29 +143,7 @@ export function UiTerminalPrompt({
       data-error={error ? 'true' : 'false'}
       data-disabled={disabled ? 'true' : 'false'}
     >
-      {segments.length > 0 || context != null ? (
-        <div className="ui-terminal-prompt__context">
-          {context ?? (
-            <>
-              <span className="ui-terminal-prompt__lead" aria-hidden="true">
-                <span />
-                <span />
-                <span />
-              </span>
-              {segments.map((segment) => (
-                <span
-                  key={segment.id}
-                  className="ui-terminal-prompt__segment"
-                  data-tone={segment.tone ?? 'runtime'}
-                  title={segment.label}
-                >
-                  {renderSegment ? renderSegment(segment) : segment.label}
-                </span>
-              ))}
-            </>
-          )}
-        </div>
-      ) : null}
+      <TerminalPromptContext segments={segments} context={context} renderSegment={renderSegment} />
       <label className="ui-terminal-prompt__entry" htmlFor={resolvedId}>
         <span className="ui-terminal-prompt__symbol" aria-hidden="true">
           {symbol}
@@ -204,6 +218,43 @@ export function UiTerminalPrompt({
           />
         </span>
       </label>
+    </div>
+  );
+}
+
+export interface UiTerminalEchoProps extends HTMLAttributes<HTMLElement> {
+  /** Recorded command text. Rendered as plain text; never interpreted. */
+  text: string;
+  symbol?: string;
+  segments?: readonly TerminalPromptSegment[];
+  error?: boolean;
+  renderSegment?: (segment: TerminalPromptSegment) => ReactNode;
+}
+
+export function UiTerminalEcho({
+  text,
+  symbol = '❯',
+  segments = [],
+  error = false,
+  renderSegment,
+  className = '',
+  children,
+  ...rest
+}: UiTerminalEchoProps) {
+  return (
+    <div
+      {...rest}
+      className={`ui-terminal-echo ${className}`}
+      data-error={error ? 'true' : 'false'}
+      data-readonly="true"
+    >
+      <TerminalPromptContext segments={segments} renderSegment={renderSegment} />
+      <div className="ui-terminal-echo__entry">
+        <span className="ui-terminal-prompt__symbol" aria-hidden="true">
+          {symbol}
+        </span>
+        <span className="ui-terminal-echo__text">{text}</span>
+      </div>
     </div>
   );
 }

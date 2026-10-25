@@ -234,6 +234,12 @@
       }
     },
     {
+      "name": "UiTerminalEcho",
+      "vueType": "TerminalEchoProps",
+      "reactType": "UiTerminalEchoProps",
+      "props": ["text", "symbol", "segments", "error"]
+    },
+    {
       "name": "UiTerminalSurface",
       "vueType": "TerminalSurfaceProps",
       "reactType": "UiTerminalSurfaceProps",

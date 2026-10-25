@@ -73,6 +73,7 @@ export type {
   SurfaceProps,
   SwitchProps,
   TableProps,
+  TerminalEchoProps,
   TerminalLineProps,
   TerminalPromptProps,
   TerminalPromptSegment,
@@ -114,6 +115,7 @@ export { default as UiSurface } from './UiSurface.vue';
 export { default as UiSwitch } from './UiSwitch.vue';
 export { default as UiTable } from './UiTable.vue';
 export { default as UiTerminalLine } from './UiTerminalLine.vue';
+export { default as UiTerminalEcho } from './UiTerminalEcho.vue';
 export { default as UiTerminalPrompt } from './UiTerminalPrompt.vue';
 export { default as UiTerminalSurface } from './UiTerminalSurface.vue';
 export { default as UiTerminalTranscript } from './UiTerminalTranscript.vue';

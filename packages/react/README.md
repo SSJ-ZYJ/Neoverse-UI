@@ -137,4 +137,6 @@ Consumers without their own Tailwind build can import `@neoverse-ui/react/index.
 
 `UiTerminalPrompt` uses `value/defaultValue/onValueChange` and preserves native `onChange`, keyboard/composition events and an input ref. `suggestion` displays only a matching ghost suffix while focused at the end. `context` and `renderSegment(segment)` customize context content. Command execution and accepting suggestions belong to the application.
 
+`UiTerminalEcho` displays escaped recorded `text` with the same `segments`, `symbol`, `error` state and `renderSegment` chrome as the live prompt, without an input or tab stop. Capture segment values when committing history so later directory changes do not rewrite old prompts.
+
 `UiScrollbar` decorates document scrolling with `autoHideMs` (1200), `minThumbRatio` (0.1), `refreshKey`, and `hideNative` (true). Set `autoHideMs={0}` to keep it revealed while the document has overflow. It supports track seeking and pointer dragging, and restores native-scrollbar ownership on unmount. It is decorative and does not replace native document keyboard scrolling.

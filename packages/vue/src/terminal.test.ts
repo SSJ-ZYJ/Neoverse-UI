@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import { h, nextTick, ref } from 'vue';
+import UiTerminalEcho from './UiTerminalEcho.vue';
 import UiTerminalLine from './UiTerminalLine.vue';
 import UiTerminalPrompt from './UiTerminalPrompt.vue';
 import UiTerminalSurface from './UiTerminalSurface.vue';
@@ -143,6 +144,52 @@ describe('Terminal composition', () => {
     expect(segments[0]?.attributes('data-tone')).toBe('path');
     expect(wrapper.findAll('svg[aria-hidden="true"]')).toHaveLength(2);
     expect(wrapper.get('input').attributes('aria-label')).toBe('Command');
+  });
+
+  it('echoes recorded commands as selectable plain text without an editor or empty chrome', async () => {
+    const payload = '<img src=x onerror=alert(1)>';
+    const wrapper = mount(UiTerminalEcho, {
+      props: {
+        text: payload,
+        segments: [
+          { id: 'host', label: 'visitor@xca', tone: 'host' },
+          { id: 'path', label: '~', tone: 'path' },
+        ],
+      },
+    });
+    expect(wrapper.find('input').exists()).toBe(false);
+    expect(wrapper.attributes('data-readonly')).toBe('true');
+    expect(wrapper.get('.ui-terminal-echo__text').text()).toBe(payload);
+    expect(wrapper.find('img').exists()).toBe(false);
+    const segments = wrapper.findAll('.ui-terminal-prompt__segment');
+    expect(segments).toHaveLength(2);
+    expect(segments[0]?.attributes('data-tone')).toBe('host');
+    expect(segments[1]?.attributes('data-tone')).toBe('path');
+    expect(wrapper.get('.ui-terminal-prompt__symbol').text()).toBe('❯');
+    expect(wrapper.find('.ui-terminal-prompt__lead').exists()).toBe(true);
+    await wrapper.setProps({ segments: [], text: 'echo 你好\n  next' });
+    expect(wrapper.find('.ui-terminal-prompt__context').exists()).toBe(false);
+    expect(wrapper.get('.ui-terminal-echo__text').element.textContent).toBe('echo 你好\n  next');
+    expect(wrapper.find('input, button, [tabindex], label').exists()).toBe(false);
+  });
+
+  it('marks error state and composes segment content like the live prompt', () => {
+    const wrapper = mount(UiTerminalEcho, {
+      props: {
+        text: 'xca open about',
+        error: true,
+        segments: [{ id: 'path', label: '~/docs', tone: 'path' }],
+      },
+      slots: {
+        segment: ({ segment }) => [
+          h('svg', { 'aria-hidden': 'true', viewBox: '0 0 16 16' }),
+          h('span', segment.label),
+        ],
+      },
+    });
+    expect(wrapper.attributes('data-error')).toBe('true');
+    expect(wrapper.findAll('svg[aria-hidden="true"]')).toHaveLength(1);
+    expect(wrapper.get('.ui-terminal-echo__text').text()).toBe('xca open about');
   });
 
   it('exposes an accessible native scroll region and cleans observers on unmount', async () => {

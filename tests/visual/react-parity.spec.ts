@@ -30,6 +30,7 @@ for (const theme of ['light', 'dark']) {
         'UiTerminalTranscript',
         'UiTerminalLine',
         'UiTerminalPrompt',
+        'UiTerminalEcho',
         'UiScrollbar',
       ]) {
         await expect(page.locator(`[data-react-adapter="${name}"]`)).toHaveCount(1);
@@ -150,6 +151,75 @@ for (const theme of ['light', 'dark']) {
       await expect(input).toHaveCount(0);
       await page.locator('[data-parity-mount]').click();
       await expect(input).toHaveCount(1);
+    });
+
+    test('recorded commands retain prompt context, selectable text and readonly geometry', async ({
+      page,
+    }) => {
+      const terminal = page.locator('[data-react-adapter="UiTerminalSurface"]');
+      const input = terminal.locator('input');
+      const transcript = terminal.locator('.ui-terminal-transcript');
+      const echo = transcript.locator('.ui-terminal-echo').first();
+      await expect(echo.locator('.ui-terminal-echo__text')).toHaveText('help --all');
+      await expect(echo.locator('input, textarea, [contenteditable="true"]')).toHaveCount(0);
+      await expect(echo.locator('.ui-terminal-prompt__symbol')).toHaveAttribute(
+        'aria-hidden',
+        'true',
+      );
+      await expect(echo.locator('.ui-terminal-prompt__segment')).toHaveCount(3);
+      await expect(echo.locator('svg')).toHaveCount(1);
+      await expect(transcript.locator('[role="log"]')).toHaveAttribute('aria-live', 'polite');
+      await echo.locator('.ui-terminal-echo__text').click();
+      await expect(input).not.toBeFocused();
+      await echo.locator('.ui-terminal-echo__text').evaluate((element) => {
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        const selection = window.getSelection();
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+      });
+      await expect
+        .poll(() => page.evaluate(() => window.getSelection()?.toString()))
+        .toBe('help --all');
+      for (const width of [480, 1440]) {
+        await page.setViewportSize({ width, height: 900 });
+        const chrome = await terminal
+          .locator('.ui-terminal-prompt__context')
+          .evaluateAll((elements) =>
+            elements.map((element) => ({
+              height: element.getBoundingClientRect().height,
+              segments: Array.from(element.querySelectorAll('.ui-terminal-prompt__segment')).map(
+                (segment) => ({
+                  width: segment.getBoundingClientRect().width,
+                  color: getComputedStyle(segment).color,
+                  background: getComputedStyle(segment).backgroundColor,
+                }),
+              ),
+            })),
+          );
+        expect(chrome).toHaveLength(2);
+        expect(chrome[0]).toEqual(chrome[1]);
+        expect(
+          await terminal.evaluate((element) => element.scrollWidth <= element.clientWidth + 1),
+        ).toBe(true);
+        await page.evaluate(() => {
+          window.getSelection()?.removeAllRanges();
+          return document.fonts.ready;
+        });
+        await expect(terminal).toHaveScreenshot(`react-terminal-${theme}-${width}.png`, {
+          animations: 'disabled',
+          caret: 'hide',
+        });
+      }
+      await input.fill('echo <recorded> & literal');
+      await input.press('Enter');
+      await expect(transcript.locator('.ui-terminal-echo__text').last()).toHaveText(
+        'echo <recorded> & literal',
+      );
+      await expect(
+        transcript.locator('.ui-terminal-echo').last().locator('.ui-terminal-prompt__segment'),
+      ).toHaveCount(3);
+      await expect(input).toHaveValue('');
     });
 
     test('terminal tail follows appended and reflowed output while preserving history readers', async ({

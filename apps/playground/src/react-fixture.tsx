@@ -1,4 +1,5 @@
 import {
+  type TerminalPromptSegment,
   UiAction,
   UiBadge,
   UiBreadcrumb,
@@ -27,6 +28,7 @@ import {
   UiSurface,
   UiSwitch,
   UiTable,
+  UiTerminalEcho,
   UiTerminalLine,
   UiTerminalPrompt,
   UiTerminalSurface,
@@ -35,7 +37,7 @@ import {
   UiTimeline,
   UiTooltipSurface,
 } from '@neoverse-ui/react';
-import { useCallback, useEffect, useState } from 'react';
+import { Fragment, useCallback, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { mountPlaygroundGlass } from './glass-runtime';
 import { appCopy, localize } from './playground-content';
@@ -184,6 +186,38 @@ const channelOptions = [
   { value: 'preview', label: copy.preview },
 ] as const;
 
+const terminalSegments: readonly TerminalPromptSegment[] = [
+  { id: 'host', label: 'neoverse', tone: 'host' },
+  { id: 'path', label: '~/playground', tone: 'path' },
+  { id: 'branch', label: 'dev', tone: 'branch' },
+];
+
+function renderTerminalSegment(segment: TerminalPromptSegment) {
+  return (
+    <>
+      {segment.tone === 'host' ? (
+        <svg
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <rect x="1.5" y="2.5" width="13" height="11" rx="1.5" />
+          <path d="m4 6 2 2-2 2m4 0h3" />
+        </svg>
+      ) : null}
+      <span className={segment.tone === 'host' ? 'sr-only' : undefined}>{segment.label}</span>
+    </>
+  );
+}
+
+type TerminalHistoryLine = {
+  text: string;
+  segments?: readonly TerminalPromptSegment[];
+};
+
 function ParityFixtures() {
   const [active, setActive] = useState(0);
   const [segment, setSegment] = useState('en');
@@ -192,7 +226,9 @@ function ParityFixtures() {
   const [reject, setReject] = useState(false);
   const [options, setOptions] = useState(true);
   const [command, setCommand] = useState('');
-  const [lines, setLines] = useState<string[]>([]);
+  const [lines, setLines] = useState<TerminalHistoryLine[]>([
+    { text: 'help --all', segments: terminalSegments.map((segment) => ({ ...segment })) },
+  ]);
   const [follow, setFollow] = useState(true);
   const [scrollbar, setScrollbar] = useState(true);
   const [hideNative, setHideNative] = useState(false);
@@ -337,7 +373,7 @@ function ParityFixtures() {
             <>
               <UiButton
                 data-parity-append
-                onClick={() => setLines((previous) => [...previous, 'Appended output'])}
+                onClick={() => setLines((previous) => [...previous, { text: 'Appended output' }])}
               >
                 {text('Append output', '追加输出')}
               </UiButton>
@@ -353,7 +389,18 @@ function ParityFixtures() {
             <UiTerminalLine data-react-adapter="UiTerminalLine" tone="success" text={copy.ready} />
             {lines.map((line, index) => (
               // biome-ignore lint/suspicious/noArrayIndexKey: This transcript only appends lines or clears the whole list.
-              <UiTerminalLine key={`${index}-${line}`} text={line} />
+              <Fragment key={`${index}-${line.text}`}>
+                {line.segments ? (
+                  <UiTerminalEcho
+                    data-react-adapter="UiTerminalEcho"
+                    text={line.text}
+                    segments={line.segments}
+                    renderSegment={renderTerminalSegment}
+                  />
+                ) : (
+                  <UiTerminalLine text={line.text} />
+                )}
+              </Fragment>
             ))}
             <UiTerminalPrompt
               data-react-adapter="UiTerminalPrompt"
@@ -364,10 +411,23 @@ function ParityFixtures() {
               disabled={blocked}
               readOnly={loading}
               type={password ? 'password' : 'text'}
-              segments={[{ id: 'host', label: 'neoverse', tone: 'host' }]}
+              segments={terminalSegments}
+              renderSegment={renderTerminalSegment}
               onKeyDown={(event) => {
-                if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
-                  setLines((previous) => [...previous, command]);
+                if (
+                  event.key === 'Enter' &&
+                  !event.nativeEvent.isComposing &&
+                  !event.repeat &&
+                  command.trim()
+                ) {
+                  event.preventDefault();
+                  setLines((previous) => [
+                    ...previous,
+                    {
+                      text: command,
+                      segments: terminalSegments.map((segment) => ({ ...segment })),
+                    },
+                  ]);
                   setCommand('');
                 }
               }}
