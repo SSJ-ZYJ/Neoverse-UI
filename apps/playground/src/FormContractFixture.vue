@@ -8,6 +8,7 @@ const sync = ref(true);
 const options = [
   { value: 1, label: 'First channel' },
   { value: 2, label: 'Second channel' },
+  { value: 3, label: 'Unavailable channel', disabled: true },
 ];
 
 function resetControlledForm(event: Event) {

@@ -15,6 +15,7 @@ The repository is a Bun workspace. Public-package dependencies use explicit SemV
 | `@neoverse-ui/glass-runtime` | Consumer Validation | Optional live backdrop refraction with WebGL/CSS fallback |
 | `@neoverse-ui/vue` | Consumer Validation | Vue 3 SFC integration |
 | `@neoverse-ui/react` | Consumer Validation | React 19 adapters for consumer-validated shared components |
+| `@neoverse-ui/giscus-theme` | Published 0.2.0 | Standalone light/dark Giscus theme CSS |
 | `apps/playground` | Consumer Validation | Design Lab, frame route, and visual baselines |
 
 The dependency direction is:
@@ -25,7 +26,7 @@ tokens -> motion
 overlay-runtime -> vue
 overlay-runtime -> react
 tailwind + motion + overlay-runtime -> vue
-tailwind + overlay-runtime -> react
+tailwind + motion + overlay-runtime -> react
 tokens + tailwind + motion + overlay-runtime + vue + react -> playground
 glass-runtime -> playground (optional enhancement)
 ```
@@ -104,40 +105,25 @@ UiTooltipSurface
 UiSkeleton
 UiScrollbar
 UiPresence
+UiTerminalSurface
+UiTerminalLine
+UiTerminalTranscript
+UiTerminalPrompt
+UiTerminalEcho
+UiStatCard
+UiTimeline
+UiStepFlow
 ```
 
-They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. Components that own a visual plane consume the shared `surface` contract instead of hard-coding Glass as an intrinsic component trait. `UiButton`, `UiAction`, `UiIconButton`, and `UiSegmentedControl` use `glass-subtle` as their canonical default, while `UiNavigationItem` defaults to `none` so grouped navigation inherits the parent chrome rather than creating nested Glass. `UiSegmentedControl` keeps its active slider and keyboard interaction independent from the outer Surface, so `surface="none"` can be used inside a composition that already owns the chrome. `UiSurface` is the generic polymorphic material primitive. `UiCard` owns standard card geometry (`rounded-card` + base card padding) while consuming the same `surface` contract; standard cards should therefore use `UiCard surface="..."` rather than rebuilding card geometry around `UiSurface`. `UiControlSurface` owns one grouped-control chrome boundary and optional trailing separation. It also owns grouped-surface behavior policy: `hoverMode="static"` keeps parent material stable while descendants hover, and `edgeMode="local"` requests a locally rendered Glass edge without exposing renderer attributes to consumers. `UiDock` defaults to the same `glass-subtle` material as `UiControlSurface`; the separate `chrome` preset and `ui-surface-chrome` renderer have been removed without an alias. `UiDock` specializes that contract for reusable floating navigation: it owns Dock layout, chrome, scale, compact composition, and trailing separation while route data, destination state, icons, and trailing controls stay consumer-owned. `UiStatusIndicator` leaves live-region announcements to the caller. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities.
+They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. Components that own a visual plane consume the shared `surface` contract instead of hard-coding Glass as an intrinsic component trait. `UiButton`, `UiAction`, `UiIconButton`, and `UiSegmentedControl` use `glass-subtle` as their canonical default, while `UiNavigationItem` defaults to `none` so grouped navigation inherits the parent chrome rather than creating nested Glass. `UiSegmentedControl` keeps its active slider and keyboard interaction independent from the outer Surface, so `surface="none"` can be used inside a composition that already owns the chrome. `UiSurface` is the generic polymorphic material primitive. `UiCard` owns standard card geometry (`rounded-card` + base card padding) while consuming the same `surface` contract; standard cards should therefore use `UiCard surface="..."` rather than rebuilding card geometry around `UiSurface`. `UiControlSurface` owns one grouped-control chrome boundary and optional trailing separation. It also owns grouped-surface behavior policy: `hoverMode="static"` keeps parent material stable while descendants hover, and `edgeMode="local"` requests a locally rendered Glass edge without exposing renderer attributes to consumers. `UiDock` defaults to `glass-elevated`, while `UiControlSurface` defaults to `glass-subtle`; the separate `chrome` preset and `ui-surface-chrome` renderer have been removed without an alias. `UiDock` specializes that contract for reusable floating navigation: it owns Dock layout, chrome, scale, compact composition, and trailing separation while route data, destination state, icons, and trailing controls stay consumer-owned. `UiStatusIndicator` leaves live-region announcements to the caller. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities.
 
 ## React components
 
-`@neoverse-ui/react` contains the consumer-validated React 19 adapters:
+The current source of `@neoverse-ui/react` provides the same 36 components listed above, including consumer-driven navigation, feedback, terminal, presentation and scrollbar adapters. This is a source inventory, not an assertion that all adapters exist in npm React 0.3.0 or have real React product acceptance; see [framework parity](framework-parity.md) and the [published baseline](release-0.3.0.md).
 
-```text
-UiButton
-UiIconButton
-UiAction
-UiBreadcrumb
-UiDock
-UiSurface
-UiCard
-UiCheckbox
-UiRadioGroup
-UiSwitch
-UiField
-UiInput
-UiTextarea
-UiSelect
-UiPopover
-UiDropdownMenu
-UiTable
-UiDisclosure
-UiNotice
-UiPresence
-```
+React adapters share the same Tailwind component selectors, Surface presets, native interaction semantics, and accessibility expectations as Vue. Canonical Shared and Consumer Driven remain distinct maturity tracks even where both adapters now exist. `UiAction` supports `asChild` routing composition, `UiBreadcrumb` exposes a custom item renderer seam, and `UiDock` shares ControlSurface's navigation indicator while leaving navigation content and active state to the consumer. Native controls preserve refs and platform attributes. Form controls share the state and accessibility rules documented in [`form-control-contract.md`](./form-control-contract.md). Top-layer controls share the positioning and dismiss rules documented in [`overlay-contract.md`](./overlay-contract.md).
 
-React adapters share the same Tailwind component selectors, Surface presets, native interaction semantics, and accessibility expectations as Vue. The canonical shared set currently includes Button, IconButton, Action, Surface, Card, Checkbox, RadioGroup, Switch, Field, Input, Textarea, Select, Popover, DropdownMenu, Table, Disclosure, and Presence. Consumer-driven adapters such as Dock and Breadcrumb remain available where concrete React consumers need them; additional framework parity is added by contract rather than by component-count symmetry. `UiAction` supports `asChild` routing composition, `UiBreadcrumb` exposes a custom item renderer seam, `UiDock` exposes the same shared Dock shell while leaving navigation content and active state to the consumer, and native controls preserve refs and platform attributes. Form controls share the state and accessibility rules documented in [`form-control-contract.md`](./form-control-contract.md). Top-layer controls share the positioning and dismiss rules documented in [`overlay-contract.md`](./overlay-contract.md).
-
-Framework parity is declared in `contracts/framework-parity.json` and validated by `scripts/check-framework-parity.ts`. The contract covers every Canonical Shared component, shared option/item structures, and shared literal unions. Framework-native binding names are normalized explicitly—for example Vue `modelValue` maps to React `value`/`checked`, while Vue `readonly` maps to React `readOnly`. Consumer-driven components are intentionally excluded from this lockstep contract. The React Runtime Fixture is checked against `component-matrix.json` rather than a handwritten component list, so a newly runtime-validated adapter cannot silently miss browser coverage.
+Framework parity is declared in `contracts/framework-parity.json` and validated by `scripts/check-framework-parity.ts`. The current contract covers all 36 components, shared option/item structures, and shared literal unions, including Consumer Driven adapters. Framework-native binding names are normalized explicitly—for example Vue `modelValue` maps to React `value`/`checked`, while Vue `readonly` maps to React `readOnly`. This parity does not promote maturity or replace real consumer evidence. The React Runtime Fixture is checked against `component-matrix.json` rather than a handwritten component list, so a newly runtime-validated adapter cannot silently miss browser coverage.
 
 ## Overlay runtime
 

@@ -27,6 +27,10 @@ const forwardedAttrs = computed(() => {
   return rest;
 });
 const ariaInvalid = computed(() => resolveAriaInvalid(attrs['aria-invalid'], props.validation));
+const value = computed({
+  get: () => props.modelValue ?? '',
+  set: (next: string | number) => emit('update:modelValue', String(next)),
+});
 
 function onInput(event: Event) {
   emit('update:modelValue', (event.currentTarget as HTMLInputElement).value);
@@ -101,17 +105,16 @@ function onBlur(event: FocusEvent) {
     </span>
   </span>
   <input
+    v-model="value"
     v-else
     v-bind="forwardedAttrs"
     class="ui-input"
     :class="attrs.class"
     :style="attrs.style"
-    :value="props.modelValue"
     :disabled="props.disabled"
     :readonly="props.readonly"
     :data-validation="props.validation"
     :aria-invalid="ariaInvalid"
-    @input="onInput"
     @pointerdown="onPointerDown"
     @blur="onBlur"
   >

@@ -42,14 +42,14 @@ Column values:
 | `UiCheckbox` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiRadioGroup` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiSwitch` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
-| `UiField` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
-| `UiInput` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
+| `UiField` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Validated |
+| `UiInput` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiTextarea` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
-| `UiSelect` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
+| `UiSelect` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiTable` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
 | `UiDisclosure` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
 | `UiPresence` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
-| `UiPopover` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
+| `UiPopover` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Validated |
 | `UiDropdownMenu` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiBreadcrumb` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
 | `UiControlSurface` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
@@ -59,7 +59,7 @@ Column values:
 | `UiBadge` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiStatusIndicator` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiNotice` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
-| `UiTooltipSurface` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
+| `UiTooltipSurface` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiSkeleton` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiScrollbar` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiTerminalPrompt` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
@@ -75,9 +75,20 @@ The existing Stable / Release / Consumer statuses above retain previously establ
 
 `UiTerminalEcho` additionally has Vue/React prompt-context screenshots and XCA recorded-command consumer evidence. Its React `reactValidation.visual` is validated, while `reactValidation.consumer` remains pending; no real React product consumption or automatic Stable promotion is claimed.
 
+The [2026-10-25 governance audit](consumer-validation-2026-10-25.md) separates the
+evidence for every Consumer Validation component by framework. Vue Input/Select/Field
+now have real Slides workflow evidence; Vue Popover has XCA menu evidence and Vue
+TooltipSurface has real Neoverse Pulse data evidence. These update only the
+aggregate consumer field, not React consumer validation or component maturity.
+All 15 targets remain Consumer Validation; the Stable count remains 21.
+React Breadcrumb's existing release screenshots were rerun and are explicitly
+recorded in `reactValidation.visual`. No target has validated real React product
+consumption. Four existing Consumer Parity module snapshots still omit the Echo
+matrix row and fail on both platforms; they were not updated to hide that drift.
+
 ## Change policy
 
-`UiInput type="number"` includes shared token-driven increment/decrement buttons in Vue and React. `tests/visual/number-input.spec.ts` covers the Design Lab material controls and React runtime fixture at desktop/mobile sizes, including both themes for the material controls. This is Playground/runtime evidence; real consumer validation remains pending.
+`UiInput type="number"` includes shared token-driven increment/decrement buttons in Vue and React. `tests/visual/number-input.spec.ts` covers bounds, steps and locked states; `tests/visual/form-control-behavior.spec.ts` covers text/selection state and Field composition. Real Vue consumption is validated in Slides search and filters; real React product consumption and independent React form release visuals remain pending.
 
 A new public component must be added to the matrix in the same change that exports it. Canonical Shared components cannot be marked complete while either Vue or React is missing, and every Canonical Shared React adapter must appear in the browser runtime fixture. A component cannot be promoted to Stable without release visual coverage and real consumer validation.
 

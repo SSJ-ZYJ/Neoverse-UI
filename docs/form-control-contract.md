@@ -40,6 +40,25 @@ Choice controls preserve native `input` elements. Checkbox and Switch use native
 
 Framework-specific binding syntax is intentionally preserved. Contract parity means equivalent semantics and visual states, not identical prop spelling where the host framework already has a native convention.
 
+Vue Input and Textarea use composition-aware native `v-model` behavior: unfinished
+IME text is not committed to the model or overwritten by unrelated consumer
+rerenders. Number-input model updates retain their string-valued event contract.
+React text inputs retain native `value/defaultValue/onChange` and composition
+events; consumers should use the framework's own composition conventions.
+Vue model state remains consumer-owned; an omitted model is not a separate
+uncontrolled/default-value API. React native Input/Textarea support uncontrolled
+`defaultValue` and native form reset.
+
+Select is a controlled selection component in both adapters: Vue uses
+`modelValue`/`update:modelValue`, React uses `value`/`onValueChange`. Neither promises
+an uncontrolled `defaultValue` mode. A rejected update does not change the displayed
+selection or hidden submitted value. ArrowDown/ArrowUp on the trigger open the
+listbox and focus its selected enabled option, falling back to its first/last
+enabled option. Arrow keys, Home and End navigate enabled options; Escape closes
+and restores trigger focus. Disabled/readonly controls do not accept changes.
+SSR-stable IDs associate the combobox and listbox through `aria-controls`; native
+Popover and fallback paths keep the same keyboard contract.
+
 ## Field composition
 
 `UiField` does not run validation and does not own application state. It only composes:

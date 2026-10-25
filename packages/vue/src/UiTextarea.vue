@@ -24,9 +24,10 @@ const forwardedAttrs = computed(() => {
 });
 const ariaInvalid = computed(() => resolveAriaInvalid(attrs['aria-invalid'], props.validation));
 
-function onInput(event: Event) {
-  emit('update:modelValue', (event.currentTarget as HTMLTextAreaElement).value);
-}
+const value = computed({
+  get: () => props.modelValue ?? '',
+  set: (next: string) => emit('update:modelValue', next),
+});
 
 function onPointerDown(event: PointerEvent) {
   (event.currentTarget as HTMLElement).dataset.neoverseFocusOrigin = 'pointer';
@@ -40,16 +41,15 @@ function onBlur(event: FocusEvent) {
 <template>
   <span class="ui-textarea-shell">
     <textarea
+      v-model="value"
       v-bind="forwardedAttrs"
       class="ui-textarea"
       :class="attrs.class"
       :style="attrs.style"
-      :value="props.modelValue"
       :disabled="props.disabled"
       :readonly="props.readonly"
       :data-validation="props.validation"
       :aria-invalid="ariaInvalid"
-      @input="onInput"
       @pointerdown="onPointerDown"
       @blur="onBlur"
     />

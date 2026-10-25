@@ -47,6 +47,21 @@ bun D:/SSJ/Projects/Neoverse-UI/scripts/sync-consumer.ts --consumer .
 
 Neoverse-Slides 已接入 `bun run ui:sync`；门户的开发、构建、生成、类型检查和样式同步会先同步共享包，再复制预编译 CSS 到 `/vendor/neoverse-ui.css`。
 
+## 2026-10-25 消费依赖核查
+
+此处区分安装来源与源码成熟度，不要求所有项目统一使用 npm。当前官方发布基线见[发布说明](release-0.3.0.md)；相同 manifest 版本不代表本地 `file:` 构建与已发布 tarball 相同。
+
+| 消费项目 | 直接来源及锁定 / 已安装版本 | 复现边界 |
+| --- | --- | --- |
+| Neoverse | npm：Glass / Motion 0.2.1，Tailwind / Tokens / Vue 0.3.0；传递 Overlay Runtime 0.3.0 | 六包锁定完整性与官方一致，无嵌套 UI 安装副本，不依赖兄弟源码 |
+| Neoverse-Doc | 六包仍为 0.1.0；Tokens / Motion / Glass 改为精确 npm 0.1.0，React / Tailwind / Giscus 继续本地 tarball | 前三包官方 SHA-512 与原 tarball 完全相同，Motion / Tokens overrides 同步；其余三包仍依赖被 UI Git 忽略的 `.release/packages/`，现有 CI 未获取它们，干净 checkout 不能独立安装 |
+| Neoverse-Slides | 六个 UI 包使用兄弟仓库 `file:`；Glass / Motion 0.2.1，其余 0.3.0；业务子包另用 `workspace:*` | UI 不属于本站 workspace；CI 未检出兄弟 UI。`ui:sync` 同步生成物并复制 vendor CSS，不会固定源码提交 |
+| XCA-Portal | 六个 UI 包的 direct / overrides 使用兄弟仓库 `file:`；Glass / Motion 0.2.1，其余 0.3.0 | CI 联合检出固定 UI `82d0614`，本地 UI 已在后续提交；本地 Echo 验证不等于该固定组合的 CI 验证，不擅自移动消费者 SHA |
+
+Doc 的官方 `react@0.1.0`、`giscus-theme@0.1.0` 返回 404；官方 `tailwind@0.1.0` 与原锁定 tarball 完整性不同，不能视为同制品来源替换。完整升级跨越 0.1 → 0.2 → 0.3，涉及 Token / Motion / Glass、chrome 删除、Dock 默认材质及共享尺寸，须另行迁移并验收真实页面，不添加兼容 shim。Doc 的 `sync:ui-assets` 只复制已安装 Giscus CSS，不能解决历史制品缺失。
+
+目录审计：Doc 六个根包无嵌套 UI 副本；Slides 的 web/theme Vue 和 Tailwind 链接指向相同缓存实体，另有 Motion → Tokens 嵌套锁条目。XCA 有 17 个 UI 目录（Tokens ×7、Motion ×4、Tailwind ×2、Overlay ×2、Vue ×1、Glass ×1），同名 manifest 为硬链接，不能按目录数认定为不同版本。共享同步器已覆盖嵌套副本；此轮未改动 Slides / XCA 的开发依赖方式、锁文件或现有用户工作。
+
 ## 验证
 
 - `tests/visual/component-size.spec.ts` 测量真实 Vue 控件的宽高、字号。

@@ -883,6 +883,30 @@ describe('UiDisclosure', () => {
 });
 
 describe('form controls', () => {
+  for (const [name, component] of [
+    ['UiInput', UiInput],
+    ['UiTextarea', UiTextarea],
+  ] as const) {
+    it(`${name} commits IME text only after composition ends`, async () => {
+      const wrapper = mount(component, { props: { modelValue: 'Initial' } });
+      const editor = wrapper.get('input, textarea');
+      const element = editor.element as HTMLInputElement | HTMLTextAreaElement;
+      await editor.trigger('compositionstart');
+      element.value = 'ni';
+      await editor.trigger('input', { isComposing: true });
+      expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+
+      element.value = '你好';
+      await editor.trigger('compositionend');
+      expect(wrapper.emitted('update:modelValue')).toEqual([['你好']]);
+      await wrapper.setProps({ modelValue: '你好' });
+      element.value = '你好!';
+      await editor.trigger('input');
+      expect(wrapper.emitted('update:modelValue')).toEqual([['你好'], ['你好!']]);
+      wrapper.unmount();
+    });
+  }
+
   it('renders themed number steps while forwarding native attributes and localized labels', async () => {
     const wrapper = mount(UiInput, {
       attrs: { type: 'number', id: 'amount', name: 'amount', min: '0', max: '2', step: '0.5' },

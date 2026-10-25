@@ -88,7 +88,13 @@
       "visual": "playground",
       "consumer": "pending",
       "runtime": "validated",
-      "evidence": ["tests/visual/choice-indicator-colour.spec.ts"]
+      "evidence": [
+        "tests/visual/choice-indicator-colour.spec.ts",
+        "tests/visual/choice-control-behavior.spec.ts",
+        "tests/visual/component-interactions.spec.ts",
+        "docs/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
     {
       "name": "UiRadioGroup",
@@ -102,7 +108,13 @@
       "visual": "playground",
       "consumer": "pending",
       "runtime": "validated",
-      "evidence": ["tests/visual/choice-indicator-colour.spec.ts"]
+      "evidence": [
+        "tests/visual/choice-indicator-colour.spec.ts",
+        "tests/visual/choice-control-behavior.spec.ts",
+        "tests/visual/component-interactions.spec.ts",
+        "docs/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
     {
       "name": "UiSwitch",
@@ -116,7 +128,13 @@
       "visual": "playground",
       "consumer": "pending",
       "runtime": "validated",
-      "evidence": ["tests/visual/choice-indicator-colour.spec.ts"]
+      "evidence": [
+        "tests/visual/choice-indicator-colour.spec.ts",
+        "tests/visual/choice-control-behavior.spec.ts",
+        "tests/visual/component-interactions.spec.ts",
+        "docs/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
     {
       "name": "UiField",
@@ -128,8 +146,16 @@
       "react": "stable",
       "unit": "stable",
       "visual": "playground",
-      "consumer": "pending",
-      "runtime": "validated"
+      "consumer": "validated",
+      "runtime": "validated",
+      "evidence": [
+        "packages/vue/src/components.test.ts",
+        "packages/react/src/field.test.tsx",
+        "tests/visual/form-control-behavior.spec.ts",
+        "../Neoverse-Slides/apps/web/app/pages/slides/index.vue",
+        "docs/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
     {
       "name": "UiInput",
@@ -141,9 +167,16 @@
       "react": "stable",
       "unit": "stable",
       "visual": "release",
-      "consumer": "pending",
+      "consumer": "validated",
       "runtime": "validated",
-      "evidence": ["tests/visual/number-input.spec.ts"]
+      "evidence": [
+        "tests/visual/number-input.spec.ts",
+        "tests/visual/form-control-behavior.spec.ts",
+        "packages/vue/src/components.test.ts",
+        "../Neoverse-Slides/apps/web/app/pages/slides/index.vue",
+        "docs/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
     {
       "name": "UiTextarea",
@@ -156,7 +189,13 @@
       "unit": "stable",
       "visual": "release",
       "consumer": "pending",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": [
+        "packages/vue/src/components.test.ts",
+        "tests/visual/form-control-behavior.spec.ts",
+        "docs/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
     {
       "name": "UiSelect",
@@ -168,8 +207,16 @@
       "react": "stable",
       "unit": "stable",
       "visual": "release",
-      "consumer": "pending",
-      "runtime": "validated"
+      "consumer": "validated",
+      "runtime": "validated",
+      "evidence": [
+        "tests/visual/form-control-behavior.spec.ts",
+        "tests/visual/select-blocked-regression.spec.ts",
+        "tests/visual/component-interactions.spec.ts",
+        "../Neoverse-Slides/apps/web/app/pages/slides/index.vue",
+        "docs/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
     {
       "name": "UiTable",
@@ -182,7 +229,14 @@
       "unit": "stable",
       "visual": "release",
       "consumer": "pending",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": [
+        "tests/visual/table-backdrop.spec.ts",
+        "tests/visual/playground-interactions.spec.ts",
+        "tests/visual/design-lab.spec.ts",
+        "docs/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
     {
       "name": "UiDisclosure",
@@ -195,7 +249,14 @@
       "unit": "stable",
       "visual": "release",
       "consumer": "pending",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": [
+        "tests/visual/disclosure-edge.spec.ts",
+        "tests/visual/playground-interactions.spec.ts",
+        "tests/visual/design-lab.spec.ts",
+        "docs/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
     {
       "name": "UiPresence",
@@ -208,7 +269,14 @@
       "unit": "stable",
       "visual": "playground",
       "consumer": "pending",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": [
+        "packages/vue/src/components.test.ts",
+        "packages/react/src/presence.test.tsx",
+        "tests/visual/playground-interactions.spec.ts",
+        "docs/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
     {
       "name": "UiPopover",
@@ -220,8 +288,16 @@
       "react": "stable",
       "unit": "stable",
       "visual": "playground",
-      "consumer": "pending",
-      "runtime": "validated"
+      "consumer": "validated",
+      "runtime": "validated",
+      "evidence": [
+        "tests/visual/component-interactions.spec.ts",
+        "tests/visual/overlay-review-regressions.spec.ts",
+        "../XCA-Portal/app/components/site/SiteHeader.vue",
+        "../XCA-Portal/tests/e2e/mobile-header.spec.ts",
+        "docs/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
     {
       "name": "UiDropdownMenu",
@@ -234,7 +310,13 @@
       "unit": "stable",
       "visual": "playground",
       "consumer": "pending",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": [
+        "tests/visual/component-interactions.spec.ts",
+        "tests/visual/overlay-review-regressions.spec.ts",
+        "docs/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
     {
       "name": "UiBreadcrumb",
@@ -247,7 +329,14 @@
       "unit": "stable",
       "visual": "release",
       "consumer": "pending",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": [
+        "tests/visual/navigation-runtime.spec.ts",
+        "tests/visual/react-navigation-visual.spec.ts",
+        "tests/visual/design-lab.spec.ts",
+        "docs/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "validated", "consumer": "pending" }
     },
     {
       "name": "UiControlSurface",
@@ -402,12 +491,15 @@
       "react": "stable",
       "unit": "stable",
       "visual": "release",
-      "consumer": "pending",
+      "consumer": "validated",
       "runtime": "validated",
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/visual/react-parity.spec.ts",
-        "docs/framework-parity.md"
+        "docs/framework-parity.md",
+        "tests/visual/tooltip-entrance.spec.ts",
+        "../Neoverse/app/components/pulse/ContributionLandscape.vue",
+        "docs/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -482,7 +574,8 @@
         "docs/terminal-composition.md",
         "../XCA-Portal/app/features/terminal/components/TerminalTranscript.vue",
         "../XCA-Portal/tests/e2e/terminal-shared-ui.spec.ts",
-        "../XCA-Portal/tests/e2e/terminal-visual-acceptance.spec.ts"
+        "../XCA-Portal/tests/e2e/terminal-visual-acceptance.spec.ts",
+        "docs/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": {
         "runtime": "validated",
