@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { glassMaterial } from '@neoverse-ui/tokens';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import type { Locale } from './playground-content';
 
@@ -8,9 +9,9 @@ const samples = ref<{ id: number; text: string }[]>([]);
 let observer: MutationObserver | undefined;
 let frame = 0;
 const tiers = {
-  'glass-subtle': { zh: '轻薄', en: 'Light', blur: '12px', alpha: 0.15 },
-  'glass-elevated': { zh: '标准', en: 'Standard', blur: '18px', alpha: 0.2 },
-  'glass-immersive': { zh: '厚实', en: 'Immersive', blur: '24px', alpha: 0.3 },
+  'glass-subtle': { name: glassMaterial.tiers.subtle, blur: '12px', alpha: 0.15 },
+  'glass-elevated': { name: glassMaterial.tiers.elevated, blur: '18px', alpha: 0.2 },
+  'glass-immersive': { name: glassMaterial.tiers.immersive, blur: '24px', alpha: 0.3 },
 } as const;
 
 function refresh() {
@@ -73,8 +74,8 @@ function refresh() {
     } else if (element.matches('.ui-status-indicator, .ui-scrollbar')) {
       detail =
         props.locale === 'zh'
-          ? '共享语义效果（不独立采样玻璃）'
-          : 'Shared semantic effect (no independent Glass sampling)';
+          ? `共享语义效果（不独立采样${glassMaterial.name.zh}）`
+          : `Shared semantic effect (no independent ${glassMaterial.name.en} sampling)`;
     } else if (tier) {
       const preset = tiers[tier];
       const filter = style.backdropFilter;
@@ -98,7 +99,7 @@ function refresh() {
         : 1;
       const expectedBlur = `${parseFloat(preset.blur) * blurScale}px`;
       const custom = !fallback && (blur !== expectedBlur || Math.abs(alpha - preset.alpha) > 0.005);
-      detail = `${element.matches('.ui-notice') ? (props.locale === 'zh' ? '语义状态色 · ' : 'Semantic status tint · ') : ''}${props.locale === 'zh' ? preset.zh : preset.en} · ${tier} · ${blur} / ${Math.round(alpha * 100)}%${fallback ? (props.locale === 'zh' ? ' · 不透明回退' : ' · Opaque fallback') : custom ? (props.locale === 'zh' ? ' · 自定义' : ' · Custom') : ''}`;
+      detail = `${element.matches('.ui-notice') ? (props.locale === 'zh' ? '语义状态色 · ' : 'Semantic status tint · ') : ''}${glassMaterial.name[props.locale]} · ${preset.name[props.locale]} · ${tier} · ${blur} / ${Math.round(alpha * 100)}%${fallback ? (props.locale === 'zh' ? ' · 不透明回退' : ' · Opaque fallback') : custom ? (props.locale === 'zh' ? ' · 自定义' : ' · Custom') : ''}`;
     } else {
       detail = `${surface} · ${props.locale === 'zh' ? '语义表面' : 'Semantic surface'}`;
     }

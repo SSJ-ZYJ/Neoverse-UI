@@ -1,5 +1,5 @@
 @layer components {
-  /* Both themes share quiet status tint, a hairline border and Glass depth. */
+  /* Both themes share quiet status tint, a hairline border and Aurora Glass depth. */
   .ui-badge {
     --ui-badge-status: var(--neoverse-color-text-secondary);
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)

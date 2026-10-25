@@ -1,6 +1,6 @@
 # Overlay Contract
 
-Neoverse-UI uses one overlay contract for anchored top-layer UI. Popover, DropdownMenu, and Select share the same framework-agnostic positioning runtime and the same Glass depth language.
+Neoverse-UI uses one overlay contract for anchored top-layer UI. Popover, DropdownMenu, and Select share the same framework-agnostic positioning runtime and the same Aurora Glass (极光玻璃) depth language.
 
 ## Runtime ownership
 
@@ -22,7 +22,7 @@ Framework adapters do not duplicate those algorithms.
 
 The preferred browser path uses `popover="auto"`. This supplies native top-layer stacking and light dismiss. The fallback path keeps the same runtime-computed `position: fixed`, `top`, and `left` contract and only changes visibility through the fallback class.
 
-Generic Glass material helpers must not replace top-layer positioning with `position: relative`. Overlay panels and Select popovers therefore own their positioning context directly.
+Generic Aurora Glass material helpers must not replace top-layer positioning with `position: relative`. Overlay panels and Select popovers therefore own their positioning context directly.
 
 ## Dismiss and focus
 

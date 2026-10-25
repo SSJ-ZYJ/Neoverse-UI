@@ -9,7 +9,7 @@ import {
 } from '@neoverse-ui/vue';
 import { computed, onMounted, ref, watch } from 'vue';
 import LabIcon from '../LabIcon.vue';
-import { localize, localized, moduleCopy } from '../playground-content';
+import { localize, localized, moduleCopy, tokenCopy } from '../playground-content';
 import QaPreviewMatrix from '../QaPreviewMatrix.vue';
 import StateRow from '../StateRow.vue';
 import type { LabModuleProps } from './types';
@@ -17,10 +17,17 @@ import type { LabModuleProps } from './types';
 const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.button;
 const tiers = ['glass-subtle', 'glass-elevated', 'glass-immersive'] as const;
+const tierLabels = {
+  'glass-subtle': tokenCopy.glassVariants.subtle,
+  'glass-elevated': tokenCopy.glassVariants.elevated,
+  'glass-immersive': tokenCopy.glassVariants.immersive,
+} as const;
 const customTier = ref('glass-elevated');
 const customBlur = ref('');
 const customAlpha = ref('');
-const customOptions = tiers.map((value) => ({ value, label: value }));
+const customOptions = computed(() =>
+  tiers.map((value) => ({ value, label: localize(tierLabels[value], props.locale) })),
+);
 function resetCustom() {
   const style = getComputedStyle(document.documentElement);
   customBlur.value = style
@@ -62,7 +69,7 @@ const qaCopy = {
 
 <template>
   <StateRow
-    :label="localized('Three material tiers', '三档材质')"
+    :label="localized('Three Aurora Glass tiers', '三档极光玻璃')"
     :hint="localized('Identical backdrop; each preset can be overridden through CSS tokens.', '同一背景对比；每档支持 CSS token 覆盖。')"
     :locale="props.locale"
     layout="wide"
@@ -70,7 +77,7 @@ const qaCopy = {
     <div class="playground-preview-columns">
       <div v-for="tier in tiers" :key="tier" class="grid gap-3 min-w-0">
         <UiButton :surface="tier" class="justify-self-start" @click="clicks += 1"
-          >{{ tier }}</UiButton
+          >{{ localize(tierLabels[tier], props.locale) }}</UiButton
         >
         <UiButton :surface="tier" variant="secondary" class="justify-self-start"
           >Secondary</UiButton

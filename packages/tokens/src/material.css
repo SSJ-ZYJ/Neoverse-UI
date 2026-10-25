@@ -20,7 +20,7 @@
     --neoverse-material-refraction-strength: 1;
     --neoverse-material-edge-refraction-gain: 1;
 
-    /* Soft Glass is a composed material rather than a single white overlay:
+    /* Aurora Glass is a composed material rather than a single white overlay:
        the fill keeps the canvas visible, while the edge gets a stronger
        filtered sample of that same canvas. */
     --neoverse-material-filter-subtle: var(--neoverse-material-glass-subtle-filter);
@@ -97,7 +97,7 @@
       transparent
     );
     /* Keep a layered fallback for surfaces without the masked backdrop path;
-       supported Glass utilities replace it with a filtered slice of the
+       supported Aurora Glass utilities replace it with a filtered slice of the
        actual backdrop. Dark restores its lower-contrast fallback in themes/dark.css. */
     --neoverse-material-edge-highlight-subtle:
       inset 0 1px 2px
@@ -326,7 +326,7 @@
     --neoverse-material-glass-subtle-transparency: var(--neoverse-material-transparency-subtle);
     --neoverse-material-glass-subtle-blur: var(--neoverse-material-blur-sm);
     --neoverse-material-glass-subtle-saturation: var(--neoverse-material-saturation-subtle);
-    /* Light Glass gets its silhouette from refraction and shadow; a dark
+    /* Light Aurora Glass gets its silhouette from refraction and shadow; a dark
        hairline fights the pale atmospheric canvas. Dark restores the
        theme-specific border in themes/dark.css. */
     --neoverse-material-glass-subtle-border: transparent;

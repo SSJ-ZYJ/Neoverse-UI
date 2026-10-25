@@ -19,7 +19,7 @@
   --neoverse-material-edge-filter-immersive: brightness(145%);
   --neoverse-effect-grouped-inset-field: var(--neoverse-effect-grouped-inset-field-dark);
   --neoverse-effect-grouped-inset-border: var(--neoverse-effect-grouped-inset-border-dark);
-  /* Effect identity is theme-specific; Glass blur and alpha remain tier-owned. */
+  /* Effect identity is theme-specific; Aurora Glass blur and alpha remain tier-owned. */
   --neoverse-effect-compact-rest-shadow: var(--neoverse-effect-compact-rest-shadow-dark);
   --neoverse-effect-compact-hover-shadow: var(--neoverse-effect-compact-hover-shadow-dark);
   --neoverse-effect-selection-highlight: var(--neoverse-effect-selection-highlight-dark);
@@ -168,7 +168,7 @@
   --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
   --neoverse-control-segmented-border: var(--neoverse-control-button-border);
   --neoverse-control-segmented-shadow: var(--neoverse-effect-choice-rest-shadow);
-  /* Dark segmented controls use the same Glass edge field as system-dark.
+  /* Dark segmented controls use the same Aurora Glass edge field as system-dark.
      Lower its opacity instead of disabling it: no hard monochrome outline. */
   --neoverse-control-segmented-edge-refraction-opacity: var(
     --neoverse-material-edge-refraction-opacity-subtle

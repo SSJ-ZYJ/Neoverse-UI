@@ -11,8 +11,8 @@ const copy = moduleCopy.card;
 const qaCopy = {
   label: localized('Card backdrop QA', '卡片背景 QA'),
   hint: localized(
-    'The default elevated Glass card is repeated across the shared QA backdrop contexts.',
-    '在共享 QA 背景环境中重复检查默认高层级玻璃卡片。',
+    'The default Aurora Glass · Standard card is repeated across the shared QA backdrop contexts.',
+    '在共享 QA 背景环境中重复检查默认的极光玻璃 · 标准卡片。',
   ),
 } as const;
 </script>

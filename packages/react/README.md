@@ -1,6 +1,6 @@
 # @neoverse-ui/react
 
-React adapters for Neoverse UI.
+React adapters for Neoverse UI, with Aurora Glass / 极光玻璃 as the shared glass material. Light / 轻薄, Standard / 标准, and Immersive / 厚实 are its tiers, not separate styles. Use the [Tokens `glassMaterial` metadata](../tokens/README.md#aurora-glass--极光玻璃) for display labels; `glass-*` surface identifiers remain stable. See [material standards](../../docs/material-standards.md).
 
 The package provides the same 35 public components as the Vue package, including navigation, forms, feedback, data presentation, terminal composition and document scrollbars. Both adapters use the shared Tokens, Tailwind, Material, Motion and Overlay Runtime. See [framework parity](../../docs/framework-parity.md) for state bindings and validation scope.
 

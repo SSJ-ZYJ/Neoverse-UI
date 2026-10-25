@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { prewarmParticleDissolve, startViewTransition } from '@neoverse-ui/motion';
-import { layoutBreakpoints } from '@neoverse-ui/tokens';
+import { glassMaterial, layoutBreakpoints } from '@neoverse-ui/tokens';
 import {
   staggerStyle,
   UiButton,
@@ -32,6 +32,7 @@ import {
   type Locale,
   localize,
   localized,
+  tokenCopy,
 } from './playground-content';
 import { readPreferences, writePreferences } from './playground-preferences';
 import type { ThemeMode } from './playground-types';
@@ -162,8 +163,8 @@ const catalogueCopy = {
   ),
   searchLabel: localized('Search specimens', '搜索示例'),
   searchPlaceholder: localized(
-    'Search UiButton, glass, reading…',
-    '搜索 UiButton、glass、reading…',
+    `Search UiButton, ${glassMaterial.name.en}, reading…`,
+    `搜索 UiButton、${glassMaterial.name.zh}、reading…`,
   ),
   filterLabel: localized('Specimen kind', '示例类型'),
   summary: localized(
@@ -188,8 +189,8 @@ const showcaseCopy = {
     '直接体验真实组件、材质与交互状态。',
   ),
   surfaceLabel: localized('Preview material', '预览材质'),
-  subtle: localized('Soft', '柔和'),
-  elevated: localized('Raised', '悬浮'),
+  subtle: tokenCopy.glassVariants.subtle,
+  elevated: tokenCopy.glassVariants.elevated,
   components: localized('Components', '查看组件'),
   materials: localized('Materials', '浏览材质'),
 } as const;
@@ -222,6 +223,9 @@ const filteredSpecimens = computed(() => {
       specimen.label.zh,
       ...specimen.apiNames,
       ...specimen.tags,
+      ...specimen.tags.flatMap((tag) =>
+        tag === 'glass' ? [glassMaterial.name.en, glassMaterial.name.zh] : [],
+      ),
     ]
       .join(' ')
       .toLowerCase();
@@ -1006,7 +1010,7 @@ onBeforeUnmount(() => {
                     </code>
                   </div>
                   <p class="text-body-sm text-secondary">
-                    {{ specimen.tags.join(' · ') }}
+                    {{ specimen.tags.map((tag) => tag === 'glass' ? localize(glassMaterial.name, locale) : tag).join(' · ') }}
                   </p>
                 </UiSurface>
                 <p

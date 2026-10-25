@@ -45,8 +45,8 @@ const copy = {
   ),
   select: localized('Select', '选择框'),
   selectDescription: localized(
-    'Library-owned selection surface with shared Glass material and keyboard semantics.',
-    '选择弹层由组件库接管，并复用统一的 Glass 材质与键盘交互语义。',
+    'Library-owned selection surface with shared Aurora Glass and keyboard semantics.',
+    '选择弹层由组件库接管，并复用统一的极光玻璃与键盘交互语义。',
   ),
   choices: localized('Choice controls', '选择控件'),
   choicesDescription: localized(

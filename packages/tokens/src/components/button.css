@@ -51,7 +51,7 @@
     --neoverse-control-button-active-background: none;
     --neoverse-control-button-ghost-active-background:
       var(--neoverse-control-active-background), transparent;
-    /* Ghost is a transparent control, not a bordered Glass plate.
+    /* Ghost is a transparent control, not a bordered Aurora Glass plate.
        Theme parity is intentional: neither light nor dark paints a geometric
        outline at rest, hover, or press. Interaction comes from the wash,
        foreground shift, and restrained inner light only. */

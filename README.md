@@ -8,7 +8,7 @@
   </picture>
 </h1>
 
-**Neoverse UI** is a component library for Vue 3 and React, with Glass surfaces, light and dark themes, and shared interactions. Use it for personal sites, documentation, tools, and pages with terminal or data displays.
+**Neoverse UI** is a component library for Vue 3 and React, with Aurora Glass (极光玻璃) surfaces, light and dark themes, and shared interactions. Use it for personal sites, documentation, tools, and pages with terminal or data displays.
 
 [Vue guide](packages/vue/README.md) · [React guide](packages/react/README.md) · [Report an issue](https://github.com/SSJ-ZYJ/Neoverse-UI/issues)
 
@@ -135,17 +135,29 @@ Set `data-theme` on the root element to `light`, `dark`, or `system`:
 
 The theme also follows the system preference when no value is set.
 
-Components with a `surface` prop can use plain or Glass surfaces:
+Components with a `surface` prop can use plain surfaces or **Aurora Glass / 极光玻璃**, the single shared glass material:
 
 | `surface` | Use |
 | --- | --- |
 | `none` | Transparent containers |
 | `solid`, `subtle`, `elevated`, `inset` | Content surfaces and layout layers |
-| `glass-subtle` | Lightweight controls and thin Glass layers |
-| `glass-elevated` | Cards, floating navigation, and main content containers |
-| `glass-immersive` | Stronger background blur and material depth |
+| `glass-subtle` | Light / 轻薄 — lightweight controls and thin Aurora Glass layers |
+| `glass-elevated` | Standard / 标准 — cards, floating navigation, and main content containers |
+| `glass-immersive` | Immersive / 厚实 — stronger background blur and material depth |
 
-Some controls accept only the Glass presets and `none`; see their component types for available options. Glass needs visible background content to show its effect. Surfaces remain readable when transparency effects are unavailable or the user prefers reduced transparency.
+These are tiers of Aurora Glass, not separate glass styles. The `glass-*` values are stable technical identifiers. Consumers should obtain the shared display name and tier short names from Tokens rather than defining their own:
+
+```ts
+import { glassMaterial } from '@neoverse-ui/tokens';
+
+glassMaterial.name.zh; // 极光玻璃
+glassMaterial.name.en; // Aurora Glass
+glassMaterial.tiers.subtle; // { zh: '轻薄', en: 'Light' }
+glassMaterial.tiers.elevated; // { zh: '标准', en: 'Standard' }
+glassMaterial.tiers.immersive; // { zh: '厚实', en: 'Immersive' }
+```
+
+Some controls accept only the Aurora Glass presets and `none`; see their component types for available options. Aurora Glass needs visible background content to show its effect. Surfaces remain readable when transparency effects are unavailable or the user prefers reduced transparency. See [material standards](docs/material-standards.md) for the shared optical contract.
 
 Components respect the system's reduced-motion preference. Switching themes preserves component dimensions and layout.
 
@@ -173,7 +185,7 @@ You can also install individual packages for the features you need:
 | [`@neoverse-ui/tokens`](packages/tokens/README.md) | CSS variables for color, type, spacing, and more, with TypeScript name maps |
 | [`@neoverse-ui/tailwind`](packages/tailwind/README.md) | Tailwind theme, component styles, and reading typography |
 | [`@neoverse-ui/motion`](packages/motion/README.md) | Enter and exit animations, list transitions, and page transitions |
-| [`@neoverse-ui/glass-runtime`](packages/glass-runtime/README.md) | Optional Glass edge rendering enhancement |
+| [`@neoverse-ui/glass-runtime`](packages/glass-runtime/README.md) | Optional Aurora Glass edge rendering enhancement |
 | [`@neoverse-ui/giscus-theme`](packages/giscus-theme/README.md) | Light and dark themes for Giscus comments |
 
 ## Documentation and feedback

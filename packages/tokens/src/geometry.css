@@ -36,7 +36,7 @@
       0 1.5rem 4rem -1.75rem rgb(5 16 23 / 42%), 0 6px 14px -1px rgb(5 16 23 / 16%);
     --neoverse-shadow-xl:
       0 2rem 4.75rem -1.875rem rgb(5 16 23 / 48%), 0 8px 18px -1px rgb(5 16 23 / 20%);
-    /* Inset material shares the softened refractive edge catch used by Glass
+    /* Inset material shares the softened refractive edge catch used by Aurora Glass
        and keeps a cool, soft lower falloff so light surfaces do not read flat. */
     --neoverse-shadow-inset:
       var(--neoverse-material-edge-highlight-subtle), inset 0 -1px 2px rgb(14 34 44 / 8%);

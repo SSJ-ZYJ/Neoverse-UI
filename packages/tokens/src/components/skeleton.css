@@ -1,6 +1,6 @@
 @layer neoverse.tokens {
   :root {
-    /* Foreground tint keeps placeholders visible on pale Glass surfaces. */
+    /* Foreground tint keeps placeholders visible on pale Aurora Glass surfaces. */
     --neoverse-skeleton-base-fill: var(--neoverse-effect-loading-base);
     --neoverse-skeleton-fill: var(--neoverse-effect-highlight-color);
     --neoverse-skeleton-backdrop-filter: var(--neoverse-material-glass-subtle-filter);

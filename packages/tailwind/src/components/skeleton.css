@@ -19,7 +19,7 @@
     border-radius: var(--neoverse-radius-control-inner);
   }
 
-  /* Glass ancestors already filter the backdrop. Dense grids must not create
+  /* Aurora Glass ancestors already filter the backdrop. Dense grids must not create
      one extra backdrop surface per placeholder. Keep the shared tint intact. */
   :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
   :is(.ui-skeleton, .skeleton-surface) {

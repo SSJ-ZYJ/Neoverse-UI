@@ -43,7 +43,7 @@
 - [2026-10-19 全量浏览器回归与剩余阻塞](acceptance-2026-10-19.md)
 - [终端组合边界](terminal-composition.md)
 - [消费项目默认尺寸与已知问题](consumer-sizing.md)
-- [材料与玻璃规范](material-standards.md)
+- [极光玻璃材质规范](material-standards.md)
 - [版本与发布流程](releasing.md)
 
 较早的 P0/P1 审计过程保留在 Git 历史，不再作为“尚待实施”清单重复维护。

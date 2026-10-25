@@ -1,7 +1,7 @@
 # Terminal composition
 
 Neoverse-UI provides a **terminal presentation**, not a shell emulator or command runtime.
-The prompt is a text line rather than a form-field surface: translucent Glass stays on the
+The prompt is a text line rather than a form-field surface: translucent Aurora Glass (极光玻璃) stays on the
 outer `UiTerminalSurface`; the editor itself has no border, fill, shadow or rounded box.
 
 ## Vue example
@@ -51,7 +51,7 @@ function submit(event: KeyboardEvent) {
 </template>
 ```
 
-- `UiTerminalSurface` composes an existing Glass Surface with accessible title and action slots.
+- `UiTerminalSurface` composes an existing Aurora Glass surface with accessible title and action slots.
 - `UiTerminalLine` renders strings as text, preserving copy/selection; `preformatted` handles ASCII banners separately.
 - `UiTerminalTranscript` has a native scroll region and nested live log; it auto-follows only while at bottom, reusing `scrollbar-immersive`.
 - `UiTerminalPrompt` owns a transparent **native** `<input>` that looks indistinguishable from inline terminal text. Do not use `UiInput` here. The prompt has a composable `segments` array (host, path, branch, runtime, time) or `#context` slot; `#segment="{ segment }"` customizes each segment's content while preserving the shared shape and colors. A text/password/search type, disabled, readonly, error, and native attrs remain available. Focus is exposed to consumers via `ref.focus()`. Enter handling and IME composition are consumer responsibilities.

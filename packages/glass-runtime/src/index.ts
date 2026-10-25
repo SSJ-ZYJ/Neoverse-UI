@@ -186,10 +186,10 @@ const getVariant = (element: Element): GlassVariant | undefined => {
 };
 
 const inheritsParentGlassEdge = (element: Element): boolean => {
-  // An independent Glass surface owns its own refractive silhouette, even
-  // when the layout around it is also Glass. In particular, Playground's
-  // Glass specimen cards must not lose the WebGL edge when the section itself
-  // becomes a Glass surface. Segmented controls own a separate control edge.
+  // An independent Aurora Glass surface owns its own refractive silhouette, even
+  // when the layout around it is also Aurora Glass. In particular, Playground's
+  // Aurora Glass specimen cards must not lose the WebGL edge when the section itself
+  // becomes an Aurora Glass surface. Segmented controls own a separate control edge.
   if (element.classList.contains('ui-segmented-control')) {
     return true;
   }

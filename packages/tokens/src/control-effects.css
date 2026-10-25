@@ -1,10 +1,10 @@
 /* Shared visual effects retain the established control identity.
-   Glass base alpha/filter belong exclusively to material.css. Colour strengths
+   Aurora Glass base alpha/filter belong exclusively to material.css. Colour strengths
    are exact compatibility values, independent of material tier opacity. */
 @layer neoverse.tokens {
   :root {
     --neoverse-effect-strength-17: 17%;
-    /* Dark command bodies expose their Glass plate without a whitening wash.
+    /* Dark command bodies expose their Aurora Glass plate without a whitening wash.
        Reuse the existing state field for hover/press instead of a grey veil. */
     --neoverse-effect-command-rest-field-dark: none;
     --neoverse-effect-command-hover-field-dark: var(--neoverse-effect-selection-field);
@@ -162,7 +162,7 @@
         transparent
       )
     );
-    /* The shared Glass bevel owns the edge. Command elevation must not add
+    /* The shared Aurora Glass bevel owns the edge. Command elevation must not add
        a second opaque white inset stroke over the sampled background. */
     --neoverse-effect-command-rest-shadow-light:
       0 3px 9px -5px rgb(14 34 44 / var(--neoverse-effect-strength-18)),
