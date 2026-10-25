@@ -1,6 +1,6 @@
-# Migrating from 0.2.x to the planned 0.3.x contract line
+# Migrating from 0.2.x to the published 0.3.0 baseline
 
-This is the migration guide for the versioned 0.3.0 release candidate, **not an announcement that packages are published**. The Version Packages PR has been merged; the exact manifest versions are listed below. Do not upgrade consumer dependencies until these versions exist on npm. The previous [0.1.x → 0.2.0 guide](migration-0.2.0.md) remains applicable to older consumers.
+The 0.3.0 baseline was published on 2026-10-21; the official Registry was rechecked on 2026-10-25. The exact versions below are available on npm; later source-only React parity and `UiTerminalEcho` additions are outside this release. See [release evidence](release-0.3.0.md). The previous [0.1.x → 0.2.0 guide](migration-0.2.0.md) remains applicable to older consumers.
 
 ## Package coordination and availability
 
@@ -21,7 +21,7 @@ Do not assign `0.3.0` to every package. The versioned manifests already contain 
 
 Vue and React now depend on Overlay Runtime alongside Motion and Tailwind; Tailwind brings Tokens and Motion. Ordinary adapter consumers do not need to import the runtime themselves. Direct runtime consumers should use its [public guide](../packages/overlay-runtime/README.md).
 
-**Publication prerequisite:** All eight package names, including Overlay Runtime, were registered on npm when checked on 2026-10-21. Follow [release preparation and publishing](releasing.md): `bun run check:release-registry` checks package-name availability only; each package's Trusted Publisher identity still requires separate review.
+**Publication evidence:** All eight versions above are present on the official Registry, and [Release 39613361164](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/39613361164) completed publication and Registry installation checks. For subsequent releases, follow [release preparation and publishing](releasing.md): `bun run check:release-registry` checks package-name availability only; it does not establish current Trusted Publisher configuration or authorization.
 
 ## Required source cutover
 
@@ -42,7 +42,7 @@ The earlier `remove-chrome-surface` Changeset described a subtle Dock default, b
 ### Framework requirements and styles
 
 - Vue now requires **`>=3.5.0 <4.0.0`**. Upgrade the consumer's Vue runtime/tooling coherently before adopting the new adapter: Field and choice controls use Vue's SSR-stable `useId`.
-- React's current manifest requires **`>=19.0.0 <20.0.0`**; the pending changes do not establish Vue/React API identity or add Vue-only components to React.
+- React's 0.3.0 manifest requires **`>=19.0.0 <20.0.0`**. That release does not include the later source-only React terminal/presentation adapters; see [current framework parity](framework-parity.md) for the unreleased additions.
 - Keep adapter code, Tokens, and compiled consumer CSS from the same approved release plan. Consumers without a Tailwind build can use the adapter `index.css` entry; do not retain an old copied vendor stylesheet after upgrading JS. Setup examples live in the [Vue](../packages/vue/README.md) and [React](../packages/react/README.md) guides.
 
 ## Forms and anchored overlays
@@ -57,20 +57,20 @@ Select now shares Overlay Runtime positioning/tracking with Popover and Dropdown
 
 ## Terminal and presentation consumers
 
-The terminal primitives and semantic roles are already implemented in this workspace. Vue exports `UiTerminalSurface`, `UiTerminalLine`, `UiTerminalTranscript`, and `UiTerminalPrompt`; use `cssVariables.components.terminal` and the shared `--neoverse-terminal-*` roles rather than a consumer-owned brand palette. Terminal rendering is presentation, not a shell emulator or command runtime.
+The terminal primitives and semantic roles are included in Vue 0.3.0. It exports `UiTerminalSurface`, `UiTerminalLine`, `UiTerminalTranscript`, and `UiTerminalPrompt`; use `cssVariables.components.terminal` and the shared `--neoverse-terminal-*` roles rather than a consumer-owned brand palette. Terminal rendering is presentation, not a shell emulator or command runtime.
 
-For shell-style command entry previously built around `UiInput`, cut over to `UiTerminalPrompt`: the editor is a borderless native input within the outer terminal Glass surface. `UiInput` remains the canonical form input, not a terminal compatibility wrapper. Command execution, Enter handling, and history remain consumer-owned. React does **not** currently export these Vue terminal adapters. Follow [terminal composition](terminal-composition.md) for examples, transcript following, theme roles, and the Maple font fallback contract; fonts are not bundled by this addition.
+For shell-style command entry previously built around `UiInput`, cut over to `UiTerminalPrompt`: the editor is a borderless native input within the outer terminal Glass surface. `UiInput` remains the canonical form input, not a terminal compatibility wrapper. Command execution, Enter handling, and history remain consumer-owned. React **0.3.0** does not export these terminal adapters; the current source adds them separately. Follow [terminal composition](terminal-composition.md) for current examples, transcript following, theme roles, and the Maple font fallback contract; fonts are not bundled by this addition.
 
-**XCA publication gate:** [CR-20261010-2A6D0E6E](../contracts/component-requests/CR-20261010-2A6D0E6E.json) remains `blocked` on formal publication and subsequent consumer verification. Its acceptance criteria require formally published variables and forbid referencing them in XCA before publication. Do not reimplement the tokens, mark the request delivered, or change XCA dependencies merely because local implementation exists. After authorized publication, verify the real XCA consumer against those criteria and record the delivery evidence through the [request workflow](component-requests.md).
+**XCA acceptance:** [CR-20261010-2A6D0E6E](../contracts/component-requests/archive/CR-20261010-2A6D0E6E.json) was delivered and archived on 2026-10-23. Published Tokens 0.3.0 contains the variables; the user confirmed local/npm Token parity and accepted XCA's local `file:` consumer evidence without requiring a dependency-source switch. See the [dated acceptance](acceptance-2026-10-20-terminal-tokens.md); do not reopen or reimplement this request.
 
-Vue also adds `UiStatCard`, `UiTimeline`, and `UiStepFlow`. They are additive, consumer-driven presentation components, not React parity promises. Their [archived delivery resolutions](../contracts/component-requests/archive/) record completed release visual and real Slides consumer validation on 2026-10-13; the component matrix records them as Stable. That evidence does not authorize publication or add missing framework adapters.
+Vue 0.3.0 also adds `UiStatCard`, `UiTimeline`, and `UiStepFlow`. Their [archived delivery resolutions](../contracts/component-requests/archive/) record completed release visual and real Slides consumer validation on 2026-10-13; the component matrix records them as Stable. React adapters for these components exist in later source, not in React 0.3.0; Vue consumer evidence does not establish React consumer validation.
 
 ## Practical upgrade and verification order
 
 1. Inventory directly consumed packages, lockfile versions, root overrides, local `file:`/link dependencies, and copied CSS. Identify chrome references, shell-style `UiInput` compositions, and local form/overlay substitutes.
-2. Prepare the source cutover and framework prerequisites against a deliberately synchronized local workspace where permitted. Follow [consumer sizing and local synchronization](consumer-sizing.md) for local artifacts; rebuilding this repository alone does not refresh stale installed copies. This local route does not override XCA's publication-only requirement.
-3. Have release owners resolve the exact Changesets plan, complete release gates, and obtain authorization for versioning/publication. Overlay Runtime's initial publication and Trusted Publisher setup must be covered. This guide performs none of those operations.
-4. Only once the required versions actually exist on the intended registry, upgrade all directly consumed UI packages to the approved coordinated versions, resolve transitive versions and overrides, refresh the lockfile, and regenerate copied/vendor CSS. Do not use one assumed version for every package or manually force unpublished transitive dependencies.
+2. Prepare the source cutover and framework prerequisites against a deliberately synchronized local workspace where permitted. Follow [consumer sizing and local synchronization](consumer-sizing.md) for local artifacts; rebuilding this repository alone does not refresh stale installed copies. XCA's accepted local dependency mode need not be changed to satisfy its archived Token request.
+3. Use the coordinated published baseline above for a 0.2.x → 0.3.0 migration. For later source-only APIs, release owners must review their own Changesets plan, complete gates, and authorize versioning/publication; this guide performs none of those operations.
+4. Upgrade all directly consumed UI packages to the approved coordinated versions, resolve transitive versions and overrides, refresh the lockfile, and regenerate copied/vendor CSS. Do not use one assumed version for every package or manually force unpublished transitive dependencies.
 5. Run the consumer's typecheck and production build. Check SSR/hydration IDs where applicable, Field label/description/message associations, required/disabled/readonly submission, controlled and uncontrolled resets, and overlay behavior on native and fallback paths.
 6. Review real pages in light/dark/system themes and at desktop/mobile widths with the normal root font size. Inspect Dock geometry/default material, terminal contrast and scrollback, forms, Badge/Skeleton/Tooltip material changes, reduced motion/transparency, and forced-colors behavior where supported. Shared sizing expectations and existing consumer checks are linked in [consumer sizing](consumer-sizing.md).
 7. Record actual consumer evidence before closing a request or promoting maturity. A passing Playground specimen, a local sync, or this migration guide alone is not release or consumer acceptance evidence.

@@ -1,8 +1,10 @@
 # Neoverse UI 0.3.0 release notes
 
-The version plan is merged. Publication is complete only when the Release workflow's
-publish and official-registry installation checks succeed; a Version Packages merge
-or a successful version-mode workflow alone does not establish npm availability.
+Published on 2026-10-21. [Release run 39613361164](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/39613361164)
+completed npm publication and official-registry installation verification. On
+2026-10-25 the eight official npm `latest` versions matched the table below; the
+seven new package tags point to `dfb84a7`. Giscus Theme retains its earlier 0.2.0 tag.
+A Version Packages merge alone is not publication evidence.
 
 ## Coordinated versions
 
@@ -41,7 +43,8 @@ See [the migration guide](migration-0.3.0.md) for complete API and upgrade detai
 
 Component maturity remains defined by the [contract matrix](component-contract-matrix.md).
 Forms and overlays retain Consumer Validation status where real-consumer acceptance
-is incomplete. Vue-only terminal/presentation additions do not promise React parity.
+is incomplete. Terminal/presentation additions were Vue-only in this release;
+later React parity and `UiTerminalEcho` source additions are not included in npm 0.3.0.
 
 ## Release verification
 

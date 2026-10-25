@@ -42,6 +42,7 @@ import { createRoot } from 'react-dom/client';
 import { mountPlaygroundGlass } from './glass-runtime';
 import { appCopy, localize } from './playground-content';
 import type { ThemeMode } from './playground-types';
+import { TextControlContractFixture } from './TextControlContractFixture';
 import {
   applyThemeMode,
   isThemeMode,
@@ -898,6 +899,7 @@ function ReactFixture() {
             </button>
             <output data-overlay-dismiss-attempts>{dismissAttempts}</output>
           </div>
+          <TextControlContractFixture />
           <form
             data-contract-form
             className="grid gap-3"
@@ -923,6 +925,7 @@ function ReactFixture() {
               options={[
                 { value: 1, label: 'First channel' },
                 { value: 2, label: 'Second channel' },
+                { value: 3, label: 'Unavailable channel', disabled: true },
               ]}
               name="channel"
               aria-label="Channel"

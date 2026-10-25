@@ -14,6 +14,7 @@ import LabSpecimenSection from '../LabSpecimenSection.vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, localized } from '../playground-content';
 import QaPreviewMatrix from '../QaPreviewMatrix.vue';
+import TextControlContractFixture from '../TextControlContractFixture.vue';
 
 const contractMode = new URLSearchParams(window.location.search).has('contract-fixtures');
 
@@ -386,5 +387,6 @@ const releaseChannelOptions = computed(() => [
       </MaterialBackdrop>
     </LabSpecimenSection>
     <FormContractFixture v-if="contractMode" />
+    <TextControlContractFixture v-if="contractMode" />
   </div>
 </template>

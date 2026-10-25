@@ -6,7 +6,7 @@ import {
   showAnchoredOverlay,
   stopOverlayTracking,
 } from '@neoverse-ui/overlay-runtime';
-import { computed, nextTick, onBeforeUnmount, ref, useAttrs, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, useAttrs, useId, watch } from 'vue';
 import { resolveAriaInvalid } from './form-control';
 import { presence } from './presence';
 import type { FormControlValue, SelectOption, SelectProps } from './types';
@@ -23,6 +23,7 @@ const attrs = useAttrs();
 const detailsRef = ref<HTMLDetailsElement | null>(null);
 const popoverRef = ref<HTMLElement | null>(null);
 const open = ref(false);
+const listboxId = `${useId()}-listbox`;
 
 const disabled = computed(() => props.disabled);
 const readonlyState = computed(() => props.readonly);
@@ -110,6 +111,31 @@ function onToggle(event: Event) {
 function onTriggerClick(event: MouseEvent) {
   if (!blocked.value) return;
   event.preventDefault();
+}
+
+async function onTriggerKeydown(event: KeyboardEvent) {
+  if (
+    event.defaultPrevented ||
+    blocked.value ||
+    (event.key !== 'ArrowDown' && event.key !== 'ArrowUp')
+  )
+    return;
+  event.preventDefault();
+  if (!detailsRef.value) return;
+  detailsRef.value.open = true;
+  open.value = true;
+  await openPopover();
+  const panel = popoverRef.value;
+  if (panel === null) return;
+  const selected = panel.querySelector<HTMLButtonElement>(
+    '.ui-select__option[aria-selected="true"]:not(:disabled)',
+  );
+  if (selected) {
+    selected.focus();
+    return;
+  }
+  const options = panel.querySelectorAll<HTMLButtonElement>('.ui-select__option:not(:disabled)');
+  (event.key === 'ArrowDown' ? options[0] : options[options.length - 1])?.focus();
 }
 
 function markTriggerPointerFocus() {
@@ -207,10 +233,12 @@ onBeforeUnmount(() => {
       role="combobox"
       aria-haspopup="listbox"
       :aria-expanded="open && !blocked"
+      :aria-controls="listboxId"
       :aria-disabled="blocked || undefined"
       :aria-invalid="ariaInvalid"
       :data-validation="props.validation"
       @click="onTriggerClick"
+      @keydown="onTriggerKeydown"
       @pointerdown="markTriggerPointerFocus"
       @blur="clearTriggerFocusOrigin"
     >
@@ -224,6 +252,7 @@ onBeforeUnmount(() => {
 
     <div
       ref="popoverRef"
+      :id="listboxId"
       class="ui-select__popover nv-presence"
       role="listbox"
       popover="auto"

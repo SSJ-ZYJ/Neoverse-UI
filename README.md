@@ -14,7 +14,7 @@
 
 </div>
 
-Vue and React provide the same 35 components, sharing themes, styles, and motion. Use the components directly, or build your own layouts with CSS variables and Tailwind CSS.
+Vue and React provide the same 36 components in the current source, sharing themes, styles, and motion. Use the components directly, or build your own layouts with CSS variables and Tailwind CSS.
 
 ## Installation
 

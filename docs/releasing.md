@@ -13,10 +13,13 @@ Neoverse UI publishes the following public packages under the npm `@neoverse-ui`
 
 `apps/playground` is an internal workspace and is never published.
 
-The merged 0.3.0 version plan contains Tokens, Tailwind, Vue, React and Overlay
-Runtime at 0.3.0, Motion and Glass Runtime at 0.2.1, and unchanged Giscus Theme at
-0.2.0. See [release notes](release-0.3.0.md). Versioned manifests are not proof of
-npm publication; verify registry and Trusted Publisher state at publication time.
+The 0.3.0 baseline was published on 2026-10-21: Tokens, Tailwind, Vue, React and
+Overlay Runtime at 0.3.0, Motion and Glass Runtime at 0.2.1, and unchanged Giscus
+Theme at 0.2.0. On 2026-10-25 all eight official-registry `latest` versions matched
+these manifests. [Release run 39613361164](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/39613361164)
+completed publication and official-registry installation verification; the seven
+new package tags point to `dfb84a7`. See [release notes](release-0.3.0.md).
+Later source changes and pending Changesets are not part of that published baseline.
 
 ## Release preparation versus publishing
 
@@ -54,9 +57,11 @@ On 2026-10-20 this check found seven registered packages and
 On 2026-10-21 all eight names were registered, including Overlay Runtime at 0.2.0;
 its name no longer requires bootstrap for the 0.3.0 release. This does not establish
 that its Trusted Publisher identity is configured correctly.
-The terminal token request has completed its local code and XCA-Portal validation and is
-`blocked` solely on the formal publication criterion. Do not upgrade consumers to
-unpublished variables; see [terminal token acceptance](acceptance-2026-10-20-terminal-tokens.md).
+The terminal token request was delivered and archived on 2026-10-23 after published
+Tokens 0.3.0 contents and XCA-Portal's accepted local `file:` consumption were verified.
+The user accepted local/npm Token parity without changing dependency sources; see
+[terminal token acceptance](acceptance-2026-10-20-terminal-tokens.md) and the
+[archived resolution](../contracts/component-requests/archive/CR-20261010-2A6D0E6E.json).
 
 ## Release gates
 
@@ -72,7 +77,49 @@ bun changeset status
 
 `release:check` runs non-mutating Biome checks, text/style/Tailwind checks, typechecks, tests, and build. It verifies every public package, rejects leaked `workspace:` protocols and source/test/playground artifacts, and checks that packed internal runtime dependency ranges include the corresponding workspace release versions before installing local overrides. It then installs the generated package contents into a temporary clean consumer for JS, CSS, and TypeScript smoke tests. Local overrides prove package usability, not npm availability. The full Playwright gate must also finish with zero failures; conditional skips must have a documented design reason. Review expected/actual/diff images before accepting intentional snapshot changes, then rerun without snapshot updates. The release workflow runs these visual gates before packing.
 
+`verify:published` checks the installed official packages against the published
+0.3.0 API baseline. Candidate-only exports and types (React parity and
+`UiTerminalEcho`) are additionally required by local tarball verification, not by
+checks of an older published version. Both modes retain JS/CSS/type checks and
+published mode still verifies exact versions and the resolved dependency graph.
+When a candidate is released, promote its API assertions into the shared baseline;
+do not remove them from candidate verification to make an old registry package pass.
+
+Run release gates in an isolated checkout/copy when another `bun dev` is active.
+The development watcher intentionally writes readable CSS to the same `dist`
+paths as production builds; concurrent writes can replace a minified package
+artifact during verification. Do not stop a user's development service or relax
+package checks to accept that race. Exclude `dist` and `*.tsbuildinfo` together
+when preparing a clean validation copy, then install with the frozen lockfile.
+
 The repository and all public packages use the MIT license. `scripts/verify-packages.ts` verifies the public package metadata and package contents before release.
+
+### 2026-10-25 Batch A baseline audit
+
+- Validated source based on local `dev` `f35c566` plus this audit's non-visual
+  fixes. The one unpushed commit remains unpushed; no versioning or publication ran.
+- Isolated Windows (Bun 1.4.4) and native Linux/WSL (Bun 1.4.0) both passed
+  `release:check`, including lint, all workspace typechecks/unit/contract tests,
+  builds and eight local-tarball clean-consumer JS/CSS/type smokes.
+- `verify:published` initially failed because candidate-only Echo/React exports
+  were required from npm 0.3.0. Separating those assertions from the published
+  baseline preserved candidate checks; official-registry installation then passed
+  for all eight packages on both platforms.
+- Non-update Playwright runs: Windows **112 passed**, Linux **94 passed**, zero
+  failures. Both covered `terminal-composition`, `terminal-surface`,
+  `terminal-resize`, `terminal-theme-contract`, `react-parity` and
+  `component-interactions`; Windows additionally covered `control-identity`,
+  `dock-language-proportions` and `react-theme`. No screenshot baselines changed.
+  This was targeted coverage, not a rerun of the full visual suite.
+- Linux ran on Arch/WSL using Playwright's Ubuntu 24.04 fallback Chromium build;
+  it is local native Linux evidence, not a new GitHub Actions run. The latest
+  successful remote Linux/Windows run remains
+  [40107362521 at 34bd4a1](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/40107362521).
+- Neoverse-Doc retained UI 0.1.0. Three tarballs were replaced only by exact npm
+  versions with identical SHA-512 integrity. Frozen installation, typecheck and
+  production build passed (93 HTML pages, 72 Mermaid assets); generated Giscus
+  source CSS was restored after the build. Remaining historical artifacts still
+  block standalone clean-checkout installation; see [consumer audit](consumer-sizing.md#2026-10-25-消费依赖核查).
 
 ### CI and visual baselines
 
@@ -183,11 +230,11 @@ Choose the affected packages and the appropriate SemVer bump. Commit the generat
 
 For the 0.2.0 line, breaking changes from 0.1.x use a `minor` bump because every public package is still pre-1.0. The migration contract is documented in [migration-0.2.0.md](migration-0.2.0.md).
 
-For the pending 0.3.x line, use [migration-0.3.0.md](migration-0.3.0.md).
-Packages are not fixed or linked as one version group: the current plan has minor bumps
+For migration to the published 0.3.0 baseline, use [migration-0.3.0.md](migration-0.3.0.md).
+Packages are not fixed or linked as one version group: that release used minor bumps
 for Tokens, Tailwind, Overlay Runtime and both adapters, patch bumps for Motion and
-Glass Runtime, and no Giscus Theme bump. Inspect the actual version PR rather than
-assigning `0.3.0` to every dependency.
+Glass Runtime, and no Giscus Theme bump. Pending Changesets describe later source
+changes; inspect their actual release plan rather than assigning one version to every dependency.
 
 During release-candidate work, validate the pending release plan with:
 

@@ -647,12 +647,14 @@ export function UiSelect({
   className,
   onClick,
   onPointerDown,
+  onKeyDown,
   onBlur,
   'aria-invalid': ariaInvalid,
   ...props
 }: UiSelectProps) {
   const [open, setOpen] = useState(false);
   const detailsRef = useRef<HTMLDetailsElement | null>(null);
+  const listboxId = `${useId()}-listbox`;
   const blocked = disabled || readOnly;
   useEffect(() => {
     if (!blocked) return;
@@ -734,12 +736,39 @@ export function UiSelect({
         role="combobox"
         aria-haspopup="listbox"
         aria-expanded={open && !blocked}
+        aria-controls={listboxId}
         aria-disabled={blocked || undefined}
         aria-invalid={ariaInvalid ?? (validation === 'error' || undefined)}
         data-validation={validation}
         onClick={(event) => {
           if (disabled || readOnly) event.preventDefault();
           onClick?.(event);
+        }}
+        onKeyDown={(event) => {
+          onKeyDown?.(event);
+          if (
+            event.defaultPrevented ||
+            blocked ||
+            (event.key !== 'ArrowDown' && event.key !== 'ArrowUp')
+          )
+            return;
+          event.preventDefault();
+          const details = detailsRef.current;
+          if (details === null) return;
+          details.open = true;
+          setOpen(true);
+          openSelectPopover(details);
+          const selected = details.querySelector<HTMLButtonElement>(
+            '.ui-select__option[aria-selected="true"]:not(:disabled)',
+          );
+          if (selected) {
+            selected.focus();
+            return;
+          }
+          const enabled = details.querySelectorAll<HTMLButtonElement>(
+            '.ui-select__option:not(:disabled)',
+          );
+          (event.key === 'ArrowDown' ? enabled[0] : enabled[enabled.length - 1])?.focus();
         }}
         onPointerDown={(event) => {
           event.currentTarget.dataset.neoverseFocusOrigin = 'pointer';
@@ -763,6 +792,7 @@ export function UiSelect({
       </summary>
 
       <div
+        id={listboxId}
         className="ui-select__popover nv-presence"
         role="listbox"
         popover="auto"
