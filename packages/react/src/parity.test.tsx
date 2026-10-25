@@ -10,6 +10,7 @@ import {
   UiStatCard,
   UiStatusIndicator,
   UiStepFlow,
+  UiTerminalEcho,
   UiTerminalLine,
   UiTerminalPrompt,
   UiTerminalSurface,
@@ -201,6 +202,29 @@ test('terminal composition forwards native input constraints without leaking sug
   expect(html).not.toContain('suggestion=');
   const ids = [...html.matchAll(/(?:for|id)="([^"]+)"/g)].map((match) => match[1]);
   expect(ids[0]).toBe(ids[1]);
+});
+
+test('terminal echo renders recorded commands with prompt chrome and no editor', () => {
+  const html = renderToStaticMarkup(
+    <UiTerminalEcho
+      text="<img src=x onerror=alert(1)>"
+      segments={[
+        { id: 'host', label: 'visitor@xca', tone: 'host' },
+        { id: 'path', label: '~', tone: 'path' },
+      ]}
+    />,
+  );
+  expect(html).not.toContain('<input');
+  expect(html).toContain('data-readonly="true"');
+  expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
+  expect(html).toContain('data-tone="host"');
+  expect(html).toContain('data-tone="path"');
+  expect(html).toContain('ui-terminal-prompt__lead');
+  expect(html).toContain('ui-terminal-echo__text');
+  const plain = renderToStaticMarkup(<UiTerminalEcho text={'echo 你好\n  next'} />);
+  expect(plain).not.toContain('ui-terminal-prompt__context');
+  expect(plain).toContain('echo 你好\n  next');
+  expect(plain).not.toMatch(/<(input|button|label)|tabindex=/i);
 });
 
 test('scrollbar is safe during server rendering and hides decorative controls from accessibility', () => {

@@ -296,7 +296,7 @@ try {
       `import * as ReactAdapters from '@neoverse-ui/react';\n` +
       `import { UiCheckbox as ReactUiCheckbox, UiRadioGroup as ReactUiRadioGroup, UiSwitch as ReactUiSwitch, UiField as ReactUiField, UiPopover as ReactUiPopover, UiDropdownMenu as ReactUiDropdownMenu, type UiFieldControlAttrs } from '@neoverse-ui/react';\n` +
       `import { UiButton, UiNotice, UiTooltipSurface, UiPresence as VueUiPresence, presence, staggerStyle } from '@neoverse-ui/vue';\n` +
-      `import { UiTerminalSurface, UiTerminalLine, UiTerminalTranscript, UiTerminalPrompt, type TerminalSurfaceProps, type TerminalLineProps, type TerminalTranscriptProps, type TerminalPromptProps } from '@neoverse-ui/vue';\n` +
+      `import { UiTerminalSurface, UiTerminalLine, UiTerminalTranscript, UiTerminalPrompt, UiTerminalEcho, type TerminalEchoProps, type TerminalSurfaceProps, type TerminalLineProps, type TerminalTranscriptProps, type TerminalPromptProps } from '@neoverse-ui/vue';\n` +
       `import { UiStatCard, UiTimeline, UiStepFlow, type StatCardProps, type TimelineProps, type StepFlowProps } from '@neoverse-ui/vue';\n` +
       `import { UiCheckbox as VueUiCheckbox, UiRadioGroup as VueUiRadioGroup, UiSwitch as VueUiSwitch, UiField as VueUiField, UiPopover as VueUiPopover, UiDropdownMenu as VueUiDropdownMenu, type FieldControlAttrs } from '@neoverse-ui/vue';\n` +
       `import { showAnchoredOverlay, hideAnchoredOverlay, stopOverlayTracking, positionAnchoredOverlay, resolveAnchoredPosition, type AnchoredOverlayOptions } from '@neoverse-ui/overlay-runtime';\n` +
@@ -304,13 +304,14 @@ try {
       `import { createGlassRenderer } from '@neoverse-ui/glass-runtime';\n` +
       `import { startViewTransition, createParticleDissolve, particleDissolvePresets, presenceVariants } from '@neoverse-ui/motion';\n` +
       `if (!ReactUiAction || !UiButton || !UiNotice || !UiTooltipSurface || !cssVariables || !createGlassRenderer) throw new Error('public JS exports are incomplete');\n` +
-      `for (const name of ['UiControlSurface', 'UiNavigationItem', 'UiSegmentedControl', 'UiBadge', 'UiStatusIndicator', 'UiTooltipSurface', 'UiSkeleton', 'UiScrollbar', 'UiTerminalSurface', 'UiTerminalTranscript', 'UiTerminalLine', 'UiTerminalPrompt', 'UiStatCard', 'UiTimeline', 'UiStepFlow'] as const) if (typeof ReactAdapters[name] !== 'function') throw new Error('missing React adapter: ' + name);\n` +
+      `for (const name of ['UiControlSurface', 'UiNavigationItem', 'UiSegmentedControl', 'UiBadge', 'UiStatusIndicator', 'UiTooltipSurface', 'UiSkeleton', 'UiScrollbar', 'UiTerminalSurface', 'UiTerminalTranscript', 'UiTerminalLine', 'UiTerminalPrompt', 'UiTerminalEcho', 'UiStatCard', 'UiTimeline', 'UiStepFlow'] as const) if (typeof ReactAdapters[name] !== 'function') throw new Error('missing React adapter: ' + name);\n` +
       `const reactSegments: ReactAdapters.UiSegmentedControlProps = { options: [{ value: 'en', label: 'English' }], value: 'en', onValueChange: value => { void value; } };\n` +
       `const reactPrompt: ReactAdapters.UiTerminalPromptProps = { label: 'Command', value: 'he', suggestion: 'help', segments: [{ id: 'host', label: 'local', tone: 'host' }] };\n` +
+      `const reactEcho: ReactAdapters.UiTerminalEchoProps = { text: 'echo hello', segments: reactPrompt.segments };\n` +
       `const reactMetric: ReactAdapters.UiStatCardProps = { label: 'Latency', value: 0, unit: 'ms' };\n` +
-      `void [reactSegments, reactPrompt, reactMetric];\n` +
+      `void [reactSegments, reactPrompt, reactEcho, reactMetric];\n` +
       `if (![ReactUiCheckbox, ReactUiRadioGroup, ReactUiSwitch, ReactUiField, ReactUiPopover, ReactUiDropdownMenu, VueUiCheckbox, VueUiRadioGroup, VueUiSwitch, VueUiField, VueUiPopover, VueUiDropdownMenu].every(Boolean)) throw new Error('public form/overlay exports are incomplete');\n` +
-      `if (![UiTerminalSurface, UiTerminalLine, UiTerminalTranscript, UiTerminalPrompt].every(Boolean)) throw new Error('public terminal exports are incomplete');\n` +
+      `if (![UiTerminalSurface, UiTerminalLine, UiTerminalTranscript, UiTerminalPrompt, UiTerminalEcho].every(Boolean)) throw new Error('public terminal exports are incomplete');\n` +
       `const statCardProps: StatCardProps = { label: 'Latency', value: 0, unit: 'ms' };\n` +
       `const timelineProps: TimelineProps = { items: [{ id: 'release', title: 'Release', time: 'October', dateTime: '2026-10' }] };\n` +
       `const stepFlowProps: StepFlowProps = { items: [{ id: 'build', title: 'Build', status: 'current', statusLabel: 'In progress' }] };\n` +
@@ -320,6 +321,8 @@ try {
       `const terminalLineProps: TerminalLineProps = { text: 'Ready', tone: 'normal' };\n` +
       `const terminalTranscriptProps: TerminalTranscriptProps = { followTail: true };\n` +
       `const terminalPromptProps: TerminalPromptProps = { label: 'Smoke input', segments: [{ id: 'host', label: 'neoverse', tone: 'host' }] };\n` +
+      `const terminalEchoProps: TerminalEchoProps = { text: 'echo hello', segments: terminalPromptProps.segments };\n` +
+      `void terminalEchoProps;\n` +
       `if (terminalSurfaceProps.title !== 'Smoke terminal' || terminalLineProps.text !== 'Ready' || !terminalTranscriptProps.followTail || terminalPromptProps.label !== 'Smoke input' || cssVariables.components.terminal.cursor !== '--neoverse-terminal-cursor') throw new Error('public terminal types/tokens are incomplete');\n` +
       `if (![showAnchoredOverlay, hideAnchoredOverlay, stopOverlayTracking, positionAnchoredOverlay, resolveAnchoredPosition].every((entry) => typeof entry === 'function')) throw new Error('public Overlay Runtime exports are incomplete');\n` +
       `const vueFieldAttrs: FieldControlAttrs = { id: 'email', 'aria-describedby': 'email-help', required: true };\n` +

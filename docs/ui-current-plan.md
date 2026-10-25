@@ -1,14 +1,14 @@
 # Neoverse-UI 当前工作计划
 
-更新：2026-10-20。以本地 `dev` 工作区及 `contracts/component-matrix.json`、需求登记为准。**本页只记录未完成事项**，已完成验收不再复制进待办正文。
+更新：2026-10-25。以本地 `dev` 工作区及 `contracts/component-matrix.json`、需求登记为准。**本页只记录未完成事项**，已完成验收不再复制进待办正文。
 
 ## 当前基线
 
-- 组件矩阵：35 个公开组件，21 个 Stable、14 个 Consumer Validation。成熟度必须以组件矩阵及其测试/真实消费证据为准。
+- 组件矩阵：36 个公开组件，21 个 Stable、15 个 Consumer Validation。`UiTerminalEcho` 已补齐共享提示符回显、Vue/React 浏览器与 XCA 消费证据，未自动晋升 Stable。成熟度必须以组件矩阵及其测试/真实消费证据为准。
 - 2026-10-13 已完成：`UiStatCard`、`UiTimeline`、`UiStepFlow`、`UiTerminalPrompt`、`UiTerminalSurface`、`UiTerminalLine`、`UiTerminalTranscript` 的真实消费与视觉验收；React Breadcrumb / Dock 浏览器运行态补齐。交付依据见[归档需求的 resolution](../contracts/component-requests/archive/)；旧的独立验收文档当前不在工作区。
 - 2026-10-18 用户明确批准以当前页面视觉为新基准：有效截图基线为桌面/移动各 30 张，46 项截图测试在更新后与非更新模式下均通过；已移除 12 张无测试引用的历史快照。详见 [2026-10-18 验收记录](acceptance-2026-10-18.md)。
 - 2026-10-19 本地浏览器门禁已通过：Playwright 714 项，675 通过、0 失败、39 跳过，`bun run release:check` 通过；移动端触控、浮层定位、预览锚点以及桌面字体/加载时序已收口。详见 [2026-10-19 验收记录](acceptance-2026-10-19.md)。
-- 活动需求登记仅剩 `CR-20261010-2A6D0E6E`。已交付或拒绝的请求放在 `contracts/component-requests/archive/`，仍由 CLI 校验和提供历史查询，**不得作为待实现事项再次分派**。
+- 活动需求以 `bun run requests list` 为准。已交付或拒绝的请求放在 `contracts/component-requests/archive/`，仍由 CLI 校验和提供历史查询，**不得作为待实现事项再次分派**。
 - 相关修复已由用户提交至本地 `dev` 的 `dd5f374`（当前比 `origin/dev` 超前一个提交），但尚未推送、执行版本落盘或 npm 发布。
 - 2026-10-19 晚间补充浏览器稳定性复核：在不复用既有 Playground 服务的受控环境中，高并发专项 165 通过/0 失败/15 条件跳过，完整 714 项连续两轮各 **675 通过、0 失败、39 跳过**。历史间歇性超时的确切根因尚未证实，远端 CI 仍是发布前必要门禁，见[验收记录](acceptance-2026-10-19.md)。
 

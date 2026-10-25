@@ -462,6 +462,35 @@
       }
     },
     {
+      "name": "UiTerminalEcho",
+      "track": "consumer-driven",
+      "maturity": "consumer-validation",
+      "tokens": "stable",
+      "css": "stable",
+      "vue": "stable",
+      "react": "stable",
+      "unit": "stable",
+      "visual": "release",
+      "consumer": "validated",
+      "runtime": "validated",
+      "evidence": [
+        "packages/vue/src/terminal.test.ts",
+        "packages/react/src/parity.test.tsx",
+        "tests/visual/terminal-composition.spec.ts",
+        "tests/visual/terminal-surface.spec.ts",
+        "tests/visual/react-parity.spec.ts",
+        "docs/terminal-composition.md",
+        "../XCA-Portal/app/features/terminal/components/TerminalTranscript.vue",
+        "../XCA-Portal/tests/e2e/terminal-shared-ui.spec.ts",
+        "../XCA-Portal/tests/e2e/terminal-visual-acceptance.spec.ts"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "validated",
+        "consumer": "pending"
+      }
+    },
+    {
       "name": "UiTerminalSurface",
       "track": "consumer-driven",
       "maturity": "stable",

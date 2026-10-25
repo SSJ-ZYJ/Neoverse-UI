@@ -2,7 +2,8 @@
   .ui-terminal-surface,
   .ui-terminal-line,
   .ui-terminal-transcript,
-  .ui-terminal-prompt {
+  .ui-terminal-prompt,
+  .ui-terminal-echo {
     font-variant-ligatures: common-ligatures contextual;
     font-feature-settings:
       'liga' 1,
@@ -130,7 +131,8 @@
 
   /* The prompt looks like terminal output. Its editor remains a real, accessible
      native input for IME, selection, caret, password masking and mobile keyboards. */
-  .ui-terminal-prompt {
+  .ui-terminal-prompt,
+  .ui-terminal-echo {
     display: flex;
     min-width: 0;
     flex-direction: column;
@@ -341,6 +343,45 @@
 
   .ui-terminal-prompt[data-error='true'] .ui-terminal-prompt__symbol {
     color: var(--neoverse-effect-status-danger-text);
+  }
+
+  /* Recorded commands keep the same prompt chrome as the live editor, but as a
+     static text line: no input, no caret, no focus, selection still works. */
+  .ui-terminal-echo {
+    user-select: text;
+  }
+
+  .ui-terminal-echo__entry {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: baseline;
+    gap: var(--neoverse-space-2);
+    white-space: pre-wrap;
+  }
+
+  .ui-terminal-echo__text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: var(--neoverse-terminal-command);
+    font: inherit;
+    font-variant-ligatures: inherit;
+    font-feature-settings: inherit;
+  }
+
+  .ui-terminal-echo[data-error='true'] .ui-terminal-prompt__symbol {
+    color: var(--neoverse-effect-status-danger-text);
+  }
+
+  .ui-terminal-echo ::selection,
+  .ui-terminal-echo::selection {
+    background: var(--neoverse-terminal-selection);
+  }
+
+  @media (forced-colors: active) {
+    .ui-terminal-echo__text {
+      color: CanvasText;
+    }
   }
 
   @media (forced-colors: active) {

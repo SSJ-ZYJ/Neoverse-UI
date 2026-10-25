@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, useAttrs, useId, watch } from 'vue';
+import TerminalPromptSegments from './TerminalPromptSegments.vue';
 import type { TerminalPromptProps, TerminalPromptSegment } from './types';
 
 defineOptions({ inheritAttrs: false });
@@ -77,18 +78,11 @@ defineExpose({ focus });
   >
     <div v-if="props.segments.length > 0 || $slots.context" class="ui-terminal-prompt__context">
       <slot name="context">
-        <span class="ui-terminal-prompt__lead" aria-hidden="true">
-          <span /><span /><span />
-        </span>
-        <span
-          v-for="segment in props.segments"
-          :key="segment.id"
-          class="ui-terminal-prompt__segment"
-          :data-tone="segment.tone ?? 'runtime'"
-          :title="segment.label"
-        >
-          <slot name="segment" :segment="segment">{{ segment.label }}</slot>
-        </span>
+        <TerminalPromptSegments :segments="props.segments">
+          <template #segment="{ segment }">
+            <slot name="segment" :segment="segment">{{ segment.label }}</slot>
+          </template>
+        </TerminalPromptSegments>
       </slot>
     </div>
     <label class="ui-terminal-prompt__entry" :for="resolvedId">

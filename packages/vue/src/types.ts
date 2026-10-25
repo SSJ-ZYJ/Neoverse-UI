@@ -262,6 +262,14 @@ export interface TerminalPromptProps {
   error?: boolean;
 }
 
+export interface TerminalEchoProps {
+  /** Recorded command text. Rendered as plain text; never interpreted. */
+  text: string;
+  symbol?: string;
+  segments?: readonly TerminalPromptSegment[];
+  error?: boolean;
+}
+
 export interface TerminalSurfaceProps {
   title: string;
   ariaLabel?: string;

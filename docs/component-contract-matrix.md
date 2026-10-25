@@ -63,6 +63,7 @@ Column values:
 | `UiSkeleton` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiScrollbar` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiTerminalPrompt` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
+| `UiTerminalEcho` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiTerminalSurface` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiTerminalLine` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiTerminalTranscript` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
@@ -71,6 +72,8 @@ Column values:
 | `UiStepFlow` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 
 The existing Stable / Release / Consumer statuses above retain previously established Vue or shared-component evidence. They do not certify the newly added React adapters in real products. `reactValidation` in the machine-readable matrix separately records their browser runtime as validated and their release visual / real consumer validation as pending. See [framework parity](framework-parity.md) for scope and evidence.
+
+`UiTerminalEcho` additionally has Vue/React prompt-context screenshots and XCA recorded-command consumer evidence. Its React `reactValidation.visual` is validated, while `reactValidation.consumer` remains pending; no real React product consumption or automatic Stable promotion is claimed.
 
 ## Change policy
 

@@ -116,7 +116,7 @@ All of these components are available in both Vue and React:
 | Popovers and menus | `UiPopover`, `UiDropdownMenu` |
 | Status and feedback | `UiBadge`, `UiStatusIndicator`, `UiNotice`, `UiTooltipSurface`, `UiSkeleton` |
 | Data and progress | `UiTable`, `UiDisclosure`, `UiStatCard`, `UiTimeline`, `UiStepFlow` |
-| Terminal interfaces | `UiTerminalSurface`, `UiTerminalTranscript`, `UiTerminalLine`, `UiTerminalPrompt` |
+| Terminal interfaces | `UiTerminalSurface`, `UiTerminalTranscript`, `UiTerminalLine`, `UiTerminalPrompt`, `UiTerminalEcho` |
 | Scrolling and transitions | `UiScrollbar`, `UiPresence` |
 
 Buttons offer `primary`, `secondary`, and `ghost` variants, with `sm`, `md`, and `lg` sizes. Icon buttons use `label` for their accessible name. Form controls support disabled, read-only, and validation states. Segmented controls and menus support keyboard navigation.
