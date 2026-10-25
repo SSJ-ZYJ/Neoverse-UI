@@ -186,7 +186,6 @@ export const moduleGroups = [
   moduleIds: readonly ModuleId[];
 }[];
 
-export type ModuleGroupId = (typeof moduleGroups)[number]['id'];
 export const specimenKinds = ['foundation', 'component', 'composition'] as const;
 export type SpecimenKind = (typeof specimenKinds)[number];
 

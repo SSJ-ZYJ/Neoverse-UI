@@ -112,6 +112,18 @@ jobs:
           name: verified-workspace-assets
           path: .
 
+      # The browser download is the single most variable step in this job:
+      # observed runs took 21-28s when the Playwright CDN was healthy and
+      # 181s/648s when it was not. Cache the pinned build keyed by the lockfile
+      # that pins the Playwright version so shards only download on a bump.
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
       - name: Install Chromium for visual checks
         run: bunx playwright install --with-deps chromium
 
@@ -172,6 +184,14 @@ jobs:
       # once here for Windows Playwright instead of duplicating the full gate.
       - name: Build Windows browser fixtures
         run: bun run build
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
 
       - name: Install Chromium for browser interaction checks
         run: bunx playwright install chromium

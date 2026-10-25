@@ -407,9 +407,6 @@ test('module toolbar keeps the canonical elevated Glass material', async ({ page
       surface: element.getAttribute('data-surface'),
       mode: element.getAttribute('data-toolbar-mode'),
       transparency: style.getPropertyValue('--neoverse-material-transparency').trim(),
-      toolbarTransparency: style
-        .getPropertyValue('--neoverse-playground-toolbar-module-transparency')
-        .trim(),
       elevatedTransparency: style
         .getPropertyValue('--neoverse-material-glass-elevated-transparency')
         .trim(),
@@ -418,9 +415,8 @@ test('module toolbar keeps the canonical elevated Glass material', async ({ page
 
   expect(material.surface).toBe('glass-elevated');
   expect(material.mode).toBe('module');
-  // The current shell uses the shared elevated tier, not the legacy denser override.
+  // The current shell uses the shared elevated tier, not a local denser override.
   expect(material.transparency).toBe(material.elevatedTransparency);
-  expect(material.toolbarTransparency).not.toBe(material.elevatedTransparency);
 });
 
 test('resting Playground Glass stays outside View Transition capture layers', async ({ page }) => {

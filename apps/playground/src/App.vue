@@ -24,6 +24,7 @@ import {
   type SpecimenId,
   type SpecimenKind,
   specimenKinds,
+  specimensForModule,
 } from './lab-modules';
 import {
   appCopy,
@@ -204,9 +205,7 @@ function setShowcaseSurface(value: string): void {
   }
 }
 const catalogueSpecimens = sectionsByGroup.flatMap((group) =>
-  group.modules.flatMap((module) =>
-    labSpecimens.filter((specimen) => specimen.moduleId === module.id),
-  ),
+  group.modules.flatMap((module) => specimensForModule(module.id)),
 );
 const filteredSpecimens = computed(() => {
   const query = catalogueQuery.value.trim().toLowerCase();
