@@ -665,6 +665,25 @@ export function UiSelect({
     }
     setOpen(false);
   }, [blocked]);
+
+  // The overlay runtime owns document/window listeners while a panel is open.
+  // Unmounting an open Select must hand that tracking back, otherwise the
+  // listeners keep detached DOM alive for the page lifetime. Tracking is keyed
+  // by the overlay element, so hold that element rather than re-resolving it
+  // from a ref that React has already detached.
+  const overlayRef = useRef<HTMLElement | null>(null);
+  useEffect(
+    () => () => {
+      const overlay = overlayRef.current;
+      if (overlay === null) return;
+      stopOverlayTracking(overlay);
+      if (typeof overlay.showPopover === 'function' && overlay.matches(':popover-open')) {
+        overlay.hidePopover();
+      }
+      overlay.classList.remove('ui-select__popover--fallback-open');
+    },
+    [],
+  );
   const selected = options.find((option) => String(option.value) === String(value ?? ''));
 
   const focusRelativeOption = (current: HTMLButtonElement, direction: 1 | -1) => {
@@ -793,6 +812,11 @@ export function UiSelect({
 
       <div
         id={listboxId}
+        ref={(element) => {
+          // Keep the last attached element: React detaches refs before passive
+          // effect cleanup, and the runtime cleanup needs the element identity.
+          if (element !== null) overlayRef.current = element;
+        }}
         className="ui-select__popover nv-presence"
         role="listbox"
         popover="auto"

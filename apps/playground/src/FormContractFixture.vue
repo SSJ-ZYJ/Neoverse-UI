@@ -10,6 +10,10 @@ const options = [
   { value: 2, label: 'Second channel' },
   { value: 3, label: 'Unavailable channel', disabled: true },
 ];
+const unnamedOptions = [
+  { value: 'first', label: 'Unnamed first' },
+  { value: 'second', label: 'Unnamed second' },
+];
 
 function resetControlledForm(event: Event) {
   event.preventDefault();
@@ -49,7 +53,32 @@ function resetControlledForm(event: Event) {
     <UiCheckbox model-value disabled name="disabled" value="yes" data-contract-disabled-checkbox
       >Disabled notifications</UiCheckbox
     >
+    <UiSwitch model-value disabled name="disabled-sync" value="yes" data-contract-disabled-switch
+      >Disabled synchronization</UiSwitch
+    >
+    <UiRadioGroup
+      :options="unnamedOptions"
+      aria-label="Unnamed radio group"
+      data-contract-radio-unnamed
+    />
     <button type="reset" data-contract-reset>Reset controlled form</button>
+    <div class="ui-choice-trap">
+      <UiCheckbox
+        model-value
+        value="yes"
+        data-contract-checkbox-reject
+        @update:model-value="() => undefined"
+        >Reject updates</UiCheckbox
+      >
+      <UiSwitch
+        model-value
+        value="yes"
+        data-contract-switch-reject
+        @update:model-value="() => undefined"
+        >Reject updates</UiSwitch
+      >
+      <output data-choice-trap-state>true</output>
+    </div>
     <output data-contract-form-state
       >{{ notifications }}
       / {{ channel }} / {{ sync }} / {{ typeof channel }}</output

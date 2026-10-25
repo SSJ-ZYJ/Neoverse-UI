@@ -187,6 +187,23 @@ function installDismiss(options: AnchoredOverlayOptions): () => void {
     options.onDismiss?.('outside');
   };
 
+  // Native popovers dismiss on light-dismiss interactions (outside pointer
+  // input, Escape) but Chromium keeps an open popover when keyboard focus
+  // walks out of the panel. The fallback path has no dismissal at all. Both
+  // modes need this focusout handler to satisfy the APG menu/listbox pattern.
+  //
+  // Only a focus change that lands on another element counts: pointer-driven
+  // dismissal already ran through onPointerDown/was accepted by the parent,
+  // and re-firing here would double-count a single dismiss request.
+  const onFocusOut = (event: FocusEvent) => {
+    if (!isOverlayOpen(options.overlay, options.fallbackOpenClass)) return;
+    const next = event.relatedTarget;
+    if (!(next instanceof Node)) return;
+    if (options.overlay.contains(next) || options.trigger.contains(next)) return;
+    hideAnchoredOverlay(options);
+    options.onDismiss?.('outside');
+  };
+
   const onKeydown = (event: KeyboardEvent) => {
     if (event.key !== 'Escape') return;
     if (!isOverlayOpen(options.overlay, options.fallbackOpenClass)) return;
@@ -199,9 +216,11 @@ function installDismiss(options: AnchoredOverlayOptions): () => void {
   if (!supportsPopover(options.overlay)) {
     document.addEventListener('pointerdown', onPointerDown, true);
   }
+  document.addEventListener('focusout', onFocusOut, true);
   document.addEventListener('keydown', onKeydown, true);
   return () => {
     document.removeEventListener('pointerdown', onPointerDown, true);
+    document.removeEventListener('focusout', onFocusOut, true);
     document.removeEventListener('keydown', onKeydown, true);
   };
 }
@@ -232,3 +251,6 @@ export function hideAnchoredOverlay(options: AnchoredOverlayOptions): void {
   }
   stopOverlayTracking(options.overlay);
 }
+
+// Shared document-level owner used by UiScrollbar in both adapters.
+export { acquireNativeScrollbarHiding } from './scrollbar-owner';

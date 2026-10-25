@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { cssVariables } from '@neoverse-ui/tokens';
 import { UiCard, UiScrollbar, UiSurface } from '@neoverse-ui/vue';
+import { ref } from 'vue';
 import { localize, localized, moduleCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const owners = ref([0, 1]);
+const contractMode = new URLSearchParams(window.location.search).has('contract-fixtures');
 const copy = moduleCopy.scrollbar;
 const fixtureCopy = {
   label: localized('UiScrollbar document overlay', 'UiScrollbar 文档级浮层'),
@@ -100,6 +103,12 @@ const tokenRows = [
 <template>
   <div class="grid gap-grid">
     <UiScrollbar data-ui-scrollbar-fixture :refresh-key="props.locale" />
+    <div v-if="contractMode" data-scrollbar-owners class="grid gap-2">
+      <UiScrollbar v-for="owner in owners" :key="owner" data-scrollbar-owner :refresh-key="owner" />
+      <button type="button" data-scrollbar-unmount @click="owners = owners.slice(1)">
+        Unmount one scrollbar
+      </button>
+    </div>
     <section class="grid gap-3" aria-labelledby="scrollbar-preview-title">
       <header class="grid gap-1">
         <h2 id="scrollbar-preview-title" class="text-subtitle font-heading tracking-heading">
