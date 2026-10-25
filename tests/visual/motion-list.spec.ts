@@ -37,9 +37,13 @@ test('list reorder visibly travels through intermediate positions', async ({ pag
   const end = frames.at(-1);
   if (!start || !end) throw new Error('Missing movement samples');
   expect(Math.hypot(end.x - start.x, end.y - start.y)).toBeGreaterThan(20);
-  expect(new Set(frames.map((point) => `${point.x.toFixed(1)},${point.y.toFixed(1)}`)).size).toBe(
-    6,
-  );
+  // Require distinct sub-pixel samples, not six distinct one-decimal strings.
+  // An eased transition approaches its destination asymptotically, so the last
+  // two samples can legitimately differ by well under 0.1px; rounding to one
+  // decimal collapsed them into one position on Linux and made this fail.
+  const distinct = new Set(frames.map((point) => `${point.x.toFixed(3)},${point.y.toFixed(3)}`))
+    .size;
+  expect(distinct).toBe(6);
   await expect(items).toHaveText([...originalOrder.slice(1), ...originalOrder.slice(0, 1)]);
   await page.locator('[data-motion-presence-shuffle]').click();
   await expect(items).toHaveText([...originalOrder.slice(2), ...originalOrder.slice(0, 2)]);
