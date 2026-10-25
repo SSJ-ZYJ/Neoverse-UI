@@ -357,7 +357,7 @@
    remaining duration of its active particle dissolve. */
 :root[data-neoverse-particle-transitioning] [data-neoverse-motion-incoming] {
   /* Opacity promotion creates a Backdrop Root. Release it with the incoming
-     animation so descendant Glass can sample the surrounding page at rest. */
+     animation so descendant Aurora Glass can sample the surrounding page at rest. */
   will-change: opacity;
   animation: neoverse-motion-particle-enter var(--neoverse-motion-particle-enter-duration) linear
     var(--neoverse-motion-particle-enter-delay) both;

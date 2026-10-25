@@ -10,7 +10,7 @@
   color-scheme: light;
   --neoverse-effect-grouped-inset-field: var(--neoverse-effect-grouped-inset-field-light);
   --neoverse-effect-grouped-inset-border: var(--neoverse-effect-grouped-inset-border-light);
-  /* Effect identity is theme-specific; Glass blur and alpha remain tier-owned. */
+  /* Effect identity is theme-specific; Aurora Glass blur and alpha remain tier-owned. */
   --neoverse-effect-compact-rest-shadow: var(--neoverse-effect-compact-rest-shadow-light);
   --neoverse-effect-compact-hover-shadow: var(--neoverse-effect-compact-hover-shadow-light);
   --neoverse-effect-selection-highlight: var(--neoverse-effect-selection-highlight-light);
@@ -54,7 +54,7 @@
   --neoverse-terminal-foreground: var(--neoverse-color-text-primary);
   --neoverse-terminal-muted: var(--neoverse-color-text-secondary);
   --neoverse-terminal-command: var(--neoverse-color-text-primary);
-  /* Pale Glass needs darker mint ink for the command marker and caret. */
+  /* Pale Aurora Glass needs darker mint ink for the command marker and caret. */
   --neoverse-terminal-prompt: var(--neoverse-color-mint-700);
   --neoverse-terminal-cursor: var(--neoverse-color-mint-700);
   --neoverse-terminal-selection: var(--neoverse-color-accent-soft);
@@ -194,7 +194,7 @@
     var(--neoverse-surface-inset-edge-active), var(--neoverse-surface-inset-active-highlight),
     var(--neoverse-surface-inset-bloom-rest);
 
-  /* Disclosure uses directional Glass catches on the pale canvas. Adding
+  /* Disclosure uses directional Aurora Glass catches on the pale canvas. Adding
      the generic inset outline turns its boundary into a dark, uniform ring. */
   --neoverse-disclosure-edge-rest: var(--neoverse-surface-inset-edge-rest);
   --neoverse-disclosure-edge-active: var(--neoverse-surface-inset-edge-active);
@@ -227,7 +227,7 @@
   /* Keep the shell translucent; the selected plate adds a soft accent tint
        and reuses the ordinary light-button edge shadow. */
   /* Light segmented controls take their silhouette from the same subtle
-       Glass refraction field as other Glass surfaces, not from a painted
+       Aurora Glass refraction field as other Aurora Glass surfaces, not from a painted
        hairline. Dark keeps its original segmented-control edge recipe. */
   --neoverse-control-segmented-border: transparent;
   --neoverse-control-segmented-edge-refraction-opacity: var(

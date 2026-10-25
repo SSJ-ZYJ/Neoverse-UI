@@ -1,6 +1,6 @@
 # @neoverse-ui/glass-runtime
 
-Shared optional directional Glass edges for Neoverse UI.
+Shared optional directional Aurora Glass (极光玻璃) edges for Neoverse UI. Aurora Glass is the single shared glass material; its Light / 轻薄, Standard / 标准, and Immersive / 厚实 tiers share the same name. Obtain display labels from `glassMaterial` in `@neoverse-ui/tokens`; see [material standards](../../docs/material-standards.md). Package and renderer identifiers remain stable.
 
 The renderer reuses the 0.2.0 directional RGB response: left catches favour
 cyan/green and right catches favour blue/violet, with the released normal-based
@@ -8,7 +8,7 @@ corner and fringe calculations. Preserve the full RGB contribution, including it
 neutral component; minimum-channel subtraction and peak normalization change the
 released colour balance. Shared chroma roles retain the release's nearly neutral
 dark response independently of brighter edge opacity.
-A scalar-only gain loses this directional colour and is not the Glass contract.
+A scalar-only gain loses this directional colour and is not the Aurora Glass contract.
 
 The shared WebGL canvas encodes each channel response as (1 + g_rgb) / 2.
 CSS overlay produces C_backdrop + g_rgb * min(C_backdrop, 1 - C_backdrop).

@@ -30,7 +30,7 @@ const previewItems = [
   {
     number: '02',
     label: localized('Material surfaces', '材质表面'),
-    detail: localized('Glass / opaque / overlay', '玻璃 / 不透明 / 覆盖层'),
+    detail: localized('Aurora Glass / opaque / overlay', '极光玻璃 / 不透明 / 覆盖层'),
   },
   {
     number: '03',

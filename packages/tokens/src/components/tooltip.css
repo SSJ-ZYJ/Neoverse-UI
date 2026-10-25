@@ -1,6 +1,6 @@
 @layer neoverse.tokens {
   :root {
-    /* Tooltip chrome inherits the shared Glass compositor. These tokens own
+    /* Tooltip chrome inherits the shared Aurora Glass compositor. These tokens own
        only the compact geometry and the pointer/accent adaptations. */
     --neoverse-tooltip-radius: var(--neoverse-radius-control);
     --neoverse-tooltip-padding-block: var(--neoverse-space-2);
@@ -18,7 +18,7 @@
     --neoverse-tooltip-accent-foreground: var(--neoverse-effect-accent-foreground);
     --neoverse-tooltip-accent-tint: var(--neoverse-effect-accent-tint);
     --neoverse-tooltip-accent-arrow-background: var(--neoverse-effect-accent-background);
-    /* Accent depth stays diffuse. The shared Glass refraction owns the edge;
+    /* Accent depth stays diffuse. The shared Aurora Glass refraction owns the edge;
        a hard inset highlight would read as a monochrome top border. */
     --neoverse-tooltip-accent-shadow: var(--neoverse-effect-accent-floating-shadow);
   }

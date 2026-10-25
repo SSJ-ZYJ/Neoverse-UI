@@ -13,7 +13,7 @@
     --neoverse-badge-line-height-md: var(--neoverse-typography-label-md-line-height);
     --neoverse-badge-line-height-lg: var(--neoverse-typography-label-lg-line-height);
 
-    /* Shared status optics and Glass shadow composition in both themes. */
+    /* Shared status optics and Aurora Glass shadow composition in both themes. */
     --neoverse-badge-background: var(--neoverse-effect-label-neutral-background);
     --neoverse-badge-foreground: var(--neoverse-color-text-secondary);
     --neoverse-badge-shadow: var(--neoverse-effect-label-edge);

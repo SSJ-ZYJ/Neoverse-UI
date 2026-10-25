@@ -168,7 +168,7 @@ const copy = {
     <LabSpecimenSection
       id="data-display-stat-card"
       :title="localize(localized('Metric cards', '指标卡'), props.locale)"
-      :description="localize(localized('Display typography on shared Glass surfaces; resize to compare two to four metrics.', '展示字体与共享 Glass 材质；调整宽度查看 2–4 个指标的布局。'), props.locale)"
+      :description="localize(localized('Display typography on shared Aurora Glass surfaces; resize to compare two to four metrics.', '展示字体与共享极光玻璃；调整宽度查看 2–4 个指标的布局。'), props.locale)"
     >
       <MaterialBackdrop edge="inset">
         <div class="ui-stat-grid">
@@ -188,7 +188,7 @@ const copy = {
     <LabSpecimenSection
       id="data-display-timeline"
       :title="localize(localized('Timeline', '时间线'), props.locale)"
-      :description="localize(localized('Glass milestones with a continuous rail and dates leading each entry.', '玻璃节点沿连续轨道排列，日期先于标题呈现。'), props.locale)"
+      :description="localize(localized('Aurora Glass milestones with a continuous rail and dates leading each entry.', '极光玻璃节点沿连续轨道排列，日期先于标题呈现。'), props.locale)"
     >
       <MaterialBackdrop edge="inset">
         <UiTimeline
@@ -201,7 +201,7 @@ const copy = {
     <LabSpecimenSection
       id="data-display-step-flow"
       :title="localize(localized('Step flow', '步骤流'), props.locale)"
-      :description="localize(localized('Glass steps distinguish completed, current and upcoming stages, adapting to the available width.', '玻璃步骤区分已完成、当前与待完成阶段，并随可用宽度调整排列。'), props.locale)"
+      :description="localize(localized('Aurora Glass steps distinguish completed, current and upcoming stages, adapting to the available width.', '极光玻璃步骤区分已完成、当前与待完成阶段，并随可用宽度调整排列。'), props.locale)"
     >
       <MaterialBackdrop edge="inset">
         <UiStepFlow

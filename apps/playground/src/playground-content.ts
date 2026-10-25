@@ -1,3 +1,5 @@
+import { glassMaterial } from '@neoverse-ui/tokens';
+
 export type Locale = 'en' | 'zh';
 
 export function isLocale(value: unknown): value is Locale {
@@ -99,8 +101,8 @@ export const groupCopy = {
   materials: {
     label: localized('Materials & Styles', '材质与样式'),
     description: localized(
-      'Tailwind surface styles and the optional Glass runtime enhancement.',
-      'Tailwind 表面样式与可选的 Glass Runtime 增强。',
+      'Tailwind surface styles and the optional Aurora Glass runtime enhancement.',
+      'Tailwind 表面样式与可选的极光玻璃运行时增强。',
     ),
   },
   motion: {
@@ -150,10 +152,10 @@ export const moduleCopy = {
     ),
   },
   materials: {
-    label: localized('Surfaces & Glass', '表面与玻璃'),
+    label: localized(`Surfaces & ${glassMaterial.name.en}`, `表面与${glassMaterial.name.zh}`),
     description: localized(
-      'Opaque surfaces and glass materials are compared in one place to make layer hierarchy easier to judge.',
-      '将不透明表面与玻璃材质集中展示，便于直接比较不同层级关系。',
+      'Opaque surfaces and Aurora Glass are compared in one place to make layer hierarchy easier to judge.',
+      '将不透明表面与极光玻璃集中展示，便于直接比较不同层级关系。',
     ),
   },
   statusFeedback: {
@@ -301,10 +303,10 @@ export const moduleCopy = {
     ),
   },
   glass: {
-    label: localized('Glass', '玻璃材质'),
+    label: glassMaterial.name,
     description: localized(
-      'Each sample uses the canonical UiSurface API with an explicit glass-* Surface; nested Glass is intentionally absent.',
-      '每个示例都通过 canonical UiSurface API 显式选择 glass-* Surface；刻意不展示嵌套 Glass。',
+      'Each sample uses the canonical UiSurface API with an explicit glass-* Surface; nested Aurora Glass is intentionally absent.',
+      '每个示例都通过 canonical UiSurface API 显式选择 glass-* Surface；刻意不展示嵌套极光玻璃。',
     ),
     sampleDescription: localized(
       'Token-backed transparency, border, blur, saturation, and refraction.',
@@ -382,8 +384,8 @@ export const moduleCopy = {
       circular: {
         label: localized('Circular buttons', '圆形按钮'),
         hint: localized(
-          'The same circular icon button used in Surface & Glass, in sm, md, and lg sizes.',
-          '复用“表面与玻璃”中的圆形图标按钮，展示 sm、md、lg 三档尺寸。',
+          'The same circular icon button used in Surfaces & Aurora Glass, in sm, md, and lg sizes.',
+          '复用“表面与极光玻璃”中的圆形图标按钮，展示 sm、md、lg 三档尺寸。',
         ),
       },
       default: {
@@ -487,14 +489,14 @@ export const moduleCopy = {
   card: {
     label: localized('Card', '卡片'),
     description: localized(
-      'UiCard owns standard card geometry and uses the shared glass-elevated material by default; transparent cards require an explicit surface="none" opt-out.',
-      'UiCard 负责标准卡片几何，并默认复用共享的 glass-elevated 材质；透明卡片必须显式设置 surface="none" 才会启用。',
+      'UiCard owns standard card geometry and uses shared Aurora Glass · Standard (glass-elevated) by default; transparent cards require an explicit surface="none" opt-out.',
+      'UiCard 负责标准卡片几何，并默认复用共享的极光玻璃 · 标准（glass-elevated）；透明卡片必须显式设置 surface="none" 才会启用。',
     ),
     reference: localized('Reference card', '参考卡片'),
     ready: localized('Ready', '就绪'),
     body: localized(
-      'The default card reuses the elevated Glass surface so cards do not define a fourth material variant.',
-      '默认卡片直接复用抬升玻璃表面，不再额外定义第四种玻璃材质。',
+      'The default card reuses Aurora Glass · Standard so cards do not define a fourth material tier.',
+      '默认卡片直接复用极光玻璃 · 标准，不再额外定义第四种材质层级。',
     ),
     continue: localized('Continue', '继续'),
     externalClass: localized('Elevated card', '抬升卡片'),
@@ -613,8 +615,8 @@ export const moduleCopy = {
   scrollbar: {
     label: localized('Scrollbar', '滚动条'),
     description: localized(
-      'A quiet glass rail keeps scrolling visible without bringing back the browser chrome.',
-      '克制的玻璃轨道让滚动状态保持可见，同时不带回浏览器默认的厚重控件。',
+      'A quiet Aurora Glass rail keeps scrolling visible without bringing back the browser chrome.',
+      '克制的极光玻璃轨道让滚动状态保持可见，同时不带回浏览器默认的厚重控件。',
     ),
     preview: {
       label: localized('Immersive scrollbar', '沉浸式滚动条'),
@@ -645,8 +647,8 @@ export const moduleCopy = {
   action: {
     label: localized('Action', '操作链接'),
     description: localized(
-      'Semantic destination controls keep link behavior, Glass treatment, and comfortable action geometry together.',
-      '语义目标控件将链接行为、玻璃材质与舒适的操作尺寸统一在一起。',
+      'Semantic destination controls keep link behavior, Aurora Glass treatment, and comfortable action geometry together.',
+      '语义目标控件将链接行为、极光玻璃与舒适的操作尺寸统一在一起。',
     ),
     states: {
       default: {
@@ -768,8 +770,8 @@ export const moduleCopy = {
   controlSurface: {
     label: localized('ControlSurface', '控件表面'),
     description: localized(
-      'A single Glass chrome boundary groups related controls and owns optional trailing separation.',
-      '单一玻璃材质边界用于分组相关控件，并负责可选尾部区域的分隔关系。',
+      'A single Aurora Glass chrome boundary groups related controls and owns optional trailing separation.',
+      '单一极光玻璃边界用于分组相关控件，并负责可选尾部区域的分隔关系。',
     ),
     states: {
       toolbar: {
@@ -880,17 +882,17 @@ export const moduleCopy = {
     ),
     previewModes: {
       standard: {
-        label: localized('Standard Glass mode', '标准 Glass 模式'),
+        label: localized('Aurora Glass mode', '极光玻璃模式'),
         description: localized(
-          'Normal product compositions keep translucent, backdrop-filtered Glass surfaces with edge depth and refraction.',
-          '正常产品组合统一使用半透明、带背景模糊与边缘层次的 Glass 表面。',
+          'Normal product compositions keep translucent, backdrop-filtered Aurora Glass surfaces with edge depth and refraction.',
+          '正常产品组合统一使用半透明、带背景模糊与边缘层次的极光玻璃表面。',
         ),
       },
       accessibility: {
         label: localized('Accessibility fallback', '无障碍适配预览'),
         description: localized(
           'Reduced-transparency mode keeps the same semantic surfaces but replaces backdrop sampling with an opaque readable fallback.',
-          '降低透明度模式保持相同语义表面，但以不采样背景的高可读性不透明回退替代 Glass 模糊。',
+          '降低透明度模式保持相同语义表面，但以不采样背景的高可读性不透明回退替代极光玻璃的背景模糊。',
         ),
         cardTitle: localized('Readable project summary', '高可读性项目摘要'),
         cardBody: localized(
@@ -1050,7 +1052,7 @@ export const tokenCopy = {
     canvas: localized('Canvas', '画布'),
     subtle: localized('Subtle', '弱化'),
     raised: localized('Raised', '抬升'),
-    glass: localized('Glass', '玻璃'),
+    glass: glassMaterial.name,
     overlay: localized('Overlay', '覆盖层'),
     primary: localized('Primary', '主要'),
     secondary: localized('Secondary', '次要'),
@@ -1103,9 +1105,18 @@ export const tokenCopy = {
     overlay: localized('Overlay', '覆盖层'),
   },
   glassVariants: {
-    subtle: localized('Subtle', '弱化'),
-    elevated: localized('Elevated', '抬升'),
-    immersive: localized('Immersive', '沉浸'),
+    subtle: localized(
+      `${glassMaterial.name.en} · ${glassMaterial.tiers.subtle.en}`,
+      `${glassMaterial.name.zh} · ${glassMaterial.tiers.subtle.zh}`,
+    ),
+    elevated: localized(
+      `${glassMaterial.name.en} · ${glassMaterial.tiers.elevated.en}`,
+      `${glassMaterial.name.zh} · ${glassMaterial.tiers.elevated.zh}`,
+    ),
+    immersive: localized(
+      `${glassMaterial.name.en} · ${glassMaterial.tiers.immersive.en}`,
+      `${glassMaterial.name.zh} · ${glassMaterial.tiers.immersive.zh}`,
+    ),
   },
   motion: {
     durations: localized('Durations', '时长'),

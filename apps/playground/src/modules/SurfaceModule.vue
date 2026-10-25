@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { type SurfacePreset, surfaceClasses, UiSurface } from '@neoverse-ui/vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
-import { localize, localized } from '../playground-content';
+import { localize, localized, tokenCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
@@ -15,6 +15,11 @@ const presets: readonly SurfacePreset[] = [
   'glass-elevated',
   'glass-immersive',
 ];
+const glassLabels = {
+  'glass-subtle': tokenCopy.glassVariants.subtle,
+  'glass-elevated': tokenCopy.glassVariants.elevated,
+  'glass-immersive': tokenCopy.glassVariants.immersive,
+} as const;
 const copy = {
   description: localized(
     'Every sample is a real UiSurface instance. The displayed class is the shared implementation behind the semantic preset.',
@@ -37,7 +42,9 @@ const copy = {
           class="grid min-h-32 content-between gap-3 rounded-card p-5"
           :data-surface-preset="preset"
         >
-          <h3 class="text-label font-label text-primary">{{ preset }}</h3>
+          <h3 class="text-label font-label text-primary">
+            {{ preset in glassLabels ? localize(glassLabels[preset as keyof typeof glassLabels], props.locale) : preset }}
+          </h3>
           <code class="text-code text-secondary">
             {{ surfaceClasses[preset] || '(no material class)' }}
           </code>

@@ -44,9 +44,9 @@ main {
   --color-btn-active-bg: rgb(56 189 248 / 20%);
   --color-btn-active-border: rgb(56 189 248 / 58%);
   --color-btn-selected-bg: rgb(56 189 248 / 16%);
-  /* The primary action uses a low-luminance ocean glass palette so GitHub login
+  /* The primary action uses a low-luminance Aurora Glass palette so GitHub login
      remains prominent without importing the light theme's bright gradient.
-     主操作采用低亮度深海玻璃配色，使 GitHub 登录保持醒目，同时避免沿用浅色主题的高亮渐变。 */
+     主操作采用低亮度极光玻璃配色，使 GitHub 登录保持醒目，同时避免沿用浅色主题的高亮渐变。 */
   --color-btn-primary-text: #dff7ff;
   --color-btn-primary-bg: #132238;
   --color-btn-primary-border: rgb(125 211 252 / 44%);
@@ -101,8 +101,8 @@ main {
   --neoverse-surface-raised: rgb(17 25 43 / 64%);
   --neoverse-surface-subtle: rgb(11 19 34 / 52%);
   /* Reaction popovers use a more translucent refractive layer than persistent
-     comment surfaces so the document remains visible through the floating glass.
-     表情弹层使用比常驻评论表面更透明的折射层，使文档背景能透过悬浮玻璃。 */
+     comment surfaces so the document remains visible through the floating Aurora Glass.
+     表情弹层使用比常驻评论表面更透明的折射层，使文档背景能透过悬浮极光玻璃。 */
   --neoverse-reaction-popover-surface: rgb(10 18 35 / 44%);
   --neoverse-reaction-popover-refraction: linear-gradient(
     145deg,
@@ -156,9 +156,9 @@ body {
   backdrop-filter: blur(8px) saturate(132%);
 }
 
-/* The reaction picker is a floating glass layer: its lower opacity and stronger
+/* The reaction picker is a floating Aurora Glass layer: its lower opacity and stronger
    backdrop blur reveal page context without sacrificing emoji or label contrast.
-   表情选择器使用悬浮玻璃层：降低底色不透明度并增强背景模糊，在保留页面语境的同时
+   表情选择器使用悬浮极光玻璃层：降低底色不透明度并增强背景模糊，在保留页面语境的同时
    确保表情与提示文字清晰。 */
 .gsc-reactions-popover {
   border-color: var(--neoverse-edge-muted) !important;

@@ -5,6 +5,7 @@ import {
   supportsParticleCapture,
   supportsParticleDissolve,
 } from '@neoverse-ui/motion';
+import { glassMaterial } from '@neoverse-ui/tokens';
 import {
   presence,
   staggerStyle,
@@ -24,7 +25,7 @@ const props = defineProps<LabModuleProps>();
 const presenceCopy = moduleCopy.motion.presence;
 const pageCopy = moduleCopy.motion.page;
 const presenceOn = ref(true);
-const presenceSpecimens = ['Neoverse', 'Motion', 'Presence', 'Glass', 'Edge to Edge'];
+const presenceSpecimens = ['Neoverse', 'Motion', 'Presence', glassMaterial.name, 'Edge to Edge'];
 const staggerOrder = ref(presenceSpecimens.map((label, index) => ({ label, seed: index })));
 const staggerReplay = ref(0);
 
@@ -211,7 +212,7 @@ const variantLabels = computed(() =>
             data-motion-presence-group-item
             :style="staggerStyle(index)"
           >
-            {{ item.label }}
+            {{ typeof item.label === 'string' ? item.label : localize(item.label, props.locale) }}
           </UiBadge>
         </TransitionGroup>
       </UiSurface>

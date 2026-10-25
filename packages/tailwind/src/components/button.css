@@ -1,5 +1,5 @@
 @layer components {
-  /* Filled buttons share the project's Glass surface. Variants tune the
+  /* Filled buttons share the project's Aurora Glass surface. Variants tune the
      sampled plane and depth without painting extra rings. Ghost is deliberately
      borderless so the surrounding surface remains visible in both themes. */
   .ui-button {
@@ -314,7 +314,7 @@
       --neoverse-control-hit-area: var(--neoverse-control-touch-hit-area);
       overflow: visible;
     }
-    /* Glass buttons set overflow:hidden with a more specific selector above.
+    /* Aurora Glass buttons set overflow:hidden with a more specific selector above.
        Match that specificity so the expanded touch target remains hittable
        outside the visual button bounds without changing its rendered size. */
     .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
@@ -353,7 +353,7 @@
 }
 
 @layer utilities {
-  /* Same layer as Glass; interactions change feedback, never the base plate. */
+  /* Same layer as Aurora Glass; interactions change feedback, never the base plate. */
   .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
     .ui-button--ghost
   ) {

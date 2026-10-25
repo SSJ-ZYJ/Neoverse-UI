@@ -8,7 +8,7 @@ import {
 } from '@neoverse-ui/vue';
 import { ref } from 'vue';
 import LabIcon from '../LabIcon.vue';
-import { localize, localized, moduleCopy } from '../playground-content';
+import { localize, localized, moduleCopy, tokenCopy } from '../playground-content';
 import QaPreviewMatrix from '../QaPreviewMatrix.vue';
 import StateRow from '../StateRow.vue';
 import type { LabModuleProps } from './types';
@@ -16,9 +16,9 @@ import type { LabModuleProps } from './types';
 const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.controlSurface;
 const surfaceVariants = [
-  { surface: 'glass-subtle', label: 'subtle' },
-  { surface: 'glass-elevated', label: 'elevated' },
-  { surface: 'glass-immersive', label: 'immersive' },
+  { surface: 'glass-subtle', label: tokenCopy.glassVariants.subtle },
+  { surface: 'glass-elevated', label: tokenCopy.glassVariants.elevated },
+  { surface: 'glass-immersive', label: tokenCopy.glassVariants.immersive },
 ] as const;
 const viewOptions = [
   { value: 'map', label: 'Map' },
@@ -34,8 +34,8 @@ const extraCopy = {
   surface: {
     label: localized('Canonical surface', '规范 Surface'),
     hint: localized(
-      'The explicit surface prop can opt out of Glass or choose another shared semantic material.',
-      '显式 surface 属性可以退出玻璃材质，或选择其他共享语义表面。',
+      'The explicit surface prop can opt out of Aurora Glass or choose another shared semantic material.',
+      '显式 surface 属性可以退出极光玻璃，或选择其他共享语义表面。',
     ),
   },
   hover: {
@@ -126,7 +126,7 @@ const extraCopy = {
         hover-mode="static"
         edge-mode="local"
       >
-        <span class="px-2 text-caption font-label text-primary">{{ variant.label }}</span>
+        <span class="px-2 text-caption font-label text-primary">{{ localize(variant.label, props.locale) }}</span>
       </UiControlSurface>
     </div>
   </StateRow>
@@ -165,7 +165,7 @@ const extraCopy = {
       <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <code class="min-w-0 text-caption text-muted">surface="glass-subtle"</code>
         <UiControlSurface surface="glass-subtle" edge-mode="local">
-          <UiButton size="sm" variant="ghost" surface="none">glass</UiButton>
+          <UiButton size="sm" variant="ghost" surface="none">{{ localize(moduleCopy.glass.label, props.locale) }}</UiButton>
         </UiControlSurface>
       </div>
     </div>

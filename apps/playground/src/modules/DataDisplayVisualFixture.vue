@@ -269,8 +269,8 @@ const copy = {
   metric: {
     title: localized('Metric cards', '指标卡'),
     description: localized(
-      'Two and four metric cards exercise wrapping, Glass edges, and readable supporting text.',
-      '两项与四项指标用于检查换行、Glass 边缘与补充文字可读性。',
+      'Two and four metric cards exercise wrapping, Aurora Glass edges, and readable supporting text.',
+      '两项与四项指标用于检查换行、极光玻璃边缘与补充文字可读性。',
     ),
     minimum: localized('Two metrics · narrow container', '两项指标 · 窄容器'),
     maximum: localized('Four metrics · wide container', '四项指标 · 宽容器'),

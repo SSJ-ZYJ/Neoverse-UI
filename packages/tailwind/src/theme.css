@@ -471,7 +471,7 @@
       box-shadow var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-emphasized);
   }
 
-  /* Glass surfaces clip by default so their own content respects the rounded
+  /* Aurora Glass surfaces clip by default so their own content respects the rounded
      silhouette. Layout surfaces that intentionally host floating controls,
      focus rings, shadows, or translated children can opt into visible
      overflow without disabling the material plane itself. */
@@ -593,7 +593,7 @@
   }
 
   /* An explicitly CSS-backed surface keeps the complete library edge field
-     even while the shared renderer paints other Glass surfaces. */
+     even while the shared renderer paints other Aurora Glass surfaces. */
   :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
   :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
     .ui-button
@@ -681,7 +681,7 @@
       backdrop-filter: none;
     }
 
-    /* SegmentedControl owns a component-specific Glass filter in the normal
+    /* SegmentedControl owns a component-specific Aurora Glass filter in the normal
        state. Repeat the accessibility fallback at matching specificity so
        reduced transparency cannot be shadowed by that component contract. */
     .ui-segmented-control.material-glass-subtle[data-surface='glass-subtle'] {
@@ -731,8 +731,8 @@
     backdrop-filter: none;
   }
 
-  /* Independent Glass surfaces keep their own material even when a parent
-     happens to be Glass (for example, specimen cards inside a Glass section).
+  /* Independent Aurora Glass surfaces keep their own material even when a parent
+     happens to be Aurora Glass (for example, specimen cards inside an Aurora Glass section).
      Only an explicitly inherited nested grouping opts out of its own plane.
      Never flatten unmarked cards or surfaces: they must be visible at rest,
      before hover, and also in reduced-transparency mode. */

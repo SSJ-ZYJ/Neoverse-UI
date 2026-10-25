@@ -1,8 +1,31 @@
-# Material and interaction standards
+# Aurora Glass material and interaction standards
 
 Components use shared material and effect roles. Concrete optical values belong to
 `packages/tokens/src/material.css`, `effects.css`, and `control-effects.css`; component tokens are compatibility
 aliases and consumers never need a second material implementation.
+
+## One material, three tiers
+
+**Aurora Glass / 极光玻璃** is the only display name for the shared glass
+material. Light / 轻薄, Standard / 标准, and Immersive / 厚实 are tiers of that
+same material, not separate glass styles. The `glass-*` surface values, CSS
+classes/variables, package names, and existing TypeScript APIs are stable
+technical identifiers and do not designate other glass styles.
+
+Consumers obtain the shared name and short tier names from Tokens:
+
+```ts
+import { glassMaterial } from '@neoverse-ui/tokens';
+
+glassMaterial.name.zh; // 极光玻璃
+glassMaterial.name.en; // Aurora Glass
+glassMaterial.tiers.subtle; // { zh: '轻薄', en: 'Light' }
+glassMaterial.tiers.elevated; // { zh: '标准', en: 'Standard' }
+glassMaterial.tiers.immersive; // { zh: '厚实', en: 'Immersive' }
+```
+
+The tier keys map to the stable surface values below. Blur, frost, refraction,
+and transparency describe optical properties, not additional material names.
 
 | Tier | Surface | Blur | Background opacity | Default use |
 | --- | --- | --- | --- | --- |
@@ -21,7 +44,7 @@ surfaces layered together still composite; grouping owners explicitly use
 `surface="none"` or `glassNesting="inherit"` for borrowed material. Ghost controls
 have no independent plate. Reduced transparency uses an opaque tint and no blur.
 
-## Glass edge reflection
+## Aurora Glass edge reflection
 
 The renderer reuses the 0.2.0 directional RGB response: left catches favour
 cyan/green and right catches favour blue/violet, with the released normal-based
@@ -29,7 +52,7 @@ corner and fringe calculations. Preserve the full RGB contribution, including it
 neutral component; minimum-channel subtraction and peak normalization change the
 released colour balance. Shared chroma roles retain the release's nearly neutral
 dark response independently of brighter edge opacity.
-A scalar-only gain loses this directional colour and is not the Glass contract.
+A scalar-only gain loses this directional colour and is not the Aurora Glass contract.
 
 The shared WebGL canvas encodes each channel response as (1 + g_rgb) / 2.
 CSS overlay produces C_backdrop + g_rgb * min(C_backdrop, 1 - C_backdrop).
@@ -58,14 +81,14 @@ edge normal so bounding-box corner distances cannot truncate their arcs.
 
 ## Selection and customization
 
-Existing Vue and React control adapters accept all three Glass surface names.
+Existing Vue and React control adapters accept all three Aurora Glass surface tiers.
 Vue SegmentedControl supports all three; there is no existing React SegmentedControl
 adapter in the current matrix, and this material migration does not add one.
 Dock defaults to `glass-elevated`; ControlSurface defaults to `glass-subtle`. The `chrome` preset and
 `ui-surface-chrome` class have been removed; replace explicit uses with
 `glass-subtle` / `material-glass-subtle`. There is no compatibility alias.
 The `--neoverse-control-chrome-*` and `--neoverse-effect-floating-chrome-*` tokens
-and their TypeScript exports are removed. Customize the selected Glass tier for
+and their TypeScript exports are removed. Customize the selected Aurora Glass tier for
 material and `--neoverse-control-surface-*` for grouping geometry instead.
 `inset` uses Light optics; status colours use shared semantic
 effect roles. Typography, geometry, and native control semantics remain independent.
@@ -96,7 +119,7 @@ overriding `backdrop-filter`. `cssVariables.material.glass` exposes the public n
 ## Interaction policy
 
 - Hover is available only on hover-capable devices. It uses foreground, local light,
-  and shadow; it does not change the Glass base alpha or filter.
+  and shadow; it does not change the Aurora Glass base alpha or filter.
 - Press takes precedence over hover, uses the shared press light/shadow, and restores
   hover or rest on release. It does not select an option until native activation.
 - Selected, checked, and expanded states persist independently of transient press.
@@ -109,13 +132,13 @@ overriding `backdrop-filter`. `cssVariables.material.glass` exposes the public n
   feedback. Reduced transparency retains feedback over the opaque fallback.
 
 Status tint, scrollbar affordances, Skeleton/StatusIndicator pulses, and Terminal ANSI
-opacity are semantic effects, not alternative Glass tiers. Their optical weights use
+opacity are semantic effects, not alternative Aurora Glass tiers. Their optical weights use
 the shared effect scale. Gradient positions, clipping masks, animation endpoints
 (`opacity: 0/1`), and layout dimensions are structural values, not material alpha.
 
 ## Preserve component identity
 
-Tier standardization changes only the Glass base blur and alpha. Established primary/
+Tier standardization changes only the Aurora Glass base blur and alpha. Established primary/
 secondary hierarchy, selected accent fields, directional edge light and floating
 Dock shadows live in shared `control-effects.css` roles. Compatibility component
 tokens reference those roles; they do not define optical recipes themselves.
@@ -123,7 +146,7 @@ tokens reference those roles; they do not define optical recipes themselves.
 
 Badge uses a real thin border, a shared 10% semantic field in both themes,
 and the shared subtle edge highlight, inner glow and bloom composition.
-Its background filter aliases the shared Light Glass filter (12px blur); labels
+Its background filter aliases the shared Light tier of Aurora Glass (12px blur); labels
 stay sharp. It adds no surface gradient or outline. Every variant uses
 the same border geometry; the existing `sm` / `md` / `lg` size classes and optical
 label alignment remain intact. Neutral uses secondary text as its tint source,
@@ -145,10 +168,10 @@ illegible text. Dark status colours and text-only feedback retain their palette.
 
 Disclosure panels use the shared inset outline roles in every state, together
 with the shared control shadow. The inset outline separates the panel from pale
-or textured backdrops without changing its dimensions, Glass fill or blur. Vue,
+or textured backdrops without changing its dimensions, Aurora Glass fill or blur. Vue,
 React and prose `details` consume the same styles.
 
-Timeline and StepFlow use `UiSurface` Light Glass for their markers and content.
+Timeline and StepFlow use `UiSurface` with the Light tier of Aurora Glass for their markers and content.
 Timeline dates precede each title; thin rails remain continuous between markers.
 StepFlow uses circular numbered markers, replacing completed numbers with a check.
 Current steps use a quiet accent contour and the shared info Badge for their status
@@ -159,7 +182,7 @@ list/date semantics and consumer-owned state remain unchanged.
 A selected SegmentedControl slider and a selected navigation item use a local accent
 field. Dock trailing groups retain a local grouping wash. These fields express
 selection or grouping, never create another backdrop filter, and remain consistent
-through hover and press. The surrounding Glass plate keeps its tier alpha/filter.
+through hover and press. The surrounding Aurora Glass plate keeps its tier alpha/filter.
 
 Checkbox, RadioGroup and Switch use a pale blue selected field in Light mode,
 with blue-grey checks and compact radio dots. Dark mode uses a translucent blue
@@ -168,7 +191,7 @@ selected controls. White marks remain readable. Reduced transparency restores an
 opaque selected field. Both themes use a porcelain Switch thumb. A quiet top catch adds
 depth. The Switch
 keeps the same outer footprint, with a smaller thumb and even inset. Unchecked
-controls retain their neutral Glass plate; disabled controls use neutral plates
+controls retain their neutral Aurora Glass plate; disabled controls use neutral plates
 and muted indicators. The selection field and keyboard focus are component tokens,
 independent of Button labels and secondary accent colors. Native state semantics
 remain unchanged.
@@ -181,8 +204,8 @@ fill without the raised navigation gradient or shadow. This fill persists throug
 hover, press, release and focus; inactive entries keep their resting background.
 
 Dark Button/Action/IconButton keep `ui-button__tone-field` transparent at rest:
-neither a white fill nor a pale grey gradient covers the sampled Glass plate.
-Their Glass tint uses neutral black through `components.button.glassTint` in dark
+neither a white fill nor a pale grey gradient covers the sampled Aurora Glass plate.
+Their Aurora Glass tint uses neutral black through `components.button.glassTint` in dark
 mode, preserving the selected tier's single background alpha with compact blur sampling. The body
 therefore reveals the live blurred backdrop without imposing a navy hue.
 Buttons explicitly disable native appearance and reset the platform background;
@@ -191,7 +214,7 @@ Primary hierarchy uses the existing foreground and shadow roles. Hover and press
 reuse the shared selection field and retain their distinct shadow/press feedback.
 The decorative field owns no backdrop filter, layout or hit testing;
 disabled/loading retain the resting field while content alone is attenuated.
-Ghost and `surface="none"` hide this field. The Glass owner continues to use one
+Ghost and `surface="none"` hide this field. The Aurora Glass owner continues to use one
 tier background alpha and the compact sampling filter.
 
 Dock's original desktop `lg` scale is 1.3, with a 0.9 optical type factor for
@@ -200,16 +223,16 @@ are geometry contracts, not material parameters. The original language option
 height, inline/block padding and gap remain unchanged; the previous specimen
 override to `md` and removal of the large type factor were reverted.
 
-Regression contracts compare the established light/dark command shadows and shared Glass Dock depth,
+Regression contracts compare the established light/dark command shadows and shared Aurora Glass Dock depth,
 require the selected accent field at rest, and check that changing selection leaves
-the Glass base unchanged. This keeps material cleanup from silently redesigning
+the Aurora Glass base unchanged. This keeps material cleanup from silently redesigning
 controls.
 
 | Component | Preserved visual role | Shared role / source |
 | --- | --- | --- |
 | Button, Action, IconButton | Command/primary depth, pointer light and quiet Ghost feedback | `command-*`, `primary-*`, `quiet-command-*` in `control-effects.css` |
 | SegmentedControl | Shell depth and theme-specific selected accent field/fill/edge | `choice-rest-shadow`, `choice-selected-*` |
-| Dock, ControlSurface | Selected Glass tier depth/boundary and local trailing group contrast | Glass material tokens, `control-surface-*`, `grouped-inset-*` |
+| Dock, ControlSurface | Selected Aurora Glass tier depth/boundary and local trailing group contrast | Aurora Glass material tokens, `control-surface-*`, `grouped-inset-*` |
 | NavigationItem | Persistent selection at rest, hover and press | `selection-*`; distinct shared press feedback |
 | Skeleton, Badge, Tooltip, Scrollbar | Highlight, edge, accent depth and thumb state effects | `placeholder-*`, `label-edge`, `accent-*`, `rail-*` |
 | StatusIndicator | Established 42% glow, 88% pulse and separate glow/pulse spread | Status roles in `effects.css` |
@@ -222,13 +245,13 @@ rendering rules; Vue/React adapter sources are scanned separately.
 
 | Component family / source | Previous divergence | Shared destination | Verification |
 | --- | --- | --- | --- |
-| Button, Action, IconButton, NavigationItem / `components/button.css`, both adapters | Light 18px, Dark 36px, separate layered fills | Selected Glass tier; shared hover/press roles | Tier/state/disabled tests |
-| SegmentedControl / `components/segmented-control.css` | 6px filter and theme-specific shell | Selected Glass tier; independent selection indicator | Tier/selection/press tests |
+| Button, Action, IconButton, NavigationItem / `components/button.css`, both adapters | Light 18px, Dark 36px, separate layered fills | Selected Aurora Glass tier; shared hover/press roles | Tier/state/disabled tests |
+| SegmentedControl / `components/segmented-control.css` | 6px filter and theme-specific shell | Selected Aurora Glass tier; independent selection indicator | Tier/selection/press tests |
 | ControlSurface, Dock | Separate chrome fill removed | ControlSurface defaults to `glass-subtle`; Dock defaults to `glass-elevated`; both retain grouped ownership | Composition and tier tests |
 | Skeleton | Hardcoded 12px and independent pulse alpha | Light tier blur, shared neutral foreground tint for visible placeholders, shared loading/pulse roles | Fallback and inherited blur tests |
 | Input, Textarea, Select, Checkbox, RadioGroup, Switch, Disclosure, Table, Prose | Inset fill became denser on hover/focus/open | Light inset base; shared interaction shadow | Form/disclosure/inset tests |
 | Popover, Select panel, menus, Tooltip | Panel fill/filter tier mismatch; tooltip arrow denser than body | Standard panel; Light tooltip and matching arrow | Overlay/focus/fallback tests |
-| Badge | Borderless flat tint / added outline / fixed white backing | Shared border, Glass shadows, Light Glass blur and quiet semantic tint in both themes | Browser theme parity, geometry, backdrop pixels and semantic ink checks |
+| Badge | Borderless flat tint / added outline / fixed white backing | Shared border, Aurora Glass shadows, Light-tier Aurora Glass blur and quiet semantic tint in both themes | Browser theme parity, geometry, backdrop pixels and semantic ink checks |
 | Notice | Per-status full-surface gradients | Shared semantic status tint at Light alpha | Status material checks |
 | Scrollbar | Per-component blend weights | Shared effect alpha vocabulary; semantic thumb states | Token and interaction checks |
 | StatusIndicator | Independent pulse/glow opacity | Shared pulse/glow vocabulary | Loading/reduced-motion checks |
@@ -255,15 +278,15 @@ baselines or assert real consumer validation.
 | `tailwind/src/components/skeleton.css` | Shimmer angle and stop positions | Spatial distribution of a shared highlight, not alpha; pulse opacity is shared |
 | `motion/src/motion.css` | `opacity: 0/1`, `blur(0)` | Presence visibility/filter endpoints; veil blur is a shared motion role |
 | `glass-runtime/src/index.ts` `getDefaultEdgeValues` | Edge width/softness/opacity defaults | Existing compatibility fallback when the CSS contract is absent; ordinary rendering reads the resolved shared edge tokens first. This fallback does not set any component's base blur/alpha |
-| Playground decorative canvas, layout thumbnails, clipping masks | Gradient coordinates, mask shape and decorative background | Examples of geometry/environment; ordinary component Glass plates have no local material override; the explicitly labeled Custom specimen is an intentional user-controlled override |
+| Playground decorative canvas, layout thumbnails, clipping masks | Gradient coordinates, mask shape and decorative background | Examples of geometry/environment; ordinary component Aurora Glass plates have no local material override; the explicitly labeled Custom specimen is an intentional user-controlled override |
 
 ControlSurface/Dock trailing groups borrow the container plate and retain their local
 grouping contrast; they have no independent backdrop filter.
-Options inside SegmentedControl own no independent glass. Table cells own the Light
+Options inside SegmentedControl own no independent Aurora Glass. Table cells own the Light
 inset planes; its Playground wrapper is `surface="none"`. Disclosure previews use the
-component's actual inset standard rather than adding a second elevated Glass class.
+component's actual inset standard rather than adding a second Standard-tier Aurora Glass class.
 Terminal body/header and prompt/line/transcript borrow the TerminalSurface plate.
-A caller can still explicitly request an independent nested Glass surface.
+A caller can still explicitly request an independent nested Aurora Glass surface.
 
 `check:materials` scans component token recipes, Tailwind component values and both
 adapter sources. It rejects literal blur/alpha/intensity and independent component
@@ -291,7 +314,7 @@ standard without changing component maturity or claiming consumer delivery.
 
 - Restored decorative roles instead of replacing each control's depth and selected
   treatment with the generic rest/hover/selected shadows. Component aliases still
-  contain no independent material recipes; the three Glass tier parameters remain.
+  contain no independent material recipes; the three Aurora Glass tier parameters remain.
 - Final targeted browser runs: 59 passed / 5 capability skips, then 14 passed /
   2 capability skips. They cover preserved Vue/React command and primary shadows,
   both themes, desktop/mobile, selected segment/navigation fields, Dock geometry
@@ -312,7 +335,7 @@ standard without changing component maturity or claiming consumer delivery.
   together with the removed 0.9 large-label compensation. Language option geometry
   retains its original values. Normal Dock uses 1.3; compact Dock uses 1.
 - Restored dark command neutral sheen and primary rest/hover/press fields in shared
-  effect roles and a non-interactive decorative span in both adapters. Glass base
+  effect roles and a non-interactive decorative span in both adapters. Aurora Glass base
   alpha/filter and the accepted SegmentedControl selection styling remain intact.
 - Final material/identity/default-geometry browser suite: 58 passed, 2 device skips.
   Dock scale/specimen rerun: 5 passed, 1 desktop-only skip. Exact dark decorative
@@ -335,13 +358,13 @@ standard without changing component maturity or claiming consumer delivery.
 
 ### Light Disclosure edge correction (2026-10-16)
 
-- The light Disclosure composed a dark 1px inset outline over its Glass catches.
+- The light Disclosure composed a dark 1px inset outline over its Aurora Glass catches.
   Its light theme now aliases the shared directional edge roles directly; the
   existing dark outline is explicitly retained for both Dark and System modes.
   Fill, blur, inner glow, geometry, and native disclosure interactions are unchanged.
 - The focused edge regression first reproduced the light-only dark ring, then
   passed all 8 desktop/mobile, Light/Dark, and explicit/System cases. It checks
-  closed, hover, press, and open states, including retained Glass highlights.
+  closed, hover, press, and open states, including retained Aurora Glass highlights.
   Light/Dark screenshots were inspected; 38 token/material unit tests, package
   builds, Playground typecheck, style lint, and shared contracts passed.
 - The separate existing table/disclosure material test still fails in both

@@ -10,7 +10,7 @@
       'calt' 1;
   }
 
-  /* Terminal chrome is a composition of UiSurface, never a second Glass renderer. */
+  /* Terminal chrome is a composition of UiSurface, never a second Aurora Glass renderer. */
   .ui-terminal-surface {
     display: flex;
     min-width: 0;

@@ -113,7 +113,7 @@ export const glassFragmentShader = `
     float cornerCatch = abs(normal.x * normal.y);
     // The top-right and bottom-left corners sit between the two directional
     // catches. Keep a separate, neutral bridge for those opposing quadrants
-    // so low-opacity dark Glass does not visually lose either corner.
+    // so low-opacity dark Aurora Glass does not visually lose either corner.
     float opposingCornerCatch = max(
       max(normal.x, 0.0) * max(-normal.y, 0.0),
       max(-normal.x, 0.0) * max(normal.y, 0.0)
@@ -128,7 +128,7 @@ export const glassFragmentShader = `
       : smoothstep(0.55, 0.88, edgeLightLuminance);
     float chromaticVisibility = mix(1.0, 1.34, lightSurface);
 
-    // Restore the established Aurora chromatic edge field. The surface body
+    // Restore the established Aurora Glass chromatic edge field. The surface body
     // still gets its transparency and blur from CSS; WebGL only supplies the
     // directional refractive silhouette.
     vec3 refractedBase = mix(u_primary, u_secondary, 0.48 + (bottomRightScatter * 0.2));
@@ -156,7 +156,7 @@ export const glassFragmentShader = `
     color = clamp(color, 0.0, 1.0);
     vec3 lightChromaticColor = color * vec3(0.78, 0.88, 1.0);
     color = mix(color, lightChromaticColor, lightSurface * 0.72);
-    // 0.2.0 kept low-opacity dark Glass nearly neutral. Chroma is independent
+    // 0.2.0 kept low-opacity dark Aurora Glass nearly neutral. Chroma is independent
     // of today's brighter edge opacity, so stronger lighting cannot recolour it.
     vec3 neutralEdgeColor = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)));
     color = mix(neutralEdgeColor, color, u_chroma);
