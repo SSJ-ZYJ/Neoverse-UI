@@ -178,7 +178,12 @@ test('overview showcase switches real material presets and opens the component m
   await page.goto('/?theme=dark&lang=en', { waitUntil: 'domcontentloaded' });
   const sample = page.locator('[data-overview-hero] .playground-overview-hero__sample');
   await expect(sample).toHaveAttribute('data-surface', 'glass-subtle');
-  await page.getByRole('radio', { name: 'Raised' }).click();
+  // UiSegmentedControl renders buttons with role="radio", and each label is
+  // composed from the shared glass material name and tier. Select through the
+  // radiogroup's accessible name instead of the tier copy, which the Aurora
+  // Glass naming renamed.
+  const presets = page.getByRole('radiogroup', { name: 'Preview material' });
+  await presets.getByRole('radio').nth(1).click();
   await expect(sample).toHaveAttribute('data-surface', 'glass-elevated');
   await sample.getByRole('button', { name: 'Components' }).click();
   await expect(page).toHaveURL(/#controls$/);
