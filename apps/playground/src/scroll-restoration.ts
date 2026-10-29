@@ -44,6 +44,19 @@ export function restoreScrollPosition(element: HTMLElement | null): boolean {
     // shifting the restored offset while the initial layout settles.
     const overflowAnchor = element.style.overflowAnchor;
     element.style.overflowAnchor = 'none';
+    // Font-driven layout can continue after fonts.ready. Keep the saved offset
+    // authoritative until the reader starts interacting with this workspace.
+    const interaction = new AbortController();
+    const releaseAnchoring = (): void => {
+      interaction.abort();
+      element.style.overflowAnchor = overflowAnchor;
+    };
+    for (const event of ['wheel', 'touchstart', 'pointerdown', 'keydown']) {
+      element.addEventListener(event, releaseAnchoring, {
+        passive: true,
+        signal: interaction.signal,
+      });
+    }
     element.scrollTo({ top: position.top, left: position.left, behavior: 'instant' });
     const appliedTop = element.scrollTop;
     const appliedLeft = element.scrollLeft;
@@ -51,6 +64,7 @@ export function restoreScrollPosition(element: HTMLElement | null): boolean {
       // Before fonts load the content can be too short for a saved position
       // near the bottom. Retry only if the reader has not scrolled meanwhile.
       if (
+        !interaction.signal.aborted &&
         element.isConnected &&
         window.location.href === position.href &&
         element.scrollTop === appliedTop &&
@@ -58,7 +72,6 @@ export function restoreScrollPosition(element: HTMLElement | null): boolean {
       ) {
         element.scrollTo({ top: position.top, left: position.left, behavior: 'instant' });
       }
-      element.style.overflowAnchor = overflowAnchor;
     });
     return true;
   } catch {

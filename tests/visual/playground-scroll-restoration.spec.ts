@@ -67,3 +67,20 @@ test('reload preserves a reading position near the bottom after fonts load', asy
   await page.evaluate(() => document.fonts.ready.then(() => new Promise(requestAnimationFrame)));
   await expect.poll(() => workspace.evaluate((element) => element.scrollTop)).toBe(top);
 });
+
+test('reload releases scroll anchoring when the reader interacts', async ({ page }) => {
+  await page.goto('/?lang=en#controls');
+  const workspace = page.locator('[data-design-lab-workspace]');
+  await expect(page.locator('#controls-segmented-control')).toBeAttached();
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  await workspace.evaluate((element) => {
+    element.scrollTop = 760;
+  });
+  await page.reload();
+  await expect(page.locator('#controls-segmented-control')).toBeAttached();
+  await expect
+    .poll(() => workspace.evaluate((element) => element.style.overflowAnchor))
+    .toBe('none');
+  await workspace.dispatchEvent('wheel', { deltaY: 10 });
+  await expect.poll(() => workspace.evaluate((element) => element.style.overflowAnchor)).toBe('');
+});

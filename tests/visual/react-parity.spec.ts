@@ -156,6 +156,7 @@ for (const theme of ['light', 'dark']) {
     test('recorded commands retain prompt context, selectable text and readonly geometry', async ({
       page,
     }) => {
+      await page.evaluate(() => document.fonts.ready.then(() => undefined));
       const terminal = page.locator('[data-react-adapter="UiTerminalSurface"]');
       const input = terminal.locator('input');
       const transcript = terminal.locator('.ui-terminal-transcript');
@@ -183,6 +184,7 @@ for (const theme of ['light', 'dark']) {
         .toBe('help --all');
       for (const width of [480, 1440]) {
         await page.setViewportSize({ width, height: 900 });
+        await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' }));
         const chrome = await terminal
           .locator('.ui-terminal-prompt__context')
           .evaluateAll((elements) =>
@@ -205,6 +207,15 @@ for (const theme of ['light', 'dark']) {
         await page.evaluate(() => {
           window.getSelection()?.removeAllRanges();
           return document.fonts.ready;
+        });
+        // Element screenshots must use a stable device-pixel origin after reflow.
+        await terminal.evaluate((element) => {
+          element.style.translate = '';
+        });
+        await terminal.scrollIntoViewIfNeeded();
+        await terminal.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          element.style.translate = `${Math.round(rect.left) - rect.left}px ${Math.round(rect.top) - rect.top}px`;
         });
         await expect(terminal).toHaveScreenshot(`react-terminal-${theme}-${width}.png`, {
           animations: 'disabled',
