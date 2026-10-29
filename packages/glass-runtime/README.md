@@ -27,6 +27,13 @@ disables the renderer. The CSS fallback uses alpha-only gradient masks and live
 backdrop brightness. Native SVG displacement remains an explicit alternative
 through backend: 'native' (Playground: ?glass=native).
 
+Animation tracking redraws moving edges and occluders. Background-position-only
+effects stay in CSS; transformed or fading descendants also stay in CSS when
+their nearest Glass surface isolates and clips both axes and they contain no
+nested Glass. Unknown effects remain tracked. Hidden subtrees do not sustain a
+frame loop; visibility and clipping mutations trigger reevaluation, including
+animations that are already running. These rules do not change the edge shader.
+
 The 0.2.0 reference test compares channel-gain ordering at the released four sides
 and four rounded corners in light and dark modes; a neutral brightness mask fails.
 The live-canvas regression calibrates per-channel gains and checks source changes,

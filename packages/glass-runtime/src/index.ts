@@ -25,6 +25,65 @@ const glassMutationAttributes = [
   'data-neoverse-tooltip-surface',
 ] as const;
 const maxOccluders = 6;
+const staticEdgeFrameProperties = new Set([
+  'offset',
+  'computedOffset',
+  'easing',
+  'composite',
+  'backgroundPosition',
+  'backgroundPositionX',
+  'backgroundPositionY',
+]);
+const clippedContentFrameProperties = new Set([
+  ...staticEdgeFrameProperties,
+  'transform',
+  'translate',
+  'rotate',
+  'scale',
+  'opacity',
+]);
+const animationIsActive = (animation: Animation): boolean =>
+  animation.playState === 'running' || animation.pending;
+
+function isInHiddenTree(element: Element): boolean {
+  if (element.getClientRects().length > 0) return false;
+  const view = element.ownerDocument.defaultView;
+  for (let ancestor: Element | null = element; ancestor; ancestor = ancestor.parentElement) {
+    if (view?.getComputedStyle(ancestor).display === 'none') return true;
+  }
+  return false;
+}
+
+function needsEdgeFrame(animation: Animation): boolean {
+  if (!animationIsActive(animation)) return false;
+  const effect = animation.effect;
+  // Keep unknown effects conservative; only known background-position motion
+  // can be left to live CSS compositing without redrawing the edge geometry.
+  if (!effect || !('getKeyframes' in effect)) return true;
+  const keyframeEffect = effect as KeyframeEffect;
+  const properties = keyframeEffect.getKeyframes().flatMap((frame) => Object.keys(frame));
+  if (properties.every((property) => staticEdgeFrameProperties.has(property))) return false;
+  const target = keyframeEffect.target;
+  const boundary = target?.closest(glassSelector);
+  if (
+    target &&
+    boundary &&
+    target !== boundary &&
+    !target.querySelector(glassSelector) &&
+    properties.every((property) => clippedContentFrameProperties.has(property))
+  ) {
+    const style = target.ownerDocument.defaultView?.getComputedStyle(boundary);
+    // Isolated, clipped content cannot change its surface geometry or occlude
+    // another surface outside the boundary. CSS composites glyph motion live.
+    if (
+      style?.isolation === 'isolate' &&
+      (style.overflowX === 'hidden' || style.overflowX === 'clip') &&
+      (style.overflowY === 'hidden' || style.overflowY === 'clip')
+    )
+      return false;
+  }
+  return true;
+}
 const occlusionSampleInset = 2;
 const quadPositions = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
 const motionEvents = [
@@ -1058,17 +1117,18 @@ class GlassRendererImpl implements GlassRenderer {
       this.refresh();
       // CSS transforms/opacity do not emit DOM mutations or resize events.
       // Repaint while affected surfaces move, then clear their final frame.
+      let movingEdges = false;
       for (const element of this.animatedElements) {
-        if (
-          !element.isConnected ||
-          !element
-            .getAnimations?.()
-            .some((animation) => animation.playState === 'running' || animation.pending)
-        ) {
+        const animations = element.getAnimations?.() ?? [];
+        if (!element.isConnected || !animations.some(animationIsActive)) {
           this.animatedElements.delete(element);
+        } else if (!isInHiddenTree(element) && animations.some(needsEdgeFrame)) {
+          movingEdges = true;
         }
       }
-      if (this.animatedElements.size > 0) this.scheduleRefresh();
+      // Retain live decorative targets so clip/style changes can make them
+      // relevant again, without reserving frames while their edges rest.
+      if (movingEdges) this.scheduleRefresh();
     });
     if (!completedSynchronously) {
       this.animationFrame = frame;

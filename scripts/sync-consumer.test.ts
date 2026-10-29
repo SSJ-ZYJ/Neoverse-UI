@@ -70,6 +70,35 @@ test('does not synchronize registry dependencies', async () => {
   }
 });
 
+test('syncs standalone Giscus theme CSS through the shared consumer entrypoint', async () => {
+  const consumer = await mkdtemp(join(tmpdir(), 'neoverse-ui-giscus-'));
+  const giscusSource = join(uiRoot, 'packages', 'giscus-theme');
+  const installed = join(consumer, 'node_modules', '@neoverse-ui', 'giscus-theme');
+  try {
+    await mkdir(join(installed, 'dist'), { recursive: true });
+    await writeFile(
+      join(consumer, 'package.json'),
+      JSON.stringify({
+        dependencies: { '@neoverse-ui/giscus-theme': `file:${giscusSource}` },
+      }),
+    );
+    await copyFile(join(giscusSource, 'package.json'), join(installed, 'package.json'));
+    for (const name of ['giscus-light.css', 'giscus-dark.css']) {
+      await writeFile(join(installed, 'dist', name), 'stale theme');
+    }
+    const child = run(consumer);
+    const error = await new Response(child.stderr).text();
+    expect(await child.exited, error).toBe(0);
+    for (const name of ['giscus-light.css', 'giscus-dark.css']) {
+      expect(await readFile(join(installed, 'dist', name), 'utf8')).toBe(
+        await readFile(join(giscusSource, 'dist', name), 'utf8'),
+      );
+    }
+  } finally {
+    await rm(consumer, { recursive: true, force: true });
+  }
+});
+
 test('refuses an installed package link outside the consumer', async () => {
   const consumer = await mkdtemp(join(tmpdir(), 'neoverse-ui-consumer-'));
   const external = await mkdtemp(join(tmpdir(), 'neoverse-ui-external-'));

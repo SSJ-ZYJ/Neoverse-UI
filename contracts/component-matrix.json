@@ -22,7 +22,8 @@
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": ["docs/consumer-migration-2026-10-29.md"]
     },
     {
       "name": "UiIconButton",
@@ -35,7 +36,8 @@
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": ["docs/consumer-migration-2026-10-29.md"]
     },
     {
       "name": "UiAction",
@@ -48,7 +50,8 @@
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": ["docs/consumer-migration-2026-10-29.md"]
     },
     {
       "name": "UiSurface",
@@ -293,6 +296,9 @@
       "evidence": [
         "tests/visual/component-interactions.spec.ts",
         "tests/visual/overlay-review-regressions.spec.ts",
+        "tests/visual/overlay-tracking.spec.ts",
+        "packages/vue/src/overlay-hydration.test.ts",
+        "packages/react/src/overlay-hydration.test.tsx",
         "../XCA-Portal/app/components/site/SiteHeader.vue",
         "../XCA-Portal/tests/e2e/mobile-header.spec.ts",
         "docs/consumer-validation-2026-10-25.md"
@@ -314,6 +320,9 @@
       "evidence": [
         "tests/visual/component-interactions.spec.ts",
         "tests/visual/overlay-review-regressions.spec.ts",
+        "tests/visual/overlay-tracking.spec.ts",
+        "packages/vue/src/overlay-hydration.test.ts",
+        "packages/react/src/overlay-hydration.test.tsx",
         "docs/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }

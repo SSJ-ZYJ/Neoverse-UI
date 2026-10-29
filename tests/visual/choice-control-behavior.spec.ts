@@ -8,6 +8,7 @@ for (const adapter of ['Vue', 'React']) {
     ]) {
       test(`${adapter} ${control.name} label activates the native control / ${theme}`, async ({
         page,
+        browserName,
       }) => {
         const url =
           adapter === 'Vue'
@@ -24,6 +25,10 @@ for (const adapter of ['Vue', 'React']) {
         // label coordinates rather than requiring the text span to receive it.
         await page.mouse.click(label.x + label.width / 2, label.y + label.height / 2);
         await expect(input).not.toBeChecked();
+        // WebKit preserves its platform's mouse-focus policy. Keyboard focus is
+        // still required; do not impose Chromium's pointer policy on the adapter.
+        if (browserName !== 'webkit') await expect(input).toBeFocused();
+        await input.focus();
         await expect(input).toBeFocused();
         await input.press('Space');
         await expect(input).toBeChecked();

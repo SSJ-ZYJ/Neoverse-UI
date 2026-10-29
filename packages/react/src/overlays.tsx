@@ -13,6 +13,7 @@ import {
   type SyntheticEvent,
   useCallback,
   useEffect,
+  useId,
   useRef,
   useState,
 } from 'react';
@@ -37,6 +38,7 @@ function useAnchoredOverlayController({
 }: AnchoredOverlayControllerOptions) {
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const panelId = useId();
   const ignoreDisabledNativeClose = useRef(false);
   const [internalOpen, setInternalOpen] = useState(defaultOpen);
   const [syncRevision, setSyncRevision] = useState(0);
@@ -107,6 +109,7 @@ function useAnchoredOverlayController({
   return {
     triggerRef,
     panelRef,
+    panelId,
     resolvedOpen,
     expandedOpen,
     setOpen,
@@ -159,12 +162,14 @@ export function UiPopover({
         type="button"
         disabled={disabled}
         aria-expanded={controller.expandedOpen}
+        aria-controls={controller.panelId}
         onClick={controller.toggle}
       >
         {trigger}
       </button>
       <div
         ref={controller.panelRef}
+        id={controller.panelId}
         className="ui-overlay-panel ui-popover__content material-glass-elevated nv-presence"
         popover="auto"
         role="dialog"
@@ -283,6 +288,7 @@ export function UiDropdownMenu({
         type="button"
         aria-haspopup="menu"
         aria-expanded={controller.expandedOpen}
+        aria-controls={controller.panelId}
         disabled={disabled}
         onClick={controller.toggle}
       >
@@ -290,6 +296,7 @@ export function UiDropdownMenu({
       </button>
       <div
         ref={controller.panelRef}
+        id={controller.panelId}
         className="ui-overlay-panel ui-dropdown-menu__panel material-glass-elevated nv-presence"
         popover="auto"
         role="menu"

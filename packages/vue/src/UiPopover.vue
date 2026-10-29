@@ -6,7 +6,7 @@ import {
   showAnchoredOverlay,
   stopOverlayTracking,
 } from '@neoverse-ui/overlay-runtime';
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue';
 import { presence } from './presence';
 import type { PopoverProps } from './types';
 
@@ -21,6 +21,7 @@ const emit = defineEmits<{ 'update:open': [value: boolean] }>();
 
 const triggerRef = ref<HTMLButtonElement | null>(null);
 const panelRef = ref<HTMLElement | null>(null);
+const panelId = `${useId()}-popover`;
 const ignoreDisabledNativeClose = ref(false);
 const internalOpen = ref(props.defaultOpen);
 const resolvedOpen = computed(() => props.open ?? internalOpen.value);
@@ -113,6 +114,7 @@ onBeforeUnmount(() => {
       type="button"
       :disabled="props.disabled"
       :aria-expanded="expandedOpen"
+      :aria-controls="panelId"
       @click="toggleOpen"
     >
       <slot name="trigger" />
@@ -120,6 +122,7 @@ onBeforeUnmount(() => {
 
     <div
       ref="panelRef"
+      :id="panelId"
       class="ui-overlay-panel ui-popover__content material-glass-elevated nv-presence"
       popover="auto"
       role="dialog"

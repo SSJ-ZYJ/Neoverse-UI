@@ -588,11 +588,12 @@ for (const mode of ['native', 'fallback'] as const) {
     await page.goto('/react-fixture?lang=en&contract-fixtures=1', {
       waitUntil: 'domcontentloaded',
     });
-    const baseline = await activeOverlayListenerCounts(page);
     const controlled = page.locator('[data-overlay-controlled-popover]');
     const container = page.locator('[data-overlay-controlled]');
     const trigger = controlled.locator('.ui-popover__trigger');
     const panel = controlled.locator('.ui-popover__content');
+    await expect(trigger).toBeVisible();
+    const baseline = await activeOverlayListenerCounts(page);
     await trigger.click();
     await expect(panel).toBeVisible();
     await expect(trigger).toHaveAttribute('aria-expanded', 'true');

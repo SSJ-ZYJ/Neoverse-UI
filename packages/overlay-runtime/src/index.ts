@@ -169,9 +169,42 @@ export function positionAnchoredOverlay({
 function startOverlayTracking(options: AnchoredOverlayOptions): void {
   stopOverlayTracking(options.overlay);
   const update = () => positionAnchoredOverlay(options);
+  const readGeometry = () => {
+    const rect = options.trigger.getBoundingClientRect();
+    return [
+      rect.left,
+      rect.top,
+      rect.width,
+      rect.height,
+      options.overlay.offsetWidth,
+      options.overlay.offsetHeight,
+    ];
+  };
+  let previous = readGeometry();
+  let frame = 0;
+  // Scroll/resize events do not cover async content or an ancestor's layout /
+  // transform changes. Sample only while open and write only on geometry changes.
+  const track = () => {
+    if (
+      !options.trigger.isConnected ||
+      !options.overlay.isConnected ||
+      !isOverlayOpen(options.overlay, options.fallbackOpenClass)
+    ) {
+      stopOverlayTracking(options.overlay);
+      return;
+    }
+    const next = readGeometry();
+    if (next.some((value, index) => value !== previous[index])) {
+      previous = next;
+      update();
+    }
+    frame = requestAnimationFrame(track);
+  };
+  frame = requestAnimationFrame(track);
   window.addEventListener('resize', update);
   window.addEventListener('scroll', update, true);
   overlayCleanup.set(options.overlay, () => {
+    cancelAnimationFrame(frame);
     window.removeEventListener('resize', update);
     window.removeEventListener('scroll', update, true);
   });

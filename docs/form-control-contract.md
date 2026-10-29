@@ -27,6 +27,12 @@ The canonical control set is:
 
 Choice controls preserve native `input` elements. Checkbox and Switch use native checkbox state; RadioGroup uses native radio inputs grouped by `name`. The visual control is a sibling presentation layer and does not replace browser semantics.
 
+The transparent choice input explicitly fills its visual row; `inset: 0` alone
+does not stretch replaced checkbox inputs in WebKit. This keeps visible choice
+text inside the native hit area without changing the painted control's size.
+Mouse-focus policy remains browser-owned; keyboard focus and Space activation
+are tested separately from pointer activation.
+
 ## Framework bindings
 
 | Contract | Vue | React |

@@ -95,11 +95,13 @@ for (const mode of ['native', 'fallback'] as const) {
     await page.goto('/react-fixture?lang=en&contract-fixtures=1', {
       waitUntil: 'domcontentloaded',
     });
-    const baseline = await activeOverlayListenerCounts(page);
     const controls = page.locator('[data-select-block-controls]');
     const trigger = page.locator('[data-react-adapter="UiSelect"]');
     const shell = trigger.locator('xpath=..');
     const panel = shell.getByRole('listbox');
+    // Count after the client fixture and its renderer have mounted, not just DCL.
+    await expect(trigger).toBeVisible();
+    const baseline = await activeOverlayListenerCounts(page);
 
     await trigger.focus();
     await page.keyboard.press('ArrowDown');

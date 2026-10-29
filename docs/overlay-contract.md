@@ -13,10 +13,20 @@ Neoverse-UI uses one overlay contract for anchored top-layer UI. Popover, Dropdo
 - CSS zoom compensation,
 - optional trigger-width matching,
 - scroll and resize tracking while a panel is open,
+- geometry tracking for asynchronously resized content and trigger movement without scroll/resize,
 - native Popover API detection,
 - fixed-position fallback behavior when Popover is unavailable.
 
 Framework adapters do not duplicate those algorithms.
+
+While open, one animation frame samples the trigger's viewport rectangle and the
+panel's layout dimensions. Only changed geometry requests a positioning write;
+unchanged frames do not rewrite coordinates. This includes layout shifts and
+translated ancestors, and preserves the existing CSS zoom and viewport clamping
+rules. Closing, disabling, unmounting or disconnecting either element cancels the
+frame and removes tracking/dismiss listeners. No document-wide mutation observer
+or second positioning algorithm is installed. This does not add general rotated
+or scaled containing-block support to the fallback contract.
 
 ## Top-layer behavior
 
@@ -38,11 +48,17 @@ A dismiss is a request to change controlled `open`. After the parent update, ada
 
 `UiPopover` exposes a button trigger and a `role="dialog"` panel. The caller provides the accessible label for the dialog content. Popover does not impose menu semantics or focus trapping.
 
+The trigger's `aria-controls` references the panel's generated ID, including while
+closed. Vue and React use their own SSR-stable `useId`; multiple instances receive
+distinct IDs and hydration/open/close cycles retain the association. IDs are
+internal implementation details, so consumers must not depend on their format.
+
 ## DropdownMenu
 
 `UiDropdownMenu` exposes:
 
 - `aria-haspopup="menu"` on the trigger,
+- `aria-controls` referencing an SSR-stable panel ID, with the same lifetime rules as Popover,
 - `role="menu"` on the panel,
 - native button menu items with `role="menuitem"`,
 - ArrowUp / ArrowDown wrapping,
@@ -64,5 +80,16 @@ The contract is covered at three levels:
 3. Playwright browser tests for real Popover behavior, Escape, light dismiss, focus restoration, keyboard navigation, viewport containment, and the existing Select top-layer regression.
 
 Dedicated interaction tests also disable `HTMLElement.prototype.showPopover` / `hidePopover` before mounting the Vue/React fixtures, forcing the fixed-position fallback rather than relying on the browser's default support. Additional controlled/readonly/reset scenarios are opt-in through `contract-fixtures=1`; they do not alter the default Design Lab layout.
+
+`overlay-tracking.spec.ts` covers trigger translation, async content growth,
+zoom, ID associations, idle position writes and cancellation on disable/unmount.
+It retains normal Motion while forcing only the optional renderer to use its CSS
+fallback, keeping geometry/lifetime assertions independent from WebGL scheduling.
+The optional renderer's enhanced-mode browser acceptance remains a separate gate.
+Both adapters additionally render server markup and hydrate it in their
+`overlay-hydration.test` suites; these are DOM hydration checks, not assistive
+technology acceptance. The cross-browser configuration also selects the tracking,
+audit, form semantics/behavior and overlay regression suites alongside its
+existing interaction suites.
 
 Any new anchored overlay primitive should reuse this runtime before adding a new positioning implementation.
