@@ -14,6 +14,7 @@ const packageOrder = [
   'tokens',
   'motion',
   'overlay-runtime',
+  'giscus-theme',
   'glass-runtime',
   'tailwind',
   'vue',

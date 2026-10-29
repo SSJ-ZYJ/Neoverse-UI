@@ -6,7 +6,19 @@ const playgroundBaseUrl = `http://127.0.0.1:${playgroundPort}`;
 
 export default defineConfig({
   ...baseConfig,
-  testMatch: ['**/component-interactions.spec.ts', '**/react-parity.spec.ts'],
+  // Chromium owns the platform release snapshots; this suite validates behavior.
+  ignoreSnapshots: true,
+  testMatch: [
+    '**/component-interactions.spec.ts',
+    '**/react-parity.spec.ts',
+    '**/audit-regressions.spec.ts',
+    '**/form-control-ax.spec.ts',
+    '**/form-control-behavior.spec.ts',
+    '**/choice-control-behavior.spec.ts',
+    '**/overlay-review-regressions.spec.ts',
+    '**/overlay-tracking.spec.ts',
+    '**/glass-scheduling.spec.ts',
+  ],
   projects: [
     {
       name: 'firefox',

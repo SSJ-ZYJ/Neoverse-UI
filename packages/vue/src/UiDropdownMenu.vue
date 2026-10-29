@@ -6,7 +6,7 @@ import {
   showAnchoredOverlay,
   stopOverlayTracking,
 } from '@neoverse-ui/overlay-runtime';
-import { computed, nextTick, onBeforeUnmount, ref, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue';
 import { presence } from './presence';
 import type { DropdownMenuItem, DropdownMenuProps } from './types';
 
@@ -23,6 +23,7 @@ const emit = defineEmits<{
 
 const triggerRef = ref<HTMLButtonElement | null>(null);
 const panelRef = ref<HTMLElement | null>(null);
+const panelId = `${useId()}-menu`;
 const ignoreDisabledNativeClose = ref(false);
 const internalOpen = ref(props.defaultOpen);
 const resolvedOpen = computed(() => props.open ?? internalOpen.value);
@@ -167,6 +168,7 @@ onBeforeUnmount(() => {
       type="button"
       aria-haspopup="menu"
       :aria-expanded="expandedOpen"
+      :aria-controls="panelId"
       :disabled="props.disabled"
       @click="toggleOpen"
     >
@@ -175,6 +177,7 @@ onBeforeUnmount(() => {
 
     <div
       ref="panelRef"
+      :id="panelId"
       class="ui-overlay-panel ui-dropdown-menu__panel material-glass-elevated nv-presence"
       popover="auto"
       role="menu"

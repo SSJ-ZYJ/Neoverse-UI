@@ -62,6 +62,10 @@ Doc 的官方 `react@0.1.0`、`giscus-theme@0.1.0` 返回 404；官方 `tailwind
 
 目录审计：Doc 六个根包无嵌套 UI 副本；Slides 的 web/theme Vue 和 Tailwind 链接指向相同缓存实体，另有 Motion → Tokens 嵌套锁条目。XCA 有 17 个 UI 目录（Tokens ×7、Motion ×4、Tailwind ×2、Overlay ×2、Vue ×1、Glass ×1），同名 manifest 为硬链接，不能按目录数认定为不同版本。共享同步器已覆盖嵌套副本；此轮未改动 Slides / XCA 的开发依赖方式、锁文件或现有用户工作。
 
+## 2026-10-29 Doc 迁移跟进
+
+上述 10 月 25 日记录保留为历史。Doc 现已切换六个精确 npm 依赖及对应 overrides：Tokens / Tailwind / React 0.3.0，Motion / Glass 0.2.1，Giscus 0.2.0，不再依赖历史 tarball。正式包与本地候选分别完成隔离构建和真实阅读/首页回归；原工作区 frozen install 通过。候选使用共享同步器（新增 Giscus 支持），不复制第二份同步逻辑。RSC 适配、81 项候选单测与未验收边界见[本轮消费迁移](consumer-migration-2026-10-29.md)。未修改 Slides / XCA 的来源或 CI 固定 SHA。
+
 ## 验证
 
 - `tests/visual/component-size.spec.ts` 测量真实 Vue 控件的宽高、字号。
