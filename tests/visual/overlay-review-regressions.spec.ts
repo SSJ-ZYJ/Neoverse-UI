@@ -109,16 +109,22 @@ for (const adapter of adapters) {
         });
         const panel = popover.locator('.ui-popover__content');
         await expect(panel).toBeVisible();
-        const bounds = await panel.boundingBox();
-        expect(bounds).not.toBeNull();
-        if (!bounds) return;
-        // Mobile emulation can use a different layout viewport from the
-        // requested device viewport when the fixture has no viewport meta.
-        const viewport = await page.evaluate(() => ({ width: innerWidth, height: innerHeight }));
-        expect(bounds.x, 'overlay left').toBeGreaterThanOrEqual(-1);
-        expect(bounds.x + bounds.width, 'overlay right').toBeLessThanOrEqual(viewport.width + 1);
-        expect(bounds.y, 'overlay top').toBeGreaterThanOrEqual(-1);
-        expect(bounds.y + bounds.height, 'overlay bottom').toBeLessThanOrEqual(viewport.height + 1);
+        // Visibility can precede the opening animation and tracked positioning.
+        // Keep the same bounds, but wait for them in one layout measurement.
+        await expect(async () => {
+          const { bounds, viewport } = await panel.evaluate((element) => {
+            const rect = element.getBoundingClientRect();
+            return {
+              bounds: { x: rect.x, y: rect.y, right: rect.right, bottom: rect.bottom },
+              // Mobile emulation can use a larger layout viewport than requested.
+              viewport: { width: innerWidth, height: innerHeight },
+            };
+          });
+          expect(bounds.x, 'overlay left').toBeGreaterThanOrEqual(-1);
+          expect(bounds.right, 'overlay right').toBeLessThanOrEqual(viewport.width + 1);
+          expect(bounds.y, 'overlay top').toBeGreaterThanOrEqual(-1);
+          expect(bounds.bottom, 'overlay bottom').toBeLessThanOrEqual(viewport.height + 1);
+        }).toPass({ timeout: 5_000 });
       });
     }
   }
