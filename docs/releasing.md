@@ -119,7 +119,7 @@ The repository and all public packages use the MIT license. `scripts/verify-pack
   versions with identical SHA-512 integrity. Frozen installation, typecheck and
   production build passed (93 HTML pages, 72 Mermaid assets); generated Giscus
   source CSS was restored after the build. Remaining historical artifacts still
-  block standalone clean-checkout installation; see [consumer audit](consumer-sizing.md#2026-10-25-消费依赖核查).
+  block standalone clean-checkout installation; see [consumer audit](consumer-sizing.md#2026-10-25-consumer-dependency-audit).
 
 ### CI and visual baselines
 

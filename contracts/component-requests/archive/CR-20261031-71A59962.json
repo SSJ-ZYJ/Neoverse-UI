@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261031-71A59962",
+  "kind": "enhancement",
+  "target": "UiTerminalSurface",
+  "summary": "Consumer-owned terminal window header",
+  "expected": "Vue header slot and React header prop replace only header contents while preserving shared surface, accessible label, body and default fallback",
+  "acceptanceCriteria": [
+    "Custom real header actions interact without duplicate fallback title, status or actions",
+    "Both adapters preserve accessible surface and terminal body with custom headers and unchanged defaults",
+    "XCA Portal supplies platform chrome through app/features/terminal/components/TerminalWindowHeader.vue; consumer evidence required before delivery"
+  ],
+  "impact": "normal",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/features/terminal/components/TerminalWindowHeader.vue",
+      "framework": "vue",
+      "scenario": "OS-specific terminal window chrome remains consumer-owned without changing output or prompt"
+    }
+  ],
+  "createdAt": "2026-10-31T04:04:48.172Z",
+  "updatedAt": "2026-10-31T04:14:39.163Z",
+  "resolution": "Implemented Vue header slot and equivalent React header prop without changing fallback header or terminal body. Vue terminal tests: 10 passed; React terminal/parity tests: 11 passed. Vue, React and Playground typechecks, Playground build, scoped Biome lint, material/contracts/parity and Tailwind checks passed. XCA-Portal ui:sync, production build and full check passed; 31 nonvisual Playwright tests passed covering platform chrome, fonts, shared terminal styles and home entry. Live Windows browser expand/restore/echo smoke passed with no page errors. Consumer: XCA-Portal/app/features/terminal/components/TerminalWindowHeader.vue. No screenshot or visual validation per user request."
+}

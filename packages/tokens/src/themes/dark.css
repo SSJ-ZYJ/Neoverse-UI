@@ -14,6 +14,7 @@
   --neoverse-disclosure-edge-active:
     var(--neoverse-surface-inset-outline-active), var(--neoverse-surface-inset-edge-active);
   --neoverse-material-edge-refraction-gain: 1;
+  --neoverse-material-edge-refraction-blend: overlay;
   --neoverse-material-edge-filter-subtle: brightness(125%);
   --neoverse-material-edge-filter-elevated: brightness(135%);
   --neoverse-material-edge-filter-immersive: brightness(145%);

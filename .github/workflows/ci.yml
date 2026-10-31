@@ -6,9 +6,14 @@ on:
     branches:
       - dev
   workflow_dispatch:
+    inputs:
+      cross_browser_only:
+        description: Run only the Firefox and WebKit risk suite
+        type: boolean
+        default: false
 
 concurrency:
-  group: ci-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}
+  group: ci-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}-${{ inputs.cross_browser_only && 'cross-browser' || 'verify' }}
   cancel-in-progress: true
 
 permissions:
@@ -18,6 +23,7 @@ permissions:
 jobs:
   scope:
     name: Select CI scope
+    if: github.event_name != 'workflow_dispatch' || !inputs.cross_browser_only
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -51,3 +57,8 @@ jobs:
       metadata-checks: ${{ needs.scope.outputs.metadata-checks == 'true' }}
       quality-checks: ${{ needs.scope.outputs.quality-checks == 'true' }}
       visual-checks: ${{ needs.scope.outputs.visual-checks == 'true' }}
+
+  cross-browser:
+    name: Cross-browser risk checks
+    if: github.event_name == 'workflow_dispatch' && inputs.cross_browser_only
+    uses: ./.github/workflows/cross-browser-smoke.yml

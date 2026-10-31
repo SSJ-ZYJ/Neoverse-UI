@@ -1,7 +1,7 @@
 # Terminal composition
 
 Neoverse-UI provides a **terminal presentation**, not a shell emulator or command runtime.
-The prompt is a text line rather than a form-field surface: translucent Aurora Glass (极光玻璃) stays on the
+The prompt is a text line rather than a form-field surface: translucent Aurora Glass stays on the
 outer `UiTerminalSurface`; the editor itself has no border, fill, shadow or rounded box.
 
 ## Vue example
@@ -60,6 +60,35 @@ function submit(event: KeyboardEvent) {
 - Three full-height shade bands lead into flush, overlapping round caps. The context and next-line editor share the same monospace text size; the last cap stays inside the horizontally scrollable context on narrow screens. All shapes use CSS geometry, not Nerd Font private glyphs. Optional host, branch or runtime segments can be omitted without changing the join geometry.
 - All terminal primitives use `--neoverse-font-family-code-maple`, which prefers the installed **Maple Mono NF CN** for both Chinese and Latin text. The regular Maple Mono Latin webfont is a fallback, not a replacement for the NF CN font. Consumers without an installed NF CN font can supply an `@font-face` for that family; otherwise the stack explicitly includes the shared Chinese sans fonts. The default code-font role outside the terminal remains independently configurable.
 - The previous `UiInput appearance="terminal"` approach was removed. Regular form inputs retain the regular form appearance.
+
+### Consumer-owned headers
+
+Vue's `#header` slot and React's optional `header` ReactNode replace only the contents
+of the existing `UiTerminalSurface` header. Without a Vue header slot, or with a
+nullish React `header`, the title, status and actions retain their existing fallback.
+A custom header replaces all three: fallback titles, status and action toolbars are
+not rendered alongside it.
+
+The shared component still owns the header element, padding and material, accessible
+surface label (`ariaLabel`, falling back to `title`), and unchanged body. Keep passing
+`title` even when replacing its visible rendering. The consumer owns the replacement
+layout, visible title/status, action grouping and accessible action names; use
+`UiButton` / `UiIconButton` for real controls. Platform detection, window chrome and
+platform-specific styling stay in the consumer, not the shared terminal components.
+
+```vue
+<UiTerminalSurface title="Workspace terminal">
+  <template #header>
+    <span>Workspace terminal</span>
+    <UiButton @click="closeTerminal">Close terminal</UiButton>
+  </template>
+  <p>Ready</p>
+</UiTerminalSurface>
+```
+
+The equivalent React composition is
+`<UiTerminalSurface title="Workspace terminal" header={<UiButton onClick={closeTerminal}>Close terminal</UiButton>}><p>Ready</p></UiTerminalSurface>`.
+Neither API changes terminal output, transcript or prompt behavior.
 
 The optional `suggestion` prop is a full proposed value. The shared prompt displays only its
 matching suffix in muted italic text, without changing the input value. It appears only while

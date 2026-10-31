@@ -57,6 +57,7 @@ const segmentStyle = computed(() => ({
   ...(sliderBounds.value === null
     ? {}
     : {
+        '--segment-active-column': '1 / -1',
         '--segment-active-offset': `${sliderBounds.value.offset}px`,
         '--segment-active-width': `${sliderBounds.value.width}px`,
       }),

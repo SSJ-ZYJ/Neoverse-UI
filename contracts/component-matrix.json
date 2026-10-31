@@ -421,7 +421,8 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/visual/react-parity.spec.ts",
-        "docs/framework-parity.md"
+        "docs/framework-parity.md",
+        "contracts/component-requests/archive/CR-20261030-41A82EFD.json"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -605,6 +606,9 @@
       "consumer": "validated",
       "runtime": "validated",
       "evidence": [
+        "packages/vue/src/terminal.test.ts",
+        "packages/react/src/terminal.test.tsx",
+        "docs/terminal-composition.md",
         "packages/react/src/parity.test.tsx",
         "tests/visual/react-parity.spec.ts",
         "docs/framework-parity.md"

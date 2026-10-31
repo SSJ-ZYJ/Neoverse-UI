@@ -11,5 +11,6 @@ playwright-report/
 Thumbs.db
 .omp/
 .workbuddy/
+.codeartsdoer/
 *.log
 .motion-probes/

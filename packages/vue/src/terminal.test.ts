@@ -1,6 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import { h, nextTick, ref } from 'vue';
+import UiButton from './UiButton.vue';
 import UiTerminalEcho from './UiTerminalEcho.vue';
 import UiTerminalLine from './UiTerminalLine.vue';
 import UiTerminalPrompt from './UiTerminalPrompt.vue';
@@ -20,8 +21,45 @@ describe('Terminal composition', () => {
     expect(wrapper.classes()).toContain('material-glass-elevated');
     expect(wrapper.attributes('aria-label')).toBe('Session');
     expect(wrapper.attributes('data-density')).toBe('expanded');
+    expect(wrapper.get('.ui-terminal-surface__title').text()).toBe('Session');
+    expect(wrapper.get('.ui-terminal-surface__status').text()).toBe('Connected');
+    expect(wrapper.get('[role="toolbar"] button').text()).toBe('Close');
     expect(wrapper.get('[role="toolbar"]').attributes('aria-label')).toBe('Session actions');
     expect(wrapper.get('.ui-terminal-surface__body').text()).toBe('Ready');
+  });
+
+  it('replaces only header contents with interactive consumer controls', async () => {
+    const closed = ref(false);
+    const wrapper = mount(UiTerminalSurface, {
+      props: { title: 'Fallback title', ariaLabel: 'Workspace console' },
+      slots: {
+        header: () =>
+          h(
+            UiButton,
+            {
+              onClick: () => {
+                closed.value = true;
+              },
+            },
+            () => 'Close window',
+          ),
+        status: () => h('span', 'Fallback status'),
+        actions: () => h('button', 'Fallback action'),
+        default: () => h('p', closed.value ? 'Closed' : 'Ready'),
+      },
+    });
+    expect(wrapper.element.tagName).toBe('SECTION');
+    expect(wrapper.attributes('aria-label')).toBe('Workspace console');
+    expect(wrapper.classes()).toContain('material-glass-elevated');
+    expect(wrapper.findAll('header')).toHaveLength(1);
+    expect(wrapper.get('header').text()).toBe('Close window');
+    expect(wrapper.findAll('button')).toHaveLength(1);
+    expect(wrapper.find('[role="toolbar"]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('Fallback');
+    expect(wrapper.get('.ui-terminal-surface__body').text()).toBe('Ready');
+    await wrapper.get('header button').trigger('click');
+    expect(wrapper.get('.ui-terminal-surface__body').text()).toBe('Closed');
+    wrapper.unmount();
   });
 
   it('renders user-provided output as text and exposes preformatted line semantics', () => {

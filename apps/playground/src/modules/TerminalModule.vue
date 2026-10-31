@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {
   type TerminalPromptSegment,
+  UiButton,
   UiTerminalEcho,
   UiTerminalLine,
   UiTerminalPrompt,
@@ -121,6 +122,7 @@ const copy = {
   ),
   label: localized('Terminal command', '终端命令'),
   placeholder: localized('type a command…', '输入命令…'),
+  focusCommand: localized('Focus command', '聚焦命令'),
 };
 </script>
 
@@ -132,7 +134,12 @@ const copy = {
   >
     <MaterialBackdrop edge="inset">
       <UiTerminalSurface title="neoverse / session" class="w-full" @click="focusOnBackground">
-        <template #status><span>● active</span></template>
+        <template #header>
+          <span class="text-caption text-secondary">neoverse / session</span>
+          <UiButton class="ml-auto" variant="ghost" size="sm" @click="prompt?.focus()"
+            >{{ localize(copy.focusCommand, locale) }}</UiButton
+          >
+        </template>
         <UiTerminalTranscript label="Terminal history" style="max-height: 9rem">
           <template v-for="(line, index) in lines" :key="index">
             <UiTerminalEcho

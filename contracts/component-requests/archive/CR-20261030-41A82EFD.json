@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261030-41A82EFD",
+  "kind": "enhancement",
+  "target": "UiSegmentedControl",
+  "summary": "SSR 首帧选中背景应对齐不等宽按钮",
+  "expected": "共享分段控件在 SSR、首次水合和字体加载期间使用选中按钮的真实 Grid 列定位背景，不先按等宽估算；水合后保留正常选择滑动。",
+  "acceptanceCriteria": [
+    "中文与 English 等不等宽选项在水合前选中背景的左右位置与宽度误差小于 1 CSS 像素",
+    "首项、中间项、末项与多个独立实例均正确定位",
+    "Vue 和 React 使用相同首帧样式规则，水合后仍可切换与键盘操作"
+  ],
+  "impact": "normal",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/components/site/SiteHeaderPreferences.vue",
+      "framework": "vue",
+      "scenario": "关于学社页面刷新时，语言选中背景从约 56.57px 缩到 45px，主题控件也存在首帧估算位置变化。用户已授权同时修改共享库。"
+    }
+  ],
+  "createdAt": "2026-10-30T15:37:16.069Z",
+  "updatedAt": "2026-10-30T16:03:34.671Z",
+  "resolution": "Vue 与 React 采用选中 Grid 列作为 SSR 背景定位，水合后保留测量滑动。XCA-Portal preferences-refresh.spec.ts 的中英与主题组合 4 项通过，覆盖延迟水合前后逐帧状态和几何；React 实际 SSR 首中末项不等宽按钮浏览器测量误差均为 0px；Vue 78 项和 React 39 项单测通过，两个适配器类型检查与共享 Stylelint 通过，门户 bun run check 通过。额外语言与主题套件仍有 3 项失败，未作为本次交付通过证据。"
+}

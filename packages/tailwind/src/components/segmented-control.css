@@ -40,13 +40,11 @@
     z-index: 0;
     inset-block: 0;
     inset-inline-start: 0;
-    width: var(
-      --segment-active-width,
-      calc(
-        (100% - (var(--segment-count) - 1) * var(--neoverse-control-segmented-gap)) /
-        var(--segment-count)
-      )
-    );
+    /* Match the selected content-sized track before hydration has measured any buttons.
+       在水合测量按钮前，直接占据选中按钮按内容定宽的网格列。 */
+    grid-column: var(--segment-active-column, calc(var(--segment-index) + 1) / span 1);
+    grid-row: 1;
+    width: var(--segment-active-width, 100%);
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
       var(--neoverse-control-segmented-active-border);
     border-radius: var(--neoverse-control-segmented-option-radius);
@@ -54,12 +52,7 @@
     background-color: var(--neoverse-control-segmented-active-fill);
     box-shadow: var(--neoverse-control-segmented-active-shadow);
     pointer-events: none;
-    transform: translateX(
-      var(
-        --segment-active-offset,
-        calc(var(--segment-index) * (100% + var(--neoverse-control-segmented-gap)))
-      )
-    );
+    transform: translateX(var(--segment-active-offset, 0px));
     transition: none;
     will-change: transform;
   }

@@ -1,6 +1,7 @@
 name: Cross-browser smoke
 
 on:
+  workflow_call:
   workflow_dispatch:
   schedule:
     - cron: '0 2 * * 1'
@@ -21,6 +22,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
@@ -44,11 +48,20 @@ jobs:
       - name: Install Firefox and WebKit
         run: bunx playwright install --with-deps firefox webkit
 
-      - name: Run cross-browser interaction checks
-        run: bunx playwright test --config=playwright.cross-browser.config.ts --workers=2 --reporter=list,html
+      - name: Record candidate and browser provenance
+        run: |
+          git rev-parse HEAD
+          bun --version
+          bunx playwright --version
+          bunx playwright install --list
 
-      - name: Upload failed browser check evidence
-        if: ${{ failure() }}
+      - name: Run cross-browser interaction checks
+        env:
+          PLAYWRIGHT_JSON_OUTPUT_NAME: test-results/cross-browser-results.json
+        run: bunx playwright test --config=playwright.cross-browser.config.ts --workers=1 --retries=0 --trace=retain-on-failure --reporter=list,html,json
+
+      - name: Upload browser check evidence
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
           name: cross-browser-smoke-${{ github.run_attempt }}

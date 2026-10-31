@@ -264,6 +264,7 @@ export interface UiTerminalSurfaceProps extends HTMLAttributes<HTMLElement> {
   ariaLabel?: string;
   density?: 'compact' | 'expanded';
   surface?: SurfacePreset;
+  header?: ReactNode;
   status?: ReactNode;
   actions?: ReactNode;
 }
@@ -273,6 +274,7 @@ export function UiTerminalSurface({
   ariaLabel,
   density = 'compact',
   surface = 'glass-elevated',
+  header,
   status,
   actions,
   className = '',
@@ -289,17 +291,21 @@ export function UiTerminalSurface({
       className={`ui-terminal-surface ${className}`}
     >
       <header className="ui-terminal-surface__header">
-        <span className="ui-terminal-surface__title">{title}</span>
-        {status != null ? <div className="ui-terminal-surface__status">{status}</div> : null}
-        {actions != null ? (
-          <div
-            className="ui-terminal-surface__actions"
-            role="toolbar"
-            aria-label={`${title} actions`}
-          >
-            {actions}
-          </div>
-        ) : null}
+        {header ?? (
+          <>
+            <span className="ui-terminal-surface__title">{title}</span>
+            {status != null ? <div className="ui-terminal-surface__status">{status}</div> : null}
+            {actions != null ? (
+              <div
+                className="ui-terminal-surface__actions"
+                role="toolbar"
+                aria-label={`${title} actions`}
+              >
+                {actions}
+              </div>
+            ) : null}
+          </>
+        )}
       </header>
       <div className="ui-terminal-surface__body">{children}</div>
     </UiSurface>
