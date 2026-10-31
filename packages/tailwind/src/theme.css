@@ -471,6 +471,17 @@
       box-shadow var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-emphasized);
   }
 
+  /* Opted-in surfaces paint the stroke ahead of the material highlights, so an
+     edge that cannot borrow backdrop light keeps a readable silhouette. */
+  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    .ui-button
+  )[data-neoverse-glass-edge-stroke] {
+    box-shadow:
+      var(--neoverse-material-edge-stroke), var(--neoverse-material-edge-highlight),
+      var(--neoverse-material-inner-glow), var(--neoverse-material-seam-glow),
+      var(--neoverse-material-bloom), var(--neoverse-material-shadow);
+  }
+
   /* Aurora Glass surfaces clip by default so their own content respects the rounded
      silhouette. Layout surfaces that intentionally host floating controls,
      focus rings, shadows, or translated children can opt into visible
@@ -648,6 +659,15 @@
     backdrop-filter: var(--neoverse-material-filter);
   }
 
+  /* The runtime owns refraction, so an opted-in surface adds its painted stroke to
+     the runtime shadow instead of the highlights the renderer replaces. */
+  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
+  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    .ui-button
+  )[data-neoverse-glass-edge-stroke] {
+    box-shadow: var(--neoverse-material-edge-stroke), var(--neoverse-material-shadow);
+  }
+
   @media (hover: hover) {
     :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
       :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
@@ -679,6 +699,16 @@
         var(--neoverse-material-shadow);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
+    }
+
+    /* The painted stroke survives the reduced-transparency fallback; only surfaces
+       that asked for it keep it, exactly like the sampled path. */
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+        .ui-button
+      )[data-neoverse-glass-edge-stroke] {
+      box-shadow:
+        var(--neoverse-material-edge-stroke), var(--neoverse-material-edge-highlight),
+        var(--neoverse-material-inner-glow), var(--neoverse-material-shadow);
     }
 
     /* SegmentedControl owns a component-specific Aurora Glass filter in the normal

@@ -96,6 +96,10 @@
       var(--neoverse-color-edge-light) 23%,
       transparent
     );
+    /* Surfaces anchored to the window edge cannot borrow backdrop light for their
+       silhouette, because refraction only brightens pixels the backdrop carries.
+       Opting in paints this stroke instead of relying on the refracted rim. */
+    --neoverse-material-edge-stroke: 0 0 transparent;
     /* Keep a layered fallback for surfaces without the masked backdrop path;
        supported Aurora Glass utilities replace it with a filtered slice of the
        actual backdrop. Dark restores its lower-contrast fallback in themes/dark.css. */

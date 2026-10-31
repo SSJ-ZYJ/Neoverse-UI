@@ -295,6 +295,11 @@
     var(--neoverse-color-edge-light) 32%,
     transparent
   );
+  /* Dark pages leave window-anchored chrome without backdrop light, so its stroke
+     uses the strong border role instead of the 13% edge-light the rim starts from. */
+  --neoverse-material-edge-stroke:
+    inset 0 0 0 var(--neoverse-border-width-thin) var(--neoverse-color-border-strong),
+    inset 0 1px 0 var(--neoverse-color-edge-light);
   --neoverse-material-glass-subtle-border: var(--neoverse-color-border-subtle);
   --neoverse-material-glass-elevated-border: color-mix(
     in srgb,
