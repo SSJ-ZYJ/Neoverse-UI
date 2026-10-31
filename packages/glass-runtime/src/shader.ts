@@ -154,12 +154,21 @@ export const glassFragmentShader = `
     color.g += topLeftLight * 0.055 * chromaticStrength;
     color.b += coolFringe * 0.2;
     color = clamp(color, 0.0, 1.0);
-    vec3 lightChromaticColor = color * vec3(0.78, 0.88, 1.0);
+    vec3 lightChromaticColor = color * vec3(0.9, 0.95, 1.0);
     color = mix(color, lightChromaticColor, lightSurface * 0.72);
-    // 0.2.0 kept low-opacity dark Aurora Glass nearly neutral. Chroma is independent
-    // of today's brighter edge opacity, so stronger lighting cannot recolour it.
+    // Light restores 0.2.0's opacity-dependent colour response. The chroma
+    // token remains an optional multiplier for applications that tune it.
     vec3 neutralEdgeColor = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)));
-    color = mix(neutralEdgeColor, color, u_chroma);
+    float legacyChroma = mix(0.12, 1.0, smoothstep(0.3, 0.5, u_opacity));
+    float chromaticEdgeStrength = lightSurface > 0.5 ? legacyChroma * u_chroma : u_chroma;
+    color = mix(neutralEdgeColor, color, chromaticEdgeStrength);
+    // The indigo right catch is the one place light Glass reads as blue over
+    // pale backdrops. Keep the mint-to-indigo direction, but cap how far blue
+    // may pass the green/red content: 0 removes the cast, 1 keeps the release.
+    if (lightSurface > 0.5) {
+      float coolExcess = max(color.b - max(color.r, color.g), 0.0);
+      color.b -= coolExcess * 0.72;
+    }
     // There is deliberately no uniform base alpha: these directional catches
     // must break up instead of closing into a white outline around the card.
     float directionalAlpha = smoothstep(0.16, 0.82, topLeftLight) * 0.42
@@ -215,6 +224,15 @@ export const glassFragmentShader = `
     }
     alpha *= occlusionMask;
 
+    if (lightSurface > 0.5) {
+      // 0.2.0 uses the translucent directional colour directly with normal
+      // canvas composition and SRC_ALPHA for both WebGL blend channels.
+      // The shared gain still permits an explicit exposure adjustment; 1 is
+      // the unmodified release response.
+      color *= u_gain;
+      gl_FragColor = vec4(color, alpha);
+      return;
+    }
     if (alpha <= 0.0001) discard;
     // The release composited alpha*color + (1-alpha^2)*backdrop. Preserve that
     // RGB response at middle grey, including its neutral contribution, rather

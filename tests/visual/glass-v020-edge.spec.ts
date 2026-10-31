@@ -39,7 +39,10 @@ const released = {
   ],
 };
 for (const theme of ['light', 'dark'] as const) {
-  for (const backdrop of ['reference', 'pale'] as const) {
+  // The recovered light samples describe source-over at middle grey, not
+  // overlay's transfer curve on pale colours. Do not extrapolate them.
+  const backdrops = theme === 'light' ? (['reference'] as const) : (['reference', 'pale'] as const);
+  for (const backdrop of backdrops) {
     test(`${theme}/${backdrop}: released directional chroma remains visible on the live backdrop`, async ({
       page,
     }, testInfo) => {

@@ -144,17 +144,21 @@
   --neoverse-color-ambient-mint: rgb(52 211 153 / 10%);
   --neoverse-color-ambient-violet: rgb(124 110 230 / 9%);
 
-  /* Pale backdrops need stronger edge exposure after the shader's alpha cap. */
+  /* Restore 0.2.0's light edge inputs without changing body blur or tint. */
   --neoverse-material-backdrop-brightness: 1;
   --neoverse-material-backdrop-contrast: 1;
-  --neoverse-material-edge-refraction-gain: 2.5;
-  --neoverse-material-edge-refraction-opacity-subtle: 0.46;
-  --neoverse-material-edge-refraction-opacity-elevated: 0.5;
-  --neoverse-material-edge-refraction-opacity-immersive: 0.54;
-  --neoverse-material-edge-filter-subtle: brightness(175%);
-  --neoverse-material-edge-filter-elevated: brightness(185%);
-  --neoverse-material-edge-filter-immersive: brightness(195%);
-  /* Released large-surface catches; compact controls retain their own edge roles. */
+  --neoverse-material-edge-refraction-gain: 1;
+  --neoverse-material-edge-filter-subtle: brightness(125%);
+  --neoverse-material-edge-filter-elevated: brightness(135%);
+  --neoverse-material-edge-filter-immersive: brightness(145%);
+  --neoverse-material-edge-refraction-opacity-subtle: 0.16;
+  --neoverse-material-edge-refraction-opacity-elevated: 0.22;
+  --neoverse-material-edge-refraction-opacity-immersive: 0.14;
+  /* Let the shader reproduce the release's opacity-dependent colour by default. */
+  --neoverse-material-edge-refraction-chroma-subtle: 1;
+  --neoverse-material-edge-refraction-chroma-elevated: 1;
+  --neoverse-material-edge-refraction-chroma-immersive: 1;
+  /* Large surfaces use the stronger three released 0.2.0 catches. */
   --neoverse-surface-glass-subtle-edge-opacity: 0.46;
   --neoverse-surface-glass-elevated-edge-opacity: 0.5;
   --neoverse-surface-glass-immersive-edge-opacity: 0.54;

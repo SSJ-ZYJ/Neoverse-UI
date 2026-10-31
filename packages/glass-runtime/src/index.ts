@@ -12,6 +12,7 @@ const glassClassNames = [
 const glassSelector = glassClassNames.map((className) => `.${className}`).join(', ');
 const cssEdgePassSelector = '[data-neoverse-glass-edge-pass="css"]';
 const reducedTransparencyQuery = '(prefers-reduced-transparency: reduce)';
+const systemDarkQuery = '(prefers-color-scheme: dark)';
 const maxDefaultDevicePixelRatio = 2;
 const glassMutationAttributes = [
   'class',
@@ -735,6 +736,7 @@ class GlassRendererImpl implements GlassRenderer {
   private readonly observedGlassElements = new Set<HTMLElement>();
   private mutationObserver: MutationObserver | undefined;
   private transparencyQuery: MediaQueryList | undefined;
+  private systemSchemeQuery: MediaQueryList | undefined;
   private animationFrame: number | undefined;
   private paintedEdges = false;
   private contextLost = false;
@@ -755,6 +757,7 @@ class GlassRendererImpl implements GlassRenderer {
   private readonly handleResize = (): void => this.scheduleRefresh();
   private readonly handleScroll = (): void => this.scheduleRefresh();
   private readonly handleToggle = (): void => this.scheduleRefresh();
+  private readonly handleSystemSchemeChange = (): void => this.scheduleRefresh();
   private readonly handleMutations = (records: MutationRecord[]): void => {
     if (
       records.every(
@@ -819,6 +822,8 @@ class GlassRendererImpl implements GlassRenderer {
     const view = getWindow(this.ownerDocument);
     this.transparencyQuery = view?.matchMedia?.(reducedTransparencyQuery);
     this.transparencyQuery?.addEventListener('change', this.handleTransparencyChange);
+    this.systemSchemeQuery = view?.matchMedia?.(systemDarkQuery);
+    this.systemSchemeQuery?.addEventListener('change', this.handleSystemSchemeChange);
     this.ownerDocument.addEventListener('scroll', this.handleScroll, true);
     this.ownerDocument.addEventListener('toggle', this.handleToggle, true);
     for (const event of motionEvents) {
@@ -843,6 +848,8 @@ class GlassRendererImpl implements GlassRenderer {
     this.mounted = false;
     this.transparencyQuery?.removeEventListener('change', this.handleTransparencyChange);
     this.transparencyQuery = undefined;
+    this.systemSchemeQuery?.removeEventListener('change', this.handleSystemSchemeChange);
+    this.systemSchemeQuery = undefined;
     this.ownerDocument?.removeEventListener('scroll', this.handleScroll, true);
     this.ownerDocument?.removeEventListener('toggle', this.handleToggle, true);
     for (const event of motionEvents) {
@@ -946,8 +953,7 @@ class GlassRendererImpl implements GlassRenderer {
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, quadPositions, gl.STATIC_DRAW);
     gl.enable(gl.BLEND);
-    // Preserve the mask's coverage independently of RGB. The browser then
-    // applies its gain to the actual composited pixels beneath the canvas.
+    // The draw pass selects the theme-specific alpha factors before painting.
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     this.observe();
     this.active = true;
@@ -1191,12 +1197,6 @@ class GlassRendererImpl implements GlassRenderer {
         0,
       ),
     );
-    if (this.canvas.style.mixBlendMode !== 'overlay') this.canvas.style.mixBlendMode = 'overlay';
-    // Theme appearance must not depend on how bright a consumer's edge tint is.
-    // Keep the luminance fallback for integrations without an explicit scheme.
-    const lightSurface =
-      rootStyle.colorScheme === 'light' ? 1 : rootStyle.colorScheme === 'dark' ? 0 : -1;
-    gl.uniform1f(locations.lightSurface, lightSurface);
     const edgeLight = resolveColor(
       rootStyle,
       [
@@ -1208,6 +1208,23 @@ class GlassRendererImpl implements GlassRenderer {
       this.colorProbe,
       [1, 1, 1],
     );
+    const lightSurface =
+      rootStyle.colorScheme === 'light' ? 1 : rootStyle.colorScheme === 'dark' ? 0 : -1;
+    // Match the shader's smoothstep(0.55, 0.88, luminance) > 0.5 fallback
+    // when a consumer has not declared a colour scheme.
+    const lightLuminance = edgeLight[0] * 0.2126 + edgeLight[1] * 0.7152 + edgeLight[2] * 0.0722;
+    const isLight = lightSurface === 1 || (lightSurface === -1 && lightLuminance > 0.715);
+    const blendMode = isLight ? 'normal' : 'overlay';
+    if (this.canvas.style.mixBlendMode !== blendMode) this.canvas.style.mixBlendMode = blendMode;
+    // The 0.2.0 light renderer used blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA),
+    // including SRC_ALPHA for alpha itself. Dark retains its current coverage.
+    gl.blendFuncSeparate(
+      gl.SRC_ALPHA,
+      gl.ONE_MINUS_SRC_ALPHA,
+      isLight ? gl.SRC_ALPHA : gl.ONE,
+      gl.ONE_MINUS_SRC_ALPHA,
+    );
+    gl.uniform1f(locations.lightSurface, lightSurface);
     const primary = resolveColor(
       rootStyle,
       [
@@ -1277,7 +1294,10 @@ class GlassRendererImpl implements GlassRenderer {
       gl.uniform1f(locations.edgeWidth, style.edgeWidth);
       gl.uniform1f(locations.softness, style.softness);
       gl.uniform1f(locations.opacity, style.opacity);
-      gl.uniform1f(locations.cornerFocus, element.classList.contains('ui-button') ? 1 : 0);
+      gl.uniform1f(
+        locations.cornerFocus,
+        !isLight && element.classList.contains('ui-button') ? 1 : 0,
+      );
       gl.uniform1f(locations.chroma, style.chroma);
       gl.uniform3f(locations.carrier, ...style.carrier);
       gl.uniform3f(locations.edgeLight, ...edgeLight);

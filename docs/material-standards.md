@@ -46,38 +46,34 @@ have no independent plate. Reduced transparency uses an opaque tint and no blur.
 
 ## Aurora Glass edge reflection
 
-The renderer reuses the 0.2.0 directional RGB response: left catches favour
-cyan/green and right catches favour blue/violet, with the released normal-based
-corner and fringe calculations. Preserve the full RGB contribution, including its
-neutral component; minimum-channel subtraction and peak normalization change the
-released colour balance. Shared chroma roles retain the release's nearly neutral
-dark response independently of brighter edge opacity.
-A scalar-only gain loses this directional colour and is not the Aurora Glass contract.
+Light restores the 0.2.0 directional edge: the shader combines theme accent
+colours, varies chroma with effective opacity, and caps fragment alpha at 0.34.
+The light canvas uses normal composition and the release's WebGL blend factors;
+large surfaces use edge opacities 0.46 / 0.5 / 0.54. Chroma and gain remain
+optional multipliers, both defaulting to 1 in light mode.
 
-The shared WebGL canvas encodes each channel response as (1 + g_rgb) / 2.
-CSS overlay produces C_backdrop + g_rgb * min(C_backdrop, 1 - C_backdrop).
-At unit exposure the response matches the released blend at middle grey and follows highlight
-headroom on pale backgrounds. Black and zero source channels stay zero. Actual DOM,
-gradients, images, canvas and video remain live inputs; no backdrop screenshot
-or ancestor CSS reconstruction is required. The response consumes shared theme
-colour roles instead of a second hard-coded palette.
-The shared edge gain is 2.5 in light mode and 1 in dark mode, applied after alpha
-limiting so pale cards and buttons receive the stronger exposure consistently.
+Light keeps that mint-to-indigo direction but caps its cool excess: 72% of the
+blue lead over the red/green content is trimmed, so the right catch stays cool
+without the release's threefold margin that read as a blue band on pale pages.
+The cap applies to light surfaces only; dark composition is unchanged.
 
-Opacity, clipping and overlay occlusion still apply. Button highlights concentrate
-at upper-left and lower-right, with quieter continuous vertical sides. Base fill,
-blur and button tone are independent of the edge response. Reduced transparency
-disables the renderer. The CSS fallback uses alpha-only gradient masks and live
-backdrop brightness. Native SVG displacement remains an explicit alternative
-through backend: 'native' (Playground: ?glass=native).
+This is a translucent, theme-coloured highlight composited over the backdrop,
+not a sampled or displaced image of the background. Its apparent colour and
+contrast depend on both the theme accents and the pixels underneath. Dark
+retains its overlay response. Both themes share one canvas; CSS continues to
+own the body tint, blur and shadows.
 
-The 0.2.0 reference test compares channel-gain ordering at the released four sides
-and four rounded corners in light and dark modes; a neutral brightness mask fails.
-The live-canvas regression calibrates per-channel gains and checks source changes,
-black, zero channels and final clipping independently. Button tests guard the two
-dominant lit corners and unchanged central frost. Coverage checks include 32/40/48px
-rectangles and circles on muted and pale backdrops. Circular catches follow the
-edge normal so bounding-box corner distances cannot truncate their arcs.
+Opacity, clipping and overlay occlusion still apply. Light follows the 0.2.0
+edge profile for controls and surfaces; dark buttons retain their focused
+catches. Reduced transparency disables the renderer. The CSS fallback uses
+alpha-only gradient masks and backdrop brightness. Native SVG displacement
+remains an explicit alternative through `backend: 'native'` (Playground:
+`?glass=native`).
+
+The 0.2.0 reference test checks the released light edge samples on middle grey
+and the dark response on grey and pale backdrops. Runtime tests cover theme
+switching, canvas reuse and unchanged body blur; live-canvas tests exercise the
+different light and dark composition models against changing background pixels. The grey backdrop case also bounds how far blue may lead the green and red content, so the cool edge cannot regress into a cast.
 
 ## Selection and customization
 
