@@ -1,7 +1,7 @@
-import { renderToString } from '@vue/server-renderer';
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSSRApp, h, nextTick } from 'vue';
+import { renderToString } from 'vue/server-renderer';
 import { presence, staggerStyle } from './presence';
 import UiAction from './UiAction.vue';
 import UiBadge from './UiBadge.vue';
