@@ -429,91 +429,38 @@
         var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-54),
         transparent
       );
-    --neoverse-effect-rail-thumb-hover-shadow: 0 0 var(--neoverse-space-4) -0.35rem
-      color-mix(
-        in srgb,
-        var(--neoverse-color-accent-primary) var(--neoverse-effect-alpha-intense),
-        transparent
-      );
+    /* Scrollbar rails are ink, not light: one neutral that darkens in light
+       themes and lifts in dark ones, a single inset crown for physicality, and
+       no outer shadow. Outer scrollbar shadows render a stray arc around the
+       native thumb cap and a wide bloom hazes the canvas. Accent never colours
+       the resting rail; it only enters the grip while it is being dragged. */
     --neoverse-effect-rail-track: color-mix(
       in srgb,
-      var(--neoverse-color-surface-raised) var(--neoverse-effect-strength-24),
+      var(--neoverse-color-text-secondary) var(--neoverse-effect-strength-12),
       transparent
     );
     --neoverse-effect-rail-thumb: color-mix(
       in srgb,
-      var(--neoverse-color-text-secondary) var(--neoverse-effect-strength-46),
+      var(--neoverse-color-text-secondary) var(--neoverse-effect-strength-44),
       transparent
     );
     --neoverse-effect-rail-thumb-hover: color-mix(
       in srgb,
-      var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-62),
-      var(--neoverse-color-text-secondary) var(--neoverse-effect-strength-38)
+      var(--neoverse-color-text-secondary) var(--neoverse-effect-strength-60),
+      transparent
     );
     --neoverse-effect-rail-thumb-active: color-mix(
       in srgb,
-      var(--neoverse-color-accent-secondary) var(--neoverse-effect-strength-68),
-      var(--neoverse-color-text-secondary) var(--neoverse-effect-strength-32)
+      var(--neoverse-effect-rail-thumb-hover) var(--neoverse-effect-strength-88),
+      var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-12)
     );
-    --neoverse-effect-rail-thumb-background: linear-gradient(
-      180deg,
+    --neoverse-effect-rail-thumb-background: var(--neoverse-effect-rail-thumb);
+    --neoverse-effect-rail-thumb-hover-background: var(--neoverse-effect-rail-thumb-hover);
+    --neoverse-effect-rail-thumb-active-background: var(--neoverse-effect-rail-thumb-active);
+    --neoverse-effect-rail-thumb-edge: inset 0 1px 0
       color-mix(
         in srgb,
-        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-46),
-        transparent
-      ),
-      var(--neoverse-effect-rail-thumb) 48%,
-      color-mix(
-        in srgb,
-        var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-34),
-        transparent
-      )
-    );
-    --neoverse-effect-rail-thumb-hover-background: linear-gradient(
-      180deg,
-      color-mix(
-        in srgb,
-        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-58),
-        transparent
-      ),
-      var(--neoverse-effect-rail-thumb-hover) 48%,
-      color-mix(
-        in srgb,
-        var(--neoverse-color-accent-tertiary) var(--neoverse-effect-strength-42),
-        transparent
-      )
-    );
-    --neoverse-effect-rail-thumb-active-background: linear-gradient(
-      180deg,
-      color-mix(
-        in srgb,
-        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-64),
-        transparent
-      ),
-      var(--neoverse-effect-rail-thumb-active) 48%,
-      color-mix(
-        in srgb,
-        var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-48),
-        transparent
-      )
-    );
-    --neoverse-effect-rail-thumb-edge:
-      inset 0 1px 1px
-      color-mix(
-        in srgb,
-        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-42),
-        transparent
-      ),
-      inset 0 -1px 2px
-      color-mix(
-        in srgb,
-        var(--neoverse-color-text-primary) var(--neoverse-effect-strength-18),
-        transparent
-      );
-    --neoverse-effect-rail-thumb-glow: 0 0 12px -4px
-      color-mix(
-        in srgb,
-        var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-32),
+        var(--neoverse-color-edge-light) var(--neoverse-effect-strength-62),
         transparent
       );
     --neoverse-effect-compact-rest-shadow: var(--neoverse-effect-compact-rest-shadow-light);

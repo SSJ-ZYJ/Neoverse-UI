@@ -86,6 +86,11 @@ const previewItems = [
 
 const tokenRows = [
   { label: copy.tokens.size, variable: cssVariables.components.scrollbar.immersive.size },
+  { label: copy.tokens.thumbWidth, variable: cssVariables.components.scrollbar.overlay.thumbWidth },
+  {
+    label: copy.tokens.thumbWidthHover,
+    variable: cssVariables.components.scrollbar.overlay.thumbWidthHover,
+  },
   { label: copy.tokens.track, variable: cssVariables.components.scrollbar.immersive.track },
   { label: copy.tokens.thumb, variable: cssVariables.components.scrollbar.immersive.thumb },
   {

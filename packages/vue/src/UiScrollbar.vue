@@ -327,6 +327,7 @@ onBeforeUnmount(() => {
     :class="[classes, attrs.class]"
     :style="[attrs.style, scrollbarStyle]"
     :data-visible="isVisible && hasScrollableContent ? 'true' : 'false'"
+    :data-hide-native="props.hideNative ? 'true' : 'false'"
     aria-hidden="true"
     @pointerdown="onTrackPointerDown"
   >

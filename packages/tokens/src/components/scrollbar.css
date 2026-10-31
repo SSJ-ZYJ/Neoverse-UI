@@ -1,15 +1,28 @@
 @layer neoverse.tokens {
   :root {
     /* The resting rail stays neutral; accents appear during interaction. */
-    --neoverse-scrollbar-immersive-size: var(--neoverse-space-3);
-    --neoverse-scrollbar-immersive-track-border-width: var(--neoverse-space-1);
-    --neoverse-scrollbar-immersive-thumb-min-length: var(--neoverse-space-11);
-    --neoverse-scrollbar-immersive-thumb-border-width: 0.2rem;
     --neoverse-scrollbar-overlay-inset-block: 0.72rem;
     --neoverse-scrollbar-overlay-inset-inline: 0.35rem;
     --neoverse-scrollbar-overlay-thumb-width: 0.3rem;
     --neoverse-scrollbar-overlay-thumb-width-hover: 0.42rem;
-    --neoverse-scrollbar-overlay-thumb-hover-shadow: var(--neoverse-effect-rail-thumb-hover-shadow);
+
+    /* The native immersive variant and the UiScrollbar overlay share one
+       geometry: the scrollbar slot keeps the rail width and the transparent
+       thumb border carries the difference, so both thumb widths match. */
+    --neoverse-scrollbar-immersive-size: var(--neoverse-space-3);
+    --neoverse-scrollbar-immersive-thumb-min-length: var(--neoverse-space-11);
+    --neoverse-scrollbar-immersive-thumb-border-width: calc(
+      (var(--neoverse-scrollbar-immersive-size) - var(--neoverse-scrollbar-overlay-thumb-width)) /
+      2
+    );
+    --neoverse-scrollbar-immersive-thumb-hover-border-width: calc(
+      (
+        var(--neoverse-scrollbar-immersive-size) -
+        var(--neoverse-scrollbar-overlay-thumb-width-hover)
+      ) /
+      2
+    );
+    --neoverse-scrollbar-immersive-rail-inset: calc(var(--neoverse-space-1) / 2);
     --neoverse-scrollbar-immersive-track: var(--neoverse-effect-rail-track);
     --neoverse-scrollbar-immersive-thumb: var(--neoverse-effect-rail-thumb);
     --neoverse-scrollbar-immersive-thumb-hover: var(--neoverse-effect-rail-thumb-hover);
@@ -22,6 +35,5 @@
       --neoverse-effect-rail-thumb-active-background
     );
     --neoverse-scrollbar-immersive-thumb-edge: var(--neoverse-effect-rail-thumb-edge);
-    --neoverse-scrollbar-immersive-thumb-glow: var(--neoverse-effect-rail-thumb-glow);
   }
 }

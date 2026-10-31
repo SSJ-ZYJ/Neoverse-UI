@@ -1,6 +1,7 @@
+import { renderToString } from '@vue/server-renderer';
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { h, nextTick } from 'vue';
+import { createSSRApp, h, nextTick } from 'vue';
 import { presence, staggerStyle } from './presence';
 import UiAction from './UiAction.vue';
 import UiBadge from './UiBadge.vue';
@@ -746,6 +747,17 @@ describe('display components', () => {
 });
 
 describe('UiScrollbar', () => {
+  it('publishes its native-hiding contract in server-rendered markup', async () => {
+    const render = (hideNative: boolean) =>
+      renderToString(createSSRApp({ render: () => h(UiScrollbar, { hideNative }) }));
+
+    const html = await render(true);
+    expect(html).toContain('data-hide-native="true"');
+    expect(html).toContain('data-visible="false"');
+    expect(html).toContain('aria-hidden="true"');
+    expect(await render(false)).toContain('data-hide-native="false"');
+  });
+
   it('reacts when native scrollbar ownership is toggled', async () => {
     const root = document.documentElement;
     const wrapper = mount(UiScrollbar, {
