@@ -70,6 +70,20 @@ alpha-only gradient masks and backdrop brightness. Native SVG displacement
 remains an explicit alternative through `backend: 'native'` (Playground:
 `?glass=native`).
 
+### Painted stroke for window-anchored chrome
+
+The refracted rim only brightens pixels the backdrop already carries, so a
+surface sitting on an empty page area has no rim to show. Surfaces anchored to
+the window edge, where that is the normal case, opt into a painted stroke with
+`data-neoverse-glass-edge-stroke`. The stroke comes from
+`--neoverse-material-edge-stroke`, which is `0 0 transparent` by default and
+therefore inert for every other surface; dark themes resolve it to the strong
+border role plus a top catch. The renderer path keeps the stroke ahead of the
+runtime shadow, and the reduced-transparency fallback keeps it ahead of the
+material highlights. The stroke is geometry, not refraction: it does not track
+backdrop colour, which is what keeps a nav bar's silhouette readable while it
+scrolls over both empty and content-heavy areas.
+
 The 0.2.0 reference test checks the released light edge samples on middle grey
 and the dark response on grey and pale backdrops. Runtime tests cover theme
 switching, canvas reuse and unchanged body blur; live-canvas tests exercise the
