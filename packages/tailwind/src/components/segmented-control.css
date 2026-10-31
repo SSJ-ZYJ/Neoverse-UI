@@ -52,7 +52,7 @@
     background-color: var(--neoverse-control-segmented-active-fill);
     box-shadow: var(--neoverse-control-segmented-active-shadow);
     pointer-events: none;
-    transform: translateX(var(--segment-active-offset, 0px));
+    transform: translateX(var(--segment-active-offset, 0));
     transition: none;
     will-change: transform;
   }

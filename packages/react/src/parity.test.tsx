@@ -76,6 +76,12 @@ test('segmented selection has one tab stop, skips disabled defaults and respects
   expect(html.match(/aria-checked="true"/g)).toHaveLength(1);
   expect(html).toContain('aria-label="Chinese"');
   expect(html).toContain('role="radiogroup"');
+  // Before the browser measures every option, the slider keeps the selected
+  // content-sized grid column rather than an estimated offset and width.
+  expect(html).toContain('--segment-index');
+  expect(html).not.toContain('--segment-active-offset');
+  expect(html).not.toContain('--segment-active-width');
+  expect(html).not.toContain('--segment-active-column');
   const invalid = renderToStaticMarkup(<UiSegmentedControl options={options} value="missing" />);
   expect(invalid).not.toContain('aria-checked="true"');
   expect(invalid).not.toContain('ui-segmented-control__slider');

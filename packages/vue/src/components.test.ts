@@ -1116,6 +1116,21 @@ describe('form controls', () => {
 });
 
 describe('UiSegmentedControl', () => {
+  it('publishes the selected grid column instead of measured offsets before hydration', async () => {
+    const html = await renderToString(
+      createSSRApp({
+        render: () =>
+          h(UiSegmentedControl, { options, defaultValue: 'overview', ariaLabel: 'View' }),
+      }),
+    );
+
+    expect(html).toContain('--segment-index');
+    expect(html).toContain('ui-segmented-control__slider');
+    expect(html).not.toContain('--segment-active-offset');
+    expect(html).not.toContain('--segment-active-width');
+    expect(html).not.toContain('--segment-active-column');
+  });
+
   it('uses the shared Glass surface by default and can opt out of outer chrome', () => {
     const glass = mount(UiSegmentedControl, { props: { options } });
     expect(glass.classes()).toContain('material-glass-subtle');
