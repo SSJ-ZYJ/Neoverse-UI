@@ -20,6 +20,27 @@ test('publishes three monotonic tiers with exactly one background alpha', async 
   }
 });
 
+test('light restores the 0.2.0 surface and material edge inputs', async () => {
+  const light = await source('themes/light.css');
+  const dark = await source('themes/dark.css');
+  expect(light).toContain('--neoverse-material-edge-refraction-gain: 1;');
+  expect(dark).toContain('--neoverse-material-edge-refraction-gain: 1;');
+  for (const [tier, compactOpacity, surfaceOpacity, carrier] of [
+    ['subtle', 0.16, 0.46, 22],
+    ['elevated', 0.22, 0.5, 24],
+    ['immersive', 0.14, 0.54, 18],
+  ] as const) {
+    expect(light).toContain(
+      `--neoverse-material-edge-refraction-opacity-${tier}: ${compactOpacity};`,
+    );
+    expect(light).toContain(`--neoverse-surface-glass-${tier}-edge-opacity: ${surfaceOpacity};`);
+    expect(light).toContain(`--neoverse-material-edge-refraction-chroma-${tier}: 1;`);
+    expect(light.replace(/\s+/g, ' ')).toContain(
+      `--neoverse-material-edge-refraction-carrier-${tier}: color-mix( in srgb, var(--neoverse-color-border-default) ${carrier}%, transparent );`,
+    );
+  }
+});
+
 test('themes cannot redefine Glass optics and command decoration aliases shared roles', async () => {
   for (const theme of ['light', 'dark']) {
     const css = await source(`themes/${theme}.css`);

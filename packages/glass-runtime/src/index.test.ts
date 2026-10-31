@@ -295,13 +295,19 @@ describe('Glass renderer', () => {
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });
 
-  it.each(['ui-card', 'ui-surface'])('keeps %s on the established WebGL edge pass', (className) => {
+  it.each([
+    ['ui-card', 'light', 'normal'],
+    ['ui-card', 'dark', 'overlay'],
+    ['ui-surface', 'light', 'normal'],
+    ['ui-surface', 'dark', 'overlay'],
+  ])('keeps %s on the %s WebGL edge pass', (className, theme, blendMode) => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const glass = document.createElement('article');
     glass.className = `${className} material-glass-elevated`;
     setRect(glass, {});
     document.body.append(glass);
+    document.documentElement.style.colorScheme = theme;
 
     createTestRenderer().mount();
 
@@ -309,7 +315,7 @@ describe('Glass renderer', () => {
     expect(
       document.querySelector<HTMLCanvasElement>('[data-neoverse-glass-renderer-canvas]')?.style
         .mixBlendMode,
-    ).toBe('overlay');
+    ).toBe(blendMode);
   });
 
   it('masks a Glass edge wherever an overlay paints above the surface', () => {
@@ -441,7 +447,7 @@ describe('Glass renderer', () => {
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
   });
 
-  it('applies light gain to the live composited backdrop in both themes', () => {
+  it('switches between the 0.2.0 light composition and the existing dark composition', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const card = document.createElement('div');
@@ -455,18 +461,174 @@ describe('Glass renderer', () => {
     const canvas = document.querySelector<HTMLCanvasElement>(
       '[data-neoverse-glass-renderer-canvas]',
     );
-    expect(canvas?.style.mixBlendMode).toBe('overlay');
+    const fragmentSource = gl.shaderSource.mock.calls
+      .map(([, source]) => source as string)
+      .find((source) => source.includes('u_light_surface'));
+    expect(fragmentSource).toContain('smoothstep(0.3, 0.5, u_opacity)');
+    expect(fragmentSource).toContain('color *= u_gain;');
+    expect(fragmentSource).toContain('gl_FragColor = vec4(color, alpha);');
+    expect(canvas?.style.mixBlendMode).toBe('normal');
+    expect(gl.blendFuncSeparate).toHaveBeenLastCalledWith(
+      gl.SRC_ALPHA,
+      gl.ONE_MINUS_SRC_ALPHA,
+      gl.SRC_ALPHA,
+      gl.ONE_MINUS_SRC_ALPHA,
+    );
     expect(gl.uniform1f).toHaveBeenCalledWith(expect.objectContaining({ name: 'u_gain' }), 2.5);
     document.documentElement.style.colorScheme = 'dark';
     document.documentElement.style.setProperty('--neoverse-material-edge-refraction-gain', '1');
     renderer.refresh();
     expect(canvas?.style.mixBlendMode).toBe('overlay');
+    expect(gl.blendFuncSeparate).toHaveBeenLastCalledWith(
+      gl.SRC_ALPHA,
+      gl.ONE_MINUS_SRC_ALPHA,
+      gl.ONE,
+      gl.ONE_MINUS_SRC_ALPHA,
+    );
     expect(
       gl.uniform1f.mock.calls.filter(([location]) => location?.name === 'u_gain').at(-1)?.[1],
     ).toBe(1);
+    document.documentElement.style.colorScheme = 'light';
+    renderer.refresh();
+    expect(canvas?.style.mixBlendMode).toBe('normal');
+    expect(gl.blendFuncSeparate).toHaveBeenLastCalledWith(
+      gl.SRC_ALPHA,
+      gl.ONE_MINUS_SRC_ALPHA,
+      gl.SRC_ALPHA,
+      gl.ONE_MINUS_SRC_ALPHA,
+    );
   });
 
-  it('keeps chroma independent of brighter edge opacity and ancestor opacity', () => {
+  it('keeps a translucent light contour and the existing dark response on one canvas', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const card = document.createElement('article');
+    card.className = 'material-glass-elevated';
+    card.style.backdropFilter = 'blur(18px) saturate(145%)';
+    setRect(card, { width: 120, height: 80 });
+    document.body.append(card);
+    document.documentElement.style.colorScheme = 'light';
+    const renderer = createTestRenderer();
+    renderer.mount();
+    const canvas = document.querySelector('[data-neoverse-glass-renderer-canvas]');
+    for (const theme of ['dark', 'light']) {
+      document.documentElement.style.colorScheme = theme;
+      renderer.refresh();
+      expect(
+        gl.uniform1f.mock.calls
+          .filter(([location]) => location?.name === 'u_light_surface')
+          .at(-1)?.[1],
+      ).toBe(theme === 'light' ? 1 : 0);
+      expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBe(canvas);
+      expect(card.style.backdropFilter).toBe('blur(18px) saturate(145%)');
+      expect(card.children).toHaveLength(0);
+    }
+    expect(gl.drawArrays).toHaveBeenCalledTimes(3);
+    expect(gl.createProgram).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('[data-neoverse-glass-native-defs]')).toBeNull();
+  });
+
+  it('repaints the composition when the system colour scheme changes', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const systemScheme = new EventTarget();
+    const removeListener = vi.spyOn(systemScheme, 'removeEventListener');
+    const originalMatchMedia = window.matchMedia.bind(window);
+    const originalGetComputedStyle = window.getComputedStyle.bind(window);
+    let computedScheme = 'light';
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) =>
+      query === '(prefers-color-scheme: dark)'
+        ? (systemScheme as MediaQueryList)
+        : originalMatchMedia(query),
+    );
+    vi.spyOn(window, 'getComputedStyle').mockImplementation((element, pseudo) => {
+      const style = originalGetComputedStyle(element, pseudo);
+      if (element !== document.documentElement) return style;
+      return new Proxy(style, {
+        get(target, property) {
+          if (property === 'colorScheme') return computedScheme;
+          const value = Reflect.get(target, property, target);
+          return typeof value === 'function' ? value.bind(target) : value;
+        },
+      });
+    });
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      callback(0);
+      return 1;
+    });
+    const card = document.createElement('article');
+    card.className = 'material-glass-elevated';
+    setRect(card, {});
+    document.body.append(card);
+    const renderer = createTestRenderer();
+    renderer.mount();
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    expect(canvas?.style.mixBlendMode).toBe('normal');
+
+    // A media-query change updates computed CSS without mutating the DOM.
+    computedScheme = 'dark';
+    systemScheme.dispatchEvent(new Event('change'));
+    expect(canvas?.style.mixBlendMode).toBe('overlay');
+    renderer.destroy();
+    expect(removeListener).toHaveBeenCalledWith('change', expect.any(Function));
+  });
+
+  it('uses the established luminance fallback when no colour scheme is declared', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const card = document.createElement('article');
+    card.className = 'material-glass-elevated';
+    setRect(card, {});
+    document.body.append(card);
+    document.documentElement.style.setProperty('--neoverse-color-edge-light', 'rgb(255 255 255)');
+    const renderer = createTestRenderer();
+    renderer.mount();
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    expect(canvas?.style.mixBlendMode).toBe('normal');
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_light_surface' }),
+      -1,
+    );
+
+    document.documentElement.style.setProperty('--neoverse-color-edge-light', 'rgb(0 0 0)');
+    renderer.refresh();
+    expect(canvas?.style.mixBlendMode).toBe('overlay');
+    expect(gl.blendFuncSeparate).toHaveBeenLastCalledWith(
+      gl.SRC_ALPHA,
+      gl.ONE_MINUS_SRC_ALPHA,
+      gl.ONE,
+      gl.ONE_MINUS_SRC_ALPHA,
+    );
+  });
+
+  it('uses the 0.2.0 light profile for buttons and retains the focused dark profile', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const button = document.createElement('button');
+    button.className = 'ui-button material-glass-subtle';
+    setRect(button, { width: 100, height: 32 });
+    document.body.append(button);
+    document.documentElement.style.colorScheme = 'light';
+    const renderer = createTestRenderer();
+    renderer.mount();
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_corner_focus' }),
+      0,
+    );
+
+    document.documentElement.style.colorScheme = 'dark';
+    renderer.refresh();
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_corner_focus' }),
+      1,
+    );
+  });
+
+  it('keeps dark chroma independent of brighter edge opacity and ancestor opacity', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const parent = document.createElement('section');
@@ -478,6 +640,7 @@ describe('Glass renderer', () => {
     setRect(card, { width: 100, height: 60 });
     parent.append(card);
     document.body.append(parent);
+    document.documentElement.style.colorScheme = 'dark';
     const renderer = createTestRenderer();
     renderer.mount();
     expect(gl.uniform1f).toHaveBeenCalledWith(expect.objectContaining({ name: 'u_opacity' }), 0.27);
@@ -828,6 +991,7 @@ describe('Glass renderer', () => {
     glass.className = 'material-glass-subtle';
     setRect(glass, {});
     document.body.append(glass);
+    document.documentElement.style.colorScheme = 'light';
     const renderer = createTestRenderer();
     renderer.mount();
 
@@ -850,6 +1014,13 @@ describe('Glass renderer', () => {
     expect(restoredCanvas).not.toBeNull();
     expect(restoredCanvas).not.toBe(canvas);
     expect(restoredCanvas?.style.display).toBe('block');
+    expect(restoredCanvas?.style.mixBlendMode).toBe('normal');
+    expect(gl.blendFuncSeparate).toHaveBeenLastCalledWith(
+      gl.SRC_ALPHA,
+      gl.ONE_MINUS_SRC_ALPHA,
+      gl.SRC_ALPHA,
+      gl.ONE_MINUS_SRC_ALPHA,
+    );
     expect(document.documentElement.getAttribute(glassRendererAttribute)).toBe('webgl');
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
   });

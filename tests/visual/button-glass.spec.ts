@@ -141,8 +141,12 @@ for (const theme of ['light', 'dark'] as const) {
     );
     expect(delta.centre, 'the refraction must stay at the perimeter').toBeLessThanOrEqual(1);
     expect(delta.lit, 'both opposing lit corners must remain visible').toBeGreaterThan(3);
-    expect(delta.quiet, 'the other corners must not close into a bright ring').toBeLessThan(
-      delta.lit * 0.45,
-    );
+    if (theme === 'dark') {
+      // The restored 0.2.0 light profile includes a bridge at opposing corners;
+      // only the newer dark profile concentrates its catches this strongly.
+      expect(delta.quiet, 'the other corners must not close into a bright ring').toBeLessThan(
+        delta.lit * 0.45,
+      );
+    }
   });
 }

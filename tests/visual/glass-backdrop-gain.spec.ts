@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 for (const renderer of ['webgl', 'css'] as const) {
   for (const theme of ['light', 'dark'] as const) {
-    test(`${renderer}/${theme}: edge light increases live backdrop channels without adding white`, async ({
+    test(`${renderer}/${theme}: edge response follows the live backdrop transfer`, async ({
       page,
     }) => {
       await page.route('**/*', (route) =>
@@ -33,6 +33,7 @@ for (const renderer of ['webgl', 'css'] as const) {
       }, renderer);
       const canvas = page.locator('[data-neoverse-glass-renderer-canvas]');
       const channelGains: number[][] = [];
+      const lightOffsets: number[][] = [];
       for (const colour of [
         'rgb(0 0 0)',
         'rgb(80 96 112)',
@@ -87,6 +88,14 @@ for (const renderer of ['webgl', 'css'] as const) {
           const unlit = samples.base[index] ?? [];
           const peak = Math.max(...unlit);
           if (peak === 0) {
+            if (renderer === 'webgl' && theme === 'light') {
+              lightOffsets[index] = lit;
+              expect(
+                Math.max(...lit),
+                'the 0.2.0 light edge contributes its translucent colour on black',
+              ).toBeGreaterThan(1);
+              continue;
+            }
             expect(Math.max(...lit), 'black has no colour energy to amplify').toBeLessThanOrEqual(
               1,
             );
@@ -95,9 +104,9 @@ for (const renderer of ['webgl', 'css'] as const) {
           if (colour === 'rgb(80 96 112)') {
             channelGains[index] = lit.map((value, channel) => {
               const base = unlit[channel] ?? 0;
-              return renderer === 'webgl'
-                ? (value - base) / Math.min(base, 255 - base)
-                : value / base;
+              if (renderer !== 'webgl') return value / base;
+              if (theme === 'light') return (value - (lightOffsets[index]?.[channel] ?? 0)) / base;
+              return (value - base) / Math.min(base, 255 - base);
             });
           }
           const spectrum = channelGains[index];
@@ -105,11 +114,11 @@ for (const renderer of ['webgl', 'css'] as const) {
           const gain = Math.max(
             ...lit.map((value, channel) => (unlit[channel] ? value / (unlit[channel] ?? 1) : 1)),
           );
-          if (renderer === 'webgl')
+          if (renderer === 'webgl' && theme === 'dark')
             expect(gain, `${theme}/${colour}/${index}: visible backdrop gain`).toBeGreaterThan(
               1.01,
             );
-          else
+          else if (renderer === 'css')
             expect(
               gain,
               'CSS brightness must not replace the source colour',
@@ -118,11 +127,17 @@ for (const renderer of ['webgl', 'css'] as const) {
             expect(
               Math.abs(
                 value -
-                  (renderer === 'webgl'
-                    ? (unlit[channel] ?? 0) +
-                      (spectrum[channel] ?? 0) *
-                        Math.min(unlit[channel] ?? 0, 255 - (unlit[channel] ?? 0))
-                    : Math.min(255, (unlit[channel] ?? 0) * (spectrum[channel] ?? 1))),
+                  (renderer !== 'webgl'
+                    ? Math.min(255, (unlit[channel] ?? 0) * (spectrum[channel] ?? 1))
+                    : theme === 'light'
+                      ? Math.min(
+                          255,
+                          (lightOffsets[index]?.[channel] ?? 0) +
+                            (unlit[channel] ?? 0) * (spectrum[channel] ?? 1),
+                        )
+                      : (unlit[channel] ?? 0) +
+                        (spectrum[channel] ?? 0) *
+                          Math.min(unlit[channel] ?? 0, 255 - (unlit[channel] ?? 0))),
               ),
               `${colour}: each channel must follow its calibrated live-backdrop transfer`,
             ).toBeLessThanOrEqual(3);
