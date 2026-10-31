@@ -27,16 +27,18 @@ const forwardedAttrs = computed(() => {
     :data-density="props.density"
   >
     <header class="ui-terminal-surface__header">
-      <span class="ui-terminal-surface__title">{{ props.title }}</span>
-      <div v-if="$slots.status" class="ui-terminal-surface__status"><slot name="status" /></div>
-      <div
-        v-if="$slots.actions"
-        class="ui-terminal-surface__actions"
-        role="toolbar"
-        :aria-label="`${props.title} actions`"
-      >
-        <slot name="actions" />
-      </div>
+      <slot name="header">
+        <span class="ui-terminal-surface__title">{{ props.title }}</span>
+        <div v-if="$slots.status" class="ui-terminal-surface__status"><slot name="status" /></div>
+        <div
+          v-if="$slots.actions"
+          class="ui-terminal-surface__actions"
+          role="toolbar"
+          :aria-label="`${props.title} actions`"
+        >
+          <slot name="actions" />
+        </div>
+      </slot>
     </header>
     <div class="ui-terminal-surface__body"><slot /></div>
   </UiSurface>

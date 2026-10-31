@@ -1,6 +1,6 @@
 # @neoverse-ui/vue
 
-Vue 3 components for the Neoverse UI design system, with Aurora Glass / 极光玻璃 as the shared glass material. Light / 轻薄, Standard / 标准, and Immersive / 厚实 are its tiers, not separate styles. Use the [Tokens `glassMaterial` metadata](../tokens/README.md#aurora-glass--极光玻璃) for display labels; `glass-*` surface identifiers remain stable. See [material standards](../../docs/material-standards.md).
+Vue 3 components for the Neoverse UI design system, with Aurora Glass as the shared glass material. Light, Standard, and Immersive are its tiers, not separate styles. Use the [Tokens `glassMaterial` metadata](../tokens/README.md#aurora-glass) for localized display labels; `glass-*` surface identifiers remain stable. See [material standards](../../docs/material-standards.md).
 
 ```sh
 bun add @neoverse-ui/vue
@@ -28,7 +28,7 @@ Vue `>=3.5 <4` is required as a peer dependency. Field and choice-control IDs us
 
 `UiBadge` sizes `sm` / `md` / `lg` share `--neoverse-badge-font-family` and `--neoverse-badge-font-weight`. Their font sizes follow the shared label scale (13 / 14 / 16px at a 16px root); size-specific line heights and padding retain the existing geometry.
 
-Terminal composition (Aurora Glass / 极光玻璃 window, output lines, scrollback, and native terminal input) is documented in [Terminal composition](../../docs/terminal-composition.md). The embedded transcript uses `scrollbar-immersive`; `UiScrollbar` is reserved for document scrolling.
+Terminal composition (Aurora Glass window, output lines, scrollback, and native terminal input) is documented in [Terminal composition](../../docs/terminal-composition.md). The embedded transcript uses `scrollbar-immersive`; `UiScrollbar` is reserved for document scrolling. A server-rendered `UiScrollbar` publishes `data-hide-native`, so the native bar disappears on the first paint instead of after hydration; wrapping it in `ClientOnly` keeps the older post-mount swap.
 
 `UiTerminalEcho` displays recorded command `text` with the live prompt's `segments`, `symbol`, `error` state and `#segment` rendering, without an input or tab stop. Capture segment values when committing history; do not bind old commands to the live directory.
 

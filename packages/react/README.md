@@ -1,6 +1,6 @@
 # @neoverse-ui/react
 
-React adapters for Neoverse UI, with Aurora Glass / 极光玻璃 as the shared glass material. Light / 轻薄, Standard / 标准, and Immersive / 厚实 are its tiers, not separate styles. Use the [Tokens `glassMaterial` metadata](../tokens/README.md#aurora-glass--极光玻璃) for display labels; `glass-*` surface identifiers remain stable. See [material standards](../../docs/material-standards.md).
+React adapters for Neoverse UI, with Aurora Glass as the shared glass material. Light, Standard, and Immersive are its tiers, not separate styles. Use the [Tokens `glassMaterial` metadata](../tokens/README.md#aurora-glass) for localized display labels; `glass-*` surface identifiers remain stable. See [material standards](../../docs/material-standards.md).
 
 The package provides the same 35 public components as the Vue package, including navigation, forms, feedback, data presentation, terminal composition and document scrollbars. Both adapters use the shared Tokens, Tailwind, Material, Motion and Overlay Runtime. See [framework parity](../../docs/framework-parity.md) for state bindings and validation scope.
 
@@ -139,4 +139,4 @@ Consumers without their own Tailwind build can import `@neoverse-ui/react/index.
 
 `UiTerminalEcho` displays escaped recorded `text` with the same `segments`, `symbol`, `error` state and `renderSegment` chrome as the live prompt, without an input or tab stop. Capture segment values when committing history so later directory changes do not rewrite old prompts.
 
-`UiScrollbar` decorates document scrolling with `autoHideMs` (1200), `minThumbRatio` (0.1), `refreshKey`, and `hideNative` (true). Set `autoHideMs={0}` to keep it revealed while the document has overflow. It supports track seeking and pointer dragging, and restores native-scrollbar ownership on unmount. It is decorative and does not replace native document keyboard scrolling.
+`UiScrollbar` decorates document scrolling with `autoHideMs` (1200), `minThumbRatio` (0.1), `refreshKey`, and `hideNative` (true). Set `autoHideMs={0}` to keep it revealed while the document has overflow. It supports track seeking and pointer dragging, and restores native-scrollbar ownership on unmount. It is decorative and does not replace native document keyboard scrolling. The rail renders on the server with `data-hide-native`, so a server-rendered rail removes the native bar on the first paint instead of after hydration; `hideNative={false}` keeps the native bar.

@@ -20,6 +20,8 @@
 
 这些值由 `rem` 计算，会随用户字体设置变化，不需要消费项目设置更大的 `html` 字号或逐个覆盖 `.ui-*`。小型状态标签、辅助说明仍使用较小的语义字号。Playground shell 与 `/frame` 都使用普通根字号。
 
+SegmentedControl 的选项按内容宽度排列。SSR 首帧的选中背景直接占据选中项所在的 Grid 列，不用等宽估算；Vue 与 React 水合测量后使用整行坐标和真实按钮尺寸，保留后续选择切换的滑动过渡。消费项目不需要隐藏控件、固定选项宽度或覆盖私有滑块样式。
+
 Dock 尾部的嵌入式语言切换保持 0.2.0 的独立几何：外层高 30px、选项高 24px、字号
 11.2px、左右留白 6px，桌面最小宽度 32px；紧凑模式按内容宽度排布。
 尾部分组背景到首尾选项的左右留白复用独立分段控件的 inset 与边界之和，默认各 5px；
@@ -47,7 +49,7 @@ bun D:/SSJ/Projects/Neoverse-UI/scripts/sync-consumer.ts --consumer .
 
 Neoverse-Slides 已接入 `bun run ui:sync`；门户的开发、构建、生成、类型检查和样式同步会先同步共享包，再复制预编译 CSS 到 `/vendor/neoverse-ui.css`。
 
-## 2026-10-25 消费依赖核查
+## 2026-10-25 Consumer dependency audit
 
 此处区分安装来源与源码成熟度，不要求所有项目统一使用 npm。当前官方发布基线见[发布说明](release-0.3.0.md)；相同 manifest 版本不代表本地 `file:` 构建与已发布 tarball 相同。
 

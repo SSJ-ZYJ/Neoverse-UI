@@ -307,6 +307,7 @@ export function UiSegmentedControl({
           '--segment-index': Math.max(active, 0),
           ...(bounds
             ? {
+                '--segment-active-column': '1 / -1',
                 '--segment-active-offset': `${bounds.offset}px`,
                 '--segment-active-width': `${bounds.width}px`,
               }
