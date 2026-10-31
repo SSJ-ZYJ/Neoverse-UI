@@ -621,13 +621,13 @@ export const moduleCopy = {
     preview: {
       label: localized('Immersive scrollbar', '沉浸式滚动条'),
       description: localized(
-        'The rail stays close to the canvas; the thumb gains contrast and an accent edge during interaction.',
-        '轨道融入画布；交互时滑块提高对比度并显出强调色边缘。',
+        'One neutral ink replaces the former gradient rail: the grip brightens and widens on hover, and accent only enters it while dragging.',
+        '单一中性墨色取代此前的渐变轨道：悬停时滑块提亮并加宽，仅在拖拽时渗入强调色。',
       ),
       viewportLabel: localized('Scrollable viewport', '可滚动视口'),
       viewportHint: localized(
-        'Scroll inside the panel to inspect the track, thumb, and hover state.',
-        '在面板内滚动，查看轨道、滑块与悬停状态。',
+        'Hover the thumb to compare its lift and width with the overlay above.',
+        '将指针移到滑块上，对照上方浮层的提亮与加宽效果。',
       ),
     },
     tokens: {
@@ -637,11 +637,13 @@ export const moduleCopy = {
         '该工具类使用主题感知的 token 家族，使样式跟随浅色与深色表面。',
       ),
       size: localized('Thickness', '厚度'),
+      thumbWidth: localized('Resting width', '静止宽度'),
+      thumbWidthHover: localized('Hover width', '悬停宽度'),
       track: localized('Track', '轨道'),
       thumb: localized('Resting thumb', '静止滑块'),
       hover: localized('Hover thumb', '悬停滑块'),
       active: localized('Active thumb', '按下滑块'),
-      edge: localized('Edge and glow', '边缘与辉光'),
+      edge: localized('Edge highlight', '边缘高光'),
     },
   },
   action: {

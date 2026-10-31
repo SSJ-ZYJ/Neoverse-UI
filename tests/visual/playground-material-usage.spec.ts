@@ -139,5 +139,16 @@ for (const theme of ['light', 'dark'] as const) {
       element.scrollTop = 100;
     });
     expect(await viewport.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+
+    // Chromium drops every ::-webkit-scrollbar rule once a standard scrollbar
+    // property is declared, which flattened the preview to the platform thin
+    // bar. Keep the standard layer scoped to engines without the pseudo-elements
+    // so the utility keeps the same rail as the UiScrollbar overlay.
+    const scrollbar = await viewport.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { width: style.scrollbarWidth, color: style.scrollbarColor };
+    });
+    expect(scrollbar.width).toBe('auto');
+    expect(scrollbar.color).toBe('auto');
   });
 }

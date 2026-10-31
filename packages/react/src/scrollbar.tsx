@@ -216,6 +216,7 @@ export function UiScrollbar({
         pointerEvents: state.visible ? 'auto' : 'none',
       }}
       data-visible={state.visible ? 'true' : 'false'}
+      data-hide-native={hideNative ? 'true' : 'false'}
       aria-hidden="true"
     >
       <div

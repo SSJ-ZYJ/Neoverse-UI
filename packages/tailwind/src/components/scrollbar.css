@@ -1,12 +1,22 @@
 @layer utilities {
-  /* Immersive scrollbars let the canvas show through the rail while the thumb
-     keeps a readable touch target. The descendant selectors make one opt-in
-     class cover nested scroll containers in a Playground surface. */
-  .scrollbar-immersive,
-  .scrollbar-immersive * {
-    scrollbar-color: var(--neoverse-scrollbar-immersive-thumb)
-      var(--neoverse-scrollbar-immersive-track);
-    scrollbar-width: thin;
+  /* The immersive utility renders the same rail as the UiScrollbar overlay:
+     the canvas shows through the lane, and the thumb reuses the overlay's
+     widths, gradient, edge, and glow. One opt-in class therefore reads the
+     same on a document and on a nested container. The descendant selectors
+     keep that coverage for nested scroll containers in a Playground surface.
+     A native lane cannot repaint on rail hover, so the lane stays transparent
+     and the thumb carries every interaction state, as the overlay does at
+     rest. */
+
+  /* Standard scrollbar properties disable the WebKit pseudo-elements in
+     Chromium, which would flatten the rail to the platform "thin" bar. They are
+     therefore scoped to engines without those pseudo-elements. */
+  @supports not selector(::-webkit-scrollbar) {
+    .scrollbar-immersive,
+    .scrollbar-immersive * {
+      scrollbar-color: var(--neoverse-scrollbar-immersive-thumb) transparent;
+      scrollbar-width: thin;
+    }
   }
 
   .scrollbar-immersive::-webkit-scrollbar,
@@ -17,9 +27,8 @@
 
   .scrollbar-immersive::-webkit-scrollbar-track,
   .scrollbar-immersive *::-webkit-scrollbar-track {
-    border: var(--neoverse-scrollbar-immersive-track-border-width) solid transparent;
+    border: var(--neoverse-scrollbar-immersive-rail-inset) solid transparent;
     border-radius: var(--neoverse-radius-pill);
-    background: var(--neoverse-scrollbar-immersive-track);
     background-clip: padding-box;
   }
 
@@ -30,19 +39,20 @@
     border-radius: var(--neoverse-radius-pill);
     background: var(--neoverse-scrollbar-immersive-thumb-background);
     background-clip: padding-box;
-    box-shadow:
-      var(--neoverse-scrollbar-immersive-thumb-edge), var(--neoverse-scrollbar-immersive-thumb-glow);
+    box-shadow: var(--neoverse-scrollbar-immersive-thumb-edge);
   }
 
   @media (hover: hover) {
     .scrollbar-immersive::-webkit-scrollbar-thumb:hover,
     .scrollbar-immersive *::-webkit-scrollbar-thumb:hover {
+      border-width: var(--neoverse-scrollbar-immersive-thumb-hover-border-width);
       background: var(--neoverse-scrollbar-immersive-thumb-hover-background);
     }
   }
 
   .scrollbar-immersive::-webkit-scrollbar-thumb:active,
   .scrollbar-immersive *::-webkit-scrollbar-thumb:active {
+    border-width: var(--neoverse-scrollbar-immersive-thumb-hover-border-width);
     background: var(--neoverse-scrollbar-immersive-thumb-active-background);
   }
 
@@ -66,7 +76,7 @@
 
     .scrollbar-immersive::-webkit-scrollbar-track,
     .scrollbar-immersive *::-webkit-scrollbar-track {
-      border-color: Canvas;
+      border-color: transparent;
       background: Canvas;
     }
 
@@ -87,6 +97,23 @@
     display: none;
     width: 0;
     height: 0;
+  }
+
+  /* A server-rendered rail hides the native bar before hydration, so the first
+     paint never shows a native-then-immersive swap. The ownership class above
+     still covers client-only renders; scripting-off pages keep native bars
+     because a rail cannot reveal itself without the runtime. */
+  @media (scripting: enabled) {
+    html:has(.ui-scrollbar[data-hide-native='true']) {
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    html:has(.ui-scrollbar[data-hide-native='true'])::-webkit-scrollbar {
+      display: none;
+      width: 0;
+      height: 0;
+    }
   }
 
   .ui-scrollbar {
@@ -115,23 +142,18 @@
     width: var(--neoverse-scrollbar-overlay-thumb-width);
     border-radius: var(--neoverse-radius-pill);
     background: var(--neoverse-scrollbar-immersive-thumb-background);
-    box-shadow:
-      var(--neoverse-scrollbar-immersive-thumb-edge), var(--neoverse-scrollbar-immersive-thumb-glow);
+    box-shadow: var(--neoverse-scrollbar-immersive-thumb-edge);
     cursor: grab;
     touch-action: none;
     transform: translateX(-50%);
     transition:
       width var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
-      background var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
-      box-shadow var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
+      background var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
   }
 
   .ui-scrollbar--dragging .ui-scrollbar__thumb {
     width: var(--neoverse-scrollbar-overlay-thumb-width-hover);
     background: var(--neoverse-scrollbar-immersive-thumb-hover-background);
-    box-shadow:
-      var(--neoverse-scrollbar-immersive-thumb-edge),
-      var(--neoverse-scrollbar-overlay-thumb-hover-shadow);
   }
 
   @media (hover: hover) {
@@ -141,9 +163,6 @@
     .ui-scrollbar:hover:not(.ui-scrollbar--dragging) .ui-scrollbar__thumb {
       width: var(--neoverse-scrollbar-overlay-thumb-width-hover);
       background: var(--neoverse-scrollbar-immersive-thumb-hover-background);
-      box-shadow:
-        var(--neoverse-scrollbar-immersive-thumb-edge),
-        var(--neoverse-scrollbar-overlay-thumb-hover-shadow);
     }
   }
 

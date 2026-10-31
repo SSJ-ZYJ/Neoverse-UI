@@ -231,5 +231,10 @@ test('scrollbar is safe during server rendering and hides decorative controls fr
   const html = renderToStaticMarkup(<UiScrollbar hideNative autoHideMs={0} refreshKey="route" />);
   expect(html).toContain('aria-hidden="true"');
   expect(html).toContain('data-visible="false"');
+  expect(html).toContain('data-hide-native="true"');
   expect(html).not.toContain('refreshKey');
+  // Consumers can opt out of native hiding while keeping the rail decorative.
+  expect(renderToStaticMarkup(<UiScrollbar hideNative={false} />)).toContain(
+    'data-hide-native="false"',
+  );
 });

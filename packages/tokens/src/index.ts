@@ -388,9 +388,10 @@ const componentCssVariables = {
   scrollbar: {
     immersive: {
       size: '--neoverse-scrollbar-immersive-size',
-      trackBorderWidth: '--neoverse-scrollbar-immersive-track-border-width',
+      railInset: '--neoverse-scrollbar-immersive-rail-inset',
       thumbMinLength: '--neoverse-scrollbar-immersive-thumb-min-length',
       thumbBorderWidth: '--neoverse-scrollbar-immersive-thumb-border-width',
+      thumbHoverBorderWidth: '--neoverse-scrollbar-immersive-thumb-hover-border-width',
       track: '--neoverse-scrollbar-immersive-track',
       thumb: '--neoverse-scrollbar-immersive-thumb',
       thumbHover: '--neoverse-scrollbar-immersive-thumb-hover',
@@ -399,14 +400,12 @@ const componentCssVariables = {
       thumbHoverBackground: '--neoverse-scrollbar-immersive-thumb-hover-background',
       thumbActiveBackground: '--neoverse-scrollbar-immersive-thumb-active-background',
       thumbEdge: '--neoverse-scrollbar-immersive-thumb-edge',
-      thumbGlow: '--neoverse-scrollbar-immersive-thumb-glow',
     },
     overlay: {
       insetBlock: '--neoverse-scrollbar-overlay-inset-block',
       insetInline: '--neoverse-scrollbar-overlay-inset-inline',
       thumbWidth: '--neoverse-scrollbar-overlay-thumb-width',
       thumbWidthHover: '--neoverse-scrollbar-overlay-thumb-width-hover',
-      thumbHoverShadow: '--neoverse-scrollbar-overlay-thumb-hover-shadow',
     },
   },
   table: {
