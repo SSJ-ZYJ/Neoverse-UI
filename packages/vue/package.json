@@ -29,7 +29,7 @@
   "scripts": {
     "build": "rm -rf dist tsconfig.build.tsbuildinfo && vue-tsc --project tsconfig.build.json --emitDeclarationOnly && vite build && bun ./scripts/copy-css.ts",
     "typecheck": "vue-tsc --noEmit",
-    "test": "vitest run --environment happy-dom"
+    "test": "vitest run"
   },
   "peerDependencies": {
     "vue": ">=3.5.0 <4.0.0"

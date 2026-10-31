@@ -83,41 +83,38 @@ async function measureLightEdges(
       };
       const a = await decode(lit);
       const b = await decode(unlit);
-      const pixel = (image: ImageData, x: number, y: number) => {
+      const pixel = (image: ImageData, x: number, y: number): [number, number, number] => {
         const offset = (y * image.width + x) * 4;
-        return [image.data[offset], image.data[offset + 1], image.data[offset + 2]];
+        return [image.data[offset] ?? 0, image.data[offset + 1] ?? 0, image.data[offset + 2] ?? 0];
       };
       // Walk perpendicular to an edge and keep the brightest lift, so the
       // measurement follows the contour instead of a fixed inset.
       const scan = (points: number[][], normal: number[]) => {
-        const sum = [0, 0, 0];
+        let sum: [number, number, number] = [0, 0, 0];
         let samples = 0;
         let peak = 0;
         for (const [pointX = 0, pointY = 0] of points) {
-          let best: number[] | undefined;
+          let best: [number, number, number] | undefined;
           let bestLift = -1;
           for (let step = -6; step <= 5; step += 1) {
             const x = pointX + (normal[0] ?? 0) * step;
             const y = pointY + (normal[1] ?? 0) * step;
             const current = pixel(a, x, y);
             const base = pixel(b, x, y);
-            const lift = Math.max(
-              (current[0] ?? 0) - (base[0] ?? 0),
-              (current[1] ?? 0) - (base[1] ?? 0),
-              (current[2] ?? 0) - (base[2] ?? 0),
-            );
+            const lift = Math.max(current[0] - base[0], current[1] - base[1], current[2] - base[2]);
             if (lift > bestLift) {
               bestLift = lift;
-              best = current.map((value, index) => value - (base[index] ?? 0));
+              best = [current[0] - base[0], current[1] - base[1], current[2] - base[2]];
             }
           }
           if (best && bestLift > 3) {
-            for (let index = 0; index < 3; index += 1) sum[index] += best[index] ?? 0;
+            sum = [sum[0] + best[0], sum[1] + best[1], sum[2] + best[2]];
             samples += 1;
             peak = Math.max(peak, bestLift);
           }
         }
-        const mean = samples === 0 ? 0 : sum.map((value) => value / samples);
+        const mean: [number, number, number] =
+          samples === 0 ? [0, 0, 0] : [sum[0] / samples, sum[1] / samples, sum[2] / samples];
         return { mean, peak };
       };
 
@@ -142,10 +139,13 @@ async function measureLightEdges(
           scan(left, [-1, 0]),
           scan(right, [1, 0]),
         ];
+        const rightEdge = edges[3]?.mean;
         return {
           tier: rect.tier,
           maxLift: Math.max(...edges.map((edge) => edge.peak)),
-          rightEdge: edges[3]?.mean.map((value) => Math.round(value)) ?? [0, 0, 0],
+          rightEdge: rightEdge
+            ? [Math.round(rightEdge[0]), Math.round(rightEdge[1]), Math.round(rightEdge[2])]
+            : [0, 0, 0],
         };
       });
     },
