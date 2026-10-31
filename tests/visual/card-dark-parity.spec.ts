@@ -10,6 +10,8 @@ for (const theme of ['light', 'dark'] as const) {
       const reference = element.cloneNode(false) as HTMLElement;
       reference.removeAttribute('data-card-default');
       reference.classList.remove('ui-card');
+      // Compare with the shared large surface, not a compact material control.
+      reference.classList.add('ui-surface');
       reference.setAttribute('data-neoverse-surface-hover', 'static');
       reference.setAttribute('data-neoverse-glass-edge-pass', 'css');
       element.setAttribute('data-neoverse-glass-edge-pass', 'css');

@@ -1,5 +1,7 @@
 import { expect, test } from '@playwright/test';
 
+// Linux baselines come from CI 41216161288 at 124fc11, after the custom header
+// and light Glass colour changes. Preserve the new header rather than the old status row.
 for (const theme of ['light', 'dark'] as const) {
   for (const width of [480, 1440]) {
     test(`shared terminal surface / ${theme} / ${width}`, async ({ page }) => {
@@ -21,6 +23,9 @@ for (const theme of ['light', 'dark'] as const) {
       ).toBe(true);
       await page.evaluate(() => document.fonts.ready);
 
+      await terminal.getByRole('button', { name: 'Focus command', exact: true }).click();
+      await expect(input).toBeFocused();
+      await page.mouse.move(0, 0);
       await input.fill('echo');
       await expect(terminal.locator('.ui-terminal-prompt__ghost-suffix')).toHaveText(' hello');
       await page.addStyleTag({
