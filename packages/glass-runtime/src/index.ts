@@ -22,6 +22,7 @@ const glassMutationAttributes = [
   glassRendererAttribute,
   'data-neoverse-glass-edge-pass',
   'data-neoverse-glass-edge-pass-active',
+  'data-neoverse-glass-occluder',
   'data-neoverse-glass-nesting',
   'data-neoverse-tooltip-surface',
 ] as const;
@@ -148,6 +149,13 @@ type Occluder = {
   height: number;
   radius: number;
   area: number;
+  topmost: boolean;
+};
+
+type OcclusionCandidate = {
+  element: HTMLElement;
+  rect: DOMRect;
+  visible?: boolean;
 };
 
 type ProgramLocations = {
@@ -462,17 +470,48 @@ const intersectionArea = (rect: DOMRect, bounds: DOMRect): number => {
   return width > 0 && height > 0 ? width * height : 0;
 };
 
+const isVisibleOccluder = (candidate: OcclusionCandidate, view: Window): boolean => {
+  if (candidate.visible !== undefined) return candidate.visible;
+  for (let node: HTMLElement | null = candidate.element; node !== null; node = node.parentElement) {
+    const style = view.getComputedStyle(node);
+    if (
+      style.display === 'none' ||
+      style.visibility === 'hidden' ||
+      style.visibility === 'collapse' ||
+      parseFirstNumber(style.opacity, 1) <= 0
+    ) {
+      candidate.visible = false;
+      return false;
+    }
+  }
+  candidate.visible = true;
+  return true;
+};
+
 export const collectOccluders = (
   element: HTMLElement,
   bounds: DOMRect,
   ownerDocument: Document,
   view: Window,
+  candidates: readonly OcclusionCandidate[] = [],
 ): Occluder[] => {
   if (typeof ownerDocument.elementsFromPoint !== 'function') {
     return [];
   }
 
   const occluders = new Map<Element, Occluder>();
+  const addOccluder = (entry: Element, rect: DOMRect): void => {
+    if (rect.width <= 0 || rect.height <= 0) return;
+    occluders.set(entry, {
+      left: rect.left,
+      top: rect.top,
+      width: rect.width,
+      height: rect.height,
+      radius: occluderRadius(entry, view),
+      area: intersectionArea(rect, bounds),
+      topmost: entry.getAttribute('data-neoverse-glass-occluder') === 'topmost',
+    });
+  };
   for (const [x, y] of occlusionSamplePoints(bounds)) {
     const stack = ownerDocument.elementsFromPoint(x, y);
     const elementIndex = stack.indexOf(element);
@@ -486,26 +525,54 @@ export const collectOccluders = (
       if (element.contains(entry) || occluders.has(entry)) {
         continue;
       }
-      const rect = entry.getBoundingClientRect();
-      if (rect.width <= 0 || rect.height <= 0) {
-        continue;
-      }
-      occluders.set(entry, {
-        left: rect.left,
-        top: rect.top,
-        width: rect.width,
-        height: rect.height,
-        radius: occluderRadius(entry, view),
-        area: intersectionArea(rect, bounds),
-      });
+      addOccluder(entry, entry.getBoundingClientRect());
     }
     if (occluders.size >= maxOccluders) {
       break;
     }
   }
 
+  // Probe actual overlapping Glass rectangles as well as the fixed samples.
+  // This catches small overlays between sample points without a dense per-edge
+  // hit-test grid. Rectangles are measured once per frame by the caller.
+  for (const candidate of candidates) {
+    const entry = candidate.element;
+    const rect = candidate.rect;
+    if (
+      entry === element ||
+      element.contains(entry) ||
+      entry.contains(element) ||
+      occluders.has(entry)
+    )
+      continue;
+
+    const left = Math.max(bounds.left, rect.left);
+    const right = Math.min(bounds.right, rect.right);
+    const top = Math.max(bounds.top, rect.top);
+    const bottom = Math.min(bounds.bottom, rect.bottom);
+    if (left >= right || top >= bottom) continue;
+    const reachesEdge =
+      left <= bounds.left + occlusionSampleInset ||
+      right >= bounds.right - occlusionSampleInset ||
+      top <= bounds.top + occlusionSampleInset ||
+      bottom >= bounds.bottom - occlusionSampleInset;
+    if (!reachesEdge) continue;
+
+    // A non-interactive topmost overlay is absent from elementsFromPoint. Its
+    // owner may explicitly declare that it sits above ordinary page surfaces.
+    if (entry.getAttribute('data-neoverse-glass-occluder') !== 'topmost') {
+      const stack = ownerDocument.elementsFromPoint((left + right) / 2, (top + bottom) / 2);
+      const targetIndex = stack.indexOf(element);
+      const candidateIndex = stack.findIndex((item) => item === entry || entry.contains(item));
+      if (targetIndex < 0 || candidateIndex < 0 || candidateIndex >= targetIndex) continue;
+    }
+    if (isVisibleOccluder(candidate, view)) addOccluder(entry, rect);
+  }
+
   return [...occluders.values()]
-    .sort((first, second) => second.area - first.area)
+    .sort(
+      (first, second) => Number(second.topmost) - Number(first.topmost) || second.area - first.area,
+    )
     .slice(0, maxOccluders);
 };
 
@@ -602,9 +669,10 @@ const readStyle = (
   view: Window,
   colorProbe: HTMLElement,
   viewport: CanvasViewport,
+  measuredRect?: DOMRect,
 ): GlassStyle | undefined => {
   const style = view.getComputedStyle(element);
-  const rect = element.getBoundingClientRect();
+  const rect = measuredRect ?? element.getBoundingClientRect();
   if (
     rect.width <= 0 ||
     rect.height <= 0 ||
@@ -1164,6 +1232,22 @@ class GlassRendererImpl implements GlassRenderer {
     }
 
     const viewport = getCanvasViewport(this.canvas, this.ownerDocument, view);
+    const candidates = Array.from(
+      this.ownerDocument.querySelectorAll<HTMLElement>(
+        `${glassSelector}, [data-neoverse-glass-occluder='topmost']`,
+      ),
+      (element): OcclusionCandidate => ({ element, rect: element.getBoundingClientRect() }),
+    );
+    const measuredRects = new Map(candidates.map(({ element, rect }) => [element, rect]));
+    const visibleCandidates = candidates.filter(
+      ({ rect }) =>
+        rect.width > 0 &&
+        rect.height > 0 &&
+        rect.right > viewport.left &&
+        rect.bottom > viewport.top &&
+        rect.left < viewport.right &&
+        rect.top < viewport.bottom,
+    );
     const width = viewport.width;
     const height = viewport.height;
     const pixelRatio = resolveDevicePixelRatio(view, this.maxDevicePixelRatio);
@@ -1265,7 +1349,7 @@ class GlassRendererImpl implements GlassRenderer {
     const occluderRects = new Float32Array(maxOccluders * 4);
     const occluderRadii = new Float32Array(maxOccluders);
     for (const element of elements) {
-      const style = readStyle(element, view, this.colorProbe, viewport);
+      const style = readStyle(element, view, this.colorProbe, viewport, measuredRects.get(element));
       if (style === undefined) {
         continue;
       }
@@ -1306,7 +1390,13 @@ class GlassRendererImpl implements GlassRenderer {
       gl.uniform3f(locations.tertiary, ...tertiary);
       let occluderCount = 0;
       if (locations.occluders !== null && locations.occluderCount !== null) {
-        for (const occluder of collectOccluders(element, style.rect, this.ownerDocument, view)) {
+        for (const occluder of collectOccluders(
+          element,
+          style.rect,
+          this.ownerDocument,
+          view,
+          visibleCandidates,
+        )) {
           occluderRects.set(
             [
               occluder.left - viewport.left,

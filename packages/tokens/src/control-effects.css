@@ -35,6 +35,7 @@
     --neoverse-effect-strength-50: 50%;
     --neoverse-effect-strength-54: 54%;
     --neoverse-effect-strength-58: 58%;
+    --neoverse-effect-strength-60: 60%;
     --neoverse-effect-strength-62: 62%;
     --neoverse-effect-strength-64: 64%;
     --neoverse-effect-strength-68: 68%;
@@ -43,6 +44,7 @@
     --neoverse-effect-strength-77: 77%;
     --neoverse-effect-strength-82: 82%;
     --neoverse-effect-strength-86: 86%;
+    --neoverse-effect-strength-88: 88%;
     --neoverse-effect-command-edge-opacity-light: var(
       --neoverse-material-edge-refraction-opacity-subtle
     );

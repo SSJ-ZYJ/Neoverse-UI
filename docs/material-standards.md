@@ -66,9 +66,9 @@ own the body tint, blur and shadows.
 Opacity, clipping and overlay occlusion still apply. Light retains a continuous
 fine edge while moderately emphasizing the upper-left and lower-right corners;
 dark buttons retain their focused catches. Reduced transparency disables the renderer. The CSS fallback uses
-alpha-only gradient masks and backdrop brightness. Native SVG displacement
-remains an explicit alternative through `backend: 'native'` (Playground:
-`?glass=native`).
+alpha-only gradient masks and backdrop brightness. The historical `backend: 'native'`
+option remains available for compatibility, but must not be used as the repair
+approach prohibited below.
 
 ### Painted stroke for window-anchored chrome
 
@@ -88,6 +88,61 @@ Live-pixel tests check light edge continuity and corner emphasis, while the
 0.2.0 reference test checks the dark response on grey and pale backdrops. Runtime tests cover theme
 switching, canvas reuse and unchanged body blur; live-canvas tests exercise the
 different light and dark composition models against changing background pixels. The grey backdrop case also bounds how far blue may lead the green and red content, so the cool edge cannot regress into a cast.
+
+### Glass repair guardrails
+
+Glass repairs must preserve all of the following at once: the actual tier-owned
+background blur, a continuous narrow edge on all four sides and corners, colour
+that responds to the underlying content, and interactive performance. The upper-left
+and lower-right catches may be stronger, but the other edges must remain visible;
+an uninterrupted bright strip across the top is not the desired profile.
+
+The following repair approaches are prohibited. These are observed regressions,
+not alternative styles to retry when a different test fails:
+
+- Do not switch the default renderer to full-surface SVG displacement in
+  `backdrop-filter`, or replace the existing blur with a generated filter. The
+  historical opt-in `native` backend is not a solution for this repair and must
+  not be promoted into the default path.
+- Do not add a page screenshot, cloned DOM, reconstructed backdrop or continuous
+  capture layer to simulate refraction; prior capture layers caused stutter and
+  dark or grey edges. Do not paint a fixed white, mint or blue outline or a
+  theme-coloured highlight and call it a sample of the backdrop.
+- Do not strengthen the entire top edge to make the corners brighter: this makes
+  that edge look thicker than the others. Do not apply full corner-only focus or
+  let the top, bottom, sides or the other two corners disappear. The two stronger
+  corners must remain part of one continuous, fine silhouette.
+- Do not replace the established compositing with another blend mode or change
+  its gain in isolation. An unverified overlay experiment made the light edge
+  disappear; a coloured source-over layer can also mask the true backdrop. A
+  change must preserve visible edges and their response to the actual background.
+- Do not compensate for a failed edge by removing, overriding, or replacing the
+  tier-owned body blur, changing opacity to an opaque fill, or adding a bright
+  border. Keep blur, colour, edges and performance together as one contract.
+- Do not fix a visual mismatch by only changing an assertion or updating
+  snapshots. Unit mocks, computed styles, a single grey background, and passing
+  colour thresholds do not establish a correct rendered appearance or performance.
+
+Before changing the effect, compare the relevant historical implementation and
+the changes made after it; retain independently accepted corrections rather than
+blindly reverting an entire commit. The light edge in `7f43d37` uses a
+theme-coloured source-over highlight. The preceding `eda31c3` uses a
+backdrop-dependent overlay transfer. Neither description proves spatial
+displacement, so do not describe either as sampled backdrop refraction. A later
+full-focus experiment caused the other edges to disappear; partial focus then
+restored part of the original contour. Preserve useful corner adjustments when
+comparing earlier commits rather than restoring an old appearance wholesale.
+
+Keep the current CSS body blur and the renderer's scheduling optimizations while
+evaluating a change. Verify all three surface tiers and representative controls
+over changing, coloured and patterned backgrounds, including live DOM and canvas
+content. Inspect rendered blur and edge continuity rather than computed styles
+alone; check the light and dark themes and interactive responsiveness. Run
+browser, WebGL, build and performance checks remotely under the project safety
+constraint. Update screenshot baselines only after the actual candidate has passed
+the relevant checks; report any missing verification or visual review explicitly.
+Do not push successive diagnostic commits or trigger repeated failing CI runs while
+the repair is still being developed.
 
 ## Selection and customization
 

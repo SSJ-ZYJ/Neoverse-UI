@@ -55,6 +55,7 @@ onBeforeUnmount(() => {
   <Teleport to="body">
     <UiSurface
       data-playground-fps
+      data-neoverse-glass-occluder="topmost"
       aria-live="off"
       surface="glass-elevated"
       class="pointer-events-none fixed left-2 top-2 z-layer-toast min-w-20 rounded-control px-2 py-1 font-mono text-caption text-primary tabular-nums"

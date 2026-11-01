@@ -351,6 +351,18 @@ test('keeps immersive scrollbars on shared affordance roles', async () => {
   expect(css).not.toContain('color-mix(');
 });
 
+test('resolves every shared control effect strength used by scrollbar states', async () => {
+  const css = await readTokenCss('control-effects.css');
+  const definitions = new Set(
+    Array.from(css.matchAll(/(--neoverse-effect-strength-\d+)\s*:/g), (match) => match[1]),
+  );
+  const references = Array.from(
+    css.matchAll(/var\((--neoverse-effect-strength-\d+)\)/g),
+    (match) => match[1],
+  );
+  expect([...new Set(references.filter((name) => !definitions.has(name)))]).toEqual([]);
+});
+
 test('keeps button surfaces independent of theme accents', async () => {
   const [buttonCss, sharedControlCss] = await Promise.all([
     readTokenCss('components/button.css'),

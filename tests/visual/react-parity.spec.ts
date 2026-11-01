@@ -288,6 +288,7 @@ for (const theme of ['light', 'dark']) {
       await expect(track).toHaveClass(/ui-scrollbar--dragging/);
       await page.mouse.up();
       await expect(track).not.toHaveClass(/ui-scrollbar--dragging/);
+      await page.mouse.move(rect.x - 32, rect.y + rect.height * 0.85);
       await expect(track).toHaveAttribute('data-visible', 'false');
       await page.locator('[data-parity-scrollbar]').click();
       await expect(track).toHaveCount(0);

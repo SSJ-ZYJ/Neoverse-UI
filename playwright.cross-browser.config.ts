@@ -18,6 +18,7 @@ export default defineConfig({
     '**/overlay-review-regressions.spec.ts',
     '**/overlay-tracking.spec.ts',
     '**/glass-scheduling.spec.ts',
+    '**/scrollbar-states.spec.ts',
   ],
   projects: [
     {

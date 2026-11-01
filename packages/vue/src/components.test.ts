@@ -1459,3 +1459,69 @@ describe('Presentation data', () => {
     wrapper.unmount();
   });
 });
+
+describe('UiScrollbar interaction visibility', () => {
+  it('keeps the scrollbar visible while the pointer rests on its track', async () => {
+    vi.useFakeTimers();
+    const root = document.documentElement;
+    Object.defineProperty(root, 'scrollHeight', { configurable: true, value: 1600 });
+    Object.defineProperty(root, 'clientHeight', { configurable: true, value: 800 });
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
+    const wrapper = mount(UiScrollbar, { attachTo: document.body, props: { autoHideMs: 100 } });
+    try {
+      await nextTick();
+      const track = wrapper.get('.ui-scrollbar');
+      await track.trigger('pointerenter', { pointerType: 'mouse' });
+      vi.advanceTimersByTime(250);
+      await nextTick();
+      expect(track.attributes('data-visible')).toBe('true');
+
+      await track.trigger('pointerleave', { pointerType: 'mouse' });
+      vi.advanceTimersByTime(100);
+      await nextTick();
+      expect(track.attributes('data-visible')).toBe('false');
+    } finally {
+      wrapper.unmount();
+      vi.useRealTimers();
+    }
+  });
+
+  it.each(['pointerup', 'pointercancel', 'lostpointercapture'])(
+    'keeps the scrollbar visible while a drag is held, until %s',
+    async (finishEvent) => {
+      vi.useFakeTimers();
+      const root = document.documentElement;
+      Object.defineProperty(root, 'scrollHeight', { configurable: true, value: 1600 });
+      Object.defineProperty(root, 'clientHeight', { configurable: true, value: 800 });
+      Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
+      const wrapper = mount(UiScrollbar, { attachTo: document.body, props: { autoHideMs: 100 } });
+      try {
+        await nextTick();
+        const track = wrapper.get('.ui-scrollbar');
+        const thumb = wrapper.get('.ui-scrollbar__thumb');
+        vi.spyOn(thumb.element, 'getBoundingClientRect').mockReturnValue({
+          top: 0,
+          bottom: 400,
+          height: 400,
+        } as DOMRect);
+        await thumb.trigger('pointerdown', { button: 0, clientY: 20, pointerId: 1 });
+        await track.trigger('pointerleave', { pointerType: 'mouse' });
+        vi.advanceTimersByTime(250);
+        await nextTick();
+        expect(track.classes()).toContain('ui-scrollbar--dragging');
+        expect(track.attributes('data-visible')).toBe('true');
+
+        await thumb.trigger('pointerup', { pointerId: 2 });
+        expect(track.classes()).toContain('ui-scrollbar--dragging');
+        await thumb.trigger(finishEvent, { pointerId: 1 });
+        expect(track.classes()).not.toContain('ui-scrollbar--dragging');
+        vi.advanceTimersByTime(100);
+        await nextTick();
+        expect(track.attributes('data-visible')).toBe('false');
+      } finally {
+        wrapper.unmount();
+        vi.useRealTimers();
+      }
+    },
+  );
+});

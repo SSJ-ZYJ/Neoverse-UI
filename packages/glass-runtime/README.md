@@ -2,7 +2,7 @@
 
 Shared optional directional Aurora Glass (极光玻璃) edges for Neoverse UI. Aurora Glass is the single shared glass material; its Light / 轻薄, Standard / 标准, and Immersive / 厚实 tiers share the same name. Obtain display labels from `glassMaterial` in `@neoverse-ui/tokens`; see [material standards](../../docs/material-standards.md). Package and renderer identifiers remain stable.
 
-Light restores the 0.2.0 directional edge: the shader combines theme accent
+Light uses a directional edge: the shader combines theme accent
 colours, varies chroma with effective opacity, and caps fragment alpha at 0.34.
 The light canvas uses normal composition and the release's WebGL blend factors;
 large surfaces use edge opacities 0.46 / 0.5 / 0.54. Chroma and gain remain
@@ -19,12 +19,13 @@ contrast depend on both the theme accents and the pixels underneath. Dark
 retains its overlay response. Both themes share one canvas; CSS continues to
 own the body tint, blur and shadows.
 
-Opacity, clipping and overlay occlusion still apply. Light follows the 0.2.0
-edge profile for controls and surfaces; dark buttons retain their focused
-catches. Reduced transparency disables the renderer. The CSS fallback uses
-alpha-only gradient masks and backdrop brightness. Native SVG displacement
-remains an explicit alternative through `backend: 'native'` (Playground:
-`?glass=native`).
+Opacity, clipping and overlay occlusion still apply. Light has a moderate
+upper-left and lower-right focus; dark buttons retain their focused catches.
+Reduced transparency disables the renderer. The CSS fallback uses alpha-only
+gradient masks and backdrop brightness. The historical `native` backend remains
+an explicit API option, but full-surface SVG displacement must not be made the
+default or used as the Glass repair described in the
+[repair guardrails](../../docs/material-standards.md#glass-repair-guardrails).
 
 Animation tracking redraws moving edges and occluders. Background-position-only
 effects stay in CSS; transformed or fading descendants also stay in CSS when
@@ -33,8 +34,15 @@ nested Glass. Unknown effects remain tracked. Hidden subtrees do not sustain a
 frame loop; visibility and clipping mutations trigger reevaluation, including
 animations that are already running. These rules do not change the edge shader.
 
-The 0.2.0 reference test checks the released light edge samples on middle grey
-and the dark response on grey and pale backdrops. Runtime tests cover theme
+Pointer-transparent overlays that are guaranteed to sit above ordinary Glass
+surfaces can opt into edge occlusion with
+`data-neoverse-glass-occluder="topmost"`. Do not use this marker on an overlay
+that can be underneath those surfaces. The renderer limits each edge pass to six
+occluding rectangles; this marker controls visibility and does not sample or
+refract background pixels.
+
+The 0.2.0 reference test checks the dark response on grey and pale backdrops.
+Light edge continuity and corner emphasis have separate checks. Runtime tests cover theme
 switching, canvas reuse and unchanged body blur; live-canvas tests exercise the
 different light and dark composition models against changing background pixels. The grey backdrop case also bounds how far blue may lead the green and red content, so the cool edge cannot regress into a cast.
 
