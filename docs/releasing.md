@@ -21,6 +21,10 @@ completed publication and official-registry installation verification; the seven
 new package tags point to `dfb84a7`. See [release notes](release-0.3.0.md).
 Later source changes and pending Changesets are not part of that published baseline.
 
+The next candidate is [0.3.1](release-0.3.1.md): Tokens, Tailwind, Vue, React and
+Overlay Runtime at 0.3.1; Motion and Glass Runtime at 0.2.2; Giscus Theme unchanged
+at 0.2.0. That document tracks the pending plan, token migration and release evidence.
+
 ## Release preparation versus publishing
 
 Normal development and release-candidate preparation may create Changesets, run quality gates, build packages, and verify package contents. Those steps do not publish anything.
@@ -77,13 +81,14 @@ bun changeset status
 
 `release:check` runs non-mutating Biome checks, text/style/Tailwind checks, typechecks, tests, and build. It verifies every public package, rejects leaked `workspace:` protocols and source/test/playground artifacts, and checks that packed internal runtime dependency ranges include the corresponding workspace release versions before installing local overrides. It then installs the generated package contents into a temporary clean consumer for JS, CSS, and TypeScript smoke tests. Local overrides prove package usability, not npm availability. The full Playwright gate must also finish with zero failures; conditional skips must have a documented design reason. Review expected/actual/diff images before accepting intentional snapshot changes, then rerun without snapshot updates. The release workflow runs these visual gates before packing.
 
-`verify:published` checks the installed official packages against the published
-0.3.0 API baseline. Candidate-only exports and types (React parity and
-`UiTerminalEcho`) are additionally required by local tarball verification, not by
-checks of an older published version. Both modes retain JS/CSS/type checks and
-published mode still verifies exact versions and the resolved dependency graph.
-When a candidate is released, promote its API assertions into the shared baseline;
-do not remove them from candidate verification to make an old registry package pass.
+`verify:published` selects API checks from each package's exact manifest version.
+Registry packages at 0.3.1 or later must expose React parity, Vue `UiTerminalEcho`,
+the React terminal header type, material names and the new token-map entries.
+Published 0.3.0 packages retain their older API baseline. Local tarballs always
+exercise the new assertions, including before manifest versioning. Both modes
+retain JS/CSS/type checks, and published mode still verifies exact versions and
+the resolved dependency graph. Future API additions must extend this shared,
+version-aware baseline rather than remain excluded from published verification.
 
 Run release gates in an isolated checkout/copy when another `bun dev` is active.
 The development watcher intentionally writes readable CSS to the same `dist`

@@ -1,5 +1,5 @@
 ---
-'@neoverse-ui/react': minor
+'@neoverse-ui/react': patch
 '@neoverse-ui/vue': patch
 ---
 

@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { basename, join, relative } from 'node:path';
+import { releaseApiSmoke } from './release-api-smoke';
 import {
   type ReleasePackage,
   verifyInstalledPackages,
@@ -219,6 +220,9 @@ try {
         '.ui-stat-grid',
         '.ui-timeline',
         '.ui-step-flow',
+        '.ui-terminal-echo',
+        'data-neoverse-glass-edge-stroke',
+        'data-hide-native',
       ]) {
         assert(
           consumerCss.includes(fragment),
@@ -288,21 +292,6 @@ try {
     )}\n`,
   );
 
-  // Registry checks exercise the published baseline, not unversioned source additions.
-  // Local tarball verification must also compile and load every candidate API below.
-  const candidateSmoke = published
-    ? ''
-    : `import * as ReactAdapters from '@neoverse-ui/react';\n` +
-      `import { UiTerminalEcho, type TerminalEchoProps } from '@neoverse-ui/vue';\n` +
-      `for (const name of ['UiControlSurface', 'UiNavigationItem', 'UiSegmentedControl', 'UiBadge', 'UiStatusIndicator', 'UiTooltipSurface', 'UiSkeleton', 'UiScrollbar', 'UiTerminalSurface', 'UiTerminalTranscript', 'UiTerminalLine', 'UiTerminalPrompt', 'UiTerminalEcho', 'UiStatCard', 'UiTimeline', 'UiStepFlow'] as const) if (typeof ReactAdapters[name] !== 'function') throw new Error('missing React adapter: ' + name);\n` +
-      `const reactSegments: ReactAdapters.UiSegmentedControlProps = { options: [{ value: 'en', label: 'English' }], value: 'en', onValueChange: value => { void value; } };\n` +
-      `const reactPrompt: ReactAdapters.UiTerminalPromptProps = { label: 'Command', value: 'he', suggestion: 'help', segments: [{ id: 'host', label: 'local', tone: 'host' }] };\n` +
-      `const reactEcho: ReactAdapters.UiTerminalEchoProps = { text: 'echo hello', segments: reactPrompt.segments };\n` +
-      `const reactMetric: ReactAdapters.UiStatCardProps = { label: 'Latency', value: 0, unit: 'ms' };\n` +
-      `const terminalEchoProps: TerminalEchoProps = { text: 'echo hello', segments: terminalPromptProps.segments };\n` +
-      `if (!UiTerminalEcho) throw new Error('missing Vue terminal echo');\n` +
-      `void [reactSegments, reactPrompt, reactEcho, reactMetric, terminalEchoProps];\n`;
-
   await writeFile(
     join(consumerDir, 'smoke.ts'),
     `import { existsSync } from 'node:fs';\n` +
@@ -342,7 +331,7 @@ try {
       `  const resolved = import.meta.resolve(specifier);\n` +
       `  if (!existsSync(fileURLToPath(resolved))) throw new Error(\`missing CSS export: \${specifier}\`);\n` +
       `}\n` +
-      candidateSmoke,
+      releaseApiSmoke(publicVersions, published),
   );
 
   await writeFile(

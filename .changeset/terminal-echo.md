@@ -1,7 +1,7 @@
 ---
-'@neoverse-ui/react': minor
-'@neoverse-ui/vue': minor
-'@neoverse-ui/tailwind': minor
+'@neoverse-ui/react': patch
+'@neoverse-ui/vue': patch
+'@neoverse-ui/tailwind': patch
 ---
 
 Add `UiTerminalEcho` to Vue and React for recorded commands, with plain-text `text`, prompt `symbol` and `segments`, an `error` state, and custom segment rendering. Export Vue `TerminalEchoProps` and React `UiTerminalEchoProps`.
