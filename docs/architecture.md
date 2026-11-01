@@ -12,7 +12,7 @@ The repository is a Bun workspace. Public-package dependencies use explicit SemV
 | `@neoverse-ui/tailwind` | Stable | Tailwind v4 semantic theme and shared component selectors |
 | `@neoverse-ui/motion` | Stable | CSS motion aliases and reduced-motion policy |
 | `@neoverse-ui/overlay-runtime` | Consumer Validation | Framework-agnostic top-layer positioning, tracking, and dismiss runtime |
-| `@neoverse-ui/glass-runtime` | Consumer Validation | Optional live backdrop refraction with WebGL/CSS fallback |
+| `@neoverse-ui/glass-runtime` | Consumer Validation | Optional Glass edge rendering with WebGL and CSS fallback |
 | `@neoverse-ui/vue` | Consumer Validation | Vue 3 SFC integration |
 | `@neoverse-ui/react` | Consumer Validation | React 19 adapters for consumer-validated shared components |
 | `@neoverse-ui/giscus-theme` | Published 0.2.0 | Standalone light/dark Giscus theme CSS |
@@ -143,7 +143,7 @@ Material values are token-owned. Ordinary Surface Solid, Subtle, and Elevated us
 
 Independent Aurora Glass surfaces must render their own tint, border, backdrop filter, and shadow **before hover**, including when nested inside an Aurora Glass layout. Vue and React `UiSurface` therefore default to `glassNesting="local"`; `UiCard` also retains its own material without a nesting override. Only a layout grouping that deliberately borrows its parent's Aurora Glass plane should set `glassNesting="inherit"` (Vue: `glass-nesting="inherit"`). A component that intentionally has no material should use `surface="none"` instead. Never flatten all unmarked nested Aurora Glass elements: that silently removes real card surfaces in the Playground and consumer compositions. Normal-state material and reduced-transparency fallbacks must remain independently testable, without relying on hover or the optional WebGL renderer.
 
-`@neoverse-ui/glass-runtime` is an optional shared renderer, not a prerequisite for any base component. Its policy is:
+`@neoverse-ui/glass-runtime` is an optional shared renderer, not a prerequisite for any base component. Follow the [Glass repair guardrails](material-standards.md#glass-repair-guardrails) when changing it. Its policy is:
 
 | Tier | Default | Runtime policy |
 | --- | --- | --- |
@@ -168,15 +168,14 @@ contrast depend on both the theme accents and the pixels underneath. Dark
 retains its overlay response. Both themes share one canvas; CSS continues to
 own the body tint, blur and shadows.
 
-Opacity, clipping and overlay occlusion still apply. Light follows the 0.2.0
-edge profile for controls and surfaces; dark buttons retain their focused
-catches. Reduced transparency disables the renderer. The CSS fallback uses
-alpha-only gradient masks and backdrop brightness. Native SVG displacement
-remains an explicit alternative through `backend: 'native'` (Playground:
-`?glass=native`).
+Opacity, clipping and overlay occlusion still apply. Light moderately focuses the
+upper-left and lower-right catches; dark buttons retain their focused catches.
+Reduced transparency disables the renderer. The CSS fallback uses alpha-only
+gradient masks and backdrop brightness. The historical `backend: 'native'`
+option is not a remedy for the problems recorded in the repair guardrails.
 
-The 0.2.0 reference test checks the released light edge samples on middle grey
-and the dark response on grey and pale backdrops. Runtime tests cover theme
+The 0.2.0 reference test checks the dark response on grey and pale backdrops;
+light edge continuity and corner emphasis have separate checks. Runtime tests cover theme
 switching, canvas reuse and unchanged body blur; live-canvas tests exercise the
 different light and dark composition models against changing background pixels. The grey backdrop case also bounds how far blue may lead the green and red content, so the cool edge cannot regress into a cast.
 

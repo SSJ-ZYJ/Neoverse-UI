@@ -417,6 +417,145 @@ describe('Glass renderer', () => {
     expect(occluders[0]?.width).toBe(1100);
   });
 
+  it('finds a Glass overlay crossing an edge between the fixed sample points', () => {
+    const card = document.createElement('article');
+    const overlay = document.createElement('aside');
+    document.body.append(card, overlay);
+    setRect(card, { left: 100, top: 100, width: 400, height: 600 });
+    setRect(overlay, { left: 80, top: 130, width: 80, height: 60 });
+    const fakeDocument = {
+      elementsFromPoint: (x: number, y: number): Element[] =>
+        x >= 80 && x <= 160 && y >= 130 && y <= 190 ? [overlay, card] : [card],
+    } as unknown as Document;
+
+    const occluders = collectOccluders(card, card.getBoundingClientRect(), fakeDocument, window, [
+      { element: overlay, rect: overlay.getBoundingClientRect() },
+    ]);
+    expect(occluders).toHaveLength(1);
+    expect(occluders[0]?.left).toBe(80);
+
+    overlay.style.opacity = '0';
+    expect(
+      collectOccluders(card, card.getBoundingClientRect(), fakeDocument, window, [
+        { element: overlay, rect: overlay.getBoundingClientRect() },
+      ]),
+    ).toHaveLength(0);
+  });
+
+  it('uses an explicitly topmost pointer-transparent overlay as an occluder', () => {
+    const card = document.createElement('article');
+    const overlay = document.createElement('aside');
+    overlay.style.pointerEvents = 'none';
+    overlay.setAttribute('data-neoverse-glass-occluder', 'topmost');
+    document.body.append(card, overlay);
+    setRect(card, { left: 100, top: 100, width: 400, height: 600 });
+    setRect(overlay, { left: 80, top: 130, width: 80, height: 60 });
+    const fakeDocument = { elementsFromPoint: (): Element[] => [card] } as unknown as Document;
+
+    const occluders = collectOccluders(card, card.getBoundingClientRect(), fakeDocument, window, [
+      { element: overlay, rect: overlay.getBoundingClientRect() },
+    ]);
+    expect(occluders).toHaveLength(1);
+    expect(occluders[0]?.left).toBe(80);
+    overlay.style.visibility = 'hidden';
+    expect(
+      collectOccluders(card, card.getBoundingClientRect(), fakeDocument, window, [
+        { element: overlay, rect: overlay.getBoundingClientRect() },
+      ]),
+    ).toHaveLength(0);
+    expect(
+      collectOccluders(overlay, overlay.getBoundingClientRect(), fakeDocument, window, [
+        { element: overlay, rect: overlay.getBoundingClientRect() },
+      ]),
+    ).toHaveLength(0);
+  });
+
+  it('uploads the pointer-transparent overlay mask in the real rendering path', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const card = document.createElement('article');
+    card.className = 'material-glass-elevated';
+    const overlay = document.createElement('aside');
+    overlay.className = 'material-glass-elevated';
+    overlay.style.pointerEvents = 'none';
+    overlay.setAttribute('data-neoverse-glass-occluder', 'topmost');
+    document.body.append(card, overlay);
+    setRect(card, { left: 100, top: 100, width: 400, height: 600 });
+    setRect(overlay, { left: 80, top: 130, width: 80, height: 60 });
+    Reflect.defineProperty(document, 'elementsFromPoint', {
+      configurable: true,
+      value: (): Element[] => [card],
+    });
+    try {
+      createTestRenderer({ maxDevicePixelRatio: 1 }).mount();
+      expect(
+        gl.uniform4fv.mock.calls.some(([location, values]) => {
+          if ((location as { name?: string }).name !== 'u_occluders') return false;
+          const rect = values as Float32Array;
+          return rect[0] === 80 && rect[1] === 130 && rect[2] === 80 && rect[3] === 60;
+        }),
+      ).toBe(true);
+    } finally {
+      Reflect.deleteProperty(document, 'elementsFromPoint');
+    }
+  });
+
+  it('retains a topmost overlay when other occluders fill the shader limit', () => {
+    const card = document.createElement('article');
+    const covers = Array.from({ length: 6 }, () => document.createElement('aside'));
+    const topmost = document.createElement('aside');
+    topmost.setAttribute('data-neoverse-glass-occluder', 'topmost');
+    document.body.append(card, ...covers, topmost);
+    setRect(card, { left: 100, top: 100, width: 400, height: 600 });
+    for (const cover of covers) setRect(cover, { left: 200, top: 100, width: 300, height: 100 });
+    setRect(topmost, { left: 80, top: 130, width: 80, height: 60 });
+    const fakeDocument = {
+      elementsFromPoint: (x: number, y: number): Element[] =>
+        x >= 200 && y < 200 ? [...covers, card] : [card],
+    } as unknown as Document;
+    const occluders = collectOccluders(card, card.getBoundingClientRect(), fakeDocument, window, [
+      { element: topmost, rect: topmost.getBoundingClientRect() },
+    ]);
+    expect(occluders).toHaveLength(6);
+    expect(occluders.some((occluder) => occluder.left === 80 && occluder.width === 80)).toBe(true);
+  });
+
+  it('does not mask an edge for a Glass candidate painted underneath it', () => {
+    const card = document.createElement('article');
+    const underlay = document.createElement('aside');
+    document.body.append(underlay, card);
+    setRect(card, { left: 100, top: 100, width: 400, height: 600 });
+    setRect(underlay, { left: 80, top: 130, width: 80, height: 60 });
+    const fakeDocument = {
+      elementsFromPoint: (): Element[] => [card, underlay],
+    } as unknown as Document;
+
+    expect(
+      collectOccluders(card, card.getBoundingClientRect(), fakeDocument, window, [
+        { element: underlay, rect: underlay.getBoundingClientRect() },
+      ]),
+    ).toHaveLength(0);
+  });
+
+  it('avoids extra hit tests for candidates away from the surface edge', () => {
+    const card = document.createElement('article');
+    const inner = document.createElement('aside');
+    const outside = document.createElement('aside');
+    document.body.append(card, inner, outside);
+    setRect(card, { left: 100, top: 100, width: 400, height: 600 });
+    setRect(inner, { left: 220, top: 250, width: 60, height: 60 });
+    setRect(outside, { left: 600, top: 100, width: 60, height: 60 });
+    const hitTest = vi.fn((): Element[] => [card]);
+    const fakeDocument = { elementsFromPoint: hitTest } as unknown as Document;
+    expect(
+      collectOccluders(card, card.getBoundingClientRect(), fakeDocument, window, [
+        { element: inner, rect: inner.getBoundingClientRect() },
+        { element: outside, rect: outside.getBoundingClientRect() },
+      ]),
+    ).toHaveLength(0);
+    expect(hitTest).toHaveBeenCalledTimes(5);
+  });
+
   it('skips sample points that miss the surface silhouette entirely', () => {
     const other = document.createElement('div');
     const card = document.createElement('article');

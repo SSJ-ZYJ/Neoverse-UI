@@ -28,6 +28,8 @@ let mutationFrame: number | undefined;
 let layoutObserver: ResizeObserver | undefined;
 let contentObserver: MutationObserver | undefined;
 let refreshNeedsReveal = false;
+let hovering = false;
+let activePointer: number | undefined;
 let previousScrollBehavior: string | undefined;
 let releaseNativeHiding: (() => void) | undefined;
 
@@ -124,7 +126,7 @@ function update() {
 function scheduleHide() {
   if (hideTimer !== undefined) window.clearTimeout(hideTimer);
   hideTimer = undefined;
-  if (normalizedAutoHideMs.value <= 0) return;
+  if (normalizedAutoHideMs.value <= 0 || hovering || dragging.value) return;
   hideTimer = window.setTimeout(() => {
     isVisible.value = false;
     hideTimer = undefined;
@@ -134,6 +136,18 @@ function scheduleHide() {
 function show() {
   if (!hasScrollableContent.value) return;
   isVisible.value = true;
+  scheduleHide();
+}
+
+function onTrackPointerEnter(event: PointerEvent) {
+  if (event.pointerType === 'touch') return;
+  hovering = true;
+  show();
+}
+
+function onTrackPointerLeave(event: PointerEvent) {
+  if (event.pointerType === 'touch') return;
+  hovering = false;
   scheduleHide();
 }
 
@@ -179,13 +193,14 @@ function setScrollTop(top: number) {
 
 function onPointerDown(event: PointerEvent) {
   const thumb = thumbElement.value;
-  if (!thumb || event.button !== 0) return;
+  if (!thumb || event.button !== 0 || dragging.value) return;
   const rect = thumb.getBoundingClientRect();
   if (event.clientY < rect.top || event.clientY > rect.bottom) return;
 
   event.preventDefault();
   event.stopPropagation();
   dragging.value = true;
+  activePointer = event.pointerId;
   dragOffset.value = event.clientY - rect.top;
   setInstantScroll(true);
   thumb.setPointerCapture?.(event.pointerId);
@@ -193,7 +208,7 @@ function onPointerDown(event: PointerEvent) {
 }
 
 function onPointerMove(event: PointerEvent) {
-  if (!dragging.value || !scrollElement) return;
+  if (!dragging.value || !scrollElement || event.pointerId !== activePointer) return;
   const metrics = readMetrics();
   const trackRect = getTrackRect();
   const maxThumbTop = Math.max(metrics.trackHeight - metrics.thumbHeight, 0);
@@ -209,11 +224,15 @@ function onPointerMove(event: PointerEvent) {
 }
 
 function finishPointer(event: PointerEvent) {
-  if (!dragging.value) return;
+  if (!dragging.value || event.pointerId !== activePointer) return;
   dragging.value = false;
   setInstantScroll(false);
-  thumbElement.value?.releasePointerCapture?.(event.pointerId);
+  if (thumbElement.value?.hasPointerCapture?.(event.pointerId)) {
+    thumbElement.value.releasePointerCapture(event.pointerId);
+  }
+  activePointer = undefined;
   update();
+  show();
 }
 
 function onTrackPointerDown(event: PointerEvent) {
@@ -330,6 +349,8 @@ onBeforeUnmount(() => {
     :data-hide-native="props.hideNative ? 'true' : 'false'"
     aria-hidden="true"
     @pointerdown="onTrackPointerDown"
+    @pointerenter="onTrackPointerEnter"
+    @pointerleave="onTrackPointerLeave"
   >
     <div
       ref="thumbElement"
@@ -339,6 +360,7 @@ onBeforeUnmount(() => {
       @pointermove="onPointerMove"
       @pointerup="finishPointer"
       @pointercancel="finishPointer"
+      @lostpointercapture="finishPointer"
     />
   </div>
 </template>

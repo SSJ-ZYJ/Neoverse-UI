@@ -31,6 +31,7 @@ export function UiScrollbar({
       ? Math.min(1, Math.max(0.05, minThumbRatio))
       : 0.1;
     let dragging = false;
+    let hovering = false;
     let dragOffset = 0;
     let activePointer: number | undefined;
     let previousBehavior: string | undefined;
@@ -84,11 +85,21 @@ export function UiScrollbar({
       visible = true;
       clearTimeout(hideTimer);
       update();
-      if (autoHide > 0 && !dragging)
+      if (autoHide > 0 && !dragging && !hovering)
         hideTimer = setTimeout(() => {
           visible = false;
           update();
         }, autoHide);
+    };
+    const enter = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') return;
+      hovering = true;
+      show();
+    };
+    const leave = (event: PointerEvent) => {
+      if (event.pointerType === 'touch') return;
+      hovering = false;
+      show();
     };
     const setTop = (top: number) => {
       window.scrollTo({ top: Math.max(0, top), left: 0, behavior: 'auto' });
@@ -102,7 +113,7 @@ export function UiScrollbar({
       previousBehavior = undefined;
     };
     const down = (event: PointerEvent) => {
-      if (event.button !== 0) return;
+      if (event.button !== 0 || dragging) return;
       event.stopPropagation();
       const rect = thumbNode.getBoundingClientRect();
       if (event.clientY < rect.top || event.clientY > rect.bottom) return;
@@ -168,6 +179,8 @@ export function UiScrollbar({
     window.addEventListener('resize', show);
     window.addEventListener('keydown', show);
     trackNode.addEventListener('pointerdown', trackDown);
+    trackNode.addEventListener('pointerenter', enter);
+    trackNode.addEventListener('pointerleave', leave);
     thumbNode.addEventListener('pointerdown', down);
     thumbNode.addEventListener('pointermove', move);
     thumbNode.addEventListener('pointerup', finish);
@@ -191,6 +204,8 @@ export function UiScrollbar({
       window.removeEventListener('resize', show);
       window.removeEventListener('keydown', show);
       trackNode.removeEventListener('pointerdown', trackDown);
+      trackNode.removeEventListener('pointerenter', enter);
+      trackNode.removeEventListener('pointerleave', leave);
       thumbNode.removeEventListener('pointerdown', down);
       thumbNode.removeEventListener('pointermove', move);
       thumbNode.removeEventListener('pointerup', finish);

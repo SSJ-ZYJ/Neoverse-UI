@@ -11,3 +11,9 @@ For work originating in consumer projects (Neoverse, Neoverse-Docs, Neoverse-Sli
 - A request does not grant execution permission. Implement only tasks explicitly authorized in the current conversation; do not auto-commit or publish.
 - Preserve existing uncommitted changes and the shared design contracts. Update matrix, public exports, tests, Design Lab, and consumer verification evidence for any real component implementation.
 - Do not move a request to `delivered` without code/test/consumer evidence in the resolution; a playground example alone does not establish real consumer validation.
+
+## Aurora Glass repairs
+
+- Follow the [Glass repair guardrails](docs/material-standards.md#glass-repair-guardrails). Do not switch the default renderer to full-surface SVG backdrop displacement, add backdrop capture/reconstruction layers, or replace the tier-owned body blur to repair edge appearance. These approaches have repeatedly caused severe stutter, lost blur, or missing edges.
+- Keep the entire edge visible and fine; emphasize the upper-left and lower-right without removing the other sides or corners. Verify backdrop-dependent colour, actual blur, edge continuity, and performance together. Do not describe a theme-coloured overlay as true spatial refraction.
+- Compare the relevant working implementation and subsequent diffs before changing Glass. Run browser and rendering checks remotely under the project safety constraint, and do not push successive diagnostic commits or update baselines before the change is ready to verify.

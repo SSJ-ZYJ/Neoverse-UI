@@ -47,6 +47,7 @@
     .scrollbar-immersive *::-webkit-scrollbar-thumb:hover {
       border-width: var(--neoverse-scrollbar-immersive-thumb-hover-border-width);
       background: var(--neoverse-scrollbar-immersive-thumb-hover-background);
+      background-clip: padding-box;
     }
   }
 
@@ -54,6 +55,7 @@
   .scrollbar-immersive *::-webkit-scrollbar-thumb:active {
     border-width: var(--neoverse-scrollbar-immersive-thumb-hover-border-width);
     background: var(--neoverse-scrollbar-immersive-thumb-active-background);
+    background-clip: padding-box;
   }
 
   .scrollbar-immersive::-webkit-scrollbar-button,

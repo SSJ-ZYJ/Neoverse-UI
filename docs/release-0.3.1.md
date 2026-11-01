@@ -2,9 +2,10 @@
 
 Release candidate, prepared on 2026-11-01. The versions below are the pending
 Changesets plan, not a statement that versioning or npm publication has completed.
-Ordinary candidate CI passed; cross-browser acceptance remains open with 16
-captured failures and an incomplete WebKit run. See the [findings](acceptance-2026-11-01-cross-browser.md)
-before advancing the release review.
+The earlier preparation candidate passed ordinary CI, but subsequent Glass and
+cross-browser repair commits have not passed all visual checks. Cross-browser
+acceptance also remains open. See the [findings](acceptance-2026-11-01-cross-browser.md)
+and the later verification status below before advancing the release review.
 
 ## Coordinated versions
 
@@ -41,7 +42,8 @@ for this release. Review the scrollbar migration below even when upgrading from
   shared ownership prevents one adapter's unmount from restoring another's bar.
 - Name the material Aurora Glass / 极光玻璃 and export the bilingual `glassMaterial`
   descriptor from Tokens. Existing `glass-*` surface identifiers retain their names.
-- Restore the 0.2.0 light Glass edge response and reduce its blue cast. Avoid
+- Adjust the light Glass edge response and reduce its blue cast; its appearance
+  and backdrop-colour behavior remain under review. Avoid
   repeated edge paints for isolated, clipped decoration animations while retaining
   tracking for surface motion, layout changes and unknown effects.
 - Add the opt-in `data-neoverse-glass-edge-stroke` attribute and
@@ -96,6 +98,16 @@ Linux Chromium shards reported 998 passed and 68 skipped, with no failures;
 Windows reported 62 passed. Package, Playground and browser-test source is
 unchanged from `608a7ac`; the preparation changes cover Changesets, tooling and
 documentation. Final versioned artifacts still require the Release workflow's gates.
+
+Before history consolidation, changes through `594d011` included Glass and overlay repairs. In
+[CI run 41300016963](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/41300016963),
+the Linux quality and Windows checks passed, but visual shards 1 and 3 failed;
+shard 2 was still running when this status was recorded. The focused
+[light-edge run 41300022981](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/41300022981)
+also failed on Linux and Windows. These failures leave the later source candidate
+unverified. Glass appearance, background colour, complete edges and replacement
+baselines still require repair and verification; the earlier successful run does
+not cover those later changes.
 
 [Cross-browser run 41277876420](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/41277876420)
 checked out the `608a7ac` source baseline and was cancelled at the job's 20-minute
