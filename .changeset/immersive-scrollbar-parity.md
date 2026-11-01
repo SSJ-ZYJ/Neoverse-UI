@@ -1,5 +1,5 @@
 ---
-'@neoverse-ui/tokens': minor
+'@neoverse-ui/tokens': patch
 '@neoverse-ui/tailwind': patch
 ---
 
