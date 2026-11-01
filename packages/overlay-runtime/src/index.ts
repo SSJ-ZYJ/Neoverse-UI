@@ -106,6 +106,30 @@ function resolveEffectiveZoom(element: HTMLElement): number {
   return zoom;
 }
 
+function resolveMotionOffset(element: HTMLElement, style: CSSStyleDeclaration) {
+  const scales = (style.scale || 'none').split(/\s+/);
+  const scale = (value: string | undefined, fallback: number) => {
+    const parsed = Number.parseFloat(value ?? '');
+    return Number.isFinite(parsed) ? parsed / (value?.endsWith('%') ? 100 : 1) : fallback;
+  };
+  const scaleX = scale(scales[0], 1);
+  const scaleY = scale(scales[1], scaleX);
+  const length = (value: string | undefined, size: number) =>
+    value?.endsWith('%')
+      ? (Number.parseFloat(value) * size) / 100
+      : resolveCssLength(element, value ?? '0');
+  const origins = style.transformOrigin.split(/\s+/);
+  const translations = (style.translate || 'none').split(/\s+/);
+  return {
+    x:
+      length(origins[0], element.offsetWidth) * (1 - scaleX) +
+      length(translations[0], element.offsetWidth),
+    y:
+      length(origins[1], element.offsetHeight) * (1 - scaleY) +
+      length(translations[1], element.offsetHeight),
+  };
+}
+
 export function stopOverlayTracking(overlay: HTMLElement): void {
   overlayCleanup.get(overlay)?.();
   overlayCleanup.delete(overlay);
@@ -156,8 +180,12 @@ export function positionAnchoredOverlay({
   // in the top layer need no adjustment.
   if (!supportsPopover(overlay)) {
     const rect = overlay.getBoundingClientRect();
-    const deltaX = position.left - rect.left;
-    const deltaY = position.top - rect.top;
+    // The panel's own presence scale/translate is intentional entrance motion,
+    // not a containing-block offset. Exclude it or the initial correction leaves
+    // a permanent drift after the animation reaches its resting geometry.
+    const motion = resolveMotionOffset(overlay, overlayStyle);
+    const deltaX = position.left - (rect.left - motion.x * effectiveZoom);
+    const deltaY = position.top - (rect.top - motion.y * effectiveZoom);
     if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
       overlay.style.setProperty(leftVariable, `${(position.left + deltaX) / effectiveZoom}px`);
       overlay.style.setProperty(topVariable, `${(position.top + deltaY) / effectiveZoom}px`);

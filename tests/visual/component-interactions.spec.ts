@@ -381,10 +381,15 @@ for (const theme of themes) {
     const afterScroll = await reactSelectAnchorGeometry(page);
     expect(initial.side).toBeDefined();
     expect(Math.abs(afterScroll.triggerTop - initial.triggerTop)).toBeGreaterThan(60);
-    expect(
-      Math.abs(afterScroll.overlayTop - initial.overlayTop),
-      `Fallback overlay should track document scroll: ${JSON.stringify({ initial, afterScroll })}`,
-    ).toBeGreaterThan(60);
+    // A top/bottom flip changes the anchored edge, so its absolute top may stay
+    // almost unchanged even while it follows the trigger. Relative geometry
+    // below remains authoritative for both placements.
+    if (afterScroll.side === initial.side) {
+      expect(
+        Math.abs(afterScroll.overlayTop - initial.overlayTop),
+        `Fallback overlay should track document scroll: ${JSON.stringify({ initial, afterScroll })}`,
+      ).toBeGreaterThan(60);
+    }
     expect(Math.abs(afterScroll.verticalGap - initial.verticalGap)).toBeLessThan(2);
     expect(Math.abs(afterScroll.leftOffset - initial.leftOffset)).toBeLessThan(2);
     expect(Math.abs(afterScroll.overlayWidth - afterScroll.triggerWidth)).toBeLessThan(2);

@@ -2,7 +2,24 @@ name: Cross-browser smoke
 
 on:
   workflow_call:
+    inputs:
+      browser:
+        type: string
+        default: all
+      grep:
+        type: string
+        default: ''
   workflow_dispatch:
+    inputs:
+      browser:
+        description: Browser to verify
+        type: choice
+        options: [all, firefox, webkit]
+        default: all
+      grep:
+        description: Optional test-title regex for targeted remote diagnosis
+        type: string
+        default: ''
   schedule:
     - cron: '0 2 * * 1'
 
@@ -10,14 +27,18 @@ permissions:
   contents: read
 
 concurrency:
-  group: cross-browser-smoke-${{ github.ref }}
+  group: cross-browser-smoke-${{ github.ref }}-${{ inputs.browser || 'all' }}-${{ inputs.grep || 'full' }}
   cancel-in-progress: true
 
 jobs:
   cross-browser:
-    name: Firefox and WebKit interaction smoke tests
+    name: ${{ matrix.browser }} interaction smoke tests
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: ${{ fromJSON(inputs.browser == 'firefox' && '["firefox"]' || inputs.browser == 'webkit' && '["webkit"]' || '["firefox","webkit"]') }}
 
     steps:
       - name: Checkout repository
@@ -38,15 +59,15 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.cache/ms-playwright
-          key: ${{ runner.os }}-playwright-cross-${{ hashFiles('bun.lock') }}
+          key: ${{ runner.os }}-playwright-cross-${{ matrix.browser }}-${{ hashFiles('bun.lock') }}
           restore-keys: |
-            ${{ runner.os }}-playwright-cross-
+            ${{ runner.os }}-playwright-cross-${{ matrix.browser }}-
 
       - name: Build packages and playground
         run: bun run build
 
-      - name: Install Firefox and WebKit
-        run: bunx playwright install --with-deps firefox webkit
+      - name: Install ${{ matrix.browser }}
+        run: bunx playwright install --with-deps ${{ matrix.browser }}
 
       - name: Record candidate and browser provenance
         run: |
@@ -58,13 +79,21 @@ jobs:
       - name: Run cross-browser interaction checks
         env:
           PLAYWRIGHT_JSON_OUTPUT_NAME: test-results/cross-browser-results.json
-        run: bunx playwright test --config=playwright.cross-browser.config.ts --workers=1 --retries=0 --trace=retain-on-failure --reporter=list,html,json
+          BROWSER: ${{ matrix.browser }}
+          TEST_GREP: ${{ inputs.grep }}
+        run: |
+          args=(--config=playwright.cross-browser.config.ts --project="$BROWSER" --workers=1 --retries=0 --trace=retain-on-failure --reporter=list,html,json)
+          if [[ -n "$TEST_GREP" ]]; then args+=(--grep "$TEST_GREP"); fi
+          # Firefox headless cannot create a WebGL context on this Linux runner.
+          # Exercise real browser rendering under Xvfb, including native focus
+          # and the page animation clock, while keeping one worker per engine.
+          xvfb-run --auto-servernum bunx playwright test "${args[@]}" --headed
 
       - name: Upload browser check evidence
         if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: cross-browser-smoke-${{ github.run_attempt }}
+          name: cross-browser-smoke-${{ matrix.browser }}-${{ github.run_attempt }}
           path: |
             test-results/
             playwright-report/

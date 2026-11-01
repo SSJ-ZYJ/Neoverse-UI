@@ -942,8 +942,8 @@ function ReactFixture() {
               onValueChange={setFormChannel}
               options={[
                 { value: 1, label: 'First channel' },
-                { value: 2, label: 'Second channel' },
                 { value: 3, label: 'Unavailable channel', disabled: true },
+                { value: 2, label: 'Second channel' },
               ]}
               name="channel"
               aria-label="Channel"

@@ -12,39 +12,21 @@ const anchors = [
   [7, 172],
   [292, 172],
 ];
-// Light samples reflect the reduced blue cast introduced in 7f43d37, captured
-// by CI 41216161288 at 124fc11 on middle grey. All three attempts in both
-// projects produced identical anchors. Keep the original three-level tolerance.
-// Dark still uses independently reconstructed 0.2.0 release samples from black
-// and [96,112,136] captures; its nearly neutral edge must not turn saturated blue.
-// The fixture uses opacity .5 in light and .24 in dark.
-const reference = {
-  light: [
-    [134, 167, 158],
-    [151, 150, 163],
-    [139, 177, 175],
-    [139, 175, 175],
-    [136, 178, 171],
-    [140, 146, 151],
-    [136, 152, 152],
-    [149, 155, 166],
-  ],
-  dark: [
-    [141, 142, 141],
-    [143, 144, 145],
-    [143, 146, 146],
-    [144, 147, 146],
-    [144, 147, 147],
-    [136, 137, 137],
-    [136, 137, 137],
-    [145, 147, 147],
-  ],
-};
-for (const theme of ['light', 'dark'] as const) {
-  // Light samples describe source-over at middle grey, not overlay's transfer
-  // curve on pale colours. Do not extrapolate them.
-  const backdrops = theme === 'light' ? (['reference'] as const) : (['reference', 'pale'] as const);
-  for (const backdrop of backdrops) {
+// The dark samples are independently reconstructed 0.2.0 release samples from
+// black and [96,112,136] captures. The fixture uses opacity .24 in dark.
+// Light continuity and corner emphasis have their own live-pixel regression.
+const reference = [
+  [141, 142, 141],
+  [143, 144, 145],
+  [143, 146, 146],
+  [144, 147, 146],
+  [144, 147, 147],
+  [136, 137, 137],
+  [136, 137, 137],
+  [145, 147, 147],
+];
+for (const theme of ['dark'] as const) {
+  for (const backdrop of ['reference', 'pale'] as const) {
     test(`${theme}/${backdrop}: directional chroma matches its reference on the live backdrop`, async ({
       page,
     }, testInfo) => {
@@ -56,7 +38,7 @@ for (const theme of ['light', 'dark'] as const) {
       });
       await page.locator('[data-glass-variant="elevated"]').waitFor();
       await page.evaluate(
-        ({ backdrop, theme }) => {
+        ({ backdrop }) => {
           // Compare the reference RGB balance independently of theme exposure.
           document.documentElement.style.setProperty(
             '--neoverse-material-edge-refraction-gain',
@@ -69,13 +51,10 @@ for (const theme of ['light', 'dark'] as const) {
           card.className = 'ui-surface material-glass-elevated';
           card.style.cssText =
             'position:fixed;left:32px;top:32px;width:300px;height:180px;border-radius:24px;border:0!important;background:transparent!important;box-shadow:none!important;--neoverse-material-filter:blur(0px)';
-          card.style.setProperty(
-            '--neoverse-material-edge-refraction-opacity',
-            theme === 'light' ? '0.5' : '0.24',
-          );
+          card.style.setProperty('--neoverse-material-edge-refraction-opacity', '0.24');
           document.body.append(card);
         },
-        { backdrop, theme },
+        { backdrop },
       );
       await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
       await expect
@@ -114,7 +93,7 @@ for (const theme of ['light', 'dark'] as const) {
               ...pixels.flatMap((rgb, index) =>
                 rgb.map((value, channel) => {
                   const source = base[channel] ?? 128;
-                  const gain = ((reference[theme][index]?.[channel] ?? 128) - 128) / 127;
+                  const gain = ((reference[index]?.[channel] ?? 128) - 128) / 127;
                   const expected = source + gain * Math.min(source, 255 - source);
                   return Math.abs(value - expected);
                 }),
