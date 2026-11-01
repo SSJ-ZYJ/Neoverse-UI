@@ -2,6 +2,7 @@ import { spawn } from 'node:child_process';
 import { watch } from 'node:fs';
 import { readdir, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
+import { requireTailwindCli } from './tailwind-cli';
 
 const rootDirectory = resolve(import.meta.dir, '..');
 const tokensDirectory = resolve(rootDirectory, 'packages/tokens');
@@ -9,11 +10,13 @@ const motionDirectory = resolve(rootDirectory, 'packages/motion');
 const glassRuntimeDirectory = resolve(rootDirectory, 'packages/glass-runtime');
 const tailwindDirectory = resolve(rootDirectory, 'packages/tailwind');
 const playgroundDirectory = resolve(rootDirectory, 'apps/playground');
-const tailwindCli = resolve(
-  tailwindDirectory,
-  'node_modules/.bin',
-  process.platform === 'win32' ? 'tailwindcss.exe' : 'tailwindcss',
-);
+// Bun hoists workspace dependencies to the repository root, so the CLI is not
+// always inside packages/tailwind/node_modules. Resolve it once at startup:
+// a missing entry is an install problem, and failing here is far clearer than
+// dying after the token step has already written half of the CSS pipeline.
+// The resolved file is the package's JS entry, which the current runtime
+// executes directly, so POSIX and Windows share one code path.
+const tailwindCli = requireTailwindCli(tailwindDirectory);
 
 const run = (cwd: string, command: string, args: string[]): Promise<void> =>
   new Promise((resolvePromise, rejectPromise) => {
@@ -33,12 +36,25 @@ const buildMotionCss = (): Promise<void> => run(motionDirectory, 'bun', ['script
 const buildGlassRuntime = (): Promise<void> => run(glassRuntimeDirectory, 'bun', ['run', 'build']);
 const buildTailwind = async (): Promise<void> => {
   await run(tailwindDirectory, 'bun', ['scripts/copy-theme.ts']);
-  await run(tailwindDirectory, tailwindCli, ['-i', 'src/index.css', '-o', 'dist/playground.css']);
-  await run(tailwindDirectory, tailwindCli, ['-i', 'src/consumer.css', '-o', 'dist/index.css']);
+  await run(tailwindDirectory, process.execPath, [
+    tailwindCli,
+    '-i',
+    'src/index.css',
+    '-o',
+    'dist/playground.css',
+  ]);
+  await run(tailwindDirectory, process.execPath, [
+    tailwindCli,
+    '-i',
+    'src/consumer.css',
+    '-o',
+    'dist/index.css',
+  ]);
 };
 
 let timer: ReturnType<typeof setTimeout> | undefined;
 let pending: (() => Promise<void>) | undefined;
+let lastFailure: string | undefined;
 
 const queue = (label: string, work: () => Promise<void>): void => {
   pending = work;
@@ -55,8 +71,23 @@ const queue = (label: string, work: () => Promise<void>): void => {
     const started = Date.now();
     console.log(`[watch] ${label}: rebuilding…`);
     job()
-      .then(() => console.log(`[watch] ${label}: done in ${Date.now() - started}ms`))
-      .catch((error: unknown) => console.error(`[watch] ${label}: failed`, error));
+      .then(() => {
+        console.log(`[watch] ${label}: done in ${Date.now() - started}ms`);
+        if (lastFailure !== undefined) {
+          console.log(`[watch] recovered from the previous ${lastFailure} failure`);
+          lastFailure = undefined;
+        }
+      })
+      .catch((error: unknown) => {
+        // A swallowed failure leaves the served CSS half-written and looks
+        // like a broken token value. Name the step, keep watching, and say
+        // what recovers it instead of implying the source edit was invalid.
+        lastFailure = label;
+        console.error(`[watch] ${label}: FAILED`, error);
+        console.error(
+          `[watch] ${label} is still serving the previous output. Fix the error above and save again; if it persists, restart the dev loop.`,
+        );
+      });
   }, 150);
 };
 
