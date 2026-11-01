@@ -53,11 +53,14 @@ for (const adapter of ['Vue', 'React']) {
       const second = group.getByRole('radio', { name: 'Second channel', exact: true });
       await expect(group.getByRole('radio', { name: 'Unavailable channel' })).toBeDisabled();
       await second.focus();
-      await second.press('ArrowRight');
+      await expect(second).toBeFocused();
+      // Cross the disabled middle option in both directions. Native WebKit
+      // stops at group boundaries instead of wrapping like Chromium/Firefox.
+      await second.press('ArrowLeft');
       await expect(first).toBeFocused();
       await expect(first).toBeChecked();
       await expect(second).not.toBeChecked();
-      await page.keyboard.press('ArrowLeft');
+      await page.keyboard.press('ArrowRight');
       await expect(second).toBeFocused();
       await expect(second).toBeChecked();
       await expect(form.locator('[data-contract-form-state]')).toContainText(

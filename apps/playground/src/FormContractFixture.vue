@@ -7,8 +7,8 @@ const channel = ref<string | number>(2);
 const sync = ref(true);
 const options = [
   { value: 1, label: 'First channel' },
-  { value: 2, label: 'Second channel' },
   { value: 3, label: 'Unavailable channel', disabled: true },
+  { value: 2, label: 'Second channel' },
 ];
 const unnamedOptions = [
   { value: 'first', label: 'Unnamed first' },

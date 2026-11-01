@@ -605,7 +605,7 @@ describe('Glass renderer', () => {
     );
   });
 
-  it('uses the 0.2.0 light profile for buttons and retains the focused dark profile', () => {
+  it('keeps a continuous light contour with a moderate corner focus and retains the dark button profile', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const button = document.createElement('button');
@@ -617,10 +617,32 @@ describe('Glass renderer', () => {
     renderer.mount();
     expect(gl.uniform1f).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'u_corner_focus' }),
-      0,
+      0.4,
+    );
+
+    button.remove();
+    const card = document.createElement('article');
+    card.className = 'material-glass-elevated';
+    setRect(card, { width: 300, height: 180 });
+    document.body.append(card);
+    gl.uniform1f.mockClear();
+    renderer.refresh();
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_corner_focus' }),
+      0.4,
     );
 
     document.documentElement.style.colorScheme = 'dark';
+    gl.uniform1f.mockClear();
+    renderer.refresh();
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_corner_focus' }),
+      0,
+    );
+
+    card.remove();
+    document.body.append(button);
+    gl.uniform1f.mockClear();
     renderer.refresh();
     expect(gl.uniform1f).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'u_corner_focus' }),

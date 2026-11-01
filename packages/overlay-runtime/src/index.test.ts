@@ -1,7 +1,90 @@
 import { expect, test } from 'bun:test';
-import { resolveAnchoredPosition } from './index';
+import { positionAnchoredOverlay, resolveAnchoredPosition } from './index';
 
 const viewport = { width: 1200, height: 800 };
+
+test('fallback containing-block correction preserves its own entrance scale and translate', () => {
+  const saved = ['window', 'document', 'getComputedStyle'].map(
+    (name) => [name, Object.getOwnPropertyDescriptor(globalThis, name)] as const,
+  );
+  const values = new Map<string, string>();
+  const zoom = 1.5;
+  const parentOffset = { left: 100, top: 50 };
+  const style = {
+    zoom: String(zoom),
+    fontSize: '16px',
+    scale: '0.97',
+    translate: '0px 8px',
+    transformOrigin: '200px 0px',
+    getPropertyValue: () => '8px',
+  };
+  const overlay = {
+    parentElement: null,
+    classList: { contains: () => true },
+    offsetWidth: 400,
+    offsetHeight: 80,
+    dataset: {},
+    style: { setProperty: (name: string, value: string) => values.set(name, value) },
+    getBoundingClientRect: () => ({
+      left:
+        Number.parseFloat(values.get('--left') ?? '0') * zoom +
+        parentOffset.left +
+        200 * (1 - Number(style.scale)) * zoom,
+      top:
+        Number.parseFloat(values.get('--top') ?? '0') * zoom +
+        parentOffset.top +
+        Number.parseFloat(style.translate.split(' ')[1] ?? '0') * zoom,
+    }),
+  } as unknown as HTMLElement;
+  const trigger = {
+    getBoundingClientRect: () => ({
+      top: 100,
+      bottom: 140,
+      left: 200,
+      right: 300,
+      width: 100,
+      height: 40,
+    }),
+  } as unknown as HTMLElement;
+  try {
+    Object.defineProperty(globalThis, 'window', {
+      configurable: true,
+      value: { innerWidth: 1200, innerHeight: 800 },
+    });
+    Object.defineProperty(globalThis, 'document', {
+      configurable: true,
+      value: { documentElement: {} },
+    });
+    Object.defineProperty(globalThis, 'getComputedStyle', {
+      configurable: true,
+      value: () => style,
+    });
+    const options = {
+      trigger,
+      overlay,
+      gapVariable: '--gap',
+      leftVariable: '--left',
+      topVariable: '--top',
+      fallbackOpenClass: 'open',
+    };
+    positionAnchoredOverlay(options);
+    expect(Number.parseFloat(values.get('--left') ?? '')).toBeCloseTo(
+      (200 - parentOffset.left) / zoom,
+    );
+    expect(Number.parseFloat(values.get('--top') ?? '')).toBeCloseTo(
+      (152 - parentOffset.top) / zoom,
+    );
+    style.scale = '1';
+    style.translate = '0px';
+    expect(overlay.getBoundingClientRect().left).toBeCloseTo(200);
+    expect(overlay.getBoundingClientRect().top).toBeCloseTo(152);
+  } finally {
+    for (const [name, descriptor] of saved) {
+      if (descriptor) Object.defineProperty(globalThis, name, descriptor);
+      else Reflect.deleteProperty(globalThis, name);
+    }
+  }
+});
 
 test('keeps a bottom-start overlay aligned to the trigger when space is available', () => {
   expect(

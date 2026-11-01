@@ -46,7 +46,7 @@ have no independent plate. Reduced transparency uses an opaque tint and no blur.
 
 ## Aurora Glass edge reflection
 
-Light restores the 0.2.0 directional edge: the shader combines theme accent
+Light uses a directional edge: the shader combines theme accent
 colours, varies chroma with effective opacity, and caps fragment alpha at 0.34.
 The light canvas uses normal composition and the release's WebGL blend factors;
 large surfaces use edge opacities 0.46 / 0.5 / 0.54. Chroma and gain remain
@@ -63,9 +63,9 @@ contrast depend on both the theme accents and the pixels underneath. Dark
 retains its overlay response. Both themes share one canvas; CSS continues to
 own the body tint, blur and shadows.
 
-Opacity, clipping and overlay occlusion still apply. Light follows the 0.2.0
-edge profile for controls and surfaces; dark buttons retain their focused
-catches. Reduced transparency disables the renderer. The CSS fallback uses
+Opacity, clipping and overlay occlusion still apply. Light retains a continuous
+fine edge while moderately emphasizing the upper-left and lower-right corners;
+dark buttons retain their focused catches. Reduced transparency disables the renderer. The CSS fallback uses
 alpha-only gradient masks and backdrop brightness. Native SVG displacement
 remains an explicit alternative through `backend: 'native'` (Playground:
 `?glass=native`).
@@ -84,8 +84,8 @@ material highlights. The stroke is geometry, not refraction: it does not track
 backdrop colour, which is what keeps a nav bar's silhouette readable while it
 scrolls over both empty and content-heavy areas.
 
-The 0.2.0 reference test checks the released light edge samples on middle grey
-and the dark response on grey and pale backdrops. Runtime tests cover theme
+Live-pixel tests check light edge continuity and corner emphasis, while the
+0.2.0 reference test checks the dark response on grey and pale backdrops. Runtime tests cover theme
 switching, canvas reuse and unchanged body blur; live-canvas tests exercise the
 different light and dark composition models against changing background pixels. The grey backdrop case also bounds how far blue may lead the green and red content, so the cool edge cannot regress into a cast.
 

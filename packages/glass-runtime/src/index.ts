@@ -1296,7 +1296,7 @@ class GlassRendererImpl implements GlassRenderer {
       gl.uniform1f(locations.opacity, style.opacity);
       gl.uniform1f(
         locations.cornerFocus,
-        !isLight && element.classList.contains('ui-button') ? 1 : 0,
+        isLight ? 0.4 : element.classList.contains('ui-button') ? 1 : 0,
       );
       gl.uniform1f(locations.chroma, style.chroma);
       gl.uniform3f(locations.carrier, ...style.carrier);

@@ -116,17 +116,27 @@ for (const adapter of adapters) {
           panel.evaluate(async (element) => {
             const style = (element as HTMLElement).style;
             const original = style.setProperty;
+            const descriptor = Object.getOwnPropertyDescriptor(style, 'setProperty');
             let count = 0;
-            style.setProperty = function (name, value, priority) {
-              if (name.startsWith('--neoverse-overlay-')) count += 1;
-              original.call(this, name, value, priority);
-            };
+            Object.defineProperty(style, 'setProperty', {
+              configurable: true,
+              value: function (
+                this: CSSStyleDeclaration,
+                name: string,
+                value: string,
+                priority?: string,
+              ) {
+                if (name.startsWith('--neoverse-overlay-')) count += 1;
+                original.call(this, name, value, priority);
+              },
+            });
             try {
               for (let index = 0; index < 2; index += 1) {
                 await new Promise<void>((resolve) => requestAnimationFrame(() => resolve()));
               }
             } finally {
-              style.setProperty = original;
+              if (descriptor) Object.defineProperty(style, 'setProperty', descriptor);
+              else Reflect.deleteProperty(style, 'setProperty');
             }
             return count;
           }),
@@ -170,19 +180,21 @@ for (const adapter of adapters) {
             position: 'fixed',
             left: '100px',
             top: '180px',
+            zIndex: '2147483647',
             zoom: String(factor),
           });
         }, zoom);
+        await page.evaluate(() => document.fonts.ready);
         await trigger.click();
         await expect(panel).toBeVisible();
         await expectAnchored(trigger, panel);
-        const before = await trigger.boundingBox();
+        const before = await trigger.evaluate((element) => element.getBoundingClientRect().left);
         await shell.evaluate((element) => {
           (element as HTMLElement).style.transform = 'translate(120px, 50px)';
         });
         await expect
-          .poll(async () => (await trigger.boundingBox())?.x)
-          .toBeGreaterThan((before?.x ?? 0) + 100);
+          .poll(() => trigger.evaluate((element) => element.getBoundingClientRect().left))
+          .toBeGreaterThan(before + 100);
         await expectAnchored(trigger, panel);
         // Vertical motion must follow as well, rather than only preserving left.
         await expect
@@ -217,9 +229,11 @@ for (const adapter of adapters) {
             position: 'fixed',
             left: '100px',
             top: `${480 / factor}px`,
+            zIndex: '2147483647',
             zoom: String(factor),
           });
         }, zoom);
+        await page.evaluate(() => document.fonts.ready);
         await trigger.click();
         await expect(panel).toBeVisible();
         await expect(panel).toHaveAttribute('data-neoverse-overlay-side', 'bottom');

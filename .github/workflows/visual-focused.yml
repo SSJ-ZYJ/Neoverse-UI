@@ -1,0 +1,94 @@
+name: Focused visual checks
+
+on:
+  workflow_call:
+    inputs:
+      suite:
+        type: string
+        default: optics
+      grep:
+        type: string
+        default: ''
+      update:
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+jobs:
+  visual:
+    name: Chromium (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, windows-latest]
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+      - run: bun install --frozen-lockfile
+      - run: bun run build
+      - uses: actions/cache@v4
+        with:
+          path: ${{ runner.os == 'Windows' && '~\AppData\Local\ms-playwright' || '~/.cache/ms-playwright' }}
+          key: ${{ runner.os }}-playwright-${{ hashFiles('bun.lock') }}
+          restore-keys: ${{ runner.os }}-playwright-
+      - name: Install Chromium on Linux
+        if: runner.os == 'Linux'
+        run: bunx playwright install --with-deps chromium
+      - name: Install Chromium on Windows
+        if: runner.os == 'Windows'
+        run: bunx playwright install chromium
+      - name: Run focused visual checks
+        shell: bash
+        env:
+          VISUAL_SUITE: ${{ inputs.suite }}
+          VISUAL_GREP: ${{ inputs.grep }}
+          UPDATE_BASELINES: ${{ inputs.update }}
+          PLAYWRIGHT_JSON_OUTPUT_NAME: test-results/visual-results.json
+        run: |
+          case "$VISUAL_SUITE" in
+            optics)
+              files=(tests/visual/glass-directional-light.spec.ts tests/visual/glass-v020-edge.spec.ts tests/visual/glass-light-colour.spec.ts tests/visual/button-glass.spec.ts tests/visual/button-edge-coverage.spec.ts tests/visual/glass-optics.spec.ts)
+              ;;
+            baselines)
+              files=(tests/visual/design-lab.spec.ts tests/visual/presentation-data.spec.ts tests/visual/terminal-surface.spec.ts tests/visual/react-parity.spec.ts tests/visual/react-navigation-visual.spec.ts)
+              ;;
+            *) echo 'Unknown visual suite' >&2; exit 1 ;;
+          esac
+          args=("${files[@]}" --workers=2 --retries=0 --reporter=list,html,json)
+          if [[ -n "$VISUAL_GREP" ]]; then args+=(--grep "$VISUAL_GREP"); fi
+          if [[ "$UPDATE_BASELINES" == 'true' ]]; then
+            if [[ "$VISUAL_SUITE" != 'baselines' || -z "$VISUAL_GREP" ]]; then
+              echo 'Baseline updates require the baseline suite and a test filter' >&2
+              exit 1
+            fi
+            args+=(--update-snapshots)
+          fi
+          bunx playwright test "${args[@]}"
+      - name: Upload visual test evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: focused-visual-${{ matrix.os }}-${{ github.run_attempt }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: ignore
+          retention-days: 7
+      - name: Upload light baseline candidates
+        if: ${{ always() && inputs.update && inputs.suite == 'baselines' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: light-baselines-${{ matrix.os }}-${{ github.run_attempt }}
+          path: tests/visual/snapshots/${{ runner.os == 'Windows' && 'win32' || 'linux' }}/**/*light*.png
+          if-no-files-found: error
+          retention-days: 7

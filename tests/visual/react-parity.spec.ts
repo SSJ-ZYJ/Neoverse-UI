@@ -248,8 +248,17 @@ for (const theme of ['light', 'dark']) {
       await page.setViewportSize({ width: 480, height: 900 });
       await expect.poll(bottom).toBeLessThanOrEqual(3);
       await transcript.hover();
-      await page.mouse.wheel(0, -100000);
-      await expect.poll(() => transcript.evaluate((node) => node.scrollTop)).toBe(0);
+      // Native engines can cap one wheel event's scroll distance. Keep using
+      // real reader input until the top is reached before checking preservation.
+      await expect
+        .poll(
+          async () => {
+            await page.mouse.wheel(0, -100000);
+            return transcript.evaluate((node) => node.scrollTop);
+          },
+          { intervals: [100] },
+        )
+        .toBe(0);
       await page.locator('[data-parity-append]').click();
       await expect.poll(() => transcript.evaluate((node) => node.scrollTop)).toBe(0);
       await page.setViewportSize({ width: 1440, height: 900 });
