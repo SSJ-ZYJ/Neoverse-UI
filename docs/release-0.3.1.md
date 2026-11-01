@@ -2,6 +2,9 @@
 
 Release candidate, prepared on 2026-11-01. The versions below are the pending
 Changesets plan, not a statement that versioning or npm publication has completed.
+Ordinary candidate CI passed; cross-browser acceptance remains open with 16
+captured failures and an incomplete WebKit run. See the [findings](acceptance-2026-11-01-cross-browser.md)
+before advancing the release review.
 
 ## Coordinated versions
 
@@ -85,10 +88,22 @@ passed Linux release quality, all three Linux Chromium visual shards and Windows
 keyboard/overlay/theme interactions. Its Firefox/WebKit job was skipped. This run
 does not cover the later Changeset, verification-tool or release-document changes.
 
+The preparation commit `59262b08e19471a8b3741d99e214484943755a19` was pushed to
+`dev`. [CI run 41278138700](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/41278138700)
+passed the full Linux release quality gate, including 34 release-tool tests and
+all eight clean-consumer package smokes with the new API assertions. Its three
+Linux Chromium shards reported 998 passed and 68 skipped, with no failures;
+Windows reported 62 passed. Package, Playground and browser-test source is
+unchanged from `608a7ac`; the preparation changes cover Changesets, tooling and
+documentation. Final versioned artifacts still require the Release workflow's gates.
+
 [Cross-browser run 41277876420](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/41277876420)
-was requested through `ci.yml` on `dev` for that source baseline. Record the final
-result and checked-out SHA before treating Firefox/WebKit as verified. It does not
-replace the ordinary release quality and Chromium gates.
+checked out the `608a7ac` source baseline and was cancelled at the job's 20-minute
+limit. Its partial log records Firefox 128 passed / 6 failed and WebKit 98 passed /
+10 failed, with 26 WebKit cases unfinished or not started. All 16 failure traces
+were retained. These results require targeted remote diagnosis; they do not establish
+cross-browser acceptance. Details and the artifact are in the
+[cross-browser findings](acceptance-2026-11-01-cross-browser.md).
 
 Local preparation runs only lightweight checks. Builds, package installation
 smokes and browser execution remain on remote CI. The release API smoke now checks
@@ -124,6 +139,22 @@ Before publication:
   and [consumer record](consumer-migration-2026-10-29.md) do not establish acceptance
   of this final candidate. Component maturity and pending matrix evidence remain
   unchanged; unresolved coverage must be carried into the release review.
+
+A read-only local consumer snapshot on 2026-11-01 found the following. No consumer
+files were changed, and these source/configuration observations are not run results.
+
+| Consumer | Observed source | Candidate evidence still needed |
+| --- | --- | --- |
+| XCA-Portal | HEAD `e804c33`; staged quality workflow pins UI `59262b08e19471a8b3741d99e214484943755a19`; Vue uses sibling `file:` packages. | Commit the consumer slice and obtain a successful run for that exact combination. |
+| Neoverse-Doc | HEAD `4c7de67`; React dependency remains npm `0.3.0`. | Validate the target React candidate independently of the historical 0.3.0 result. |
+| Neoverse-Slides | Local `main` has no first commit; workflow pins UI `eda31c32d6881541c847256eaacb60c3719f2763`. | Establish a reproducible consumer commit and validate it with the target UI candidate. |
+
+The contract snapshot retains 36 public components: 21 Stable and 15 Consumer
+Validation. Seven lack release-level visual evidence and nine lack validated
+consumer evidence; React-specific coverage retains 27 visual and 29 consumer
+pending entries. These dimensions overlap. In particular, Field and Popover
+retain Playground visual status and pending React visual/consumer evidence;
+automated CI does not itself promote their maturity.
 
 After publication, require `bun run verify:published` against the exact versioned
 manifests, official npm tarballs and dependency graph without local overrides.
