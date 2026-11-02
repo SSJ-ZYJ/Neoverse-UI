@@ -16,12 +16,16 @@
     --neoverse-form-control-focus-background: var(--neoverse-surface-inset-strong-background);
     --neoverse-form-control-disabled-background: var(--neoverse-surface-inset-disabled-background);
     --neoverse-form-control-readonly-background: var(--neoverse-surface-inset-rest-background);
-    --neoverse-form-control-shadow: var(--neoverse-shadow-inset);
+    /* A contact shadow and subtle-tier bloom give full-size fields a quiet lift. */
+    --neoverse-form-control-shadow:
+      var(--neoverse-shadow-inset), var(--neoverse-shadow-control),
+      var(--neoverse-material-glass-subtle-bloom);
     --neoverse-form-control-hover-shadow:
-      var(--neoverse-shadow-inset), var(--neoverse-surface-inset-active-highlight);
+      var(--neoverse-shadow-inset), var(--neoverse-surface-inset-active-highlight),
+      var(--neoverse-shadow-control), var(--neoverse-material-glass-subtle-bloom);
     --neoverse-form-control-focus-depth-shadow:
       var(--neoverse-shadow-inset), var(--neoverse-surface-inset-active-highlight),
-      var(--neoverse-shadow-control);
+      var(--neoverse-shadow-control), var(--neoverse-material-glass-subtle-bloom);
     --neoverse-form-control-focus-shadow: var(--neoverse-form-control-focus-depth-shadow);
     --neoverse-form-control-webgl-shadow: initial;
     --neoverse-form-control-webgl-hover-shadow: initial;
@@ -54,7 +58,8 @@
     --neoverse-choice-control-hover-background: var(--neoverse-surface-inset-hover-background);
     --neoverse-choice-control-active-background: var(--neoverse-effect-choice-filled-field);
     --neoverse-choice-control-active-foreground: var(--neoverse-effect-choice-filled-foreground);
-    --neoverse-choice-control-shadow: var(--neoverse-shadow-inset);
+    --neoverse-choice-control-shadow:
+      var(--neoverse-shadow-inset), var(--neoverse-shadow-control);
     --neoverse-choice-control-webgl-shadow: initial;
     --neoverse-choice-control-active-shadow: var(--neoverse-effect-choice-filled-shadow);
     --neoverse-choice-control-disabled-opacity: var(--neoverse-effect-disabled-content-opacity);

@@ -23,6 +23,7 @@ const tableCss = unwrap(read('../../tailwind/src/components/table.css'), '@layer
   .replaceAll('@media (hover: hover)', '@media all')
   .replaceAll('tr:hover td', 'tr[data-test-hover] td');
 const materialCss = unwrap(read('../../tokens/src/material.css'), '@layer');
+const controlEffectsCss = unwrap(read('../../tokens/src/control-effects.css'), '@layer');
 const tokenCss = unwrap(read('../../tokens/src/components/form-control.css'), '@layer');
 const tableTokenCss = unwrap(read('../../tokens/src/components/table.css'), '@layer');
 const disclosureCss = unwrap(
@@ -84,6 +85,7 @@ const installStyles = (
       --neoverse-shadow-control: 0 2px 6px black;
       --neoverse-border-width-none: 0px;
     }
+    ${controlEffectsCss}
     ${tokenCss}
     ${tableTokenCss}
     ${disclosureTokenCss}
@@ -108,6 +110,91 @@ describe('form control shadows with the shared Glass renderer', () => {
     delete document.documentElement.dataset.theme;
     delete document.documentElement.dataset.neoverseGlassRenderer;
   });
+
+  it.each([
+    ['light', 'webgl'],
+    ['light', 'none'],
+    ['dark', 'webgl'],
+    ['dark', 'none'],
+  ] as const)(
+    'adds the shared control elevation in %s mode with %s renderer',
+    (theme, renderer) => {
+      installStyles(theme, renderer);
+      const input = document.createElement('input');
+      input.className = 'ui-input';
+      const select = document.createElement('summary');
+      select.className = 'ui-select';
+      const shell = document.createElement('span');
+      shell.className = 'ui-textarea-shell';
+      const textarea = document.createElement('textarea');
+      textarea.className = 'ui-textarea';
+      shell.append(textarea);
+      document.body.append(input, select, shell);
+      const elevation = property(document.documentElement, '--neoverse-shadow-control');
+      const bloom = property(document.documentElement, '--neoverse-material-glass-subtle-bloom');
+
+      expect(property(input, 'box-shadow')).toContain(elevation);
+      expect(property(input, 'box-shadow')).toContain(bloom);
+      expect(property(select, 'box-shadow')).toContain(elevation);
+      expect(property(select, 'box-shadow')).toContain(bloom);
+      expect(property(input, '--neoverse-form-control-effective-hover-shadow')).toContain(
+        elevation,
+      );
+      expect(property(input, '--neoverse-form-control-effective-hover-shadow')).toContain(bloom);
+      expect(property(input, '--neoverse-form-control-effective-focus-shadow')).toContain(
+        elevation,
+      );
+      expect(property(input, '--neoverse-form-control-effective-focus-shadow')).toContain(bloom);
+      // The textarea is clipped by the resizable shell, so its shadow belongs on the shell.
+      expect(property(shell, 'overflow')).toBe('hidden');
+      expect(property(shell, 'box-shadow')).toContain(elevation);
+      expect(property(shell, 'box-shadow')).toContain(bloom);
+    },
+  );
+
+  it.each([
+    ['light', 'webgl'],
+    ['light', 'none'],
+    ['dark', 'webgl'],
+    ['dark', 'none'],
+  ] as const)(
+    'keeps %s choice plates elevated in checked and unchecked states with %s renderer',
+    (theme, renderer) => {
+      installStyles(theme, renderer);
+      const choice = document.createElement('label');
+      choice.className = 'ui-choice';
+      const input = document.createElement('input');
+      input.className = 'ui-choice__native';
+      input.type = 'checkbox';
+      const plate = document.createElement('span');
+      plate.className = 'ui-choice__control';
+      choice.append(input, plate);
+      document.body.append(choice);
+      const elevation = property(document.documentElement, '--neoverse-shadow-control');
+
+      expect(property(plate, 'box-shadow')).toContain(elevation);
+      input.checked = true;
+      expect(property(plate, 'box-shadow')).toContain(elevation);
+    },
+  );
+
+  it.each(['light', 'dark'] as const)(
+    'keeps %s disabled and validation feedback alongside the control elevation',
+    (theme) => {
+      installStyles(theme, 'webgl');
+      const input = document.createElement('input');
+      input.className = 'ui-input';
+      input.disabled = true;
+      input.dataset.validation = 'error';
+      input.style.setProperty('--neoverse-form-control-validation-error-shadow', '0 0 0 2px red');
+      document.body.append(input);
+      expect(property(input, 'box-shadow')).toContain(
+        property(document.documentElement, '--neoverse-shadow-control'),
+      );
+      expect(property(input, 'box-shadow')).toContain('2px red');
+      expect(property(input, 'opacity')).toBe('1');
+    },
+  );
 
   it.each(['ui-input', 'ui-textarea', 'ui-select'])(
     'removes the conflicting lower inset shadow from light %s while retaining state feedback',
@@ -188,8 +275,11 @@ describe('form control shadows with the shared Glass renderer', () => {
       element.className = className;
       document.body.append(element);
 
-      expect(property(element, '--neoverse-form-control-effective-shadow')).toBe(
+      expect(property(element, '--neoverse-form-control-effective-shadow')).toContain(
         property(document.documentElement, '--neoverse-material-edge-highlight-subtle'),
+      );
+      expect(property(element, '--neoverse-form-control-effective-shadow')).toContain(
+        property(document.documentElement, '--neoverse-shadow-control'),
       );
       expect(property(element, '--neoverse-form-control-effective-shadow')).not.toContain(
         'rgb(0 0 0 / 18%)',
@@ -269,8 +359,14 @@ describe('form control shadows with the shared Glass renderer', () => {
     const choice = document.createElement('span');
     choice.className = 'ui-choice__control';
     document.body.append(choice);
-    expect(property(choice, '--neoverse-choice-control-effective-shadow')).toBe(
+    expect(property(choice, '--neoverse-choice-control-effective-shadow')).toContain(
       property(document.documentElement, '--neoverse-material-edge-highlight-subtle'),
+    );
+    expect(property(choice, '--neoverse-choice-control-effective-shadow')).toContain(
+      property(document.documentElement, '--neoverse-shadow-control'),
+    );
+    expect(property(choice, '--neoverse-choice-control-effective-shadow')).not.toContain(
+      'rgb(0 0 0 / 18%)',
     );
   });
 });

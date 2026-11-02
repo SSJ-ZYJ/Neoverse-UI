@@ -49,6 +49,9 @@ test('exposes canonical component token namespaces', () => {
   expect(cssVariables.components.segmentedControl.optionHoverBackground).toBe(
     '--neoverse-control-hover-background',
   );
+  expect(cssVariables.components.segmentedControl.hoverForeground).toBe(
+    '--neoverse-control-segmented-hover-foreground',
+  );
   expect(cssVariables.components.segmentedControl.optionPressScale).toBe(
     '--neoverse-control-segmented-option-press-scale',
   );

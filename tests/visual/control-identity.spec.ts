@@ -64,11 +64,38 @@ for (const theme of ['light', 'dark'] as const) {
     expect(await slider.evaluate((element) => getComputedStyle(element).backgroundImage)).not.toBe(
       'none',
     );
+    const selectionEdge = () =>
+      slider.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          content: getComputedStyle(element, '::before').content,
+          borderColor: style.borderTopColor,
+          borderStyle: style.borderTopStyle,
+          borderWidth: style.borderTopWidth,
+        };
+      });
+    const edge = await selectionEdge();
+    expect(['none', 'normal']).toContain(edge.content);
+    if (theme === 'light') {
+      const releaseBorder = await slider.evaluate((element) => {
+        const reference = document.createElement('span');
+        reference.style.borderTopColor =
+          'color-mix(in srgb, rgb(116 186 229 / 48%) 34%, transparent)';
+        element.append(reference);
+        const color = getComputedStyle(reference).borderTopColor;
+        reference.remove();
+        return color;
+      });
+      expect(edge.borderColor).toBe(releaseBorder);
+      expect(edge.borderStyle).toBe('solid');
+      expect(edge.borderWidth).toBe('1px');
+    }
     const base = await group.evaluate((element) => ({
       fill: getComputedStyle(element).backgroundColor,
       filter: getComputedStyle(element).backdropFilter,
     }));
     await group.getByRole('radio', { name: 'Two', exact: true }).click();
+    expect(await selectionEdge()).toEqual(edge);
     expect(
       await group.evaluate((element) => ({
         fill: getComputedStyle(element).backgroundColor,

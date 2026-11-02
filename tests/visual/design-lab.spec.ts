@@ -493,6 +493,57 @@ for (const theme of themes) {
     expect(duringHover).toEqual(beforeHover);
     expect(shellDuringHover).toEqual(shellBeforeHover);
   });
+
+  test(`unselected segmented option keeps one hover label and wash through press / ${theme}`, async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.name !== 'desktop', 'Mouse hover is desktop-only.');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`/frame?theme=${theme}&lang=en#controls`, {
+      waitUntil: 'domcontentloaded',
+    });
+    await page.addStyleTag({ content: freezeMotion });
+
+    const control = page
+      .locator('#controls-segmented-control .ui-segmented-control[data-surface="glass-subtle"]')
+      .first();
+    await expect(control).toBeVisible();
+    const option = control
+      .locator(
+        '.ui-segmented-control__option:not(.ui-segmented-control__option--active):not(:disabled)',
+      )
+      .first();
+    await expect(option).toBeVisible();
+
+    const readOption = () =>
+      option.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return { color: style.color, backgroundColor: style.backgroundColor };
+      });
+    const readSelectedColor = () =>
+      control
+        .locator('.ui-segmented-control__option--active')
+        .first()
+        .evaluate((element) => getComputedStyle(element).color);
+
+    const resting = await readOption();
+    await option.hover();
+    const hovered = await readOption();
+    // Hover is a neutral affordance: it must not preview the selected accent.
+    expect(hovered.color).not.toBe(resting.color);
+    expect(hovered.color).not.toBe(await readSelectedColor());
+    expect(hovered.backgroundColor).not.toBe(resting.backgroundColor);
+
+    const bounds = await option.boundingBox();
+    if (!bounds) throw new Error('Unselected segmented option is missing');
+    await page.mouse.move(bounds.x + bounds.width / 2, bounds.y + bounds.height / 2);
+    await page.mouse.down();
+    expect(await readOption()).toEqual(hovered);
+    // Release outside so the option activates once at rest instead of switching selection.
+    await page.mouse.move(2, 2);
+    await page.mouse.up();
+    expect(await readOption()).toEqual(resting);
+  });
 }
 
 test('Dock Glass edge refraction is removed when reduced transparency is requested', async ({
