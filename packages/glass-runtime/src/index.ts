@@ -1,6 +1,7 @@
 import { createProgram, type GlassGl } from './gl-program';
 import { NativeGlassRenderer, supportsNativeRefraction } from './native';
 import { type Color, parseColor } from './style-colors';
+import { getTableGridEdges, getTableOuterRect } from './table-edges';
 
 export const glassRendererAttribute = 'data-neoverse-glass-renderer';
 
@@ -9,7 +10,15 @@ const glassClassNames = [
   'material-glass-elevated',
   'material-glass-immersive',
 ] as const;
-const glassSelector = glassClassNames.map((className) => `.${className}`).join(', ');
+const insetGlassSelector =
+  '.ui-input, .ui-textarea, .ui-select, .ui-choice__control, table.ui-table, .neoverse-prose table, .ui-disclosure, .neoverse-prose details';
+const tableGlassSelector = 'table.ui-table, .neoverse-prose table';
+const elevatedFormGlassSelector = '.ui-select__popover';
+const glassSelector = [
+  ...glassClassNames.map((className) => `.${className}`),
+  insetGlassSelector,
+  elevatedFormGlassSelector,
+].join(', ');
 const cssEdgePassSelector = '[data-neoverse-glass-edge-pass="css"]';
 const reducedTransparencyQuery = '(prefers-reduced-transparency: reduce)';
 const systemDarkQuery = '(prefers-color-scheme: dark)';
@@ -25,6 +34,9 @@ const glassMutationAttributes = [
   'data-neoverse-glass-occluder',
   'data-neoverse-glass-nesting',
   'data-neoverse-tooltip-surface',
+  'colspan',
+  'rowspan',
+  'span',
 ] as const;
 const maxOccluders = 6;
 const staticEdgeFrameProperties = new Set([
@@ -248,14 +260,21 @@ const parsePixels = (value: string, fallback: number): number => {
   return parseFirstNumber(match[0], fallback);
 };
 
-const getVariant = (element: Element): GlassVariant | undefined => {
+const getExplicitVariant = (element: Element): GlassVariant | undefined => {
   const materialClassName = glassClassNames.find((className) =>
     element.classList.contains(className),
   );
   if (materialClassName !== undefined) {
     return materialClassName.replace('material-glass-', '') as GlassVariant;
   }
+  return undefined;
+};
 
+const getVariant = (element: Element): GlassVariant | undefined => {
+  const explicit = getExplicitVariant(element);
+  if (explicit !== undefined) return explicit;
+  if (element.matches(insetGlassSelector)) return 'subtle';
+  if (element.matches(elevatedFormGlassSelector)) return 'elevated';
   return undefined;
 };
 
@@ -273,7 +292,7 @@ const inheritsParentGlassEdge = (element: Element): boolean => {
 
   let ancestor = element.parentElement;
   while (ancestor !== null) {
-    if (getVariant(ancestor) !== undefined) {
+    if (getExplicitVariant(ancestor) !== undefined) {
       return true;
     }
     ancestor = ancestor.parentElement;
@@ -574,6 +593,7 @@ export const collectOccluders = (
   ownerDocument: Document,
   view: Window,
   candidates: readonly OcclusionCandidate[] = [],
+  includeInterior = false,
 ): Occluder[] => {
   if (typeof ownerDocument.elementsFromPoint !== 'function') {
     return [];
@@ -605,6 +625,9 @@ export const collectOccluders = (
       if (element.contains(entry) || occluders.has(entry)) {
         continue;
       }
+      // Native choice inputs deliberately cover the visible control with
+      // opacity: 0 to preserve native hit testing. They do not cover its edge.
+      if (!isVisibleOccluder({ element: entry as HTMLElement, rect: bounds }, view)) continue;
       addOccluder(entry, entry.getBoundingClientRect());
     }
     if (occluders.size >= maxOccluders) {
@@ -620,7 +643,7 @@ export const collectOccluders = (
     const rect = candidate.rect;
     if (
       entry === element ||
-      element.contains(entry) ||
+      (!includeInterior && element.contains(entry)) ||
       entry.contains(element) ||
       occluders.has(entry)
     )
@@ -636,7 +659,7 @@ export const collectOccluders = (
       right >= bounds.right - occlusionSampleInset ||
       top <= bounds.top + occlusionSampleInset ||
       bottom >= bounds.bottom - occlusionSampleInset;
-    if (!reachesEdge) continue;
+    if (!includeInterior && !reachesEdge) continue;
 
     // A non-interactive topmost overlay is absent from elementsFromPoint. Its
     // owner may explicitly declare that it sits above ordinary page surfaces.
@@ -885,6 +908,7 @@ class GlassRendererImpl implements GlassRenderer {
   private buffer: WebGLBuffer | undefined;
   private resizeObserver: ResizeObserver | undefined;
   private readonly observedGlassElements = new Set<HTMLElement>();
+  private readonly observedTableCells = new Set<HTMLElement>();
   private mutationObserver: MutationObserver | undefined;
   private transparencyQuery: MediaQueryList | undefined;
   private systemSchemeQuery: MediaQueryList | undefined;
@@ -1194,6 +1218,7 @@ class GlassRendererImpl implements GlassRenderer {
     this.resizeObserver?.disconnect();
     this.resizeObserver = undefined;
     this.observedGlassElements.clear();
+    this.observedTableCells.clear();
     this.mutationObserver?.disconnect();
     this.mutationObserver = undefined;
   }
@@ -1409,6 +1434,7 @@ class GlassRendererImpl implements GlassRenderer {
     this.paintedEdges = elements.length > 0;
     if (!this.paintedEdges) {
       if (this.chromaCanvas) this.chromaCanvas.style.display = 'none';
+      this.observeTableCells(new Set());
       return;
     }
     gl.useProgram(this.program);
@@ -1512,8 +1538,32 @@ class GlassRendererImpl implements GlassRenderer {
     gl.enable(gl.SCISSOR_TEST);
     const occluderRects = new Float32Array(maxOccluders * 4);
     const occluderRadii = new Float32Array(maxOccluders);
+    const visibleTableCells = new Set<HTMLElement>();
+    const uploadOccluders = (occluders: readonly Occluder[]): void => {
+      if (locations.occluders === null || locations.occluderCount === null) return;
+      let count = 0;
+      for (const occluder of occluders) {
+        occluderRects.set(
+          [
+            occluder.left - viewport.left,
+            occluder.top - viewport.top,
+            occluder.width,
+            occluder.height,
+          ],
+          count * 4,
+        );
+        occluderRadii[count] = occluder.radius;
+        count += 1;
+      }
+      gl.uniform4fv(locations.occluders, occluderRects);
+      if (locations.occluderRadii !== null) gl.uniform1fv(locations.occluderRadii, occluderRadii);
+      gl.uniform1f(locations.occluderCount, count);
+    };
     for (const element of elements) {
-      const style = readStyle(element, view, this.colorProbe, viewport, measuredRects.get(element));
+      const table = element.matches(tableGlassSelector) ? (element as HTMLTableElement) : undefined;
+      const measuredRect = measuredRects.get(element);
+      const rect = table && measuredRect ? getTableOuterRect(table, measuredRect) : measuredRect;
+      const style = readStyle(element, view, this.colorProbe, viewport, rect);
       if (style === undefined) {
         continue;
       }
@@ -1552,7 +1602,6 @@ class GlassRendererImpl implements GlassRenderer {
       gl.uniform3f(locations.primary, ...primary);
       gl.uniform3f(locations.secondary, ...secondary);
       gl.uniform3f(locations.tertiary, ...tertiary);
-      let occluderCount = 0;
       const occluders = collectOccluders(
         element,
         style.rect,
@@ -1560,26 +1609,7 @@ class GlassRendererImpl implements GlassRenderer {
         view,
         visibleCandidates,
       );
-      if (locations.occluders !== null && locations.occluderCount !== null) {
-        for (const occluder of occluders) {
-          occluderRects.set(
-            [
-              occluder.left - viewport.left,
-              occluder.top - viewport.top,
-              occluder.width,
-              occluder.height,
-            ],
-            occluderCount * 4,
-          );
-          occluderRadii[occluderCount] = occluder.radius;
-          occluderCount += 1;
-        }
-        gl.uniform4fv(locations.occluders, occluderRects);
-        if (locations.occluderRadii !== null) {
-          gl.uniform1fv(locations.occluderRadii, occluderRadii);
-        }
-        gl.uniform1f(locations.occluderCount, occluderCount);
-      }
+      uploadOccluders(occluders);
       if (isLight && this.chromaContext) {
         paintBackdropChroma(this.chromaContext, style, viewport, occluders, gain);
       }
@@ -1594,8 +1624,58 @@ class GlassRendererImpl implements GlassRenderer {
         gl.scissor(strip.x, strip.y, strip.width, strip.height);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       }
+
+      if (!table) continue;
+      const grid = getTableGridEdges(
+        table,
+        style.rect,
+        style.clipRect,
+        viewport,
+        style.edgeWidth,
+        view,
+      );
+      if (grid.length === 0) continue;
+      // Unlike the outer rim, a grid can be covered by an overlay entirely
+      // inside the table. Share one interior occlusion pass across its cells.
+      uploadOccluders(
+        collectOccluders(element, style.rect, this.ownerDocument, view, visibleCandidates, true),
+      );
+      gl.uniform4f(locations.radii, 0, 0, 0, 0);
+      gl.uniform3f(locations.pointer, 0, 0, 0);
+      for (const { cell, rect: cellRect, strips } of grid) {
+        visibleTableCells.add(cell);
+        gl.uniform4f(
+          locations.rect,
+          cellRect.left - viewport.left,
+          cellRect.top - viewport.top,
+          cellRect.width,
+          cellRect.height,
+        );
+        gl.uniform2f(locations.rectSize, cellRect.width, cellRect.height);
+        for (const strip of strips) {
+          const area = getScissorRect(strip, viewport, pixelRatio, drawingWidth, drawingHeight);
+          if (area.width === 0 || area.height === 0) continue;
+          gl.scissor(area.x, area.y, area.width, area.height);
+          gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+        }
+      }
     }
     gl.disable(gl.SCISSOR_TEST);
+    this.observeTableCells(visibleTableCells);
+  }
+
+  private observeTableCells(current: Set<HTMLElement>): void {
+    if (!this.resizeObserver) return;
+    for (const cell of current) {
+      if (this.observedTableCells.has(cell)) continue;
+      this.observedTableCells.add(cell);
+      if (!this.observedGlassElements.has(cell)) this.resizeObserver.observe(cell);
+    }
+    for (const cell of this.observedTableCells) {
+      if (current.has(cell)) continue;
+      if (!this.observedGlassElements.has(cell)) this.resizeObserver.unobserve(cell);
+      this.observedTableCells.delete(cell);
+    }
   }
 
   private getGlassElements(): HTMLElement[] {
@@ -1630,14 +1710,14 @@ class GlassRendererImpl implements GlassRenderer {
       for (const element of currentElements) {
         if (!this.observedGlassElements.has(element)) {
           this.observedGlassElements.add(element);
-          this.resizeObserver.observe(element);
+          if (!this.observedTableCells.has(element)) this.resizeObserver.observe(element);
         }
       }
 
       const currentSet = new Set(currentElements);
       for (const element of this.observedGlassElements) {
         if (!currentSet.has(element)) {
-          this.resizeObserver.unobserve(element);
+          if (!this.observedTableCells.has(element)) this.resizeObserver.unobserve(element);
           this.observedGlassElements.delete(element);
         }
       }

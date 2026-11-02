@@ -1,6 +1,31 @@
 @layer components {
+  /* These inset controls own Light optics even inside a different Glass tier. */
+  :where(.ui-input, .ui-textarea, .ui-select, .ui-choice__control) {
+    --neoverse-material-edge-refraction-width: var(
+      --neoverse-material-glass-subtle-edge-refraction-width
+    );
+    --neoverse-material-edge-refraction-softness: var(
+      --neoverse-material-glass-subtle-edge-refraction-softness
+    );
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-material-glass-subtle-edge-refraction-opacity
+    );
+    --neoverse-material-edge-refraction-carrier: var(
+      --neoverse-material-glass-subtle-edge-refraction-carrier
+    );
+    --neoverse-material-edge-refraction-chroma: var(
+      --neoverse-material-edge-refraction-chroma-subtle
+    );
+  }
+
   :where(.ui-input, .ui-textarea, .ui-select) {
-    --neoverse-form-control-current-shadow: var(--neoverse-form-control-shadow);
+    --neoverse-form-control-effective-shadow: var(--neoverse-form-control-shadow);
+    --neoverse-form-control-effective-hover-shadow: var(--neoverse-form-control-hover-shadow);
+    --neoverse-form-control-effective-focus-depth-shadow: var(
+      --neoverse-form-control-focus-depth-shadow
+    );
+    --neoverse-form-control-effective-focus-shadow: var(--neoverse-form-control-focus-shadow);
+    --neoverse-form-control-current-shadow: var(--neoverse-form-control-effective-shadow);
     --neoverse-form-control-validation-shadow: 0 0 0 var(--neoverse-border-width-none) transparent;
     width: 100%;
     min-height: var(--neoverse-form-control-min-height);
@@ -37,13 +62,15 @@
         [aria-readonly='true']
       ):hover {
       background: var(--neoverse-form-control-hover-background);
-      --neoverse-form-control-current-shadow: var(--neoverse-form-control-hover-shadow);
+      --neoverse-form-control-current-shadow: var(--neoverse-form-control-effective-hover-shadow);
     }
   }
 
   :where(.ui-input, .ui-textarea, .ui-select):focus {
     background: var(--neoverse-form-control-focus-background);
-    --neoverse-form-control-current-shadow: var(--neoverse-form-control-focus-depth-shadow);
+    --neoverse-form-control-current-shadow: var(
+      --neoverse-form-control-effective-focus-depth-shadow
+    );
   }
 
   :where(.ui-input, .ui-textarea, .ui-select):focus-visible:not(
@@ -52,14 +79,14 @@
     background: var(--neoverse-form-control-focus-background);
     outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
     outline-offset: var(--neoverse-focus-ring-offset);
-    --neoverse-form-control-current-shadow: var(--neoverse-form-control-focus-shadow);
+    --neoverse-form-control-current-shadow: var(--neoverse-form-control-effective-focus-shadow);
   }
 
   :where(.ui-input, .ui-textarea, .ui-select):is(:disabled, [aria-disabled='true']) {
     cursor: not-allowed;
     color: var(--neoverse-form-control-disabled-foreground);
     background: var(--neoverse-form-control-disabled-background);
-    --neoverse-form-control-current-shadow: var(--neoverse-form-control-shadow);
+    --neoverse-form-control-current-shadow: var(--neoverse-form-control-effective-shadow);
     -webkit-text-fill-color: var(--neoverse-form-control-disabled-foreground);
     opacity: 1;
   }
@@ -100,6 +127,70 @@
 
   :where(.ui-input, .ui-textarea):disabled::placeholder {
     color: var(--neoverse-form-control-disabled-foreground);
+  }
+
+  /* A native top layer and an explicit CSS edge pass cannot use the document
+     canvas, so they retain their ordinary inset fallback. */
+  [data-neoverse-glass-renderer='webgl']
+    :where(.ui-input, .ui-textarea, .ui-select):not([data-neoverse-glass-edge-pass='css']) {
+    --neoverse-form-control-effective-shadow: var(
+      --neoverse-form-control-webgl-shadow,
+      var(--neoverse-form-control-shadow)
+    );
+    --neoverse-form-control-effective-hover-shadow: var(
+      --neoverse-form-control-webgl-hover-shadow,
+      var(--neoverse-form-control-hover-shadow)
+    );
+    --neoverse-form-control-effective-focus-depth-shadow: var(
+      --neoverse-form-control-webgl-focus-depth-shadow,
+      var(--neoverse-form-control-focus-depth-shadow)
+    );
+    --neoverse-form-control-effective-focus-shadow: var(
+      --neoverse-form-control-webgl-focus-shadow,
+      var(--neoverse-form-control-focus-shadow)
+    );
+  }
+
+  [data-neoverse-glass-renderer='webgl']
+    :where(.ui-choice__control):not([data-neoverse-glass-edge-pass='css']) {
+    --neoverse-choice-control-effective-shadow: var(
+      --neoverse-choice-control-webgl-shadow,
+      var(--neoverse-choice-control-shadow)
+    );
+  }
+
+  [data-neoverse-glass-renderer='webgl']
+    :is(:popover-open, :modal)
+    :where(.ui-input, .ui-textarea, .ui-select) {
+    --neoverse-form-control-effective-shadow: var(--neoverse-form-control-shadow);
+    --neoverse-form-control-effective-hover-shadow: var(--neoverse-form-control-hover-shadow);
+    --neoverse-form-control-effective-focus-depth-shadow: var(
+      --neoverse-form-control-focus-depth-shadow
+    );
+    --neoverse-form-control-effective-focus-shadow: var(--neoverse-form-control-focus-shadow);
+  }
+
+  [data-neoverse-glass-renderer='webgl']
+    :is(:popover-open, :modal)
+    :where(.ui-choice__control) {
+    --neoverse-choice-control-effective-shadow: var(--neoverse-choice-control-shadow);
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    [data-neoverse-glass-renderer='webgl']
+      :where(.ui-input, .ui-textarea, .ui-select):not([data-neoverse-glass-edge-pass='css']) {
+      --neoverse-form-control-effective-shadow: var(--neoverse-form-control-shadow);
+      --neoverse-form-control-effective-hover-shadow: var(--neoverse-form-control-hover-shadow);
+      --neoverse-form-control-effective-focus-depth-shadow: var(
+        --neoverse-form-control-focus-depth-shadow
+      );
+      --neoverse-form-control-effective-focus-shadow: var(--neoverse-form-control-focus-shadow);
+    }
+
+    [data-neoverse-glass-renderer='webgl']
+      :where(.ui-choice__control):not([data-neoverse-glass-edge-pass='css']) {
+      --neoverse-choice-control-effective-shadow: var(--neoverse-choice-control-shadow);
+    }
   }
 
   .ui-input-number {
@@ -235,6 +326,7 @@
   }
 
   .ui-select {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -276,6 +368,21 @@
   }
 
   .ui-select__popover {
+    --neoverse-material-edge-refraction-width: var(
+      --neoverse-material-glass-elevated-edge-refraction-width
+    );
+    --neoverse-material-edge-refraction-softness: var(
+      --neoverse-material-glass-elevated-edge-refraction-softness
+    );
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-material-glass-elevated-edge-refraction-opacity
+    );
+    --neoverse-material-edge-refraction-carrier: var(
+      --neoverse-material-glass-elevated-edge-refraction-carrier
+    );
+    --neoverse-material-edge-refraction-chroma: var(
+      --neoverse-material-edge-refraction-chroma-elevated
+    );
     position: fixed;
     inset: auto;
     top: var(--neoverse-select-popover-top);
@@ -300,6 +407,73 @@
 
   .ui-select__popover--fallback-open {
     display: grid;
+  }
+
+  /* The shared canvas cannot enter the browser's top layer. The established
+     CSS edge field also supplies a fallback when WebGL is unavailable. */
+  @supports (backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1)) {
+    :where(.ui-select, .ui-choice__control, .ui-textarea-shell, .ui-select__popover)::before {
+      position: absolute;
+      z-index: 0;
+      inset: 0;
+      border-radius: inherit;
+      background: transparent;
+      mask-image: var(--neoverse-material-glass-subtle-refraction-gradient);
+      mask-mode: alpha;
+      opacity: var(--neoverse-material-glass-subtle-edge-refraction-opacity);
+      pointer-events: none;
+      filter: var(--neoverse-material-glass-subtle-edge-refraction-softness);
+      -webkit-backdrop-filter: var(--neoverse-material-glass-subtle-edge-filter);
+      backdrop-filter: var(--neoverse-material-glass-subtle-edge-filter);
+      content: '';
+    }
+
+    :where(.ui-select, .ui-choice__control, .ui-select__popover) > *,
+    .ui-textarea-shell > .ui-textarea {
+      z-index: 1;
+    }
+
+    .ui-textarea-shell::after {
+      z-index: 2;
+    }
+
+    .ui-select__popover::before {
+      mask-image: var(--neoverse-material-glass-elevated-refraction-gradient);
+      opacity: var(--neoverse-material-glass-elevated-edge-refraction-opacity);
+      filter: var(--neoverse-material-glass-elevated-edge-refraction-softness);
+      -webkit-backdrop-filter: var(--neoverse-material-glass-elevated-edge-filter);
+      backdrop-filter: var(--neoverse-material-glass-elevated-edge-filter);
+    }
+
+    [data-neoverse-glass-renderer='webgl']
+      :where(.ui-select, .ui-choice__control, .ui-textarea-shell, .ui-select__popover)::before {
+      display: none;
+    }
+
+    [data-neoverse-glass-renderer='webgl']
+      :where(
+        .ui-select__popover:popover-open,
+        :popover-open .ui-select,
+        :popover-open .ui-choice__control,
+        :popover-open .ui-textarea-shell,
+        :modal .ui-select,
+        :modal .ui-choice__control,
+        :modal .ui-textarea-shell,
+        .ui-select[data-neoverse-glass-edge-pass='css'],
+        .ui-choice__control[data-neoverse-glass-edge-pass='css'],
+        .ui-select__popover[data-neoverse-glass-edge-pass='css'],
+        .ui-textarea-shell:has(> .ui-textarea[data-neoverse-glass-edge-pass='css'])
+      )::before {
+      display: block;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    :where(.ui-select, .ui-choice__control, .ui-textarea-shell, .ui-select__popover)::before,
+    [data-neoverse-glass-renderer='webgl']
+      :where(.ui-select, .ui-choice__control, .ui-textarea-shell, .ui-select__popover)::before {
+      display: none;
+    }
   }
 
   :where(.ui-select-shell--disabled, .ui-select-shell--readonly) .ui-select__popover {
@@ -387,6 +561,7 @@
   }
 
   .ui-choice__control {
+    --neoverse-choice-control-effective-shadow: var(--neoverse-choice-control-shadow);
     --neoverse-choice-validation-shadow: 0 0 0 var(--neoverse-border-width-none) transparent;
     position: relative;
     display: inline-grid;
@@ -398,7 +573,8 @@
     border-radius: var(--neoverse-choice-control-radius);
     color: var(--neoverse-choice-control-active-foreground);
     background: var(--neoverse-choice-control-background);
-    box-shadow: var(--neoverse-choice-control-shadow), var(--neoverse-choice-validation-shadow);
+    box-shadow:
+      var(--neoverse-choice-control-effective-shadow), var(--neoverse-choice-validation-shadow);
     -webkit-backdrop-filter: var(--neoverse-form-control-filter);
     backdrop-filter: var(--neoverse-form-control-filter);
     transition:
@@ -479,7 +655,8 @@
   .ui-choice[data-disabled='true'] .ui-choice__control {
     color: var(--neoverse-form-control-disabled-foreground);
     background: var(--neoverse-form-control-disabled-background);
-    box-shadow: var(--neoverse-choice-control-shadow), var(--neoverse-choice-validation-shadow);
+    box-shadow:
+      var(--neoverse-choice-control-effective-shadow), var(--neoverse-choice-validation-shadow);
   }
 
   :where(.ui-choice[data-disabled='true'])

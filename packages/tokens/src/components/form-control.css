@@ -23,6 +23,10 @@
       var(--neoverse-shadow-inset), var(--neoverse-surface-inset-active-highlight),
       var(--neoverse-shadow-control);
     --neoverse-form-control-focus-shadow: var(--neoverse-form-control-focus-depth-shadow);
+    --neoverse-form-control-webgl-shadow: initial;
+    --neoverse-form-control-webgl-hover-shadow: initial;
+    --neoverse-form-control-webgl-focus-depth-shadow: initial;
+    --neoverse-form-control-webgl-focus-shadow: initial;
     --neoverse-form-control-filter: var(--neoverse-surface-inset-filter);
     --neoverse-input-step-inline-size: var(--neoverse-space-7);
     --neoverse-input-step-inset: var(--neoverse-space-1);
@@ -51,6 +55,7 @@
     --neoverse-choice-control-active-background: var(--neoverse-effect-choice-filled-field);
     --neoverse-choice-control-active-foreground: var(--neoverse-effect-choice-filled-foreground);
     --neoverse-choice-control-shadow: var(--neoverse-shadow-inset);
+    --neoverse-choice-control-webgl-shadow: initial;
     --neoverse-choice-control-active-shadow: var(--neoverse-effect-choice-filled-shadow);
     --neoverse-choice-control-disabled-opacity: var(--neoverse-effect-disabled-content-opacity);
     --neoverse-choice-control-label-gap: var(--neoverse-space-2);

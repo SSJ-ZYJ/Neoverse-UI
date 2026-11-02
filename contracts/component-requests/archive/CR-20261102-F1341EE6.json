@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261102-F1341EE6",
+  "kind": "enhancement",
+  "target": "AuroraGlassWindowStroke",
+  "summary": "Light window-anchored glass chrome needs an opt-in painted silhouette",
+  "expected": "The existing data-neoverse-glass-edge-stroke opt-in supplies a fine light-theme perimeter when backdrop refraction cannot establish the edge, without changing the dark mapping or ordinary glass surfaces.",
+  "acceptanceCriteria": [
+    "Explicit light and system-light provide a nontransparent fine perimeter through the existing painted-stroke token.",
+    "The dark stroke mapping and renderer, blur, opacity, scheduling and ordinary non-opted-in surfaces are unchanged.",
+    "XCA Portal light header retains a visible bottom edge with the CSS fallback; rendered edge pixels change without changing interior pixels.",
+    "Synchronize local consumer dependencies and pass the affected XCA header, theme, transition and baseline regressions without starting its development server on port 4100."
+  ],
+  "impact": "normal",
+  "status": "rejected",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/components/site/SiteHeader.vue",
+      "framework": "vue",
+      "scenario": "The light navbar is anchored to the window and loses its bottom glass highlight while the dark navbar remains correct."
+    }
+  ],
+  "createdAt": "2026-11-02T01:37:43.876Z",
+  "updatedAt": "2026-11-02T01:47:15.256Z",
+  "resolution": "Superseded by consumer requirement: a fixed white outline is not acceptable; the window edge must brighten the actual backdrop instead."
+}

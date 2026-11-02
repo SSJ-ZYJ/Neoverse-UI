@@ -104,16 +104,24 @@
   --neoverse-color-border-subtle: rgb(15 23 42 / 11%);
   --neoverse-color-border-default: rgb(15 23 42 / 16%);
   --neoverse-color-border-strong: rgb(15 23 42 / 24%);
-  --neoverse-color-border-interactive: rgb(116 186 229 / 48%);
-  /* Light uses a pale sky blue; the dark theme keeps its luminous cyan. */
-  --neoverse-color-accent-primary: #74bae5;
+  --neoverse-color-border-interactive: color-mix(
+    in srgb,
+    var(--neoverse-color-accent-primary) 48%,
+    transparent
+  );
+  /* Light uses a clear azure blue; the dark theme keeps its luminous cyan. */
+  --neoverse-color-accent-primary: #3d95e6;
   --neoverse-color-accent-primary-foreground: var(--neoverse-color-neutral-900);
   --neoverse-color-accent-secondary: var(--neoverse-color-mint-500);
   --neoverse-color-accent-tertiary: #7c6ee6;
   --neoverse-color-accent-tertiary-foreground: var(--neoverse-color-white);
-  --neoverse-color-accent-soft: rgb(116 186 229 / 16%);
-  --neoverse-color-action-primary-hover: #62a8d0;
-  --neoverse-color-action-primary-active: #5594b8;
+  --neoverse-color-accent-soft: color-mix(
+    in srgb,
+    var(--neoverse-color-accent-primary) 16%,
+    transparent
+  );
+  --neoverse-color-action-primary-hover: #338bdd;
+  --neoverse-color-action-primary-active: #2b84d5;
   --neoverse-color-action-primary-foreground: var(--neoverse-color-neutral-900);
   --neoverse-color-action-secondary: var(--neoverse-color-mint-500);
   --neoverse-color-action-secondary-hover: var(--neoverse-color-mint-600);
@@ -138,7 +146,11 @@
   --neoverse-effect-label-success-foreground: var(--neoverse-color-mint-600);
   --neoverse-effect-label-warning-foreground: var(--neoverse-color-amber-600);
   --neoverse-effect-label-danger-foreground: var(--neoverse-color-red-500);
-  --neoverse-color-focus-ring: rgb(116 186 229 / 56%);
+  --neoverse-color-focus-ring: color-mix(
+    in srgb,
+    var(--neoverse-color-accent-primary) 56%,
+    transparent
+  );
   --neoverse-color-overlay-scrim: rgb(20 33 43 / 28%);
   --neoverse-color-ambient-ice: rgb(56 189 248 / 18%);
   --neoverse-color-ambient-mint: rgb(52 211 153 / 10%);
@@ -154,6 +166,16 @@
   --neoverse-material-edge-refraction-opacity-subtle: 0.16;
   --neoverse-material-edge-refraction-opacity-elevated: 0.22;
   --neoverse-material-edge-refraction-opacity-immersive: 0.14;
+  /* The WebGL rim owns the lower contour. Avoid darkening it with the inset
+     fallback's lower shadow while retaining the established interaction cues. */
+  --neoverse-form-control-webgl-shadow: var(--neoverse-material-edge-highlight-subtle);
+  --neoverse-form-control-webgl-hover-shadow:
+    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight);
+  --neoverse-form-control-webgl-focus-depth-shadow:
+    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight),
+    var(--neoverse-shadow-control);
+  --neoverse-form-control-webgl-focus-shadow: var(--neoverse-form-control-webgl-focus-depth-shadow);
+  --neoverse-choice-control-webgl-shadow: var(--neoverse-material-edge-highlight-subtle);
   /* Let the shader reproduce the release's opacity-dependent colour by default. */
   --neoverse-material-edge-refraction-chroma-subtle: 1;
   --neoverse-material-edge-refraction-chroma-elevated: 1;

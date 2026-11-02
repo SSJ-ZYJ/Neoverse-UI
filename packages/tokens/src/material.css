@@ -103,6 +103,14 @@
     /* Keep a layered fallback for surfaces without the masked backdrop path;
        supported Aurora Glass utilities replace it with a filtered slice of the
        actual backdrop. Dark restores its lower-contrast fallback in themes/dark.css. */
+    /* The lower catch can also sit above an inset surface's cell fills. */
+    --neoverse-material-edge-highlight-subtle-bottom:
+      inset 0 -1px 2px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-secondary) 12%,
+        var(--neoverse-color-edge-light) 8%
+      );
     --neoverse-material-edge-highlight-subtle:
       inset 0 1px 2px
       color-mix(
@@ -110,12 +118,7 @@
         var(--neoverse-color-edge-light) 20%,
         var(--neoverse-color-accent-primary) 15%
       ),
-      inset 0 -1px 2px
-      color-mix(
-        in srgb,
-        var(--neoverse-color-accent-secondary) 12%,
-        var(--neoverse-color-edge-light) 8%
-      ),
+      var(--neoverse-material-edge-highlight-subtle-bottom),
       inset 1px 0 2px
       color-mix(
         in srgb,

@@ -27,6 +27,16 @@ an explicit API option, but full-surface SVG displacement must not be made the
 default or used as the Glass repair described in the
 [repair guardrails](../../docs/material-standards.md#glass-repair-guardrails).
 
+The WebGL renderer also recognizes the shared Input, Textarea, Select, choice
+and Disclosure classes, plus `UiTable`, prose tables and prose details. It draws the table perimeter and
+visible internal cell borders on the same canvas, while CSS keeps the table's
+single backdrop filter. A Select panel in the browser top layer uses a local CSS
+edge field because the shared canvas cannot paint above that layer. The optional
+historical `native` backend does not extend its displacement filters to these
+implicit control, disclosure and table surfaces. Native text inputs, disclosures and table grids inside
+top-layer popovers or modals retain their existing inset styling because the
+shared canvas cannot reach them.
+
 Animation tracking redraws moving edges and occluders. Background-position-only
 effects stay in CSS; transformed or fading descendants also stay in CSS when
 their nearest Glass surface isolates and clips both axes and they contain no

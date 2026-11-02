@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261102-D91F7075",
+  "kind": "enhancement",
+  "target": "UiSurface",
+  "summary": "Allow a surface to use the existing local backdrop-sampling edge",
+  "expected": "Expose the existing auto/local edge mode on Vue and React UiSurface, matching UiControlSurface, so a consumer can choose the shared CSS backdrop filter instead of a fixed-colour outline.",
+  "acceptanceCriteria": [
+    "UiSurface defaults to automatic edge rendering and exposes local mode through the existing shared CSS edge path in Vue and React.",
+    "XCA Portal opts only its light navbar into the local backdrop-filter edge; explicit dark and system-dark retain the existing automatic renderer.",
+    "The light edge filters the real backdrop without a fixed white border or changes to shared Glass body blur, dark rendering, renderer composition or scheduling.",
+    "System preference changes update the header edge mode and synchronize the existing shared renderer."
+  ],
+  "impact": "normal",
+  "status": "rejected",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/components/site/SiteHeader.vue",
+      "framework": "vue",
+      "scenario": "Light navbar edge should brighten the actual colour behind it while the dark navbar stays unchanged."
+    }
+  ],
+  "createdAt": "2026-11-02T01:47:23.173Z",
+  "updatedAt": "2026-11-02T01:48:50.751Z",
+  "resolution": "Consumer chose to keep the current appearance and requested no further changes; no implementation was made."
+}
