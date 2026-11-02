@@ -17,7 +17,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { mergeClassNames } from './internal';
+import { type ButtonVariant, buttonVariantClasses, mergeClassNames } from './internal';
 
 interface AnchoredOverlayControllerOptions {
   open?: boolean;
@@ -129,6 +129,8 @@ export interface UiPopoverProps extends Omit<ComponentPropsWithRef<'span'>, 'chi
   placement?: OverlayPlacement;
   matchTriggerWidth?: boolean;
   ariaLabel?: string;
+  /** Button variant of the rendered trigger; ghost reuses the shared washes for chrome. */
+  triggerVariant?: ButtonVariant;
   onOpenChange?: (open: boolean) => void;
 }
 
@@ -141,6 +143,7 @@ export function UiPopover({
   placement = 'auto',
   matchTriggerWidth = false,
   ariaLabel,
+  triggerVariant = 'secondary',
   onOpenChange,
   className,
   ...props
@@ -158,7 +161,7 @@ export function UiPopover({
     <span {...props} className={mergeClassNames('ui-popover', className)}>
       <button
         ref={controller.triggerRef}
-        className="ui-popover__trigger ui-button ui-button--secondary ui-button--md"
+        className={`ui-popover__trigger ui-button ${buttonVariantClasses[triggerVariant]} ui-button--md`}
         type="button"
         disabled={disabled}
         aria-expanded={controller.expandedOpen}
@@ -202,6 +205,8 @@ export interface UiDropdownMenuProps
   defaultOpen?: boolean;
   disabled?: boolean;
   placement?: OverlayPlacement;
+  /** Button variant of the rendered trigger; ghost reuses the shared washes for chrome. */
+  triggerVariant?: ButtonVariant;
   onOpenChange?: (open: boolean) => void;
   onSelect?: (item: UiDropdownMenuItem) => void;
   renderItem?: (item: UiDropdownMenuItem) => ReactNode;
@@ -215,6 +220,7 @@ export function UiDropdownMenu({
   defaultOpen = false,
   disabled = false,
   placement = 'auto',
+  triggerVariant = 'secondary',
   onOpenChange,
   onSelect,
   renderItem,
@@ -284,7 +290,7 @@ export function UiDropdownMenu({
     <span {...props} className={mergeClassNames('ui-dropdown-menu', className)}>
       <button
         ref={controller.triggerRef}
-        className="ui-dropdown-menu__trigger ui-button ui-button--secondary ui-button--md"
+        className={`ui-dropdown-menu__trigger ui-button ${buttonVariantClasses[triggerVariant]} ui-button--md`}
         type="button"
         aria-haspopup="menu"
         aria-expanded={controller.expandedOpen}

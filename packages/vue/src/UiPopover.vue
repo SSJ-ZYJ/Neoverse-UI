@@ -7,8 +7,9 @@ import {
   stopOverlayTracking,
 } from '@neoverse-ui/overlay-runtime';
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue';
+import { buttonVariantClasses } from './classes';
 import { presence } from './presence';
-import type { PopoverProps } from './types';
+import type { ButtonVariant, PopoverProps } from './types';
 
 const props = withDefaults(defineProps<PopoverProps>(), {
   open: undefined,
@@ -16,8 +17,16 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   disabled: false,
   placement: 'auto',
   matchTriggerWidth: false,
+  triggerVariant: 'secondary',
 });
 const emit = defineEmits<{ 'update:open': [value: boolean] }>();
+
+const triggerClasses = computed(() => [
+  'ui-popover__trigger',
+  'ui-button',
+  buttonVariantClasses[props.triggerVariant as ButtonVariant] ?? buttonVariantClasses.secondary,
+  'ui-button--md',
+]);
 
 const triggerRef = ref<HTMLButtonElement | null>(null);
 const panelRef = ref<HTMLElement | null>(null);
@@ -110,7 +119,7 @@ onBeforeUnmount(() => {
   <span class="ui-popover">
     <button
       ref="triggerRef"
-      class="ui-popover__trigger ui-button ui-button--secondary ui-button--md"
+      :class="triggerClasses"
       type="button"
       :disabled="props.disabled"
       :aria-expanded="expandedOpen"

@@ -22,6 +22,30 @@ test('UiPopover renders the shared trigger and dialog contract', () => {
   expect(html).toContain('aria-label="Details"');
 });
 
+test('overlay triggers accept a ghost variant and keep the secondary default', () => {
+  const ghostPopover = renderToStaticMarkup(
+    <UiPopover trigger="Open details" ariaLabel="Details" triggerVariant="ghost">
+      <p>Overlay body</p>
+    </UiPopover>,
+  );
+  const ghostMenu = renderToStaticMarkup(
+    <UiDropdownMenu trigger="Actions" ariaLabel="Actions" items={[]} triggerVariant="ghost" />,
+  );
+  const defaultPopover = renderToStaticMarkup(
+    <UiPopover trigger="Open details" ariaLabel="Details" />,
+  );
+
+  expect(ghostPopover).toContain(
+    'class="ui-popover__trigger ui-button ui-button--ghost ui-button--md"',
+  );
+  expect(ghostMenu).toContain(
+    'class="ui-dropdown-menu__trigger ui-button ui-button--ghost ui-button--md"',
+  );
+  expect(defaultPopover).toContain(
+    'class="ui-popover__trigger ui-button ui-button--secondary ui-button--md"',
+  );
+});
+
 test('disabled Popover and DropdownMenu never announce expanded even with controlled/default open', () => {
   for (const openProps of [{ open: true }, { defaultOpen: true }]) {
     const popover = renderToStaticMarkup(

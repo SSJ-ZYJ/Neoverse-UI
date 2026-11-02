@@ -26,7 +26,12 @@ import {
   useState,
 } from 'react';
 
-import { mergeClassNames, resolveAriaInvalid } from './internal';
+import {
+  type ButtonVariant,
+  buttonVariantClasses,
+  mergeClassNames,
+  resolveAriaInvalid,
+} from './internal';
 
 export * from './display';
 export * from './navigation';
@@ -39,9 +44,8 @@ export * from './terminal';
 import { UiControlSurface } from './navigation';
 import { type SurfacePreset, surfaceClasses } from './surface';
 
+export type { ButtonVariant } from './internal';
 export type { SurfacePreset } from './surface';
-
-export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 export type NoticeVariant = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 export type FormControlValidation = 'none' | 'error' | 'warning' | 'success';
 export type ActionSize = 'sm' | 'md' | 'lg';
@@ -50,12 +54,6 @@ export type ControlSurfaceScale = 'md' | 'lg';
 export type SurfaceHoverMode = 'auto' | 'static';
 export type SurfaceEdgeMode = 'auto' | 'local';
 export type ControlSurfacePreset = 'none' | 'glass-subtle' | 'glass-elevated' | 'glass-immersive';
-
-const buttonVariantClasses: Record<ButtonVariant, string> = {
-  primary: 'ui-button--primary',
-  secondary: 'ui-button--secondary',
-  ghost: 'ui-button--ghost',
-};
 
 const actionSizeClasses: Record<ActionSize, string> = {
   sm: 'ui-action--sm',

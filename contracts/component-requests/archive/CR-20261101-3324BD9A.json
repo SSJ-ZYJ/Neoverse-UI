@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261101-3324BD9A",
+  "kind": "enhancement",
+  "target": "UiPopover",
+  "summary": "Overlay triggers need an opt-in ghost variant so header menu triggers match ghost chrome",
+  "expected": "UiPopover and UiDropdownMenu accept a trigger variant option that reuses the existing shared ui-button ghost classes; the default secondary look is unchanged",
+  "acceptanceCriteria": [
+    "triggerVariant defaults to secondary and the rendered trigger class list is unchanged for existing consumers",
+    "triggerVariant ghost renders ui-button--ghost with transparent idle background and the shared ghost hover/press washes",
+    "Vue and React adapters expose the same prop name and class output",
+    "XCA-Portal header menu trigger uses the ghost variant and its pressed state no longer paints the secondary tone fill"
+  ],
+  "impact": "normal",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/components/site/SiteHeader.vue",
+      "framework": "vue",
+      "scenario": "The compact header menu button renders as a filled secondary pill with a tinted press state while every neighbouring header control is ghost"
+    }
+  ],
+  "createdAt": "2026-11-01T15:35:03.626Z",
+  "updatedAt": "2026-11-02T00:27:08.349Z",
+  "resolution": "UiPopover 与 UiDropdownMenu 新增 triggerVariant（默认 secondary），Vue 与 React 适配层共用同一变体映射；packages/vue/src/components.test.ts 与 packages/react/src/overlay.test.tsx 覆盖默认值与 ghost 变体；XCA-Portal app/components/site/SiteHeader.vue 以 trigger-variant=ghost 接入紧凑菜单，tests/e2e/mobile-header.spec.ts 校验触发器类名，tests/e2e/site-transitions.spec.ts 校验过渡与层级。"
+}

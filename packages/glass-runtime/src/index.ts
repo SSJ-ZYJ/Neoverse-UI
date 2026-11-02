@@ -137,6 +137,7 @@ type CanvasViewport = {
 };
 
 type GlassWindow = Window & {
+  CSS?: Pick<typeof CSS, 'supports'>;
   ResizeObserver?: typeof ResizeObserver;
   MutationObserver?: typeof MutationObserver;
   Document?: typeof Document;
@@ -420,6 +421,85 @@ const getEdgeScissors = (
     { x: scissor.x, y: bottom, width: left - scissor.x, height: top - bottom },
     { x: right, y: bottom, width: scissor.x + scissor.width - right, height: top - bottom },
   ].filter((strip) => strip.width > 0 && strip.height > 0);
+};
+
+const paintBackdropChroma = (
+  context: CanvasRenderingContext2D,
+  style: GlassStyle,
+  viewport: CanvasViewport,
+  occluders: readonly Occluder[],
+  gain: number,
+): void => {
+  const opacity = Math.min(style.opacity * 0.7 * gain, 0.55);
+  if (opacity <= 0) return;
+  const inset = 0.65;
+  const x = style.rect.left - viewport.left + inset;
+  const y = style.rect.top - viewport.top + inset;
+  const width = Math.max(style.rect.width - inset * 2, 0);
+  const height = Math.max(style.rect.height - inset * 2, 0);
+  if (width === 0 || height === 0) return;
+  const radii = [style.radii[3], style.radii[0], style.radii[1], style.radii[2]].map((radius) =>
+    Math.min(Math.max(radius - inset, 0), width / 2, height / 2),
+  );
+  context.save();
+  context.beginPath();
+  context.rect(
+    style.clipRect.left - viewport.left,
+    style.clipRect.top - viewport.top,
+    style.clipRect.width,
+    style.clipRect.height,
+  );
+  context.clip();
+  for (const occluder of occluders) {
+    context.beginPath();
+    context.rect(0, 0, viewport.width, viewport.height);
+    context.roundRect(
+      occluder.left - viewport.left,
+      occluder.top - viewport.top,
+      occluder.width,
+      occluder.height,
+      occluder.radius,
+    );
+    context.clip('evenodd');
+  }
+  const path = new Path2D();
+  if (style.pointer[2] > 0) {
+    const [topLeft = 0, topRight = 0, bottomRight = 0, bottomLeft = 0] = radii;
+    const right = x + width;
+    const bottom = y + height;
+    const arrow = x + width / 2 + style.pointer[0];
+    const halfArrow = Math.min(style.pointer[1], width / 2);
+    path.moveTo(x + topLeft, y);
+    path.lineTo(right - topRight, y);
+    path.arcTo(right, y, right, y + topRight, topRight);
+    path.lineTo(right, bottom - bottomRight);
+    path.arcTo(right, bottom, right - bottomRight, bottom, bottomRight);
+    path.lineTo(arrow + halfArrow, bottom);
+    path.lineTo(arrow, bottom + style.pointer[2]);
+    path.lineTo(arrow - halfArrow, bottom);
+    path.lineTo(x + bottomLeft, bottom);
+    path.arcTo(x, bottom, x, bottom - bottomLeft, bottomLeft);
+    path.lineTo(x, y + topLeft);
+    path.arcTo(x, y, x + topLeft, y, topLeft);
+    path.closePath();
+  } else {
+    path.roundRect(x, y, width, height, radii);
+  }
+  // Only the saturation of this signal is used; its hue is never painted.
+  context.lineWidth = Math.max(style.edgeWidth, 0.75);
+  context.globalAlpha = opacity;
+  const reach = Math.max(Math.min(width * 0.5, height * 1.25), 16);
+  for (const [cx = 0, cy = 0] of [
+    [x, y],
+    [x + width, y + height + style.pointer[2]],
+  ]) {
+    const gradient = context.createRadialGradient(cx, cy, 0, cx, cy, reach);
+    gradient.addColorStop(0, 'rgb(255 0 0)');
+    gradient.addColorStop(1, 'rgb(255 0 0 / 0%)');
+    context.strokeStyle = gradient;
+    context.stroke(path);
+  }
+  context.restore();
 };
 
 const clipsOverflowAxis = (value: string): boolean =>
@@ -795,6 +875,9 @@ class GlassRendererImpl implements GlassRenderer {
   private mounted = false;
   private active = false;
   private canvas: HTMLCanvasElement | undefined;
+  private chromaCanvas: HTMLCanvasElement | undefined;
+  private chromaContext: CanvasRenderingContext2D | undefined;
+  private chromaUnavailable = false;
   private colorProbe: HTMLElement | undefined;
   private gl: GlassGl | undefined;
   private program: WebGLProgram | undefined;
@@ -827,10 +910,13 @@ class GlassRendererImpl implements GlassRenderer {
   private readonly handleToggle = (): void => this.scheduleRefresh();
   private readonly handleSystemSchemeChange = (): void => this.scheduleRefresh();
   private readonly handleMutations = (records: MutationRecord[]): void => {
+    if (records.some((record) => record.target === this.canvas)) this.syncChromaVisibility();
     if (
       records.every(
         (record) =>
           record.target === this.colorProbe ||
+          record.target === this.canvas ||
+          record.target === this.chromaCanvas ||
           (record.target.nodeType === 1 &&
             (record.target as Element).closest('[data-neoverse-particle-capture]')),
       )
@@ -858,6 +944,7 @@ class GlassRendererImpl implements GlassRenderer {
     if (this.canvas !== undefined) {
       this.canvas.style.display = 'none';
     }
+    if (this.chromaCanvas !== undefined) this.chromaCanvas.style.display = 'none';
     this.restoreRendererAttribute();
     this.active = false;
   };
@@ -1034,7 +1121,7 @@ class GlassRendererImpl implements GlassRenderer {
     }
 
     const staleCanvases = this.ownerDocument.querySelectorAll<HTMLCanvasElement>(
-      '[data-neoverse-glass-renderer-canvas]',
+      '[data-neoverse-glass-renderer-canvas], [data-neoverse-glass-chroma-canvas]',
     );
     for (const staleCanvas of staleCanvases) {
       staleCanvas.remove();
@@ -1053,6 +1140,54 @@ class GlassRendererImpl implements GlassRenderer {
 
     getWindow(this.ownerDocument)?.cancelAnimationFrame(this.animationFrame);
     this.animationFrame = undefined;
+  }
+
+  private ensureChromaCanvas(): void {
+    if (this.chromaCanvas || this.chromaUnavailable || !this.canvas || !this.ownerDocument) return;
+    const view = getWindow(this.ownerDocument);
+    if (
+      typeof Path2D !== 'function' ||
+      typeof Path2D.prototype.roundRect !== 'function' ||
+      !view?.CSS?.supports('mix-blend-mode', 'saturation')
+    ) {
+      // The geometry signal is only safe to paint when the compositor can
+      // interpret it as saturation rather than displaying its source colour.
+      this.chromaUnavailable = true;
+      return;
+    }
+    const canvas = this.ownerDocument.createElement('canvas');
+    canvas.setAttribute('aria-hidden', 'true');
+    canvas.setAttribute('data-neoverse-glass-chroma-canvas', 'true');
+    canvas.style.position = 'fixed';
+    canvas.style.inset = '0';
+    canvas.style.display = 'none';
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+    canvas.style.pointerEvents = 'none';
+    canvas.style.zIndex = '2147483646';
+    canvas.style.mixBlendMode = 'saturation';
+    let context: CanvasRenderingContext2D | null = null;
+    try {
+      context = canvas.getContext('2d');
+    } catch {
+      // Keep the established edge if the optional colour field is unavailable.
+    }
+    if (!context || typeof context.roundRect !== 'function') {
+      this.chromaUnavailable = true;
+      return;
+    }
+    this.chromaCanvas = canvas;
+    this.chromaContext = context;
+    this.canvas.before(canvas);
+  }
+
+  private syncChromaVisibility(): void {
+    const view = getWindow(this.ownerDocument);
+    if (!view || !this.canvas || !this.chromaCanvas) return;
+    const visibility = view.getComputedStyle(this.canvas).visibility;
+    if (this.chromaCanvas.style.visibility !== visibility) {
+      this.chromaCanvas.style.visibility = visibility;
+    }
   }
 
   private disconnectObservers(): void {
@@ -1083,6 +1218,10 @@ class GlassRendererImpl implements GlassRenderer {
       this.canvas.remove();
     }
     this.canvas = undefined;
+    this.chromaCanvas?.remove();
+    this.chromaCanvas = undefined;
+    this.chromaContext = undefined;
+    this.chromaUnavailable = false;
     this.colorProbe?.remove();
     this.colorProbe = undefined;
     this.gl = undefined;
@@ -1114,6 +1253,10 @@ class GlassRendererImpl implements GlassRenderer {
     this.restoreRendererAttribute();
 
     this.canvas = undefined;
+    this.chromaCanvas?.remove();
+    this.chromaCanvas = undefined;
+    this.chromaContext = undefined;
+    this.chromaUnavailable = false;
     this.colorProbe?.remove();
     this.colorProbe = undefined;
     this.gl = undefined;
@@ -1257,7 +1400,6 @@ class GlassRendererImpl implements GlassRenderer {
       this.canvas.width = drawingWidth;
       this.canvas.height = drawingHeight;
     }
-
     const gl = this.gl;
     const locations = this.locations;
     gl.viewport(0, 0, drawingWidth, drawingHeight);
@@ -1265,7 +1407,10 @@ class GlassRendererImpl implements GlassRenderer {
     gl.clearColor(0, 0, 0, 0);
     gl.clear(gl.COLOR_BUFFER_BIT);
     this.paintedEdges = elements.length > 0;
-    if (!this.paintedEdges) return;
+    if (!this.paintedEdges) {
+      if (this.chromaCanvas) this.chromaCanvas.style.display = 'none';
+      return;
+    }
     gl.useProgram(this.program);
     gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
     gl.enableVertexAttribArray(locations.position);
@@ -1274,13 +1419,11 @@ class GlassRendererImpl implements GlassRenderer {
     gl.uniform1f(locations.pixelRatio, pixelRatio);
 
     const rootStyle = view.getComputedStyle(this.ownerDocument.documentElement);
-    gl.uniform1f(
-      locations.gain,
-      Math.max(
-        parseFirstNumber(rootStyle.getPropertyValue('--neoverse-material-edge-refraction-gain'), 1),
-        0,
-      ),
+    const gain = Math.max(
+      parseFirstNumber(rootStyle.getPropertyValue('--neoverse-material-edge-refraction-gain'), 1),
+      0,
     );
+    gl.uniform1f(locations.gain, gain);
     const edgeLight = resolveColor(
       rootStyle,
       [
@@ -1298,6 +1441,27 @@ class GlassRendererImpl implements GlassRenderer {
     // when a consumer has not declared a colour scheme.
     const lightLuminance = edgeLight[0] * 0.2126 + edgeLight[1] * 0.7152 + edgeLight[2] * 0.0722;
     const isLight = lightSurface === 1 || (lightSurface === -1 && lightLuminance > 0.715);
+    if (isLight) this.ensureChromaCanvas();
+    if (this.chromaCanvas && this.chromaContext) {
+      if (!this.chromaCanvas.isConnected && this.canvas.isConnected) {
+        this.canvas.before(this.chromaCanvas);
+      }
+      const display = isLight ? 'block' : 'none';
+      if (this.chromaCanvas.style.display !== display) this.chromaCanvas.style.display = display;
+      this.syncChromaVisibility();
+      if (isLight) {
+        if (
+          this.chromaCanvas.width !== drawingWidth ||
+          this.chromaCanvas.height !== drawingHeight
+        ) {
+          this.chromaCanvas.width = drawingWidth;
+          this.chromaCanvas.height = drawingHeight;
+        }
+        this.chromaContext.setTransform(1, 0, 0, 1, 0, 0);
+        this.chromaContext.clearRect(0, 0, drawingWidth, drawingHeight);
+        this.chromaContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+      }
+    }
     const blendMode = isLight ? 'normal' : 'overlay';
     if (this.canvas.style.mixBlendMode !== blendMode) this.canvas.style.mixBlendMode = blendMode;
     // The 0.2.0 light renderer used blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA),
@@ -1389,14 +1553,15 @@ class GlassRendererImpl implements GlassRenderer {
       gl.uniform3f(locations.secondary, ...secondary);
       gl.uniform3f(locations.tertiary, ...tertiary);
       let occluderCount = 0;
+      const occluders = collectOccluders(
+        element,
+        style.rect,
+        this.ownerDocument,
+        view,
+        visibleCandidates,
+      );
       if (locations.occluders !== null && locations.occluderCount !== null) {
-        for (const occluder of collectOccluders(
-          element,
-          style.rect,
-          this.ownerDocument,
-          view,
-          visibleCandidates,
-        )) {
+        for (const occluder of occluders) {
           occluderRects.set(
             [
               occluder.left - viewport.left,
@@ -1414,6 +1579,9 @@ class GlassRendererImpl implements GlassRenderer {
           gl.uniform1fv(locations.occluderRadii, occluderRadii);
         }
         gl.uniform1f(locations.occluderCount, occluderCount);
+      }
+      if (isLight && this.chromaContext) {
+        paintBackdropChroma(this.chromaContext, style, viewport, occluders, gain);
       }
       for (const strip of getEdgeScissors(
         style,

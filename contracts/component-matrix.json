@@ -299,6 +299,8 @@
         "tests/visual/overlay-tracking.spec.ts",
         "packages/vue/src/overlay-hydration.test.ts",
         "packages/react/src/overlay-hydration.test.tsx",
+        "packages/vue/src/components.test.ts",
+        "packages/react/src/overlay.test.tsx",
         "../XCA-Portal/app/components/site/SiteHeader.vue",
         "../XCA-Portal/tests/e2e/mobile-header.spec.ts",
         "docs/consumer-validation-2026-10-25.md"
