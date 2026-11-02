@@ -227,8 +227,16 @@ export const glassFragmentShader = `
     if (lightSurface > 0.5) {
       // 0.2.0 uses the translucent directional colour directly with normal
       // canvas composition and SRC_ALPHA for both WebGL blend channels.
-      // The shared gain still permits an explicit exposure adjustment; 1 is
-      // the unmodified release response.
+      // The shared gain still permits an explicit exposure adjustment.
+      // On long straight surfaces, reduce the theme tint in the middle so it
+      // does not overpower the composited backdrop's own warm or cool colour.
+      // The existing directional corners and compact controls are unchanged.
+      float wideFactor = smoothstep(3.0, 5.0, u_rect_size.x / max(u_rect_size.y, 1.0));
+      float wideReach = max(min(u_rect_size.x * 0.5, u_rect_size.y * 1.25), 16.0);
+      float distanceFromEnds = min(v_local.x, 1.0 - v_local.x) * u_rect_size.x;
+      float wideMiddle = wideFactor * smoothstep(wideReach * 0.7, wideReach, distanceFromEnds);
+      vec3 neutralHighlight = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)) * 0.68);
+      color = mix(color, neutralHighlight, wideMiddle);
       color *= u_gain;
       gl_FragColor = vec4(color, alpha);
       return;

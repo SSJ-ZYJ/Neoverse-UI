@@ -355,6 +355,8 @@ export interface PopoverProps {
   placement?: OverlayPlacement;
   matchTriggerWidth?: boolean;
   ariaLabel?: string;
+  /** Button variant of the rendered trigger; ghost reuses the shared washes for chrome. */
+  triggerVariant?: ButtonVariant;
 }
 
 export type DropdownMenuItemTone = 'default' | 'danger';
@@ -373,6 +375,8 @@ export interface DropdownMenuProps {
   disabled?: boolean;
   placement?: OverlayPlacement;
   ariaLabel: string;
+  /** Button variant of the rendered trigger; ghost reuses the shared washes for chrome. */
+  triggerVariant?: ButtonVariant;
 }
 
 export interface PresenceProps {

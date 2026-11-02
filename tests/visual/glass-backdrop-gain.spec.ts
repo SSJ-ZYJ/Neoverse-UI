@@ -1,10 +1,11 @@
 import { expect, test } from '@playwright/test';
+import { measureColourRetention, measureDominantHighlight } from '../support/glass-colour-metrics';
 
 for (const renderer of ['webgl', 'css'] as const) {
   for (const theme of ['light', 'dark'] as const) {
     test(`${renderer}/${theme}: edge response follows the live backdrop transfer`, async ({
       page,
-    }) => {
+    }, testInfo) => {
       await page.route('**/*', (route) =>
         route.request().resourceType() === 'font' ? route.abort() : route.continue(),
       );
@@ -33,15 +34,26 @@ for (const renderer of ['webgl', 'css'] as const) {
       }, renderer);
       const canvas = page.locator('[data-neoverse-glass-renderer-canvas]');
       const channelGains: number[][] = [];
-      const lightOffsets: number[][] = [];
-      for (const colour of [
+      const colours = [
         'rgb(0 0 0)',
         'rgb(80 96 112)',
         'rgb(96 0 48)',
         'rgb(0 96 32)',
         'rgb(192 160 128)',
         'rgb(224 32 64)',
-      ]) {
+      ];
+      if (renderer === 'webgl' && theme === 'light') {
+        colours.push(
+          'rgb(160 48 32)',
+          'rgb(176 96 32)',
+          'rgb(176 152 40)',
+          'rgb(48 96 176)',
+          'rgb(128 64 176)',
+          'rgb(48 144 128)',
+          'rgb(240 240 240)',
+        );
+      }
+      for (const colour of colours) {
         // This is live sibling canvas paint, with no DOM/style mutation for the
         // Glass runtime to observe and no ancestor CSS background to reconstruct.
         await page.evaluate((colour) => {
@@ -84,28 +96,71 @@ for (const renderer of ['webgl', 'css'] as const) {
           },
           { lit: lit.toString('base64'), base: base.toString('base64') },
         );
+        if (renderer === 'webgl' && theme === 'light') {
+          const measurements = samples.lit.map((lit, index) => {
+            const base = samples.base[index] ?? [];
+            return {
+              surface: index === 0 ? 'elevated' : 'button',
+              ...measureDominantHighlight(
+                [base[0] ?? 0, base[1] ?? 0, base[2] ?? 0],
+                [lit[0] ?? 0, lit[1] ?? 0, lit[2] ?? 0],
+              ),
+            };
+          });
+          await testInfo.attach(`light-edge-response-${colour.replace(/[^\d]+/g, '-')}`, {
+            body: JSON.stringify({
+              colour,
+              backdrop: 'live canvas',
+              bodyBlur: 'disabled',
+              measurements,
+            }),
+            contentType: 'application/json',
+          });
+        }
         for (const [index, lit] of samples.lit.entries()) {
           const unlit = samples.base[index] ?? [];
           const peak = Math.max(...unlit);
-          if (peak === 0) {
-            if (renderer === 'webgl' && theme === 'light') {
-              lightOffsets[index] = lit;
+          if (renderer === 'webgl' && theme === 'light') {
+            if (peak === 0) {
               expect(
-                Math.max(...lit),
-                'the 0.2.0 light edge contributes its translucent colour on black',
-              ).toBeGreaterThan(1);
+                Math.max(...lit) - Math.min(...lit),
+                'a black backdrop must not acquire a theme-coloured edge',
+              ).toBeLessThanOrEqual(2);
               continue;
             }
-            expect(Math.max(...lit), 'black has no colour energy to amplify').toBeLessThanOrEqual(
-              1,
+            if (colour === 'rgb(240 240 240)') {
+              expect(
+                Math.max(...lit.map((value, channel) => value - (unlit[channel] ?? 0))),
+                'near-white background should not be pushed into a white edge',
+              ).toBeLessThanOrEqual(4);
+            }
+            const retention = measureColourRetention(
+              [unlit[0] ?? 0, unlit[1] ?? 0, unlit[2] ?? 0],
+              [lit[0] ?? 0, lit[1] ?? 0, lit[2] ?? 0],
             );
+            if (retention.hueDifference !== null && retention.saturationRetention !== null) {
+              expect(
+                retention.hueDifference,
+                `${colour}: preserve the live backdrop hue`,
+              ).toBeLessThanOrEqual(8);
+              expect(
+                retention.saturationRetention,
+                `${colour}: do not wash the backdrop towards white`,
+              ).toBeGreaterThanOrEqual(0.8);
+            }
+            continue;
+          }
+          if (peak === 0) {
+            expect(
+              Math.max(...lit),
+              'black has no backdrop colour to brighten or replace with a theme colour',
+            ).toBeLessThanOrEqual(1);
             continue;
           }
           if (colour === 'rgb(80 96 112)') {
             channelGains[index] = lit.map((value, channel) => {
               const base = unlit[channel] ?? 0;
               if (renderer !== 'webgl') return value / base;
-              if (theme === 'light') return (value - (lightOffsets[index]?.[channel] ?? 0)) / base;
               return (value - base) / Math.min(base, 255 - base);
             });
           }
@@ -114,7 +169,7 @@ for (const renderer of ['webgl', 'css'] as const) {
           const gain = Math.max(
             ...lit.map((value, channel) => (unlit[channel] ? value / (unlit[channel] ?? 1) : 1)),
           );
-          if (renderer === 'webgl' && theme === 'dark')
+          if (renderer === 'webgl')
             expect(gain, `${theme}/${colour}/${index}: visible backdrop gain`).toBeGreaterThan(
               1.01,
             );
@@ -124,20 +179,15 @@ for (const renderer of ['webgl', 'css'] as const) {
               'CSS brightness must not replace the source colour',
             ).toBeGreaterThanOrEqual(1);
           for (const [channel, value] of lit.entries()) {
+            const base = unlit[channel] ?? 0;
             expect(
               Math.abs(
                 value -
                   (renderer !== 'webgl'
                     ? Math.min(255, (unlit[channel] ?? 0) * (spectrum[channel] ?? 1))
-                    : theme === 'light'
-                      ? Math.min(
-                          255,
-                          (lightOffsets[index]?.[channel] ?? 0) +
-                            (unlit[channel] ?? 0) * (spectrum[channel] ?? 1),
-                        )
-                      : (unlit[channel] ?? 0) +
-                        (spectrum[channel] ?? 0) *
-                          Math.min(unlit[channel] ?? 0, 255 - (unlit[channel] ?? 0))),
+                    : base +
+                      (spectrum[channel] ?? 0) *
+                        Math.min(unlit[channel] ?? 0, 255 - (unlit[channel] ?? 0))),
               ),
               `${colour}: each channel must follow its calibrated live-backdrop transfer`,
             ).toBeLessThanOrEqual(3);

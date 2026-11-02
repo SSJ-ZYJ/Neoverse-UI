@@ -1359,6 +1359,26 @@ describe('Overlay primitives', () => {
     expect(panel.classes()).toContain('material-glass-elevated');
   });
 
+  it('renders overlay triggers with the shared button variant and keeps the secondary default', () => {
+    const wrapper = mount(UiPopover, {
+      props: { ariaLabel: 'Details', triggerVariant: 'ghost' },
+      slots: { trigger: 'Open details', default: '<p>Overlay body</p>' },
+    });
+    const menu = mount(UiDropdownMenu, {
+      props: { ariaLabel: 'Actions', triggerVariant: 'ghost', items: [] },
+      slots: { trigger: 'Actions' },
+    });
+    const fallback = mount(UiPopover, {
+      props: { ariaLabel: 'Details' },
+      slots: { trigger: 'Open details' },
+    });
+
+    expect(wrapper.get('.ui-popover__trigger').classes()).toContain('ui-button--ghost');
+    expect(menu.get('.ui-dropdown-menu__trigger').classes()).toContain('ui-button--ghost');
+    expect(fallback.get('.ui-popover__trigger').classes()).toContain('ui-button--secondary');
+    expect(wrapper.get('.ui-popover__trigger').classes()).not.toContain('ui-button--secondary');
+  });
+
   it('renders DropdownMenu with native menu items, disabled state, and danger tone', () => {
     const wrapper = mount(UiDropdownMenu, {
       props: {

@@ -48,6 +48,8 @@ A dismiss is a request to change controlled `open`. After the parent update, ada
 
 `UiPopover` exposes a button trigger and a `role="dialog"` panel. The caller provides the accessible label for the dialog content. Popover does not impose menu semantics or focus trapping.
 
+The trigger is a shared button. `triggerVariant` selects its variant and defaults to `secondary`, so existing consumers keep the same trigger classes. `ghost` reuses the shared ghost button classes: transparent chrome with the standard hover and press washes, for triggers that sit inside ghost chrome such as a page header. `UiDropdownMenu` exposes the same option with the same default.
+
 The trigger's `aria-controls` references the panel's generated ID, including while
 closed. Vue and React use their own SSR-stable `useId`; multiple instances receive
 distinct IDs and hydration/open/close cycles retain the association. IDs are

@@ -7,19 +7,28 @@ import {
   stopOverlayTracking,
 } from '@neoverse-ui/overlay-runtime';
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue';
+import { buttonVariantClasses } from './classes';
 import { presence } from './presence';
-import type { DropdownMenuItem, DropdownMenuProps } from './types';
+import type { ButtonVariant, DropdownMenuItem, DropdownMenuProps } from './types';
 
 const props = withDefaults(defineProps<DropdownMenuProps>(), {
   open: undefined,
   defaultOpen: false,
   disabled: false,
   placement: 'auto',
+  triggerVariant: 'secondary',
 });
 const emit = defineEmits<{
   'update:open': [value: boolean];
   select: [item: DropdownMenuItem];
 }>();
+
+const triggerClasses = computed(() => [
+  'ui-dropdown-menu__trigger',
+  'ui-button',
+  buttonVariantClasses[props.triggerVariant as ButtonVariant] ?? buttonVariantClasses.secondary,
+  'ui-button--md',
+]);
 
 const triggerRef = ref<HTMLButtonElement | null>(null);
 const panelRef = ref<HTMLElement | null>(null);
@@ -164,7 +173,7 @@ onBeforeUnmount(() => {
   <span class="ui-dropdown-menu">
     <button
       ref="triggerRef"
-      class="ui-dropdown-menu__trigger ui-button ui-button--secondary ui-button--md"
+      :class="triggerClasses"
       type="button"
       aria-haspopup="menu"
       :aria-expanded="expandedOpen"

@@ -141,13 +141,29 @@
       "name": "UiPopover",
       "vueType": "PopoverProps",
       "reactType": "UiPopoverProps",
-      "props": ["open", "defaultOpen", "disabled", "placement", "matchTriggerWidth", "ariaLabel"]
+      "props": [
+        "open",
+        "defaultOpen",
+        "disabled",
+        "placement",
+        "matchTriggerWidth",
+        "ariaLabel",
+        "triggerVariant"
+      ]
     },
     {
       "name": "UiDropdownMenu",
       "vueType": "DropdownMenuProps",
       "reactType": "UiDropdownMenuProps",
-      "props": ["items", "open", "defaultOpen", "disabled", "placement", "ariaLabel"]
+      "props": [
+        "items",
+        "open",
+        "defaultOpen",
+        "disabled",
+        "placement",
+        "ariaLabel",
+        "triggerVariant"
+      ]
     },
     {
       "name": "UiBreadcrumb",
