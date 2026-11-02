@@ -356,6 +356,34 @@ filter, background alpha, activation and recovery rather than accepting CSS sour
 alone. Screenshot acceptance belongs to the user; this change does not regenerate
 baselines or assert real consumer validation.
 
+### Open edge-contract failures (2026-11-02)
+
+The screenshot baselines for Design Lab `data-display` and the shared terminal
+surface were refreshed to the current implementation. Twenty additional browser
+contracts still fail and were deliberately left red rather than weakened:
+
+- `glass-backdrop-gain`: a black backdrop reports a theme-coloured edge (`47`
+  against a limit of `2`), so the saturation chroma field is not yet neutral on
+  source-free backdrops.
+- `glass-light-multicolour` and `glass-playground-visibility`: source light
+  reaches the edge at `0.11–0.31` against a `0.4` expectation, and pale
+  Playground surfaces retain under `0.31` of the inner colour.
+- `glass-chroma-field`: a blue source still measures `49` on the orange
+  remainder check that expects `>194`.
+- `glass-directional-light`, `glass-edge-restoration`, `glass-visible-refraction`,
+  `glass-v020-edge`, `glass-dark-visibility`, `glass-resting`,
+  `glass-transition` and `button-edge-coverage`: directional corner contrast
+  stays within about `1%` of the middle sample instead of the expected margin.
+- `scrollbar-states`: the native immersive thumb reports `0` background alpha
+  during hover and drag.
+- `choice-indicator-colour`: the light selection mark measures `0.643` against
+  `0.7`, and the React dark case times out in `locator.check`.
+
+These cases fail identically at `1a8f60b`, before the inset-edge and light-accent
+change, so they are recorded as pre-existing optical drift rather than
+acceptance. Threshold relaxation would retire the "edge follows the real
+backdrop" contract, so the numbers stay as written until the renderer is fixed.
+
 ## Remaining literals and ownership
 
 | Location | Remaining literals | Purpose / policy |
