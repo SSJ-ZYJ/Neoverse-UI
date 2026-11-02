@@ -316,6 +316,20 @@ describe('Glass renderer', () => {
     expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
   });
 
+  it('does not render a separate Glass edge on the segmented selection', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const slider = document.createElement('span');
+    slider.className = 'ui-segmented-control__slider';
+    slider.style.setProperty('--neoverse-control-segmented-active-edge-display', 'block');
+    slider.style.setProperty('--neoverse-material-edge-refraction-opacity', '0.34');
+    setRect(slider, { left: 24, top: 30, width: 120, height: 36 });
+    document.body.append(slider);
+
+    createTestRenderer().mount();
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
   it.each([
     ['input', 'ui-input', 0.5],
     ['textarea', 'ui-textarea', 0.5],

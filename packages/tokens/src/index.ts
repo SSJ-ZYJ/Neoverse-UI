@@ -275,6 +275,7 @@ const componentCssVariables = {
     edgeRefractionOpacity: '--neoverse-control-segmented-edge-refraction-opacity',
     edgeDisplay: '--neoverse-control-segmented-edge-display',
     optionHoverBackground: '--neoverse-control-hover-background',
+    hoverForeground: '--neoverse-control-segmented-hover-foreground',
   },
   badge: {
     labelOpticalOffset: '--neoverse-badge-label-optical-offset',

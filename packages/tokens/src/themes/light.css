@@ -168,14 +168,18 @@
   --neoverse-material-edge-refraction-opacity-immersive: 0.14;
   /* The WebGL rim owns the lower contour. Avoid darkening it with the inset
      fallback's lower shadow while retaining the established interaction cues. */
-  --neoverse-form-control-webgl-shadow: var(--neoverse-material-edge-highlight-subtle);
+  --neoverse-form-control-webgl-shadow:
+    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-shadow-control),
+    var(--neoverse-material-glass-subtle-bloom);
   --neoverse-form-control-webgl-hover-shadow:
-    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight);
+    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight),
+    var(--neoverse-shadow-control), var(--neoverse-material-glass-subtle-bloom);
   --neoverse-form-control-webgl-focus-depth-shadow:
     var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight),
-    var(--neoverse-shadow-control);
+    var(--neoverse-shadow-control), var(--neoverse-material-glass-subtle-bloom);
   --neoverse-form-control-webgl-focus-shadow: var(--neoverse-form-control-webgl-focus-depth-shadow);
-  --neoverse-choice-control-webgl-shadow: var(--neoverse-material-edge-highlight-subtle);
+  --neoverse-choice-control-webgl-shadow:
+    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-shadow-control);
   /* Let the shader reproduce the release's opacity-dependent colour by default. */
   --neoverse-material-edge-refraction-chroma-subtle: 1;
   --neoverse-material-edge-refraction-chroma-elevated: 1;
@@ -261,14 +265,28 @@
   );
   --neoverse-control-segmented-edge-display: block;
   --neoverse-control-segmented-shadow: var(--neoverse-effect-choice-rest-shadow);
-  --neoverse-control-segmented-active-background: var(--neoverse-effect-choice-selected-field);
+  /* Keep the selected field's 0.3.0 accent without changing the global blue. */
+  --neoverse-control-segmented-active-background: linear-gradient(
+    145deg,
+    color-mix(
+      in srgb,
+      var(--neoverse-color-accent-secondary) var(--neoverse-effect-strength-24),
+      transparent
+    ),
+    color-mix(in srgb, #74bae5 var(--neoverse-effect-alpha-quiet), transparent)
+  );
   --neoverse-control-segmented-active-fill: var(--neoverse-effect-choice-selected-fill);
-  --neoverse-control-segmented-active-border: var(--neoverse-effect-choice-selected-border);
+  /* Preserve the pale selected outline from 0.3.0 independently of the newer accent. */
+  --neoverse-control-segmented-active-border: color-mix(
+    in srgb,
+    rgb(116 186 229 / 48%) var(--neoverse-effect-strength-34),
+    transparent
+  );
   --neoverse-control-segmented-active-shadow: var(--neoverse-effect-choice-selected-shadow);
   /* The segmented shell stays visually still on hover in both themes. */
   --neoverse-control-segmented-shell-hover-border: transparent;
   --neoverse-control-segmented-shell-hover-shadow: var(--neoverse-control-segmented-shadow);
-  --neoverse-navigation-item-active-background: var(--neoverse-control-segmented-active-background);
+  --neoverse-navigation-item-active-background: var(--neoverse-effect-choice-selected-field);
   --neoverse-navigation-item-active-fill: var(--neoverse-control-segmented-active-fill);
   --neoverse-navigation-item-active-border: transparent;
   --neoverse-navigation-item-active-shadow: var(--neoverse-control-segmented-active-shadow);

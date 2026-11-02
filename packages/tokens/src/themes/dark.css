@@ -271,14 +271,18 @@
   --neoverse-material-edge-refraction-opacity-immersive: 0.58;
   /* Keep the same dark material edge but remove the extra black inset falloff
      when the shared WebGL renderer owns the control's rim. */
-  --neoverse-form-control-webgl-shadow: var(--neoverse-material-edge-highlight-subtle);
+  --neoverse-form-control-webgl-shadow:
+    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-shadow-control),
+    var(--neoverse-material-glass-subtle-bloom);
   --neoverse-form-control-webgl-hover-shadow:
-    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight);
+    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight),
+    var(--neoverse-shadow-control), var(--neoverse-material-glass-subtle-bloom);
   --neoverse-form-control-webgl-focus-depth-shadow:
     var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight),
-    var(--neoverse-shadow-control);
+    var(--neoverse-shadow-control), var(--neoverse-material-glass-subtle-bloom);
   --neoverse-form-control-webgl-focus-shadow: var(--neoverse-form-control-webgl-focus-depth-shadow);
-  --neoverse-choice-control-webgl-shadow: var(--neoverse-material-edge-highlight-subtle);
+  --neoverse-choice-control-webgl-shadow:
+    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-shadow-control);
   --neoverse-material-edge-refraction-chroma-subtle: 0.12;
   --neoverse-material-edge-refraction-chroma-elevated: 0.12;
   --neoverse-material-edge-refraction-chroma-immersive: 0.14464;

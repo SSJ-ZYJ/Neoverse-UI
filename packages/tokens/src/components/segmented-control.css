@@ -5,6 +5,9 @@
     --neoverse-control-segmented-background-image: none;
     --neoverse-control-segmented-background-color: var(--neoverse-material-glass-subtle-background);
     --neoverse-control-segmented-foreground: var(--neoverse-color-text-secondary);
+    /* Hover stays a neutral affordance: the selected accent belongs to the
+       active option only, and the hover label must survive press unchanged. */
+    --neoverse-control-segmented-hover-foreground: var(--neoverse-color-text-primary);
     --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
     --neoverse-control-segmented-active-background: var(--neoverse-effect-choice-selected-field);
     --neoverse-control-segmented-active-fill: var(--neoverse-effect-choice-selected-fill);

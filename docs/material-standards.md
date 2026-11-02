@@ -248,6 +248,10 @@ A selected SegmentedControl slider and a selected navigation item use a local ac
 field. Dock trailing groups retain a local grouping wash. These fields express
 selection or grouping, never create another backdrop filter, and remain consistent
 through hover and press. The surrounding Aurora Glass plate keeps its tier alpha/filter.
+Unselected segmented options hover and press on the neutral foreground
+(`segmentedControl.hoverForeground`) and keep that hover wash while pressed; only
+the press shadow and scale respond. The secondary accent stays reserved for the
+active option, so pressing never flips the label color or previews selection.
 
 Checkbox, RadioGroup and Switch use a pale blue selected field in Light mode,
 with blue-grey checks and compact radio dots. Dark mode uses a translucent blue
@@ -287,6 +291,10 @@ navigation and embedded segmented labels. Compact Dock remains `md` at 1. These
 are geometry contracts, not material parameters. The original language option
 height, inline/block padding and gap remain unchanged; the previous specimen
 override to `md` and removal of the large type factor were reverted.
+
+The light segmented selection plate retains its 0.3.0 pale outline and selected
+gradient. The well keeps its tier-owned blur, and inactive options remain
+transparent. The dark selection keeps its existing edge treatment.
 
 Regression contracts compare the established light/dark command shadows and shared Aurora Glass Dock depth,
 require the selected accent field at rest, and check that changing selection leaves
@@ -345,6 +353,9 @@ background blur.
 
 With the WebGL edge active in either theme, form controls use the existing
 directional inset highlights without the additional dark lower inset shadow.
+Inputs and Select reuse the shared control elevation and Light-tier bloom for a
+subtle lift; a resizable Textarea applies those outer shadows on its clipping
+shell. Choice plates use the smaller shared control elevation.
 Hover, focus, validation and disabled states keep their own feedback. Explicit
 CSS edge passes, top-layer controls and reduced-transparency fallbacks retain
 their normal inset shadows. The `formControl.webgl*` token names allow the

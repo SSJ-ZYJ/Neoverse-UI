@@ -235,7 +235,9 @@ export const glassFragmentShader = `
       float wideReach = max(min(u_rect_size.x * 0.5, u_rect_size.y * 1.25), 16.0);
       float distanceFromEnds = min(v_local.x, 1.0 - v_local.x) * u_rect_size.x;
       float wideMiddle = wideFactor * smoothstep(wideReach * 0.7, wideReach, distanceFromEnds);
-      vec3 neutralHighlight = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)) * 0.68);
+      // Removing theme chroma must preserve luminance along the straight rim.
+      // 去除主题色偏移时必须保留直边轮廓的亮度。
+      vec3 neutralHighlight = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)));
       color = mix(color, neutralHighlight, wideMiddle);
       color *= u_gain;
       gl_FragColor = vec4(color, alpha);
