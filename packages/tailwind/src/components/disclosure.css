@@ -1,5 +1,20 @@
 @layer components {
   :where(.ui-disclosure, .neoverse-prose details) {
+    --neoverse-material-edge-refraction-width: var(
+      --neoverse-material-glass-subtle-edge-refraction-width
+    );
+    --neoverse-material-edge-refraction-softness: var(
+      --neoverse-material-glass-subtle-edge-refraction-softness
+    );
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-material-glass-subtle-edge-refraction-opacity
+    );
+    --neoverse-material-edge-refraction-carrier: var(
+      --neoverse-material-glass-subtle-edge-refraction-carrier
+    );
+    --neoverse-material-edge-refraction-chroma: var(
+      --neoverse-material-edge-refraction-chroma-subtle
+    );
     border: 0;
     border-radius: var(--neoverse-disclosure-radius);
     padding: var(--neoverse-disclosure-padding);

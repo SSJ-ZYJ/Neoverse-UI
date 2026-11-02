@@ -666,6 +666,9 @@ test('exposes shared Surface and Glass material contracts', () => {
     '--neoverse-material-edge-filter-immersive',
   );
   expect(cssVariables.material.scale.tint.subtle).toBe('--neoverse-material-tint-subtle');
+  expect(cssVariables.material.scale.edgeHighlight.subtleBottom).toBe(
+    '--neoverse-material-edge-highlight-subtle-bottom',
+  );
   expect(cssVariables.material.scale.innerGlow.elevated).toBe(
     '--neoverse-material-inner-glow-elevated',
   );
@@ -980,23 +983,38 @@ test('keeps inset material distinct between light and dark surfaces', async () =
   const lightEdgeHighlight = materialCss.match(
     /--neoverse-material-edge-highlight-subtle:([\s\S]*?);/,
   )?.[1];
+  const lightBottomHighlight = materialCss.match(
+    /--neoverse-material-edge-highlight-subtle-bottom:([\s\S]*?);/,
+  )?.[1];
   const darkValues = shadowDeclarations(themesCss, 'inset');
   const darkEdgeHighlights = [
     ...themesCss.matchAll(/--neoverse-material-edge-highlight-subtle:([\s\S]*?);/g),
   ].flatMap((match) => (match[1] === undefined ? [] : [match[1]]));
+  const darkBottomHighlight = themesCss.match(
+    /--neoverse-material-edge-highlight-subtle-bottom:([\s\S]*?);/,
+  )?.[1];
 
   expect(lightValue).toBeDefined();
   expect(lightEdgeHighlight).toBeDefined();
+  expect(lightBottomHighlight).toBeDefined();
+  expect(darkBottomHighlight).toBeDefined();
   expect(darkValues).toHaveLength(1);
   expect(darkEdgeHighlights).toHaveLength(1);
 
-  if (lightValue === undefined || lightEdgeHighlight === undefined) {
+  if (
+    lightValue === undefined ||
+    lightEdgeHighlight === undefined ||
+    lightBottomHighlight === undefined ||
+    darkBottomHighlight === undefined
+  ) {
     return;
   }
 
   expect(
     parseShadowLayers(
-      lightValue.replace('var(--neoverse-material-edge-highlight-subtle)', lightEdgeHighlight),
+      lightValue
+        .replace('var(--neoverse-material-edge-highlight-subtle)', lightEdgeHighlight)
+        .replace('var(--neoverse-material-edge-highlight-subtle-bottom)', lightBottomHighlight),
     ),
   ).toEqual([
     [true, 0, 1, 2, 0],
@@ -1016,7 +1034,9 @@ test('keeps inset material distinct between light and dark surfaces', async () =
 
     expect(
       parseShadowLayers(
-        darkValue.replace('var(--neoverse-material-edge-highlight-subtle)', darkEdgeHighlight),
+        darkValue
+          .replace('var(--neoverse-material-edge-highlight-subtle)', darkEdgeHighlight)
+          .replace('var(--neoverse-material-edge-highlight-subtle-bottom)', darkBottomHighlight),
       ),
     ).toEqual([
       [true, 0, 1, 2, 0],

@@ -296,6 +296,241 @@ describe('Glass renderer', () => {
   });
 
   it.each([
+    ['input', 'ui-input'],
+    ['textarea', 'ui-textarea'],
+    ['summary', 'ui-select'],
+    ['span', 'ui-choice__control'],
+    ['div', 'ui-select__popover'],
+    ['details', 'ui-disclosure'],
+  ])('draws the shared edge for %s without a material utility', (tag, className) => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const control = document.createElement(tag);
+    control.className = className;
+    setRect(control, { left: 20, top: 30, width: 180, height: 40 });
+    document.body.append(control);
+
+    createTestRenderer().mount();
+
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
+  });
+
+  it.each([
+    ['input', 'ui-input', 0.5],
+    ['textarea', 'ui-textarea', 0.5],
+    ['summary', 'ui-select', 0.5],
+    ['span', 'ui-choice__control', 0.5],
+    ['div', 'ui-select__popover', 0.54],
+    ['details', 'ui-disclosure', 0.5],
+  ])('renders the dark Glass pass for %s with its tier optics', (tag, className, opacity) => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    document.documentElement.style.colorScheme = 'dark';
+    const control = document.createElement(tag);
+    control.className = className;
+    control.style.setProperty('--neoverse-material-edge-refraction-opacity', String(opacity));
+    control.style.setProperty('--neoverse-material-edge-refraction-chroma', '0.12');
+    control.style.backdropFilter = 'blur(12px)';
+    setRect(control, { left: 20, top: 30, width: 180, height: 40 });
+    document.body.append(control);
+
+    createTestRenderer().mount();
+
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    expect(canvas?.style.mixBlendMode).toBe('overlay');
+    expect(gl.blendFuncSeparate).toHaveBeenLastCalledWith(
+      gl.SRC_ALPHA,
+      gl.ONE_MINUS_SRC_ALPHA,
+      gl.ONE,
+      gl.ONE_MINUS_SRC_ALPHA,
+    );
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_light_surface' }),
+      0,
+    );
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_opacity' }),
+      opacity,
+    );
+    expect(gl.uniform1f).toHaveBeenCalledWith(expect.objectContaining({ name: 'u_chroma' }), 0.12);
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    expect(control.style.backdropFilter).toBe('blur(12px)');
+  });
+
+  it.each(['component', 'prose'] as const)(
+    'updates the %s disclosure edge when its native details element opens',
+    (kind) => {
+      const gl = createFakeGl();
+      installCanvasContext({ webgl2: gl });
+      const details = document.createElement('details');
+      if (kind === 'component') {
+        details.className = 'ui-disclosure';
+        document.body.append(details);
+      } else {
+        const prose = document.createElement('article');
+        prose.className = 'neoverse-prose';
+        prose.append(details);
+        document.body.append(prose);
+      }
+      setRect(details, { left: 20, top: 30, width: 180, height: 40 });
+      const renderer = createTestRenderer();
+      renderer.mount();
+      expect(gl.uniform4f).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'u_rect' }),
+        20,
+        30,
+        180,
+        40,
+      );
+
+      details.open = true;
+      setRect(details, { left: 20, top: 30, width: 180, height: 100 });
+      renderer.refresh();
+      expect(gl.uniform4f).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'u_rect' }),
+        20,
+        30,
+        180,
+        100,
+      );
+    },
+  );
+
+  it.each(['disabled', 'readonly'])('retains the dark Glass edge on %s inputs', (state) => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    document.documentElement.style.colorScheme = 'dark';
+    const input = document.createElement('input');
+    input.className = 'ui-input';
+    input.setAttribute(state, '');
+    setRect(input, { left: 20, top: 30, width: 180, height: 40 });
+    document.body.append(input);
+
+    createTestRenderer().mount();
+
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    expect(gl.uniform1f).toHaveBeenCalledWith(expect.objectContaining({ name: 'u_opacity' }), 0.46);
+  });
+
+  it('does not flatten an inherited surface merely because it is inside an implicit form plate', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const popover = document.createElement('div');
+    popover.className = 'ui-select__popover';
+    const child = document.createElement('div');
+    child.className = 'material-glass-subtle';
+    child.dataset.neoverseGlassNesting = 'inherit';
+    popover.append(child);
+    setRect(popover, { left: 10, top: 10, width: 200, height: 100 });
+    setRect(child, { left: 30, top: 30, width: 80, height: 40 });
+    document.body.append(popover);
+
+    createTestRenderer().mount();
+
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    ['ui-table', 'light'],
+    ['ui-table', 'dark'],
+    ['prose', 'light'],
+    ['prose', 'dark'],
+  ])('draws a %s table outline and its actual internal borders in %s mode', (kind, theme) => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    document.documentElement.style.colorScheme = theme;
+    const table = document.createElement('table');
+    table.style.backdropFilter = 'blur(12px)';
+    table.style.setProperty(
+      '--neoverse-material-edge-refraction-opacity',
+      theme === 'dark' ? '0.5' : '0.16',
+    );
+    if (kind === 'ui-table') table.className = 'ui-table';
+    else {
+      const prose = document.createElement('article');
+      prose.className = 'neoverse-prose';
+      prose.append(table);
+      document.body.append(prose);
+    }
+    const row = table.insertRow();
+    const first = row.insertCell();
+    const second = row.insertCell();
+    first.style.borderRight = '1px solid black';
+    setRect(table, { left: 20, top: 30, width: 200, height: 40 });
+    setRect(row, { left: 20, top: 30, width: 200, height: 40 });
+    setRect(first, { left: 20, top: 30, width: 100, height: 40 });
+    setRect(second, { left: 120, top: 30, width: 100, height: 40 });
+    if (kind === 'ui-table') document.body.append(table);
+
+    createTestRenderer().mount();
+
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+    expect(
+      document.querySelector<HTMLCanvasElement>('[data-neoverse-glass-renderer-canvas]')?.style
+        .mixBlendMode,
+    ).toBe(theme === 'dark' ? 'overlay' : 'normal');
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_opacity' }),
+      theme === 'dark' ? 0.5 : 0.16,
+    );
+    expect(table.style.backdropFilter).toBe('blur(12px)');
+    expect(gl.uniform4f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_rect' }),
+      20,
+      30,
+      200,
+      40,
+    );
+    expect(gl.uniform4f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_rect' }),
+      20,
+      30,
+      100,
+      40,
+    );
+  });
+
+  it('keeps a large captioned table bottom in the shared perimeter draw', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const region = document.createElement('div');
+    region.style.overflow = 'auto';
+    setRect(region, { left: 20, top: 40, width: 900, height: 320 });
+    const table = document.createElement('table');
+    table.className = 'ui-table';
+    table.style.setProperty('--neoverse-material-edge-refraction-opacity', '0.16');
+    setRect(table, { left: 20, top: 40, width: 900, height: 320 });
+    setRect(table.createCaption(), { left: 20, top: 40, width: 900, height: 20 });
+    setRect(table.createTBody().insertRow(), { left: 20, top: 70, width: 900, height: 290 });
+    region.append(table);
+    document.body.append(region);
+
+    const renderer = createTestRenderer({ maxDevicePixelRatio: 1 });
+    renderer.mount();
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    expect(canvas).not.toBeNull();
+    if (!canvas) return;
+    setRect(canvas, { left: 0, top: 0, width: 1000, height: 500 });
+    gl.scissor.mockClear();
+    renderer.refresh();
+
+    expect(gl.uniform4f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_rect' }),
+      20,
+      70,
+      900,
+      290,
+    );
+    expect(gl.scissor).toHaveBeenCalledWith(20, 140, 900, 5);
+    expect(gl.uniform1f).toHaveBeenCalledWith(expect.objectContaining({ name: 'u_opacity' }), 0.16);
+  });
+
+  it.each([
     ['ui-card', 'light', 'normal'],
     ['ui-card', 'dark', 'overlay'],
     ['ui-surface', 'light', 'normal'],
@@ -440,6 +675,57 @@ describe('Glass renderer', () => {
         { element: overlay, rect: overlay.getBoundingClientRect() },
       ]),
     ).toHaveLength(0);
+  });
+
+  it('does not let a transparent native choice input mask its visible control', () => {
+    const label = document.createElement('label');
+    const native = document.createElement('input');
+    const control = document.createElement('span');
+    native.style.opacity = '0';
+    label.append(native, control);
+    document.body.append(label);
+    setRect(native, { left: 20, top: 30, width: 100, height: 40 });
+    setRect(control, { left: 20, top: 30, width: 20, height: 20 });
+    const fakeDocument = {
+      elementsFromPoint: (): Element[] => [native, control, label],
+    } as unknown as Document;
+
+    expect(
+      collectOccluders(control, control.getBoundingClientRect(), fakeDocument, window),
+    ).toEqual([]);
+    native.style.opacity = '1';
+    expect(
+      collectOccluders(control, control.getBoundingClientRect(), fakeDocument, window),
+    ).toHaveLength(1);
+  });
+
+  it('finds a nested Glass overlay over the inside of a table grid', () => {
+    const table = document.createElement('table');
+    const cell = table.insertRow().insertCell();
+    const overlay = document.createElement('div');
+    cell.append(overlay);
+    document.body.append(table);
+    setRect(table, { left: 20, top: 20, width: 400, height: 300 });
+    setRect(overlay, { left: 150, top: 100, width: 80, height: 60 });
+    const fakeDocument = {
+      elementsFromPoint: (x: number, y: number): Element[] =>
+        x >= 150 && x <= 230 && y >= 100 && y <= 160 ? [overlay, cell, table] : [cell, table],
+    } as unknown as Document;
+    const candidates = [{ element: overlay, rect: overlay.getBoundingClientRect() }];
+
+    expect(
+      collectOccluders(table, table.getBoundingClientRect(), fakeDocument, window, candidates),
+    ).toEqual([]);
+    expect(
+      collectOccluders(
+        table,
+        table.getBoundingClientRect(),
+        fakeDocument,
+        window,
+        candidates,
+        true,
+      ),
+    ).toHaveLength(1);
   });
 
   it('uses an explicitly topmost pointer-transparent overlay as an occluder', () => {
@@ -1235,6 +1521,44 @@ describe('Glass renderer', () => {
       expect(unobserve).toHaveBeenCalledWith(glass);
     } finally {
       window.ResizeObserver = OriginalResizeObserver;
+    }
+  });
+
+  it('tracks only visible table cells with grid edges and releases them when removed', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const observe = vi.fn();
+    const unobserve = vi.fn();
+    const originalResizeObserver = window.ResizeObserver;
+    window.ResizeObserver = class {
+      public observe = observe;
+      public unobserve = unobserve;
+      public disconnect = vi.fn();
+    } as unknown as typeof ResizeObserver;
+    try {
+      const table = document.createElement('table');
+      table.className = 'ui-table';
+      const row = table.insertRow();
+      const first = row.insertCell();
+      const second = row.insertCell();
+      first.style.borderRight = '1px solid black';
+      setRect(table, { left: 20, top: 30, width: 200, height: 40 });
+      setRect(row, { left: 20, top: 30, width: 200, height: 40 });
+      setRect(first, { left: 20, top: 30, width: 100, height: 40 });
+      setRect(second, { left: 120, top: 30, width: 100, height: 40 });
+      document.body.append(table);
+
+      const renderer = createTestRenderer();
+      renderer.mount();
+      expect(observe).toHaveBeenCalledWith(table);
+      expect(observe).toHaveBeenCalledWith(first);
+      expect(observe).not.toHaveBeenCalledWith(second);
+
+      first.style.borderRight = 'none';
+      renderer.refresh();
+      expect(unobserve).toHaveBeenCalledWith(first);
+    } finally {
+      window.ResizeObserver = originalResizeObserver;
     }
   });
 

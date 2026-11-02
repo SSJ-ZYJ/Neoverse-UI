@@ -327,6 +327,28 @@ rendering rules; Vue/React adapter sources are scanned separately.
 Tables sample the Light inset backdrop once on the table, including prose tables.
 Cells retain their semantic fills, grid lines, and interaction shadows without
 separate backdrop filters, so long tables keep continuous frost across cell boundaries.
+Cells in the final table row also reuse the lower directional material catch,
+which remains above their fills without adding a dark outer border.
+The optional WebGL renderer also draws the Light edge around Input, Textarea,
+Select, Checkbox, RadioGroup, Switch and Disclosure, and around tables and their
+existing internal grid lines. Table grid geometry follows visible cell borders, including
+spanning cells and horizontal clipping; captions remain outside the table rim.
+The Select panel uses the Standard edge. The existing CSS edge field supplies a
+local fallback for the Select panel in the browser top layer, and for Select,
+choice controls and the Textarea shell when the shared canvas is unavailable.
+Native text inputs and disclosures retain their existing inset shadows without
+the optional renderer; tables retain their grid lines and cell fills. The shared
+canvas also cannot reach native text inputs, tables or disclosures inside a browser
+top-layer popover or modal, so those retain their CSS material there. Reduced
+transparency disables the added edge fields. None of these paths adds per-cell
+background blur.
+
+With the WebGL edge active in either theme, form controls use the existing
+directional inset highlights without the additional dark lower inset shadow.
+Hover, focus, validation and disabled states keep their own feedback. Explicit
+CSS edge passes, top-layer controls and reduced-transparency fallbacks retain
+their normal inset shadows. The `formControl.webgl*` token names allow the
+WebGL-state shadows to be customized independently in both themes.
 
 Run `bun run check:materials`, package tests, build, typecheck, style and semantic
 utility lint, and focused browser contract tests. Browser contracts inspect actual

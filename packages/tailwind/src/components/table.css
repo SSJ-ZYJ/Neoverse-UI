@@ -6,6 +6,21 @@
   }
 
   :where(.ui-table, .neoverse-prose table) {
+    --neoverse-material-edge-refraction-width: var(
+      --neoverse-material-glass-subtle-edge-refraction-width
+    );
+    --neoverse-material-edge-refraction-softness: var(
+      --neoverse-material-glass-subtle-edge-refraction-softness
+    );
+    --neoverse-material-edge-refraction-opacity: var(
+      --neoverse-material-glass-subtle-edge-refraction-opacity
+    );
+    --neoverse-material-edge-refraction-carrier: var(
+      --neoverse-material-glass-subtle-edge-refraction-carrier
+    );
+    --neoverse-material-edge-refraction-chroma: var(
+      --neoverse-material-edge-refraction-chroma-subtle
+    );
     width: 100%;
     border: 0;
     border-collapse: separate;
@@ -35,16 +50,34 @@
   }
 
   :where(.ui-table, .neoverse-prose table) th {
+    --neoverse-table-cell-current-shadow: var(--neoverse-table-header-shadow);
     color: var(--neoverse-table-header-foreground);
     background: var(--neoverse-table-header-background);
     border-block-end: var(--neoverse-border-width-thin) solid var(--neoverse-table-grid-line-strong);
-    box-shadow: var(--neoverse-table-header-shadow);
+    box-shadow: var(--neoverse-table-cell-current-shadow);
     font-weight: var(--neoverse-font-weight-semibold);
   }
 
   :where(.ui-table, .neoverse-prose table) td {
+    --neoverse-table-cell-current-shadow: var(--neoverse-table-cell-shadow);
     background: var(--neoverse-table-background);
-    box-shadow: var(--neoverse-table-cell-shadow);
+    box-shadow: var(--neoverse-table-cell-current-shadow);
+  }
+
+  /* Cells paint above the table's inset shadow. Repeat only its lower catch on
+     the actual final row so the shared rim stays visible through the cell fill. */
+  :where(.ui-table, .neoverse-prose table):not(:has(> tfoot))
+    > tbody:last-of-type
+    > tr:last-child
+    > :where(th, td),
+  :where(.ui-table, .neoverse-prose table) > tfoot:last-of-type > tr:last-child > :where(th, td),
+  :where(.ui-table, .neoverse-prose table):not(:has(> :is(tbody, tfoot)))
+    > thead:last-of-type
+    > tr:last-child
+    > :where(th, td) {
+    box-shadow:
+      var(--neoverse-material-edge-highlight-subtle-bottom),
+      var(--neoverse-table-cell-current-shadow);
   }
 
   :where(.ui-table, .neoverse-prose table) :where(th, td):not(:last-child) {
@@ -92,7 +125,7 @@
     :where(.ui-table--hoverable, .neoverse-prose table) tbody tr:hover td {
       color: var(--neoverse-table-hover-foreground);
       background: var(--neoverse-table-hover-background);
-      box-shadow: var(--neoverse-table-hover-shadow);
+      --neoverse-table-cell-current-shadow: var(--neoverse-table-hover-shadow);
     }
   }
 

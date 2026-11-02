@@ -224,11 +224,13 @@
   --neoverse-control-button-ghost-active-background: var(--neoverse-control-active-background);
 
   /* Material dark mapping. */
+  --neoverse-material-edge-highlight-subtle-bottom:
+    inset 0 -1px 2px
+    color-mix(in srgb, var(--neoverse-color-text-primary) 3%, transparent);
   --neoverse-material-edge-highlight-subtle:
     inset 0 1px 2px
     color-mix(in srgb, var(--neoverse-color-edge-light) 16%, transparent),
-    inset 0 -1px 2px
-    color-mix(in srgb, var(--neoverse-color-text-primary) 3%, transparent),
+    var(--neoverse-material-edge-highlight-subtle-bottom),
     inset 1px 0 2px
     color-mix(in srgb, var(--neoverse-color-edge-light) 6%, transparent),
     inset -1px 0 2px
@@ -267,6 +269,16 @@
   --neoverse-material-edge-refraction-opacity-subtle: 0.5;
   --neoverse-material-edge-refraction-opacity-elevated: 0.54;
   --neoverse-material-edge-refraction-opacity-immersive: 0.58;
+  /* Keep the same dark material edge but remove the extra black inset falloff
+     when the shared WebGL renderer owns the control's rim. */
+  --neoverse-form-control-webgl-shadow: var(--neoverse-material-edge-highlight-subtle);
+  --neoverse-form-control-webgl-hover-shadow:
+    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight);
+  --neoverse-form-control-webgl-focus-depth-shadow:
+    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight),
+    var(--neoverse-shadow-control);
+  --neoverse-form-control-webgl-focus-shadow: var(--neoverse-form-control-webgl-focus-depth-shadow);
+  --neoverse-choice-control-webgl-shadow: var(--neoverse-material-edge-highlight-subtle);
   --neoverse-material-edge-refraction-chroma-subtle: 0.12;
   --neoverse-material-edge-refraction-chroma-elevated: 0.12;
   --neoverse-material-edge-refraction-chroma-immersive: 0.14464;
