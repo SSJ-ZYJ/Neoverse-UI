@@ -2,8 +2,9 @@ import { expect, test } from '@playwright/test';
 
 const presentationViewports = [
   { label: 'mobile 390', width: 390, height: 844 },
+  // 1280/1920/2560 cover the xl breakpoint and the presentation baselines;
+  // 1600 falls between breakpoints and duplicates 1280/1920 coverage.
   { label: 'desktop 1280', width: 1280, height: 900 },
-  { label: 'desktop 1600', width: 1600, height: 900 },
   { label: 'desktop 1920', width: 1920, height: 1080 },
   { label: 'desktop 2560', width: 2560, height: 1080 },
 ] as const;

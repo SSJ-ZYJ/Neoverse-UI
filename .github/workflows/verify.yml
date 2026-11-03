@@ -60,6 +60,14 @@ jobs:
         with:
           bun-version: 1.4.0
 
+      - name: Cache Bun package cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
@@ -102,6 +110,14 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.0
+
+      - name: Cache Bun package cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
@@ -164,6 +180,7 @@ jobs:
 
   verify-windows:
     name: Verify workspace (Windows)
+    needs: quality-linux
     if: inputs.visual-checks
     runs-on: windows-latest
     timeout-minutes: 30
@@ -177,13 +194,25 @@ jobs:
         with:
           bun-version: 1.4.0
 
+      - name: Cache Bun package cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+
       - name: Install dependencies
         run: bun install --frozen-lockfile
 
-      # Linux already enforces release:check. Build platform-specific assets
-      # once here for Windows Playwright instead of duplicating the full gate.
-      - name: Build Windows browser fixtures
-        run: bun run build
+      # Linux already enforced release:check and uploaded the same
+      # platform-independent playground assets. Reuse them instead of repeating
+      # the full build before the Windows interaction checks.
+      - name: Download validated playground assets
+        uses: actions/download-artifact@v4
+        with:
+          name: verified-workspace-assets
+          path: .
 
       - name: Cache Playwright browsers
         uses: actions/cache@v4

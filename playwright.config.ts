@@ -10,7 +10,9 @@ export default defineConfig({
   fullyParallel: true,
   workers: 2,
   forbidOnly: Boolean(process.env.CI),
-  retries: process.env.CI ? 2 : 0,
+  // One retry absorbs a transient rendering hiccup without tripling the cost
+  // of a genuinely failing test.
+  retries: process.env.CI ? 1 : 0,
   reporter: 'list',
   snapshotPathTemplate: '{testDir}/snapshots/{platform}/{projectName}/{arg}{ext}',
   expect: {

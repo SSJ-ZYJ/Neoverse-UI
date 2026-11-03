@@ -58,8 +58,7 @@
     --neoverse-choice-control-hover-background: var(--neoverse-surface-inset-hover-background);
     --neoverse-choice-control-active-background: var(--neoverse-effect-choice-filled-field);
     --neoverse-choice-control-active-foreground: var(--neoverse-effect-choice-filled-foreground);
-    --neoverse-choice-control-shadow:
-      var(--neoverse-shadow-inset), var(--neoverse-shadow-control);
+    --neoverse-choice-control-shadow: var(--neoverse-shadow-inset), var(--neoverse-shadow-control);
     --neoverse-choice-control-webgl-shadow: initial;
     --neoverse-choice-control-active-shadow: var(--neoverse-effect-choice-filled-shadow);
     --neoverse-choice-control-disabled-opacity: var(--neoverse-effect-disabled-content-opacity);

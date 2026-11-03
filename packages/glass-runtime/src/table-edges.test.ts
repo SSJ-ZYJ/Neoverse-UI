@@ -95,5 +95,4 @@ describe('table edge geometry', () => {
     expect(edges[0]?.cell).toBe(spanning);
     expect(edges[0]?.strips[0]).toMatchObject({ top: 45, bottom: 75 });
   });
-
 });

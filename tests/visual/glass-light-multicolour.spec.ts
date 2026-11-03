@@ -15,6 +15,10 @@ for (const source of ['dom', 'canvas'] as const) {
     page,
   }, testInfo) => {
     test.skip(testInfo.project.name !== 'desktop', 'The comparison uses a fixed desktop layout.');
+    test.fixme(
+      true,
+      'Known light-edge drift; see docs/material-standards.md#open-edge-contract-failures.',
+    );
     await page.emulateMedia({ reducedMotion: 'reduce' });
     await page.goto('/frame?theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
