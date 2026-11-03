@@ -26,7 +26,7 @@
     "check:requests": "bun run requests check",
     "requests": "bun run scripts/component-requests.ts",
     "test:requests": "bun test scripts/component-requests.test.ts scripts/component-request-intake.test.ts",
-    "test:contracts": "bun test scripts/react-runtime-fixture.test.ts scripts/tailwind-cli.test.ts",
+    "test:contracts": "bun test scripts/react-runtime-fixture.test.ts scripts/tailwind-cli.test.ts tests/support/glass-colour-metrics.test.ts",
     "test:consumer-sync": "bun run --filter @neoverse-ui/tokens build && bun run --filter @neoverse-ui/giscus-theme build && bun test scripts/sync-consumer.test.ts",
     "test:release-tools": "bun test scripts/check-changeset-targets.test.ts scripts/verify-published.test.ts scripts/release-api-smoke.test.ts",
     "typecheck": "bun run build:types && bun run typecheck:only",

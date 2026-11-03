@@ -116,9 +116,15 @@ for (const theme of ['light', 'dark'] as const) {
         .first()
         .evaluate((element) => {
           const style = getComputedStyle(element);
-          return [style.borderBlockStartWidth, style.borderInlineStartWidth];
+          // The shared renderer paints the table perimeter; cells keep only
+          // their internal grid line at the header's block end.
+          return [
+            style.borderBlockStartWidth,
+            style.borderInlineStartWidth,
+            style.borderBlockEndWidth,
+          ];
         }),
-    ).toEqual(['1px', '1px']);
+    ).toEqual(['0px', '0px', '1px']);
     expect(headerMaterial.backgroundImage).toBe(cellMaterial.backgroundImage);
     expect(headerMaterial.backgroundColor).toBe(bodyBackgroundColor);
     expect(headerMaterial.boxShadow).not.toBe(cellMaterial.boxShadow);

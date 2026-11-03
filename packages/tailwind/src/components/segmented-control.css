@@ -106,9 +106,7 @@
     /* Hover moves the label to the neutral foreground instead of previewing the
        selected accent, so the selected option stays the only accented label.
        Wash and label persist while pressed; press only adds its shadow and scale. */
-    .ui-segmented-control__option:not(.ui-segmented-control__option--active):hover:not(
-        :disabled
-      ) {
+    .ui-segmented-control__option:not(.ui-segmented-control__option--active):hover:not(:disabled) {
       background-color: var(--neoverse-control-hover-background);
       color: var(--neoverse-control-segmented-hover-foreground);
     }

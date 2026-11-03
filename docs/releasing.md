@@ -149,15 +149,18 @@ Three Ubuntu 24.04 visual jobs then download that same build and run the complet
 Playwright suite with `--shard=1/3`, `2/3`, or `3/3`, two workers each.
 `Verify workspace (Linux)` remains the required aggregate gate, checking only
 the jobs selected by change scope and rejecting any selected failed job.
-Windows runs its own package build and four-file keyboard/overlay/theme browser
-gate only for visual-impacting changes; it no longer duplicates Linux's
-`release:check` static analysis and unit test matrix.
+Windows reuses the validated playground assets Linux already built, then runs its
+own four-file keyboard/overlay/theme browser gate only for visual-impacting
+changes; it does not duplicate Linux's `release:check` static analysis or unit
+test matrix.
 
 These OS jobs do not run equivalent browser workloads. In failed run
 [39412200952](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/39412200952),
 Linux ran 718 browser cases while Windows ran 62. Release quality took 68 seconds
 on Linux versus 107 seconds on Windows; the Linux bottleneck was its 21m35s full
-browser step, including two retries of deterministic screenshot mismatches.
+browser step, including two retries of deterministic screenshot mismatches. The
+current CI retry budget is one attempt: a second retry only tripled the cost of
+failures that reproduce identically.
 
 Playwright stores native baselines in
 `tests/visual/snapshots/{platform}/{projectName}/`. Preserve `win32` images when
