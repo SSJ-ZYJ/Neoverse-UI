@@ -130,7 +130,7 @@ describe('form control shadows with the shared Glass renderer', () => {
       textarea.className = 'ui-textarea';
       shell.append(textarea);
       document.body.append(input, select, shell);
-      const elevation = property(document.documentElement, '--neoverse-shadow-control');
+      const elevation = property(document.documentElement, '--neoverse-shadow-float');
       const bloom = property(document.documentElement, '--neoverse-material-glass-subtle-bloom');
 
       expect(property(input, 'box-shadow')).toContain(elevation);
@@ -189,7 +189,7 @@ describe('form control shadows with the shared Glass renderer', () => {
       input.style.setProperty('--neoverse-form-control-validation-error-shadow', '0 0 0 2px red');
       document.body.append(input);
       expect(property(input, 'box-shadow')).toContain(
-        property(document.documentElement, '--neoverse-shadow-control'),
+        property(document.documentElement, '--neoverse-shadow-float'),
       );
       expect(property(input, 'box-shadow')).toContain('2px red');
       expect(property(input, 'opacity')).toBe('1');
@@ -212,7 +212,7 @@ describe('form control shadows with the shared Glass renderer', () => {
         property(document.documentElement, '--neoverse-form-control-webgl-focus-shadow'),
       );
       expect(property(element, '--neoverse-form-control-effective-shadow')).not.toContain(
-        '14 34 44 / 8%',
+        'inset 0 -1px 2px',
       );
     },
   );
@@ -279,14 +279,14 @@ describe('form control shadows with the shared Glass renderer', () => {
         property(document.documentElement, '--neoverse-material-edge-highlight-subtle'),
       );
       expect(property(element, '--neoverse-form-control-effective-shadow')).toContain(
-        property(document.documentElement, '--neoverse-shadow-control'),
+        property(document.documentElement, '--neoverse-shadow-float'),
       );
       expect(property(element, '--neoverse-form-control-effective-shadow')).not.toContain(
         'rgb(0 0 0 / 18%)',
       );
       expect(property(element, '--neoverse-form-control-effective-hover-shadow')).toContain('blue');
       expect(property(element, '--neoverse-form-control-effective-focus-shadow')).toContain(
-        '0 1px 3px',
+        property(document.documentElement, '--neoverse-shadow-float'),
       );
     },
   );

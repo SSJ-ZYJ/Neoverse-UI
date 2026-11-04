@@ -5,13 +5,16 @@ Shared optional directional Aurora Glass (极光玻璃) edges for Neoverse UI. A
 Light uses a directional edge: the shader combines theme accent
 colours, varies chroma with effective opacity, and caps fragment alpha at 0.34.
 The light canvas uses normal composition and the release's WebGL blend factors;
-large surfaces use edge opacities 0.46 / 0.5 / 0.54. Chroma and gain remain
-optional multipliers, both defaulting to 1 in light mode.
+large surfaces use edge opacities 0.36 / 0.38 / 0.40, and no extra light alpha
+gain multiplies the tier value. Chroma and gain remain optional multipliers,
+both defaulting to 1 in light mode.
 
-Light keeps that mint-to-indigo direction but caps its cool excess: 72% of the
-blue lead over the red/green content is trimmed, so the right catch stays cool
-without the release's threefold margin that read as a blue band on pale pages.
-The cap applies to light surfaces only; dark composition is unchanged.
+The light fragment keeps 30% of that theme mix and resolves the rest toward the
+neutral edge light, so a pale backdrop's own hue is not overlaid by a saturated
+cyan band. Light keeps that tinted direction but caps its cool excess: 72% of
+the blue lead over the red/green content is trimmed, so the right catch stays
+cool without the release's threefold margin that read as a blue band on pale
+pages. The cap applies to light surfaces only; dark composition is unchanged.
 
 This is a translucent, theme-coloured highlight composited over the backdrop,
 not a sampled or displaced image of the background. Its apparent colour and
@@ -30,7 +33,9 @@ default or used as the Glass repair described in the
 The WebGL renderer also recognizes the shared Input, Textarea, Select, choice
 and Disclosure classes, plus `UiTable`, prose tables and prose details. It draws the table perimeter and
 visible internal cell borders on the same canvas, while CSS keeps the table's
-single backdrop filter. A Select panel in the browser top layer uses a local CSS
+single backdrop filter. The final row's local lower catch stays on the CSS edge
+path only, so the renderer's perimeter is not doubled by a second mint line.
+A Select panel in the browser top layer uses a local CSS
 edge field because the shared canvas cannot paint above that layer. The optional
 historical `native` backend does not extend its displacement filters to these
 implicit control, disclosure and table surfaces. Native text inputs, disclosures and table grids inside

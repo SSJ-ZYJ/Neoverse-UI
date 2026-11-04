@@ -16,7 +16,8 @@
     --neoverse-table-hover-background: var(--neoverse-surface-inset-hover-background);
     --neoverse-table-shadow:
       var(--neoverse-material-glass-subtle-edge-highlight),
-      var(--neoverse-material-glass-subtle-inner-glow), var(--neoverse-material-glass-subtle-bloom);
+      var(--neoverse-material-glass-subtle-inner-glow), var(--neoverse-shadow-float),
+      var(--neoverse-material-glass-subtle-bloom);
     --neoverse-table-cell-shadow: var(--neoverse-material-inner-glow-subtle);
     --neoverse-table-header-shadow:
       var(--neoverse-material-inner-glow-elevated), var(--neoverse-surface-inset-active-highlight);

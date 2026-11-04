@@ -20,15 +20,15 @@ test('publishes three monotonic tiers with exactly one background alpha', async 
   }
 });
 
-test('light restores the 0.2.0 surface and material edge inputs', async () => {
+test('light keeps the restored 0.2.0 edge inputs with a softer surface alpha', async () => {
   const light = await source('themes/light.css');
   const dark = await source('themes/dark.css');
   expect(light).toContain('--neoverse-material-edge-refraction-gain: 1;');
   expect(dark).toContain('--neoverse-material-edge-refraction-gain: 1;');
   for (const [tier, compactOpacity, surfaceOpacity, carrier] of [
-    ['subtle', 0.16, 0.46, 22],
-    ['elevated', 0.22, 0.5, 24],
-    ['immersive', 0.14, 0.54, 18],
+    ['subtle', 0.16, 0.36, 22],
+    ['elevated', 0.22, 0.38, 24],
+    ['immersive', 0.14, 0.4, 18],
   ] as const) {
     expect(light).toContain(
       `--neoverse-material-edge-refraction-opacity-${tier}: ${compactOpacity};`,

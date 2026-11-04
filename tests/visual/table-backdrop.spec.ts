@@ -88,3 +88,61 @@ test('table frost stays continuous at cell seams and while clipped by the viewpo
   expect(after.body, 'partially clipped tables must keep their central frost').toBeLessThan(8);
   expect(after.seam).toBeLessThan(8);
 });
+
+test('the shared renderer owns the table bottom rim instead of the inset catch', async ({
+  page,
+}) => {
+  await page.goto('/frame?theme=light&lang=en#data-display', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
+  const table = page.locator('[data-data-display-table]');
+  await expect(table).toBeVisible();
+
+  const read = () =>
+    table.evaluate((element) => {
+      const lastRow = element.rows[element.rows.length - 1];
+      const cell = lastRow.cells[1] as HTMLElement;
+      return {
+        tableShadow: getComputedStyle(element).boxShadow,
+        cellShadow: getComputedStyle(cell).boxShadow,
+      };
+    });
+
+  await expect
+    .poll(async () => (await read()).tableShadow, { message: 'the canvas gives the perimeter' })
+    .not.toContain('inset');
+  await expect
+    .poll(async () => (await read()).cellShadow, {
+      message: 'the final row must not repeat a local bottom catch',
+    })
+    .not.toContain('0px -1px 2px');
+
+  await table.evaluate((element) =>
+    element.setAttribute('data-neoverse-glass-edge-pass', 'css'),
+  );
+  await expect.poll(async () => (await read()).tableShadow).toContain('inset');
+  await expect
+    .poll(async () => (await read()).cellShadow, {
+      message: 'the CSS edge pass keeps its local bottom catch',
+    })
+    .toContain('0px -1px 2px');
+
+  // The canvas cannot paint inside a native top layer, so a table inside a
+  // popover keeps the local catch.
+  const topLayerShadow = await table.evaluate((element) => {
+    const host = document.createElement('div');
+    host.popover = 'manual';
+    document.body.append(host);
+    const clone = element.cloneNode(true) as HTMLTableElement;
+    clone.removeAttribute('data-neoverse-glass-edge-pass');
+    host.append(clone);
+    host.showPopover();
+    const lastRow = clone.rows[clone.rows.length - 1];
+    const shadow = getComputedStyle(lastRow.cells[1] as HTMLElement).boxShadow;
+    host.hidePopover();
+    host.remove();
+    return shadow;
+  });
+  expect(topLayerShadow, 'a top-layer table keeps its local bottom catch').toContain(
+    '0px -1px 2px',
+  );
+});

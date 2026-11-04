@@ -908,6 +908,7 @@ export const cssVariables = {
     xl: '--neoverse-shadow-xl',
     inset: '--neoverse-shadow-inset',
     control: '--neoverse-shadow-control',
+    float: '--neoverse-shadow-float',
     raised: '--neoverse-shadow-raised',
     card: '--neoverse-shadow-card',
     overlay: '--neoverse-shadow-overlay',

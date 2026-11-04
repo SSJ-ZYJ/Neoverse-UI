@@ -168,6 +168,10 @@ export const glassFragmentShader = `
     if (lightSurface > 0.5) {
       float coolExcess = max(color.b - max(color.r, color.g), 0.0);
       color.b -= coolExcess * 0.72;
+      // A pale backdrop already carries the page's cool hue. Let the light
+      // highlight borrow the neutral edge colour instead of adding a saturated
+      // cyan band on top of it; the accent only tints the remaining mix.
+      color = mix(color, u_edge_light, 0.7);
     }
     // There is deliberately no uniform base alpha: these directional catches
     // must break up instead of closing into a white outline around the card.
@@ -199,8 +203,7 @@ export const glassFragmentShader = `
     // corner focus must not erase the middle of a button's vertical contour.
     cornerAlpha += leftCatch * 0.1 + rightCatch * 0.12;
     directionalAlpha = mix(directionalAlpha, cornerAlpha, u_corner_focus);
-    float lightAlphaGain = mix(1.0, 1.35, lightSurface);
-    float alpha = edgeMask * u_opacity * directionalAlpha * thicknessScale * lightAlphaGain;
+    float alpha = edgeMask * u_opacity * directionalAlpha * thicknessScale;
     alpha = clamp(alpha, 0.0, 0.34);
 
     // The shared canvas paints above every overlay, so an edge would pierce
