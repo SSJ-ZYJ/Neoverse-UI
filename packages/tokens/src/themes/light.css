@@ -169,14 +169,14 @@
   /* The WebGL rim owns the lower contour. Avoid darkening it with the inset
      fallback's lower shadow while retaining the established interaction cues. */
   --neoverse-form-control-webgl-shadow:
-    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-shadow-control),
+    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-shadow-float),
     var(--neoverse-material-glass-subtle-bloom);
   --neoverse-form-control-webgl-hover-shadow:
     var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight),
-    var(--neoverse-shadow-control), var(--neoverse-material-glass-subtle-bloom);
+    var(--neoverse-shadow-float), var(--neoverse-material-glass-subtle-bloom);
   --neoverse-form-control-webgl-focus-depth-shadow:
     var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight),
-    var(--neoverse-shadow-control), var(--neoverse-material-glass-subtle-bloom);
+    var(--neoverse-shadow-float), var(--neoverse-material-glass-subtle-bloom);
   --neoverse-form-control-webgl-focus-shadow: var(--neoverse-form-control-webgl-focus-depth-shadow);
   --neoverse-choice-control-webgl-shadow:
     var(--neoverse-material-edge-highlight-subtle), var(--neoverse-shadow-control);
@@ -184,10 +184,11 @@
   --neoverse-material-edge-refraction-chroma-subtle: 1;
   --neoverse-material-edge-refraction-chroma-elevated: 1;
   --neoverse-material-edge-refraction-chroma-immersive: 1;
-  /* Large surfaces use the stronger three released 0.2.0 catches. */
-  --neoverse-surface-glass-subtle-edge-opacity: 0.46;
-  --neoverse-surface-glass-elevated-edge-opacity: 0.5;
-  --neoverse-surface-glass-immersive-edge-opacity: 0.54;
+  /* Large light surfaces keep the released directional catches at a softer
+     alpha so the pale rim stays translucent instead of reading as a stroke. */
+  --neoverse-surface-glass-subtle-edge-opacity: 0.36;
+  --neoverse-surface-glass-elevated-edge-opacity: 0.38;
+  --neoverse-surface-glass-immersive-edge-opacity: 0.4;
   --neoverse-material-edge-refraction-carrier-subtle: color-mix(
     in srgb,
     var(--neoverse-color-border-default) 22%,
@@ -246,6 +247,8 @@
        visual feedback; this layer only supplies a quiet separation from the
        atmospheric canvas. */
   --neoverse-shadow-control: 0 1px 4px -1px rgb(14 34 44 / 10%);
+  /* Compact elevated controls: a contact layer plus a short ambient falloff. */
+  --neoverse-shadow-float: 0 1px 2px rgb(14 34 44 / 8%), 0 6px 16px -6px rgb(14 34 44 / 18%);
 
   /* Compact controls use one top catch plus a neutral falloff. The former
        four-sided inset recipe made light buttons look double-bordered. */

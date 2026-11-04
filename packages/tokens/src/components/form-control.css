@@ -18,14 +18,14 @@
     --neoverse-form-control-readonly-background: var(--neoverse-surface-inset-rest-background);
     /* A contact shadow and subtle-tier bloom give full-size fields a quiet lift. */
     --neoverse-form-control-shadow:
-      var(--neoverse-shadow-inset), var(--neoverse-shadow-control),
+      var(--neoverse-shadow-inset), var(--neoverse-shadow-float),
       var(--neoverse-material-glass-subtle-bloom);
     --neoverse-form-control-hover-shadow:
       var(--neoverse-shadow-inset), var(--neoverse-surface-inset-active-highlight),
-      var(--neoverse-shadow-control), var(--neoverse-material-glass-subtle-bloom);
+      var(--neoverse-shadow-float), var(--neoverse-material-glass-subtle-bloom);
     --neoverse-form-control-focus-depth-shadow:
       var(--neoverse-shadow-inset), var(--neoverse-surface-inset-active-highlight),
-      var(--neoverse-shadow-control), var(--neoverse-material-glass-subtle-bloom);
+      var(--neoverse-shadow-float), var(--neoverse-material-glass-subtle-bloom);
     --neoverse-form-control-focus-shadow: var(--neoverse-form-control-focus-depth-shadow);
     --neoverse-form-control-webgl-shadow: initial;
     --neoverse-form-control-webgl-hover-shadow: initial;

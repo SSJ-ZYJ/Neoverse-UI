@@ -432,6 +432,7 @@ test('provides the complete four-pixel spacing grid', () => {
 test('exposes the shared geometry and typography contracts', () => {
   expect(cssVariables.radius['2xl']).toBe('--neoverse-radius-2xl');
   expect(cssVariables.shadow.inset).toBe('--neoverse-shadow-inset');
+  expect(cssVariables.shadow.float).toBe('--neoverse-shadow-float');
   expect(cssVariables.font.family.mono).toBe('--neoverse-font-family-mono');
   expect(cssVariables.typography.family.display).toBe('--neoverse-typography-display-font-family');
   expect(cssVariables.typography.family.body).toBe('--neoverse-typography-body-font-family');

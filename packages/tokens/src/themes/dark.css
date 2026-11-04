@@ -143,6 +143,8 @@
 
   --neoverse-shadow-xs: 0 1px 3px rgb(0 0 0 / 20%);
   --neoverse-shadow-control: var(--neoverse-shadow-xs);
+  /* Compact elevated controls keep a darker contact and ambient falloff. */
+  --neoverse-shadow-float: 0 1px 2px rgb(0 0 0 / 26%), 0 8px 20px -8px rgb(0 0 0 / 44%);
   --neoverse-shadow-sm: 0 0.75rem 2rem -1.25rem rgb(0 0 0 / 44%), 0 3px 8px -1px rgb(0 0 0 / 18%);
   --neoverse-shadow-md: 0 1rem 2.8rem -1.6rem rgb(0 0 0 / 62%), 0 4px 10px -1px rgb(0 0 0 / 24%);
   --neoverse-shadow-lg: 0 1.5rem 4rem -1.75rem rgb(0 0 0 / 72%), 0 6px 14px -1px rgb(0 0 0 / 36%);
@@ -271,14 +273,14 @@
   /* Keep the same dark material edge but remove the extra black inset falloff
      when the shared WebGL renderer owns the control's rim. */
   --neoverse-form-control-webgl-shadow:
-    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-shadow-control),
+    var(--neoverse-material-edge-highlight-subtle), var(--neoverse-shadow-float),
     var(--neoverse-material-glass-subtle-bloom);
   --neoverse-form-control-webgl-hover-shadow:
     var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight),
-    var(--neoverse-shadow-control), var(--neoverse-material-glass-subtle-bloom);
+    var(--neoverse-shadow-float), var(--neoverse-material-glass-subtle-bloom);
   --neoverse-form-control-webgl-focus-depth-shadow:
     var(--neoverse-material-edge-highlight-subtle), var(--neoverse-surface-inset-active-highlight),
-    var(--neoverse-shadow-control), var(--neoverse-material-glass-subtle-bloom);
+    var(--neoverse-shadow-float), var(--neoverse-material-glass-subtle-bloom);
   --neoverse-form-control-webgl-focus-shadow: var(--neoverse-form-control-webgl-focus-depth-shadow);
   --neoverse-choice-control-webgl-shadow:
     var(--neoverse-material-edge-highlight-subtle), var(--neoverse-shadow-control);

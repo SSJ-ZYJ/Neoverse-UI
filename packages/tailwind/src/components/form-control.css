@@ -284,7 +284,7 @@
     min-block-size: var(--neoverse-textarea-min-block-size);
     overflow: hidden;
     border-radius: var(--neoverse-form-control-radius);
-    box-shadow: var(--neoverse-shadow-control), var(--neoverse-material-glass-subtle-bloom);
+    box-shadow: var(--neoverse-shadow-float), var(--neoverse-material-glass-subtle-bloom);
     resize: vertical;
   }
 

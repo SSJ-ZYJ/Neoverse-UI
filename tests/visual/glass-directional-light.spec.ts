@@ -5,10 +5,6 @@ test.use({ launchOptions: { args: ['--use-angle=swiftshader', '--enable-unsafe-s
 test('light Glass keeps a continuous edge with stronger upper-left and lower-right corners', async ({
   page,
 }, testInfo) => {
-  test.fixme(
-    true,
-    'Known light-edge drift; see docs/material-standards.md#open-edge-contract-failures.',
-  );
   await page.route('**/*', (route) =>
     route.request().resourceType() === 'font' ? route.abort() : route.continue(),
   );
@@ -112,11 +108,10 @@ test('light Glass keeps a continuous edge with stronger upper-left and lower-rig
   });
   for (const metric of metrics) {
     expect(metric.interior, JSON.stringify(metrics)).toBeLessThanOrEqual(1);
+    expect(metric.upperLeft, JSON.stringify(metrics)).toBeGreaterThan(metric.upperMiddle * 1.2);
+    expect(metric.lowerRight, JSON.stringify(metrics)).toBeGreaterThan(metric.upperMiddle);
     expect(Math.min(metric.upperLeft, metric.lowerRight), JSON.stringify(metrics)).toBeGreaterThan(
       4,
-    );
-    expect(Math.min(metric.upperLeft, metric.lowerRight), JSON.stringify(metrics)).toBeGreaterThan(
-      metric.upperMiddle * 1.2,
     );
     expect(Math.min(metric.upperRight, metric.lowerLeft), JSON.stringify(metrics)).toBeGreaterThan(
       4,

@@ -80,6 +80,40 @@
       var(--neoverse-table-cell-current-shadow);
   }
 
+  /* The shared canvas paints the table perimeter above the cell fills. Keep
+     the local inset catch for the CSS edge path only; otherwise the final row
+     repeats a mint line below the renderer's rim. */
+  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
+    :where(.ui-table, .neoverse-prose table):not(
+      [data-neoverse-glass-edge-pass='css']
+    ):not(:is(:popover-open, :modal) *) {
+    box-shadow: var(--neoverse-shadow-float), var(--neoverse-material-glass-subtle-bloom);
+  }
+
+  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
+    :where(.ui-table, .neoverse-prose table):not(
+      [data-neoverse-glass-edge-pass='css']
+    ):not(:is(:popover-open, :modal) *):not(:has(> tfoot))
+    > tbody:last-of-type
+    > tr:last-child
+    > :where(th, td),
+  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
+    :where(.ui-table, .neoverse-prose table):not(
+      [data-neoverse-glass-edge-pass='css']
+    ):not(:is(:popover-open, :modal) *)
+    > tfoot:last-of-type
+    > tr:last-child
+    > :where(th, td),
+  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
+    :where(.ui-table, .neoverse-prose table):not(
+      [data-neoverse-glass-edge-pass='css']
+    ):not(:is(:popover-open, :modal) *):not(:has(> :is(tbody, tfoot)))
+    > thead:last-of-type
+    > tr:last-child
+    > :where(th, td) {
+    box-shadow: var(--neoverse-table-cell-current-shadow);
+  }
+
   :where(.ui-table, .neoverse-prose table) :where(th, td):not(:last-child) {
     border-inline-end: var(--neoverse-border-width-thin) solid var(--neoverse-table-grid-line);
   }

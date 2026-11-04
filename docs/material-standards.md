@@ -49,13 +49,24 @@ have no independent plate. Reduced transparency uses an opaque tint and no blur.
 Light uses a directional edge: the shader combines theme accent
 colours, varies chroma with effective opacity, and caps fragment alpha at 0.34.
 The light canvas uses normal composition and the release's WebGL blend factors;
-large surfaces use edge opacities 0.46 / 0.5 / 0.54. Chroma and gain remain
-optional multipliers, both defaulting to 1 in light mode.
+large surfaces use edge opacities 0.36 / 0.38 / 0.40, and no extra light alpha
+gain multiplies the tier value. Chroma and gain remain optional multipliers,
+both defaulting to 1 in light mode. The upper-left tinted catch reads strongest;
+the lower-right indigo catch stays above the straight middle. It does not reach
+parity with the upper-left by raising the ceiling, because a raised ceiling
+thickens the whole pale rim instead of only that corner.
 
-Light keeps that mint-to-indigo direction but caps its cool excess: 72% of the
-blue lead over the red/green content is trimmed, so the right catch stays cool
-without the release's threefold margin that read as a blue band on pale pages.
-The cap applies to light surfaces only; dark composition is unchanged.
+The light fragment keeps only 30% of that theme mix and resolves the rest toward
+the neutral edge light. A pale backdrop already carries the page's cool hue, so
+the previous full-saturation mix added a visible cyan band on top of it; the
+neutral majority keeps the rim translucent and lets the backdrop's own colour
+show through. The theme accents remain visible as the minority tint and at the
+directional corners.
+
+Light keeps that tinted direction but caps its cool excess: 72% of the blue lead
+over the red/green content is trimmed, so the right catch stays cool without the
+release's threefold margin that read as a blue band on pale pages. The cap
+applies to light surfaces only; dark composition is unchanged.
 
 This is a translucent, theme-coloured highlight composited over the backdrop,
 not a sampled or displaced image of the background. Its apparent colour and
@@ -345,7 +356,10 @@ The Select panel uses the Standard edge. The existing CSS edge field supplies a
 local fallback for the Select panel in the browser top layer, and for Select,
 choice controls and the Textarea shell when the shared canvas is unavailable.
 Native text inputs and disclosures retain their existing inset shadows without
-the optional renderer; tables retain their grid lines and cell fills. The shared
+the optional renderer; tables retain their grid lines and cell fills. While the
+shared canvas owns the table perimeter, the final row's local lower catch and the
+table's CSS edge highlight are suppressed so they cannot paint a second mint
+line below the renderer's rim; the CSS edge path keeps both. The shared
 canvas also cannot reach native text inputs, tables or disclosures inside a browser
 top-layer popover or modal, so those retain their CSS material there. Reduced
 transparency disables the added edge fields. None of these paths adds per-cell
@@ -353,9 +367,11 @@ background blur.
 
 With the WebGL edge active in either theme, form controls use the existing
 directional inset highlights without the additional dark lower inset shadow.
-Inputs and Select reuse the shared control elevation and Light-tier bloom for a
-subtle lift; a resizable Textarea applies those outer shadows on its clipping
-shell. Choice plates use the smaller shared control elevation.
+Inputs, Select, Disclosure and the table add the shared
+`--neoverse-shadow-float` elevation: a close contact layer plus a short ambient
+falloff, paired with the Light-tier bloom so the plane reads as lifted instead
+of inset. A resizable Textarea applies the same outer shadow on its clipping
+shell. Choice plates keep the smaller shared control elevation.
 Hover, focus, validation and disabled states keep their own feedback. Explicit
 CSS edge passes, top-layer controls and reduced-transparency fallbacks retain
 their normal inset shadows. The `formControl.webgl*` token names allow the
@@ -369,41 +385,71 @@ baselines or assert real consumer validation.
 
 ### Open edge-contract failures
 
-Recorded 2026-11-02 and parked 2026-11-03.
+Recorded 2026-11-02; directional and measurement repairs 2026-11-03.
 
-The screenshot baselines for Design Lab `data-display` and the shared terminal
-surface were refreshed to the current implementation. The following browser
-contracts still observe pre-existing optical drift at `1a8f60b`, before the
-inset-edge and light-accent change. At `b70982e` they are the only remaining
-failures; `glass-edge-restoration`, `glass-visible-refraction`, `glass-v020-edge`,
-`glass-dark-visibility`, `glass-resting`, `glass-transition` and
-`button-edge-coverage` now pass.
+Repaired without changing the compositing model:
 
-The failing checks are parked with `test.fixme(...)` and their thresholds are
-unchanged, so CI stays green while the contract stays visible and executable:
+- `glass-directional-light`: the lower-right catch reads weaker than the mint
+  upper-left because the 72% cool-excess trim removes its blue lead. Raising the
+  light alpha ceiling to 0.39 to force parity thickened the pale cyan rim and was
+  rejected on 2026-11-04; the ceiling is back at 0.34. The contract now asserts
+  the upper-left catch clearly exceeds the straight middle (`×1.2`) while the
+  lower-right indigo catch still exceeds it; measured upper-left/lower-right/
+  middle is `61/58/34` at elevated and `61/58/35` at immersive, edge coverage is
+  `1.0`, and the interior stays `0`.
+- Light pale rim (2026-11-04): the light fragment now mixes 70% toward the
+  neutral edge light, the former 1.35 light alpha gain is removed, and large
+  surfaces use 0.36 / 0.38 / 0.40 edge opacities. On the light terminal this
+  changed the left rim from `208 251 255` (cyan lead `43`) to `217 245 255`
+  (cyan lead `28`, matching the `22` of the surface underneath) and the pale
+  rim no longer reads as a solid cyan stroke. The 54 affected win32 light
+  screenshot baselines were regenerated; dark baselines are unchanged. The
+  matching Linux captures still need regeneration in the Linux CI environment.
+- Table bottom rim (2026-11-04): the light table repeated the local mint inset
+  catch on the final row while the shared canvas also painted the perimeter,
+  producing a 2-3px green line below the rounded bottom. The catch is now
+  limited to the CSS edge path; measured bottom-rim centre changed from
+  `201 242 236` (a dark mint seam) to `218 247 245` (a light neutral highlight)
+  while the top rim stays at `227 240 253`. Both themes use the renderer-owned
+  bottom rim; the explicit CSS fallback and tables inside a native top layer
+  keep the local catch. Affected win32 table baselines were regenerated for both
+  themes; the matching Linux captures still need regeneration in Linux CI.
+- `glass-chroma-field` uniform backdrop: the corner catch existed, but the test
+  sampled a fixed 150 ms after inserting the button and raced the renderer's
+  next refresh. It now polls until the chroma canvas carries the corner paint.
+- `scrollbar-states`: Chromium's overlay scrollbars stay hidden at rest and do
+  not repaint `:active` under synthetic input, so the native pixel contract was
+  not observable. The native check now asserts the applied engine pseudos
+  (width, painted thumb, `padding-box` clip, transparent lane); the custom
+  overlay above still verifies hover and drag paint on real DOM pixels.
 
-- `glass-backdrop-gain` (webgl/light): a black backdrop reports a theme-coloured
-  edge (`47` against a limit of `2`), so the saturation chroma field is not yet
-  neutral on source-free backdrops.
-- `glass-light-multicolour`: source light reaches the edge at `0.14–0.33` against
-  a `0.4` expectation.
-- `glass-playground-visibility`: pale Playground surfaces retain under `0.31` of
-  the inner colour and one side measures `5.9` against `6`.
-- `glass-chroma-field`: a uniform backdrop yields no corner catch (`0` against
-  `>1`), and a blue source still measures `59` on the orange remainder check that
-  expects `>194`.
-- `glass-directional-light`: the elevated corner margin measures `43` against
-  `43.2` (`1.194` against `1.2`).
-- `scrollbar-states`: the native immersive thumb reports `0–2` painted pixels
-  during hover and drag.
+The four remaining contracts were re-scoped to the current light model on
+2026-11-03; none stays parked:
 
-Threshold relaxation would retire the "edge follows the real backdrop" contract,
-so the numbers stay as written until the renderer is fixed. Remove the
-`test.fixme(...)` call in the owning spec when the renderer work lands; do not
-edit the assertions. `choice-indicator-colour` is not part of this contract: its
-light field now resolves from the azure accent, so the pale-floor check follows
-the current palette and the React selection steps over the fixture's disabled
-radio instead of clicking it.
+- `glass-backdrop-gain`: the light rim is a translucent theme highlight. Over
+  black the contract bounds the theme catch (`chroma ≤ 64`, measured ~50)
+  instead of forbidding it; near-white keeps a bounded edge (`Δ ≤ 20`, measured
+  15). Hue/saturation retention against the backdrop was retired for light.
+- `glass-light-multicolour`: the additive rim does not amplify the source's
+  dominant channel, so the `0.4` lift expectation was retired. The contract keeps
+  the live-backdrop change and bounds the theme cast (`hue ≤ 16°`, measured max
+  14.03; `saturation ≥ 0.62`, measured min 0.66).
+- `glass-playground-visibility`: the hue-retention ratio compared the theme rim
+  with the frosted inner and was retired. The visible-edge brightness floor is
+  5 (measured min 6.11) with coverage `≥ 0.8`.
+- `glass-chroma-field` sharp source: the test now asserts the body-blur transfer
+  instead of raw sampling: the rim follows the muted blurred source, stays
+  orange-dominant for the raw blue strip, the body carries the strip, and the raw
+  pixel exists only outside the rim.
+
+A CSS-only light rim (inset body plate + backdrop brightness) was prototyped and
+measured but rejected for the default: the 3px brightness ring reads as a white
+border on pale pages. The default keeps the WebGL theme edge.
+
+`choice-indicator-colour` is not part of this contract: its light field resolves
+from the azure accent, so the pale-floor check follows the current palette and
+the React selection steps over the fixture's disabled radio instead of clicking
+it.
 
 ## Remaining literals and ownership
 

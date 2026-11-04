@@ -154,13 +154,16 @@ Independent Aurora Glass surfaces must render their own tint, border, backdrop f
 Light restores the 0.2.0 directional edge: the shader combines theme accent
 colours, varies chroma with effective opacity, and caps fragment alpha at 0.34.
 The light canvas uses normal composition and the release's WebGL blend factors;
-large surfaces use edge opacities 0.46 / 0.5 / 0.54. Chroma and gain remain
-optional multipliers, both defaulting to 1 in light mode.
+large surfaces use edge opacities 0.36 / 0.38 / 0.40, and no extra light alpha
+gain multiplies the tier value. Chroma and gain remain optional multipliers,
+both defaulting to 1 in light mode.
 
-Light keeps that mint-to-indigo direction but caps its cool excess: 72% of the
-blue lead over the red/green content is trimmed, so the right catch stays cool
-without the release's threefold margin that read as a blue band on pale pages.
-The cap applies to light surfaces only; dark composition is unchanged.
+The light fragment keeps 30% of that theme mix and resolves the rest toward the
+neutral edge light, so a pale backdrop's own hue is not overlaid by a saturated
+cyan band. Light keeps that tinted direction but caps its cool excess: 72% of
+the blue lead over the red/green content is trimmed, so the right catch stays
+cool without the release's threefold margin that read as a blue band on pale
+pages. The cap applies to light surfaces only; dark composition is unchanged.
 
 This is a translucent, theme-coloured highlight composited over the backdrop,
 not a sampled or displaced image of the background. Its apparent colour and
