@@ -106,6 +106,19 @@ function resolveEffectiveZoom(element: HTMLElement): number {
   return zoom;
 }
 
+// `window.innerWidth` follows the scrollable overflow of the document, so a
+// panel that overflows the right edge widens the value that is supposed to
+// clamp it (mobile emulation, or any layout viewport that is allowed to
+// expand). The root element's client box is the nominal layout viewport and
+// keeps fixed-position coordinates and their clamps in the same space.
+function resolveLayoutViewportSize(): { width: number; height: number } {
+  const root = document.documentElement;
+  return {
+    width: Math.min(window.innerWidth, root.clientWidth || window.innerWidth),
+    height: Math.min(window.innerHeight, root.clientHeight || window.innerHeight),
+  };
+}
+
 function resolveMotionOffset(element: HTMLElement, style: CSSStyleDeclaration) {
   const scales = (style.scale || 'none').split(/\s+/);
   const scale = (value: string | undefined, fallback: number) => {
@@ -166,7 +179,7 @@ export function positionAnchoredOverlay({
     trigger: triggerRect,
     overlayWidth,
     overlayHeight,
-    viewport: { width: window.innerWidth, height: window.innerHeight },
+    viewport: resolveLayoutViewportSize(),
     gap,
     placement,
   });

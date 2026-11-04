@@ -86,6 +86,77 @@ test('fallback containing-block correction preserves its own entrance scale and 
   }
 });
 
+test('clamps to the nominal layout viewport instead of the expanded document overflow', () => {
+  const saved = ['window', 'document', 'getComputedStyle'].map(
+    (name) => [name, Object.getOwnPropertyDescriptor(globalThis, name)] as const,
+  );
+  const values = new Map<string, string>();
+  const style = {
+    zoom: '1',
+    fontSize: '16px',
+    scale: 'none',
+    translate: 'none',
+    transformOrigin: '0px 0px',
+    getPropertyValue: () => '8px',
+  };
+  // Mobile emulation widens `innerWidth` to the document's scrollable overflow,
+  // so a panel that escapes the right edge would grow the value meant to clamp it.
+  const overlay = {
+    parentElement: null,
+    classList: { contains: () => true },
+    offsetWidth: 200,
+    offsetHeight: 100,
+    dataset: {},
+    style: { setProperty: (name: string, value: string) => values.set(name, value) },
+    getBoundingClientRect: () => {
+      const left = Number.parseFloat(values.get('--left') ?? '0');
+      const top = Number.parseFloat(values.get('--top') ?? '0');
+      return { left, top, right: left + 200, bottom: top + 100 };
+    },
+  } as unknown as HTMLElement;
+  const trigger = {
+    getBoundingClientRect: () => ({
+      top: 100,
+      bottom: 140,
+      left: 700,
+      right: 800,
+      width: 100,
+      height: 40,
+    }),
+  } as unknown as HTMLElement;
+  try {
+    Object.defineProperty(globalThis, 'window', {
+      configurable: true,
+      value: { innerWidth: 838, innerHeight: 600 },
+    });
+    Object.defineProperty(globalThis, 'document', {
+      configurable: true,
+      value: { documentElement: { clientWidth: 800, clientHeight: 600 } },
+    });
+    Object.defineProperty(globalThis, 'getComputedStyle', {
+      configurable: true,
+      value: () => style,
+    });
+    positionAnchoredOverlay({
+      trigger,
+      overlay,
+      gapVariable: '--gap',
+      leftVariable: '--left',
+      topVariable: '--top',
+      fallbackOpenClass: 'open',
+    });
+    // 800 - 200 - 8, not 838 - 200 - 8. The panel must not sit under the edge
+    // that its own overflow created.
+    expect(Number.parseFloat(values.get('--left') ?? '')).toBeCloseTo(592);
+    expect(Number.parseFloat(values.get('--top') ?? '')).toBeCloseTo(148);
+  } finally {
+    for (const [name, descriptor] of saved) {
+      if (descriptor) Object.defineProperty(globalThis, name, descriptor);
+      else Reflect.deleteProperty(globalThis, name);
+    }
+  }
+});
+
 test('keeps a bottom-start overlay aligned to the trigger when space is available', () => {
   expect(
     resolveAnchoredPosition({

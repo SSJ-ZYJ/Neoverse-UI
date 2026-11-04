@@ -1,5 +1,41 @@
 import { expect, test } from '@playwright/test';
 
+type SerializedColour = { channels: [number, number, number]; alpha: number };
+
+// Engines may round a nested `color-mix` chain to 8-bit channels while a single
+// mix keeps the float alpha, so two equivalent expressions can serialize a few
+// ten-thousandths apart. Compare the rendered colour instead of its string.
+function parseSerializedColour(value: string): SerializedColour {
+  const srgb = /^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)(?:\s*\/\s*([\d.]+))?\)$/.exec(value);
+  if (srgb) {
+    return {
+      channels: [Number(srgb[1]), Number(srgb[2]), Number(srgb[3])],
+      alpha: srgb[4] === undefined ? 1 : Number(srgb[4]),
+    };
+  }
+  const rgb = /^rgba?\(\s*([\d.]+)[\s,]+([\d.]+)[\s,]+([\d.]+)(?:[\s,/]+([\d.]+))?\s*\)$/.exec(
+    value,
+  );
+  if (rgb) {
+    return {
+      channels: [Number(rgb[1]) / 255, Number(rgb[2]) / 255, Number(rgb[3]) / 255],
+      alpha: rgb[4] === undefined ? 1 : Number(rgb[4]),
+    };
+  }
+  throw new Error(`Unsupported colour serialization: ${value}`);
+}
+
+function expectSameColour(actual: string, expected: string) {
+  const rendered = parseSerializedColour(actual);
+  const reference = parseSerializedColour(expected);
+  expect(rendered.channels.map((channel) => Math.round(channel * 255))).toEqual(
+    reference.channels.map((channel) => Math.round(channel * 255)),
+  );
+  // The alpha still has to hold the intended composition; only the arithmetic
+  // path may differ, and it never moves by more than one 8-bit step.
+  expect(Math.abs(rendered.alpha - reference.alpha)).toBeLessThanOrEqual(1 / 255);
+}
+
 for (const theme of ['light', 'dark'] as const) {
   test(`sidebar selection retains its semantic background through interaction in ${theme}`, async ({
     page,
@@ -86,7 +122,7 @@ for (const theme of ['light', 'dark'] as const) {
         reference.remove();
         return color;
       });
-      expect(edge.borderColor).toBe(releaseBorder);
+      expectSameColour(edge.borderColor, releaseBorder);
       expect(edge.borderStyle).toBe('solid');
       expect(edge.borderWidth).toBe('1px');
     }
