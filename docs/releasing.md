@@ -21,9 +21,10 @@ completed publication and official-registry installation verification; the seven
 new package tags point to `dfb84a7`. See [release notes](release-0.3.0.md).
 Later source changes and pending Changesets are not part of that published baseline.
 
-The next candidate is [0.3.1](release-0.3.1.md): Tokens, Tailwind, Vue, React and
-Overlay Runtime at 0.3.1; Motion and Glass Runtime at 0.2.2; Giscus Theme unchanged
-at 0.2.0. That document tracks the pending plan, token migration and release evidence.
+The next candidate is [0.3.1](release-0.3.1.md): Tokens, Tailwind and Overlay
+Runtime at 0.3.1; Vue and React at 0.4.0; Motion and Glass Runtime at 0.2.2; Giscus
+Theme unchanged at 0.2.0. That document tracks the pending plan, token migration
+and release evidence.
 
 ## Release preparation versus publishing
 

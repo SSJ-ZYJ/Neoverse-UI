@@ -40,13 +40,13 @@
     "@neoverse-ui/tailwind": "^0.3.0"
   },
   "devDependencies": {
-    "@vitejs/plugin-vue": "^6.0.8",
-    "@vue/test-utils": "^2.5.0",
-    "happy-dom": "^20.11.10",
-    "vite": "^8.2.2",
-    "vitest": "^4.1.11",
-    "vue": "^3.5.0",
-    "vue-tsc": "^3.3.11"
+    "@vitejs/plugin-vue": "^6.0.10",
+    "@vue/test-utils": "^2.5.1",
+    "happy-dom": "^21.0.4",
+    "vite": "^8.3.5",
+    "vitest": "^5.1.0",
+    "vue": "^3.5.44",
+    "vue-tsc": "^3.3.14"
   },
   "publishConfig": {
     "access": "public",

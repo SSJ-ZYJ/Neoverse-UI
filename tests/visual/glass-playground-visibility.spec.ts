@@ -1,5 +1,12 @@
 import { expect, test } from '@playwright/test';
 
+type EdgeSide = {
+  side: 'top' | 'bottom' | 'left' | 'right';
+  mean: number;
+  coverage: number;
+  colours: Array<{ inner: [number, number, number]; edge: [number, number, number] }>;
+};
+
 test('reference card has no gaps in its long top and bottom rims', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop', 'The regression uses a wide reference card.');
   await page.emulateMedia({ reducedMotion: 'reduce' });
