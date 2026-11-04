@@ -1,4 +1,10 @@
 import { expect, test } from '@playwright/test';
+import { primitiveShadowTokens } from '../../apps/playground/src/lab-data';
+
+// The primitive group lists every shadow entry except the named aliases; keep
+// the browser assertion tied to the module's own token list instead of a fixed
+// specimen count, so a new shared shadow role is covered automatically.
+const primitiveShadowCount = primitiveShadowTokens.length;
 
 const presentationViewports = [
   { label: 'mobile 390', width: 390, height: 844 },
@@ -346,7 +352,7 @@ test('shadow token specimens always place a full-width preview above their text'
 }) => {
   await page.goto('/?theme=dark&lang=en#shadow', { waitUntil: 'domcontentloaded' });
   const specimens = page.locator('#shadow-primitive .playground-shadow-token');
-  await expect(specimens).toHaveCount(7);
+  await expect(specimens).toHaveCount(primitiveShadowCount);
   const geometry = await specimens.evaluateAll((elements) =>
     elements.map((element) => {
       const preview = element.querySelector<HTMLElement>('[data-preview="shadow"]');

@@ -11,12 +11,15 @@ and the later verification status below before advancing the release review.
 
 | Packages | Previous | Planned |
 | --- | --- | --- |
-| Tokens, Tailwind, Vue, React, Overlay Runtime | 0.3.0 | 0.3.1 |
+| Tokens, Tailwind, Overlay Runtime | 0.3.0 | 0.3.1 |
+| Vue, React | 0.3.0 | 0.4.0 |
 | Motion, Glass Runtime | 0.2.1 | 0.2.2 |
 | Giscus Theme | 0.2.0 | 0.2.0 (unchanged) |
 
-The packages retain independent versioning. The pending records use patch bumps
-for this release. Review the scrollbar migration below even when upgrading from
+The packages retain independent versioning. Vue and React take a minor bump
+because `triggerVariant` adds a new public prop to `UiPopover` and
+`UiDropdownMenu`; the remaining pending records use patch bumps. Review the
+scrollbar migration below even when upgrading from
 0.3.0: removed token names and map entries affect consumers that referenced them.
 
 ## Additions and fixes

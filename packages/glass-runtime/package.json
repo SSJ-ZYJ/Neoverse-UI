@@ -29,8 +29,8 @@
     "test": "vitest run --environment happy-dom"
   },
   "devDependencies": {
-    "happy-dom": "^20.11.10",
-    "vitest": "^4.1.11"
+    "happy-dom": "^21.0.4",
+    "vitest": "^5.1.0"
   },
   "publishConfig": {
     "access": "public",

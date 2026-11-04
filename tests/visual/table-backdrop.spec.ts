@@ -99,11 +99,12 @@ test('the shared renderer owns the table bottom rim instead of the inset catch',
 
   const read = () =>
     table.evaluate((element) => {
-      const lastRow = element.rows[element.rows.length - 1];
-      const cell = lastRow.cells[1] as HTMLElement;
+      const table = element as HTMLTableElement;
+      const lastRow = table.rows[table.rows.length - 1];
+      const cell = lastRow?.cells[1] as HTMLElement | undefined;
       return {
-        tableShadow: getComputedStyle(element).boxShadow,
-        cellShadow: getComputedStyle(cell).boxShadow,
+        tableShadow: getComputedStyle(table).boxShadow,
+        cellShadow: cell === undefined ? '' : getComputedStyle(cell).boxShadow,
       };
     });
 
@@ -116,9 +117,7 @@ test('the shared renderer owns the table bottom rim instead of the inset catch',
     })
     .not.toContain('0px -1px 2px');
 
-  await table.evaluate((element) =>
-    element.setAttribute('data-neoverse-glass-edge-pass', 'css'),
-  );
+  await table.evaluate((element) => element.setAttribute('data-neoverse-glass-edge-pass', 'css'));
   await expect.poll(async () => (await read()).tableShadow).toContain('inset');
   await expect
     .poll(async () => (await read()).cellShadow, {
@@ -137,7 +136,7 @@ test('the shared renderer owns the table bottom rim instead of the inset catch',
     host.append(clone);
     host.showPopover();
     const lastRow = clone.rows[clone.rows.length - 1];
-    const shadow = getComputedStyle(lastRow.cells[1] as HTMLElement).boxShadow;
+    const shadow = getComputedStyle(lastRow?.cells[1] as HTMLElement).boxShadow;
     host.hidePopover();
     host.remove();
     return shadow;
