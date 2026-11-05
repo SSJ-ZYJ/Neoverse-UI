@@ -20,6 +20,11 @@ on:
         description: Optional test-title regex for targeted remote diagnosis
         type: string
         default: ''
+      cross_browser_shards:
+        description: Parallel shards for the cross-browser suite (use 6 for a full run)
+        type: choice
+        options: ['1', '3', '6']
+        default: '1'
       visual_only:
         description: Run a focused Chromium visual check or baseline update
         type: boolean
@@ -39,7 +44,7 @@ on:
         default: false
 
 concurrency:
-  group: ci-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}-${{ inputs.visual_only && 'visual' || inputs.cross_browser_only && 'cross-browser' || 'verify' }}-${{ inputs.visual_suite || inputs.cross_browser_project || 'all' }}-${{ inputs.visual_grep || inputs.cross_browser_grep || 'full' }}
+  group: ci-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}-${{ inputs.visual_only && 'visual' || inputs.cross_browser_only && 'cross-browser' || 'verify' }}-${{ inputs.visual_suite || inputs.cross_browser_project || 'all' }}-${{ inputs.cross_browser_shards || '1' }}-${{ inputs.visual_grep || inputs.cross_browser_grep || 'full' }}
   cancel-in-progress: true
 
 permissions:
@@ -91,6 +96,7 @@ jobs:
     with:
       browser: ${{ inputs.cross_browser_project || 'all' }}
       grep: ${{ inputs.cross_browser_grep || '' }}
+      shards: ${{ inputs.cross_browser_shards || '1' }}
 
   focused-visual:
     name: Focused visual checks

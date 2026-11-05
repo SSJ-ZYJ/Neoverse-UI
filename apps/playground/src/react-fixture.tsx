@@ -440,7 +440,10 @@ function ParityFixtures() {
         <UiScrollbar
           data-react-adapter="UiScrollbar"
           hideNative={hideNative}
-          autoHideMs={250}
+          // Keep the fixture at the product default. A 250ms window can elapse
+          // before a slow WebKit compositor commits the revealed state, letting
+          // show and auto-hide collapse into one render that never exposes the rail.
+          autoHideMs={1200}
           refreshKey={lines.length}
         />
       ) : null}

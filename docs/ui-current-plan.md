@@ -1,5 +1,19 @@
 # Neoverse-UI 当前工作计划
 
+2026-11-05 发布差距复核：候选源码为 `dev` 的 `8e342b2`，远端 CI 41951145986 通过
+（Linux 发布质量、三分片 Chromium 视觉、Windows 交互）。当日按引擎复跑跨引擎套件：
+Firefox 全量 136 通过 / 2 跳过 / 0 失败。几何诊断定位了回退弹层被同 z-index 兄弟元素拦截点击；
+进一步定位到 Playground 无限装饰动画拖垮 WebKit 软件渲染。修复分支 `fix/glass-frame-cost`
+（PR #7，单提交）启用 reduced motion 后，24 个此前超时的浮层用例全部通过；剩余 2 例经插桩
+实测为 React fixture 的 250ms 自动隐藏窗口在 WebKit 上先于状态提交触发（`window.scrollTo`
+其实滚动成功、scroll 事件也触发了），改回 1200ms 产品默认值后，六分片完整 WebKit 复跑
+136 通过 / 0 失败（6/6 分片曾卡在 Install webkit，rerun --failed 后通过）。Firefox 全量
+136 通过 / 2 跳过，跨引擎验收已闭合。另发现并发派发不同浏览器会因
+CI concurrency key 冲突互相取消。`dev` 领先 `main` 37 个提交且尚无 PR，Version Packages
+PR 因而尚未生成。发布前仍需合并 `main`、在版本化提交上重跑门禁，并复核各包
+npm Trusted Publisher。详见 [0.3.1 候选发布记录](release-0.3.1.md) 与
+[跨引擎记录](acceptance-2026-11-01-cross-browser.md)。
+
 2026-11-01 发布准备更新：产品源码基线为 `608a7ac`，发布准备提交 `59262b0` 的远端常规 CI 已通过；
 0.3.1 的版本计划、API / token 迁移、跨引擎运行与剩余验收以
 [0.3.1 候选发布记录](release-0.3.1.md)为准。下文保留 10 月 30 日阶段规划及当时的证据边界，

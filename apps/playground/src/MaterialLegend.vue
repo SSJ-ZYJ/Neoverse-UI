@@ -8,6 +8,13 @@ const host = ref<HTMLElement>();
 const samples = ref<{ id: number; text: string }[]>([]);
 let observer: MutationObserver | undefined;
 let frame = 0;
+let timer: number | undefined;
+let lastRefresh = 0;
+const minRefreshInterval = 200;
+// Overlay positioning writes these inline styles on every tracked frame. They
+// do not change any material value, so they must not restart a full style scan.
+const locationOnlySelector =
+  '[data-overlay-panel], .ui-overlay-panel, .ui-select__popover, [data-neoverse-glass-renderer], canvas';
 const tiers = {
   'glass-subtle': { name: glassMaterial.tiers.subtle, blur: '12px', alpha: 0.15 },
   'glass-elevated': { name: glassMaterial.tiers.elevated, blur: '18px', alpha: 0.2 },
@@ -109,16 +116,32 @@ function refresh() {
 }
 
 function schedule() {
-  if (frame !== 0) return;
-  frame = requestAnimationFrame(() => {
-    frame = 0;
-    refresh();
-  });
+  // A full scan resolves computed style for every surface in the specimen.
+  // Coalesce the mutation burst that an open overlay produces each frame, or
+  // WebKit never gets an idle frame and Playwright cannot see a stable element.
+  if (frame !== 0 || timer !== undefined) return;
+  const delay = Math.max(0, minRefreshInterval - (performance.now() - lastRefresh));
+  timer = window.setTimeout(() => {
+    timer = undefined;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      lastRefresh = performance.now();
+      refresh();
+    });
+  }, delay);
 }
 
 onMounted(() => {
   observer = new MutationObserver((records) => {
-    if (records.some((record) => !host.value?.contains(record.target))) schedule();
+    const materialChange = records.some((record) => {
+      if (host.value?.contains(record.target)) return false;
+      if (record.type === 'attributes' && record.attributeName === 'style') {
+        const target = record.target;
+        if (target instanceof Element && target.closest(locationOnlySelector)) return false;
+      }
+      return true;
+    });
+    if (materialChange) schedule();
   });
   if (host.value?.parentElement)
     observer.observe(host.value.parentElement, {
@@ -150,6 +173,7 @@ onBeforeUnmount(() => {
   observer?.disconnect();
   host.value?.parentElement?.removeEventListener('transitionend', schedule);
   cancelAnimationFrame(frame);
+  if (timer !== undefined) window.clearTimeout(timer);
   window.removeEventListener('pointerup', schedule);
   window.removeEventListener('keyup', schedule);
 });
