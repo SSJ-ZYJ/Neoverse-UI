@@ -404,7 +404,9 @@ Repaired without changing the compositing model:
   (cyan lead `28`, matching the `22` of the surface underneath) and the pale
   rim no longer reads as a solid cyan stroke. The 54 affected win32 light
   screenshot baselines were regenerated; dark baselines are unchanged. The
-  matching Linux captures still need regeneration in the Linux CI environment.
+  matching Linux captures were not regenerated: the three Linux Chromium shards
+  pass at `8e342b2` (run 41951145986) within the configured 1% pixel-ratio
+  tolerance, so this is tolerance-based acceptance, not regenerated pixel parity.
 - Table bottom rim (2026-11-04): the light table repeated the local mint inset
   catch on the final row while the shared canvas also painted the perimeter,
   producing a 2-3px green line below the rounded bottom. The catch is now
@@ -413,7 +415,8 @@ Repaired without changing the compositing model:
   while the top rim stays at `227 240 253`. Both themes use the renderer-owned
   bottom rim; the explicit CSS fallback and tables inside a native top layer
   keep the local catch. Affected win32 table baselines were regenerated for both
-  themes; the matching Linux captures still need regeneration in Linux CI.
+  themes; the Linux captures were not regenerated and pass within the same 1%
+  pixel-ratio tolerance at `8e342b2`.
 - `glass-chroma-field` uniform backdrop: the corner catch existed, but the test
   sampled a fixed 150 ms after inserting the button and raced the renderer's
   next refresh. It now polls until the chroma canvas carries the corner paint.

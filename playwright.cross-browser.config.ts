@@ -6,6 +6,11 @@ const playgroundBaseUrl = `http://127.0.0.1:${playgroundPort}`;
 
 export default defineConfig({
   ...baseConfig,
+  // The Playground catalogue runs infinite shimmer/pulse/spinner animations.
+  // WebKit's software compositor spends whole seconds per protocol round trip
+  // while they run, so interaction checks never reach a stable frame. The
+  // component stylesheets already disable them for this media preference.
+  use: { reducedMotion: 'reduce' },
   // Chromium owns the platform release snapshots; this suite validates behavior.
   ignoreSnapshots: true,
   testMatch: [
@@ -32,6 +37,10 @@ export default defineConfig({
     },
     {
       name: 'webkit',
+      // On the software-rendered CI runner WebKit needs roughly twice as long
+      // per interaction as Chromium/Firefox. Assertions and retries stay
+      // unchanged; only the wall-clock budget for the same work is extended.
+      timeout: 60_000,
       use: {
         ...devices['Desktop Safari'],
         baseURL: playgroundBaseUrl,

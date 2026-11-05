@@ -171,6 +171,11 @@ type OcclusionCandidate = {
   visible?: boolean;
 };
 
+type OcclusionContext = {
+  hitTest?: (x: number, y: number) => Element[];
+  sortedByTop?: boolean;
+};
+
 type ProgramLocations = {
   position: number;
   viewport: WebGLUniformLocation | null;
@@ -594,10 +599,17 @@ export const collectOccluders = (
   view: Window,
   candidates: readonly OcclusionCandidate[] = [],
   includeInterior = false,
+  context: OcclusionContext = {},
 ): Occluder[] => {
-  if (typeof ownerDocument.elementsFromPoint !== 'function') {
+  if (context.hitTest === undefined && typeof ownerDocument.elementsFromPoint !== 'function') {
     return [];
   }
+
+  // A document-wide refresh can probe the same point for several surfaces.
+  // The caller may supply a per-frame cache so WebKit pays for each hit test once.
+  const hitTest =
+    context.hitTest ??
+    ((x: number, y: number): Element[] => ownerDocument.elementsFromPoint?.(x, y) ?? []);
 
   const occluders = new Map<Element, Occluder>();
   const addOccluder = (entry: Element, rect: DOMRect): void => {
@@ -613,7 +625,7 @@ export const collectOccluders = (
     });
   };
   for (const [x, y] of occlusionSamplePoints(bounds)) {
-    const stack = ownerDocument.elementsFromPoint(x, y);
+    const stack = hitTest(x, y);
     const elementIndex = stack.indexOf(element);
     // A missed hit (rounded corner outside its own silhouette) yields no
     // information about what is above; slice(-1) would wrongly treat the
@@ -639,6 +651,9 @@ export const collectOccluders = (
   // This catches small overlays between sample points without a dense per-edge
   // hit-test grid. Rectangles are measured once per frame by the caller.
   for (const candidate of candidates) {
+    // Callers that sort candidates by top can stop at the first rectangle below
+    // the surface instead of scanning the rest of the document.
+    if (context.sortedByTop === true && candidate.rect.top >= bounds.bottom) break;
     const entry = candidate.element;
     const rect = candidate.rect;
     if (
@@ -664,7 +679,7 @@ export const collectOccluders = (
     // A non-interactive topmost overlay is absent from elementsFromPoint. Its
     // owner may explicitly declare that it sits above ordinary page surfaces.
     if (entry.getAttribute('data-neoverse-glass-occluder') !== 'topmost') {
-      const stack = ownerDocument.elementsFromPoint((left + right) / 2, (top + bottom) / 2);
+      const stack = hitTest((left + right) / 2, (top + bottom) / 2);
       const targetIndex = stack.indexOf(element);
       const candidateIndex = stack.findIndex((item) => item === entry || entry.contains(item));
       if (targetIndex < 0 || candidateIndex < 0 || candidateIndex >= targetIndex) continue;
@@ -767,12 +782,52 @@ const getDefaultEdgeValues = (
   return { width: 1, softness: 3, opacity: 0.46 };
 };
 
+const resolveSurfaceOpacity = (
+  element: HTMLElement,
+  view: Window,
+  cache: Map<Element, number | null> | undefined,
+  ownStyle?: CSSStyleDeclaration,
+): number | undefined => {
+  const cached = cache?.get(element);
+  if (cached !== undefined) return cached === null ? undefined : cached;
+
+  const style = ownStyle ?? view.getComputedStyle(element);
+  if (style.display === 'none') {
+    cache?.set(element, null);
+    return undefined;
+  }
+
+  const own = Math.min(Math.max(parseFirstNumber(style.opacity, 1), 0), 1);
+  const parent = element.parentElement;
+  let value = own;
+  if (parent !== null) {
+    const inherited = resolveSurfaceOpacity(parent, view, cache);
+    if (inherited === undefined) {
+      cache?.set(element, null);
+      return undefined;
+    }
+    value = own * inherited;
+  }
+
+  cache?.set(element, value);
+  return value;
+};
+
+const intersectsViewport = (rect: CanvasViewport, viewport: CanvasViewport): boolean =>
+  rect.width > 0 &&
+  rect.height > 0 &&
+  rect.right > viewport.left &&
+  rect.bottom > viewport.top &&
+  rect.left < viewport.right &&
+  rect.top < viewport.bottom;
+
 const readStyle = (
   element: HTMLElement,
   view: Window,
   colorProbe: HTMLElement,
   viewport: CanvasViewport,
   measuredRect?: DOMRect,
+  opacityCache?: Map<Element, number | null>,
 ): GlassStyle | undefined => {
   const style = view.getComputedStyle(element);
   const rect = measuredRect ?? element.getBoundingClientRect();
@@ -792,13 +847,11 @@ const readStyle = (
 
   // The shared canvas is outside the surface's DOM subtree, so it must
   // explicitly reproduce opacity applied to the surface and its ancestors.
-  let surfaceOpacity = Math.min(Math.max(parseFirstNumber(style.opacity, 1), 0), 1);
-  for (let ancestor = element.parentElement; ancestor !== null; ancestor = ancestor.parentElement) {
-    const ancestorStyle = view.getComputedStyle(ancestor);
-    if (ancestorStyle.display === 'none') return undefined;
-    surfaceOpacity *= Math.min(Math.max(parseFirstNumber(ancestorStyle.opacity, 1), 0), 1);
-  }
-  if (surfaceOpacity === 0) return undefined;
+  // Resolve the chain through a per-frame cache: a document-wide refresh visits
+  // every surface, so an uncached walk costs one style resolution per ancestor
+  // per surface.
+  const surfaceOpacity = resolveSurfaceOpacity(element, view, opacityCache, style);
+  if (surfaceOpacity === undefined || surfaceOpacity === 0) return undefined;
 
   // offsetWidth is measured in layout pixels; the renderer samples the
   // zoomed viewport box. This includes both the control's and its ancestors'
@@ -916,6 +969,15 @@ class GlassRendererImpl implements GlassRenderer {
   private paintedEdges = false;
   private contextLost = false;
   private readonly animatedElements = new Set<Element>();
+  // Occlusion depends on the surface box, the boxes of the surfaces that can
+  // overlap it, and stacking/visibility mutations. Re-probing every point on
+  // every animation frame made a Playground refresh cost seconds in WebKit.
+  private readonly occlusionCache = new WeakMap<
+    HTMLElement,
+    { signature: string; revision: number; outer?: Occluder[]; interior?: Occluder[] }
+  >();
+  private surfaceRects = new Map<Element, DOMRect>();
+  private mutationRevision = 0;
   private readonly handleMotion = (event: Event): void => {
     const target = event.target as Element | null;
     if (
@@ -948,8 +1010,58 @@ class GlassRendererImpl implements GlassRenderer {
       return;
     }
 
+    this.mutationRevision += 1;
     this.scheduleRefresh();
   };
+  private changedOverlaps(
+    bounds: { left: number; top: number; width: number; height: number },
+    changed: ReadonlySet<Element>,
+    self: HTMLElement,
+  ): boolean {
+    for (const element of changed) {
+      if (element === self) return true;
+      const rect = this.surfaceRects.get(element);
+      if (rect === undefined) return true;
+      if (
+        rect.left < bounds.left + bounds.width &&
+        bounds.left < rect.left + rect.width &&
+        rect.top < bounds.top + bounds.height &&
+        bounds.top < rect.top + rect.height
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+  private collectCachedOccluders(
+    element: HTMLElement,
+    bounds: { left: number; top: number; width: number; height: number },
+    includeInterior: boolean,
+    changed: ReadonlySet<Element>,
+    collect: () => Occluder[],
+  ): Occluder[] {
+    const signature = `${bounds.left}:${bounds.top}:${bounds.width}:${bounds.height}`;
+    const cached = this.occlusionCache.get(element);
+    const valid =
+      cached !== undefined &&
+      cached.signature === signature &&
+      cached.revision === this.mutationRevision;
+    const memo = valid ? (includeInterior ? cached.interior : cached.outer) : undefined;
+    if (memo !== undefined && !this.changedOverlaps(bounds, changed, element)) return memo;
+
+    const occluders = collect();
+    if (valid && cached !== undefined) {
+      if (includeInterior) cached.interior = occluders;
+      else cached.outer = occluders;
+    } else {
+      this.occlusionCache.set(element, {
+        signature,
+        revision: this.mutationRevision,
+        ...(includeInterior ? { interior: occluders } : { outer: occluders }),
+      });
+    }
+    return occluders;
+  }
   private readonly handleTransparencyChange = (event: MediaQueryListEvent): void => {
     if (event.matches) {
       this.deactivate();
@@ -1407,15 +1519,37 @@ class GlassRendererImpl implements GlassRenderer {
       (element): OcclusionCandidate => ({ element, rect: element.getBoundingClientRect() }),
     );
     const measuredRects = new Map(candidates.map(({ element, rect }) => [element, rect]));
-    const visibleCandidates = candidates.filter(
-      ({ rect }) =>
-        rect.width > 0 &&
-        rect.height > 0 &&
-        rect.right > viewport.left &&
-        rect.bottom > viewport.top &&
-        rect.left < viewport.right &&
-        rect.top < viewport.bottom,
-    );
+    const visibleCandidates = candidates
+      .filter(({ rect }) => intersectsViewport(rect, viewport))
+      .sort((first, second) => first.rect.top - second.rect.top);
+    const opacityCache = new Map<Element, number | null>();
+    const hitTestCache = new Map<string, Element[]>();
+    const hitTest = (x: number, y: number): Element[] => {
+      const key = `${x},${y}`;
+      const cached = hitTestCache.get(key);
+      if (cached !== undefined) return cached;
+      const stack = this.ownerDocument?.elementsFromPoint?.(x, y) ?? [];
+      hitTestCache.set(key, stack);
+      return stack;
+    };
+    const occlusionContext: OcclusionContext = { hitTest, sortedByTop: true };
+    const ownerDocument = this.ownerDocument;
+    const changedSurfaces = new Set<Element>();
+    const surfaceRects = new Map<Element, DOMRect>();
+    for (const { element, rect } of candidates) {
+      surfaceRects.set(element, rect);
+      const previous = this.surfaceRects.get(element);
+      if (
+        previous === undefined ||
+        previous.left !== rect.left ||
+        previous.top !== rect.top ||
+        previous.width !== rect.width ||
+        previous.height !== rect.height
+      ) {
+        changedSurfaces.add(element);
+      }
+    }
+    this.surfaceRects = surfaceRects;
     const width = viewport.width;
     const height = viewport.height;
     const pixelRatio = resolveDevicePixelRatio(view, this.maxDevicePixelRatio);
@@ -1561,9 +1695,13 @@ class GlassRendererImpl implements GlassRenderer {
     };
     for (const element of elements) {
       const table = element.matches(tableGlassSelector) ? (element as HTMLTableElement) : undefined;
-      const measuredRect = measuredRects.get(element);
-      const rect = table && measuredRect ? getTableOuterRect(table, measuredRect) : measuredRect;
-      const style = readStyle(element, view, this.colorProbe, viewport, rect);
+      const measuredRect = measuredRects.get(element) ?? element.getBoundingClientRect();
+      const rect = table ? getTableOuterRect(table, measuredRect) : measuredRect;
+      // Skip surfaces the fixed canvas cannot show before reading their style:
+      // a document-wide refresh otherwise resolves computed style and the
+      // ancestor opacity chain for every offscreen control.
+      if (!intersectsViewport(rect, viewport)) continue;
+      const style = readStyle(element, view, this.colorProbe, viewport, rect, opacityCache);
       if (style === undefined) {
         continue;
       }
@@ -1602,12 +1740,21 @@ class GlassRendererImpl implements GlassRenderer {
       gl.uniform3f(locations.primary, ...primary);
       gl.uniform3f(locations.secondary, ...secondary);
       gl.uniform3f(locations.tertiary, ...tertiary);
-      const occluders = collectOccluders(
+      const occluders = this.collectCachedOccluders(
         element,
         style.rect,
-        this.ownerDocument,
-        view,
-        visibleCandidates,
+        false,
+        changedSurfaces,
+        () =>
+          collectOccluders(
+            element,
+            style.rect,
+            ownerDocument,
+            view,
+            visibleCandidates,
+            false,
+            occlusionContext,
+          ),
       );
       uploadOccluders(occluders);
       if (isLight && this.chromaContext) {
@@ -1638,7 +1785,17 @@ class GlassRendererImpl implements GlassRenderer {
       // Unlike the outer rim, a grid can be covered by an overlay entirely
       // inside the table. Share one interior occlusion pass across its cells.
       uploadOccluders(
-        collectOccluders(element, style.rect, this.ownerDocument, view, visibleCandidates, true),
+        this.collectCachedOccluders(element, style.rect, true, changedSurfaces, () =>
+          collectOccluders(
+            element,
+            style.rect,
+            ownerDocument,
+            view,
+            visibleCandidates,
+            true,
+            occlusionContext,
+          ),
+        ),
       );
       gl.uniform4f(locations.radii, 0, 0, 0, 0);
       gl.uniform3f(locations.pointer, 0, 0, 0);
