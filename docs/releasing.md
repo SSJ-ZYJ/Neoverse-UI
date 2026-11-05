@@ -21,16 +21,19 @@ completed publication and official-registry installation verification; the seven
 new package tags point to `dfb84a7`. See [release notes](release-0.3.0.md).
 Later source changes and pending Changesets are not part of that published baseline.
 
-The next candidate is [0.3.1](release-0.3.1.md): Tokens, Tailwind and Overlay
-Runtime at 0.3.1; Vue and React at 0.4.0; Motion and Glass Runtime at 0.2.2; Giscus
-Theme unchanged at 0.2.0. That document tracks the pending plan, token migration
-and release evidence. As of 2026-11-05 the candidate source is `8e342b2`, whose
-ordinary CI passed Linux quality, all three Chromium shards and the Windows gate.
-Firefox passes the full cross-engine suite (136 passed / 2 skipped); on
-`fix/glass-frame-cost` the complete six-shard WebKit suite is 136 passed / 0
-failed (run 42041056357). Cross-browser acceptance is closed for this candidate.
-A complete cross-browser run needs `cross_browser_shards=6`, because one job is
-capped at 20 minutes. Nothing has been versioned or published for 0.3.1.
+The next candidate is the
+[0.3.1 / 0.4.0 coordinated release](release-0.3.1.md): Tokens, Tailwind and
+Overlay Runtime at 0.3.1; Vue and React at 0.4.0; Motion and Glass Runtime at
+0.2.2; Giscus Theme unchanged at 0.2.0. `0.3.1` is a release label, not a
+version shared by the workspace. That document tracks the pending plan, token
+migration and release evidence. As of 2026-11-05 the candidate source is `dev` at
+`5d59332` (PR #7 merged; PR #8 awaits the merge into `main`), whose ordinary CI
+passed Linux quality, all three Chromium shards and the Windows gate.
+Firefox passes the full cross-engine suite (136 passed / 2 skipped); the complete
+six-shard WebKit suite is 136 passed / 0 failed (run 42041056357).
+Cross-browser acceptance is closed for this candidate. A complete cross-browser
+run needs `cross_browser_shards=6`, because one job is capped at 20 minutes.
+Nothing has been versioned or published for this release.
 
 ## Release preparation versus publishing
 
