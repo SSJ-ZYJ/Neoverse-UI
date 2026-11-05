@@ -273,12 +273,23 @@ for (const theme of ['light', 'dark']) {
       await expect(page.locator('html')).toHaveClass(/ui-scrollbar-target/);
       await page.evaluate(() => window.scrollTo(0, 100));
       await expect(track).toHaveAttribute('data-visible', 'true');
+      // The track auto-hides after 1200ms and drops pointer events while hidden,
+      // so a seek has to be revealed immediately before the click and re-attempted
+      // if the click still lands after the hide.
+      const seekTrack = async () => {
+        await page.keyboard.press('Shift');
+        await expect(track).toHaveAttribute('data-visible', 'true');
+        const box = await track.boundingBox();
+        if (!box) throw new Error('Scrollbar track is missing');
+        await page.mouse.click(box.x + box.width / 2, box.y + box.height * 0.6);
+        return page.evaluate(() => window.scrollY);
+      };
+      await expect.poll(seekTrack).toBeGreaterThan(100);
       const rect = await track.boundingBox();
       if (!rect) throw new Error('Scrollbar track is missing');
-      await page.mouse.click(rect.x + rect.width / 2, rect.y + rect.height * 0.6);
-      await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(100);
       // Reveal after any auto-hide elapsed while waiting for scrolling.
       await page.keyboard.press('Shift');
+      await expect(track).toHaveAttribute('data-visible', 'true');
       const thumb = track.locator('.ui-scrollbar__thumb');
       const thumbRect = await thumb.boundingBox();
       if (!thumbRect) throw new Error('Scrollbar thumb is missing');
