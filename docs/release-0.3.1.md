@@ -1,13 +1,17 @@
-# Neoverse UI 0.3.1 release notes
+# Neoverse UI 0.3.1 / 0.4.0 coordinated release notes
 
 Release candidate, prepared on 2026-11-01 and reviewed again on 2026-11-05. The
 versions below are the pending Changesets plan, not a statement that versioning
-or npm publication has completed. The current source candidate is `dev` at
-`8e342b2`, whose ordinary CI run passed Linux release quality, all three Linux
-Chromium visual shards and the Windows interaction gate. Firefox now passes the
-full cross-browser suite on this candidate (136 passed, 2 skipped); WebKit remains
-open with ten reproducible timeout failures and a suite that exceeds the
-20-minute job limit. See the
+or npm publication has completed. `0.3.1` is a release label, not a version
+shared by every package: only Tokens, Tailwind and Overlay Runtime reach 0.3.1,
+Vue and React reach 0.4.0, and Motion and Glass Runtime reach 0.2.2. The
+filename keeps the label so existing links continue to resolve.
+
+The current source candidate is `dev` at `5d59332` (PR #8, awaiting merge into
+`main`). Linux release quality, all three Chromium visual shards and the Windows
+interaction gate pass. Firefox reports 136 passed / 2 skipped; the complete
+six-shard WebKit suite reports 136 passed / 0 failed, so cross-browser
+acceptance is closed. See the
 [findings](acceptance-2026-11-01-cross-browser.md) and the verification status
 below before advancing the release review.
 
@@ -25,6 +29,14 @@ because `triggerVariant` adds a new public prop to `UiPopover` and
 `UiDropdownMenu`; the remaining pending records use patch bumps. Review the
 scrollbar migration below even when upgrading from
 0.3.0: removed token names and map entries affect consumers that referenced them.
+
+Seven packages publish in this release at three different version numbers.
+Giscus Theme has no pending changeset and stays at 0.2.0; the private Playground
+is not versioned (`privatePackages.version: false`). Internal dependency ranges
+(`^0.3.0`, `^0.2.1`) still admit every new version, so
+`updateInternalDependencies: "patch"` does not trigger a second round of
+dependent bumps. When describing the release, name the package together with its
+version rather than saying "upgrade to 0.3.1".
 
 ## Additions and fixes
 
@@ -201,7 +213,7 @@ WebKit re-run
 ([42041056357](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/42041056357))
 is **136 passed / 0 failed**. Shard 6/6 stalled in "Install webkit" on its first
 attempt and passed after a failed-job rerun. With Chromium, Windows, Linux and
-Firefox gates green, cross-browser acceptance is closed for 0.3.1; the evidence
+Firefox gates green, cross-browser acceptance is closed for this release; the evidence
 is in the [cross-browser findings](acceptance-2026-11-01-cross-browser.md).
 
 The Linux captures for the 2026-11-04 light rim and table bottom were not
