@@ -691,6 +691,39 @@ describe('Glass renderer', () => {
     ).toHaveLength(0);
   });
 
+  it('routes every occlusion probe through the supplied hit test', () => {
+    const card = document.createElement('article');
+    const overlay = document.createElement('aside');
+    document.body.append(card, overlay);
+    setRect(card, { left: 100, top: 100, width: 400, height: 600 });
+    setRect(overlay, { left: 80, top: 130, width: 80, height: 60 });
+    const fakeDocument = {
+      elementsFromPoint: (): Element[] => {
+        throw new Error('the per-frame cache must own hit testing');
+      },
+    } as unknown as Document;
+
+    const probed: string[] = [];
+    const occluders = collectOccluders(
+      card,
+      card.getBoundingClientRect(),
+      fakeDocument,
+      window,
+      [{ element: overlay, rect: overlay.getBoundingClientRect() }],
+      false,
+      {
+        hitTest: (x, y) => {
+          probed.push(`${x},${y}`);
+          return x >= 80 && x <= 160 && y >= 130 && y <= 190 ? [overlay, card] : [card];
+        },
+      },
+    );
+
+    expect(probed.length).toBeGreaterThan(0);
+    expect(occluders).toHaveLength(1);
+    expect(occluders[0]?.left).toBe(80);
+  });
+
   it('does not let a transparent native choice input mask its visible control', () => {
     const label = document.createElement('label');
     const native = document.createElement('input');

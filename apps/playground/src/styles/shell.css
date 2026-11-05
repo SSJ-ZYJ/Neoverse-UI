@@ -565,6 +565,18 @@
   z-index: 1;
 }
 
+/* A fallback overlay has no top layer. Its wrapper shares z-index 1 with the
+   legend and later specimens, so raise only the wrapper that owns an open
+   fallback panel; otherwise a later sibling intercepts its pointer events. */
+.playground-material-backdrop--inset
+> :has(.ui-overlay-panel--fallback-open, .ui-select__popover--fallback-open),
+[data-playground-view='frame']
+  section
+  > div:has(.ui-overlay-panel--fallback-open, .ui-select__popover--fallback-open) {
+  position: relative;
+  z-index: 30;
+}
+
 .playground-data-table-surface .ui-table-region {
   border-radius: 0;
 }
