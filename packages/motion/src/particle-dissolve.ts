@@ -1,6 +1,6 @@
 // WebGL particle dissolve — the shared page-change choreography.
 // A sanitized clone of the leaving region is rasterized through the official
-// HTML-in-Canvas capture (layoutsubtree + drawElementImage) when available;
+// HTML-in-Canvas capture (content="drawable" + drawElementImage) when available;
 // otherwise a DOM-measured silhouette mask feeds the same WebGL2 point-sprite
 // pass. Both paths erode the page into particles that sample the source and
 // drift away on a smoke plume. Browsers without WebGL2 use the CSS choreography.
@@ -732,8 +732,16 @@ export function createParticleDissolve(
 
   let clone: HTMLElement | null = null;
   if (useCapture) {
+    /* Chrome 157 renamed the HTML-in-Canvas opt-in: <canvas layoutsubtree>
+       became <canvas content="drawable">, and every element handed to
+       drawElementImage() must carry a drawable attribute. Without the pair the
+       call throws InvalidStateError and the texture stays blank. Chromium
+       147-156 only understands layoutsubtree, so both are set; each build
+       ignores the attribute it does not know. */
+    sourceCanvas.setAttribute('content', 'drawable');
     sourceCanvas.setAttribute('layoutsubtree', 'true');
     clone = source.cloneNode(true) as HTMLElement;
+    clone.setAttribute('drawable', '');
     clone.setAttribute('data-neoverse-particle-capture', '');
     clone.inert = true;
     clone.setAttribute('aria-hidden', 'true');
