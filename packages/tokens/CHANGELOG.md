@@ -1,5 +1,76 @@
 # @neoverse-ui/tokens
 
+## 0.3.1
+
+### Patch Changes
+
+- 9052731: Standardize the shared material's display name as Aurora Glass across the Design Lab, current documentation, package descriptions, and style comments. Light, Standard, and Immersive remain tiers of the same material, and Tokens keep the localized Chinese display names for interfaces presented in Chinese.
+  
+  Export `glassMaterial` from `@neoverse-ui/tokens` so consumer projects can obtain the canonical bilingual material name and tier labels directly. Preserve existing `glass-*` surface values, CSS classes and variables, package names, rendering behavior, and optical values.
+  
+  Refresh the affected native Windows and Linux desktop/mobile visual baselines for the canonical name, including text wrapping and linked layout changes. Generate Linux captures with the real pinned font responses cached to exclude intermittent CDN fallback rendering; retain the existing screenshot thresholds.
+- fefd23a: Add a shared compact floating elevation for form controls, disclosures and the
+  table. `--neoverse-shadow-float` combines a close contact layer with a short
+  ambient falloff in both themes, and the Input, Textarea, Select, Disclosure and
+  UiTable recipes alias it alongside their existing edge and Light-tier bloom.
+  Choice plates keep the smaller shared control elevation; button, navigation and
+  segmented-control shadows are unchanged.
+- 243c24a: Add the missing `components.controlSurface.trailingPadding` entry to the public token-name map. The `--neoverse-control-surface-trailing-padding` variable was already defined in the token CSS and consumed by the Tailwind ControlSurface rules, but consumers could not reference it by name from `cssVariables`. This is an additive type-level change; existing keys are unchanged.
+  
+  The React adapter also gains shared `resolveAriaInvalid` and `ButtonMaterialShell` internals, and the glass-runtime `backend` option now documents that `webgl` and `auto` select the same rendering path. Neither changes public behaviour, so no version bump is recorded for those packages.
+- b949ca0: Publish `--neoverse-material-edge-refraction-blend` for the dark Glass edge, so a refraction pass reads `overlay` there and keeps the light theme's default `normal` composition. The value follows the existing `--neoverse-material-edge-refraction-gain` hook: both are theme-level edge optics that consumers apply themselves, and neither changes any shipped component by itself.
+- ca93ad8: Give Glass form controls a subtle shared elevation in light and dark themes,
+  including the resizable textarea shell, while preserving their edge and state
+  feedback.
+- f2e1bc2: Add shared Aurora Glass edge rendering to inset form controls, disclosures and table
+  outlines and visible grid lines. Preserve the table's single backdrop filter,
+  native form interactions, clipping, and local Select-panel fallback.
+  Avoid the competing dark lower inset shadow on form controls in both themes
+  when the WebGL edge is active, while keeping interaction and fallback shadows.
+  Keep the table's directional lower catch visible above its last-row cell fills.
+- b10d0aa: Add an opt-in painted stroke for Aurora Glass surfaces anchored to the window edge, where a dark backdrop cannot supply enough light for a readable refracted silhouette. Set `data-neoverse-glass-edge-stroke` on a `material-glass-subtle`, `material-glass-elevated` or `material-glass-immersive` surface to enable it; button surfaces are excluded.
+  
+  Publish `--neoverse-material-edge-stroke` with a transparent default and a dark-theme inset border plus top highlight. The stroke composes with the CSS material shadows, remains present with the native or WebGL renderer, and survives the reduced-transparency fallback. Surfaces without the attribute retain their existing appearance.
+- 2e2da45: Unify the native `scrollbar-immersive` utility with the `UiScrollbar` overlay so a scrollable container and the document read as one control. The utility now keeps the overlay lane width, thumb widths, ink ladder, and inset edge highlight from the shared `--neoverse-scrollbar-*` tokens, and the lane stays transparent so the canvas shows through as it does behind the overlay.
+  
+  Chromium silently ignores `::-webkit-scrollbar` styling as soon as `scrollbar-width` or `scrollbar-color` is declared, which flattened the immersive rail to the platform "thin" bar with a painted track. The standard properties are now scoped to `@supports not selector(::-webkit-scrollbar)`, so Chromium and Safari keep the token-driven rail and only engines without the pseudo-elements receive the standard fallback.
+  
+  The rail palette is rebuilt as one neutral ink instead of a lit object. The former three-stop `edge-light` → accent gradient washed out to near-white on light glass, turned distinctly cyan at the bottom on dark glass, and its 12px accent bloom hazed the content underneath. The thumb is now a flat ink derived from `text-secondary` (44% rest, 60% hover) that darkens in light themes and lifts in dark ones, and accent reaches the grip only while dragging. Outer shadows are gone because they paint a stray arc around the native thumb cap; the only remaining shadow is a 1px inset crown.
+  
+  Tokens replace `--neoverse-scrollbar-immersive-track-border-width` with `--neoverse-scrollbar-immersive-rail-inset`, derive `--neoverse-scrollbar-immersive-thumb-border-width` from `--neoverse-scrollbar-overlay-thumb-width`, and add `--neoverse-scrollbar-immersive-thumb-hover-border-width` for the expanded thumb. `--neoverse-effect-rail-thumb-glow`, `--neoverse-effect-rail-thumb-hover-shadow`, their `--neoverse-scrollbar-*` aliases, and the `thumbGlow` / `thumbHoverShadow` map entries are removed; consumers that overrode them should set the ink tokens instead. Consumers that overrode the removed track-border token should set the rail inset instead, and overriding either overlay thumb width now moves both rails together.
+  
+  The Playground scrollbar module documents the shared geometry, lists the thumb width tokens, and describes the hover and drag states the palette actually renders.
+- a621b25: Restore the 0.2.0 light Glass directional colour, opacity response and normal canvas blending, together with its surface edge densities. Keep dark rendering and CSS-owned body blur unchanged.
+  
+  Cap the light edge's cool excess. The restored indigo right catch carried a blue lead of roughly three times the red and green content, which read as a blue band over pale pages. Light now trims 72% of that excess before compositing: the mint-to-indigo direction survives, the cast does not. The cap is gated to light surfaces, so dark Glass keeps its response without a change in blend mode, uniforms or canvas output.
+  
+  The grey-backdrop case in the visual suite bounds how far blue may lead the green and red content, so the cool edge cannot silently regress into a cast.
+- fefd23a: Keep the light Aurora Glass rim translucent instead of painting a saturated
+  cyan stroke on pale backdrops. The light fragment mixes 70% toward the neutral
+  edge light and leaves the theme accents as a 30% tint, the former 1.35 light
+  alpha gain is removed, and large light surfaces use 0.36 / 0.38 / 0.40 edge
+  opacities. Dark composition, geometry, blur and the 0.34 alpha ceiling are
+  unchanged.
+- ca93ad8: Restore the light segmented control's 0.3.0 selected-button outline and gradient
+  while preserving the current global accent and dark theme treatment.
+- f2e1bc2: Refresh the light theme's primary accent with a clearer azure blue and coordinated
+  hover and active colors. Derive soft accents, interactive borders and focus rings
+  from the primary accent so they follow the shared theme color.
+- 8508c04: Keep immersive scrollbar thumbs painted in hover and drag states, preserve their
+  native padding-box clip, and keep Vue and React document rails visible while the
+  pointer rests on them or a drag is held. Restart automatic hiding after the
+  interaction ends.
+  
+  Detect overlapping Glass surfaces that cross an edge between the renderer's
+  fixed hit-test points. Pointer-transparent overlays that are guaranteed to be
+  above ordinary Glass surfaces can opt into the edge mask with
+  `data-neoverse-glass-occluder="topmost"`. The edge shader, backdrop sampling,
+  body blur, and optical colours are unchanged.
+- ca93ad8: Keep segmented option hover on the neutral foreground instead of borrowing the
+  selected accent, and hold both that label color and the hover wash through press so
+  only the press shadow and scale respond. The selected accent is reserved for the
+  active option via `cssVariables.components.segmentedControl.hoverForeground`.
+
 ## 0.3.0
 
 ### Minor Changes

@@ -1,5 +1,26 @@
 # @neoverse-ui/motion
 
+## 0.2.2
+
+### Patch Changes
+
+- 7ca8673: Keep open fallback overlay and select panels at their visible resting state in browsers without the Popover API. Include the existing fallback-open classes in the presence selectors, using forgiving `:is()` so an unsupported `:popover-open` does not invalidate them, and retain reduced-motion timing for these panels.
+- Updated dependencies [9052731]
+- Updated dependencies [fefd23a]
+- Updated dependencies [243c24a]
+- Updated dependencies [b949ca0]
+- Updated dependencies [ca93ad8]
+- Updated dependencies [f2e1bc2]
+- Updated dependencies [b10d0aa]
+- Updated dependencies [2e2da45]
+- Updated dependencies [a621b25]
+- Updated dependencies [fefd23a]
+- Updated dependencies [ca93ad8]
+- Updated dependencies [f2e1bc2]
+- Updated dependencies [8508c04]
+- Updated dependencies [ca93ad8]
+  - @neoverse-ui/tokens@0.3.1
+
 ## 0.2.1
 
 ### Patch Changes
