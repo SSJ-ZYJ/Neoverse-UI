@@ -23,6 +23,18 @@ fi
 
 echo 'verify=true' >> "$GITHUB_OUTPUT"
 
+# Release asks whether the pull request behind this main push already passed CI.
+# The lookup fails closed: any error reports `ci-verified=false`, which keeps the
+# release verification instead of silently trusting an unproven commit.
+if [[ "${CI_VERIFIED_CHECK:-false}" == true && "$EVENT_NAME" == push ]]; then
+  if ci_verified=$(node .github/scripts/ci-evidence.mjs "$HEAD_SHA"); then
+    echo "$ci_verified" >> "$GITHUB_OUTPUT"
+  else
+    echo 'ci-verified=false' >> "$GITHUB_OUTPUT"
+    echo 'CI evidence lookup failed; keeping release verification.'
+  fi
+fi
+
 if [[ "$EVENT_NAME" != workflow_dispatch && -n "${BASE_SHA:-}" ]] &&
   git cat-file -e "$BASE_SHA^{commit}" 2>/dev/null; then
   node .github/scripts/ci-classify.mjs "$BASE_SHA" "$HEAD_SHA" >> "$GITHUB_OUTPUT"

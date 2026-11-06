@@ -18,10 +18,13 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
+      pull-requests: read
+      actions: read
     outputs:
       metadata-checks: ${{ steps.scope.outputs.metadata-checks }}
       quality-checks: ${{ steps.scope.outputs.quality-checks }}
       visual-checks: ${{ steps.scope.outputs.visual-checks }}
+      ci-verified: ${{ steps.scope.outputs.ci-verified }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -32,8 +35,10 @@ jobs:
       - name: Classify main branch changes
         id: scope
         env:
+          GH_TOKEN: ${{ github.token }}
           EVENT_NAME: push
           SKIP_OPEN_PR_CHECK: 'true'
+          CI_VERIFIED_CHECK: 'true'
           BASE_SHA: ${{ github.event.before }}
           HEAD_SHA: ${{ github.sha }}
         run: bash .github/scripts/ci-scope.sh
@@ -107,14 +112,24 @@ jobs:
   verify:
     name: Verify release
     needs: [scope, select-mode]
-    if: ${{ always() && needs.scope.result == 'success' && (needs.scope.outputs.metadata-checks == 'true' || needs.scope.outputs.quality-checks == 'true' || needs.select-mode.outputs.mode == 'publish') }}
+    # CI already gated the pull request that produced this commit, including the
+    # browser matrix, and release repacks that exact tree. Skip the repeat only
+    # when mode selection proved this is not a publication; a failed selection
+    # keeps verification so the assets a publish needs still exist.
+    if: ${{ always() && needs.scope.result == 'success' && (needs.scope.outputs.metadata-checks == 'true' || needs.scope.outputs.quality-checks == 'true' || needs.select-mode.outputs.mode == 'publish') && !(needs.scope.outputs.ci-verified == 'true' && needs.select-mode.result != 'failure' && needs.select-mode.outputs.mode != 'publish') }}
     uses: ./.github/workflows/verify.yml
     permissions:
       contents: read
     with:
       metadata-checks: ${{ needs.scope.outputs.metadata-checks == 'true' || needs.select-mode.outputs.mode == 'publish' }}
       quality-checks: ${{ needs.scope.outputs.quality-checks == 'true' || needs.select-mode.outputs.mode == 'publish' }}
-      visual-checks: ${{ needs.scope.outputs.visual-checks == 'true' || needs.select-mode.outputs.mode == 'publish' }}
+      # CI gates the pull request that produced this commit, including the
+      # browser matrix. Release repacks that verified tree, so repeating the
+      # same Playwright shards here only duplicates a green CI run. Without
+      # that evidence (direct push, bypassed CI, failed lookup) the browser
+      # matrix is the only proof left, so it runs.
+      visual-checks: ${{ needs.scope.outputs.ci-verified != 'true' && needs.scope.outputs.visual-checks == 'true' }}
+      release-assets: ${{ needs.select-mode.outputs.mode == 'publish' }}
 
   pack:
     name: Verify and pack release

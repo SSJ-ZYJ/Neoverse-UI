@@ -15,6 +15,10 @@ on:
         description: Run the browser matrix for changes affecting rendered UI.
         type: boolean
         default: true
+      release-assets:
+        description: Upload the built workspace assets a release job packs.
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -42,7 +46,7 @@ jobs:
         run: |
           bun run check:changesets
           bun run check:requests
-          node --test .github/scripts/ci-classify.test.mjs
+          node --test .github/scripts/ci-classify.test.mjs .github/scripts/ci-evidence.test.mjs
           bash -n .github/scripts/ci-scope.sh
 
   quality-linux:
@@ -74,13 +78,15 @@ jobs:
       - name: Validate sources, contracts, tests and publishable artifacts
         run: |
           bun run release:check
-          node --test .github/scripts/ci-classify.test.mjs
+          node --test .github/scripts/ci-classify.test.mjs .github/scripts/ci-evidence.test.mjs
           bash -n .github/scripts/ci-scope.sh
 
       # The Bun playground server serves these built files directly; visual
       # shards reuse this validated build rather than repeat release:check.
+      # Release packing consumes the same assets, so upload for that gate too
+      # instead of forcing a browser matrix just to obtain them.
       - name: Upload playground assets for visual shards and release packing
-        if: inputs.visual-checks
+        if: inputs.quality-checks && (inputs.visual-checks || inputs.release-assets)
         uses: actions/upload-artifact@v4
         with:
           name: verified-workspace-assets

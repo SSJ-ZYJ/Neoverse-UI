@@ -147,14 +147,27 @@ changes run metadata checks without visual tests. Contract-matrix documentation
 and non-visual quality scripts run source verification, but not Playwright.
 Unknown file types conservatively select both source and visual gates.
 
-Release also scopes ordinary `main` pushes. When its Changesets mode is
-`publish`, it always runs full source and visual verification before packing,
-even if the triggering commit itself changed only documentation. A `version`
-run continues through the Changesets version workflow without forcing visual tests
-for unrelated changes. Publication automation remains opt-in.
+Release also scopes ordinary `main` pushes, but does not repeat a browser matrix
+that already ran: CI gated the pull request that produced the commit, and Release
+repacks that exact tree. Once mode selection succeeds with a mode other than
+`publish`, Release skips its own `verify` job entirely if
+`.github/scripts/ci-evidence.mjs` confirms that
+this commit is the one GitHub recorded as landing a pull request on `main`
+(`merge_commit_sha`) and that the pull request head has a completed, successful
+`CI` pull-request run. That skip assumes the protected `main` branch stays strictly
+up to date, so the merged tree is the tree CI tested; the lookup fails closed, and
+a direct push, a bypassed or failing CI run, or an API error all keep the
+verification. Without that evidence, Release runs the visual checks its own change
+scope selects, because the browser matrix is then the only proof of the rendered
+UI. When its Changesets mode is `publish`, it always runs source quality before
+packing even if the triggering commit changed only documentation, because that job
+builds the package and Playground assets the pack step publishes, and `publish`
+always needs the verified build to download.
+A `version` run continues through the Changesets version workflow without forcing
+checks for unrelated changes. Publication automation remains opt-in.
 
-Linux runs `release:check` once for source changes. It uploads built package
-and Playground assets only when visual tests or publishing require them.
+Linux runs `release:check` once for source changes. It uploads the built package
+and Playground assets when visual shards run or a release needs to pack them.
 Three Ubuntu 24.04 visual jobs then download that same build and run the complete
 Playwright suite with `--shard=1/3`, `2/3`, or `3/3`, two workers each.
 `Verify workspace (Linux)` remains the required aggregate gate, checking only
@@ -371,8 +384,10 @@ workspace versioning is disabled. Empty records and mixed public/private records
 are accepted. This check runs before mode selection, in `release:check`, and in the
 local `check` command; CLI regression tests run with `bun run test:release-tools`.
 
-In publish mode, Release waits for the reusable Linux/Windows quality and browser
-gates, downloads that verified build, checks registry prerequisites and packs it.
+In publish mode, Release runs the reusable Linux quality gate, downloads that
+verified build, checks registry prerequisites and packs it; the browser matrix is
+repeated only when the commit has no confirmed CI evidence. Outside publish mode,
+a commit whose CI evidence is confirmed skips the release verification entirely.
 The `npm` Environment then gates OIDC publication. Version PRs use conventional
 `chore(release): version packages` titles and commits.
 
