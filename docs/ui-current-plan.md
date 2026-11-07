@@ -1,5 +1,16 @@
 # Neoverse-UI 当前工作计划
 
+2026-11-07 发布完结复核：0.3.1 / 0.4.0 协同发布已于 2026-11-05 完成。`dev` 的
+`5d59332` 经 PR #8 合入 `main`（合并提交 `fedafc4`），PR #9 生成版本化提交
+`a7eb5757`；[Release 运行 42055594494](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/42055594494)
+在该提交上通过发布质量、三分片 Chromium 视觉、Windows 交互、打包与 npm 发布，
+七个包标签均指向 `a7eb5757`，GitHub Release 于 15:44-15:45 UTC 创建。npm 正式注册表
+最新版本为：tokens / tailwind / overlay-runtime `0.3.1`，vue / react `0.4.0`，
+motion / glass-runtime `0.2.2`，giscus-theme `0.2.0`。当前 `dev` 领先 `main` 43 个提交，
+最近一次 CI（42375677922）在 `0ac431a` 上成功。下文 2026-11-05、2026-11-01 与
+2026-10-30 的段落保留为当时的记录：其中“PR #8 待合并”“Version Packages PR 要等合并后生成”
+“发布前仍需在版本化提交上重跑门禁”等表述均为发布前的历史状态，不是当前待办。
+
 2026-11-05 发布差距复核：候选源码为 `dev` 的 `5d59332`（PR #7 已以单提交合入）。
 Linux 发布质量、三分片 Chromium 视觉、Windows 交互门禁在 `8e342b2` 通过
 （远端 CI 41951145986）。当日按引擎复跑跨引擎套件：
@@ -11,8 +22,9 @@ Firefox 全量 136 通过 / 2 跳过 / 0 失败。几何诊断定位了回退弹
 136 通过 / 0 失败（6/6 分片曾卡在 Install webkit，rerun --failed 后通过）。Firefox 全量
 136 通过 / 2 跳过，跨引擎验收已闭合。另发现并发派发不同浏览器会因
 CI concurrency key 冲突互相取消。`dev` 领先 `main` 38 个提交，已建 dev -> main PR #8
-（待合并）；Version Packages PR 要等合并到 `main` 后才会生成。发布前仍需在版本化提交上
-重跑门禁，并复核各包 npm Trusted Publisher。注意 `0.3.1` 只是发布代号：Vue / React 发到
+（该记录写下时待合并，已于 2026-11-05 合入）；Version Packages PR 当时需等合入 `main`
+后才会生成。该记录写下时，发布前仍需在版本化提交上重跑门禁，并复核各包 npm
+Trusted Publisher。注意 `0.3.1` 只是发布代号：Vue / React 发到
 0.4.0，Motion / Glass Runtime 发到 0.2.2，Giscus Theme 停在 0.2.0。详见
 [0.3.1 / 0.4.0 协同发布记录](release-0.3.1.md) 与
 [跨引擎记录](acceptance-2026-11-01-cross-browser.md)。

@@ -21,19 +21,20 @@ completed publication and official-registry installation verification; the seven
 new package tags point to `dfb84a7`. See [release notes](release-0.3.0.md).
 Later source changes and pending Changesets are not part of that published baseline.
 
-The next candidate is the
-[0.3.1 / 0.4.0 coordinated release](release-0.3.1.md): Tokens, Tailwind and
-Overlay Runtime at 0.3.1; Vue and React at 0.4.0; Motion and Glass Runtime at
-0.2.2; Giscus Theme unchanged at 0.2.0. `0.3.1` is a release label, not a
-version shared by the workspace. That document tracks the pending plan, token
-migration and release evidence. As of 2026-11-05 the candidate source is `dev` at
-`5d59332` (PR #7 merged; PR #8 awaits the merge into `main`), whose ordinary CI
-passed Linux quality, all three Chromium shards and the Windows gate.
-Firefox passes the full cross-engine suite (136 passed / 2 skipped); the complete
-six-shard WebKit suite is 136 passed / 0 failed (run 42041056357).
-Cross-browser acceptance is closed for this candidate. A complete cross-browser
-run needs `cross_browser_shards=6`, because one job is capped at 20 minutes.
-Nothing has been versioned or published for this release.
+The [0.3.1 / 0.4.0 coordinated release](release-0.3.1.md) was published on
+2026-11-05: Tokens, Tailwind and Overlay Runtime at 0.3.1; Vue and React at
+0.4.0; Motion and Glass Runtime at 0.2.2; Giscus Theme unchanged at 0.2.0.
+`0.3.1` is a release label, not a version shared by the workspace.
+[PR #8](https://github.com/SSJ-ZYJ/Neoverse-UI/pull/8) merged `dev` into `main`
+as `fedafc4`, [PR #9](https://github.com/SSJ-ZYJ/Neoverse-UI/pull/9) produced the
+versioned commit `a7eb5757ae8f7dc18ae782e6173698272589ba01`, and
+[release run 42055594494](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/42055594494)
+passed release quality, all three Chromium shards, the Windows gate, packing and
+`Publish to npm` on that commit. The seven package tags point to `a7eb5757`, and
+`bun run verify:published` passed as the last step of the publish job.
+That document retains the candidate-era plan, token migration and cross-browser
+evidence as dated history. A complete cross-browser run needs
+`cross_browser_shards=6`, because one job is capped at 20 minutes.
 
 ## Release preparation versus publishing
 
