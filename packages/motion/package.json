@@ -30,7 +30,7 @@
     "build": "bun run build:css && tsc --project tsconfig.build.json",
     "build:css": "bun ./scripts/copy-css.ts",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "test": "bun run --filter @neoverse-ui/tokens build && bun run build:css && bun ./scripts/assert-css.ts && bun test src/index.test.ts"
+    "test": "bun run --filter @neoverse-ui/tokens build && bun run build:css && bun ./scripts/assert-css.ts && bun test src"
   },
   "dependencies": {
     "@neoverse-ui/tokens": "^0.3.1"

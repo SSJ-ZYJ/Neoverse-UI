@@ -8,6 +8,7 @@ import {
   UiNavigationItem,
   UiSegmentedControl,
   UiSurface,
+  useLayoutWidthMotion,
 } from '@neoverse-ui/vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
 import brandWordmarkUrl from './assets/neoverse-wordmark.svg';
@@ -242,6 +243,16 @@ const workspaceElement = ref<HTMLElement | null>(null);
 const overviewHeading = ref<HTMLElement | null>(null);
 const moduleHeading = ref<HTMLElement | null>(null);
 const navElement = ref<HTMLElement | null>(null);
+const toolbarActions = ref<HTMLElement | null>(null);
+// The Design Lab toolbar consumes the same shared motion as the specimen. A language
+// switch changes the theme, language and back-to-overview labels, so every visible
+// control must grow or shrink on one spatial curve instead of jumping box by box.
+// biome-ignore lint/correctness/useHookAtTopLevel: Vue composables belong at <script setup> top level; the playground's React dependency makes Biome apply React hook rules here.
+useLayoutWidthMotion({
+  root: toolbarActions,
+  targets: '[data-toolbar-width-target]',
+  trigger: () => locale.value,
+});
 const isNavOpen = ref(false);
 const isDesktopLayout = ref(window.matchMedia(persistentNavigationMediaQuery).matches);
 let stopSystemThemeObservation: (() => void) | undefined;
@@ -743,9 +754,11 @@ onBeforeUnmount(() => {
                 </h2>
               </div>
               <div
+                ref="toolbarActions"
                 class="playground-shell__toolbar-actions flex w-auto shrink-0 items-center justify-end gap-2 sm:flex-wrap"
               >
                 <UiIconButton
+                  data-toolbar-width-target
                   class="sm:hidden"
                   size="sm"
                   variant="ghost"
@@ -756,6 +769,7 @@ onBeforeUnmount(() => {
                   <LabIcon name="spark" />
                 </UiIconButton>
                 <UiIconButton
+                  data-toolbar-width-target
                   class="sm:hidden"
                   size="sm"
                   variant="ghost"
@@ -766,6 +780,7 @@ onBeforeUnmount(() => {
                   <LabIcon name="globe" />
                 </UiIconButton>
                 <UiSegmentedControl
+                  data-toolbar-width-target
                   class="hidden sm:inline-flex"
                   :aria-label="localize(appCopy.theme.label, locale)"
                   :options="themeOptions"
@@ -774,6 +789,7 @@ onBeforeUnmount(() => {
                   @update:model-value="setTheme"
                 />
                 <UiSegmentedControl
+                  data-toolbar-width-target
                   class="hidden sm:inline-flex"
                   :aria-label="localize(appCopy.language.label, locale)"
                   :options="languageOptions"
@@ -781,7 +797,12 @@ onBeforeUnmount(() => {
                   surface="glass-subtle"
                   @update:model-value="setLocale"
                 />
-                <span v-if="!isOverview" data-back-to-overview class="hidden md:inline-flex">
+                <span
+                  v-if="!isOverview"
+                  data-back-to-overview
+                  data-toolbar-width-target
+                  class="hidden md:inline-flex"
+                >
                   <UiButton variant="ghost" size="sm" @click="showOverview">
                     {{ localize(appCopy.module.backToOverview, locale) }}
                   </UiButton>

@@ -343,6 +343,24 @@ export const moduleCopy = {
       replayEntries: localized('Replay entrance', '重播入场'),
       shuffle: localized('Shuffle', '重排'),
     },
+    width: {
+      label: localized('Layout width motion', '布局宽度动效'),
+      description: localized(
+        'A language switch changes how much room each box needs. useLayoutWidthMotion samples every visible box before the update, resolves all natural endpoints, then animates the changed widths on the spatial role — the copy swaps in place and text is never scaled. Switch the Design Lab language to resize the brand, navigation, and preference boxes together.',
+        '语言切换会改变每个盒子需要的宽度。useLayoutWidthMotion 在更新前采样每个可见盒子，先解析全部自然终点，再按 spatial 角色播放变化的宽度——文案就地替换，文字从不缩放。切换设计实验室语言，观察标识、导航与偏好盒子同时伸缩。',
+      ),
+      brand: localized('Neoverse UI', 'Neoverse UI'),
+      brandSubtitle: localized('Design Lab · Layout primitives', '设计实验室 · 布局原语'),
+      navOverview: localized('Overview', '总览'),
+      navMotion: localized('Motion', '动效'),
+      navComponents: localized('Components', '组件'),
+      preferenceLabel: localized('Preferences', '偏好'),
+      preferenceValue: localized('System theme', '跟随系统'),
+      hint: localized(
+        'Only the box widths move: the selected background keeps its own slide, and a rapid second switch continues from the visible edge instead of snapping back to an endpoint.',
+        '只有盒子宽度在变化：选中背景保留自身滑动，快速再次切换会从可见边沿接续，而不是弹回端点。',
+      ),
+    },
     page: {
       label: localized('Page dissolve', '页面消散'),
       description: localized(

@@ -11,9 +11,12 @@ import {
   staggerStyle,
   UiBadge,
   UiButton,
+  UiControlSurface,
+  UiNavigationItem,
   UiPresence,
   UiSegmentedControl,
   UiSurface,
+  useLayoutWidthMotion,
 } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
@@ -23,11 +26,30 @@ import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
 const presenceCopy = moduleCopy.motion.presence;
+const widthCopy = moduleCopy.motion.width;
 const pageCopy = moduleCopy.motion.page;
 const presenceOn = ref(true);
 const presenceSpecimens = ['Neoverse', 'Motion', 'Presence', glassMaterial.name, 'Edge to Edge'];
 const staggerOrder = ref(presenceSpecimens.map((label, index) => ({ label, seed: index })));
 const staggerReplay = ref(0);
+
+// The specimen mirrors the portal header: the lab language is the trigger, so switching it
+// resizes every box at once. Nothing is stored locally — the composable samples the visible
+// widths before the copy swaps and animates them to their natural widths afterwards.
+// 示例对应门户页头：以实验室语言作为触发值，切换时整组盒子一起改变尺寸。这里不保存本地状态——
+// 组合式函数在文案替换前采样可见宽度，替换后播放到自然宽度。
+const widthStage = ref<HTMLElement | null>(null);
+// biome-ignore lint/correctness/useHookAtTopLevel: Vue composables belong at <script setup> top level; the playground's React dependency makes Biome apply React hook rules here.
+useLayoutWidthMotion({
+  root: widthStage,
+  targets: '[data-motion-width-target]',
+  trigger: () => props.locale,
+});
+const widthNavItems = computed(() => [
+  { id: 'overview', label: localize(widthCopy.navOverview, props.locale) },
+  { id: 'motion', label: localize(widthCopy.navMotion, props.locale) },
+  { id: 'components', label: localize(widthCopy.navComponents, props.locale) },
+]);
 
 const webglAvailable = supportsParticleDissolve();
 const captureAvailable = supportsParticleCapture();
@@ -215,6 +237,58 @@ const variantLabels = computed(() =>
             {{ typeof item.label === 'string' ? item.label : localize(item.label, props.locale) }}
           </UiBadge>
         </TransitionGroup>
+      </UiSurface>
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="foundation-motion-width"
+      :title="localize(widthCopy.label, props.locale)"
+      :description="localize(widthCopy.description, props.locale)"
+    >
+      <UiSurface surface="glass-subtle" class="playground-specimen-panel grid gap-3">
+        <div
+          ref="widthStage"
+          data-motion-width-stage
+          class="flex flex-col items-center gap-3 md:flex-row md:flex-wrap md:justify-center"
+        >
+          <div
+            data-motion-width-target
+            class="grid content-center gap-0.5 rounded-control border border-subtle px-3 py-1.5"
+          >
+            <p class="text-label font-label text-primary">
+              {{ localize(widthCopy.brand, props.locale) }}
+            </p>
+            <p class="text-caption text-secondary">
+              {{ localize(widthCopy.brandSubtitle, props.locale) }}
+            </p>
+          </div>
+          <UiControlSurface
+            surface="none"
+            data-motion-width-target
+            class="rounded-control border border-subtle"
+          >
+            <UiNavigationItem
+              v-for="(item, index) in widthNavItems"
+              :key="item.id"
+              as="span"
+              size="sm"
+              :label="item.label"
+              :active="index === 0"
+            />
+          </UiControlSurface>
+          <div
+            data-motion-width-target
+            class="grid content-center gap-0.5 rounded-control border border-subtle px-3 py-1.5"
+          >
+            <p class="text-caption text-secondary">
+              {{ localize(widthCopy.preferenceLabel, props.locale) }}
+            </p>
+            <p class="text-label font-label text-primary">
+              {{ localize(widthCopy.preferenceValue, props.locale) }}
+            </p>
+          </div>
+        </div>
+        <p class="text-caption text-secondary">{{ localize(widthCopy.hint, props.locale) }}</p>
       </UiSurface>
     </LabSpecimenSection>
 

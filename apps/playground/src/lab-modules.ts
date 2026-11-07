@@ -272,6 +272,14 @@ export const labSpecimens = [
     kind: 'foundation',
   },
   {
+    id: 'foundation-motion-width',
+    moduleId: 'motion',
+    label: moduleCopy.motion.width.label,
+    apiNames: [],
+    tags: ['foundation', 'motion', 'layout', 'width', 'resize', 'language'],
+    kind: 'foundation',
+  },
+  {
     id: 'foundation-motion-page',
     moduleId: 'motion',
     label: moduleCopy.motion.page.label,

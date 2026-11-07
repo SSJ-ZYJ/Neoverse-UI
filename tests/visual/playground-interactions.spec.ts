@@ -535,6 +535,294 @@ test('motion playground exercises semantic roles and the current presence contra
   expect(new Set(Object.values(reducedDurations))).toEqual(new Set(['1ms']));
 });
 
+test('layout width specimen resizes the whole row on a language switch', async ({ page }) => {
+  // The trigger is the Design Lab language control in the toolbar, which only renders in the
+  // desktop toolbar; pin the viewport so the mobile project runs the same path.
+  // 触发值是工具栏中的实验室语言控件，仅在桌面工具栏渲染；固定视口让移动项目走同一路径。
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/?lang=en#motion', { waitUntil: 'domcontentloaded' });
+
+  const stage = page.locator('[data-motion-width-stage]');
+  await expect(stage).toBeVisible();
+  await stage.scrollIntoViewIfNeeded();
+  await expect(stage.locator('[data-motion-width-target]')).toHaveCount(3);
+
+  const result = await page.evaluate(async () => {
+    const stage = document.querySelector<HTMLElement>('[data-motion-width-stage]');
+    if (stage === null) throw new Error('Missing layout width stage');
+    const targets = [...stage.querySelectorAll<HTMLElement>('[data-motion-width-target]')];
+    const before = targets.map((element) => element.getBoundingClientRect().width);
+    const spatialToken = getComputedStyle(stage)
+      .getPropertyValue('--neoverse-motion-spatial-duration')
+      .trim();
+    const spatialDuration =
+      Number.parseFloat(spatialToken) *
+      (spatialToken.endsWith('ms') ? 1 : spatialToken.endsWith('s') ? 1000 : 0);
+
+    const captured: Animation[] = [];
+    const nativeAnimate = Element.prototype.animate;
+    Element.prototype.animate = function (
+      this: Element,
+      keyframes: Keyframe[] | PropertyIndexedKeyframes | null,
+      options?: number | KeyframeAnimationOptions,
+    ) {
+      const animation = nativeAnimate.call(this, keyframes, options);
+      const animatesWidth = Array.isArray(keyframes) && keyframes.some((frame) => 'width' in frame);
+      if (stage.contains(this) && animatesWidth) {
+        animation.pause();
+        animation.currentTime = 0;
+        captured.push(animation);
+      }
+      return animation;
+    };
+
+    try {
+      const option = [...document.querySelectorAll<HTMLElement>('[role="radio"]')].find(
+        (element) => element.textContent?.trim() === '中文',
+      );
+      if (option === undefined) throw new Error('Missing language option');
+      option.click();
+      for (let index = 0; index < 3; index += 1) await new Promise(requestAnimationFrame);
+
+      const starts = targets.map((element) => element.getBoundingClientRect().width);
+      const durations = captured.map((animation) =>
+        Number(animation.effect?.getComputedTiming().duration),
+      );
+      for (const animation of captured) animation.finish();
+      for (let index = 0; index < 2; index += 1) await new Promise(requestAnimationFrame);
+      const settled = targets.map((element) => element.getBoundingClientRect().width);
+
+      return {
+        before,
+        starts,
+        settled,
+        durations,
+        spatialDuration,
+        spatialToken,
+        captured: captured.length,
+      };
+    } finally {
+      Element.prototype.animate = nativeAnimate;
+    }
+  });
+
+  // Every box changed its copy, so every box animates on the resolved spatial timing.
+  expect(result.spatialDuration, result.spatialToken).toBeGreaterThan(0);
+  expect(result.captured).toBe(3);
+  expect(new Set(result.durations)).toEqual(new Set([result.spatialDuration]));
+  result.starts.forEach((width, index) => {
+    expect(Math.abs(width - (result.before[index] ?? 0))).toBeLessThan(1);
+  });
+  result.settled.forEach((width, index) => {
+    expect(Math.abs(width - (result.before[index] ?? 0))).toBeGreaterThan(1);
+  });
+});
+
+for (const viewportWidth of [1440, 390]) {
+  test(`layout width expansion keeps copy on one line at ${viewportWidth}px`, async ({ page }) => {
+    // The shrinking direction cannot wrap; only zh -> en exposes the old hitch,
+    // where the new longer copy wrapped inside the still-narrow box. Narrow
+    // viewports additionally exercise the flex-wrap row change.
+    await page.setViewportSize({ width: viewportWidth, height: 1000 });
+    await page.goto('/?lang=zh#motion', { waitUntil: 'domcontentloaded' });
+    // Width endpoints are only stable once the self-hosted font has swapped in.
+    await page.evaluate(async () => {
+      await document.fonts?.ready;
+    });
+    const stage = page.locator('[data-motion-width-stage]');
+    await expect(stage).toBeVisible();
+    await stage.scrollIntoViewIfNeeded();
+
+    const result = await page.evaluate(async () => {
+      const stage = document.querySelector<HTMLElement>('[data-motion-width-stage]');
+      if (stage === null) throw new Error('Missing layout width stage');
+      const targets = [...stage.querySelectorAll<HTMLElement>('[data-motion-width-target]')];
+      const heights = targets.map((element) => element.getBoundingClientRect().height);
+      const stageHeight = stage.getBoundingClientRect().height;
+      const spatialToken = getComputedStyle(stage)
+        .getPropertyValue('--neoverse-motion-spatial-duration')
+        .trim();
+      const spatialDuration =
+        Number.parseFloat(spatialToken) *
+        (spatialToken.endsWith('ms') ? 1 : spatialToken.endsWith('s') ? 1000 : 0);
+      const captured: { to: string; duration: number }[] = [];
+      const held: Animation[] = [];
+      const nativeAnimate = Element.prototype.animate;
+      Element.prototype.animate = function (
+        this: Element,
+        keyframes: Keyframe[] | PropertyIndexedKeyframes | null,
+        options?: number | KeyframeAnimationOptions,
+      ) {
+        const animation = nativeAnimate.call(this, keyframes, options);
+        const widthFrames = Array.isArray(keyframes) && keyframes.some((frame) => 'width' in frame);
+        if (stage.contains(this) && widthFrames && Array.isArray(keyframes)) {
+          captured.push({
+            to: String((keyframes as Keyframe[]).at(-1)?.width),
+            duration: Number(animation.effect?.getComputedTiming().duration),
+          });
+          animation.pause();
+          animation.currentTime = 0;
+          held.push(animation);
+        }
+        return animation;
+      };
+      try {
+        const option = [...document.querySelectorAll<HTMLElement>('[role="radio"]')].find(
+          (element) => ['EN', '英文'].includes(element.textContent?.trim() ?? ''),
+        );
+        if (option === undefined) throw new Error('Missing EN language option');
+        option.click();
+        for (let index = 0; index < 3; index += 1) await new Promise(requestAnimationFrame);
+
+        const frames = [0, 0.5, 1].map((progress) => {
+          for (const animation of held) animation.currentTime = spatialDuration * progress;
+          return {
+            heights: targets.map((element) => element.getBoundingClientRect().height),
+            stageHeight: stage.getBoundingClientRect().height,
+            whiteSpaces: targets.map((element) => element.style.getPropertyValue('white-space')),
+          };
+        });
+        for (const animation of held) animation.finish();
+        for (let index = 0; index < 4; index += 1) await new Promise(requestAnimationFrame);
+        const settled = targets.map((element) => ({
+          width: element.getBoundingClientRect().width,
+          whiteSpace: element.style.getPropertyValue('white-space'),
+          overflow: element.style.getPropertyValue('overflow'),
+        }));
+        return { heights, stageHeight, spatialDuration, spatialToken, captured, frames, settled };
+      } finally {
+        Element.prototype.animate = nativeAnimate;
+      }
+    });
+
+    expect(result.spatialDuration, result.spatialToken).toBeGreaterThan(0);
+    expect(result.captured).toHaveLength(3);
+    expect(new Set(result.captured.map((entry) => entry.duration))).toEqual(
+      new Set([result.spatialDuration]),
+    );
+    for (const frame of result.frames) {
+      frame.heights.forEach((height, index) => {
+        expect(Math.abs(height - (result.heights[index] ?? 0))).toBeLessThan(1);
+      });
+      expect(Math.abs(frame.stageHeight - result.stageHeight)).toBeLessThan(1);
+      expect(new Set(frame.whiteSpaces)).toEqual(new Set(['nowrap']));
+    }
+    result.settled.forEach((box, index) => {
+      expect(
+        Math.abs(box.width - Number.parseFloat(result.captured[index]?.to ?? '')),
+      ).toBeLessThan(1);
+      expect(box.whiteSpace).toBe('');
+      expect(box.overflow).toBe('');
+    });
+  });
+}
+
+test('playground toolbar resizes every visible control on a language switch', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.goto('/?lang=zh#motion', { waitUntil: 'domcontentloaded' });
+  await page.evaluate(async () => {
+    await document.fonts?.ready;
+  });
+  const actions = page.locator('.playground-shell__toolbar-actions');
+  await expect(actions).toBeVisible();
+  await expect(actions.locator('[data-toolbar-width-target]')).toHaveCount(5);
+
+  const result = await page.evaluate(async () => {
+    const actions = document.querySelector<HTMLElement>('.playground-shell__toolbar-actions');
+    if (actions === null) throw new Error('Missing toolbar actions');
+    const targets = [...actions.querySelectorAll<HTMLElement>('[data-toolbar-width-target]')];
+    const visible = targets.filter((element) => element.getClientRects().length > 0);
+    const before = visible.map((element) => element.getBoundingClientRect().width);
+    const actionsHeight = actions.getBoundingClientRect().height;
+    const spatialToken = getComputedStyle(actions)
+      .getPropertyValue('--neoverse-motion-spatial-duration')
+      .trim();
+    const spatialDuration =
+      Number.parseFloat(spatialToken) *
+      (spatialToken.endsWith('ms') ? 1 : spatialToken.endsWith('s') ? 1000 : 0);
+    const captured: { from: string; to: string; duration: number }[] = [];
+    const held: Animation[] = [];
+    const nativeAnimate = Element.prototype.animate;
+    Element.prototype.animate = function (
+      this: Element,
+      keyframes: Keyframe[] | PropertyIndexedKeyframes | null,
+      options?: number | KeyframeAnimationOptions,
+    ) {
+      const animation = nativeAnimate.call(this, keyframes, options);
+      const widthFrames = Array.isArray(keyframes) && keyframes.some((frame) => 'width' in frame);
+      if (actions.contains(this) && widthFrames && Array.isArray(keyframes)) {
+        const frames = keyframes as Keyframe[];
+        captured.push({
+          from: String(frames[0]?.width),
+          to: String(frames.at(-1)?.width),
+          duration: Number(animation.effect?.getComputedTiming().duration),
+        });
+        animation.pause();
+        animation.currentTime = 0;
+        held.push(animation);
+      }
+      return animation;
+    };
+    try {
+      const option = [...document.querySelectorAll<HTMLElement>('[role="radio"]')].find((element) =>
+        ['EN', '英文'].includes(element.textContent?.trim() ?? ''),
+      );
+      if (option === undefined) throw new Error('Missing EN language option');
+      option.click();
+      for (let index = 0; index < 3; index += 1) await new Promise(requestAnimationFrame);
+
+      for (const animation of held) animation.currentTime = spatialDuration / 2;
+      const midHeight = actions.getBoundingClientRect().height;
+      const midWidths = visible.map((element) => element.getBoundingClientRect().width);
+      for (const animation of held) animation.finish();
+      for (let index = 0; index < 4; index += 1) await new Promise(requestAnimationFrame);
+      const settled = visible.map((element) => ({
+        width: element.getBoundingClientRect().width,
+        whiteSpace: element.style.getPropertyValue('white-space'),
+        overflow: element.style.getPropertyValue('overflow'),
+      }));
+      return {
+        before,
+        actionsHeight,
+        midHeight,
+        midWidths,
+        spatialDuration,
+        spatialToken,
+        captured,
+        settled,
+      };
+    } finally {
+      Element.prototype.animate = nativeAnimate;
+    }
+  });
+
+  expect(result.spatialDuration, result.spatialToken).toBeGreaterThan(0);
+  expect(result.captured).toHaveLength(3);
+  expect(new Set(result.captured.map((entry) => entry.duration))).toEqual(
+    new Set([result.spatialDuration]),
+  );
+  result.captured.forEach((entry, index) => {
+    expect(Math.abs(Number.parseFloat(entry.from) - (result.before[index] ?? 0))).toBeLessThan(1);
+    expect(Math.abs(Number.parseFloat(entry.to) - Number.parseFloat(entry.from))).toBeGreaterThan(
+      1,
+    );
+  });
+  expect(Math.abs(result.midHeight - result.actionsHeight)).toBeLessThan(1);
+  result.midWidths.forEach((width, index) => {
+    const from = Number.parseFloat(result.captured[index]?.from ?? '');
+    const to = Number.parseFloat(result.captured[index]?.to ?? '');
+    expect(width).toBeGreaterThan(Math.min(from, to) - 1);
+    expect(width).toBeLessThan(Math.max(from, to) + 1);
+  });
+  result.settled.forEach((box, index) => {
+    expect(Math.abs(box.width - Number.parseFloat(result.captured[index]?.to ?? ''))).toBeLessThan(
+      1,
+    );
+    expect(box.whiteSpace).toBe('');
+    expect(box.overflow).toBe('');
+  });
+});
+
 test('floating dock keeps balanced geometry across desktop presentation scales', async ({
   page,
 }) => {

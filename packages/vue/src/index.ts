@@ -8,6 +8,8 @@ export {
   iconButtonSizeClasses,
   iconButtonStretchSizeClasses,
 } from './classes';
+export type { LayoutWidthMotion, LayoutWidthMotionOptions } from './layout-width-motion';
+export { useLayoutWidthMotion } from './layout-width-motion';
 export type { PresenceAttrs, StaggerStyle } from './presence';
 export { presence, staggerStyle } from './presence';
 export { getSurfaceClass, isGlassSurface, surfaceClasses } from './surface';

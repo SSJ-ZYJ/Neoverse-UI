@@ -117,4 +117,43 @@ import { UiPresence, presence, staggerStyle } from '@neoverse-ui/vue';
 
 `UiPresence` retains its children through the shared exit animation, then unmounts, with a token-based timeout fallback. `presence(variant, origin?)` binds the shared preset attributes to native Vue transitions; `staggerStyle(index, options?)` sets entry delays for `TransitionGroup name="nv"` children. Presets, timing, and reduced-motion behavior belong to `@neoverse-ui/motion`.
 
+## Layout width motion
+
+```vue
+<script setup lang="ts">
+import { useLayoutWidthMotion } from '@neoverse-ui/vue';
+
+const header = ref<HTMLElement | null>(null);
+useLayoutWidthMotion({
+  root: header,
+  targets: '.brand, .navigation > [data-surface]',
+  trigger: () => [locale.value, theme.value],
+});
+</script>
+
+<template>
+  <div ref="header">
+    <div class="brand">…</div>
+    <nav class="navigation"><div data-surface>…</div></nav>
+  </div>
+</template>
+```
+
+The composable samples every visible target before the update and animates the
+changed widths on the shared `spatial` role afterwards, so a group of boxes that
+grows or shrinks with its copy — a language switch, a theme label — moves on one
+curve. Consumers provide the container, the selector, and the trigger values; the
+sampling, endpoint resolution, interruption, and cleanup stay in the shared
+library. An interrupted change continues from the frame it reached, and a resize,
+a reduced-motion change, or unmount ends the run instead of leaving a stale
+endpoint. Nothing plays on first render or hydration. Boxes that grow keep their
+replacement copy on one line for the duration of the run, so longer labels are
+revealed as the box opens instead of wrapping mid-animation; the shared primitive
+restores the consumer's inline styles when the run ends.
+
+The Design Lab uses the composable in two places: the `foundation-motion-width`
+specimen in the Motion module, and its own toolbar, where the theme, language,
+and back-to-overview controls move together on a language switch. Both are driven
+by the laboratory language control.
+
 For the complete component API and architecture guidance, see the [Neoverse-UI repository](https://github.com/SSJ-ZYJ/Neoverse-UI).
