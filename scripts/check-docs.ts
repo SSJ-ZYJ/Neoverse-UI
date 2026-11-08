@@ -74,7 +74,7 @@ for (const file of [...docsFiles, ...notesFiles]) {
   const name = repositoryPath(file);
   for (const match of readFileSync(file, 'utf8').matchAll(linkPattern)) {
     const link = match[1];
-    if (/^(https?:|mailto:|#)/.test(link)) continue;
+    if (!link || /^(https?:|mailto:|#)/.test(link)) continue;
     const target = link.split('#')[0];
     if (!target) continue;
     if (!existsSync(resolve(dirname(file), target))) {
