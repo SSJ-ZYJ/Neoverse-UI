@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { computed, ref, useAttrs } from 'vue';
+import { computed, onBeforeUnmount, ref, useAttrs, watch } from 'vue';
+import { slideCaret } from './caret-motion';
 import { resolveAriaInvalid } from './form-control';
 import type { InputProps } from './types';
 
@@ -15,6 +16,18 @@ const props = withDefaults(defineProps<InputProps>(), {
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 const attrs = useAttrs();
 const numberInput = ref<HTMLInputElement>();
+const inputElement = ref<HTMLInputElement>();
+const caretGlyph = ref<HTMLElement>();
+const focused = ref(false);
+const composing = ref(false);
+const caretOffset = ref<number | null>(null);
+const caretPrefix = ref('');
+const caretText = ref('');
+const scrollOffset = ref(0);
+const caretHolding = ref(false);
+let holdTimer: ReturnType<typeof setTimeout> | undefined;
+let caretLeft: number | null = null;
+let caretScroll = 0;
 const isNumber = computed(() => attrs.type === 'number');
 const forwardedAttrs = computed(() => {
   const {
@@ -31,6 +44,63 @@ const value = computed({
   get: () => props.modelValue ?? '',
   set: (next: string | number) => emit('update:modelValue', String(next)),
 });
+// The shell mirrors a blinking caret; number spinners, masking, selection and
+// assistive states keep the browser caret.
+const showsCaret = computed(
+  () =>
+    focused.value &&
+    !composing.value &&
+    !props.disabled &&
+    !props.readonly &&
+    !isNumber.value &&
+    attrs.type !== 'password' &&
+    caretOffset.value !== null,
+);
+
+function syncCaret() {
+  const editor = inputElement.value;
+  if (!editor) {
+    caretOffset.value = null;
+    return;
+  }
+  // Types without a text selection read null here, so they keep the native caret.
+  let caret: number | null = null;
+  try {
+    const start = editor.selectionStart;
+    if (start !== null && start === editor.selectionEnd) caret = start;
+  } catch {
+    caret = null;
+  }
+  caretOffset.value = caret;
+  caretPrefix.value = caret === null ? '' : editor.value.slice(0, caret);
+  caretText.value = editor.value;
+  scrollOffset.value = editor.scrollLeft;
+}
+// Editing keeps the caret solid for one blink cycle before it blinks again.
+function holdCaret() {
+  if (!showsCaret.value) return;
+  caretHolding.value = true;
+  clearTimeout(holdTimer);
+  holdTimer = setTimeout(() => {
+    caretHolding.value = false;
+  }, 600);
+}
+onBeforeUnmount(() => clearTimeout(holdTimer));
+watch(() => props.modelValue, syncCaret, { flush: 'post' });
+// A new caret position slides from the previous one instead of jumping.
+watch(
+  [caretPrefix, scrollOffset, showsCaret, caretText],
+  () => {
+    caretLeft = slideCaret(
+      caretGlyph.value,
+      caretLeft,
+      caretText.value,
+      scrollOffset.value !== caretScroll,
+    );
+    caretScroll = scrollOffset.value;
+  },
+  { flush: 'post' },
+);
 
 function onInput(event: Event) {
   emit('update:modelValue', (event.currentTarget as HTMLInputElement).value);
@@ -65,6 +135,7 @@ function onPointerDown(event: PointerEvent) {
 
 function onBlur(event: FocusEvent) {
   delete (event.currentTarget as HTMLElement).dataset.neoverseFocusOrigin;
+  focused.value = false;
 }
 </script>
 
@@ -104,18 +175,39 @@ function onBlur(event: FocusEvent) {
       </button>
     </span>
   </span>
-  <input
-    v-model="value"
-    v-else
-    v-bind="forwardedAttrs"
-    class="ui-input"
-    :class="attrs.class"
-    :style="attrs.style"
-    :disabled="props.disabled"
-    :readonly="props.readonly"
-    :data-validation="props.validation"
-    :aria-invalid="ariaInvalid"
-    @pointerdown="onPointerDown"
-    @blur="onBlur"
-  >
+  <span v-else class="ui-input-shell" :data-caret="showsCaret ? 'overlay' : 'native'">
+    <span
+      v-if="showsCaret"
+      class="ui-input-caret"
+      :class="{ 'ui-input-caret--holding': caretHolding }"
+      aria-hidden="true"
+    >
+      <span :style="{ transform: `translateX(${-scrollOffset}px)` }"
+        ><span class="ui-input-caret__prefix">{{ caretPrefix }}</span
+        ><span ref="caretGlyph" class="ui-input-caret__glyph"></span></span
+      >
+    </span>
+    <input
+      ref="inputElement"
+      v-model="value"
+      v-bind="forwardedAttrs"
+      class="ui-input"
+      :class="attrs.class"
+      :style="attrs.style"
+      :disabled="props.disabled"
+      :readonly="props.readonly"
+      :data-validation="props.validation"
+      :aria-invalid="ariaInvalid"
+      @focus="focused = true; syncCaret()"
+      @input="syncCaret(); holdCaret()"
+      @select="syncCaret(); holdCaret()"
+      @click="syncCaret()"
+      @keyup="syncCaret()"
+      @scroll="syncCaret()"
+      @compositionstart="composing = true"
+      @compositionend="composing = false; syncCaret()"
+      @pointerdown="onPointerDown"
+      @blur="onBlur"
+    >
+  </span>
 </template>

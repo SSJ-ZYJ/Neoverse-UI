@@ -10,6 +10,8 @@
     --neoverse-motion-easing-emphasized: cubic-bezier(0.16, 1, 0.3, 1);
     /* Mirror curve for departures: exits accelerate away from the pointer. */
     --neoverse-motion-easing-accelerate: cubic-bezier(0.5, 0, 0.75, 0);
+    /* Symmetric sine curve: soft at both ends, never mechanical. */
+    --neoverse-motion-easing-symmetric: cubic-bezier(0.37, 0, 0.63, 1);
 
     --neoverse-motion-spatial-distance: var(--neoverse-space-4);
     --neoverse-motion-distance-near: var(--neoverse-space-2);
@@ -20,6 +22,13 @@
     --neoverse-motion-scale-near: 0.97;
     --neoverse-motion-scale-far: 0.92;
     --neoverse-motion-veil-blur: 8px;
+
+    /* Caret cadence shared by every editable surface: one calm breath per
+       native blink cycle instead of a hard cut. */
+    --neoverse-motion-caret-duration: 1000ms;
+    --neoverse-motion-caret-easing: var(--neoverse-motion-easing-symmetric);
+    /* The longest glide; shorter hops take proportionally less time. */
+    --neoverse-motion-caret-glide-duration: 200ms;
 
     /* Particle dissolve — the shared page-change choreography. The WebGL
        path reads duration/enter timing from these tokens; without WebGL2 the

@@ -294,6 +294,63 @@
     font-synthesis: style;
   }
 
+  /* The prompt draws a breathing caret so the command line reads as a live
+     terminal; states that need native editing keep the browser caret. The
+     breath animates opacity only, so it keeps running under reduced motion
+     exactly like the native caret it replaces. */
+  .ui-terminal-prompt__caret {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    white-space: pre;
+    color: var(--neoverse-terminal-cursor);
+    font: inherit;
+    font-variant-ligatures: inherit;
+    font-feature-settings: inherit;
+    font-size: var(--neoverse-typography-body-sm-size);
+    line-height: var(--neoverse-line-height-normal);
+  }
+
+  .ui-terminal-prompt__caret > span {
+    display: block;
+    width: max-content;
+  }
+
+  .ui-terminal-prompt__caret-prefix {
+    visibility: hidden;
+  }
+
+  /* The bar spans the glyph cell: text-top anchors it to the ascent, the extra
+     quarter em reaches through the descender, and the pill radius rounds it. */
+  .ui-terminal-prompt__caret-glyph {
+    display: inline-block;
+    width: calc(var(--neoverse-border-width-thin) * 2);
+    height: 1.25em;
+    border-radius: var(--neoverse-radius-pill);
+    background: currentColor;
+    vertical-align: text-top;
+    animation: ui-caret-breathe var(--neoverse-motion-caret-duration)
+      var(--neoverse-motion-caret-easing) infinite;
+    transition-property: transform, width;
+    transition-duration: var(--neoverse-motion-caret-glide-duration);
+    transition-timing-function: var(--neoverse-motion-easing-symmetric);
+  }
+
+  /* Only the slide is motion; the opacity blink stays on in both preferences. */
+  @media (prefers-reduced-motion: reduce) {
+    .ui-terminal-prompt__caret-glyph {
+      transition: none;
+    }
+  }
+
+  /* Typing keeps the caret solid; the breath resumes once the visitor pauses. */
+  .ui-terminal-prompt__caret--holding .ui-terminal-prompt__caret-glyph {
+    animation: none;
+    opacity: 1;
+  }
+
   .ui-terminal-prompt__editor {
     display: block;
     width: 100%;
@@ -325,6 +382,11 @@
 
   .ui-terminal-prompt__editor::selection {
     background: var(--neoverse-terminal-selection);
+  }
+
+  /* The mirrored caret replaces the native one only in the states above. */
+  :where(.ui-terminal-prompt[data-caret='overlay']) .ui-terminal-prompt__editor {
+    caret-color: transparent;
   }
 
   .ui-terminal-prompt__entry:has(.ui-terminal-prompt__editor:focus-visible)
@@ -399,6 +461,14 @@
     .ui-terminal-prompt__editor {
       color: CanvasText;
       -webkit-text-fill-color: CanvasText;
+      caret-color: CanvasText;
+    }
+
+    .ui-terminal-prompt__caret {
+      display: none;
+    }
+
+    :where(.ui-terminal-prompt[data-caret='overlay']) .ui-terminal-prompt__editor {
       caret-color: CanvasText;
     }
   }

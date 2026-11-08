@@ -217,6 +217,9 @@ for (const theme of ['light', 'dark']) {
           const rect = element.getBoundingClientRect();
           element.style.translate = `${Math.round(rect.left) - rect.left}px ${Math.round(rect.top) - rect.top}px`;
         });
+        await page.addStyleTag({
+          content: '.ui-terminal-prompt__caret { display: none !important; }',
+        });
         await expect(terminal).toHaveScreenshot(`react-terminal-${theme}-${width}.png`, {
           animations: 'disabled',
           caret: 'hide',

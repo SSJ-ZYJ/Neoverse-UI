@@ -943,18 +943,41 @@ describe('form controls', () => {
       props: { modelValue: 'hello@example.com' },
     });
 
-    expect(wrapper.attributes('type')).toBe('email');
-    expect(wrapper.attributes('name')).toBe('email');
-    expect(wrapper.classes()).toContain('ui-input');
-    expect((wrapper.element as HTMLInputElement).value).toBe('hello@example.com');
+    const control = wrapper.get('input');
+    expect(wrapper.classes()).toContain('ui-input-shell');
+    expect(control.attributes('type')).toBe('email');
+    expect(control.attributes('name')).toBe('email');
+    expect(control.classes()).toContain('ui-input');
+    expect((control.element as HTMLInputElement).value).toBe('hello@example.com');
 
-    await wrapper.trigger('pointerdown');
-    expect(wrapper.attributes('data-neoverse-focus-origin')).toBe('pointer');
-    await wrapper.trigger('blur');
-    expect(wrapper.attributes('data-neoverse-focus-origin')).toBeUndefined();
+    await control.trigger('pointerdown');
+    expect(control.attributes('data-neoverse-focus-origin')).toBe('pointer');
+    await control.trigger('blur');
+    expect(control.attributes('data-neoverse-focus-origin')).toBeUndefined();
 
-    await wrapper.setValue('next@example.com');
+    await control.setValue('next@example.com');
     expect(wrapper.emitted('update:modelValue')).toEqual([['next@example.com']]);
+  });
+
+  it('draws the breathing caret inside the shared input shell', async () => {
+    const wrapper = mount(UiInput, { props: { modelValue: 'hello' } });
+    const control = wrapper.get('input');
+    control.element.setSelectionRange(2, 2);
+    await control.trigger('focus');
+    expect(wrapper.attributes('data-caret')).toBe('overlay');
+    const caret = wrapper.get('.ui-input-caret');
+    expect(caret.attributes('aria-hidden')).toBe('true');
+    expect(caret.get('.ui-input-caret__prefix').text()).toBe('he');
+    control.element.setSelectionRange(0, 2);
+    await control.trigger('select');
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    expect(wrapper.find('.ui-input-caret').exists()).toBe(false);
+    control.element.setSelectionRange(2, 2);
+    await control.trigger('focus');
+    await wrapper.setProps({ readonly: true });
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    await wrapper.setProps({ readonly: false });
+    expect(wrapper.attributes('data-caret')).toBe('overlay');
   });
 
   it('keeps textarea attributes and v-model updates native', async () => {
@@ -1005,9 +1028,10 @@ describe('form controls', () => {
     const input = mount(UiInput, {
       props: { modelValue: 'Locked', validation: 'error', readonly: true },
     });
-    expect(input.attributes('data-validation')).toBe('error');
-    expect(input.attributes('readonly')).toBeDefined();
-    expect(input.attributes('aria-invalid')).toBe('true');
+    const control = input.get('input');
+    expect(control.attributes('data-validation')).toBe('error');
+    expect(control.attributes('readonly')).toBeDefined();
+    expect(control.attributes('aria-invalid')).toBe('true');
 
     const explicit = mount(UiTextarea, {
       attrs: { 'aria-invalid': 'false' },

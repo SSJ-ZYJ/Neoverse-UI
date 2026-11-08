@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, useAttrs, useId, watch } from 'vue';
+import { computed, onBeforeUnmount, ref, useAttrs, useId, watch } from 'vue';
 import TerminalPromptSegments from './TerminalPromptSegments.vue';
+import { slideCaret } from './caret-motion';
 import type { TerminalPromptProps, TerminalPromptSegment } from './types';
 
 defineOptions({ inheritAttrs: false });
@@ -25,6 +26,9 @@ const focused = ref(false);
 const composing = ref(false);
 const atEnd = ref(false);
 const scrollOffset = ref(0);
+const caretOffset = ref<number | null>(null);
+const caretHolding = ref(false);
+let holdTimer: ReturnType<typeof setTimeout> | undefined;
 const resolvedId = computed(
   () => props.id ?? (typeof attrs.id === 'string' ? attrs.id : generatedId),
 );
@@ -51,6 +55,28 @@ const suffix = computed(() => {
     return '';
   return suggestion.slice(value.value.length);
 });
+// The prompt draws its own breathing caret; every state that needs precise
+// native editing keeps the browser caret instead.
+const drawsCaret = computed(
+  () =>
+    focused.value &&
+    !composing.value &&
+    !props.disabled &&
+    !props.readonly &&
+    props.type !== 'password' &&
+    caretOffset.value !== null,
+);
+const caretPrefix = computed(() => value.value.slice(0, caretOffset.value ?? 0));
+// Editing keeps the caret solid for one blink cycle before it breathes again.
+function holdCaret() {
+  if (!drawsCaret.value) return;
+  caretHolding.value = true;
+  clearTimeout(holdTimer);
+  holdTimer = setTimeout(() => {
+    caretHolding.value = false;
+  }, 600);
+}
+onBeforeUnmount(() => clearTimeout(holdTimer));
 
 function syncEditor() {
   const editor = inputElement.value;
@@ -59,8 +85,29 @@ function syncEditor() {
     editor.selectionStart === editor.value.length &&
     editor.selectionEnd === editor.value.length;
   scrollOffset.value = editor?.scrollLeft ?? 0;
+  caretOffset.value =
+    editor && editor.selectionStart !== null && editor.selectionStart === editor.selectionEnd
+      ? editor.selectionStart
+      : null;
 }
 watch(() => [props.modelValue, props.suggestion], syncEditor, { flush: 'post' });
+const caretGlyph = ref<HTMLElement>();
+let caretLeft: number | null = null;
+let caretScroll = 0;
+// A new caret position slides from the previous one instead of jumping.
+watch(
+  [caretPrefix, scrollOffset, drawsCaret, value],
+  () => {
+    caretLeft = slideCaret(
+      caretGlyph.value,
+      caretLeft,
+      value.value,
+      scrollOffset.value !== caretScroll,
+    );
+    caretScroll = scrollOffset.value;
+  },
+  { flush: 'post' },
+);
 
 function focus() {
   inputElement.value?.focus();
@@ -75,6 +122,7 @@ defineExpose({ focus });
     :style="attrs.style"
     :data-error="props.error ? 'true' : 'false'"
     :data-disabled="props.disabled ? 'true' : 'false'"
+    :data-caret="drawsCaret ? 'overlay' : 'native'"
   >
     <div v-if="props.segments.length > 0 || $slots.context" class="ui-terminal-prompt__context">
       <slot name="context">
@@ -94,6 +142,17 @@ defineExpose({ focus });
             ><span class="ui-terminal-prompt__ghost-suffix">{{ suffix }}</span></span
           >
         </span>
+        <span
+          v-if="drawsCaret"
+          class="ui-terminal-prompt__caret"
+          :class="{ 'ui-terminal-prompt__caret--holding': caretHolding }"
+          aria-hidden="true"
+        >
+          <span :style="{ transform: `translateX(${-scrollOffset}px)` }"
+            ><span class="ui-terminal-prompt__caret-prefix">{{ caretPrefix }}</span
+            ><span ref="caretGlyph" class="ui-terminal-prompt__caret-glyph"></span></span
+          >
+        </span>
         <input
           ref="inputElement"
           v-model="value"
@@ -110,8 +169,8 @@ defineExpose({ focus });
           :spellcheck="attrs.spellcheck === true || attrs.spellcheck === 'true'"
           @focus="focused = true; syncEditor()"
           @blur="focused = false"
-          @input="syncEditor"
-          @select="syncEditor"
+          @input="syncEditor(); holdCaret()"
+          @select="syncEditor(); holdCaret()"
           @click="syncEditor"
           @keyup="syncEditor"
           @scroll="syncEditor"

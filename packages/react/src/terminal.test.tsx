@@ -4,7 +4,7 @@ import { act, useState } from 'react';
 import { hydrateRoot, type Root } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
 import { UiButton } from './index';
-import { UiTerminalSurface } from './terminal';
+import { UiTerminalPrompt, UiTerminalSurface } from './terminal';
 
 test('terminal surface retains default title, status, actions and body for nullish headers', async () => {
   for (const header of [undefined, null]) {
@@ -101,4 +101,10 @@ test('terminal custom header replaces fallback controls while preserving the acc
       else Reflect.deleteProperty(globalThis, name);
     }
   }
+});
+
+test('terminal prompt keeps the native caret during server rendering', () => {
+  const html = renderToString(<UiTerminalPrompt label="Command" value="clear" />);
+  expect(html).toContain('data-caret="native"');
+  expect(html).not.toContain('ui-terminal-prompt__caret');
 });

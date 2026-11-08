@@ -1,5 +1,5 @@
 import { mount } from '@vue/test-utils';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { h, nextTick, ref } from 'vue';
 import UiButton from './UiButton.vue';
 import UiTerminalEcho from './UiTerminalEcho.vue';
@@ -120,6 +120,61 @@ describe('Terminal composition', () => {
     expect(input.attributes('aria-invalid')).toBe('true');
     expect(wrapper.attributes('data-error')).toBe('true');
     wrapper.unmount();
+  });
+
+  it('draws a breathing caret while the native editor keeps selection, IME and masking', async () => {
+    const wrapper = mount(UiTerminalPrompt, { props: { label: 'Command', modelValue: 'clear' } });
+    const input = wrapper.get('input');
+    input.element.setSelectionRange(2, 2);
+    await input.trigger('focus');
+    expect(wrapper.attributes('data-caret')).toBe('overlay');
+    const caret = wrapper.get('.ui-terminal-prompt__caret');
+    expect(caret.attributes('aria-hidden')).toBe('true');
+    expect(caret.get('.ui-terminal-prompt__caret-prefix').text()).toBe('cl');
+    expect(caret.get('.ui-terminal-prompt__caret-glyph').exists()).toBe(true);
+    input.element.scrollLeft = 12;
+    await input.trigger('scroll');
+    expect(caret.get('span').attributes('style')).toContain('translateX(-12px)');
+    input.element.setSelectionRange(1, 3);
+    await input.trigger('select');
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    expect(wrapper.find('.ui-terminal-prompt__caret').exists()).toBe(false);
+    input.element.setSelectionRange(2, 2);
+    await input.trigger('select');
+    await input.trigger('compositionstart');
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    await input.trigger('compositionend');
+    expect(wrapper.attributes('data-caret')).toBe('overlay');
+    await wrapper.setProps({ type: 'password' });
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    expect(wrapper.find('.ui-terminal-prompt__caret').exists()).toBe(false);
+    await wrapper.setProps({ type: 'text', disabled: true });
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    await wrapper.setProps({ disabled: false, readonly: true });
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    await wrapper.setProps({ readonly: false });
+    await input.trigger('blur');
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    expect(wrapper.find('.ui-terminal-prompt__caret').exists()).toBe(false);
+  });
+
+  it('holds the caret solid while typing and resumes the breath after a pause', async () => {
+    vi.useFakeTimers();
+    try {
+      const wrapper = mount(UiTerminalPrompt, { props: { label: 'Command', modelValue: 'cl' } });
+      const input = wrapper.get('input');
+      input.element.setSelectionRange(2, 2);
+      await input.trigger('focus');
+      const caret = wrapper.get('.ui-terminal-prompt__caret');
+      expect(caret.classes()).not.toContain('ui-terminal-prompt__caret--holding');
+      await input.trigger('input');
+      expect(caret.classes()).toContain('ui-terminal-prompt__caret--holding');
+      vi.advanceTimersByTime(700);
+      await nextTick();
+      expect(caret.classes()).not.toContain('ui-terminal-prompt__caret--holding');
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('shows a ghost suffix only during native editing at the end', async () => {

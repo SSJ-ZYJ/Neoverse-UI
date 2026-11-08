@@ -48,17 +48,14 @@ test('number inputs expose themed steps with native constraints and localized la
 });
 
 test('form controls preserve native props and compose canonical classes', () => {
-  const input = UiInput({
-    type: 'email',
-    name: 'email',
-    className: 'consumer-input',
-  }) as TestElement;
-  expect(input.type).toBe('input');
-  expect(input.props.type).toBe('email');
-  expect(input.props.name).toBe('email');
-  expect(input.props.className).toBe('ui-input consumer-input');
-  expect(typeof input.props.onPointerDown).toBe('function');
-  expect(typeof input.props.onBlur).toBe('function');
+  const inputHtml = renderToStaticMarkup(
+    createElement(UiInput, { type: 'email', name: 'email', className: 'consumer-input' }),
+  );
+  expect(inputHtml).toContain('<span class="ui-input-shell"');
+  expect(inputHtml).toContain('class="ui-input consumer-input"');
+  expect(inputHtml).toContain('type="email"');
+  expect(inputHtml).toContain('name="email"');
+  expect(inputHtml).toContain('data-caret="native"');
 
   const textarea = UiTextarea({ name: 'notes', rows: 4 }) as TestElement;
   expect(textarea.type).toBe('span');
@@ -92,10 +89,12 @@ test('form controls preserve native props and compose canonical classes', () => 
 });
 
 test('form controls expose validation and readonly semantics', () => {
-  const input = UiInput({ validation: 'error', readOnly: true }) as TestElement;
-  expect(input.props['data-validation']).toBe('error');
-  expect(input.props['aria-invalid']).toBe(true);
-  expect(input.props.readOnly).toBe(true);
+  const inputHtml = renderToStaticMarkup(
+    createElement(UiInput, { validation: 'error', readOnly: true }),
+  );
+  expect(inputHtml).toContain('data-validation="error"');
+  expect(inputHtml).toContain('aria-invalid="true"');
+  expect(inputHtml).toMatch(/readonly=""/iu);
 
   const selectHtml = renderToStaticMarkup(
     createElement(UiSelect, {

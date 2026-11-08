@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261108-DF5E3991",
+  "kind": "enhancement",
+  "target": "UiTerminalPrompt",
+  "summary": "终端命令行需要共享的光标动画，替代浏览器原生闪烁",
+  "expected": "聚焦且光标折叠时由组件绘制呼吸式光标；选区、IME 合成、密码遮罩、disabled、readonly、reduced-motion 与 forced-colors 下回退原生 caret",
+  "acceptanceCriteria": [
+    "光标颜色取 --neoverse-terminal-cursor，节奏由共享 motion token 控制",
+    "选区、中文合成、password、disabled 与 readonly 保持原生 caret 行为",
+    "prefers-reduced-motion 下停用动画，forced-colors 下不绘制自绘光标",
+    "Vue 与 React 适配输出一致的 data-caret 标记与光标层结构",
+    "XCA-Portal 终端命令行与组件单测、类型检查通过"
+  ],
+  "impact": "normal",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/features/terminal/components/TerminalCommandInput.vue",
+      "framework": "vue",
+      "scenario": "首页终端命令输入行需要与站点动画语言一致的光标反馈"
+    }
+  ],
+  "createdAt": "2026-11-08T06:46:19.945Z",
+  "updatedAt": "2026-11-08T06:57:24.164Z",
+  "resolution": "Caret cadence tokens in packages/tokens/src/motion.css; overlay caret in packages/tailwind/src/components/terminal.css with native fallback for selection, IME, password, readonly/disabled and forced-colors; Vue and React UiTerminalPrompt adapters share the data-caret state; unit tests in packages/vue/src/terminal.test.ts and packages/react/src/terminal.test.tsx; UI lint, contracts and terminal-surface/react-parity visual suites pass; XCA-Portal terminal-shared-ui, terminal-completion and terminal-visual-acceptance pass."
+}

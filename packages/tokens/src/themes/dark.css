@@ -66,7 +66,7 @@
   --neoverse-terminal-muted: var(--neoverse-color-text-secondary);
   --neoverse-terminal-command: var(--neoverse-color-text-primary);
   --neoverse-terminal-prompt: var(--neoverse-color-accent-secondary);
-  --neoverse-terminal-cursor: var(--neoverse-color-accent-secondary);
+  --neoverse-terminal-cursor: var(--neoverse-color-accent-primary);
   --neoverse-terminal-selection: var(--neoverse-color-accent-soft);
   /* Keep the layered terminal hierarchy while deriving its tint from the theme. */
   --neoverse-terminal-segment-host-background: color-mix(

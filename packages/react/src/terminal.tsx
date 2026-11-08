@@ -8,6 +8,7 @@ import {
   useState,
 } from 'react';
 import { type SurfacePreset, UiSurface } from './index';
+import { slideCaret } from './caret-motion';
 
 export type TerminalPromptTone = 'host' | 'path' | 'branch' | 'runtime' | 'time';
 export interface TerminalPromptSegment {
@@ -107,19 +108,32 @@ export function UiTerminalPrompt({
   const [internal, setInternal] = useState(defaultValue);
   const [focused, setFocused] = useState(false);
   const [composing, setComposing] = useState(false);
-  const [editor, setEditor] = useState({ atEnd: false, scroll: 0 });
+  const [editor, setEditor] = useState<{
+    atEnd: boolean;
+    scroll: number;
+    caret: number | null;
+  }>({ atEnd: false, scroll: 0, caret: null });
+  const [caretHolding, setCaretHolding] = useState(false);
+  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const current = value ?? internal;
   const syncEditor = () => {
     const node = input.current;
+    const collapsed =
+      !!node && node.selectionStart !== null && node.selectionStart === node.selectionEnd;
     const next = {
       atEnd:
         !!node &&
         node.selectionStart === node.value.length &&
         node.selectionEnd === node.value.length,
       scroll: node?.scrollLeft ?? 0,
+      caret: collapsed ? (node?.selectionStart ?? 0) : null,
     };
     setEditor((previous) =>
-      previous.atEnd === next.atEnd && previous.scroll === next.scroll ? previous : next,
+      previous.atEnd === next.atEnd &&
+      previous.scroll === next.scroll &&
+      previous.caret === next.caret
+        ? previous
+        : next,
     );
   };
   // Selection can move when a controlled value or suggestion changes.
@@ -136,12 +150,44 @@ export function UiTerminalPrompt({
     suggestion.startsWith(current)
       ? suggestion.slice(current.length)
       : '';
+  // The prompt draws its own breathing caret; states that need precise native
+  // editing keep the browser caret instead.
+  const caretIndex =
+    focused && !composing && !disabled && !readOnly && type !== 'password' ? editor.caret : null;
+  const drawsCaret = caretIndex !== null;
+  // Editing keeps the caret solid for one blink cycle before it breathes again.
+  const holdCaret = () => {
+    if (!drawsCaret) return;
+    setCaretHolding(true);
+    if (holdTimer.current !== null) clearTimeout(holdTimer.current);
+    holdTimer.current = setTimeout(() => setCaretHolding(false), 600);
+  };
+  useEffect(
+    () => () => {
+      if (holdTimer.current !== null) clearTimeout(holdTimer.current);
+    },
+    [],
+  );
+  const caretGlyph = useRef<HTMLSpanElement | null>(null);
+  const caretLeft = useRef<number | null>(null);
+  const caretScroll = useRef(0);
+  // A new caret position slides from the previous one instead of jumping.
+  useEffect(() => {
+    caretLeft.current = slideCaret(
+      caretGlyph.current,
+      caretLeft.current,
+      current,
+      editor.scroll !== caretScroll.current,
+    );
+    caretScroll.current = editor.scroll;
+  });
   return (
     <div
       className={`ui-terminal-prompt ${className}`}
       style={style}
       data-error={error ? 'true' : 'false'}
       data-disabled={disabled ? 'true' : 'false'}
+      data-caret={drawsCaret ? 'overlay' : 'native'}
     >
       <TerminalPromptContext segments={segments} context={context} renderSegment={renderSegment} />
       <label className="ui-terminal-prompt__entry" htmlFor={resolvedId}>
@@ -154,6 +200,19 @@ export function UiTerminalPrompt({
               <span style={{ transform: `translateX(${-editor.scroll}px)` }}>
                 <span className="ui-terminal-prompt__ghost-prefix">{current}</span>
                 <span className="ui-terminal-prompt__ghost-suffix">{suffix}</span>
+              </span>
+            </span>
+          ) : null}
+          {drawsCaret ? (
+            <span
+              className={`ui-terminal-prompt__caret${caretHolding ? ' ui-terminal-prompt__caret--holding' : ''}`}
+              aria-hidden="true"
+            >
+              <span style={{ transform: `translateX(${-editor.scroll}px)` }}>
+                <span className="ui-terminal-prompt__caret-prefix">
+                  {current.slice(0, caretIndex ?? 0)}
+                </span>
+                <span ref={caretGlyph} className="ui-terminal-prompt__caret-glyph" />
               </span>
             </span>
           ) : null}
@@ -188,10 +247,12 @@ export function UiTerminalPrompt({
               setInternal(event.currentTarget.value);
               onValueChange?.(event.currentTarget.value);
               syncEditor();
+              holdCaret();
               onChange?.(event);
             }}
             onSelect={(event) => {
               syncEditor();
+              holdCaret();
               onSelect?.(event);
             }}
             onClick={(event) => {

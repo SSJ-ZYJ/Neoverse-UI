@@ -56,7 +56,7 @@
   --neoverse-terminal-command: var(--neoverse-color-text-primary);
   /* Pale Aurora Glass needs darker mint ink for the command marker and caret. */
   --neoverse-terminal-prompt: var(--neoverse-color-mint-700);
-  --neoverse-terminal-cursor: var(--neoverse-color-mint-700);
+  --neoverse-terminal-cursor: var(--neoverse-color-accent-primary);
   --neoverse-terminal-selection: var(--neoverse-color-accent-soft);
   --neoverse-terminal-segment-host-background: color-mix(
     in srgb,

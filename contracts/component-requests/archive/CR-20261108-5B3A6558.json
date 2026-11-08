@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261108-5B3A6558",
+  "kind": "enhancement",
+  "target": "UiInput",
+  "summary": "普通文本输入需要与终端命令行一致的光标动画",
+  "expected": "单行输入在聚焦且光标折叠时绘制同一共享呼吸光标；不支持文本选区的类型、密码、数字、只读/禁用与强制颜色回退原生 caret",
+  "acceptanceCriteria": [
+    "UiInput 以 ui-input-shell 包裹原生输入，光标层与输入框内边距和滚动对齐",
+    "呼吸节奏与终端命令行共用 motion token 与 keyframes",
+    "Vue 与 React 适配结构一致，SSR 不渲染光标层",
+    "单测覆盖显示与回退，XCA-Portal 类型与门禁通过"
+  ],
+  "impact": "normal",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/features/terminal/components/TerminalInteraction.vue",
+      "framework": "vue",
+      "scenario": "终端内交互表单的输入行需要与命令行一致的焦点反馈"
+    }
+  ],
+  "createdAt": "2026-11-08T07:55:26.485Z",
+  "updatedAt": "2026-11-08T07:56:11.748Z",
+  "resolution": "UiInput renders ui-input-shell and shares the ui-caret-breathe keyframes and caret motion tokens with UiTerminalPrompt; Vue and React adapters mirror selection, scroll, composition and hold state; unit tests in packages/vue/src/components.test.ts and packages/react/src/index.test.ts; UI lint/contracts and playground-controls, terminal-surface and react-parity visual suites pass; XCA-Portal check, typecheck and terminal E2E pass."
+}

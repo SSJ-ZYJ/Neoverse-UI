@@ -23,7 +23,7 @@ An explicit consumer-provided `aria-invalid` always wins over the validation-der
 
 The canonical control set is:
 
-- `UiInput`, `UiTextarea`, and `UiSelect` for text and selection input.
+- `UiInput`, `UiTextarea`, and `UiSelect` for text and selection input. `UiInput` renders its native input inside `ui-input-shell`, which mirrors the shared blinking caret; selection, IME composition, masked, email, number and other types without a text selection, readonly/disabled and forced colors keep the browser caret. It stretches across the travelled span and contracts back to the bar, with a duration that grows with the distance travelled up to the glide token; the slide stops under `prefers-reduced-motion` while the opacity blink stays. The bar stays solid while it travels and blinks again once it settles. `UiTextarea` keeps the native caret because a multi-line caret needs two-axis mirroring.
 - `UiCheckbox`, `UiRadioGroup`, and `UiSwitch` for choice input.
 - `UiField` for label, description, required marker, control placement, and validation message composition.
 

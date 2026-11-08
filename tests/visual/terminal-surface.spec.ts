@@ -30,7 +30,8 @@ for (const theme of ['light', 'dark'] as const) {
       await expect(terminal.locator('.ui-terminal-prompt__ghost-suffix')).toHaveText(' hello');
       await page.addStyleTag({
         content:
-          '.ui-terminal-prompt__segment[data-tone="time"] { visibility: hidden !important; }',
+          '.ui-terminal-prompt__segment[data-tone="time"] { visibility: hidden !important; }' +
+          ' .ui-terminal-prompt__caret { display: none !important; }',
       });
       await expect(terminal).toHaveScreenshot(`shared-terminal-${theme}-${width}.png`, {
         animations: 'disabled',

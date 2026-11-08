@@ -39,7 +39,7 @@
     font: inherit;
     font-size: var(--neoverse-form-control-font-size);
     line-height: var(--neoverse-form-control-line-height);
-    caret-color: var(--neoverse-color-accent-secondary);
+    caret-color: var(--neoverse-color-accent-primary);
     -webkit-backdrop-filter: var(--neoverse-form-control-filter);
     backdrop-filter: var(--neoverse-form-control-filter);
     outline: none;
@@ -188,6 +188,97 @@
     [data-neoverse-glass-renderer='webgl']
       :where(.ui-choice__control):not([data-neoverse-glass-edge-pass='css']) {
       --neoverse-choice-control-effective-shadow: var(--neoverse-choice-control-shadow);
+    }
+  }
+
+  /* Single-line inputs mirror the same breathing caret as the terminal prompt;
+     number spinners, masking and assistive states keep the browser caret. */
+  .ui-input-shell {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    min-width: 0;
+  }
+
+  :where(.ui-input-shell[data-caret='overlay']) .ui-input {
+    caret-color: transparent;
+  }
+
+  .ui-input-caret {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    padding: var(--neoverse-form-control-padding-block) var(--neoverse-form-control-padding-inline);
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    white-space: pre;
+    color: var(--neoverse-color-accent-primary);
+    font-size: var(--neoverse-form-control-font-size);
+    line-height: var(--neoverse-form-control-line-height);
+  }
+
+  .ui-input-caret > span {
+    display: block;
+    width: max-content;
+  }
+
+  .ui-input-caret__prefix {
+    visibility: hidden;
+  }
+
+  .ui-input-caret__glyph {
+    display: inline-block;
+    width: calc(var(--neoverse-border-width-thin) * 2);
+    height: 1.25em;
+    border-radius: var(--neoverse-radius-pill);
+    background: currentColor;
+    vertical-align: text-top;
+    animation: ui-caret-breathe var(--neoverse-motion-caret-duration)
+      var(--neoverse-motion-caret-easing) infinite;
+    transition-property: transform, width;
+    transition-duration: var(--neoverse-motion-caret-glide-duration);
+    transition-timing-function: var(--neoverse-motion-easing-symmetric);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-input-caret__glyph {
+      transition: none;
+    }
+  }
+
+  .ui-input-caret--holding .ui-input-caret__glyph {
+    animation: none;
+    opacity: 1;
+  }
+
+  /* Shared blink for every mirrored caret: short soft ramps keep it calm while
+     staying unmistakably alive. Only opacity animates, so it also runs under
+     reduced motion like the native caret. */
+  @keyframes ui-caret-breathe {
+    0%,
+    40% {
+      opacity: 1;
+    }
+
+    54%,
+    88% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ui-input-caret {
+      display: none;
+    }
+
+    :where(.ui-input-shell[data-caret='overlay']) .ui-input {
+      caret-color: CanvasText;
     }
   }
 
