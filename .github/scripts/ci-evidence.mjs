@@ -7,7 +7,10 @@ import { pathToFileURL } from 'node:url';
 // commit GitHub created for that pull request and the merged tree is the tree
 // CI tested. Anything unproven fails closed and keeps the full release
 // verification.
-const CI_WORKFLOW_NAME = 'CI';
+//
+// Evidence is identified by workflow file, not display name: two definitions may
+// share a `name:` value, and only `ci.yml` owns the required gates.
+const CI_WORKFLOW_PATH = '.github/workflows/ci.yml';
 const RELEASE_BRANCH = 'main';
 
 // The pushed commit must be the commit GitHub recorded as landing a pull request
@@ -15,11 +18,17 @@ const RELEASE_BRANCH = 'main';
 // a pull request (its branch commits, or the same pull request seen from another
 // branch) do not qualify.
 export function mergedPull(pulls, headSha) {
+  // Both sides must be real commit identifiers first, so a record that lost its
+  // `merge_commit_sha` can never match a lookup that lost its SHA.
+  if (!Array.isArray(pulls) || typeof headSha !== 'string' || headSha.length === 0) {
+    return undefined;
+  }
   return pulls.find(
     (pull) =>
       pull?.merged_at &&
       pull?.base?.ref === RELEASE_BRANCH &&
-      pull?.merge_commit_sha === headSha &&
+      typeof pull?.merge_commit_sha === 'string' &&
+      pull.merge_commit_sha === headSha &&
       typeof pull?.head?.sha === 'string' &&
       pull.head.sha.length > 0,
   );
@@ -28,11 +37,12 @@ export function mergedPull(pulls, headSha) {
 // CI must have completed successfully on the pull request head that landed, so
 // the browser matrix and quality gates ran on the tree this commit contains.
 export function verifiedByCi(pull, runs) {
-  if (!pull) return false;
-  const headSha = pull.head.sha;
+  if (!pull || !Array.isArray(runs)) return false;
+  const headSha = pull.head?.sha;
+  if (typeof headSha !== 'string' || headSha.length === 0) return false;
   return runs.some(
     (run) =>
-      run?.name === CI_WORKFLOW_NAME &&
+      run?.path === CI_WORKFLOW_PATH &&
       run?.event === 'pull_request' &&
       run?.head_sha === headSha &&
       run?.status === 'completed' &&
