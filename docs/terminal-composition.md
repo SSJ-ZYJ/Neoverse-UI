@@ -1,5 +1,7 @@
 # Terminal composition
 
+Status: adopted
+
 Neoverse-UI provides a **terminal presentation**, not a shell emulator or command runtime.
 The prompt is a text line rather than a form-field surface: translucent Aurora Glass stays on the
 outer `UiTerminalSurface`; the editor itself has no border, fill, shadow or rounded box.

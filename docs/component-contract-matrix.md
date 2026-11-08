@@ -1,5 +1,7 @@
 # Component Contract Matrix
 
+Status: adopted
+
 The component matrix is the maturity baseline for Neoverse-UI 0.3.x. The machine-readable source of truth lives in `contracts/component-matrix.json`; this document explains the policy and presents the current state.
 
 ## Contract pipeline
@@ -75,7 +77,7 @@ The existing Stable / Release / Consumer statuses above retain previously establ
 
 `UiTerminalEcho` additionally has Vue/React prompt-context screenshots and XCA recorded-command consumer evidence. Its React `reactValidation.visual` is validated, while `reactValidation.consumer` remains pending; no real React product consumption or automatic Stable promotion is claimed.
 
-The [2026-10-25 governance audit](consumer-validation-2026-10-25.md) separates the
+The [2026-10-25 governance audit](../.agents/notes/archives/consumer-validation-2026-10-25.md) separates the
 evidence for every Consumer Validation component by framework. Vue Input/Select/Field
 now have real Slides workflow evidence; Vue Popover has XCA menu evidence and Vue
 TooltipSurface has real Neoverse Pulse data evidence. These update only the

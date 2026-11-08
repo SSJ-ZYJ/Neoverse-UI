@@ -23,7 +23,7 @@
       "visual": "release",
       "consumer": "validated",
       "runtime": "validated",
-      "evidence": ["docs/consumer-migration-2026-10-29.md"]
+      "evidence": [".agents/notes/archives/consumer-migration-2026-10-29.md"]
     },
     {
       "name": "UiIconButton",
@@ -37,7 +37,7 @@
       "visual": "release",
       "consumer": "validated",
       "runtime": "validated",
-      "evidence": ["docs/consumer-migration-2026-10-29.md"]
+      "evidence": [".agents/notes/archives/consumer-migration-2026-10-29.md"]
     },
     {
       "name": "UiAction",
@@ -51,7 +51,7 @@
       "visual": "release",
       "consumer": "validated",
       "runtime": "validated",
-      "evidence": ["docs/consumer-migration-2026-10-29.md"]
+      "evidence": [".agents/notes/archives/consumer-migration-2026-10-29.md"]
     },
     {
       "name": "UiSurface",
@@ -95,7 +95,7 @@
         "tests/visual/choice-indicator-colour.spec.ts",
         "tests/visual/choice-control-behavior.spec.ts",
         "tests/visual/component-interactions.spec.ts",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
@@ -115,7 +115,7 @@
         "tests/visual/choice-indicator-colour.spec.ts",
         "tests/visual/choice-control-behavior.spec.ts",
         "tests/visual/component-interactions.spec.ts",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
@@ -135,7 +135,7 @@
         "tests/visual/choice-indicator-colour.spec.ts",
         "tests/visual/choice-control-behavior.spec.ts",
         "tests/visual/component-interactions.spec.ts",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
@@ -156,7 +156,7 @@
         "packages/react/src/field.test.tsx",
         "tests/visual/form-control-behavior.spec.ts",
         "../Neoverse-Slides/apps/web/app/pages/slides/index.vue",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
@@ -177,7 +177,7 @@
         "tests/visual/form-control-behavior.spec.ts",
         "packages/vue/src/components.test.ts",
         "../Neoverse-Slides/apps/web/app/pages/slides/index.vue",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
@@ -196,7 +196,7 @@
       "evidence": [
         "packages/vue/src/components.test.ts",
         "tests/visual/form-control-behavior.spec.ts",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
@@ -217,7 +217,7 @@
         "tests/visual/select-blocked-regression.spec.ts",
         "tests/visual/component-interactions.spec.ts",
         "../Neoverse-Slides/apps/web/app/pages/slides/index.vue",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
@@ -237,7 +237,7 @@
         "tests/visual/table-backdrop.spec.ts",
         "tests/visual/playground-interactions.spec.ts",
         "tests/visual/design-lab.spec.ts",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
@@ -257,7 +257,7 @@
         "tests/visual/disclosure-edge.spec.ts",
         "tests/visual/playground-interactions.spec.ts",
         "tests/visual/design-lab.spec.ts",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
@@ -277,7 +277,7 @@
         "packages/vue/src/components.test.ts",
         "packages/react/src/presence.test.tsx",
         "tests/visual/playground-interactions.spec.ts",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
@@ -303,7 +303,7 @@
         "packages/react/src/overlay.test.tsx",
         "../XCA-Portal/app/components/site/SiteHeader.vue",
         "../XCA-Portal/tests/e2e/mobile-header.spec.ts",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
@@ -325,7 +325,7 @@
         "tests/visual/overlay-tracking.spec.ts",
         "packages/vue/src/overlay-hydration.test.ts",
         "packages/react/src/overlay-hydration.test.tsx",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
@@ -345,7 +345,7 @@
         "tests/visual/navigation-runtime.spec.ts",
         "tests/visual/react-navigation-visual.spec.ts",
         "tests/visual/design-lab.spec.ts",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": { "runtime": "validated", "visual": "validated", "consumer": "pending" }
     },
@@ -511,7 +511,7 @@
         "docs/framework-parity.md",
         "tests/visual/tooltip-entrance.spec.ts",
         "../Neoverse/app/components/pulse/ContributionLandscape.vue",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -587,7 +587,7 @@
         "../XCA-Portal/app/features/terminal/components/TerminalTranscript.vue",
         "../XCA-Portal/tests/e2e/terminal-shared-ui.spec.ts",
         "../XCA-Portal/tests/e2e/terminal-visual-acceptance.spec.ts",
-        "docs/consumer-validation-2026-10-25.md"
+        ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": {
         "runtime": "validated",

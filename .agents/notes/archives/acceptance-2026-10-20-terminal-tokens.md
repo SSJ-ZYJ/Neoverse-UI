@@ -1,5 +1,7 @@
 # 2026-10-20 终端语义色 Token 需求验收
 
+Status: historical
+
 关联需求：`CR-20261010-2A6D0E6E`，消费者 XCA-Portal。
 
 ## 已完成的实现与消费证据

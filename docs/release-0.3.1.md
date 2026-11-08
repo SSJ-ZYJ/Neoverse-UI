@@ -1,40 +1,56 @@
 # Neoverse UI 0.3.1 / 0.4.0 coordinated release notes
 
-Release candidate, prepared on 2026-11-01 and reviewed again on 2026-11-05. The
-versions below are the pending Changesets plan, not a statement that versioning
-or npm publication has completed. `0.3.1` is a release label, not a version
-shared by every package: only Tokens, Tailwind and Overlay Runtime reach 0.3.1,
-Vue and React reach 0.4.0, and Motion and Glass Runtime reach 0.2.2. The
-filename keeps the label so existing links continue to resolve.
+Status: historical
 
-The current source candidate is `dev` at `5d59332` (PR #8, awaiting merge into
-`main`). Linux release quality, all three Chromium visual shards and the Windows
-interaction gate pass. Firefox reports 136 passed / 2 skipped; the complete
-six-shard WebKit suite reports 136 passed / 0 failed, so cross-browser
-acceptance is closed. See the
-[findings](acceptance-2026-11-01-cross-browser.md) and the verification status
-below before advancing the release review.
+Published release record; the current release process is [Releasing Neoverse UI](releasing.md).
+
+Published on 2026-11-05. `0.3.1` is a release label, not a version shared by
+every package: Tokens, Tailwind and Overlay Runtime reached 0.3.1, Vue and React
+reached 0.4.0, Motion and Glass Runtime reached 0.2.2, and Giscus Theme stayed at
+0.2.0. The filename keeps the label so existing links continue to resolve.
+
+| Step | Reference |
+| --- | --- |
+| Candidate merge | [PR #8](https://github.com/SSJ-ZYJ/Neoverse-UI/pull/8) merged `dev` into `main` as `fedafc424c103558864dcc483010f707907def1d` on 2026-11-05. |
+| Version packages | [PR #9](https://github.com/SSJ-ZYJ/Neoverse-UI/pull/9) merged as `a7eb5757ae8f7dc18ae782e6173698272589ba01` (`chore(release): version packages`), the direct child of that merge. |
+| Release run | [42055594494](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/42055594494) succeeded at `a7eb5757`: release quality, all three Chromium shards, the Windows gate, packing and `Publish to npm`. |
+| Tags and releases | The seven package tags point to `a7eb5757`; GitHub Releases were created 2026-11-05 15:44-15:45 UTC. |
+| Registry | `npm view` on 2026-11-07 reports Tokens, Tailwind and Overlay Runtime at 0.3.1, Vue and React at 0.4.0, Motion and Glass Runtime at 0.2.2, Giscus Theme at 0.2.0. |
+
+The candidate was prepared on 2026-11-01 and reviewed again on 2026-11-05 at
+`dev` `5d59332` ([PR #7](https://github.com/SSJ-ZYJ/Neoverse-UI/pull/7) merged as
+that commit). Linux release quality, all three Chromium visual shards and the
+Windows interaction gate passed. Firefox reported 136 passed / 2 skipped; the
+complete six-shard WebKit suite reported 136 passed / 0 failed, so cross-browser
+acceptance closed before publication. See the
+[findings](../.agents/notes/archives/acceptance-2026-11-01-cross-browser.md) and the verification record
+below.
+
+The sections below preserve the pre-publication record: the release plan as it
+stood before versioning, the token migration, and the cross-browser evidence
+gathered while the candidate was `dev` at `5d59332`. Read them as dated history
+rather than as outstanding work.
 
 ## Coordinated versions
 
-| Packages | Previous | Planned |
+| Packages | Previous | Published |
 | --- | --- | --- |
 | Tokens, Tailwind, Overlay Runtime | 0.3.0 | 0.3.1 |
 | Vue, React | 0.3.0 | 0.4.0 |
 | Motion, Glass Runtime | 0.2.1 | 0.2.2 |
 | Giscus Theme | 0.2.0 | 0.2.0 (unchanged) |
 
-The packages retain independent versioning. Vue and React take a minor bump
+The packages retain independent versioning. Vue and React took a minor bump
 because `triggerVariant` adds a new public prop to `UiPopover` and
-`UiDropdownMenu`; the remaining pending records use patch bumps. Review the
+`UiDropdownMenu`; the remaining records used patch bumps. Review the
 scrollbar migration below even when upgrading from
 0.3.0: removed token names and map entries affect consumers that referenced them.
 
-Seven packages publish in this release at three different version numbers.
-Giscus Theme has no pending changeset and stays at 0.2.0; the private Playground
+Seven packages published in this release at three different version numbers.
+Giscus Theme had no pending changeset and stayed at 0.2.0; the private Playground
 is not versioned (`privatePackages.version: false`). Internal dependency ranges
-(`^0.3.0`, `^0.2.1`) still admit every new version, so
-`updateInternalDependencies: "patch"` does not trigger a second round of
+(`^0.3.0`, `^0.2.1`) still admitted every new version, so
+`updateInternalDependencies: "patch"` did not trigger a second round of
 dependent bumps. When describing the release, name the package together with its
 version rather than saying "upgrade to 0.3.1".
 
@@ -136,7 +152,7 @@ and exclude button surfaces; see [material standards](material-standards.md).
 
 ## Verification and remaining release work
 
-The current source candidate is `dev` at `8e342b2`.
+The candidate source at the time of this record was `dev` at `8e342b2`.
 [CI run 41951145986](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/41951145986)
 passed on that exact commit: Linux release quality, Linux Chromium visual shards
 1/3, 2/3 and 3/3, and the Windows keyboard/overlay/theme gate. The cross-browser
@@ -214,7 +230,7 @@ WebKit re-run
 is **136 passed / 0 failed**. Shard 6/6 stalled in "Install webkit" on its first
 attempt and passed after a failed-job rerun. With Chromium, Windows, Linux and
 Firefox gates green, cross-browser acceptance is closed for this release; the evidence
-is in the [cross-browser findings](acceptance-2026-11-01-cross-browser.md).
+is in the [cross-browser findings](../.agents/notes/archives/acceptance-2026-11-01-cross-browser.md).
 
 The Linux captures for the 2026-11-04 light rim and table bottom were not
 regenerated. The three Chromium shards pass at `8e342b2` within the configured 1%
@@ -241,12 +257,15 @@ reports all eight names registered with exit 0.
 
 On 2026-11-05 the official npm registry reported all eight package names
 registered, and direct `npm view` requests found none of the seven planned versions
-published. Both repository release automation variables were `true`, and the `npm`
+published; that check ran before the same day's release run. Both repository
+release automation variables were `true`, and the `npm`
 Environment retained its required reviewer. These read-only checks do not inspect
 each package's authenticated npm Trusted Publisher configuration or authorize
 publication.
 
-Before publication, each gate below remains open unless stated otherwise:
+The gate state recorded at `8e342b2`, before publication. Everything except
+consumer, AT/IME and maintainer visual acceptance closed by the 2026-11-05
+release; those remain open and separate from publication.
 
 | Gate | Status at `8e342b2` |
 | --- | --- |
@@ -258,8 +277,8 @@ Before publication, each gate below remains open unless stated otherwise:
 | Consumer, AT/IME and visual acceptance | Pending. See the consumer snapshot and contract numbers below. |
 
 Real-consumer results, manual AT/IME and maintainer visual acceptance stay separate
-from automated CI. The historical [overlay record](acceptance-2026-10-29-overlays.md)
-and [consumer record](consumer-migration-2026-10-29.md) do not establish acceptance
+from automated CI. The historical [overlay record](../.agents/notes/archives/acceptance-2026-10-29-overlays.md)
+and [consumer record](../.agents/notes/archives/consumer-migration-2026-10-29.md) do not establish acceptance
 of this candidate.
 
 A read-only local consumer snapshot on 2026-11-05 found the following. No consumer
@@ -280,8 +299,9 @@ so the dimensions overlap and do not add up. The adapter columns are stable for 
 36 components, but neither that status nor a green CI run promotes a component's
 maturity on its own.
 
-After publication, require `bun run verify:published` against the exact versioned
-manifests, official npm tarballs and dependency graph without local overrides.
-Confirm all seven new Git tags and GitHub Releases, then replace this candidate
-status with the actual publication run and outcome. The complete workflow is in
-[Releasing Neoverse UI](releasing.md).
+Publication verification is complete. The `Publish to npm` job in
+[run 42055594494](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/42055594494)
+ran `bun run verify:published` against the official registry without local
+overrides and succeeded, and the seven Git tags and GitHub Releases point to
+`a7eb5757`. Re-run `bun run verify:published` only to re-check publication state.
+The complete workflow is in [Releasing Neoverse UI](releasing.md).

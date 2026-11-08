@@ -1,5 +1,9 @@
 # Migrating from 0.1.x to 0.2.0
 
+Status: historical
+
+Part of the historical upgrade path; the current migration guide is [Migrating from 0.2.x to the published 0.3.0 baseline](migration-0.3.0.md), which also requires these steps.
+
 Neoverse UI 0.2.0 intentionally removes transitional aliases and compatibility wrappers. Consumers should migrate to the canonical APIs below before switching package versions. No compatibility layer is provided.
 
 ## Package-level breaking changes

@@ -1,5 +1,7 @@
 # Migrating from 0.2.x to the published 0.3.0 baseline
 
+Status: adopted
+
 The 0.3.0 baseline was published on 2026-10-21; the official Registry was rechecked on 2026-10-25. The exact versions below are available on npm; later source-only React parity and `UiTerminalEcho` additions are outside this release. See [release evidence](release-0.3.0.md). The previous [0.1.x → 0.2.0 guide](migration-0.2.0.md) remains applicable to older consumers.
 
 ## Package coordination and availability
@@ -61,7 +63,7 @@ The terminal primitives and semantic roles are included in Vue 0.3.0. It exports
 
 For shell-style command entry previously built around `UiInput`, cut over to `UiTerminalPrompt`: the editor is a borderless native input within the outer terminal Glass surface. `UiInput` remains the canonical form input, not a terminal compatibility wrapper. Command execution, Enter handling, and history remain consumer-owned. React **0.3.0** does not export these terminal adapters; the current source adds them separately. Follow [terminal composition](terminal-composition.md) for current examples, transcript following, theme roles, and the Maple font fallback contract; fonts are not bundled by this addition.
 
-**XCA acceptance:** [CR-20261010-2A6D0E6E](../contracts/component-requests/archive/CR-20261010-2A6D0E6E.json) was delivered and archived on 2026-10-23. Published Tokens 0.3.0 contains the variables; the user confirmed local/npm Token parity and accepted XCA's local `file:` consumer evidence without requiring a dependency-source switch. See the [dated acceptance](acceptance-2026-10-20-terminal-tokens.md); do not reopen or reimplement this request.
+**XCA acceptance:** [CR-20261010-2A6D0E6E](../contracts/component-requests/archive/CR-20261010-2A6D0E6E.json) was delivered and archived on 2026-10-23. Published Tokens 0.3.0 contains the variables; the user confirmed local/npm Token parity and accepted XCA's local `file:` consumer evidence without requiring a dependency-source switch. See the [dated acceptance](../.agents/notes/archives/acceptance-2026-10-20-terminal-tokens.md); do not reopen or reimplement this request.
 
 Vue 0.3.0 also adds `UiStatCard`, `UiTimeline`, and `UiStepFlow`. Their [archived delivery resolutions](../contracts/component-requests/archive/) record completed release visual and real Slides consumer validation on 2026-10-13; the component matrix records them as Stable. React adapters for these components exist in later source, not in React 0.3.0; Vue consumer evidence does not establish React consumer validation.
 

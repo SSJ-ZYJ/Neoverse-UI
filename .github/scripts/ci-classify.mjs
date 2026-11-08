@@ -20,10 +20,14 @@ export function classifyPaths(paths) {
       checks.metadataChecks = true;
     } else if (
       path.startsWith('docs/') ||
+      path.startsWith('.agents/') ||
       (!path.includes('/') && path.endsWith('.md')) ||
       /(?:^|\/)(?:README|CHANGELOG|CONTRIBUTING|AGENTS)\.md$/.test(path)
     ) {
-      // Non-contract documentation never changes the shipped UI.
+      // Documentation never changes the shipped UI, but current-state docs and
+      // dated process material are both checked by check:docs, so they take the
+      // metadata gate instead of skipping validation entirely.
+      checks.metadataChecks = true;
     } else if (
       path.startsWith('tests/visual/') ||
       path.startsWith('packages/') ||

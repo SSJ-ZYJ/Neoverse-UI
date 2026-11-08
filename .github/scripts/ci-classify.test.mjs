@@ -11,9 +11,14 @@ const metadata = { metadataChecks: true, qualityChecks: false, visualChecks: fal
 const quality = { metadataChecks: false, qualityChecks: true, visualChecks: false };
 const visual = { metadataChecks: false, qualityChecks: true, visualChecks: true };
 
-test('ordinary documentation and issue templates need no runtime verification', () => {
-  expectChecks(['README.md', 'docs/releasing.md', '.github/ISSUE_TEMPLATE/bug.md'], docs);
-  expectChecks(['docs/architecture.md', 'AGENTS.md'], docs);
+test('documentation and issue templates need metadata checks but no runtime verification', () => {
+  expectChecks(['README.md', 'docs/releasing.md', '.github/ISSUE_TEMPLATE/bug.md'], metadata);
+  expectChecks(['docs/architecture.md', 'AGENTS.md'], metadata);
+  // Dated process material lives outside docs/ but still takes the metadata
+  // gate, so check:docs validates it.
+  expectChecks(['.agents/notes/archives/acceptance-2026-11-01-cross-browser.md'], metadata);
+  expectChecks(['.agents/notes/plans/ui-current-plan.md'], metadata);
+  expectChecks(['docs/AGENTS.md'], metadata);
 });
 
 test('changesets, request archives, and workflow edits use lightweight metadata verification', () => {

@@ -1,5 +1,7 @@
 # Aurora Glass material and interaction standards
 
+Status: adopted
+
 Components use shared material and effect roles. Concrete optical values belong to
 `packages/tokens/src/material.css`, `effects.css`, and `control-effects.css`; component tokens are compatibility
 aliases and consumers never need a second material implementation.
