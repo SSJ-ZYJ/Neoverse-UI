@@ -1,5 +1,7 @@
 # Neoverse-UI CI 性能与架构复杂度治理（2026-10-25）
 
+Status: historical
+
 基线：`dev` 的 `0ce9b9e`。审计期间 [`3a20866`](https://github.com/SSJ-ZYJ/Neoverse-UI/commit/3a20866)（Aurora Glass 统一命名）由维护者并行落盘，与本轮的 CI/复杂度改动互相独立、无冲突；本文所有实测数字均在本轮改动之上复测。
 
 本文只记录有实测数据的结论；无法量化的项目标明"未量化"，不声称提速。

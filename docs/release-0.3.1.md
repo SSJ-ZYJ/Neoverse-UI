@@ -1,5 +1,9 @@
 # Neoverse UI 0.3.1 / 0.4.0 coordinated release notes
 
+Status: historical
+
+Published release record; the current release process is [Releasing Neoverse UI](releasing.md).
+
 Published on 2026-11-05. `0.3.1` is a release label, not a version shared by
 every package: Tokens, Tailwind and Overlay Runtime reached 0.3.1, Vue and React
 reached 0.4.0, Motion and Glass Runtime reached 0.2.2, and Giscus Theme stayed at
@@ -19,7 +23,7 @@ that commit). Linux release quality, all three Chromium visual shards and the
 Windows interaction gate passed. Firefox reported 136 passed / 2 skipped; the
 complete six-shard WebKit suite reported 136 passed / 0 failed, so cross-browser
 acceptance closed before publication. See the
-[findings](acceptance-2026-11-01-cross-browser.md) and the verification record
+[findings](../.agents/notes/archives/acceptance-2026-11-01-cross-browser.md) and the verification record
 below.
 
 The sections below preserve the pre-publication record: the release plan as it
@@ -226,7 +230,7 @@ WebKit re-run
 is **136 passed / 0 failed**. Shard 6/6 stalled in "Install webkit" on its first
 attempt and passed after a failed-job rerun. With Chromium, Windows, Linux and
 Firefox gates green, cross-browser acceptance is closed for this release; the evidence
-is in the [cross-browser findings](acceptance-2026-11-01-cross-browser.md).
+is in the [cross-browser findings](../.agents/notes/archives/acceptance-2026-11-01-cross-browser.md).
 
 The Linux captures for the 2026-11-04 light rim and table bottom were not
 regenerated. The three Chromium shards pass at `8e342b2` within the configured 1%
@@ -273,8 +277,8 @@ release; those remain open and separate from publication.
 | Consumer, AT/IME and visual acceptance | Pending. See the consumer snapshot and contract numbers below. |
 
 Real-consumer results, manual AT/IME and maintainer visual acceptance stay separate
-from automated CI. The historical [overlay record](acceptance-2026-10-29-overlays.md)
-and [consumer record](consumer-migration-2026-10-29.md) do not establish acceptance
+from automated CI. The historical [overlay record](../.agents/notes/archives/acceptance-2026-10-29-overlays.md)
+and [consumer record](../.agents/notes/archives/consumer-migration-2026-10-29.md) do not establish acceptance
 of this candidate.
 
 A read-only local consumer snapshot on 2026-11-05 found the following. No consumer

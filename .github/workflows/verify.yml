@@ -47,11 +47,12 @@ jobs:
         if: ${{ !inputs.quality-checks }}
         run: bun install --frozen-lockfile
 
-      - name: Validate Changesets, requests and CI scripts
+      - name: Validate Changesets, requests, docs and CI scripts
         if: ${{ !inputs.quality-checks }}
         run: |
           bun run check:changesets
           bun run check:requests
+          bun run check:docs
           node --test .github/scripts/ci-classify.test.mjs .github/scripts/ci-evidence.test.mjs
           bash -n .github/scripts/ci-scope.sh
 

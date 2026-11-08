@@ -1,5 +1,7 @@
 # 跨项目组件需求登记
 
+Status: adopted
+
 ## 目标与边界
 
 Neoverse-UI 的组件供 Neoverse、Neoverse-Docs、Neoverse-Slides 等项目消费。需求可能是缺少新的可复用组件、现有组件缺少交互/视觉契约，或者 Vue / React 某一适配层不完整。消费项目应记录**发生位置、用户场景、期望行为、验收条件**，而不是先写一套项目专用组件后忘记回收。

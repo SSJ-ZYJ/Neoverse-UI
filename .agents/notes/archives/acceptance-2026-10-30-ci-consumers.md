@@ -1,5 +1,7 @@
 # 2026-10-30 远端跨引擎入口与消费 CI 实施记录
 
+Status: historical
+
 ## 来源与执行限制
 
 UI 基底为 `eda31c32d6881541c847256eaacb60c3719f2763` 加本轮 CI / 文档改动。Doc 仍为 `4c7de67` 加已有迁移和用户工作；Slides 尚无首个提交。保留三个消费工作区的既有修改，本轮不更改包版本、锁文件或组件成熟度。
@@ -39,4 +41,4 @@ gh workflow run ci.yml --repo SSJ-ZYJ/Neoverse-UI --ref dev -f cross_browser_onl
 
 消费工作流在各自源码提交后另行远端验收；Slides 仍需建立消费源码基线，Doc 迁移仍需与既有用户修改明确区分。提交、推送和发布不由本记录自动授权。
 
-参考：[GitHub 手动执行前提](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow)、[同提交复用工作流](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows)、[当前计划](ui-current-plan.md)。
+参考：[GitHub 手动执行前提](https://docs.github.com/en/actions/how-tos/manage-workflow-runs/manually-run-a-workflow)、[同提交复用工作流](https://docs.github.com/en/actions/how-tos/reuse-automations/reuse-workflows)、[当前计划](../plans/ui-plan-2026-10-30.md)。

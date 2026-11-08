@@ -1,5 +1,7 @@
 # 2026-10-25 Consumer Validation 治理（B1—B5）
 
+Status: historical
+
 ## 边界与结论
 
 状态唯一来源是 `contracts/component-matrix.json`。本次基于 `dev` 的 `f35c566`、Batch A 尚未提交的修正及本轮改动；没有提交、推送、版本落盘或发布。保留消费者的原有源码与依赖方式，Slides / XCA 使用隔离的真实消费源码副本及当前打包产物验收，不把副本当作新产品实现。

@@ -1,5 +1,7 @@
 # Releasing Neoverse UI
 
+Status: adopted
+
 Neoverse UI publishes the following public packages under the npm `@neoverse-ui` organization scope:
 
 - `@neoverse-ui/tokens`
@@ -75,7 +77,7 @@ that its Trusted Publisher identity is configured correctly.
 The terminal token request was delivered and archived on 2026-10-23 after published
 Tokens 0.3.0 contents and XCA-Portal's accepted local `file:` consumption were verified.
 The user accepted local/npm Token parity without changing dependency sources; see
-[terminal token acceptance](acceptance-2026-10-20-terminal-tokens.md) and the
+[terminal token acceptance](../.agents/notes/archives/acceptance-2026-10-20-terminal-tokens.md) and the
 [archived resolution](../contracts/component-requests/archive/CR-20261010-2A6D0E6E.json).
 
 ## Release gates
@@ -142,11 +144,13 @@ The repository and all public packages use the MIT license. `scripts/verify-pack
 CI and Release call `.github/workflows/verify.yml` on their exact checked-out commit.
 CI handles PRs and `dev` pushes without an open PR. Both workflows classify changed
 paths into documentation, metadata, source quality, and rendered UI impact.
-Ordinary documentation skips build and browsers while retaining the lightweight
-Linux aggregate check. Changesets, archived component requests, and CI config
-changes run metadata checks without visual tests. Contract-matrix documentation
-and non-visual quality scripts run source verification, but not Playwright.
-Unknown file types conservatively select both source and visual gates.
+Ordinary documentation and the dated process material under `.agents/notes/` run
+metadata checks without build or browser work, so `check:docs` validates their
+status lines and links; the Linux aggregate check still runs. Changesets,
+archived component requests, and CI config changes take the same metadata gate.
+Contract-matrix documentation and non-visual quality scripts run source
+verification, but not Playwright. Unknown file types conservatively select both
+source and visual gates.
 
 Release also scopes ordinary `main` pushes, but does not repeat a browser matrix
 that already ran: CI gated the pull request that produced the commit, and Release

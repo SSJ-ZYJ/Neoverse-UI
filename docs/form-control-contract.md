@@ -1,5 +1,7 @@
 # Form Control Contract
 
+Status: adopted
+
 Neoverse-UI form controls share one state, accessibility, and styling contract across Vue and React. Native HTML controls remain the source of interaction semantics; the component layer adds the Neoverse material, geometry, state language, and framework bindings.
 
 ## State model

@@ -1,5 +1,7 @@
 # Vue / React 功能对应
 
+Status: adopted
+
 Vue 与 React 现提供相同的 36 个公开组件。两套适配复用 Tokens、Tailwind 组件样式、Motion 与 Overlay Runtime，业务数据和路由仍由使用方管理。
 
 ## 状态与事件

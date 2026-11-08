@@ -1,5 +1,9 @@
 # Neoverse UI 0.3.0 release notes
 
+Status: historical
+
+Superseded by the [0.3.1 / 0.4.0 coordinated release notes](release-0.3.1.md).
+
 Published on 2026-10-21. [Release run 39613361164](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/39613361164)
 completed npm publication and official-registry installation verification. On
 2026-10-25 the eight official npm `latest` versions matched the table below; the

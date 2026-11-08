@@ -1,5 +1,7 @@
 # Overlay Contract
 
+Status: adopted
+
 Neoverse-UI uses one overlay contract for anchored top-layer UI. Popover, DropdownMenu, and Select share the same framework-agnostic positioning runtime and the same Aurora Glass depth language.
 
 ## Runtime ownership

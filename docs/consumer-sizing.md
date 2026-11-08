@@ -1,5 +1,7 @@
 # 消费项目组件尺寸
 
+Status: adopted
+
 组件默认尺寸必须在浏览器通常的 16px 根字号下可读。此前 Button/Action 默认只有 32px 高、12.48px 字号，导航/分段控件只有 24px 高、11.2px 字号；Playground 外层使用 17–20px 根字号放大了预览，使实际接入项目显得更小。
 
 现在共享 Tokens 定义以下基线，Vue、React 和预编译消费者 CSS 使用同一组值：
@@ -66,7 +68,7 @@ Doc 的官方 `react@0.1.0`、`giscus-theme@0.1.0` 返回 404；官方 `tailwind
 
 ## 2026-10-29 Doc 迁移跟进
 
-上述 10 月 25 日记录保留为历史。Doc 现已切换六个精确 npm 依赖及对应 overrides：Tokens / Tailwind / React 0.3.0，Motion / Glass 0.2.1，Giscus 0.2.0，不再依赖历史 tarball。正式包与本地候选分别完成隔离构建和真实阅读/首页回归；原工作区 frozen install 通过。候选使用共享同步器（新增 Giscus 支持），不复制第二份同步逻辑。RSC 适配、81 项候选单测与未验收边界见[本轮消费迁移](consumer-migration-2026-10-29.md)。未修改 Slides / XCA 的来源或 CI 固定 SHA。
+上述 10 月 25 日记录保留为历史。Doc 现已切换六个精确 npm 依赖及对应 overrides：Tokens / Tailwind / React 0.3.0，Motion / Glass 0.2.1，Giscus 0.2.0，不再依赖历史 tarball。正式包与本地候选分别完成隔离构建和真实阅读/首页回归；原工作区 frozen install 通过。候选使用共享同步器（新增 Giscus 支持），不复制第二份同步逻辑。RSC 适配、81 项候选单测与未验收边界见[本轮消费迁移](../.agents/notes/archives/consumer-migration-2026-10-29.md)。未修改 Slides / XCA 的来源或 CI 固定 SHA。
 
 ## 验证
 
