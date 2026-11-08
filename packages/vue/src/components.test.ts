@@ -9,6 +9,7 @@ import UiBreadcrumb from './UiBreadcrumb.vue';
 import UiButton from './UiButton.vue';
 import UiCard from './UiCard.vue';
 import UiCheckbox from './UiCheckbox.vue';
+import UiContextMenu from './UiContextMenu.vue';
 import UiControlSurface from './UiControlSurface.vue';
 import UiDisclosure from './UiDisclosure.vue';
 import UiDock from './UiDock.vue';
@@ -1401,6 +1402,163 @@ describe('Overlay primitives', () => {
     expect(menu.get('.ui-dropdown-menu__trigger').classes()).toContain('ui-button--ghost');
     expect(fallback.get('.ui-popover__trigger').classes()).toContain('ui-button--secondary');
     expect(wrapper.get('.ui-popover__trigger').classes()).not.toContain('ui-button--secondary');
+  });
+
+  it('renders a context menu with menu roles, separators, headings and checkable rows', () => {
+    const wrapper = mount(UiContextMenu, {
+      props: {
+        open: false,
+        ariaLabel: 'Page actions',
+        entries: [
+          { type: 'heading', id: 'edit', label: 'Edit' },
+          { id: 'copy', label: 'Copy', shortcut: 'Ctrl+C' },
+          { type: 'separator', id: 'sep-1' },
+          { id: 'delete', label: 'Delete', tone: 'danger', disabled: true },
+          {
+            id: 'theme-dark',
+            label: 'Dark',
+            group: 'theme',
+            selection: 'single',
+            checked: true,
+          },
+        ],
+      },
+    });
+
+    const panel = wrapper.get('.ui-context-menu');
+    // A context menu owns a nested submenu popover, so the runtime must own outside
+    // dismissal instead of the browser's light dismiss.
+    // 上下文菜单拥有一个嵌套的二级浮层，因此外部关闭由运行时负责，而不是浏览器的轻触关闭。
+    expect(panel.attributes('popover')).toBe('manual');
+    expect(panel.attributes('role')).toBe('menu');
+    expect(panel.attributes('aria-label')).toBe('Page actions');
+    expect(panel.classes()).toContain('ui-overlay-panel');
+    expect(panel.classes()).toContain('material-glass-immersive');
+
+    expect(wrapper.get('.ui-context-menu__heading').text()).toBe('Edit');
+    // A native hr carries the separator role without an explicit attribute.
+    // 原生 hr 自带分隔符语义，无需显式 role。
+    expect(wrapper.get('.ui-context-menu__separator').element.tagName).toBe('HR');
+
+    const items = wrapper.findAll('.ui-context-menu__item');
+    expect(items).toHaveLength(3);
+    expect(items[0]?.attributes('role')).toBe('menuitem');
+    expect(items[0]?.get('.ui-context-menu__shortcut').text()).toBe('Ctrl+C');
+    expect(items[1]?.attributes('disabled')).toBeDefined();
+    expect(items[1]?.attributes('data-tone')).toBe('danger');
+    expect(items[2]?.attributes('role')).toBe('menuitemradio');
+    expect(items[2]?.attributes('aria-checked')).toBe('true');
+    expect(items[2]?.get('.ui-context-menu__check').text()).toBe('✓');
+    wrapper.unmount();
+  });
+
+  it('opens a submenu popover beside the panel and keeps the parent rows visible', async () => {
+    const wrapper = mount(UiContextMenu, {
+      attachTo: document.body,
+      props: {
+        open: true,
+        autoFocus: true,
+        ariaLabel: 'Page actions',
+        point: { x: 20, y: 20 },
+        entries: [
+          { id: 'copy', label: 'Copy' },
+          {
+            id: 'theme',
+            label: 'Theme',
+            children: [
+              { id: 'theme:light', label: 'Light', selection: 'single', checked: true },
+              { id: 'theme:dark', label: 'Dark', selection: 'single', checked: false },
+            ],
+          },
+        ],
+      },
+    });
+    await nextTick();
+    await nextTick();
+
+    const rows = () => wrapper.findAll('.ui-context-menu__item');
+    expect(rows()).toHaveLength(2);
+    const opener = rows()[1];
+    expect(opener?.attributes('aria-haspopup')).toBe('menu');
+    expect(opener?.attributes('aria-expanded')).toBe('false');
+
+    await opener?.trigger('click');
+    await nextTick();
+    await nextTick();
+
+    // The submenu is its own manual popover teleported to the body, so the panel's presence
+    // filter cannot become its containing block and the parent rows stay rendered.
+    // 二级菜单是传送到 body 的独立 manual 浮层，面板入场滤镜不会成为它的包含块，父级行保持渲染。
+    const submenu = document.querySelector<HTMLElement>('.ui-context-menu__submenu');
+    expect(submenu).not.toBeNull();
+    expect(submenu?.getAttribute('popover')).toBe('manual');
+    expect(submenu?.getAttribute('role')).toBe('menu');
+    expect(submenu?.parentElement).toBe(document.body);
+    // The material contract forbids nesting a glass utility, so the column paints the
+    // shared overlay recipe from its own stylesheet instead.
+    // 材质契约禁止嵌套玻璃工具类，因此该列改由自身样式表采用共享浮层配方。
+    expect(submenu?.classList.contains('ui-context-menu__submenu')).toBe(true);
+    expect(rows()).toHaveLength(2);
+    expect(opener?.attributes('aria-expanded')).toBe('true');
+    expect(opener?.attributes('data-open')).toBe('true');
+    expect(opener?.attributes('aria-controls')).toBe(submenu?.id);
+
+    const childRows = submenu?.querySelectorAll<HTMLElement>('.ui-context-menu__item') ?? [];
+    expect(childRows).toHaveLength(2);
+    expect(childRows[0]?.getAttribute('aria-checked')).toBe('true');
+    expect(childRows[1]?.getAttribute('role')).toBe('menuitemradio');
+
+    childRows[1]?.click();
+    await nextTick();
+    expect(wrapper.emitted('select')?.[0]?.[0]).toMatchObject({ id: 'theme:dark' });
+    wrapper.unmount();
+  });
+
+  it('opens a context menu at its pointer anchor and restores focus on Escape', async () => {
+    const wrapper = mount(UiContextMenu, {
+      attachTo: document.body,
+      props: {
+        open: true,
+        ariaLabel: 'Page actions',
+        point: { x: 240, y: 160 },
+        entries: [{ id: 'copy', label: 'Copy' }],
+      },
+    });
+    await nextTick();
+    await nextTick();
+
+    const panel = wrapper.get('.ui-context-menu');
+    expect(panel.classes()).toContain('ui-overlay-panel--fallback-open');
+    expect(panel.attributes('data-neoverse-overlay-side')).toBe('bottom');
+    expect(
+      Number.parseFloat(
+        (panel.element as HTMLElement).style.getPropertyValue('--neoverse-overlay-left'),
+      ),
+    ).toBe(240);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+    await nextTick();
+    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([false]);
+    wrapper.unmount();
+  });
+
+  it('emits the selected context menu item and closes on selection', async () => {
+    const wrapper = mount(UiContextMenu, {
+      attachTo: document.body,
+      props: {
+        open: true,
+        ariaLabel: 'Page actions',
+        point: { x: 10, y: 10 },
+        entries: [{ id: 'copy', label: 'Copy' }],
+      },
+    });
+    await nextTick();
+    await nextTick();
+
+    await wrapper.get('.ui-context-menu__item').trigger('click');
+    expect(wrapper.emitted('select')?.[0]?.[0]).toMatchObject({ id: 'copy' });
+    expect(wrapper.emitted('update:open')?.at(-1)).toEqual([false]);
+    wrapper.unmount();
   });
 
   it('renders DropdownMenu with native menu items, disabled state, and danger tone', () => {

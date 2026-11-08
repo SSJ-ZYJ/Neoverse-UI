@@ -179,7 +179,7 @@ for (const theme of themes) {
 
   test(`Vue Popover and menu keep fallback dismissal and focus / ${theme}`, async ({ page }) => {
     await disablePopoverApi(page);
-    await page.goto(`/frame?theme=${theme}&lang=en&contract-fixtures=1#controls`, {
+    await page.goto(`/frame?theme=${theme}&lang=en&contract-fixtures=1#overlays`, {
       waitUntil: 'domcontentloaded',
     });
     expect(
@@ -190,10 +190,10 @@ for (const theme of themes) {
       ),
     ).toBe(true);
 
-    const popover = page.locator('#controls-overlays [data-overlay-popover]');
+    const popover = page.locator('#overlays-popover [data-overlay-popover]');
     const popoverTrigger = popover.locator('.ui-popover__trigger');
     const popoverPanel = popover.locator('.ui-popover__content');
-    const menu = page.locator('#controls-overlays [data-overlay-dropdown]');
+    const menu = page.locator('#overlays-popover [data-overlay-dropdown]');
     const menuTrigger = menu.locator('.ui-dropdown-menu__trigger');
     const menuPanel = menu.locator('.ui-dropdown-menu__panel');
 

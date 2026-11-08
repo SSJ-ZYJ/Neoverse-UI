@@ -218,3 +218,76 @@ test('keeps explicit bottom placement below even when auto placement would flip'
     }),
   ).toEqual({ left: 240, top: 572, opensAbove: false });
 });
+
+test('positions a point-anchored overlay from the cursor and flips above when needed', () => {
+  const saved = ['window', 'document', 'getComputedStyle'].map(
+    (name) => [name, Object.getOwnPropertyDescriptor(globalThis, name)] as const,
+  );
+  const values = new Map<string, string>();
+  const style = {
+    zoom: '1',
+    fontSize: '16px',
+    scale: 'none',
+    translate: 'none',
+    transformOrigin: '0px 0px',
+    getPropertyValue: () => '8px',
+  };
+  const overlay = {
+    parentElement: null,
+    classList: { contains: () => true },
+    offsetWidth: 200,
+    offsetHeight: 100,
+    dataset: {},
+    style: { setProperty: (name: string, value: string) => values.set(name, value) },
+    // A laid-out fallback panel reports the position its custom properties ask for.
+    getBoundingClientRect: () => {
+      const left = Number.parseFloat(values.get('--left') ?? '0');
+      const top = Number.parseFloat(values.get('--top') ?? '0');
+      return { left, top, right: left + 200, bottom: top + 100, width: 200, height: 100 };
+    },
+  } as unknown as HTMLElement;
+  try {
+    Object.defineProperty(globalThis, 'window', {
+      configurable: true,
+      value: { innerWidth: 1200, innerHeight: 800 },
+    });
+    Object.defineProperty(globalThis, 'document', {
+      configurable: true,
+      value: { documentElement: { clientWidth: 1200, clientHeight: 800 } },
+    });
+    Object.defineProperty(globalThis, 'getComputedStyle', {
+      configurable: true,
+      value: () => style,
+    });
+
+    const options = {
+      overlay,
+      gapVariable: '--gap',
+      leftVariable: '--left',
+      topVariable: '--top',
+      fallbackOpenClass: 'open',
+    };
+
+    // Cursor near the top-left: the panel opens below and to the right.
+    positionAnchoredOverlay({ ...options, point: { x: 240, y: 160 } });
+    expect(Number.parseFloat(values.get('--left') ?? '')).toBeCloseTo(240);
+    expect(Number.parseFloat(values.get('--top') ?? '')).toBeCloseTo(168);
+    expect(overlay.dataset.neoverseOverlaySide).toBe('bottom');
+
+    // Cursor near the bottom edge: auto placement flips the panel above it.
+    values.clear();
+    positionAnchoredOverlay({ ...options, point: { x: 240, y: 760 } });
+    expect(Number.parseFloat(values.get('--top') ?? '')).toBeCloseTo(652);
+    expect(overlay.dataset.neoverseOverlaySide).toBe('top');
+
+    // Cursor near the right edge: the panel clamps inside the viewport gap.
+    values.clear();
+    positionAnchoredOverlay({ ...options, point: { x: 1180, y: 100 } });
+    expect(Number.parseFloat(values.get('--left') ?? '')).toBeCloseTo(992);
+  } finally {
+    for (const [name, descriptor] of saved) {
+      if (descriptor) Object.defineProperty(globalThis, name, descriptor);
+      else Reflect.deleteProperty(globalThis, name);
+    }
+  }
+});

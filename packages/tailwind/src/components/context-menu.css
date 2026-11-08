@@ -1,0 +1,175 @@
+@layer components {
+  /* The panel reuses .ui-overlay-panel for positioning, material and motion;
+     this block only adds the compact row grid a context menu needs. */
+  .ui-context-menu {
+    display: none;
+    min-width: var(--neoverse-context-menu-min-inline-size);
+    padding: var(--neoverse-space-1);
+    gap: 0;
+  }
+
+  .ui-context-menu:popover-open,
+  .ui-context-menu.ui-overlay-panel--fallback-open {
+    display: grid;
+  }
+
+  .ui-context-menu__heading {
+    margin: 0;
+    padding: var(--neoverse-space-1) var(--neoverse-space-3);
+    color: var(--neoverse-context-menu-heading-foreground);
+    font-size: var(--neoverse-context-menu-heading-font-size);
+  }
+
+  /* A rule is a native hr so the separator role and its semantics are free. */
+  .ui-context-menu__separator {
+    height: 0;
+    margin: var(--neoverse-space-1) var(--neoverse-space-3);
+    border: 0;
+    border-top: var(--neoverse-border-width-thin) solid var(--neoverse-context-menu-separator-color);
+  }
+
+  .ui-context-menu__item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: var(--neoverse-context-menu-item-gap);
+    border: 0;
+    border-radius: var(--neoverse-overlay-item-radius);
+    padding: var(--neoverse-space-2) var(--neoverse-space-3);
+    color: var(--neoverse-context-menu-item-foreground);
+    background: transparent;
+    font: inherit;
+    font-size: var(--neoverse-context-menu-font-size);
+    line-height: var(--neoverse-line-height-snug);
+    text-align: left;
+    cursor: pointer;
+    transition:
+      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  /* Only checkable rows reserve a check column; a plain action starts at the padding.
+     The mark is a hairline glyph rather than a filled dot: a filled disc at this size
+     reads as a status light instead of a selection mark. */
+  /* 只有可勾选行保留勾选列，普通操作从内边距起排。标记使用细笔画字符而不是实心圆点：
+     这个尺寸下的实心圆点更像状态灯，而不是选中标记。 */
+  .ui-context-menu__check {
+    display: inline-flex;
+    flex: none;
+    width: var(--neoverse-context-menu-check-inline-size);
+    justify-content: center;
+    color: var(--neoverse-context-menu-check-foreground);
+    font-size: var(--neoverse-font-size-2xs);
+    line-height: 1;
+  }
+
+  .ui-context-menu__label {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* A submenu is its own manual popover in the top layer, flush with the panel edge the way
+     a native submenu is. It paints the shared overlay recipe itself rather than nesting a
+     glass utility, which the material contract forbids, and the panel registers it as an
+     inside element for dismissal. */
+  /* 二级菜单是顶层里独立的 manual 浮层，像原生二级菜单那样贴着面板边缘。它直接采用共享浮层配方，
+     而不是嵌套玻璃工具类（材质契约禁止嵌套），面板把它登记为内部元素以处理关闭。 */
+  .ui-context-menu__submenu {
+    position: fixed;
+    inset: auto;
+    top: var(--neoverse-overlay-top);
+    left: var(--neoverse-overlay-left);
+    display: none;
+    min-width: var(--neoverse-context-menu-min-inline-size);
+    max-width: min(var(--neoverse-overlay-max-inline-size), calc(100vw - var(--neoverse-space-4)));
+    max-height: var(--neoverse-overlay-max-block-size);
+    margin: 0;
+    padding: var(--neoverse-space-1);
+    gap: 0;
+    overflow: auto;
+    border: 0;
+    border-radius: var(--neoverse-overlay-radius);
+    color: var(--neoverse-context-menu-item-foreground);
+    background: var(--neoverse-overlay-background);
+    box-shadow: var(--neoverse-overlay-shadow);
+    -webkit-backdrop-filter: var(--neoverse-overlay-filter);
+    backdrop-filter: var(--neoverse-overlay-filter);
+    z-index: var(--neoverse-overlay-layer);
+  }
+
+  .ui-context-menu__submenu:popover-open,
+  .ui-context-menu__submenu--open {
+    display: grid;
+  }
+
+  .ui-context-menu__level {
+    display: grid;
+    gap: 0;
+    min-width: var(--neoverse-context-menu-min-inline-size);
+  }
+
+  /* The row that opened the submenu keeps its open state while the column is visible. */
+  /* 打开二级菜单的行在列可见期间保持展开状态。 */
+  .ui-context-menu__item[data-open='true'] {
+    color: var(--neoverse-color-text-primary);
+    background: var(--neoverse-overlay-item-active-background);
+  }
+
+  .ui-context-menu__chevron {
+    flex: none;
+    color: var(--neoverse-context-menu-shortcut-foreground);
+    font-size: var(--neoverse-context-menu-heading-font-size);
+  }
+
+  .ui-context-menu__shortcut {
+    flex: none;
+    margin-inline-start: var(--neoverse-space-4);
+    color: var(--neoverse-context-menu-shortcut-foreground);
+    font-size: var(--neoverse-context-menu-heading-font-size);
+    font-variant-numeric: tabular-nums;
+  }
+
+  @media (hover: hover) {
+    .ui-context-menu__item:not(:disabled):not([aria-disabled='true']):hover:not(:active) {
+      color: var(--neoverse-color-text-primary);
+      background: var(--neoverse-overlay-item-hover-background);
+    }
+  }
+
+  .ui-context-menu__item:active:not(:disabled):not([aria-disabled='true']) {
+    background: var(--neoverse-effect-press-wash);
+    box-shadow: var(--neoverse-effect-press-shadow);
+  }
+
+  .ui-context-menu__item:focus-visible:not(:active) {
+    color: var(--neoverse-color-text-primary);
+    background: var(--neoverse-overlay-item-active-background);
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: calc(var(--neoverse-focus-ring-offset) * -1);
+  }
+
+  .ui-context-menu__item[data-tone='danger'] {
+    color: var(--neoverse-overlay-item-danger-foreground);
+  }
+
+  .ui-context-menu__item:disabled {
+    cursor: not-allowed;
+    opacity: var(--neoverse-overlay-item-disabled-opacity);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-context-menu__item {
+      transition: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ui-context-menu__separator {
+      background: CanvasText;
+    }
+
+    .ui-context-menu__item:focus-visible {
+      outline-color: Highlight;
+    }
+  }
+}

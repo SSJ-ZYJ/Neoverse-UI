@@ -10,6 +10,7 @@ import FormsModule from './modules/FormsModule.vue';
 import LayoutShapeModule from './modules/LayoutShapeModule.vue';
 import MaterialsModule from './modules/MaterialsModule.vue';
 import MotionModule from './modules/MotionModule.vue';
+import OverlaysModule from './modules/OverlaysModule.vue';
 import ScrollbarModule from './modules/ScrollbarModule.vue';
 import ShadowModule from './modules/ShadowModule.vue';
 import StatusFeedbackModule from './modules/StatusFeedbackModule.vue';
@@ -59,6 +60,12 @@ export const labModules = [
     label: moduleCopy.controls.label,
     description: moduleCopy.controls.description,
     component: ControlsModule,
+  },
+  {
+    id: 'overlays',
+    label: moduleCopy.overlays.label,
+    description: moduleCopy.overlays.description,
+    component: OverlaysModule,
   },
   {
     id: 'dock',
@@ -156,6 +163,7 @@ export const moduleGroups = [
     packages: ['@neoverse-ui/vue', '@neoverse-ui/react'],
     moduleIds: [
       'controls',
+      'overlays',
       'forms',
       'status-feedback',
       'card',
@@ -343,11 +351,19 @@ export const labSpecimens = [
     kind: 'component',
   },
   {
-    id: 'controls-overlays',
-    moduleId: 'controls',
-    label: localized('Overlay primitives', '弹层控件'),
+    id: 'overlays-popover',
+    moduleId: 'overlays',
+    label: localized('Popover & dropdown', '弹层与下拉菜单'),
     apiNames: ['UiPopover', 'UiDropdownMenu'],
-    tags: ['control', 'overlay', 'popover', 'menu', 'top-layer'],
+    tags: ['overlay', 'popover', 'menu', 'top-layer'],
+    kind: 'component',
+  },
+  {
+    id: 'overlays-context-menu',
+    moduleId: 'overlays',
+    label: localized('Context menu', '右键菜单'),
+    apiNames: ['UiContextMenu'],
+    tags: ['overlay', 'menu', 'context-menu', 'top-layer', 'submenu'],
     kind: 'component',
   },
   {

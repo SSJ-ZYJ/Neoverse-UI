@@ -1,6 +1,12 @@
 export type OverlayPlacement = 'auto' | 'bottom-start' | 'bottom-end';
 
-export type OverlayDismissReason = 'escape' | 'outside';
+export type OverlayDismissReason = 'escape' | 'outside' | 'scroll';
+
+/** Viewport pointer anchor for menus opened at a cursor position. */
+export interface OverlayPoint {
+  x: number;
+  y: number;
+}
 
 export interface OverlayRect {
   top: number;
@@ -32,7 +38,12 @@ export interface AnchoredPosition {
 }
 
 export interface AnchoredOverlayOptions {
-  trigger: HTMLElement;
+  /** Element the overlay is positioned against; omitted for point-anchored menus. */
+  trigger?: HTMLElement;
+  /** Viewport coordinates for cursor-anchored menus; mutually exclusive with `trigger`. */
+  point?: OverlayPoint;
+  /** Element that receives focus when the overlay closes; defaults to `trigger`. */
+  focusReturn?: HTMLElement;
   overlay: HTMLElement;
   gapVariable: string;
   leftVariable: string;
@@ -41,6 +52,17 @@ export interface AnchoredOverlayOptions {
   matchTriggerWidth?: boolean;
   placement?: OverlayPlacement;
   fallbackOpenClass: string;
+  /**
+   * The overlay is a manual popover, so the browser does not light-dismiss it and the
+   * runtime owns outside dismissal instead. Needed when the overlay owns a nested popover
+   * (a submenu) that must not count as an outside click.
+   * 浮层是 manual popover，浏览器不会轻触关闭它，改由运行时负责外部关闭。当浮层拥有一个
+   * 不应被算作外部点击的嵌套浮层（二级菜单）时需要。
+   */
+  manual?: boolean;
+  /** Extra elements that count as inside the overlay for dismissal and focus guards. */
+  /** 关闭与焦点守卫中同样算作浮层内部的额外元素。 */
+  containedElements?: () => Array<HTMLElement | null | undefined>;
   onDismiss?: (reason: OverlayDismissReason) => void;
 }
 
@@ -150,6 +172,7 @@ export function stopOverlayTracking(overlay: HTMLElement): void {
 
 export function positionAnchoredOverlay({
   trigger,
+  point,
   overlay,
   gapVariable,
   leftVariable,
@@ -161,7 +184,19 @@ export function positionAnchoredOverlay({
 }: AnchoredOverlayOptions): void {
   if (!isOverlayOpen(overlay, fallbackOpenClass)) return;
 
-  const triggerRect = trigger.getBoundingClientRect();
+  // A cursor anchor is a zero-size rect: the panel opens from the pointer and
+  // reuses the same flip, clamp and zoom compensation as an element trigger.
+  const triggerRect =
+    trigger === undefined
+      ? {
+          top: point?.y ?? 0,
+          bottom: point?.y ?? 0,
+          left: point?.x ?? 0,
+          right: point?.x ?? 0,
+          width: 0,
+          height: 0,
+        }
+      : trigger.getBoundingClientRect();
   const overlayStyle = getComputedStyle(overlay);
   const effectiveZoom = resolveEffectiveZoom(overlay);
   const gap =
@@ -192,16 +227,20 @@ export function positionAnchoredOverlay({
   // assuming that fixed CSS coordinates are viewport-relative. Native popovers
   // in the top layer need no adjustment.
   if (!supportsPopover(overlay)) {
-    const rect = overlay.getBoundingClientRect();
-    // The panel's own presence scale/translate is intentional entrance motion,
-    // not a containing-block offset. Exclude it or the initial correction leaves
-    // a permanent drift after the animation reaches its resting geometry.
-    const motion = resolveMotionOffset(overlay, overlayStyle);
-    const deltaX = position.left - (rect.left - motion.x * effectiveZoom);
-    const deltaY = position.top - (rect.top - motion.y * effectiveZoom);
-    if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
-      overlay.style.setProperty(leftVariable, `${(position.left + deltaX) / effectiveZoom}px`);
-      overlay.style.setProperty(topVariable, `${(position.top + deltaY) / effectiveZoom}px`);
+    // A panel without a layout box reports an all-zero rect, which would turn
+    // the correction into a duplicate offset instead of a containing-block fix.
+    if (overlay.offsetWidth > 0 || overlay.offsetHeight > 0) {
+      const rect = overlay.getBoundingClientRect();
+      // The panel's own presence scale/translate is intentional entrance motion,
+      // not a containing-block offset. Exclude it or the initial correction leaves
+      // a permanent drift after the animation reaches its resting geometry.
+      const motion = resolveMotionOffset(overlay, overlayStyle);
+      const deltaX = position.left - (rect.left - motion.x * effectiveZoom);
+      const deltaY = position.top - (rect.top - motion.y * effectiveZoom);
+      if (Math.abs(deltaX) > 0.5 || Math.abs(deltaY) > 0.5) {
+        overlay.style.setProperty(leftVariable, `${(position.left + deltaX) / effectiveZoom}px`);
+        overlay.style.setProperty(topVariable, `${(position.top + deltaY) / effectiveZoom}px`);
+      }
     }
   }
   overlay.dataset.neoverseOverlaySide = position.opensAbove ? 'top' : 'bottom';
@@ -210,13 +249,15 @@ export function positionAnchoredOverlay({
 function startOverlayTracking(options: AnchoredOverlayOptions): void {
   stopOverlayTracking(options.overlay);
   const update = () => positionAnchoredOverlay(options);
+  // A point anchor does not move with the layout, so only the panel's own
+  // geometry is sampled; an element trigger also contributes its rect.
   const readGeometry = () => {
-    const rect = options.trigger.getBoundingClientRect();
+    const rect = options.trigger?.getBoundingClientRect();
     return [
-      rect.left,
-      rect.top,
-      rect.width,
-      rect.height,
+      rect?.left ?? options.point?.x ?? 0,
+      rect?.top ?? options.point?.y ?? 0,
+      rect?.width ?? 0,
+      rect?.height ?? 0,
       options.overlay.offsetWidth,
       options.overlay.offsetHeight,
     ];
@@ -227,7 +268,7 @@ function startOverlayTracking(options: AnchoredOverlayOptions): void {
   // transform changes. Sample only while open and write only on geometry changes.
   const track = () => {
     if (
-      !options.trigger.isConnected ||
+      options.trigger?.isConnected === false ||
       !options.overlay.isConnected ||
       !isOverlayOpen(options.overlay, options.fallbackOpenClass)
     ) {
@@ -252,11 +293,24 @@ function startOverlayTracking(options: AnchoredOverlayOptions): void {
 }
 
 function installDismiss(options: AnchoredOverlayOptions): () => void {
+  // A cursor-anchored menu has no trigger element; the panel and its caller's
+  // region own dismissal, so only the document listeners apply.
+  const anchor = options.trigger;
+  const isInside = (target: Node): boolean => {
+    if (options.overlay.contains(target) || anchor?.contains(target) === true) return true;
+    for (const element of options.containedElements?.() ?? []) {
+      if (element?.contains(target) === true) return true;
+    }
+    return false;
+  };
   const onPointerDown = (event: PointerEvent) => {
-    if (supportsPopover(options.overlay)) return;
+    // A manual popover is never light-dismissed by the browser, so outside pointer input
+    // has to be handled here; an auto popover already does it natively.
+    // manual popover 不会被浏览器轻触关闭，因此这里必须处理外部指针输入；auto popover 已原生处理。
+    if (supportsPopover(options.overlay) && options.manual !== true) return;
     const target = event.target;
     if (!(target instanceof Node)) return;
-    if (options.overlay.contains(target) || options.trigger.contains(target)) return;
+    if (isInside(target)) return;
     hideAnchoredOverlay(options);
     options.onDismiss?.('outside');
   };
@@ -273,7 +327,7 @@ function installDismiss(options: AnchoredOverlayOptions): () => void {
     if (!isOverlayOpen(options.overlay, options.fallbackOpenClass)) return;
     const next = event.relatedTarget;
     if (!(next instanceof Node)) return;
-    if (options.overlay.contains(next) || options.trigger.contains(next)) return;
+    if (isInside(next)) return;
     hideAnchoredOverlay(options);
     options.onDismiss?.('outside');
   };
@@ -283,11 +337,11 @@ function installDismiss(options: AnchoredOverlayOptions): () => void {
     if (!isOverlayOpen(options.overlay, options.fallbackOpenClass)) return;
     event.preventDefault();
     hideAnchoredOverlay(options);
-    options.trigger.focus();
+    (options.focusReturn ?? anchor)?.focus();
     options.onDismiss?.('escape');
   };
 
-  if (!supportsPopover(options.overlay)) {
+  if (!supportsPopover(options.overlay) || options.manual === true) {
     document.addEventListener('pointerdown', onPointerDown, true);
   }
   document.addEventListener('focusout', onFocusOut, true);

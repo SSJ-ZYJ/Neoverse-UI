@@ -410,9 +410,9 @@ test('Vue Select keeps the shared combobox and option keyboard contract', async 
 test('Vue overlay primitives share top-layer positioning, light dismiss, keyboard focus, and menu navigation', async ({
   page,
 }) => {
-  await page.goto('/frame?theme=light&lang=en#controls', { waitUntil: 'domcontentloaded' });
+  await page.goto('/frame?theme=light&lang=en#overlays', { waitUntil: 'domcontentloaded' });
 
-  const section = page.locator('#controls-overlays');
+  const section = page.locator('#overlays-popover');
   await expect(section).toBeVisible();
 
   const popover = section.locator('[data-overlay-popover]');

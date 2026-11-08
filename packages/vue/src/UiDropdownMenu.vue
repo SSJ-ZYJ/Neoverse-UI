@@ -9,6 +9,7 @@ import {
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue';
 import { buttonVariantClasses } from './classes';
 import { presence } from './presence';
+import { getSurfaceClass } from './surface';
 import type { ButtonVariant, DropdownMenuItem, DropdownMenuProps } from './types';
 
 const props = withDefaults(defineProps<DropdownMenuProps>(), {
@@ -26,6 +27,7 @@ const emit = defineEmits<{
 const triggerClasses = computed(() => [
   'ui-dropdown-menu__trigger',
   'ui-button',
+  getSurfaceClass('glass-subtle'),
   buttonVariantClasses[props.triggerVariant as ButtonVariant] ?? buttonVariantClasses.secondary,
   'ui-button--md',
 ]);
@@ -181,6 +183,8 @@ onBeforeUnmount(() => {
       :disabled="props.disabled"
       @click="toggleOpen"
     >
+      <span class="ui-button__tone-field" aria-hidden="true" />
+      <span class="ui-button__edge-field" aria-hidden="true" />
       <slot name="trigger" />
     </button>
 

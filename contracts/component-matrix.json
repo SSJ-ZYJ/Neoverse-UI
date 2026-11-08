@@ -330,6 +330,26 @@
       "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
     },
     {
+      "name": "UiContextMenu",
+      "track": "canonical-shared",
+      "maturity": "consumer-validation",
+      "tokens": "stable",
+      "css": "stable",
+      "vue": "stable",
+      "react": "stable",
+      "unit": "stable",
+      "visual": "playground",
+      "consumer": "pending",
+      "runtime": "validated",
+      "evidence": [
+        "packages/overlay-runtime/src/index.test.ts",
+        "packages/vue/src/components.test.ts",
+        "packages/react/src/overlay.test.tsx",
+        "tests/visual/context-menu.spec.ts"
+      ],
+      "reactValidation": { "runtime": "validated", "visual": "pending", "consumer": "pending" }
+    },
+    {
       "name": "UiBreadcrumb",
       "track": "consumer-driven",
       "maturity": "consumer-validation",

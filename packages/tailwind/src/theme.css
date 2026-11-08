@@ -529,7 +529,8 @@
     :where(
         :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
           .ui-overlay-panel,
-          .ui-select__popover
+          .ui-select__popover,
+          .ui-context-menu__submenu
         )
       ) {
       position: relative;

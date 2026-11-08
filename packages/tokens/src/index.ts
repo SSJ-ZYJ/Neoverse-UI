@@ -374,6 +374,15 @@ const componentCssVariables = {
     itemHoverBackground: '--neoverse-overlay-item-hover-background',
     itemDangerForeground: '--neoverse-overlay-item-danger-foreground',
   },
+  contextMenu: {
+    minInlineSize: '--neoverse-context-menu-min-inline-size',
+    checkInlineSize: '--neoverse-context-menu-check-inline-size',
+    headingForeground: '--neoverse-context-menu-heading-foreground',
+    headingFontSize: '--neoverse-context-menu-heading-font-size',
+    shortcutForeground: '--neoverse-context-menu-shortcut-foreground',
+    separatorColor: '--neoverse-context-menu-separator-color',
+    checkForeground: '--neoverse-context-menu-check-foreground',
+  },
   skeleton: {
     baseFill: '--neoverse-skeleton-base-fill',
     fill: '--neoverse-skeleton-fill',

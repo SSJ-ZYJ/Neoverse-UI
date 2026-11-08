@@ -96,4 +96,36 @@ technology acceptance. The cross-browser configuration also selects the tracking
 audit, form semantics/behavior and overlay regression suites alongside its
 existing interaction suites.
 
+## Cursor-anchored menus
+
+`AnchoredOverlayOptions` accepts either a `trigger` element or a `point`. A point is a zero-size
+rect, so a cursor menu reuses the same flip, viewport clamp and zoom compensation; `placement: 'auto'`
+still opens below the pointer and flips above when the lower viewport cannot fit the panel. `trigger`
+is optional, and `focusReturn` names the element that receives focus when a point-anchored overlay
+closes, because a cursor open has no trigger to return to.
+
+The fallback containing-block correction reads the panel's own layout box. A panel that has not been
+laid out reports an all-zero rect, which would turn the correction into a duplicate offset, so the
+correction is skipped in that case. Native popovers are unaffected.
+
+`UiContextMenu` is the adapter for this path. It renders `role="menu"` with `menuitem`,
+`menuitemradio` and `menuitemcheckbox` rows, separators and headings, and reuses the DropdownMenu
+keyboard contract: ArrowUp/ArrowDown wrapping, Home/End, disabled-item skipping, first-enabled-item
+focus on open, Escape and selection closing the panel, and focus restoration. Dismissal reasons stay
+`escape` and `outside`; a cursor menu has no trigger, so only the document listeners apply.
+
+`data-neoverse-overlay-side` records whether the panel opened above or below its anchor, and the
+adapter points `data-neoverse-motion-origin` at the opposite edge so entrance motion always grows
+from the resting edge.
+
+A row with `children` opens a submenu on click or ArrowRight, and ArrowLeft or the back row returns
+to the parent. The submenu replaces the top-level rows inside the same panel instead of opening a
+second popover: a second `popover="auto"` would light-dismiss the parent. The panel keeps the width it
+had when the submenu opened, so switching levels does not resize the surface, and the back row is
+separated by the same rule as a heading.
+
+`autoFocus` defaults to true. A pointer open passes `false` so the region keeps focus and an editor
+keeps its selection highlight; arrow keys then enter the panel at its first or last row. A keyboard
+open moves focus into the panel immediately.
+
 Any new anchored overlay primitive should reuse this runtime before adding a new positioning implementation.

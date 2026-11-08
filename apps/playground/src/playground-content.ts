@@ -144,6 +144,14 @@ export const moduleCopy = {
       '交互控件集中在一个校准模块中，避免设计实验室将每个基础组件拆成独立分类。',
     ),
   },
+  overlays: {
+    id: 'overlays',
+    label: localized('Overlays & Menus', '弹层与菜单'),
+    description: localized(
+      'Popover, dropdown, and cursor menus share one top-layer runtime, one dismiss and focus contract, and one Aurora Glass surface.',
+      '弹层、下拉菜单与右键菜单共用同一套顶层定位、关闭与焦点契约，以及同一种极光玻璃表面。',
+    ),
+  },
   layoutShape: {
     label: localized('Layout & Shape', '布局与几何'),
     description: localized(

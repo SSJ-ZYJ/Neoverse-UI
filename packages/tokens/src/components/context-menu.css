@@ -1,0 +1,18 @@
+@layer neoverse.tokens {
+  :root {
+    /* Cursor menus reuse the overlay panel recipe and only add the rows a
+       context menu needs: a check column, a shortcut column and group labels. */
+    --neoverse-context-menu-min-inline-size: var(--neoverse-space-28);
+    --neoverse-context-menu-check-inline-size: var(--neoverse-space-3);
+    --neoverse-context-menu-item-gap: var(--neoverse-space-2);
+    --neoverse-context-menu-font-size: var(--neoverse-font-size-sm);
+    --neoverse-context-menu-heading-foreground: var(--neoverse-color-text-muted);
+    --neoverse-context-menu-heading-font-size: var(--neoverse-font-size-2xs);
+    --neoverse-context-menu-shortcut-foreground: var(--neoverse-color-text-muted);
+    --neoverse-context-menu-separator-color: var(--neoverse-color-border-subtle);
+    --neoverse-context-menu-check-foreground: var(--neoverse-color-accent-primary);
+    /* A cursor menu floats over arbitrary page content, so its rows use the primary
+       text role; the secondary role is only readable over a dedicated panel background. */
+    --neoverse-context-menu-item-foreground: var(--neoverse-color-text-primary);
+  }
+}

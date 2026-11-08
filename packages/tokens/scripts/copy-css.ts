@@ -28,6 +28,7 @@ const sourceFiles = [
   'components/prose.css',
   'components/form-control.css',
   'components/overlay.css',
+  'components/context-menu.css',
   'effects.css',
   'control-effects.css',
 ] as const;

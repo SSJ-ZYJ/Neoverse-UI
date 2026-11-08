@@ -28,6 +28,12 @@ export type {
   ButtonVariant,
   CardProps,
   CheckboxProps,
+  ContextMenuEntry,
+  ContextMenuHeading,
+  ContextMenuItem,
+  ContextMenuItemTone,
+  ContextMenuProps,
+  ContextMenuSeparator,
   ControlSurfacePreset,
   ControlSurfaceProps,
   ControlSurfaceScale,
@@ -94,6 +100,7 @@ export { default as UiBreadcrumb } from './UiBreadcrumb.vue';
 export { default as UiButton } from './UiButton.vue';
 export { default as UiCard } from './UiCard.vue';
 export { default as UiCheckbox } from './UiCheckbox.vue';
+export { default as UiContextMenu } from './UiContextMenu.vue';
 export { default as UiControlSurface } from './UiControlSurface.vue';
 export { default as UiDisclosure } from './UiDisclosure.vue';
 export { default as UiDock } from './UiDock.vue';

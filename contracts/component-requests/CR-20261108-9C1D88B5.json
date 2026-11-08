@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261108-9C1D88B5",
+  "kind": "new-component",
+  "target": "UiContextMenu",
+  "summary": "需要可复用的右键上下文菜单，支持指针与键盘打开、分组与复选条目",
+  "expected": "新增共享 UiContextMenu，复用现有浮层运行时的视口夹紧与顶层行为，按指针坐标定位，提供分组、分隔线、禁用、危险、单选与复选条目、快捷键标签、方向键与 Home/End 导航、Escape 与外部关闭、关闭后焦点恢复；Vue 与 React 适配层共用同一契约，样式只使用 --neoverse-overlay-* 与共享边框、动效变量",
+  "acceptanceCriteria": [
+    "overlay-runtime 提供按指针矩形定位的入口，复用现有上翻、视口夹紧与 CSS 缩放补偿，不新增第二套定位算法",
+    "UiContextMenu 在 Vue 与 React 中暴露相同条目模型与 open/select 事件，条目支持 item、separator 与 group",
+    "打开后聚焦首个可用项，方向键循环、Home/End 跳到首尾、禁用项被跳过，Escape 与选择后焦点回到打开前元素",
+    "面板使用 popover=auto，回退路径沿用 ui-overlay-panel--fallback-open，深浅主题、减少动态效果与 forced-colors 下可用",
+    "Design Lab 提供样例，浏览器用例覆盖指针打开、外部关闭、Escape、焦点恢复与视口边缘夹紧",
+    "XCA-Portal 终端与首页标题作为真实调用方验证接入"
+  ],
+  "impact": "normal",
+  "status": "reported",
+  "consumers": [
+    {
+      "project": "XCA-Portal",
+      "location": "app/features/terminal/components/TerminalHost.vue",
+      "framework": "vue",
+      "scenario": "终端输出与命令历史需要复制选中内容、清屏、清历史、切换背景与重放入场等右键操作，浏览器默认菜单无法提供站内命令"
+    }
+  ],
+  "createdAt": "2026-11-08T09:17:42.883Z",
+  "updatedAt": "2026-11-08T09:17:42.883Z"
+}

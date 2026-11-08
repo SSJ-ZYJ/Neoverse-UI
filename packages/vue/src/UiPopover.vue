@@ -9,6 +9,7 @@ import {
 import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue';
 import { buttonVariantClasses } from './classes';
 import { presence } from './presence';
+import { getSurfaceClass } from './surface';
 import type { ButtonVariant, PopoverProps } from './types';
 
 const props = withDefaults(defineProps<PopoverProps>(), {
@@ -24,6 +25,7 @@ const emit = defineEmits<{ 'update:open': [value: boolean] }>();
 const triggerClasses = computed(() => [
   'ui-popover__trigger',
   'ui-button',
+  getSurfaceClass('glass-subtle'),
   buttonVariantClasses[props.triggerVariant as ButtonVariant] ?? buttonVariantClasses.secondary,
   'ui-button--md',
 ]);
@@ -126,6 +128,8 @@ onBeforeUnmount(() => {
       :aria-controls="panelId"
       @click="toggleOpen"
     >
+      <span class="ui-button__tone-field" aria-hidden="true" />
+      <span class="ui-button__edge-field" aria-hidden="true" />
       <slot name="trigger" />
     </button>
 

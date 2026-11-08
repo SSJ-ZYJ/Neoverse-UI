@@ -93,7 +93,9 @@ test('describes the radius aliases with their actual definitions', () => {
 test('registers consolidated controls, the reusable dock, and the parity composition', () => {
   const moduleIds = labModules.map((module) => module.id);
 
-  expect(moduleIds).toEqual(expect.arrayContaining(['controls', 'dock', 'consumer-parity']));
+  expect(moduleIds).toEqual(
+    expect.arrayContaining(['controls', 'overlays', 'dock', 'consumer-parity']),
+  );
   expect(moduleIds).not.toEqual(
     expect.arrayContaining(['action', 'navigation-item', 'status-indicator', 'control-surface']),
   );

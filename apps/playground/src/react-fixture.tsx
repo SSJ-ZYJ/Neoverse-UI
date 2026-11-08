@@ -6,6 +6,7 @@ import {
   UiButton,
   UiCard,
   UiCheckbox,
+  UiContextMenu,
   UiControlSurface,
   UiDisclosure,
   UiDock,
@@ -109,6 +110,14 @@ const copy =
         popover: '打开 Popover',
         popoverBody: 'Popover 使用统一的 top-layer overlay runtime。',
         menu: '打开菜单',
+        contextMenu: '在此处右键打开上下文菜单',
+        contextMenuCopy: '复制',
+        contextMenuArchive: '归档',
+        contextMenuRemove: '移除',
+        contextMenuEdit: '编辑',
+        contextMenuDetails: '显示详情',
+        contextMenuTheme: '主题',
+        contextMenuKeyboard: '以键盘焦点打开',
         menuOpen: '打开',
         menuArchive: '归档',
         menuRemove: '移除',
@@ -162,6 +171,14 @@ const copy =
         popover: 'Open popover',
         popoverBody: 'Popover uses the shared top-layer overlay runtime.',
         menu: 'Open menu',
+        contextMenu: 'Right-click here for a context menu',
+        contextMenuCopy: 'Copy',
+        contextMenuArchive: 'Archive',
+        contextMenuRemove: 'Remove',
+        contextMenuEdit: 'Edit',
+        contextMenuDetails: 'Show details',
+        contextMenuTheme: 'Theme',
+        contextMenuKeyboard: 'Open with keyboard focus',
         menuOpen: 'Open',
         menuArchive: 'Archive',
         menuRemove: 'Remove',
@@ -466,6 +483,11 @@ function ReactFixture() {
   const [controlledMounted, setControlledMounted] = useState(true);
   const [controlledDisabled, setControlledDisabled] = useState(false);
   const [dropdownDisabled, setDropdownDisabled] = useState(false);
+  const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const [contextMenuPoint, setContextMenuPoint] = useState({ x: 0, y: 0 });
+  const [contextMenuAutoFocus, setContextMenuAutoFocus] = useState(false);
+  const [contextTheme, setContextTheme] = useState('system');
+  const [contextShowDetails, setContextShowDetails] = useState(true);
   const [dismissAttempts, setDismissAttempts] = useState(0);
   const requestControlledOpen = useCallback((value: boolean) => {
     if (value) setControlledOpen(true);
@@ -565,6 +587,79 @@ function ReactFixture() {
                 {copy.popoverBody}
               </p>
             </UiPopover>
+          </div>
+
+          <div data-react-adapter="UiContextMenu">
+            <section
+              data-context-menu-zone
+              aria-label={copy.contextMenu}
+              className="rounded-control border border-subtle p-4 text-caption text-secondary"
+              onContextMenu={(event) => {
+                event.preventDefault();
+                setContextMenuPoint({ x: event.clientX, y: event.clientY });
+                setContextMenuAutoFocus(false);
+                setContextMenuOpen(true);
+              }}
+            >
+              <p className="m-0">{copy.contextMenu}</p>
+              <p className="m-0 mt-2">
+                {copy.contextMenuTheme}: {contextTheme} · {copy.contextMenuDetails}:{' '}
+                {contextShowDetails ? 'on' : 'off'}
+              </p>
+              <button
+                className="mt-2 rounded-control border border-default px-2 py-1 text-caption"
+                type="button"
+                data-context-menu-keyboard
+                onClick={() => {
+                  const zone = document.querySelector<HTMLElement>('[data-context-menu-zone]');
+                  const rect = zone?.getBoundingClientRect();
+                  setContextMenuPoint({ x: (rect?.left ?? 0) + 24, y: (rect?.top ?? 0) + 24 });
+                  setContextMenuAutoFocus(true);
+                  setContextMenuOpen(true);
+                }}
+              >
+                {copy.contextMenuKeyboard}
+              </button>
+            </section>
+
+            <UiContextMenu
+              open={contextMenuOpen}
+              ariaLabel={copy.contextMenu}
+              point={contextMenuPoint}
+              autoFocus={contextMenuAutoFocus}
+              entries={[
+                { type: 'heading', id: 'edit', label: copy.contextMenuEdit },
+                { id: 'copy', label: copy.contextMenuCopy, shortcut: 'Ctrl+C' },
+                {
+                  id: 'details',
+                  label: copy.contextMenuDetails,
+                  selection: 'multiple',
+                  checked: contextShowDetails,
+                },
+                { type: 'separator', id: 'sep' },
+                { id: 'archive', label: copy.contextMenuArchive },
+                {
+                  id: 'theme',
+                  label: copy.contextMenuTheme,
+                  children: ['light', 'dark', 'system'].map((value) => ({
+                    id: `theme:${value}`,
+                    label: value,
+                    group: 'theme',
+                    selection: 'single' as const,
+                    checked: contextTheme === value,
+                  })),
+                },
+                { type: 'separator', id: 'sep-danger' },
+                { id: 'disabled', label: 'Disabled action', disabled: true },
+                { id: 'remove', label: copy.contextMenuRemove, tone: 'danger' },
+              ]}
+              onOpenChange={setContextMenuOpen}
+              onSelect={(item) => {
+                if (item.id === 'details') setContextShowDetails((value) => !value);
+                else if (item.id.startsWith('theme:')) setContextTheme(item.id.slice(6));
+                else setMenuSelection(item.id);
+              }}
+            />
           </div>
 
           <div data-react-adapter="UiDropdownMenu">

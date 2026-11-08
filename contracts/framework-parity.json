@@ -166,6 +166,12 @@
       ]
     },
     {
+      "name": "UiContextMenu",
+      "vueType": "ContextMenuProps",
+      "reactType": "UiContextMenuProps",
+      "props": ["entries", "open", "ariaLabel", "point", "focusReturn", "autoFocus"]
+    },
+    {
       "name": "UiBreadcrumb",
       "vueType": "BreadcrumbProps",
       "reactType": "UiBreadcrumbProps",
@@ -324,6 +330,12 @@
       "props": ["id", "label", "disabled", "tone"]
     },
     {
+      "name": "ContextMenuItem",
+      "vueType": "ContextMenuItem",
+      "reactType": "UiContextMenuItem",
+      "props": ["id", "label", "disabled", "tone", "shortcut", "checked", "group", "selection", "children"]
+    },
+    {
       "name": "BreadcrumbItem",
       "vueType": "BreadcrumbItem",
       "reactType": "BreadcrumbItem",
@@ -389,6 +401,11 @@
       "name": "DropdownMenuItemTone",
       "vueType": "DropdownMenuItemTone",
       "reactType": "UiDropdownMenuItemTone"
+    },
+    {
+      "name": "ContextMenuItemTone",
+      "vueType": "ContextMenuItemTone",
+      "reactType": "UiContextMenuItemTone"
     },
     {
       "name": "BadgeVariant",

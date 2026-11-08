@@ -1,5 +1,5 @@
 import type { PresenceOrigin, PresenceVariant } from '@neoverse-ui/motion';
-import type { OverlayPlacement } from '@neoverse-ui/overlay-runtime';
+import type { OverlayPlacement, OverlayPoint } from '@neoverse-ui/overlay-runtime';
 import type { Component } from 'vue';
 
 export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
@@ -377,6 +377,61 @@ export interface DropdownMenuProps {
   ariaLabel: string;
   /** Button variant of the rendered trigger; ghost reuses the shared washes for chrome. */
   triggerVariant?: ButtonVariant;
+}
+
+export type ContextMenuItemTone = 'default' | 'danger';
+
+/**
+ * One selectable row. `checked` turns the row into a checkable item; rows that
+ * share a `group` behave as one radio set when `selection` is `single`.
+ */
+export interface ContextMenuItem {
+  id: string;
+  label: string;
+  disabled?: boolean;
+  tone?: ContextMenuItemTone;
+  shortcut?: string;
+  checked?: boolean;
+  group?: string;
+  selection?: 'none' | 'single' | 'multiple';
+  /**
+   * Rows of a submenu. A row with children opens the submenu on click or ArrowRight
+   * instead of emitting `select`; only top-level rows may carry children.
+   * 二级菜单的行。带 children 的行通过点击、悬停或右方向键展开二级菜单，而不是触发 select；
+   * 只有顶层行可以携带 children。
+   */
+  children?: readonly ContextMenuItem[];
+}
+
+/** Non-selectable structure: a separator or a labelled group heading. */
+export interface ContextMenuSeparator {
+  type: 'separator';
+  id?: string;
+}
+
+export interface ContextMenuHeading {
+  type: 'heading';
+  id?: string;
+  label: string;
+}
+
+export type ContextMenuEntry = ContextMenuItem | ContextMenuSeparator | ContextMenuHeading;
+
+export interface ContextMenuProps {
+  entries: readonly ContextMenuEntry[];
+  /** The menu is a transient overlay; the caller owns when it is open. */
+  open: boolean;
+  ariaLabel: string;
+  /** Viewport pointer coordinates in CSS pixels. */
+  point?: OverlayPoint | undefined;
+  /** Element that receives focus when the menu closes; defaults to the open-time focus owner. */
+  focusReturn?: HTMLElement | undefined;
+  /**
+   * Focus the first row on open. A pointer open leaves it false so the editor keeps
+   * focus and its selection highlight; arrow keys still reach the rows.
+   * 打开时聚焦首行。指针打开时保持为 false，使编辑器保留焦点与选区高亮；方向键仍可进入菜单行。
+   */
+  autoFocus?: boolean;
 }
 
 export interface PresenceProps {

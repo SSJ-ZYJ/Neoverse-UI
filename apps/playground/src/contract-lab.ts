@@ -81,9 +81,15 @@ export const interactionContracts = [
     checks: ['keyboard', 'reduced-transparency'],
   },
   {
-    specimenId: 'controls-overlays',
+    specimenId: 'overlays-popover',
     apiNames: ['UiPopover', 'UiDropdownMenu'],
-    states: ['default'],
+    states: ['default', 'open', 'disabled'],
+    checks: ['open-close', 'keyboard', 'dismiss', 'focus-restore', 'viewport'],
+  },
+  {
+    specimenId: 'overlays-context-menu',
+    apiNames: ['UiContextMenu'],
+    states: ['default', 'open', 'disabled'],
     checks: ['open-close', 'keyboard', 'dismiss', 'focus-restore', 'viewport'],
   },
   {
