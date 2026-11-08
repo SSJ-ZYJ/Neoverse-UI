@@ -23,6 +23,10 @@ const cssEdgePassSelector = '[data-neoverse-glass-edge-pass="css"]';
 const reducedTransparencyQuery = '(prefers-reduced-transparency: reduce)';
 const systemDarkQuery = '(prefers-color-scheme: dark)';
 const maxDefaultDevicePixelRatio = 2;
+// Cap edge repaints at roughly 60 fps. Unthrottled RAF on 240-360 Hz displays
+// otherwise allocates a full render's worth of temporary objects every 3 ms and
+// triggers repeated V8/CppGC collections.
+const minFrameIntervalMs = 16;
 const glassMutationAttributes = [
   'class',
   'style',
@@ -38,6 +42,23 @@ const glassMutationAttributes = [
   'rowspan',
   'span',
 ] as const;
+// Attribute changes outside a Glass surface, its occluders and its ancestors
+// cannot move or restyle an edge. Typewriters and scrollbar thumbs emit
+// thousands of style mutations per second from exactly that region.
+const sceneRelevantAttributes = new Set([
+  'data-theme',
+  glassRendererAttribute,
+  'data-neoverse-glass-edge-pass',
+  'data-neoverse-glass-edge-pass-active',
+  'data-neoverse-glass-occluder',
+  'data-neoverse-glass-nesting',
+  'data-neoverse-tooltip-surface',
+  'colspan',
+  'rowspan',
+  'span',
+  'hidden',
+]);
+const occluderSelector = '[data-neoverse-glass-occluder]';
 const maxOccluders = 6;
 const staticEdgeFrameProperties = new Set([
   'offset',
@@ -115,6 +136,25 @@ const motionEvents = [
   'animationend',
   'animationcancel',
 ] as const;
+
+/** Colour-only transitions cannot move a surface, change its clip, or alter
+ *  occlusion. A theme switch starts one such transition per colour property on
+ *  every glass surface; handling each of those events would schedule hundreds
+ *  of edge repaints whose geometry is identical. Events without a property name
+ *  (animations and synthetic realms) stay on the conservative path. */
+const staticTransitionProperty = /^(?:color|box-shadow|text-shadow|.+?-color)$/i;
+
+function isStaticTransition(event: Event): boolean {
+  const property = (event as TransitionEvent).propertyName;
+  return (
+    typeof property === 'string' &&
+    property.length > 0 &&
+    // Registered custom properties may carry geometry; leave them on the tracked path.
+    !property.startsWith('--') &&
+    staticTransitionProperty.test(property)
+  );
+}
+
 type GlassVariant = 'subtle' | 'elevated' | 'immersive';
 type Radii = [number, number, number, number];
 
@@ -215,8 +255,19 @@ export interface GlassRendererOptions {
 
 export interface GlassRenderer {
   mount(): void;
-  refresh(): void;
+  /** Force a repaint by default; pass false to let the frame cache deduplicate. */
+  refresh(force?: boolean): void;
   destroy(): void;
+}
+
+interface SceneColors {
+  gain: number;
+  edgeLight: Color;
+  primary: Color;
+  secondary: Color;
+  tertiary: Color;
+  lightSurface: number;
+  isLight: boolean;
 }
 
 const activeRenderers = new WeakMap<Document, GlassRenderer>();
@@ -729,6 +780,27 @@ const getAncestorClipRect = (element: HTMLElement, rect: ClipRect, view: Window)
   };
 };
 
+const mixColorHash = (hash: number, text: string): number => {
+  let value = hash;
+  for (let index = 0; index < text.length; index += 1) {
+    value ^= text.charCodeAt(index);
+    value = Math.imul(value, 16777619);
+  }
+  return value;
+};
+
+const colorResolutionCache = new Map<number, Color>();
+
+const hashColorInputs = (style: CSSStyleDeclaration, values: readonly string[]): number => {
+  let hash = mixColorHash(2166136261, style.colorScheme);
+  for (const property of colorProperties) {
+    hash = mixColorHash(hash, style.getPropertyValue(property));
+  }
+  hash = mixColorHash(hash, '#');
+  for (const value of values) hash = mixColorHash(hash, value);
+  return hash;
+};
+
 const resolveColor = (
   sourceStyle: CSSStyleDeclaration,
   values: readonly string[],
@@ -736,6 +808,11 @@ const resolveColor = (
   probe: HTMLElement,
   fallback: Color,
 ): Color => {
+  // Surfaces share the same token-derived carrier. Resolving it once per input
+  // signature keeps probe style writes out of the DevTools DOM mutation stream.
+  const key = hashColorInputs(sourceStyle, values);
+  const cached = colorResolutionCache.get(key);
+  if (cached !== undefined) return cached;
   const previousColor = probe.style.getPropertyValue('color');
   const previousPriority = probe.style.getPropertyPriority('color');
   for (const property of colorProperties) {
@@ -761,7 +838,10 @@ const resolveColor = (
     probe.style.setProperty('color', previousColor, previousPriority);
   }
 
-  return resolved ?? fallback;
+  const result = resolved ?? fallback;
+  if (colorResolutionCache.size > 512) colorResolutionCache.clear();
+  colorResolutionCache.set(key, result);
+  return result;
 };
 
 const getDefaultEdgeValues = (
@@ -978,10 +1058,17 @@ class GlassRendererImpl implements GlassRenderer {
   >();
   private surfaceRects = new Map<Element, DOMRect>();
   private mutationRevision = 0;
+  private colorSignature = 0;
+  private sceneColors: SceneColors | undefined;
+  private sceneSignature = 0;
+  private signatureHash = 2166136261;
+  private lastFrameTime = 0;
   private readonly handleMotion = (event: Event): void => {
+    if (!this.active || isStaticTransition(event)) {
+      return;
+    }
     const target = event.target as Element | null;
     if (
-      !this.active ||
       typeof target?.matches !== 'function' ||
       (!target.closest(glassSelector) && !target.querySelector(glassSelector))
     ) {
@@ -991,28 +1078,53 @@ class GlassRendererImpl implements GlassRenderer {
     this.scheduleRefresh();
   };
   private previousRendererAttribute: string | null = null;
-  private readonly handleResize = (): void => this.scheduleRefresh();
-  private readonly handleScroll = (): void => this.scheduleRefresh();
-  private readonly handleToggle = (): void => this.scheduleRefresh();
-  private readonly handleSystemSchemeChange = (): void => this.scheduleRefresh();
+  private readonly handleResize = (): void => {
+    this.invalidateScene();
+    this.scheduleRefresh();
+  };
+  private readonly handleScroll = (): void => {
+    this.invalidateFrame();
+    this.scheduleRefresh();
+  };
+  private readonly handleToggle = (): void => {
+    this.invalidateScene();
+    this.scheduleRefresh();
+  };
+  private readonly handleSystemSchemeChange = (): void => {
+    this.invalidateScene();
+    this.scheduleRefresh();
+  };
   private readonly handleMutations = (records: MutationRecord[]): void => {
     if (records.some((record) => record.target === this.canvas)) this.syncChromaVisibility();
-    if (
-      records.every(
-        (record) =>
-          record.target === this.colorProbe ||
-          record.target === this.canvas ||
-          record.target === this.chromaCanvas ||
-          (record.target.nodeType === 1 &&
-            (record.target as Element).closest('[data-neoverse-particle-capture]')),
-      )
-    ) {
-      return;
-    }
+    if (records.every((record) => !this.isSceneMutation(record))) return;
 
     this.mutationRevision += 1;
     this.scheduleRefresh();
   };
+
+  /** Decorative attribute churn cannot change edge geometry; only scene-bearing
+   * mutations raise the revision and schedule a repaint. */
+  private isSceneMutation(record: MutationRecord): boolean {
+    const target = record.target;
+    const element = target.nodeType === 1 ? (target as Element) : undefined;
+    if (
+      target === this.colorProbe ||
+      target === this.canvas ||
+      target === this.chromaCanvas ||
+      element?.closest('[data-neoverse-particle-capture]')
+    ) {
+      return false;
+    }
+    if (record.type !== 'attributes') return true;
+    const name = record.attributeName ?? '';
+    if (sceneRelevantAttributes.has(name)) return true;
+    if (name !== 'class' && name !== 'style') return true;
+    if (element === undefined || element === this.ownerDocument?.documentElement) return true;
+    if (element.matches?.(glassSelector) || element.closest(glassSelector)) return true;
+    if (element.matches?.(occluderSelector) || element.closest(occluderSelector)) return true;
+    // An ancestor can move or resize a surface without changing its attributes.
+    return Boolean(element.querySelector?.(glassSelector));
+  }
   private changedOverlaps(
     bounds: { left: number; top: number; width: number; height: number },
     changed: ReadonlySet<Element>,
@@ -1125,9 +1237,10 @@ class GlassRendererImpl implements GlassRenderer {
     this.activate();
   }
 
-  public refresh(): void {
+  public refresh(force = true): void {
     if (this.active) {
-      this.render();
+      // The public contract stays forceful; pass false to let the frame cache deduplicate.
+      this.render(force);
     }
   }
 
@@ -1164,6 +1277,8 @@ class GlassRendererImpl implements GlassRenderer {
       return;
     }
 
+    // A new GL context has no previous frame to reuse.
+    this.invalidateScene();
     this.removeStaleCanvas();
     if (this.transparencyQuery?.matches === true) {
       return;
@@ -1248,7 +1363,8 @@ class GlassRendererImpl implements GlassRenderer {
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     this.observe();
     this.active = true;
-    this.refresh();
+    // A fresh GL context has no previous frame to reuse.
+    this.refresh(true);
   }
 
   private removeStaleCanvas(): void {
@@ -1323,6 +1439,32 @@ class GlassRendererImpl implements GlassRenderer {
     const visibility = view.getComputedStyle(this.canvas).visibility;
     if (this.chromaCanvas.style.visibility !== visibility) {
       this.chromaCanvas.style.visibility = visibility;
+    }
+  }
+
+  /** Drop cached frame inputs so the next render cannot reuse a stale palette or geometry. */
+  private invalidateScene(): void {
+    this.colorSignature = 0;
+    this.sceneColors = undefined;
+    this.sceneSignature = 0;
+    this.lastFrameTime = 0;
+  }
+
+  /** A scroll is an explicit geometry change; keep the palette cache but repaint. */
+  private invalidateFrame(): void {
+    this.sceneSignature = 0;
+  }
+
+  /** FNV-1a accumulation keeps the frame signature allocation-free on high-refresh displays. */
+  private mixSignature(value: number): void {
+    this.signatureHash ^= Math.round(value * 100) | 0;
+    this.signatureHash = Math.imul(this.signatureHash, 16777619);
+  }
+
+  private mixSignatureText(value: string): void {
+    for (let index = 0; index < value.length; index += 1) {
+      this.signatureHash ^= value.charCodeAt(index);
+      this.signatureHash = Math.imul(this.signatureHash, 16777619);
     }
   }
 
@@ -1465,10 +1607,22 @@ class GlassRendererImpl implements GlassRenderer {
     // realms with a synchronous RAF shim cannot leave a stale frame id.
     this.animationFrame = -1;
     let completedSynchronously = false;
-    const frame = view.requestAnimationFrame(() => {
+    const frame = view.requestAnimationFrame((timestamp: number) => {
       completedSynchronously = true;
       this.animationFrame = undefined;
-      this.refresh();
+      const elapsed =
+        timestamp > 0 && this.lastFrameTime > 0
+          ? timestamp - this.lastFrameTime
+          : Number.POSITIVE_INFINITY;
+      if (elapsed < minFrameIntervalMs) {
+        // Keep reserving frames while an animation is live, but do not allocate
+        // a full edge pass in between; synchronous RAF shims report 0 and stay
+        // on the immediate path so existing contracts remain intact.
+        if (this.animatedElements.size > 0) this.scheduleRefresh();
+        return;
+      }
+      if (timestamp > 0) this.lastFrameTime = timestamp;
+      this.render(false);
       // CSS transforms/opacity do not emit DOM mutations or resize events.
       // Repaint while affected surfaces move, then clear their final frame.
       let movingEdges = false;
@@ -1489,8 +1643,94 @@ class GlassRendererImpl implements GlassRenderer {
     }
   }
 
-  private render(): void {
-    const elements = this.getGlassElements();
+  /** Theme colours change with the root token signature, not on every frame.
+   * Caching avoids roughly forty probe style writes and computed-style reads
+   * per repaint, and keeps the probe out of the mutation stream. */
+  private resolveSceneColors(
+    rootStyle: CSSStyleDeclaration,
+    view: Window,
+    probe: HTMLElement,
+  ): SceneColors {
+    this.signatureHash = 2166136261;
+    this.mixSignatureText(rootStyle.colorScheme);
+    for (const property of colorProperties) {
+      this.mixSignatureText(rootStyle.getPropertyValue(property));
+    }
+    this.mixSignatureText(rootStyle.getPropertyValue('--neoverse-material-edge-refraction-gain'));
+    const signature = this.signatureHash || 1;
+    const cached = this.sceneColors;
+    if (cached !== undefined && this.colorSignature === signature) return cached;
+    const gain = Math.max(
+      parseFirstNumber(rootStyle.getPropertyValue('--neoverse-material-edge-refraction-gain'), 1),
+      0,
+    );
+    const edgeLight = resolveColor(
+      rootStyle,
+      [
+        firstPropertyValue(rootStyle, ['--neoverse-color-edge-light', '--edge-light']) ??
+          'var(--neoverse-color-edge-light)',
+        'var(--edge-light)',
+      ],
+      view,
+      probe,
+      [1, 1, 1],
+    );
+    const lightSurface =
+      rootStyle.colorScheme === 'light' ? 1 : rootStyle.colorScheme === 'dark' ? 0 : -1;
+    // Match the shader's smoothstep(0.55, 0.88, luminance) > 0.5 fallback
+    // when a consumer has not declared a colour scheme.
+    const lightLuminance = edgeLight[0] * 0.2126 + edgeLight[1] * 0.7152 + edgeLight[2] * 0.0722;
+    const isLight = lightSurface === 1 || (lightSurface === -1 && lightLuminance > 0.715);
+    const primary = resolveColor(
+      rootStyle,
+      [
+        firstPropertyValue(rootStyle, ['--neoverse-color-accent-primary', '--accent-primary']) ??
+          'var(--neoverse-color-accent-primary)',
+        'var(--accent-primary)',
+      ],
+      view,
+      probe,
+      [0.45, 0.73, 0.9],
+    );
+    const secondary = resolveColor(
+      rootStyle,
+      [
+        firstPropertyValue(rootStyle, [
+          '--neoverse-color-accent-secondary',
+          '--accent-secondary',
+        ]) ?? 'var(--neoverse-color-accent-secondary)',
+        'var(--accent-secondary)',
+      ],
+      view,
+      probe,
+      [0.3, 0.85, 0.7],
+    );
+    const tertiary = resolveColor(
+      rootStyle,
+      [
+        firstPropertyValue(rootStyle, ['--neoverse-color-accent-tertiary', '--accent-tertiary']) ??
+          'var(--neoverse-color-accent-tertiary)',
+        'var(--accent-tertiary)',
+      ],
+      view,
+      probe,
+      [0.48, 0.43, 0.9],
+    );
+    const colors: SceneColors = {
+      gain,
+      edgeLight,
+      primary,
+      secondary,
+      tertiary,
+      lightSurface,
+      isLight,
+    };
+    this.colorSignature = signature;
+    this.sceneColors = colors;
+    return colors;
+  }
+
+  private render(force = false): void {
     if (
       !this.active ||
       this.ownerDocument === undefined ||
@@ -1504,20 +1744,21 @@ class GlassRendererImpl implements GlassRenderer {
       return;
     }
 
-    if (elements.length === 0 && !this.paintedEdges) return;
-
     const view = getWindow(this.ownerDocument);
     if (view === undefined) {
       return;
     }
 
     const viewport = getCanvasViewport(this.canvas, this.ownerDocument, view);
+    // One document-wide query feeds both the edge pass and the occlusion list.
     const candidates = Array.from(
       this.ownerDocument.querySelectorAll<HTMLElement>(
         `${glassSelector}, [data-neoverse-glass-occluder='topmost']`,
       ),
       (element): OcclusionCandidate => ({ element, rect: element.getBoundingClientRect() }),
     );
+    const elements = this.getGlassElements(candidates.map(({ element }) => element));
+    if (elements.length === 0 && !this.paintedEdges) return;
     const measuredRects = new Map(candidates.map(({ element, rect }) => [element, rect]));
     const visibleCandidates = candidates
       .filter(({ rect }) => intersectsViewport(rect, viewport))
@@ -1553,6 +1794,29 @@ class GlassRendererImpl implements GlassRenderer {
     const width = viewport.width;
     const height = viewport.height;
     const pixelRatio = resolveDevicePixelRatio(view, this.maxDevicePixelRatio);
+    // Skip a full repaint when every input to the edge pass is unchanged. Keep
+    // the compositing contract intact: no partial clear, no altered blend mode,
+    // just the previous frame retained on the fixed canvas.
+    this.signatureHash = 2166136261;
+    this.mixSignature(this.mutationRevision);
+    this.mixSignature(viewport.left);
+    this.mixSignature(viewport.top);
+    this.mixSignature(width);
+    this.mixSignature(height);
+    this.mixSignature(pixelRatio);
+    for (const { rect } of candidates) {
+      this.mixSignature(rect.left);
+      this.mixSignature(rect.top);
+      this.mixSignature(rect.width);
+      this.mixSignature(rect.height);
+    }
+    for (const element of elements) {
+      this.mixSignatureText(element.className);
+      this.mixSignatureText(element.getAttribute?.('style') ?? '');
+    }
+    const sceneSignature = this.signatureHash || 1;
+    if (!force && this.paintedEdges && this.sceneSignature === sceneSignature) return;
+    this.sceneSignature = sceneSignature;
     const drawingWidth = Math.max(Math.round(width * pixelRatio), 1);
     const drawingHeight = Math.max(Math.round(height * pixelRatio), 1);
     if (this.canvas.width !== drawingWidth || this.canvas.height !== drawingHeight) {
@@ -1579,28 +1843,9 @@ class GlassRendererImpl implements GlassRenderer {
     gl.uniform1f(locations.pixelRatio, pixelRatio);
 
     const rootStyle = view.getComputedStyle(this.ownerDocument.documentElement);
-    const gain = Math.max(
-      parseFirstNumber(rootStyle.getPropertyValue('--neoverse-material-edge-refraction-gain'), 1),
-      0,
-    );
+    const { gain, edgeLight, primary, secondary, tertiary, lightSurface, isLight } =
+      this.resolveSceneColors(rootStyle, view, this.colorProbe);
     gl.uniform1f(locations.gain, gain);
-    const edgeLight = resolveColor(
-      rootStyle,
-      [
-        firstPropertyValue(rootStyle, ['--neoverse-color-edge-light', '--edge-light']) ??
-          'var(--neoverse-color-edge-light)',
-        'var(--edge-light)',
-      ],
-      view,
-      this.colorProbe,
-      [1, 1, 1],
-    );
-    const lightSurface =
-      rootStyle.colorScheme === 'light' ? 1 : rootStyle.colorScheme === 'dark' ? 0 : -1;
-    // Match the shader's smoothstep(0.55, 0.88, luminance) > 0.5 fallback
-    // when a consumer has not declared a colour scheme.
-    const lightLuminance = edgeLight[0] * 0.2126 + edgeLight[1] * 0.7152 + edgeLight[2] * 0.0722;
-    const isLight = lightSurface === 1 || (lightSurface === -1 && lightLuminance > 0.715);
     if (isLight) this.ensureChromaCanvas();
     if (this.chromaCanvas && this.chromaContext) {
       if (!this.chromaCanvas.isConnected && this.canvas.isConnected) {
@@ -1633,41 +1878,6 @@ class GlassRendererImpl implements GlassRenderer {
       gl.ONE_MINUS_SRC_ALPHA,
     );
     gl.uniform1f(locations.lightSurface, lightSurface);
-    const primary = resolveColor(
-      rootStyle,
-      [
-        firstPropertyValue(rootStyle, ['--neoverse-color-accent-primary', '--accent-primary']) ??
-          'var(--neoverse-color-accent-primary)',
-        'var(--accent-primary)',
-      ],
-      view,
-      this.colorProbe,
-      [0.45, 0.73, 0.9],
-    );
-    const secondary = resolveColor(
-      rootStyle,
-      [
-        firstPropertyValue(rootStyle, [
-          '--neoverse-color-accent-secondary',
-          '--accent-secondary',
-        ]) ?? 'var(--neoverse-color-accent-secondary)',
-        'var(--accent-secondary)',
-      ],
-      view,
-      this.colorProbe,
-      [0.3, 0.85, 0.7],
-    );
-    const tertiary = resolveColor(
-      rootStyle,
-      [
-        firstPropertyValue(rootStyle, ['--neoverse-color-accent-tertiary', '--accent-tertiary']) ??
-          'var(--neoverse-color-accent-tertiary)',
-        'var(--accent-tertiary)',
-      ],
-      view,
-      this.colorProbe,
-      [0.48, 0.43, 0.9],
-    );
 
     gl.enable(gl.SCISSOR_TEST);
     const occluderRects = new Float32Array(maxOccluders * 4);
@@ -1835,12 +2045,13 @@ class GlassRendererImpl implements GlassRenderer {
     }
   }
 
-  private getGlassElements(): HTMLElement[] {
+  private getGlassElements(candidates?: readonly HTMLElement[]): HTMLElement[] {
     if (this.ownerDocument === undefined) {
       return [];
     }
 
-    const elements = Array.from(this.ownerDocument.querySelectorAll<HTMLElement>(glassSelector));
+    const elements =
+      candidates ?? Array.from(this.ownerDocument.querySelectorAll<HTMLElement>(glassSelector));
     const currentElements: HTMLElement[] = [];
 
     for (const element of elements) {

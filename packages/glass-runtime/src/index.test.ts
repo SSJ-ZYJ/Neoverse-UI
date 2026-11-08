@@ -1771,6 +1771,68 @@ describe('Glass renderer', () => {
     expect(frames).toHaveLength(0);
   });
 
+  it('ignores colour-only theme transitions instead of scheduling edge repaints', () => {
+    installCanvasContext({ webgl2: createFakeGl() });
+    const page = document.createElement('section');
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    page.append(glass);
+    document.body.append(page);
+    setRect(glass, { left: 20 });
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    const renderer = createTestRenderer();
+    renderer.mount();
+
+    for (const property of [
+      'color',
+      'background-color',
+      'border-top-color',
+      'border-left-color',
+      'box-shadow',
+      'text-shadow',
+      'outline-color',
+    ]) {
+      for (const type of ['transitionrun', 'transitionend']) {
+        const event = new Event(type, { bubbles: true });
+        Object.defineProperty(event, 'propertyName', { value: property });
+        page.dispatchEvent(event);
+      }
+    }
+
+    expect(frames).toHaveLength(0);
+    renderer.destroy();
+  });
+
+  it('still tracks geometry-bearing transitions', () => {
+    installCanvasContext({ webgl2: createFakeGl() });
+    const page = document.createElement('section');
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    page.append(glass);
+    document.body.append(page);
+    setRect(glass, { left: 20 });
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+    const renderer = createTestRenderer();
+    renderer.mount();
+
+    for (const property of ['transform', 'width', 'opacity', '--neoverse-color-edge-light']) {
+      const event = new Event('transitionrun', { bubbles: true });
+      Object.defineProperty(event, 'propertyName', { value: property });
+      page.dispatchEvent(event);
+    }
+
+    expect(frames).toHaveLength(1);
+    renderer.destroy();
+  });
+
   it('fades glass edges with the surface and its ancestors, including fully hidden pages', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
@@ -1855,5 +1917,132 @@ describe('Glass renderer', () => {
     expect(gl.drawArrays).not.toHaveBeenCalled();
     window.matchMedia = originalMatchMedia;
     renderer.destroy();
+  });
+
+  it('ignores decorative style mutations outside every Glass surface', async () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    const decoration = document.createElement('span');
+    document.body.append(glass, decoration);
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      callback(0);
+      return 1;
+    });
+    const renderer = createTestRenderer();
+    renderer.mount();
+    gl.drawArrays.mockClear();
+
+    decoration.style.opacity = '0.5';
+    decoration.classList.add('is-typing');
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
+  it('still repaints for style mutations on a Glass surface and its descendants', async () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    const inner = document.createElement('span');
+    glass.append(inner);
+    document.body.append(glass);
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      callback(0);
+      return 1;
+    });
+    const renderer = createTestRenderer();
+    renderer.mount();
+    gl.drawArrays.mockClear();
+
+    inner.style.opacity = '0.5';
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    expect(gl.drawArrays).toHaveBeenCalled();
+
+    gl.drawArrays.mockClear();
+    glass.style.borderRadius = '12px';
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+    expect(gl.drawArrays).toHaveBeenCalled();
+  });
+
+  it('still repaints for global theme attribute mutations', async () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      callback(0);
+      return 1;
+    });
+    const renderer = createTestRenderer();
+    renderer.mount();
+    gl.drawArrays.mockClear();
+
+    document.documentElement.dataset.theme = 'dark';
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 0));
+
+    expect(gl.drawArrays).toHaveBeenCalled();
+    delete document.documentElement.dataset.theme;
+  });
+
+  it('deduplicates scheduled frames when input leaves the scene unchanged', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+    const frames: Array<(time: number) => void> = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback as (time: number) => void);
+      return frames.length;
+    });
+    const renderer = createTestRenderer();
+    renderer.mount();
+
+    window.dispatchEvent(new Event('scroll'));
+    frames.shift()?.(0);
+    expect(gl.drawArrays).toHaveBeenCalled();
+    gl.drawArrays.mockClear();
+
+    for (let index = 0; index < 2; index += 1) {
+      glass.dispatchEvent(new KeyboardEvent('keydown', { bubbles: true, key: 'a' }));
+      frames.shift()?.(0);
+    }
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+  });
+
+  it('caps repaints on high-refresh displays instead of rendering every RAF', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+    const frames: Array<(time: number) => void> = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback as (time: number) => void);
+      return frames.length;
+    });
+    const renderer = createTestRenderer();
+    renderer.mount();
+    gl.clear.mockClear();
+
+    let timestamp = 1000;
+    for (let index = 0; index < 20; index += 1) {
+      window.dispatchEvent(new Event('scroll'));
+      frames.shift()?.(timestamp);
+      timestamp += 3;
+    }
+
+    // 20 frames at ~333 Hz should produce at most a handful of 60 Hz repaints.
+    expect(gl.clear.mock.calls.length).toBeGreaterThan(0);
+    expect(gl.clear.mock.calls.length).toBeLessThanOrEqual(5);
   });
 });

@@ -278,6 +278,16 @@
   }
 }
 
+/* The fixed Aurora Glass canvases are viewport-sized GPU composites. A
+   full-document theme snapshot captures them as well, which stalls the capture
+   under inspector instrumentation. The tier-owned CSS material stays live
+   during the crossfade, so excluding only the edge overlays keeps the blur,
+   the backdrop-dependent colour and the fade itself. */
+:root[data-neoverse-theme-view-transitioning] [data-neoverse-glass-renderer-canvas],
+:root[data-neoverse-theme-view-transitioning] [data-neoverse-glass-chroma-canvas] {
+  display: none !important;
+}
+
 :root[data-neoverse-theme-view-transitioning]::view-transition-old(root),
 :root[data-neoverse-theme-view-transitioning]::view-transition-new(root) {
   animation-duration: var(--neoverse-motion-theme-duration);

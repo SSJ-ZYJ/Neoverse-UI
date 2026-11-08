@@ -49,7 +49,6 @@ import {
   observeSystemTheme,
   persistThemeMode,
   resolveInitialThemeMode,
-  syncThemeModeToQuery,
   themeModes,
 } from './theme-runtime';
 
@@ -461,7 +460,6 @@ function ReactFixture() {
     setThemeMode(value);
     applyThemeMode(value);
     persistThemeMode(value);
-    syncThemeModeToQuery(value);
   }, []);
   useEffect(() => observeSystemTheme(), []);
   const [controlledOpen, setControlledOpen] = useState(false);

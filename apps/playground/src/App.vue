@@ -46,7 +46,6 @@ import {
   observeSystemTheme,
   persistThemeMode,
   resolveInitialThemeMode,
-  syncThemeModeToQuery,
   themeModes,
 } from './theme-runtime';
 
@@ -310,7 +309,6 @@ function setTheme(value: string): void {
   themeMode.value = value;
   applyThemeMode(value);
   persistThemeMode(value);
-  syncThemeModeToQuery(value);
 }
 
 function setLocale(value: string): void {

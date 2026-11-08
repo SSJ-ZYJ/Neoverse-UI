@@ -218,7 +218,20 @@ test('mobile toolbar keeps actions aligned and preserves theme and language swit
   expect(geometry.actionsInside).toBe(true);
   expect(geometry.documentOverflow).toBeLessThanOrEqual(0);
   await themeButton.click();
-  await expect(page).toHaveURL(/theme=system/);
+  /* Theme switches deliberately leave history alone: ?theme= stays the fixed
+     shareable preview while the interactive choice lives in preferences. */
+  await expect(page).toHaveURL(/theme=dark/);
+  /* The view transition callback commits data-theme asynchronously, so poll
+     the document rather than sampling it immediately after the click. */
+  await expect
+    .poll(() =>
+      page.evaluate(() => ({
+        mode: document.documentElement.dataset.theme ?? 'system',
+        stored: JSON.parse(window.localStorage.getItem('neoverse-design-lab.preferences') ?? '{}')
+          .theme,
+      })),
+    )
+    .toEqual({ mode: 'system', stored: 'system' });
   await languageButton.click();
   await expect(page).toHaveURL(/lang=zh/);
 });

@@ -79,28 +79,36 @@ function readStoredThemeMode(): ThemeMode | undefined {
   return isThemeMode(value) ? value : undefined;
 }
 
+function isReloadNavigation(): boolean {
+  if (typeof performance === 'undefined' || typeof performance.getEntriesByType !== 'function') {
+    return false;
+  }
+
+  const navigation = performance.getEntriesByType('navigation')[0] as
+    | PerformanceNavigationTiming
+    | undefined;
+  return navigation?.type === 'reload';
+}
+
 export function resolveInitialThemeMode(): ThemeMode {
   if (typeof window === 'undefined') {
     return defaultThemeMode;
   }
 
-  return (
-    readThemeModeFromSearch(window.location.search) ?? readStoredThemeMode() ?? defaultThemeMode
-  );
+  const queryMode = readThemeModeFromSearch(window.location.search);
+  const storedMode = readStoredThemeMode();
+  // A `?theme=` URL is a shareable fixed preview and wins on a fresh navigation.
+  // Theme switches deliberately do not write history: replaceState triggers a
+  // same-document navigation that DevTools reconstructs while the view transition
+  // is capturing, which stalls the compositor. On reload the last interactive
+  // choice wins instead, and the query remains a fallback until a choice exists.
+  return isReloadNavigation()
+    ? (storedMode ?? queryMode ?? defaultThemeMode)
+    : (queryMode ?? storedMode ?? defaultThemeMode);
 }
 
 export function persistThemeMode(value: ThemeMode): void {
   writePreferences({ theme: value });
-}
-
-export function syncThemeModeToQuery(value: ThemeMode): void {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  const url = new URL(window.location.href);
-  url.searchParams.set(themeQueryParameter, value);
-  window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
 }
 
 function clearScheduledThemeTransition(root: HTMLElement): void {
