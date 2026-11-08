@@ -2018,6 +2018,46 @@ describe('Glass renderer', () => {
     expect(gl.drawArrays).not.toHaveBeenCalled();
   });
 
+  it('keeps a scroll repaint the frame cap deferred instead of dropping it', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, { left: 20, top: 200 });
+    document.body.append(glass);
+    const frames: Array<(time: number) => void> = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback as (time: number) => void);
+      return frames.length;
+    });
+    const renderer = createTestRenderer();
+    renderer.mount();
+    frames.length = 0;
+
+    window.dispatchEvent(new Event('scroll'));
+    frames.shift()?.(1000);
+    expect(gl.drawArrays).toHaveBeenCalled();
+
+    // The last scroll event of a gesture can land inside the 16 ms cap window.
+    // Defer that frame, never discard it: a discarded request leaves the fixed
+    // canvas painting the previous offset, so the rim stays misaligned.
+    gl.uniform4f.mockClear();
+    setRect(glass, { left: 20, top: 120 });
+    window.dispatchEvent(new Event('scroll'));
+    frames.shift()?.(1008);
+    expect(frames, 'a capped scroll frame stays scheduled').not.toHaveLength(0);
+
+    frames.shift()?.(1024);
+    expect(gl.uniform4f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_rect' }),
+      20,
+      120,
+      240,
+      120,
+    );
+    expect(frames, 'a resting scene stops reserving frames').toHaveLength(0);
+  });
+
   it('caps repaints on high-refresh displays instead of rendering every RAF', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });

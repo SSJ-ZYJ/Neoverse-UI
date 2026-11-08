@@ -1615,10 +1615,13 @@ class GlassRendererImpl implements GlassRenderer {
           ? timestamp - this.lastFrameTime
           : Number.POSITIVE_INFINITY;
       if (elapsed < minFrameIntervalMs) {
-        // Keep reserving frames while an animation is live, but do not allocate
-        // a full edge pass in between; synchronous RAF shims report 0 and stay
-        // on the immediate path so existing contracts remain intact.
-        if (this.animatedElements.size > 0) this.scheduleRefresh();
+        // The cap defers the frame; it must not discard the request. A skipped
+        // frame that is never rescheduled leaves the fixed canvas painting the
+        // previous offset, so the rim stays visibly misaligned with its surface
+        // after the gesture ends. Keep the request pending and paint on the next
+        // frame that clears the interval; synchronous RAF shims report 0 and
+        // stay on the immediate path. Rendering still stops once the scene rests.
+        this.scheduleRefresh();
         return;
       }
       if (timestamp > 0) this.lastFrameTime = timestamp;

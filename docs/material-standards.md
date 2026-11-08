@@ -83,6 +83,12 @@ alpha-only gradient masks and backdrop brightness. The historical `backend: 'nat
 option remains available for compatibility, but must not be used as the repair
 approach prohibited below.
 
+The canvas is fixed to the viewport and the rim is painted in viewport
+coordinates, so every scroll request has to reach it. The frame cap defers a
+repaint by at most one interval and never drops the request; a discarded request
+would leave the rim painting the previous offset, detached from a surface that
+has already scrolled.
+
 ### Painted stroke for window-anchored chrome
 
 The refracted rim only brightens pixels the backdrop already carries, so a
