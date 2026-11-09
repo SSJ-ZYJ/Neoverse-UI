@@ -575,6 +575,10 @@ test('Dock Glass edge refraction is removed when reduced transparency is request
 });
 
 test('consumer parity dock adapts navigation items to content', async ({ page }) => {
+  // The language slider travels on a real transition. Measure its resting
+  // geometry, not a frame mid-glide, so a taller page cannot race the reading.
+  // 语言滑块有真实过渡；测量其落定几何而非滑行中的某一帧，避免页面变高后与读取竞态。
+  await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.goto('/frame?theme=dark&lang=en#consumer-parity', {
     waitUntil: 'domcontentloaded',
   });
