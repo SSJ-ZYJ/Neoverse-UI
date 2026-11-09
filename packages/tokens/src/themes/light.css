@@ -54,9 +54,11 @@
   --neoverse-terminal-foreground: var(--neoverse-color-text-primary);
   --neoverse-terminal-muted: var(--neoverse-color-text-secondary);
   --neoverse-terminal-command: var(--neoverse-color-text-primary);
-  /* Pale Aurora Glass needs darker mint ink for the command marker and caret. */
+  /* Pale Aurora Glass needs darker mint ink for the command marker, and the
+     caret keeps the accent hue in its deeper step so the 3:1 UI contrast
+     contract still holds over the canvas. */
   --neoverse-terminal-prompt: var(--neoverse-color-mint-700);
-  --neoverse-terminal-cursor: var(--neoverse-color-accent-primary);
+  --neoverse-terminal-cursor: var(--neoverse-color-blue-600);
   --neoverse-terminal-selection: var(--neoverse-color-accent-soft);
   --neoverse-terminal-segment-host-background: color-mix(
     in srgb,

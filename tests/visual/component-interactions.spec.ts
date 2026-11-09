@@ -558,7 +558,7 @@ for (const mode of ['native', 'fallback'] as const) {
     page,
   }) => {
     if (mode === 'fallback') await disablePopoverApi(page);
-    await page.goto('/frame?theme=light&lang=en&contract-fixtures=1#controls', {
+    await page.goto('/frame?theme=light&lang=en&contract-fixtures=1#overlays', {
       waitUntil: 'domcontentloaded',
     });
     const controlled = page.locator('[data-overlay-controlled-popover]');

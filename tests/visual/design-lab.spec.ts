@@ -20,12 +20,14 @@ const controlSnapshots = [
     'icon-button',
     'action',
     'breadcrumb',
-    'overlays',
     'navigation-item',
     'segmented-control',
     'surface',
     'density',
-  ].map((name) => ({ name: `controls-${name}`, selector: `#controls-${name}` })),
+  ].map((name) => ({
+    name: `controls-${name}`,
+    selector: `#controls-${name}`,
+  })),
 ];
 
 const freezeMotion = `

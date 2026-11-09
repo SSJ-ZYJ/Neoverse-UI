@@ -77,7 +77,7 @@ test('the Design Lab specimen shows checkable rows, a submenu and a disabled row
   await expect(themeRow).toHaveAttribute('aria-haspopup', 'menu');
   // The panel's own layout width, unaffected by the presence transform.
   // 面板自身的布局宽度，不受入场变换影响。
-  const topWidth = await panel.evaluate((element) => element.offsetWidth);
+  const topWidth = await panel.evaluate((element) => (element as HTMLElement).offsetWidth);
   await themeRow.click();
 
   // The submenu is its own manual popover teleported to the body.

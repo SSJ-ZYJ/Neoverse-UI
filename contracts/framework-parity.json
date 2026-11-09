@@ -333,7 +333,17 @@
       "name": "ContextMenuItem",
       "vueType": "ContextMenuItem",
       "reactType": "UiContextMenuItem",
-      "props": ["id", "label", "disabled", "tone", "shortcut", "checked", "group", "selection", "children"]
+      "props": [
+        "id",
+        "label",
+        "disabled",
+        "tone",
+        "shortcut",
+        "checked",
+        "group",
+        "selection",
+        "children"
+      ]
     },
     {
       "name": "BreadcrumbItem",

@@ -224,7 +224,7 @@ for (const adapter of ['Vue', 'React'] as const) {
       if (mode === 'fallback') await disablePopoverApi(page);
       const url =
         adapter === 'Vue'
-          ? '/frame?theme=light&lang=en&contract-fixtures=1#controls'
+          ? '/frame?theme=light&lang=en&contract-fixtures=1#overlays'
           : '/react-fixture?theme=light&lang=en&contract-fixtures=1';
       await page.goto(url, { waitUntil: 'domcontentloaded' });
       const trigger = page.getByRole('button', { name: 'Open menu' });

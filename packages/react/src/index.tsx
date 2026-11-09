@@ -25,14 +25,13 @@ import {
   useRef,
   useState,
 } from 'react';
-
+import { slideCaret } from './caret-motion';
 import {
   type ButtonVariant,
   buttonVariantClasses,
   mergeClassNames,
   resolveAriaInvalid,
 } from './internal';
-import { slideCaret } from './caret-motion';
 
 export * from './display';
 export * from './navigation';

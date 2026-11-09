@@ -131,7 +131,7 @@ describe('Terminal composition', () => {
     const caret = wrapper.get('.ui-terminal-prompt__caret');
     expect(caret.attributes('aria-hidden')).toBe('true');
     expect(caret.get('.ui-terminal-prompt__caret-prefix').text()).toBe('cl');
-    expect(caret.get('.ui-terminal-prompt__caret-glyph').exists()).toBe(true);
+    expect(caret.find('.ui-terminal-prompt__caret-glyph').exists()).toBe(true);
     input.element.scrollLeft = 12;
     await input.trigger('scroll');
     expect(caret.get('span').attributes('style')).toContain('translateX(-12px)');

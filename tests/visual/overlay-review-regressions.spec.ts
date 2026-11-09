@@ -8,7 +8,7 @@ async function useLegacyPopoverFallback(page: Page) {
 }
 
 const adapters = [
-  { name: 'Vue', url: '/frame?theme=light&lang=en&contract-fixtures=1#controls' },
+  { name: 'Vue', url: '/frame?theme=light&lang=en&contract-fixtures=1#overlays' },
   { name: 'React', url: '/react-fixture?lang=en&contract-fixtures=1' },
 ] as const;
 

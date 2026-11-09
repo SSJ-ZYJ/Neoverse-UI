@@ -64,7 +64,12 @@ test('React fixture theme control reuses the shared mode vocabulary and preferen
   await control.getByRole('radio', { name: 'Dark', exact: true }).check();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   await expect.poll(() => storedTheme(page)).toBe('dark');
-  expect(new URL(page.url()).searchParams.get('theme')).toBe('dark');
+  // Theme switches deliberately do not write history: replaceState is a
+  // same-document navigation that stalls the compositor while the transition
+  // runs, so the preference record drives the next load instead of the query.
+  // 主题切换刻意不写入历史记录：replaceState 属于同文档导航，会在过渡期间阻塞
+  // 合成器，因此由偏好记录驱动下次加载，而不是查询参数。
+  expect(new URL(page.url()).searchParams.has('theme')).toBe(false);
 
   await page.reload({ waitUntil: 'domcontentloaded' });
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');

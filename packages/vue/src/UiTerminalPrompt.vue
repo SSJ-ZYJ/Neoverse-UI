@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, useAttrs, useId, watch } from 'vue';
-import TerminalPromptSegments from './TerminalPromptSegments.vue';
 import { slideCaret } from './caret-motion';
+import TerminalPromptSegments from './TerminalPromptSegments.vue';
 import type { TerminalPromptProps, TerminalPromptSegment } from './types';
 
 defineOptions({ inheritAttrs: false });
