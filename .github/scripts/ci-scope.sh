@@ -11,7 +11,7 @@ if [[ "${EVENT_NAME}" == push && "${SKIP_OPEN_PR_CHECK:-false}" != true ]]; then
         echo 'verify=false'
         echo 'metadata-checks=false'
         echo 'quality-checks=false'
-        echo 'visual-checks=false'
+        echo 'browser-checks=false'
       } >> "$GITHUB_OUTPUT"
       echo 'The open PR will verify this branch.'
       exit 0
@@ -43,6 +43,6 @@ else
   {
     echo 'metadata-checks=true'
     echo 'quality-checks=true'
-    echo 'visual-checks=true'
+    echo 'browser-checks=true'
   } >> "$GITHUB_OUTPUT"
 fi

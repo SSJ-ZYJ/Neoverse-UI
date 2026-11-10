@@ -11,7 +11,7 @@ type Entry = {
   signature: string;
   texture: WebGLTexture | undefined;
   pending: boolean;
-  cancelled: boolean;
+  canceled: boolean;
 };
 
 const escapeXml = (value: string): string =>
@@ -65,7 +65,7 @@ export class GlassBackgrounds {
     this.styles.clear();
     for (const [element, entry] of this.entries) {
       if (!element.isConnected) {
-        entry.cancelled = true;
+        entry.canceled = true;
         if (entry.texture) this.gl.deleteTexture(entry.texture);
         this.entries.delete(element);
       }
@@ -127,16 +127,16 @@ export class GlassBackgrounds {
     const signature = `${width}x${height}/${paint.join('|')}`;
     let entry = this.entries.get(nearest.element);
     if (!entry || entry.signature !== signature) {
-      if (entry) entry.cancelled = true;
+      if (entry) entry.canceled = true;
       const previous = entry?.texture;
-      entry = { signature, texture: previous, pending: true, cancelled: false };
+      entry = { signature, texture: previous, pending: true, canceled: false };
       this.entries.set(nearest.element, entry);
       void this.paint(entry, paint, width, height);
       // Bound retained GPU resources even on very long component catalogues.
       while (this.entries.size > 64) {
         const oldest = this.entries.entries().next().value;
         if (!oldest) break;
-        oldest[1].cancelled = true;
+        oldest[1].canceled = true;
         if (oldest[1].texture) this.gl.deleteTexture(oldest[1].texture);
         this.entries.delete(oldest[0]);
       }
@@ -189,7 +189,7 @@ export class GlassBackgrounds {
     height: number,
   ): Promise<void> {
     const embedded = /url\(/i.test(layers.join('')) ? await this.embedImages(layers) : layers;
-    if (this.disposed || entry.cancelled) return;
+    if (this.disposed || entry.canceled) return;
     if (!embedded) {
       this.fail(entry);
       return;
@@ -205,7 +205,7 @@ export class GlassBackgrounds {
       .join('')}</div></foreignObject></svg>`;
     const image = this.document.createElement('img');
     image.onload = () => {
-      if (this.disposed || entry.cancelled) return;
+      if (this.disposed || entry.canceled) return;
       const canvas = this.document.createElement('canvas');
       canvas.width = pixelsWidth;
       canvas.height = pixelsHeight;
@@ -244,7 +244,7 @@ export class GlassBackgrounds {
       this.refresh();
     };
     image.onerror = () => {
-      if (!this.disposed && !entry.cancelled) this.fail(entry);
+      if (!this.disposed && !entry.canceled) this.fail(entry);
     };
     image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
   }
@@ -259,7 +259,7 @@ export class GlassBackgrounds {
   destroy(): void {
     this.disposed = true;
     for (const entry of this.entries.values()) {
-      entry.cancelled = true;
+      entry.canceled = true;
       if (entry.texture) this.gl.deleteTexture(entry.texture);
     }
     this.entries.clear();

@@ -18,7 +18,7 @@ The repository is a Bun workspace. Public-package dependencies use explicit SemV
 | `@neoverse-ui/vue` | Consumer Validation | Vue 3 SFC integration |
 | `@neoverse-ui/react` | Consumer Validation | React 19 adapters for consumer-validated shared components |
 | `@neoverse-ui/giscus-theme` | Published 0.2.0 | Standalone light/dark Giscus theme CSS |
-| `apps/playground` | Consumer Validation | Design Lab, frame route, and visual baselines |
+| `apps/playground` | Consumer Validation | Design Lab, frame route, and browser e2e fixtures |
 
 The dependency direction is:
 
@@ -154,7 +154,7 @@ Independent Aurora Glass surfaces must render their own tint, border, backdrop f
 | Immersive / 厚实 (`immersive`) | CSS baseline | automatically discovered when the renderer is mounted |
 
 Light restores the 0.2.0 directional edge: the shader combines theme accent
-colours, varies chroma with effective opacity, and caps fragment alpha at 0.34.
+colors, varies chroma with effective opacity, and caps fragment alpha at 0.34.
 The light canvas uses normal composition and the release's WebGL blend factors;
 large surfaces use edge opacities 0.36 / 0.38 / 0.40, and no extra light alpha
 gain multiplies the tier value. Chroma and gain remain optional multipliers,
@@ -167,8 +167,8 @@ the blue lead over the red/green content is trimmed, so the right catch stays
 cool without the release's threefold margin that read as a blue band on pale
 pages. The cap applies to light surfaces only; dark composition is unchanged.
 
-This is a translucent, theme-coloured highlight composited over the backdrop,
-not a sampled or displaced image of the background. Its apparent colour and
+This is a translucent, theme-colored highlight composited over the backdrop,
+not a sampled or displaced image of the background. Its apparent color and
 contrast depend on both the theme accents and the pixels underneath. Dark
 retains its overlay response. Both themes share one canvas; CSS continues to
 own the body tint, blur and shadows.
@@ -186,21 +186,21 @@ different light and dark composition models against changing background pixels. 
 
 ## Motion
 
-`@neoverse-ui/motion` is framework-agnostic. It owns the base duration/easing scale plus `feedback`, `state`, and `spatial` semantic roles. Shared component CSS consumes those roles directly; the package does not ship generic entrance-animation recipes or framework runtime animation code. It also owns the DOM behaviour that CSS cannot express: the page-change choreography, and the layout width primitives `captureLayoutWidths` / `animateLayoutWidths`, which reconcile a group of boxes whose content changes size. The width primitives sample every rendered box before the update, resolve all natural endpoints before the first animation starts, animate on the `spatial` role, and let an interrupted run continue from the frame it reached because the sample reads the animated style. Boxes that grow temporarily lock their copy to one line (`white-space: nowrap`, `overflow: clip`, restored on finish or cancellation); otherwise the longer replacement text wraps inside the still-narrow box and its height jumps mid-animation. Endpoint measurement assumes fonts have finished loading. Framework adapters stay in the component packages: Vue exposes `useLayoutWidthMotion`, which owns the pre/post update phases, viewport-resize and reduced-motion termination, and unmount cleanup. Reduced motion removes spatial distance and collapses durations so component state remains predictable.
+`@neoverse-ui/motion` is framework-agnostic. It owns the base duration/easing scale plus `feedback`, `state`, and `spatial` semantic roles. Shared component CSS consumes those roles directly; the package does not ship generic entrance-animation recipes or framework runtime animation code. It also owns the DOM behavior that CSS cannot express: the page-change choreography, and the layout width primitives `captureLayoutWidths` / `animateLayoutWidths`, which reconcile a group of boxes whose content changes size. The width primitives sample every rendered box before the update, resolve all natural endpoints before the first animation starts, animate on the `spatial` role, and let an interrupted run continue from the frame it reached because the sample reads the animated style. Boxes that grow temporarily lock their copy to one line (`white-space: nowrap`, `overflow: clip`, restored on finish or cancellation); otherwise the longer replacement text wraps inside the still-narrow box and its height jumps mid-animation. Endpoint measurement assumes fonts have finished loading. Framework adapters stay in the component packages: Vue exposes `useLayoutWidthMotion`, which owns the pre/post update phases, viewport-resize and reduced-motion termination, and unmount cleanup. Reduced motion removes spatial distance and collapses durations so component state remains predictable.
 
 ## Density and touch strategy
 
 Controls retain compact painted dimensions on every viewport. Shared Button and SegmentedControl CSS uses `@media (pointer: coarse)` to add an invisible 8px hit-area expansion with pseudo-elements. Disabled pseudo hit areas do not intercept input. No `mobile-button`, `docs-button`, or other application-specific component is introduced. The same core components serve desktop and touch; `focus-visible`, keyboard navigation, and disabled behavior remain explicit component contracts.
 
-## Design Lab and visual regression
+## Design Lab and browser end-to-end tests
 
 `apps/playground` uses Bun.serve for the HTML shell, `/frame` theme-isolated documents, built Tailwind CSS, and the Vite browser bundle. The main shell and isolated `/frame` share the consumer root size (normally 16px). The optional presentation root-size token remains public for explicit presentation use, but does not enlarge Design Lab defaults. Persistent navigation begins at the shared `xl` / 1280px breakpoint; narrower layouts keep the same module content behind drawer navigation.
 
 Playground-only composition helpers keep specimen structure consistent without becoming Consumer API. `LabSpecimenSection` owns subsection heading, description, spacing, and optional action placement. `playground-token-grid` and `playground-specimen-grid` use the available content width rather than fixed viewport column counts, while `playground-specimen-panel` and `playground-specimen-row` provide shared specimen geometry. Module specimens select material through `UiSurface surface="..."` instead of directly attaching Aurora Glass implementation classes; the Playground shell itself may still use Material classes because its sidebar and sticky header are application chrome boundaries. `StateRow` exposes stable `data-specimen-state-row` markers only for Design Lab validation; these markers are not public component API.
 
-The Motion module's `foundation-motion-width` specimen demonstrates the shared layout width motion with real content: the Design Lab language control is the trigger, and `useLayoutWidthMotion` keeps the brand, navigation, and preference boxes on one `spatial` curve without scaling text. The stage stacks its boxes below the `md` breakpoint so a width change cannot switch the flex-wrap row count mid-animation. It is registered in the specimen catalogue, so deep links and material checks cover it.
+The Motion module's `foundation-motion-width` specimen demonstrates the shared layout width motion with real content: the Design Lab language control is the trigger, and `useLayoutWidthMotion` keeps the brand, navigation, and preference boxes on one `spatial` curve without scaling text. The stage stacks its boxes below the `md` breakpoint so a width change cannot switch the flex-wrap row count mid-animation. It is registered in the specimen catalogue, so deep links cover it.
 
-The Design Lab shell itself is a consumer, not just a host for the specimen: `App.vue` binds `useLayoutWidthMotion` to `.playground-shell__toolbar-actions`, targeting the theme and language segmented controls, the compact icon buttons, and the back-to-overview control. Hidden controls are skipped by the primitive and fixed-size ones by its tolerance, so both responsive toolbars share one motion contract. `tests/visual/playground-interactions.spec.ts` verifies both directions of the language switch: one width animation per changed box at the same duration, unchanged text-line counts and container heights through the expansion, restored inline styles, and natural-width endpoints.
+The Design Lab shell itself is a consumer, not just a host for the specimen: `App.vue` binds `useLayoutWidthMotion` to `.playground-shell__toolbar-actions`, targeting the theme and language segmented controls, the compact icon buttons, and the back-to-overview control. Hidden controls are skipped by the primitive and fixed-size ones by its tolerance, so both responsive toolbars share one motion contract. `tests/e2e/motion.spec.ts` switches the lab language and checks that the specimen boxes take their new widths without wrapping their copy.
 
 `StateRow layout="wide"` reserves a full row for multi-component comparisons;
 nested QA matrices receive the same space automatically. Preview content wraps
@@ -209,15 +209,31 @@ within the stage instead of imposing its max-content width. Shared
 form and composition examples. Specimen cards size to their own content rather
 than stretching their preview to match the tallest neighbouring card.
 
-Specimen and QA stages render components without additional CSS zoom. Standard and compact Dock specimens, including the consumer-parity composition, explicitly use `scale="md"`; larger scales belong only in labeled scale-comparison examples. This prevents stage enlargement from stacking with component scaling and the shell's presentation root size. `tests/visual/playground-proportions.spec.ts` checks every navigation module in both themes and languages, in the shell and isolated frame, for unintended magnification, distorted icons, and horizontal page overflow.
+Specimen and QA stages render components without additional CSS zoom. Standard and compact Dock specimens, including the consumer-parity composition, explicitly use `scale="md"`; larger scales belong only in labeled scale-comparison examples. This prevents stage enlargement from stacking with component scaling and the shell's presentation root size.
 
-Default component geometry is consumer-owned by the shared tokens: Button and Action sizes are 32 / 40 / 48px at a normal 16px root, navigation and segmented options start at 32px with 14px labels, and grouped controls use a 36px track. Consumers should select public sizes instead of overriding internal selectors. Explicit composition scaling remains opt-in. Browser tests validate real component geometry at the normal root and compare Dock scale variants. Local `file:` consumers use `scripts/sync-consumer.ts` to build and verify every installed copy before serving CSS; see [consumer sizing](consumer-sizing.md).
+Default component geometry is consumer-owned by the shared tokens: Button and Action sizes are 32 / 40 / 48px at a normal 16px root, navigation and segmented options start at 32px with 14px labels, and grouped controls use a 36px track. Consumers should select public sizes instead of overriding internal selectors. Explicit composition scaling remains opt-in. Local `file:` consumers use `scripts/sync-consumer.ts` to build and verify every installed copy before serving CSS; see [consumer sizing](consumer-sizing.md).
 
 The validation area also acts as the Playground Contract Lab. `apps/playground/src/contract-lab.ts` derives component maturity, release-visual status, runtime validation, and framework parity from the repository contracts instead of maintaining a second component inventory. Interaction-heavy specimens declare stable state ids and browser checks; `StateRow` exposes non-localized `data-contract-state` markers so automation does not depend on English copy. The Contract Lab table mirrors the component matrix and exposes explicit Vue and React runtime-validation entry points. These `data-contract-*` attributes are development/test instrumentation only and are not part of the public package API.
 
-Playground browser validation is split by responsibility: `tests/visual/playground-shell.spec.ts` covers shell scaling, navigation, and deep links; `playground-content.spec.ts` covers content, contracts, and material states; `playground-interactions.spec.ts` covers interactive navigation and runtime fixtures; and `playground-controls.spec.ts` covers control geometry, focus, and responsive overflow across presentation widths. `tests/visual/design-lab.spec.ts` captures only `[data-design-lab-region="module"]`, with fixed light/dark query parameters, reduced motion, awaited fonts/images, disabled animation/caret, and separate Playwright projects for a 1920×1080 desktop viewport at 100% CSS-pixel scaling and 390px touch. The desktop module region remains constrained by the semantic content-width role rather than stretching to the full viewport.
+## Browser end-to-end tests
 
-The generated baselines are stored in `tests/visual/snapshots/`. This is intentionally a small Playwright layer rather than a second component-testing architecture. Update baselines only after confirming that the token, Material, component, or specimen-composition change is intentional.
+`tests/e2e/` is organised by product module, not by component: one spec per area, with the shared adapter and fixture helpers in `tests/support/e2e.ts`.
+
+| Spec | Covers |
+| --- | --- |
+| `forms.spec.ts` | Field wiring, text submission and IME, Select keyboard and controlled rejection, choice controls, number inputs, accessibility roles |
+| `overlays.spec.ts` | Popover, dropdown and context menu lifecycle, dismissal, focus return, anchor tracking, viewport clamping, tooltip content |
+| `navigation.spec.ts` | Breadcrumb, dock, segmented control, step flow |
+| `surfaces.spec.ts` | Disclosure, table, skeleton, timeline, stat card, scrollbar |
+| `terminal.spec.ts` | Transcript composition, suggestions, IME guard, tail following, reader intent |
+| `motion.spec.ts` | List reorder, entrance replay, reduced motion, layout width on a language switch |
+| `materials.spec.ts` | Aurora Glass previews render, stay readable across themes and reduced transparency, and each tier wires its own blur, saturation and tint |
+| `layout.spec.ts` | Control size baseline, badge type scale, 24px minimum target, no implicit specimen magnification |
+| `contrast.spec.ts` | WCAG contrast floors for the primary, secondary and muted text roles in both themes |
+| `playground.spec.ts` | Shell navigation, deep links, drawer, scroll restoration, responsive overflow |
+| `parity.spec.ts` | Every React adapter renders, theme resolution, shared control names |
+
+A test asserts an observable user outcome: a panel opens, focus returns, a value is submitted, a link navigates, a control keeps its token size. Geometry, color contrast and material-tier wiring stay as computed-style assertions because they are deterministic across engines and describe a contract. Pixel probes, screenshot baselines and animation-frame accounting were removed: genuine optical quality (directional light, chroma retention, refraction) is verified by manual acceptance against [Material standards](material-standards.md), not by the e2e gate. Tests use both Playwright projects (1920×1080 desktop and 390px touch), and a test that only applies to one layout skips itself with a stated reason.
 
 ## Theme model
 
@@ -229,12 +245,12 @@ The Playground resolves and applies that contract through one framework-neutral 
 
 ```sh
 bun run check
-bun run test:visual
+bun run test:e2e
 ```
 
-`bun run check` auto-fixes Biome lint/format/imports, verifies UTF-8 text integrity, runs the style and Tailwind-usage lints, typechecks every workspace, and runs all unit and contract tests. `bun run test:visual:update` is the explicit baseline-update command. Generated package CSS and TypeScript declarations are rebuilt before the visual server starts.
+`bun run check` auto-fixes Biome lint/format/imports, verifies UTF-8 text integrity, enforces the source-language rules, runs the style and Tailwind-usage lints, typechecks every workspace, and runs all unit and contract tests. `bun run test:e2e` rebuilds the workspace and runs the Playwright suite against the Design Lab server.
 
-The `scripts/check.ts` runner executes all ten check stages sequentially without stopping at the first failure, then prints a PASS/FAIL summary with durations and totals. Full stdout/stderr goes to per-stage files in the printed temporary log directory; failed stages include exit codes and standalone rerun commands. Any failed stage produces a nonzero overall exit code. The individual check scripts and `release:check` remain independently callable and retain their existing behavior.
+The `scripts/check.ts` runner executes every check stage sequentially without stopping at the first failure, then prints a PASS/FAIL summary with durations and totals. Full stdout/stderr goes to per-stage files in the printed temporary log directory; failed stages include exit codes and standalone rerun commands. Any failed stage produces a nonzero overall exit code. The individual check scripts and `release:check` remain independently callable and retain their existing behavior.
 
 
 Material tiers, customization, component audit and hover/press policy: [Material standards](material-standards.md).

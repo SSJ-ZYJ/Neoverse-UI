@@ -49,7 +49,7 @@ have no independent plate. Reduced transparency uses an opaque tint and no blur.
 ## Aurora Glass edge reflection
 
 Light uses a directional edge: the shader combines theme accent
-colours, varies chroma with effective opacity, and caps fragment alpha at 0.34.
+colors, varies chroma with effective opacity, and caps fragment alpha at 0.34.
 The light canvas uses normal composition and the release's WebGL blend factors;
 large surfaces use edge opacities 0.36 / 0.38 / 0.40, and no extra light alpha
 gain multiplies the tier value. Chroma and gain remain optional multipliers,
@@ -61,7 +61,7 @@ thickens the whole pale rim instead of only that corner.
 The light fragment keeps only 30% of that theme mix and resolves the rest toward
 the neutral edge light. A pale backdrop already carries the page's cool hue, so
 the previous full-saturation mix added a visible cyan band on top of it; the
-neutral majority keeps the rim translucent and lets the backdrop's own colour
+neutral majority keeps the rim translucent and lets the backdrop's own color
 show through. The theme accents remain visible as the minority tint and at the
 directional corners.
 
@@ -70,8 +70,8 @@ over the red/green content is trimmed, so the right catch stays cool without the
 release's threefold margin that read as a blue band on pale pages. The cap
 applies to light surfaces only; dark composition is unchanged.
 
-This is a translucent, theme-coloured highlight composited over the backdrop,
-not a sampled or displaced image of the background. Its apparent colour and
+This is a translucent, theme-colored highlight composited over the backdrop,
+not a sampled or displaced image of the background. Its apparent color and
 contrast depend on both the theme accents and the pixels underneath. Dark
 retains its overlay response. Both themes share one canvas; CSS continues to
 own the body tint, blur and shadows.
@@ -100,7 +100,7 @@ therefore inert for every other surface; dark themes resolve it to the strong
 border role plus a top catch. The renderer path keeps the stroke ahead of the
 runtime shadow, and the reduced-transparency fallback keeps it ahead of the
 material highlights. The stroke is geometry, not refraction: it does not track
-backdrop colour, which is what keeps a nav bar's silhouette readable while it
+backdrop color, which is what keeps a nav bar's silhouette readable while it
 scrolls over both empty and content-heavy areas.
 
 Live-pixel tests check light edge continuity and corner emphasis, while the
@@ -111,7 +111,7 @@ different light and dark composition models against changing background pixels. 
 ### Glass repair guardrails
 
 Glass repairs must preserve all of the following at once: the actual tier-owned
-background blur, a continuous narrow edge on all four sides and corners, colour
+background blur, a continuous narrow edge on all four sides and corners, color
 that responds to the underlying content, and interactive performance. The upper-left
 and lower-right catches may be stronger, but the other edges must remain visible;
 an uninterrupted bright strip across the top is not the desired profile.
@@ -126,26 +126,26 @@ not alternative styles to retry when a different test fails:
 - Do not add a page screenshot, cloned DOM, reconstructed backdrop or continuous
   capture layer to simulate refraction; prior capture layers caused stutter and
   dark or grey edges. Do not paint a fixed white, mint or blue outline or a
-  theme-coloured highlight and call it a sample of the backdrop.
+  theme-colored highlight and call it a sample of the backdrop.
 - Do not strengthen the entire top edge to make the corners brighter: this makes
   that edge look thicker than the others. Do not apply full corner-only focus or
   let the top, bottom, sides or the other two corners disappear. The two stronger
   corners must remain part of one continuous, fine silhouette.
 - Do not replace the established compositing with another blend mode or change
   its gain in isolation. An unverified overlay experiment made the light edge
-  disappear; a coloured source-over layer can also mask the true backdrop. A
+  disappear; a colored source-over layer can also mask the true backdrop. A
   change must preserve visible edges and their response to the actual background.
 - Do not compensate for a failed edge by removing, overriding, or replacing the
   tier-owned body blur, changing opacity to an opaque fill, or adding a bright
-  border. Keep blur, colour, edges and performance together as one contract.
-- Do not fix a visual mismatch by only changing an assertion or updating
-  snapshots. Unit mocks, computed styles, a single grey background, and passing
-  colour thresholds do not establish a correct rendered appearance or performance.
+  border. Keep blur, color, edges and performance together as one contract.
+- Do not fix a visual mismatch by only changing an assertion or relaxing a
+  check. Unit mocks, computed styles, a single grey background, and passing
+  color thresholds do not establish a correct rendered appearance or performance.
 
 Before changing the effect, compare the relevant historical implementation and
 the changes made after it; retain independently accepted corrections rather than
 blindly reverting an entire commit. The light edge in `7f43d37` uses a
-theme-coloured source-over highlight. The preceding `eda31c3` uses a
+theme-colored source-over highlight. The preceding `eda31c3` uses a
 backdrop-dependent overlay transfer. Neither description proves spatial
 displacement, so do not describe either as sampled backdrop refraction. A later
 full-focus experiment caused the other edges to disappear; partial focus then
@@ -154,12 +154,13 @@ comparing earlier commits rather than restoring an old appearance wholesale.
 
 Keep the current CSS body blur and the renderer's scheduling optimizations while
 evaluating a change. Verify all three surface tiers and representative controls
-over changing, coloured and patterned backgrounds, including live DOM and canvas
+over changing, colored and patterned backgrounds, including live DOM and canvas
 content. Inspect rendered blur and edge continuity rather than computed styles
 alone; check the light and dark themes and interactive responsiveness. Run
 browser, WebGL, build and performance checks remotely under the project safety
-constraint. Update screenshot baselines only after the actual candidate has passed
-the relevant checks; report any missing verification or visual review explicitly.
+constraint. Record the manual optical acceptance only after the actual candidate
+has passed the relevant checks; report any missing verification or visual review
+explicitly.
 Do not push successive diagnostic commits or trigger repeated failing CI runs while
 the repair is still being developed.
 
@@ -174,7 +175,7 @@ Dock defaults to `glass-elevated`; ControlSurface defaults to `glass-subtle`. Th
 The `--neoverse-control-chrome-*` and `--neoverse-effect-floating-chrome-*` tokens
 and their TypeScript exports are removed. Customize the selected Aurora Glass tier for
 material and `--neoverse-control-surface-*` for grouping geometry instead.
-`inset` uses Light optics; status colours use shared semantic
+`inset` uses Light optics; status colors use shared semantic
 effect roles. Typography, geometry, and native control semantics remain independent.
 
 ```vue
@@ -235,20 +236,20 @@ stay sharp. It adds no surface gradient or outline. Every variant uses
 the same border geometry; the existing `sm` / `md` / `lg` size classes and optical
 label alignment remain intact. Neutral uses secondary text as its tint source,
 with the same fill and border strengths as the four status variants, so its
-visible silhouette does not shrink into the backdrop. Both themes mix the semantic status colour with
+visible silhouette does not shrink into the backdrop. Both themes mix the semantic status color with
 transparency; no fixed white backing is added in light mode. Light labels use
 vivid midtone blue, mint, amber and red ink through the shared label effect roles,
 while dark labels use luminous status ink. Both are exposed
 through the per-variant `--neoverse-badge-*-foreground` tokens. The shared
 `--neoverse-badge-backdrop-filter` controls background blur for all five variants.
-Reduced transparency, forced colours, and browsers without backdrop-filter use
+Reduced transparency, forced colors, and browsers without backdrop-filter use
 an opaque semantic field with no background filter.
 
-Light semantic status colours are pale blue, mint, yellow and pink across the
+Light semantic status colors are pale blue, mint, yellow and pink across the
 library, not Badge-only overrides. Their `*-foreground` roles provide contrasting
 ink on these fields. Text-only validation, terminal feedback and destructive menu
 items use shared `status-*-text` effect roles so pale fields do not turn into
-illegible text. Dark status colours and text-only feedback retain their palette.
+illegible text. Dark status colors and text-only feedback retain their palette.
 
 Disclosure panels use the shared inset outline roles in every state, together
 with the shared control shadow. The inset outline separates the panel from pale
@@ -386,14 +387,17 @@ their normal inset shadows. The `formControl.webgl*` token names allow the
 WebGL-state shadows to be customized independently in both themes.
 
 Run `bun run check:materials`, package tests, build, typecheck, style and semantic
-utility lint, and focused browser contract tests. Browser contracts inspect actual
-filter, background alpha, activation and recovery rather than accepting CSS source
-alone. Screenshot acceptance belongs to the user; this change does not regenerate
-baselines or assert real consumer validation.
+utility lint. The browser gate asserts that each tier wires its own blur,
+saturation and tint (`tests/e2e/materials.spec.ts`) and that text keeps its
+contrast floors (`tests/e2e/contrast.spec.ts`); it does not sample pixels. Optical
+acceptance of the rendered light is manual, against the values recorded below.
+Screenshot acceptance belongs to the user.
 
-### Open edge-contract failures
+### Retired edge-contract measurements
 
-Recorded 2026-11-02; directional and measurement repairs 2026-11-03.
+Recorded 2026-11-02, repaired 2026-11-03 and 2026-11-04. The pixel-level Glass
+suite that produced these values left the browser gate on 2026-11-10; the numbers
+remain the reference for manual optical acceptance.
 
 Repaired without changing the compositing model:
 
@@ -425,31 +429,30 @@ Repaired without changing the compositing model:
   keep the local catch. Affected win32 table baselines were regenerated for both
   themes; the Linux captures were not regenerated and pass within the same 1%
   pixel-ratio tolerance at `8e342b2`.
-- `glass-chroma-field` uniform backdrop: the corner catch existed, but the test
-  sampled a fixed 150 ms after inserting the button and raced the renderer's
-  next refresh. It now polls until the chroma canvas carries the corner paint.
-- `scrollbar-states`: Chromium's overlay scrollbars stay hidden at rest and do
-  not repaint `:active` under synthetic input, so the native pixel contract was
-  not observable. The native check now asserts the applied engine pseudos
-  (width, painted thumb, `padding-box` clip, transparent lane); the custom
-  overlay above still verifies hover and drag paint on real DOM pixels.
+- Uniform chroma field: the corner catch existed, but the former probe sampled a
+  fixed 150 ms after inserting the button and raced the renderer's next refresh.
+  It was changed to poll until the chroma canvas carried the corner paint.
+- Native scrollbar: Chromium's overlay scrollbars stay hidden at rest and do not
+  repaint `:active` under synthetic input, so the native pixel contract was not
+  observable. The check compared the applied engine pseudos instead (width,
+  painted thumb, `padding-box` clip, transparent lane); the custom overlay
+  verified hover and drag paint on real DOM pixels.
 
-The four remaining contracts were re-scoped to the current light model on
-2026-11-03; none stays parked:
+The four light-model contracts were re-scoped on 2026-11-03:
 
-- `glass-backdrop-gain`: the light rim is a translucent theme highlight. Over
-  black the contract bounds the theme catch (`chroma ≤ 64`, measured ~50)
-  instead of forbidding it; near-white keeps a bounded edge (`Δ ≤ 20`, measured
-  15). Hue/saturation retention against the backdrop was retired for light.
-- `glass-light-multicolour`: the additive rim does not amplify the source's
-  dominant channel, so the `0.4` lift expectation was retired. The contract keeps
-  the live-backdrop change and bounds the theme cast (`hue ≤ 16°`, measured max
+- Backdrop gain: the light rim is a translucent theme highlight. Over black the
+  contract bounds the theme catch (`chroma ≤ 64`, measured ~50) instead of
+  forbidding it; near-white keeps a bounded edge (`Δ ≤ 20`, measured 15).
+  Hue/saturation retention against the backdrop was retired for light.
+- Light multicolor: the additive rim does not amplify the source's dominant
+  channel, so the `0.4` lift expectation was retired. The contract keeps the
+  live-backdrop change and bounds the theme cast (`hue ≤ 16°`, measured max
   14.03; `saturation ≥ 0.62`, measured min 0.66).
-- `glass-playground-visibility`: the hue-retention ratio compared the theme rim
-  with the frosted inner and was retired. The visible-edge brightness floor is
-  5 (measured min 6.11) with coverage `≥ 0.8`.
-- `glass-chroma-field` sharp source: the test now asserts the body-blur transfer
-  instead of raw sampling: the rim follows the muted blurred source, stays
+- Playground visibility: the hue-retention ratio compared the theme rim with the
+  frosted inner and was retired. The visible-edge brightness floor is 5 (measured
+  min 6.11) with coverage `≥ 0.8`.
+- Chroma field, sharp source: the check asserted the body-blur transfer instead
+  of raw sampling: the rim follows the muted blurred source, stays
   orange-dominant for the raw blue strip, the body carries the strip, and the raw
   pixel exists only outside the rim.
 
@@ -457,16 +460,16 @@ A CSS-only light rim (inset body plate + backdrop brightness) was prototyped and
 measured but rejected for the default: the 3px brightness ring reads as a white
 border on pale pages. The default keeps the WebGL theme edge.
 
-`choice-indicator-colour` is not part of this contract: its light field resolves
-from the azure accent, so the pale-floor check follows the current palette and
-the React selection steps over the fixture's disabled radio instead of clicking
+The choice indicator is not part of this contract: its light field resolves from
+the azure accent, so the pale-floor expectation follows the current palette. In
+the fixture, React selection steps over the disabled radio instead of clicking
 it.
 
 ## Remaining literals and ownership
 
 | Location | Remaining literals | Purpose / policy |
 | --- | --- | --- |
-| `tokens/src/material.css`, `effects.css`, `control-effects.css`, theme sources | Tier optics, semantic alpha scale, edge kernels, palette colours | Canonical shared standards; component tokens only alias these roles |
+| `tokens/src/material.css`, `effects.css`, `control-effects.css`, theme sources | Tier optics, semantic alpha scale, edge kernels, palette colors | Canonical shared standards; component tokens only alias these roles |
 | Component tokens | Sizes, radii, typography, durations, endpoint 0/1 and transparent/none | Existing geometry and visibility; not independently tuned optical intensity |
 | `tailwind/src/components/skeleton.css` | Shimmer angle and stop positions | Spatial distribution of a shared highlight, not alpha; pulse opacity is shared |
 | `motion/src/motion.css` | `opacity: 0/1`, `blur(0)` | Presence visibility/filter endpoints; veil blur is a shared motion role |
@@ -483,7 +486,7 @@ A caller can still explicitly request an independent nested Aurora Glass surface
 
 `check:materials` scans component token recipes, Tailwind component values and both
 adapter sources. It rejects literal blur/alpha/intensity and independent component
-colour recipes; themes cannot replace the tier filters/alpha. The matrix links this
+color recipes; themes cannot replace the tier filters/alpha. The matrix links this
 standard without changing component maturity or claiming consumer delivery.
 
 ## Local validation evidence (2026-10-11)

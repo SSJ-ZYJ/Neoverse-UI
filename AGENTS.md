@@ -15,9 +15,9 @@ For work originating in consumer projects (Neoverse, Neoverse-Docs, Neoverse-Sli
 ## Aurora Glass repairs
 
 - Follow the [Glass repair guardrails](docs/material-standards.md#glass-repair-guardrails). Do not switch the default renderer to full-surface SVG backdrop displacement, add backdrop capture/reconstruction layers, or replace the tier-owned body blur to repair edge appearance. These approaches have repeatedly caused severe stutter, lost blur, or missing edges.
-- Keep the entire edge visible and fine; emphasize the upper-left and lower-right without removing the other sides or corners. Verify backdrop-dependent colour, actual blur, edge continuity, and performance together. Do not describe a theme-coloured overlay as true spatial refraction.
+- Keep the entire edge visible and fine; emphasize the upper-left and lower-right without removing the other sides or corners. Verify backdrop-dependent color, actual blur, edge continuity, and performance together. Do not describe a theme-colored overlay as true spatial refraction.
 - Compare the relevant working implementation and subsequent diffs before changing Glass. Run browser and rendering checks remotely under the project safety constraint, and do not push successive diagnostic commits or update baselines before the change is ready to verify.
 
 ## Documentation
 
-Structure, status metadata and writing rules: [docs/AGENTS.md](docs/AGENTS.md). Current state lives in `docs/`; dated audits, acceptance runs and plans live in `.agents/notes/`. `bun run check:docs` enforces the layout and links.
+Structure, status metadata and writing rules: [docs/AGENTS.md](docs/AGENTS.md). Language, naming, abbreviation and terminology rules for source, tests and scripts: [docs/code-style.md](docs/code-style.md). Current state lives in `docs/`; dated audits, acceptance runs and plans live in `.agents/notes/`. `bun run check:docs` enforces the layout and links, and `bun run lint:language` enforces the source language rules.

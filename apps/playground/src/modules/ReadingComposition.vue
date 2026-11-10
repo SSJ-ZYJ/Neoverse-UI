@@ -146,7 +146,9 @@ function onTabKey(event: KeyboardEvent) {
           aria-controls="reading-panel"
           @click="selectTab(index)"
           @keydown="onTabKey"
-          >{{ language }}</UiButton
+          >{{
+            language
+          }}</UiButton
         >
       </div>
       <div

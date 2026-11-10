@@ -35,7 +35,9 @@ const props = defineProps<ColorSwatchCellProps>();
       <code
         data-color-swatch-variable
         class="whitespace-normal break-words font-mono text-2xs leading-normal text-secondary"
-        >{{ props.variable }}</code
+        >{{
+          props.variable
+        }}</code
       >
       <code
         v-if="props.className"

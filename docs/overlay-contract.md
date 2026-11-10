@@ -85,11 +85,9 @@ The contract is covered at three levels:
 
 Dedicated interaction tests also disable `HTMLElement.prototype.showPopover` / `hidePopover` before mounting the Vue/React fixtures, forcing the fixed-position fallback rather than relying on the browser's default support. Additional controlled/readonly/reset scenarios are opt-in through `contract-fixtures=1`; they do not alter the default Design Lab layout.
 
-`overlay-tracking.spec.ts` covers trigger translation, async content growth,
-zoom, ID associations, idle position writes and cancellation on disable/unmount.
-It retains normal Motion while forcing only the optional renderer to use its CSS
-fallback, keeping geometry/lifetime assertions independent from WebGL scheduling.
-The optional renderer's enhanced-mode browser acceptance remains a separate gate.
+`tests/e2e/overlays.spec.ts` covers trigger translation, async content growth,
+zoom, ID associations, dismissal, focus return, viewport containment and
+cancellation on disable/unmount.
 Both adapters additionally render server markup and hydrate it in their
 `overlay-hydration.test` suites; these are DOM hydration checks, not assistive
 technology acceptance. The cross-browser configuration also selects the tracking,

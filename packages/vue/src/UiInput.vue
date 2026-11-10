@@ -198,14 +198,26 @@ function onBlur(event: FocusEvent) {
       :readonly="props.readonly"
       :data-validation="props.validation"
       :aria-invalid="ariaInvalid"
-      @focus="focused = true; syncCaret()"
-      @input="syncCaret(); holdCaret()"
-      @select="syncCaret(); holdCaret()"
+      @focus="
+        focused = true;
+        syncCaret();
+      "
+      @input="
+        syncCaret();
+        holdCaret();
+      "
+      @select="
+        syncCaret();
+        holdCaret();
+      "
       @click="syncCaret()"
       @keyup="syncCaret()"
       @scroll="syncCaret()"
       @compositionstart="composing = true"
-      @compositionend="composing = false; syncCaret()"
+      @compositionend="
+        composing = false;
+        syncCaret();
+      "
       @pointerdown="onPointerDown"
       @blur="onBlur"
     >

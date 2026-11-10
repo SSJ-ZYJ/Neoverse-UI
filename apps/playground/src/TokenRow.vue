@@ -91,7 +91,9 @@ watch(resolvedTheme, () => {
   <div
     :data-token-preview="props.preview"
     class="min-w-0 gap-x-3 gap-y-1 border-b border-subtle px-1 py-2 last:border-b-0"
-    :class="props.preview === 'shadow' ? 'playground-shadow-token grid' : 'flex flex-wrap items-center'"
+    :class="
+      props.preview === 'shadow' ? 'playground-shadow-token grid' : 'flex flex-wrap items-center'
+    "
   >
     <span
       v-if="props.preview === 'color'"
@@ -183,7 +185,9 @@ watch(resolvedTheme, () => {
       <code
         class="block text-code text-secondary"
         :class="props.preview === 'shadow' ? 'break-all whitespace-normal' : 'truncate'"
-        >{{ props.variable }}</code
+        >{{
+          props.variable
+        }}</code
       >
       <code v-if="props.className" class="block truncate text-code text-muted">
         {{ props.className }}

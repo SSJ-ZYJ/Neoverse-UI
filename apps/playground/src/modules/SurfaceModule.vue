@@ -43,7 +43,11 @@ const copy = {
           :data-surface-preset="preset"
         >
           <h3 class="text-label font-label text-primary">
-            {{ preset in glassLabels ? localize(glassLabels[preset as keyof typeof glassLabels], props.locale) : preset }}
+            {{
+              preset in glassLabels
+                ? localize(glassLabels[preset as keyof typeof glassLabels], props.locale)
+                : preset
+            }}
           </h3>
           <code class="text-code text-secondary">
             {{ surfaceClasses[preset] || '(no material class)' }}

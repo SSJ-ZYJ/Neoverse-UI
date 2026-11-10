@@ -56,12 +56,9 @@ export interface AnchoredOverlayOptions {
    * The overlay is a manual popover, so the browser does not light-dismiss it and the
    * runtime owns outside dismissal instead. Needed when the overlay owns a nested popover
    * (a submenu) that must not count as an outside click.
-   * 浮层是 manual popover，浏览器不会轻触关闭它，改由运行时负责外部关闭。当浮层拥有一个
-   * 不应被算作外部点击的嵌套浮层（二级菜单）时需要。
    */
   manual?: boolean;
   /** Extra elements that count as inside the overlay for dismissal and focus guards. */
-  /** 关闭与焦点守卫中同样算作浮层内部的额外元素。 */
   containedElements?: () => Array<HTMLElement | null | undefined>;
   onDismiss?: (reason: OverlayDismissReason) => void;
 }
@@ -306,7 +303,6 @@ function installDismiss(options: AnchoredOverlayOptions): () => void {
   const onPointerDown = (event: PointerEvent) => {
     // A manual popover is never light-dismissed by the browser, so outside pointer input
     // has to be handled here; an auto popover already does it natively.
-    // manual popover 不会被浏览器轻触关闭，因此这里必须处理外部指针输入；auto popover 已原生处理。
     if (supportsPopover(options.overlay) && options.manual !== true) return;
     const target = event.target;
     if (!(target instanceof Node)) return;

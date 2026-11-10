@@ -25,16 +25,13 @@ let restoreTarget: HTMLElement | null = null;
 let ignoreNativeClose = false;
 
 const visibleEntries = computed(() => props.entries);
-// The submenu is a second column of the same glass panel: a second popover would
-// light-dismiss the parent, and a nested glass surface cannot sample the page behind it.
-// 二级菜单是同一玻璃面板的第二列：第二个浮层会轻触关闭父面板，嵌套的玻璃面又采样不到背后的页面。
+// The submenu opens as a second column beside the panel rather than replacing the
+// top-level rows, so the parent item stays visible while the column is open.
 const openSubmenu = ref<ContextMenuItem | null>(null);
-// The submenu column starts at the row that opened it, the way a native submenu aligns to
-// its parent item, so the offset is measured from the panel's content box.
-// 二级列从打开它的行开始，与原生二级菜单对齐父项的方式一致，因此偏移量相对面板内容盒测量。
+// The column starts at the row that opened it, the way a native submenu aligns to its
+// parent item, so the offset is measured from the panel's content box.
 const submenuRef = ref<HTMLElement | null>(null);
 // The row that opened the column, kept so the column can follow the panel while it moves.
-// 打开该列的行，保留它以便列在面板移动时跟随。
 let submenuOpener: HTMLButtonElement | null = null;
 let observer: ResizeObserver | null = null;
 const submenuEntries = computed(() => openSubmenu.value?.children ?? []);
@@ -70,7 +67,6 @@ function overlayOptions(): AnchoredOverlayOptions | undefined {
     placement: 'auto',
     fallbackOpenClass: 'ui-overlay-panel--fallback-open',
     // The panel owns a nested submenu popover, which must not count as an outside click.
-    // 面板拥有一个嵌套的二级浮层，它不能被算作外部点击。
     manual: true,
     containedElements: () => [submenuRef.value],
     onDismiss: () => requestDismiss(),
@@ -113,12 +109,10 @@ async function syncOverlay(value: boolean) {
     syncMotionOrigin();
     // A pointer open keeps the editor's focus and selection; a keyboard open must move
     // focus into the panel so the rows are reachable.
-    // 指针打开保留编辑器的焦点与选区；键盘打开必须把焦点移入面板，菜单行才可操作。
     if (props.autoFocus) focusFirstItem();
   } else {
     if (isOverlayOpen(options.overlay, options.fallbackOpenClass)) ignoreNativeClose = true;
     // The submenu is its own popover, so it must be dismissed with the panel.
-    // 二级菜单是独立浮层，必须随面板一起关闭。
     closeSubmenuPopover();
     openSubmenu.value = null;
     hideAnchoredOverlay(options);
@@ -167,8 +161,6 @@ function selectItem(item: ContextMenuItem) {
  * Opens the submenu beside its opener row. The column is its own manual popover in the top
  * layer: it touches the panel edge, aligns to the row that opened it, and flips to the
  * inline start when it does not fit.
- * 在打开它的行旁展开二级列。该列是顶层里独立的 manual 浮层：它贴着面板边缘，与打开它的行对齐，
- * 放不下时翻到起始侧。
  */
 async function enterSubmenu(item: ContextMenuItem, opener: HTMLButtonElement, moveFocus = true) {
   if (item.disabled || !item.children?.length) return;
@@ -185,7 +177,6 @@ async function enterSubmenu(item: ContextMenuItem, opener: HTMLButtonElement, mo
   }
   // The column is placed after it is shown so its measured size is real, and re-placed
   // whenever the panel or the page moves: a fixed column must not drift from its panel.
-  // 该列在显示后定位，尺寸测量才真实；面板或页面移动时重新定位，固定定位的列不能偏离面板。
   placeSubmenu(opener);
   observer?.disconnect();
   observer = new ResizeObserver(() => placeSubmenu(opener));
@@ -206,12 +197,10 @@ function placeSubmenu(opener: HTMLButtonElement) {
   const width = submenu.offsetWidth;
   const height = submenu.offsetHeight;
   // Flush with the panel edge, flipping to the inline start when the viewport has no room.
-  // 贴着面板边缘，视口放不下时翻到起始侧。
   const toStart = panelRect.right + width > window.innerWidth - margin;
   const left = toStart ? panelRect.left - width : panelRect.right;
   // The column's own padding sits above its first row, so it is lifted by that amount to put
   // the first row on the parent item, the way a native submenu lines up.
-  // 该列自身的内边距位于首行之上，因此上移同样的距离，使首行与父项对齐，与原生二级菜单一致。
   const paddingTop = Number.parseFloat(getComputedStyle(submenu).paddingTop) || 0;
   const top = Math.min(
     Math.max(margin, openerRect.top - paddingTop),
@@ -236,7 +225,6 @@ function stopTrackingSubmenu() {
 /**
  * Pointer hover opens a submenu row and closes the open column when another row is entered,
  * the way a native menu tracks the pointer. Hover never moves focus.
- * 指针悬停展开二级菜单行，进入其他行时关闭已展开的列，与原生菜单跟随指针的方式一致。悬停不移动焦点。
  */
 function onItemPointerEnter(entry: ContextMenuItem, event: PointerEvent) {
   if (entry.disabled) return;
@@ -282,7 +270,6 @@ function focusRelative(current: HTMLButtonElement, direction: 1 | -1) {
 
 // With focus left in the region (a pointer open), panel-scoped keydown never fires. The
 // document listener lets an arrow key enter the panel from wherever focus currently sits.
-// 指针打开时焦点留在区域，面板内的 keydown 不会触发。文档级监听使方向键能从当前焦点进入面板。
 function onDocumentKeydown(event: KeyboardEvent) {
   if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
   if (!props.open) return;
@@ -413,7 +400,9 @@ onBeforeUnmount(() => {
             v-if="entry.selection !== undefined"
             class="ui-context-menu__check"
             aria-hidden="true"
-            >{{ entry.checked ? '✓' : '' }}</span
+            >{{
+              entry.checked ? '✓' : ''
+            }}</span
           >
           <span class="ui-context-menu__label">{{ entry.label }}</span>
           <span v-if="entry.shortcut" class="ui-context-menu__shortcut">{{ entry.shortcut }}</span>
@@ -453,7 +442,9 @@ onBeforeUnmount(() => {
             v-if="child.selection !== undefined"
             class="ui-context-menu__check"
             aria-hidden="true"
-            >{{ child.checked ? '✓' : '' }}</span
+            >{{
+              child.checked ? '✓' : ''
+            }}</span
           >
           <span class="ui-context-menu__label">{{ child.label }}</span>
         </button>

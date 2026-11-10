@@ -44,7 +44,9 @@
   --neoverse-color-surface-overlay: rgb(255 255 255 / 92%);
   --neoverse-color-text-primary: var(--neoverse-color-neutral-900);
   --neoverse-color-text-secondary: var(--neoverse-color-neutral-700);
-  --neoverse-color-text-muted: var(--neoverse-color-neutral-500);
+  /* 4.89:1 on the canvas. neutral-500 measured 3.90:1, which is only AA for
+     large text; placeholders and field descriptions need body-text contrast. */
+  --neoverse-color-text-muted: #5d6f80;
   --neoverse-color-text-disabled: var(--neoverse-color-neutral-400);
   --neoverse-color-text-inverse: var(--neoverse-color-neutral-100);
   --neoverse-color-text-on-accent: var(--neoverse-color-white);

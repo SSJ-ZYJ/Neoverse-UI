@@ -11,7 +11,7 @@ on:
         description: Validate source, contracts, tests and published-package builds.
         type: boolean
         default: true
-      visual-checks:
+      browser-checks:
         description: Run the browser matrix for changes affecting rendered UI.
         type: boolean
         default: true
@@ -104,12 +104,12 @@ jobs:
           node --test .github/scripts/ci-classify.test.mjs .github/scripts/ci-evidence.test.mjs
           bash -n .github/scripts/ci-scope.sh
 
-      # The Bun playground server serves these built files directly; visual
+      # The Bun playground server serves these built files directly; browser
       # shards reuse this validated build rather than repeat release:check.
       # Release packing consumes the same assets, so upload for that gate too
       # instead of forcing a browser matrix just to obtain them.
-      - name: Upload playground assets for visual shards and release packing
-        if: inputs.quality-checks && (inputs.visual-checks || inputs.release-assets)
+      - name: Upload playground assets for browser shards and release packing
+        if: inputs.quality-checks && (inputs.browser-checks || inputs.release-assets)
         uses: actions/upload-artifact@v4
         with:
           name: verified-workspace-assets
@@ -120,10 +120,10 @@ jobs:
           retention-days: 7
           overwrite: true
 
-  visual-linux:
-    name: Visual checks (Linux, shard ${{ matrix.shard }}/3)
+  browser-linux:
+    name: Browser checks (Linux, shard ${{ matrix.shard }}/3)
     needs: quality-linux
-    if: inputs.visual-checks
+    if: inputs.browser-checks
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
@@ -169,13 +169,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-playwright-
 
-      - name: Install Chromium for visual checks
+      - name: Install Chromium for browser checks
         run: bunx playwright install --with-deps chromium
 
-      - name: Run visual checks
+      - name: Run browser checks
         run: bunx playwright test --shard=${{ matrix.shard }}/3 --workers=2 --reporter=list,html
 
-      - name: Upload failed visual check evidence
+      - name: Upload failed browser check evidence
         if: ${{ failure() }}
         uses: actions/upload-artifact@v4
         with:
@@ -189,7 +189,7 @@ jobs:
   # Preserve the required Linux aggregate check on all change scopes.
   verify-linux:
     name: Verify workspace (Linux)
-    needs: [metadata-linux, quality-linux, visual-linux]
+    needs: [metadata-linux, quality-linux, browser-linux]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -200,17 +200,17 @@ jobs:
       - name: Require source quality
         if: inputs.quality-checks
         run: test "${{ needs.quality-linux.result }}" = "success"
-      - name: Require all visual shards
-        if: inputs.visual-checks
-        run: test "${{ needs.visual-linux.result }}" = "success"
+      - name: Require all browser shards
+        if: inputs.browser-checks
+        run: test "${{ needs.browser-linux.result }}" = "success"
       - name: Complete documentation-only check
-        if: ${{ !inputs.metadata-checks && !inputs.quality-checks && !inputs.visual-checks }}
+        if: ${{ !inputs.metadata-checks && !inputs.quality-checks && !inputs.browser-checks }}
         run: echo 'Documentation-only change; no package or browser checks required.'
 
   verify-windows:
     name: Verify workspace (Windows)
     needs: quality-linux
-    if: inputs.visual-checks
+    if: inputs.browser-checks
     runs-on: windows-latest
     timeout-minutes: 30
 
@@ -255,7 +255,7 @@ jobs:
         run: bunx playwright install chromium
 
       - name: Verify browser keyboard, overlay and theme behavior
-        run: bunx playwright test tests/visual/component-interactions.spec.ts tests/visual/control-identity.spec.ts tests/visual/dock-language-proportions.spec.ts tests/visual/react-theme.spec.ts --workers=2 --reporter=list,html
+        run: bunx playwright test tests/e2e/forms.spec.ts tests/e2e/overlays.spec.ts tests/e2e/navigation.spec.ts tests/e2e/parity.spec.ts --workers=2 --reporter=list,html
 
       - name: Upload failed browser check evidence
         if: ${{ failure() }}

@@ -72,11 +72,12 @@ Doc 的官方 `react@0.1.0`、`giscus-theme@0.1.0` 返回 404；官方 `tailwind
 
 ## 验证
 
-- `tests/visual/component-size.spec.ts` 测量真实 Vue 控件的宽高、字号。
-- `tests/visual/dock-consumer-size.spec.ts` 比较 Playground shell/frame 和预编译消费 CSS 的 Dock 几何，覆盖深浅主题、中英文及桌面/手机。
-- `tests/visual/playground-shell.spec.ts` 检查桌面各宽度的根字号一致。
+- `packages/tokens/src/index.test.ts` 断言尺寸基线 Token 的取值。
+- `scripts/tailwind-cli.test.ts` 验证预编译消费 CSS 使用同一组尺寸。
 - `scripts/sync-consumer.test.ts` 覆盖旧 CSS、嵌套副本、硬链接和根 overrides。
 - Neoverse-Slides 的 `bun run test:ui-size` 检查真实 `/slides` 页面在桌面/手机、深浅主题下的导航、按钮、输入框、选择框尺寸和横向溢出。
+
+尺寸几何由 `tests/e2e/layout.spec.ts` 在真实浏览器中断言：32 / 40 / 48px 按钮与圆形控件、40px 输入框、13 / 14 / 16px 徽标字号、24px 最小点击区，以及各模块不被隐式放大。几何契约同时由 Token 单测、消费 CSS 测试和真实消费项目检查承担；`tests/e2e/playground.spec.ts` 覆盖响应式横向溢出。
 
 ### 2026-10-16 Dock 尺寸验证
 
@@ -90,4 +91,4 @@ Doc 的官方 `react@0.1.0`、`giscus-theme@0.1.0` 返回 404；官方 `tailwind
 - Vue/React 默认尺寸、所有模块在深浅主题/中英文/shell/frame 的比例、桌面与手机根字号和 Dock 缩放检查共 34 项通过。
 - Neoverse-Slides `bun run check`、`bun run test:ui-size`、`bun run build:portal` 通过。真实页面的导航与小按钮为 32px / 14px，输入与选择控件为 40px / 14px，1440px 和 390px 视口均无横向溢出。
 - UI 构建 CSS、Slides 已安装 CSS、开发 vendor CSS 和静态输出 vendor CSS 的 SHA-256 一致。没有提交代码或发布包。
-- 扩展运行 `control-identity.spec.ts` 时发现 8 项深色材质颜色/阴影断言失败；这些不属于尺寸断言，本次未修改材质规则，也不声称完整视觉门禁已通过。
+- 扩展运行当时已有的 `control-identity.spec.ts` 时发现 8 项深色材质颜色/阴影断言失败；这些不属于尺寸断言，本次未修改材质规则，也不声称完整视觉门禁已通过。该 spec 已随 `tests/visual` 移除。

@@ -5,7 +5,7 @@ export type TailwindCliLookupOptions = {
   platform?: NodeJS.Platform;
   exists?: (path: string) => boolean;
   readFile?: (path: string) => string;
-  /** Normalises the start path; tests inject a platform-specific variant. */
+  /** Normalizes the start path; tests inject a platform-specific variant. */
   normalize?: (path: string) => string;
 };
 

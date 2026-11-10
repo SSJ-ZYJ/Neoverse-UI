@@ -129,7 +129,11 @@ const forwardedAttrs = computed(() => {
   <component
     :is="props.as"
     v-bind="forwardedAttrs"
-    :class="[classes, { 'ui-control-surface--shared-indicator': props.navigationIndicator }, attrs.class]"
+    :class="[
+      classes,
+      { 'ui-control-surface--shared-indicator': props.navigationIndicator },
+      attrs.class,
+    ]"
     :style="attrs.style"
     :data-surface="surface"
     :data-neoverse-navigation-indicator-ready="

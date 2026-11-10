@@ -1,9 +1,9 @@
 import { execFileSync } from 'node:child_process';
 import { pathToFileURL } from 'node:url';
 
-// A visual change also needs source quality checks. Unknown paths fail closed.
+// A rendered UI change also needs source quality checks. Unknown paths fail closed.
 export function classifyPaths(paths) {
-  const checks = { metadataChecks: false, qualityChecks: false, visualChecks: false };
+  const checks = { metadataChecks: false, qualityChecks: false, browserChecks: false };
 
   for (const path of paths) {
     if (!path) continue;
@@ -29,7 +29,8 @@ export function classifyPaths(paths) {
       // metadata gate instead of skipping validation entirely.
       checks.metadataChecks = true;
     } else if (
-      path.startsWith('tests/visual/') ||
+      path.startsWith('tests/e2e/') ||
+      path.startsWith('tests/support/') ||
       path.startsWith('packages/') ||
       path.startsWith('apps/') ||
       path.startsWith('contracts/') ||
@@ -37,7 +38,7 @@ export function classifyPaths(paths) {
       path === 'bun.lock' ||
       /^playwright(?:\.[\w-]+)?\.config\.ts$/.test(path)
     ) {
-      checks.visualChecks = true;
+      checks.browserChecks = true;
       checks.qualityChecks = true;
     } else if (
       path.startsWith('scripts/check-') ||
@@ -48,7 +49,7 @@ export function classifyPaths(paths) {
       checks.qualityChecks = true;
     } else {
       checks.qualityChecks = true;
-      checks.visualChecks = true;
+      checks.browserChecks = true;
     }
   }
 
@@ -59,7 +60,7 @@ export function outputs(checks) {
   return [
     `metadata-checks=${checks.metadataChecks}`,
     `quality-checks=${checks.qualityChecks}`,
-    `visual-checks=${checks.visualChecks}`,
+    `browser-checks=${checks.browserChecks}`,
   ].join('\n');
 }
 

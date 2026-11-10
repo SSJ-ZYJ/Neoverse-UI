@@ -6,24 +6,17 @@ const playgroundBaseUrl = `http://127.0.0.1:${playgroundPort}`;
 
 export default defineConfig({
   ...baseConfig,
-  // The Playground catalogue runs infinite shimmer/pulse/spinner animations.
-  // WebKit's software compositor spends whole seconds per protocol round trip
-  // while they run, so interaction checks never reach a stable frame. The
-  // component stylesheets already disable them for this media preference.
+  // The component stylesheets already disable the Playground's infinite
+  // shimmer/pulse/spinner animations for this media preference, which keeps the
+  // software compositor responsive enough for interaction checks.
   use: { reducedMotion: 'reduce' },
-  // Chromium owns the platform release snapshots; this suite validates behavior.
-  ignoreSnapshots: true,
   testMatch: [
-    '**/component-interactions.spec.ts',
-    '**/react-parity.spec.ts',
-    '**/audit-regressions.spec.ts',
-    '**/form-control-ax.spec.ts',
-    '**/form-control-behavior.spec.ts',
-    '**/choice-control-behavior.spec.ts',
-    '**/overlay-review-regressions.spec.ts',
-    '**/overlay-tracking.spec.ts',
-    '**/glass-scheduling.spec.ts',
-    '**/scrollbar-states.spec.ts',
+    '**/forms.spec.ts',
+    '**/overlays.spec.ts',
+    '**/navigation.spec.ts',
+    '**/surfaces.spec.ts',
+    '**/motion.spec.ts',
+    '**/parity.spec.ts',
   ],
   projects: [
     {

@@ -79,7 +79,6 @@ const rootPackage = JSON.parse(
 ) as PackageJson;
 assert(rootPackage.license, 'The root package.json must declare the chosen SPDX license.');
 // Git can check out identical license text with different platform line endings.
-// Git 可将同一许可证文本以不同平台换行符检出。
 const rootLicenseText = (await readFile(join(repositoryRoot, rootLicense), 'utf8')).replace(
   /\r\n/g,
   '\n',

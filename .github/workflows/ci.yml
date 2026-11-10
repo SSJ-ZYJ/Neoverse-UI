@@ -25,26 +25,9 @@ on:
         type: choice
         options: ['1', '3', '6']
         default: '1'
-      visual_only:
-        description: Run a focused Chromium visual check or baseline update
-        type: boolean
-        default: false
-      visual_suite:
-        description: Select the focused visual suite
-        type: choice
-        options: [optics, baselines]
-        default: optics
-      visual_grep:
-        description: Optional test-title regex for the selected visual suite
-        type: string
-        default: ''
-      visual_update:
-        description: Update the selected screenshot baselines
-        type: boolean
-        default: false
 
 concurrency:
-  group: ci-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}-${{ inputs.visual_only && 'visual' || inputs.cross_browser_only && 'cross-browser' || 'verify' }}-${{ inputs.visual_suite || inputs.cross_browser_project || 'all' }}-${{ inputs.cross_browser_shards || '1' }}-${{ inputs.visual_grep || inputs.cross_browser_grep || 'full' }}
+  group: ci-${{ github.event.pull_request.head.repo.full_name || github.repository }}-${{ github.event_name }}-${{ github.head_ref || github.ref_name }}-${{ inputs.cross_browser_only && 'cross-browser' || 'verify' }}-${{ inputs.cross_browser_project || 'all' }}-${{ inputs.cross_browser_shards || '1' }}-${{ inputs.cross_browser_grep || 'full' }}
   cancel-in-progress: true
 
 permissions:
@@ -54,14 +37,14 @@ permissions:
 jobs:
   scope:
     name: Select CI scope
-    if: github.event_name != 'workflow_dispatch' || (!inputs.cross_browser_only && !inputs.visual_only)
+    if: github.event_name != 'workflow_dispatch' || !inputs.cross_browser_only
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
       verify: ${{ steps.scope.outputs.verify }}
       metadata-checks: ${{ steps.scope.outputs.metadata-checks }}
       quality-checks: ${{ steps.scope.outputs.quality-checks }}
-      visual-checks: ${{ steps.scope.outputs.visual-checks }}
+      browser-checks: ${{ steps.scope.outputs.browser-checks }}
     steps:
       - uses: actions/checkout@v6
         with:
@@ -87,22 +70,13 @@ jobs:
     with:
       metadata-checks: ${{ needs.scope.outputs.metadata-checks == 'true' }}
       quality-checks: ${{ needs.scope.outputs.quality-checks == 'true' }}
-      visual-checks: ${{ needs.scope.outputs.visual-checks == 'true' }}
+      browser-checks: ${{ needs.scope.outputs.browser-checks == 'true' }}
 
   cross-browser:
     name: Cross-browser risk checks
-    if: github.event_name == 'workflow_dispatch' && inputs.cross_browser_only && !inputs.visual_only
+    if: github.event_name == 'workflow_dispatch' && inputs.cross_browser_only
     uses: ./.github/workflows/cross-browser-smoke.yml
     with:
       browser: ${{ inputs.cross_browser_project || 'all' }}
       grep: ${{ inputs.cross_browser_grep || '' }}
       shards: ${{ inputs.cross_browser_shards || '1' }}
-
-  focused-visual:
-    name: Focused visual checks
-    if: github.event_name == 'workflow_dispatch' && inputs.visual_only
-    uses: ./.github/workflows/visual-focused.yml
-    with:
-      suite: ${{ inputs.visual_suite || 'optics' }}
-      grep: ${{ inputs.visual_grep || '' }}
-      update: ${{ inputs.visual_update || false }}

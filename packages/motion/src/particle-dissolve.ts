@@ -57,7 +57,7 @@ export interface ParticleDissolveOptions {
   /**
    * Texture source. `auto` (default) captures the element when the browser
    * implements HTML-in-Canvas and falls back to synthetic dust otherwise;
-   * `capture` and `synthetic` force one pipeline (preview/校准用).
+   * `capture` and `synthetic` force one pipeline (preview and calibration only).
    */
   mode?: ParticleDissolveMode;
 }

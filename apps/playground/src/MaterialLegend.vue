@@ -182,7 +182,11 @@ onBeforeUnmount(() => {
 <template>
   <aside ref="host" data-material-legend class="grid gap-1 text-caption text-muted">
     <p v-if="!samples.length">
-      {{ props.locale === 'zh' ? '无独立材质表面；使用共享语义效果。' : 'No independent material plate; shared semantic effects.' }}
+      {{
+        props.locale === 'zh'
+          ? '无独立材质表面；使用共享语义效果。'
+          : 'No independent material plate; shared semantic effects.'
+      }}
     </p>
     <p v-for="sample in samples" :key="sample.id">{{ sample.text }}</p>
   </aside>

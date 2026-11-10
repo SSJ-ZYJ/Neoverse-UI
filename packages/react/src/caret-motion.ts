@@ -1,6 +1,6 @@
 /**
- * Stretch a mirrored caret across the travelled span, then contract it back.
- * 让镜像光标横跨位移全程再收缩回细条，形成弹性拖尾。
+ * Stretch a mirrored caret across the travelled span, then contract it back
+ * into a thin bar to leave an elastic trail.
  */
 const holdTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>();
 const lastText = new WeakMap<HTMLElement, string>();

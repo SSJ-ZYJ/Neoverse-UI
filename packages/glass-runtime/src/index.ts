@@ -137,8 +137,8 @@ const motionEvents = [
   'animationcancel',
 ] as const;
 
-/** Colour-only transitions cannot move a surface, change its clip, or alter
- *  occlusion. A theme switch starts one such transition per colour property on
+/** Color-only transitions cannot move a surface, change its clip, or alter
+ *  occlusion. A theme switch starts one such transition per color property on
  *  every glass surface; handling each of those events would schedule hundreds
  *  of edge repaints whose geometry is identical. Events without a property name
  *  (animations and synthetic realms) stay on the conservative path. */
@@ -1403,7 +1403,7 @@ class GlassRendererImpl implements GlassRenderer {
       !view?.CSS?.supports('mix-blend-mode', 'saturation')
     ) {
       // The geometry signal is only safe to paint when the compositor can
-      // interpret it as saturation rather than displaying its source colour.
+      // interpret it as saturation rather than displaying its source color.
       this.chromaUnavailable = true;
       return;
     }
@@ -1422,7 +1422,7 @@ class GlassRendererImpl implements GlassRenderer {
     try {
       context = canvas.getContext('2d');
     } catch {
-      // Keep the established edge if the optional colour field is unavailable.
+      // Keep the established edge if the optional color field is unavailable.
     }
     if (!context || typeof context.roundRect !== 'function') {
       this.chromaUnavailable = true;
@@ -1649,7 +1649,7 @@ class GlassRendererImpl implements GlassRenderer {
     }
   }
 
-  /** Theme colours change with the root token signature, not on every frame.
+  /** Theme colors change with the root token signature, not on every frame.
    * Caching avoids roughly forty probe style writes and computed-style reads
    * per repaint, and keeps the probe out of the mutation stream. */
   private resolveSceneColors(
@@ -1684,7 +1684,7 @@ class GlassRendererImpl implements GlassRenderer {
     const lightSurface =
       rootStyle.colorScheme === 'light' ? 1 : rootStyle.colorScheme === 'dark' ? 0 : -1;
     // Match the shader's smoothstep(0.55, 0.88, luminance) > 0.5 fallback
-    // when a consumer has not declared a colour scheme.
+    // when a consumer has not declared a color scheme.
     const lightLuminance = edgeLight[0] * 0.2126 + edgeLight[1] * 0.7152 + edgeLight[2] * 0.0722;
     const isLight = lightSurface === 1 || (lightSurface === -1 && lightLuminance > 0.715);
     const primary = resolveColor(

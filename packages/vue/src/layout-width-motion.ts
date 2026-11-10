@@ -44,7 +44,7 @@ export interface LayoutWidthMotion {
  * Interaction guarantees:
  * - An interrupted change continues from the frame it reached, because the
  *   running width is sampled from the animated style before the old run stops.
- * - The previous run is cancelled before the DOM update, so the update measures
+ * - The previous run is canceled before the DOM update, so the update measures
  *   natural widths rather than the values its fill still pins.
  * - A viewport resize, a reduced-motion change, or unmount ends the motion
  *   instead of leaving a stale endpoint behind.

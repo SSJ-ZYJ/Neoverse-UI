@@ -20,7 +20,6 @@ function openContextMenu(event: MouseEvent) {
   contextMenuPoint.value = { x: event.clientX, y: event.clientY };
   // A pointer open keeps the region's focus so an editor keeps its selection; the
   // keyboard button below opens with focus in the panel.
-  // 指针打开保留区域焦点，编辑器因此保留选区；下方按钮模拟键盘打开，焦点落在面板内。
   contextMenuAutoFocus.value = false;
   contextMenuOpen.value = true;
 }

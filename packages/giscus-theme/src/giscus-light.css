@@ -4,7 +4,7 @@
 
 main {
   color-scheme: light;
-  --color-prettylights-syntax-comment: #6c7f90;
+  --color-prettylights-syntax-comment: #5d6f80;
   --color-prettylights-syntax-constant: #7c6ee6;
   --color-prettylights-syntax-entity: #0e7490;
   --color-prettylights-syntax-storage-modifier-import: #405467;
@@ -31,7 +31,7 @@ main {
   --color-prettylights-syntax-markup-ignored-text: #405467;
   --color-prettylights-syntax-markup-ignored-bg: rgb(14 165 233 / 14%);
   --color-prettylights-syntax-meta-diff-range: #7c3aed;
-  --color-prettylights-syntax-brackethighlighter-angle: #6c7f90;
+  --color-prettylights-syntax-brackethighlighter-angle: #5d6f80;
   --color-prettylights-syntax-sublimelinter-gutter-mark: #8294a6;
   --color-prettylights-syntax-constant-other-reference-link: #087ea4;
   --color-btn-text: #405467;
@@ -62,7 +62,7 @@ main {
   --color-segmented-control-button-selected-border: rgb(14 165 233 / 42%);
   --color-fg-default: #0f172a;
   --color-fg-muted: #405467;
-  --color-fg-subtle: #6c7f90;
+  --color-fg-subtle: #5d6f80;
   --color-canvas-default: transparent;
   --color-canvas-overlay: #f4f9fc;
   --color-canvas-inset: rgb(234 243 248 / 64%);

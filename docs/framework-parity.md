@@ -37,7 +37,7 @@ TerminalPrompt 的 `suggestion` 在两端都只显示匹配的候选后缀；接
 - `contracts/framework-parity.json`：36 个组件、9 个数据结构与 21 组字面量类型；已覆盖 consumer-driven 组件，不仅检查 Canonical Shared。
 - `packages/react/src/parity.test.tsx`：SSR、原生语义、可访问标签、默认状态与定制内容。
 - `/react-fixture?contract-fixtures`：Design Lab 中的实际 React DOM 与状态示例。
-- `tests/visual/react-parity.spec.ts`：桌面和移动端、深浅主题下的键盘选择、受控拒绝、指示器位置及 CSS zoom、终端补全与 IME、回显上下文/选字/截图、输出跟随及历史位置、滚动条拖拽与卸载清理。Echo 有 480/1440 宽度深浅主题截图，其余新增适配仍以功能检查为主。
+- `tests/e2e/parity.spec.ts`：桌面和移动端、深浅主题下每个 React 适配器的语义 DOM、主题解析与共享控件名称；键盘选择、受控拒绝、终端补全、输出跟随、滚动条拖拽等交互分别由 `navigation`、`terminal`、`surfaces` 模块覆盖。
 - `scripts/verify-packages.ts`：在临时消费项目安装本地打包产物，检查公开导出和类型。
 
 新 React 适配的真实产品使用验证和发布级截图仍待补充。已有矩阵中的 Vue / 共享组件验收记录保留，新增 `reactValidation` 单独记录 React 的验证范围。新增运行态示例不作为真实产品验收或成熟度提升依据。

@@ -87,12 +87,12 @@ Before any npm publication, the repository must pass:
 ```sh
 bun install --frozen-lockfile
 bun run release:check
-bun run test:visual
+bun run test:e2e
 git diff --check
 bun changeset status
 ```
 
-`release:check` runs non-mutating Biome checks, text/style/Tailwind checks, typechecks, tests, and build. It verifies every public package, rejects leaked `workspace:` protocols and source/test/playground artifacts, and checks that packed internal runtime dependency ranges include the corresponding workspace release versions before installing local overrides. It then installs the generated package contents into a temporary clean consumer for JS, CSS, and TypeScript smoke tests. Local overrides prove package usability, not npm availability. The full Playwright gate must also finish with zero failures; conditional skips must have a documented design reason. Review expected/actual/diff images before accepting intentional snapshot changes, then rerun without snapshot updates. The release workflow runs these visual gates before packing.
+`release:check` runs non-mutating Biome checks, text/style/Tailwind checks, typechecks, tests, and build. It verifies every public package, rejects leaked `workspace:` protocols and source/test/playground artifacts, and checks that packed internal runtime dependency ranges include the corresponding workspace release versions before installing local overrides. It then installs the generated package contents into a temporary clean consumer for JS, CSS, and TypeScript smoke tests. Local overrides prove package usability, not npm availability. The full Playwright gate must also finish with zero failures; conditional skips must have a documented design reason. The release workflow runs these browser gates before packing.
 
 `verify:published` selects API checks from each package's exact manifest version.
 Registry packages at 0.3.1 or later must expose React parity, Vue `UiTerminalEcho`,
@@ -139,7 +139,7 @@ The repository and all public packages use the MIT license. `scripts/verify-pack
   source CSS was restored after the build. Remaining historical artifacts still
   block standalone clean-checkout installation; see [consumer audit](consumer-sizing.md#2026-10-25-consumer-dependency-audit).
 
-### CI and visual baselines
+### CI and browser checks
 
 CI and Release call `.github/workflows/verify.yml` on their exact checked-out commit.
 CI handles PRs and `dev` pushes without an open PR. Both workflows classify changed
@@ -148,9 +148,9 @@ Ordinary documentation and the dated process material under `.agents/notes/` run
 metadata checks without build or browser work, so `check:docs` validates their
 status lines and links; the Linux aggregate check still runs. Changesets,
 archived component requests, and CI config changes take the same metadata gate.
-Contract-matrix documentation and non-visual quality scripts run source
+Contract-matrix documentation and non-browser quality scripts run source
 verification, but not Playwright. Unknown file types conservatively select both
-source and visual gates.
+source and browser gates.
 
 Release also scopes ordinary `main` pushes, but does not repeat a browser matrix
 that already ran: CI gated the pull request that produced the commit, and Release
@@ -162,7 +162,7 @@ this commit is the one GitHub recorded as landing a pull request on `main`
 `CI` pull-request run. That skip assumes the protected `main` branch stays strictly
 up to date, so the merged tree is the tree CI tested; the lookup fails closed, and
 a direct push, a bypassed or failing CI run, or an API error all keep the
-verification. Without that evidence, Release runs the visual checks its own change
+verification. Without that evidence, Release runs the browser checks its own change
 scope selects, because the browser matrix is then the only proof of the rendered
 UI. When its Changesets mode is `publish`, it always runs source quality before
 packing even if the triggering commit changed only documentation, because that job
@@ -172,13 +172,13 @@ A `version` run continues through the Changesets version workflow without forcin
 checks for unrelated changes. Publication automation remains opt-in.
 
 Linux runs `release:check` once for source changes. It uploads the built package
-and Playground assets when visual shards run or a release needs to pack them.
-Three Ubuntu 24.04 visual jobs then download that same build and run the complete
+and Playground assets when browser shards run or a release needs to pack them.
+Three Ubuntu 24.04 browser jobs then download that same build and run the complete
 Playwright suite with `--shard=1/3`, `2/3`, or `3/3`, two workers each.
 `Verify workspace (Linux)` remains the required aggregate gate, checking only
 the jobs selected by change scope and rejecting any selected failed job.
 Windows reuses the validated playground assets Linux already built, then runs its
-own four-file keyboard/overlay/theme browser gate only for visual-impacting
+own four-file keyboard/overlay/theme browser gate only for UI-impacting
 changes; it does not duplicate Linux's `release:check` static analysis or unit
 test matrix.
 
@@ -190,41 +190,34 @@ browser step, including two retries of deterministic screenshot mismatches. The
 current CI retry budget is one attempt: a second retry only tripled the cost of
 failures that reproduce identically.
 
-Playwright stores native baselines in
-`tests/visual/snapshots/{platform}/{projectName}/`. Preserve `win32` images when
-updating `linux` images, and vice versa. Both desktop/mobile and light/dark remain
-covered, without relaxing pixel-difference thresholds.
+The browser suite keeps no screenshot baselines. `tests/e2e/` asserts observable
+behaviour plus the deterministic rendering contracts (control sizes, target size,
+text contrast, material-tier wiring), while the optical look of Aurora Glass is
+verified by manual acceptance against [Material standards](material-standards.md)
+before release.
 
-The 2026-10-20 repair also corrects Maple Mono's invalid double `format()`
-descriptor: browsers previously discarded its source, so Linux machines without
-Maple Mono NF CN rendered terminal text in the Chinese sans fallback. Native font
-loading and equal narrow/wide glyph advances must pass before accepting terminal
-baselines. Controls screenshots cover the module header, navigation and every
-component specimen separately: the old mobile image exceeded 21,000 pixels in
-height, producing a blank tail beyond Chromium's compositor limit as well as
-slow captures. Bounded images retain complete specimen coverage with the default
-5-second screenshot assertion and 30-second test timeouts. Motion checks await
-real transitions; geometry checks wait for loaded fonts; responsive overflow
-permutations run as separate bounded cases.
+Historical record: the 2026-10-20 repair corrected Maple Mono's invalid double
+`format()` descriptor. Browsers previously discarded its source, so Linux
+machines without Maple Mono NF CN rendered terminal text in the Chinese sans
+fallback. Font loading and equal narrow/wide glyph advances remain part of manual
+terminal acceptance. The screenshot baseline workflow from that period has been
+retired with the rest of the pixel suite.
 
-For a baseline update, use the pinned Playwright dependency and Chromium build in
-the target OS, build once, then select only the intentionally changed specs:
+Run the browser suite the same way CI does:
 
 ```sh
 bun install --frozen-lockfile
 bun run build
-bunx playwright install chromium
-bunx playwright test <affected-specs> --update-snapshots
-bunx playwright test <affected-specs>
+bunx playwright install --with-deps chromium
+bunx playwright test
 ```
 
-On Ubuntu, use `playwright install --with-deps chromium` to include native browser
-libraries and fonts. Review the old/new/diff images before accepting a changed
-baseline. Never use snapshot updates as the CI test command. Failed Linux shards
-and Windows browser checks upload `test-results/` and the HTML report with
-shard/attempt-specific artifact names.
+Failed Linux shards and Windows browser checks upload `test-results/` and the
+HTML report with shard/attempt-specific artifact names. There are no screenshot
+baselines to update: a rendering change is accepted manually against
+[Material standards](material-standards.md).
 
-Local CI repair verification on 2026-10-20:
+Historical local CI verification on 2026-10-20 (screenshot suite, now retired):
 
 - `bun run release:check` passed, including all eight clean-consumer package smokes.
 - Native Ubuntu 24.04.5 / Playwright 1.60.0 Chromium ran all three non-update
@@ -252,7 +245,7 @@ These are local CLI/browser results, not a successful remote GitHub Actions run.
 - Root `tsc --noEmit`, Biome checks of changed tooling, text integrity and shared
   contract/request checks passed. The release YAML parsed with the registry gate
   preceding packing. This is local CLI evidence, not a remote workflow execution,
-  visual regression, authenticated publisher audit, or publication.
+  manual material acceptance, authenticated publisher audit, or publication.
 
 ## Changesets
 
@@ -305,7 +298,7 @@ During an explicitly approved release:
 
 1. Run `bun changeset status`, obtain approval for versioning, and review the resulting
    Version Packages changes (including `bun.lock` and internal SemVer ranges).
-2. Run `bun run release:check` and the visual gates on those exact versioned artifacts.
+2. Run `bun run release:check` and the browser gates on those exact versioned artifacts.
    Confirm Overlay Runtime is public, MIT licensed, and uses the official registry.
 3. Obtain approval for the exact initial package/version/artifact and authenticate
    against the official registry. Publish only the verified Overlay Runtime artifact,

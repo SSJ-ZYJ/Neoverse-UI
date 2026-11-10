@@ -112,9 +112,9 @@ const releaseChannelOptions = computed(() => [
         <MaterialBackdrop edge="inset">
           <div class="playground-preview-columns">
             <label for="forms-email" class="grid gap-2 text-body-sm text-secondary">
-              <span class="text-label-sm text-muted"
-                >{{ localize(copy.states.rest, props.locale) }}</span
-              >
+              <span class="text-label-sm text-muted">{{
+                localize(copy.states.rest, props.locale)
+              }}</span>
               <UiInput
                 id="forms-email"
                 v-model="email"
@@ -126,9 +126,9 @@ const releaseChannelOptions = computed(() => [
               />
             </label>
             <label for="forms-email-filled" class="grid gap-2 text-body-sm text-secondary">
-              <span class="text-label-sm text-muted"
-                >{{ localize(copy.states.value, props.locale) }}</span
-              >
+              <span class="text-label-sm text-muted">{{
+                localize(copy.states.value, props.locale)
+              }}</span>
               <UiInput
                 id="forms-email-filled"
                 v-model="filledEmail"
@@ -137,9 +137,9 @@ const releaseChannelOptions = computed(() => [
               />
             </label>
             <label for="forms-email-disabled" class="grid gap-2 text-body-sm text-secondary">
-              <span class="text-label-sm text-muted"
-                >{{ localize(copy.states.disabled, props.locale) }}</span
-              >
+              <span class="text-label-sm text-muted">{{
+                localize(copy.states.disabled, props.locale)
+              }}</span>
               <UiInput
                 id="forms-email-disabled"
                 model-value="disabled@neoverse.dev"
@@ -191,9 +191,9 @@ const releaseChannelOptions = computed(() => [
       <MaterialBackdrop edge="inset">
         <div class="playground-preview-columns">
           <label for="forms-notes" class="grid gap-2 text-body-sm text-secondary">
-            <span class="text-label-sm text-muted"
-              >{{ localize(copy.states.rest, props.locale) }}</span
-            >
+            <span class="text-label-sm text-muted">{{
+              localize(copy.states.rest, props.locale)
+            }}</span>
             <UiTextarea
               id="forms-notes"
               v-model="notes"
@@ -204,9 +204,9 @@ const releaseChannelOptions = computed(() => [
             />
           </label>
           <label for="forms-notes-filled" class="grid gap-2 text-body-sm text-secondary">
-            <span class="text-label-sm text-muted"
-              >{{ localize(copy.states.value, props.locale) }}</span
-            >
+            <span class="text-label-sm text-muted">{{
+              localize(copy.states.value, props.locale)
+            }}</span>
             <UiTextarea
               id="forms-notes-filled"
               v-model="filledNotes"
@@ -215,9 +215,9 @@ const releaseChannelOptions = computed(() => [
             />
           </label>
           <label for="forms-notes-disabled" class="grid gap-2 text-body-sm text-secondary">
-            <span class="text-label-sm text-muted"
-              >{{ localize(copy.states.disabled, props.locale) }}</span
-            >
+            <span class="text-label-sm text-muted">{{
+              localize(copy.states.disabled, props.locale)
+            }}</span>
             <UiTextarea
               id="forms-notes-disabled"
               model-value="Locked while the build is running."
@@ -239,9 +239,9 @@ const releaseChannelOptions = computed(() => [
       <MaterialBackdrop edge="inset">
         <div class="playground-preview-columns">
           <div class="grid gap-2 text-body-sm text-secondary">
-            <span class="text-label-sm text-muted"
-              >{{ localize(copy.states.rest, props.locale) }}</span
-            >
+            <span class="text-label-sm text-muted">{{
+              localize(copy.states.rest, props.locale)
+            }}</span>
             <UiSelect
               id="forms-runtime"
               v-model="runtime"
@@ -254,9 +254,9 @@ const releaseChannelOptions = computed(() => [
             />
           </div>
           <div class="grid gap-2 text-body-sm text-secondary">
-            <span class="text-label-sm text-muted"
-              >{{ localize(copy.states.value, props.locale) }}</span
-            >
+            <span class="text-label-sm text-muted">{{
+              localize(copy.states.value, props.locale)
+            }}</span>
             <UiSelect
               id="forms-runtime-value"
               v-model="remoteRuntime"
@@ -265,9 +265,9 @@ const releaseChannelOptions = computed(() => [
             />
           </div>
           <div class="grid gap-2 text-body-sm text-secondary">
-            <span class="text-label-sm text-muted"
-              >{{ localize(copy.states.disabled, props.locale) }}</span
-            >
+            <span class="text-label-sm text-muted">{{
+              localize(copy.states.disabled, props.locale)
+            }}</span>
             <UiSelect
               id="forms-runtime-disabled"
               model-value="native"

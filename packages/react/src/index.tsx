@@ -380,8 +380,7 @@ export interface UiBreadcrumbProps
   renderItem?: (state: BreadcrumbRenderState) => ReactNode;
 }
 
-/** Compact route hierarchy with native breadcrumb semantics and local overflow handling.
- * 紧凑的路径层级导航，保留原生 breadcrumb 语义与局部截断策略。 */
+/** Compact route hierarchy with native breadcrumb semantics and local overflow handling. */
 export function UiBreadcrumb({
   items,
   ariaLabel = 'Breadcrumb',
@@ -468,8 +467,7 @@ export type UiCardProps<T extends ElementType = 'div'> = {
   className?: string;
 } & Omit<ComponentPropsWithRef<T>, 'as' | 'className' | 'surface'>;
 
-/** Surface-backed card geometry with a consumer-owned native or routed root.
- * 复用 Surface 表面的卡片几何，根节点由消费端保留原生或路由语义。 */
+/** Surface-backed card geometry; the consumer owns the native or routed root element. */
 export function UiCard<T extends ElementType = 'div'>(props: UiCardProps<T>) {
   const { as, surface = 'glass-elevated', className, ...rest } = props;
 
@@ -1401,8 +1399,7 @@ export interface UiNoticeProps extends HTMLAttributes<HTMLElement> {
   action?: ReactNode;
 }
 
-/** Status callout surface shared by Vue and React consumers.
- * Vue 与 React 消费端共用的状态提示容器。 */
+/** Status callout surface shared by the Vue and React adapters. */
 export function UiNotice({
   as = 'div',
   variant = 'neutral',
@@ -1433,8 +1430,8 @@ export interface UiButtonProps extends ComponentPropsWithRef<'button'> {
   trailing?: ReactNode;
 }
 
-/** Native React 19 ref and attributes stay on the button, including form semantics.
- * 原生 ref 和属性保留在按钮上；loading 使用原生 disabled 阻止重复操作。 */
+/** Native React 19 refs and attributes stay on the button, including form semantics.
+ * `loading` uses the native disabled state to block repeat activation. */
 export function UiButton({
   variant = 'primary',
   size = 'md',
@@ -1537,8 +1534,7 @@ export type UiIconButtonProps =
         type?: never;
       });
 
-/** Accessible icon-only button or link using the same control and Surface contract.
- * 复用共享控件与 Surface 契约的无障碍纯图标按钮或链接。 */
+/** Accessible icon-only button or link that reuses the shared control and surface contract. */
 export function UiIconButton(props: UiIconButtonProps) {
   const {
     as = 'button',

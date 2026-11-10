@@ -92,7 +92,7 @@ function createElement(
         settle: () => settled.resolve(),
         cancel() {
           animation.cancels += 1;
-          settled.reject(new DOMException('cancelled', 'AbortError'));
+          settled.reject(new DOMException('canceled', 'AbortError'));
         },
       };
       animations.push(animation);
@@ -222,7 +222,7 @@ test('cancel stops every running animation', () => {
   expect(second.animations[0]?.cancels).toBeGreaterThan(0);
 });
 
-test('settles after the running animations are cancelled', async () => {
+test('settles after the running animations are canceled', async () => {
   installStyles();
   const box = createElement('box', { width: '100px' });
   const samples = captureLayoutWidths([box.element]);

@@ -70,7 +70,15 @@ const glassSurfaces = {
         </div>
       </div>
       <p class="mt-3 text-caption text-secondary">
-        {{ localize(localized('The same controls reveal different parts of the backdrop, with shared Aurora Glass edge lighting and frost effects.', '相同控件透出所在位置的背景色；共享极光玻璃的边缘高光与柔化效果。'), props.locale) }}
+        {{
+          localize(
+            localized(
+              'The same controls reveal different parts of the backdrop, with shared Aurora Glass edge lighting and frost effects.',
+              '相同控件透出所在位置的背景色；共享极光玻璃的边缘高光与柔化效果。',
+            ),
+            props.locale,
+          )
+        }}
       </p>
     </MaterialBackdrop>
   </div>

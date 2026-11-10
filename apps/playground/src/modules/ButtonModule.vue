@@ -70,15 +70,20 @@ const qaCopy = {
 <template>
   <StateRow
     :label="localized('Three Aurora Glass tiers', '三档极光玻璃')"
-    :hint="localized('Identical backdrop; each preset can be overridden through CSS tokens.', '同一背景对比；每档支持 CSS token 覆盖。')"
+    :hint="
+      localized(
+        'Identical backdrop; each preset can be overridden through CSS tokens.',
+        '同一背景对比；每档支持 CSS token 覆盖。',
+      )
+    "
     :locale="props.locale"
     layout="wide"
   >
     <div class="playground-preview-columns">
       <div v-for="tier in tiers" :key="tier" class="grid gap-3 min-w-0">
-        <UiButton :surface="tier" class="justify-self-start" @click="clicks += 1"
-          >{{ localize(tierLabels[tier], props.locale) }}</UiButton
-        >
+        <UiButton :surface="tier" class="justify-self-start" @click="clicks += 1">{{
+          localize(tierLabels[tier], props.locale)
+        }}</UiButton>
         <UiButton :surface="tier" variant="secondary" class="justify-self-start"
           >Secondary</UiButton
         >
@@ -94,7 +99,12 @@ const qaCopy = {
   </StateRow>
   <StateRow
     :label="localized('Customize a tier', '自定义档位')"
-    :hint="localized('Only this region changes; all children share the selected tier tokens.', '仅修改本区域；内部组件复用所选档位 token。')"
+    :hint="
+      localized(
+        'Only this region changes; all children share the selected tier tokens.',
+        '仅修改本区域；内部组件复用所选档位 token。',
+      )
+    "
     :locale="props.locale"
     layout="wide"
   >
@@ -131,23 +141,28 @@ const qaCopy = {
             data-custom-alpha
           /></label
         >
-        <UiButton surface="none" class="justify-self-start" @click="resetCustom" variant="ghost"
-          >{{ props.locale === 'zh' ? '恢复规范值' : 'Reset to standard' }}</UiButton
-        >
+        <UiButton surface="none" class="justify-self-start" @click="resetCustom" variant="ghost">{{
+          props.locale === 'zh' ? '恢复规范值' : 'Reset to standard'
+        }}</UiButton>
       </div>
       <div class="grid gap-3" :style="customStyle" data-material-custom-preview>
-        <UiButton :surface="customTier as typeof tiers[number]" class="justify-self-start"
-          >{{ props.locale === 'zh' ? '自定义按钮' : 'Custom button' }}</UiButton
-        >
-        <UiCard :surface="customTier as typeof tiers[number]"
-          >{{ props.locale === 'zh' ? '自定义卡片' : 'Custom card' }}</UiCard
-        >
+        <UiButton :surface="customTier as (typeof tiers)[number]" class="justify-self-start">{{
+          props.locale === 'zh' ? '自定义按钮' : 'Custom button'
+        }}</UiButton>
+        <UiCard :surface="customTier as (typeof tiers)[number]">{{
+          props.locale === 'zh' ? '自定义卡片' : 'Custom card'
+        }}</UiCard>
       </div>
     </div>
   </StateRow>
   <StateRow
     :label="localized('Hover and press', '悬停与按下')"
-    :hint="localized('Hover, hold, release, or focus with Tab. Activation updates the counter once.', '悬停、按住、松开，或用 Tab 聚焦；每次激活计数一次。')"
+    :hint="
+      localized(
+        'Hover, hold, release, or focus with Tab. Activation updates the counter once.',
+        '悬停、按住、松开，或用 Tab 聚焦；每次激活计数一次。',
+      )
+    "
     :locale="props.locale"
   >
     <UiButton @click="clicks += 1"

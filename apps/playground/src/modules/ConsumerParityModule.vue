@@ -142,36 +142,36 @@ const languageOptions = computed(
 
         <div class="grid gap-3 sm:grid-cols-2 xl:grid-cols-4" data-contract-summary>
           <UiSurface surface="glass-subtle" class="grid gap-1 rounded-card p-4">
-            <span class="text-caption text-muted"
-              >{{ localize(contractCopy.canonical, props.locale) }}</span
-            >
-            <strong class="text-title-lg font-title text-primary"
-              >{{ contractLabSummary.canonicalShared }}</strong
-            >
+            <span class="text-caption text-muted">{{
+              localize(contractCopy.canonical, props.locale)
+            }}</span>
+            <strong class="text-title-lg font-title text-primary">{{
+              contractLabSummary.canonicalShared
+            }}</strong>
           </UiSurface>
           <UiSurface surface="glass-subtle" class="grid gap-1 rounded-card p-4">
-            <span class="text-caption text-muted"
-              >{{ localize(contractCopy.releaseVisual, props.locale) }}</span
-            >
-            <strong class="text-title-lg font-title text-primary"
-              >{{ contractLabSummary.releaseVisual }}</strong
-            >
+            <span class="text-caption text-muted">{{
+              localize(contractCopy.releaseVisual, props.locale)
+            }}</span>
+            <strong class="text-title-lg font-title text-primary">{{
+              contractLabSummary.releaseVisual
+            }}</strong>
           </UiSurface>
           <UiSurface surface="glass-subtle" class="grid gap-1 rounded-card p-4">
-            <span class="text-caption text-muted"
-              >{{ localize(contractCopy.runtime, props.locale) }}</span
-            >
-            <strong class="text-title-lg font-title text-primary"
-              >{{ contractLabSummary.runtimeValidated }}</strong
-            >
+            <span class="text-caption text-muted">{{
+              localize(contractCopy.runtime, props.locale)
+            }}</span>
+            <strong class="text-title-lg font-title text-primary">{{
+              contractLabSummary.runtimeValidated
+            }}</strong>
           </UiSurface>
           <UiSurface surface="glass-subtle" class="grid gap-1 rounded-card p-4">
-            <span class="text-caption text-muted"
-              >{{ localize(contractCopy.parity, props.locale) }}</span
-            >
-            <strong class="text-title-lg font-title text-primary"
-              >{{ contractLabSummary.frameworkParity }}</strong
-            >
+            <span class="text-caption text-muted">{{
+              localize(contractCopy.parity, props.locale)
+            }}</span>
+            <strong class="text-title-lg font-title text-primary">{{
+              contractLabSummary.frameworkParity
+            }}</strong>
           </UiSurface>
         </div>
 
@@ -227,11 +227,13 @@ const languageOptions = computed(
                   {{ component.interaction ? localize(contractCopy.covered, props.locale) : '—' }}
                 </td>
                 <td>
-                  {{ component.parity
+                  {{
+                    component.parity
                       ? localize(contractCopy.covered, props.locale)
                       : component.track === 'canonical-shared'
                         ? '—'
-                        : localize(contractCopy.notApplicable, props.locale) }}
+                        : localize(contractCopy.notApplicable, props.locale)
+                  }}
                 </td>
               </tr>
             </tbody>

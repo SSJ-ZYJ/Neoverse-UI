@@ -36,7 +36,7 @@ export function supportsNativeRefraction(document: Document): boolean {
 }
 
 /** The browser supplies the live composited backdrop, including DOM, canvas
- * and video. Only a local displacement vector map is cached, never its colour.
+ * and video. Only a local displacement vector map is cached, never its color.
  */
 export class NativeGlassRenderer implements GlassRenderer {
   private owners = new Map<HTMLElement, Owner>();

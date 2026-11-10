@@ -132,7 +132,7 @@ describe('Glass background paint cache', () => {
     cache.destroy();
   });
 
-  it('discards old theme colours when the replacement paint fails', () => {
+  it('discards old theme colors when the replacement paint fails', () => {
     const { gl, images, stage, card, cache } = setup();
     cache.sample(card, window);
     images[0]?.dispatchEvent(new Event('load'));

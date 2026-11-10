@@ -37,15 +37,15 @@ const contractCopy = {
   </StateRow>
 
   <StateRow :label="copy.states.sizes.label" :hint="copy.states.sizes.hint" :locale="props.locale">
-    <UiAction href="#controls-action" @click.prevent size="sm"
-      >{{ localize(copy.controls.small, props.locale) }}</UiAction
-    >
-    <UiAction href="#controls-action" @click.prevent size="md"
-      >{{ localize(copy.controls.medium, props.locale) }}</UiAction
-    >
-    <UiAction href="#controls-action" @click.prevent size="lg"
-      >{{ localize(copy.controls.large, props.locale) }}</UiAction
-    >
+    <UiAction href="#controls-action" @click.prevent size="sm">{{
+      localize(copy.controls.small, props.locale)
+    }}</UiAction>
+    <UiAction href="#controls-action" @click.prevent size="md">{{
+      localize(copy.controls.medium, props.locale)
+    }}</UiAction>
+    <UiAction href="#controls-action" @click.prevent size="lg">{{
+      localize(copy.controls.large, props.locale)
+    }}</UiAction>
   </StateRow>
 
   <StateRow
@@ -54,9 +54,9 @@ const contractCopy = {
     :locale="props.locale"
     contract-state="hover"
   >
-    <UiAction href="#controls-action" @click.prevent
-      >{{ localize(copy.controls.hover, props.locale) }}</UiAction
-    >
+    <UiAction href="#controls-action" @click.prevent>{{
+      localize(copy.controls.hover, props.locale)
+    }}</UiAction>
   </StateRow>
 
   <StateRow
@@ -65,9 +65,9 @@ const contractCopy = {
     :locale="props.locale"
     contract-state="active"
   >
-    <UiAction href="#controls-action" @click.prevent
-      >{{ localize(copy.controls.active, props.locale) }}</UiAction
-    >
+    <UiAction href="#controls-action" @click.prevent>{{
+      localize(copy.controls.active, props.locale)
+    }}</UiAction>
   </StateRow>
 
   <StateRow
@@ -76,15 +76,15 @@ const contractCopy = {
     :locale="props.locale"
     contract-state="focus"
   >
-    <UiAction href="#controls-action" @click.prevent
-      >{{ localize(copy.controls.focus, props.locale) }}</UiAction
-    >
+    <UiAction href="#controls-action" @click.prevent>{{
+      localize(copy.controls.focus, props.locale)
+    }}</UiAction>
   </StateRow>
 
   <StateRow :label="copy.states.disabled.label" :locale="props.locale" contract-state="disabled">
-    <UiAction href="#controls-action" @click.prevent disabled
-      >{{ localize(copy.controls.disabled, props.locale) }}</UiAction
-    >
+    <UiAction href="#controls-action" @click.prevent disabled>{{
+      localize(copy.controls.disabled, props.locale)
+    }}</UiAction>
   </StateRow>
 
   <StateRow

@@ -6,6 +6,7 @@ const rootDirectory = resolve(import.meta.dir, '..');
 const checks = [
   { name: 'Biome (auto-fix)', args: ['biome', 'check', '--write', '.'] },
   { name: 'Text integrity', args: ['lint:text'] },
+  { name: 'Source language', args: ['lint:language'] },
   { name: 'Documentation standards', args: ['check:docs'] },
   { name: 'Stylelint', args: ['lint:style'] },
   { name: 'Tailwind usage', args: ['lint:tailwind'] },

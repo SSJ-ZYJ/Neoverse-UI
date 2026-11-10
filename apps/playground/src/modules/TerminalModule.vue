@@ -136,9 +136,9 @@ const copy = {
       <UiTerminalSurface title="neoverse / session" class="w-full" @click="focusOnBackground">
         <template #header>
           <span class="text-caption text-secondary">neoverse / session</span>
-          <UiButton class="ml-auto" variant="ghost" size="sm" @click="prompt?.focus()"
-            >{{ localize(copy.focusCommand, locale) }}</UiButton
-          >
+          <UiButton class="ml-auto" variant="ghost" size="sm" @click="prompt?.focus()">{{
+            localize(copy.focusCommand, locale)
+          }}</UiButton>
         </template>
         <UiTerminalTranscript label="Terminal history" style="max-height: 9rem">
           <template v-for="(line, index) in lines" :key="index">

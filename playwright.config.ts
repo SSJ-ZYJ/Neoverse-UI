@@ -5,7 +5,7 @@ const playgroundPort = Number(process.env.NEOVERSE_UI_PLAYWRIGHT_PORT ?? 3100);
 const playgroundBaseUrl = `http://127.0.0.1:${playgroundPort}`;
 
 export default defineConfig({
-  testDir: './tests/visual',
+  testDir: './tests/e2e',
   timeout: 30_000,
   fullyParallel: true,
   workers: 2,
@@ -14,15 +14,6 @@ export default defineConfig({
   // of a genuinely failing test.
   retries: process.env.CI ? 1 : 0,
   reporter: 'list',
-  snapshotPathTemplate: '{testDir}/snapshots/{platform}/{projectName}/{arg}{ext}',
-  expect: {
-    toHaveScreenshot: {
-      animations: 'disabled',
-      caret: 'hide',
-      scale: 'css',
-      maxDiffPixelRatio: 0.01,
-    },
-  },
   webServer: {
     command: 'bun apps/playground/src/index.ts',
     url: `${playgroundBaseUrl}/__playground-health`,

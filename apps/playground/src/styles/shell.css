@@ -569,7 +569,7 @@
    legend and later specimens, so raise only the wrapper that owns an open
    fallback panel; otherwise a later sibling intercepts its pointer events. */
 .playground-material-backdrop--inset
-> :has(.ui-overlay-panel--fallback-open, .ui-select__popover--fallback-open),
+  > :has(.ui-overlay-panel--fallback-open, .ui-select__popover--fallback-open),
 [data-playground-view='frame']
   section
   > div:has(.ui-overlay-panel--fallback-open, .ui-select__popover--fallback-open) {
@@ -819,7 +819,7 @@
    feedback. Re-enable UiButton's existing internal press field only while
    pressed so fallback buttons feel identical to their standard counterparts. */
 .playground-reduced-transparency-preview
-.ui-button.material-glass-subtle:active:not(:disabled):not([aria-disabled='true'])::after {
+  .ui-button.material-glass-subtle:active:not(:disabled):not([aria-disabled='true'])::after {
   display: block;
 }
 

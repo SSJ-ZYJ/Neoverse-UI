@@ -6,6 +6,21 @@ import { renderToString } from 'react-dom/server';
 import { UiButton } from './index';
 import { UiTerminalPrompt, UiTerminalSurface } from './terminal';
 
+function Fixture() {
+  const [closed, setClosed] = useState(false);
+  return (
+    <UiTerminalSurface
+      title="Fallback title"
+      ariaLabel="Workspace console"
+      header={<UiButton onClick={() => setClosed(true)}>Close window</UiButton>}
+      status="Fallback status"
+      actions={<UiButton>Fallback action</UiButton>}
+    >
+      <p>{closed ? 'Closed' : 'Ready'}</p>
+    </UiTerminalSurface>
+  );
+}
+
 test('terminal surface retains default title, status, actions and body for nullish headers', async () => {
   for (const header of [undefined, null]) {
     const html = renderToString(
@@ -52,20 +67,6 @@ test('terminal custom header replaces fallback controls while preserving the acc
   for (const [name, value] of Object.entries(globals)) {
     previous.set(name, Object.getOwnPropertyDescriptor(globalThis, name));
     Object.defineProperty(globalThis, name, { configurable: true, writable: true, value });
-  }
-  function Fixture() {
-    const [closed, setClosed] = useState(false);
-    return (
-      <UiTerminalSurface
-        title="Fallback title"
-        ariaLabel="Workspace console"
-        header={<UiButton onClick={() => setClosed(true)}>Close window</UiButton>}
-        status="Fallback status"
-        actions={<UiButton>Fallback action</UiButton>}
-      >
-        <p>{closed ? 'Closed' : 'Ready'}</p>
-      </UiTerminalSurface>
-    );
   }
   const container = browser.document.createElement('div');
   browser.document.body.append(container);

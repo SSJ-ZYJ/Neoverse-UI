@@ -353,10 +353,8 @@ export interface UiContextMenuItem {
   group?: string;
   selection?: 'none' | 'single' | 'multiple';
   /**
-   * Rows of a submenu. A row with children opens the submenu on click or ArrowRight
-   * instead of emitting `onSelect`; only top-level rows may carry children.
-   * 二级菜单的行。带 children 的行通过点击、悬停或右方向键展开二级菜单，而不是触发 onSelect；
-   * 只有顶层行可以携带 children。
+   * Rows of a submenu. A row with children opens the submenu on click, hover or
+   * ArrowRight instead of emitting `onSelect`; only top-level rows may carry children.
    */
   children?: readonly UiContextMenuItem[];
 }
@@ -387,7 +385,6 @@ export interface UiContextMenuProps
   /**
    * Focus the first row on open. A pointer open leaves it false so the editor keeps
    * focus and its selection highlight; arrow keys still reach the rows.
-   * 打开时聚焦首行。指针打开时保持为 false，使编辑器保留焦点与选区高亮；方向键仍可进入菜单行。
    */
   autoFocus?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -425,9 +422,8 @@ export function UiContextMenu({
   const ignoreNativeClose = useRef(false);
   const panelId = useId();
   const submenuId = useId();
-  // A submenu replaces the top-level rows inside the same panel: a second popover would
-  // light-dismiss the parent, so both levels share one surface.
-  // 二级菜单在同一面板内替换顶层行：第二个浮层会轻触关闭父面板，因此两级共用同一表面。
+  // The submenu opens as a second column beside the panel instead of replacing the
+  // top-level rows, so the parent item stays visible while the column is open.
   const [openSubmenu, setOpenSubmenu] = useState<UiContextMenuItem | null>(null);
 
   const resolveOptions = useCallback((): AnchoredOverlayOptions | undefined => {
@@ -444,7 +440,6 @@ export function UiContextMenu({
       placement: 'auto',
       fallbackOpenClass: 'ui-overlay-panel--fallback-open',
       // The panel owns a nested submenu popover, which must not count as an outside click.
-      // 面板拥有一个嵌套的二级浮层，它不能被算作外部点击。
       manual: true,
       containedElements: () => [submenuRef.current],
       onDismiss: () => onOpenChange?.(false),
@@ -467,7 +462,6 @@ export function UiContextMenu({
       setOpenSubmenu(item);
       // The column is its own manual popover flush with the panel edge, the way a native
       // submenu is: it keeps the parent rows visible and carries its own glass material.
-      // 该列是贴着面板边缘的独立 manual 浮层，与原生二级菜单一致：父级行保持可见，它自带玻璃材质。
       requestAnimationFrame(() => {
         const panel = panelRef.current;
         const submenu = submenuRef.current;
@@ -480,7 +474,6 @@ export function UiContextMenu({
         const toStart = panelRect.right + width > window.innerWidth - margin;
         // The column's own padding sits above its first row, so it is lifted by that amount
         // to put the first row on the parent item.
-        // 该列自身的内边距位于首行之上，因此上移同样的距离，使首行与父项对齐。
         const paddingTop = Number.parseFloat(getComputedStyle(submenu).paddingTop) || 0;
         submenu.style.setProperty(
           '--neoverse-overlay-left',
@@ -545,7 +538,6 @@ export function UiContextMenu({
       ignoreNativeClose.current = true;
     }
     // The submenu is its own popover, so it must be dismissed with the panel.
-    // 二级菜单是独立浮层，必须随面板一起关闭。
     closeSubmenuPopover();
     setOpenSubmenu(null);
     hideAnchoredOverlay(options);
@@ -581,7 +573,6 @@ export function UiContextMenu({
 
   // With focus left in the region (a pointer open), panel-scoped keydown never fires.
   // The document listener lets an arrow key enter the panel from wherever focus sits.
-  // 指针打开时焦点留在区域，面板内的 keydown 不会触发。文档级监听使方向键能从当前焦点进入面板。
   useEffect(() => {
     if (!open) return;
     const onDocumentKeyDown = (event: globalThis.KeyboardEvent) => {
@@ -603,7 +594,6 @@ export function UiContextMenu({
     const inSubmenu = openSubmenu !== null;
     const menuItems = inSubmenu ? rowsOf(submenuRef.current) : enabledItems();
     // With focus still in the region, an arrow key enters the menu at its first or last row.
-    // 焦点仍在区域时，方向键从首行或末行进入菜单。
     if (!(event.target instanceof HTMLButtonElement)) {
       if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
       if (menuItems.length === 0) return;

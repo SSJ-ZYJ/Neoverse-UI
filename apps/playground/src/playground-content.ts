@@ -864,6 +864,13 @@ export const moduleCopy = {
       activity: localized('Activity', '动态'),
     },
   },
+  giscus: {
+    label: localized('Giscus theme', 'Giscus 主题'),
+    description: localized(
+      'The published iframe theme for the Giscus comment widget, previewed with the CSS the widget actually loads.',
+      '用于 Giscus 评论组件的已发布 iframe 主题，使用组件实际加载的 CSS 预览。',
+    ),
+  },
   consumerParity: {
     label: localized('Contract Lab', '契约实验室'),
     description: localized(

@@ -167,15 +167,27 @@ defineExpose({ focus });
           :autocomplete="typeof attrs.autocomplete === 'string' ? attrs.autocomplete : 'off'"
           :autocapitalize="typeof attrs.autocapitalize === 'string' ? attrs.autocapitalize : 'off'"
           :spellcheck="attrs.spellcheck === true || attrs.spellcheck === 'true'"
-          @focus="focused = true; syncEditor()"
+          @focus="
+            focused = true;
+            syncEditor();
+          "
           @blur="focused = false"
-          @input="syncEditor(); holdCaret()"
-          @select="syncEditor(); holdCaret()"
+          @input="
+            syncEditor();
+            holdCaret();
+          "
+          @select="
+            syncEditor();
+            holdCaret();
+          "
           @click="syncEditor"
           @keyup="syncEditor"
           @scroll="syncEditor"
           @compositionstart="composing = true"
-          @compositionend="composing = false; syncEditor()"
+          @compositionend="
+            composing = false;
+            syncEditor();
+          "
         >
       </span>
     </label>

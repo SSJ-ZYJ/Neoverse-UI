@@ -41,7 +41,7 @@ export interface LayoutWidthOptions {
 export interface LayoutWidthAnimation {
   /** The animations that actually run; empty when no box changed width. */
   readonly animations: readonly Animation[];
-  /** Settles once every animation has finished or been cancelled. */
+  /** Settles once every animation has finished or been canceled. */
   readonly finished: Promise<void>;
   /** Stop the animations now; the boxes fall back to their natural widths. */
   cancel(): void;
@@ -75,7 +75,7 @@ function computedStyleOf(element: Element): CSSStyleDeclaration | undefined {
  * up — the visible "wrap then unwrap" hitch on a narrow-to-wide language switch.
  * Clipping reveals the copy as the box opens instead of painting it outside the
  * border. Only expanding boxes need the lock; it is released when the run ends
- * or is cancelled, so the consumer's own inline styles are never overwritten.
+ * or is canceled, so the consumer's own inline styles are never overwritten.
  */
 function lockContentWrapping(element: Element): (() => void) | undefined {
   const style = (element as HTMLElement).style;

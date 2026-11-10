@@ -598,27 +598,27 @@
   /* Native displacement or the shared WebGL canvas owns refraction.
      Hide duplicate decorative edge fields while either backend is active. */
   :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-    .ui-button
-  )::before {
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+      .ui-button
+    )::before {
     display: none;
   }
 
   /* An explicitly CSS-backed surface keeps the complete library edge field
      even while the shared renderer paints other Aurora Glass surfaces. */
   :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-    .ui-button
-  )[data-neoverse-glass-edge-pass='css']::before {
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+      .ui-button
+    )[data-neoverse-glass-edge-pass='css']::before {
     display: block;
   }
 
   /* A sibling cannot paint in the owner's native top layer. Keep a local
      edge on the popover/dialog itself; surfaces inside it can still sample. */
   [data-neoverse-glass-renderer='webgl']
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-    .ui-button
-  ):is(:popover-open, :modal)::before {
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+      .ui-button
+    ):is(:popover-open, :modal)::before {
     display: block;
   }
 
@@ -663,9 +663,9 @@
   /* The runtime owns refraction, so an opted-in surface adds its painted stroke to
      the runtime shadow instead of the highlights the renderer replaces. */
   :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-    .ui-button
-  )[data-neoverse-glass-edge-stroke] {
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+      .ui-button
+    )[data-neoverse-glass-edge-stroke] {
     box-shadow: var(--neoverse-material-edge-stroke), var(--neoverse-material-shadow);
   }
 
@@ -768,9 +768,9 @@
      Never flatten unmarked cards or surfaces: they must be visible at rest,
      before hover, and also in reduced-transparency mode. */
   :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-    .ui-button
-  ):not(.ui-segmented-control)[data-neoverse-glass-nesting='inherit'] {
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+      .ui-button
+    ):not(.ui-segmented-control)[data-neoverse-glass-nesting='inherit'] {
     background-color: var(--neoverse-color-transparent);
     background-image: none;
     border: var(--neoverse-border-width-none) var(--neoverse-border-style-solid)

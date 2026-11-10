@@ -84,9 +84,9 @@
      the local inset catch for the CSS edge path only; otherwise the final row
      repeats a mint line below the renderer's rim. */
   :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-  :where(.ui-table, .neoverse-prose table):not([data-neoverse-glass-edge-pass='css']):not(
-    :is(:popover-open, :modal) *
-  ) {
+    :where(.ui-table, .neoverse-prose table):not([data-neoverse-glass-edge-pass='css']):not(
+      :is(:popover-open, :modal) *
+    ) {
     box-shadow: var(--neoverse-shadow-float), var(--neoverse-material-glass-subtle-bloom);
   }
 

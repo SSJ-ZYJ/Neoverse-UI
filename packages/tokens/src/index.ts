@@ -1273,7 +1273,7 @@ export const layoutBreakpoints = {
   '2xl': 1536,
 } as const;
 
-/** Shared display names for 极光玻璃 / Aurora Glass; glass-* API identifiers stay stable. */
+/** Shared display names for Aurora Glass; `glass-*` API identifiers stay stable. */
 export const glassMaterial = {
   name: { zh: '极光玻璃', en: 'Aurora Glass' },
   tiers: {

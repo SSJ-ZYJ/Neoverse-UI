@@ -333,9 +333,13 @@ function saveWorkspaceScrollPosition(): void {
 
 function focusSpecimen(specimenId: SpecimenId): void {
   void nextTick(() => {
-    window.requestAnimationFrame(() => {
+    // A deep link can arrive before the owning module has rendered its specimen.
+    // Keep looking for two seconds instead of dropping focus on the first frame.
+    const deadline = performance.now() + 2_000;
+    const focusWhenReady = () => {
       const target = document.getElementById(specimenId);
       if (target === null) {
+        if (performance.now() < deadline) window.requestAnimationFrame(focusWhenReady);
         return;
       }
       target.scrollIntoView({ block: 'start', inline: 'nearest', behavior: 'auto' });
@@ -343,7 +347,8 @@ function focusSpecimen(specimenId: SpecimenId): void {
         target.setAttribute('tabindex', '-1');
       }
       target.focus({ preventScroll: true });
-    });
+    };
+    window.requestAnimationFrame(focusWhenReady);
   });
 }
 
@@ -844,10 +849,12 @@ onBeforeUnmount(() => {
                   </p>
                 </header>
                 <p class="text-body-sm text-muted">
-                  {{ formatLocalized(catalogueCopy.summary, locale, {
+                  {{
+                    formatLocalized(catalogueCopy.summary, locale, {
                       modules: labModules.length,
                       specimens: labSpecimens.length,
-                    }) }}
+                    })
+                  }}
                 </p>
               </div>
 
@@ -921,9 +928,11 @@ onBeforeUnmount(() => {
                     {{ localize(group.description, locale) }}
                   </p>
                   <p class="text-body-sm text-secondary">
-                    {{ formatLocalized(appCopy.overview.moduleCount, locale, {
+                    {{
+                      formatLocalized(appCopy.overview.moduleCount, locale, {
                         count: group.modules.length,
-                      }) }}
+                      })
+                    }}
                   </p>
                 </div>
                 <UiButton
@@ -932,9 +941,11 @@ onBeforeUnmount(() => {
                   stretch
                   @click="selectModule(group.moduleIds[0])"
                 >
-                  {{ formatLocalized(appCopy.overview.openGroup, locale, {
+                  {{
+                    formatLocalized(appCopy.overview.openGroup, locale, {
                       group: localize(group.label, locale),
-                    }) }}
+                    })
+                  }}
                   <template #trailing><LabIcon name="arrow-right" /></template>
                 </UiButton>
               </UiSurface>
@@ -1028,7 +1039,13 @@ onBeforeUnmount(() => {
                     </code>
                   </div>
                   <p class="text-body-sm text-secondary">
-                    {{ specimen.tags.map((tag) => tag === 'glass' ? localize(glassMaterial.name, locale) : tag).join(' · ') }}
+                    {{
+                      specimen.tags
+                        .map((tag) =>
+                          tag === 'glass' ? localize(glassMaterial.name, locale) : tag,
+                        )
+                        .join(' · ')
+                    }}
                   </p>
                 </UiSurface>
                 <p

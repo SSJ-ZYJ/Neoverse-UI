@@ -29,7 +29,7 @@ Column values:
 
 - **Tokens / CSS / Vue / React / Unit**: `Stable`, `Partial`, or `—`.
 - **Runtime**: `Validated` means the React adapter is exercised in the real browser runtime fixture; `Pending` means the React adapter exists but still relies on static/unit coverage; `—` means there is no React adapter.
-- **Visual**: `Release` means covered by Playwright release gates; `Playground` means represented in the Design Lab but not yet a release-gate visual contract.
+- **Visual**: `Release` means covered by the Playwright release gate (end-to-end behaviour); `Playground` means represented in the Design Lab but not yet a release-gate contract. The field records coverage depth, not screenshot comparison.
 - **Consumer**: `Validated` means a real Neoverse consumer exercises the API; `Pending` means validation is still fixture/Playground-only.
 
 ## Current matrix
@@ -86,12 +86,12 @@ aggregate consumer field, not React consumer validation or component maturity.
 All 15 targets remain Consumer Validation; the Stable count remains 21.
 React Breadcrumb's existing release screenshots were rerun and are explicitly
 recorded in `reactValidation.visual`. No target has validated real React product
-consumption. Four existing Consumer Parity module snapshots still omit the Echo
+consumption. Four existing Consumer Parity screenshot records still omit the Echo
 matrix row and fail on both platforms; they were not updated to hide that drift.
 
 ## Change policy
 
-`UiInput type="number"` includes shared token-driven increment/decrement buttons in Vue and React. `tests/visual/number-input.spec.ts` covers bounds, steps and locked states; `tests/visual/form-control-behavior.spec.ts` covers text/selection state and Field composition. Real Vue consumption is validated in Slides search and filters; real React product consumption and independent React form release visuals remain pending.
+`UiInput type="number"` includes shared token-driven increment/decrement buttons in Vue and React. `tests/e2e/forms.spec.ts` covers bounds, steps, locked states, text/selection state and Field composition. Real Vue consumption is validated in Slides search and filters; real React product consumption and independent React form release visuals remain pending.
 
 A new public component must be added to the matrix in the same change that exports it. Canonical Shared components cannot be marked complete while either Vue or React is missing, and every Canonical Shared React adapter must appear in the browser runtime fixture. A component cannot be promoted to Stable without release visual coverage and real consumer validation.
 

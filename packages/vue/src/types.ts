@@ -395,10 +395,8 @@ export interface ContextMenuItem {
   group?: string;
   selection?: 'none' | 'single' | 'multiple';
   /**
-   * Rows of a submenu. A row with children opens the submenu on click or ArrowRight
-   * instead of emitting `select`; only top-level rows may carry children.
-   * 二级菜单的行。带 children 的行通过点击、悬停或右方向键展开二级菜单，而不是触发 select；
-   * 只有顶层行可以携带 children。
+   * Rows of a submenu. A row with children opens the submenu on click, hover or
+   * ArrowRight instead of emitting `select`; only top-level rows may carry children.
    */
   children?: readonly ContextMenuItem[];
 }
@@ -429,7 +427,6 @@ export interface ContextMenuProps {
   /**
    * Focus the first row on open. A pointer open leaves it false so the editor keeps
    * focus and its selection highlight; arrow keys still reach the rows.
-   * 打开时聚焦首行。指针打开时保持为 false，使编辑器保留焦点与选区高亮；方向键仍可进入菜单行。
    */
   autoFocus?: boolean;
 }

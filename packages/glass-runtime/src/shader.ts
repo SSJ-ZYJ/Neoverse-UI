@@ -156,7 +156,7 @@ export const glassFragmentShader = `
     color = clamp(color, 0.0, 1.0);
     vec3 lightChromaticColor = color * vec3(0.9, 0.95, 1.0);
     color = mix(color, lightChromaticColor, lightSurface * 0.72);
-    // Light restores 0.2.0's opacity-dependent colour response. The chroma
+    // Light restores 0.2.0's opacity-dependent color response. The chroma
     // token remains an optional multiplier for applications that tune it.
     vec3 neutralEdgeColor = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)));
     float legacyChroma = mix(0.12, 1.0, smoothstep(0.3, 0.5, u_opacity));
@@ -169,7 +169,7 @@ export const glassFragmentShader = `
       float coolExcess = max(color.b - max(color.r, color.g), 0.0);
       color.b -= coolExcess * 0.72;
       // A pale backdrop already carries the page's cool hue. Let the light
-      // highlight borrow the neutral edge colour instead of adding a saturated
+      // highlight borrow the neutral edge color instead of adding a saturated
       // cyan band on top of it; the accent only tints the remaining mix.
       color = mix(color, u_edge_light, 0.7);
     }
@@ -228,18 +228,17 @@ export const glassFragmentShader = `
     alpha *= occlusionMask;
 
     if (lightSurface > 0.5) {
-      // 0.2.0 uses the translucent directional colour directly with normal
+      // 0.2.0 uses the translucent directional color directly with normal
       // canvas composition and SRC_ALPHA for both WebGL blend channels.
       // The shared gain still permits an explicit exposure adjustment.
       // On long straight surfaces, reduce the theme tint in the middle so it
-      // does not overpower the composited backdrop's own warm or cool colour.
+      // does not overpower the composited backdrop's own warm or cool color.
       // The existing directional corners and compact controls are unchanged.
       float wideFactor = smoothstep(3.0, 5.0, u_rect_size.x / max(u_rect_size.y, 1.0));
       float wideReach = max(min(u_rect_size.x * 0.5, u_rect_size.y * 1.25), 16.0);
       float distanceFromEnds = min(v_local.x, 1.0 - v_local.x) * u_rect_size.x;
       float wideMiddle = wideFactor * smoothstep(wideReach * 0.7, wideReach, distanceFromEnds);
       // Removing theme chroma must preserve luminance along the straight rim.
-      // 去除主题色偏移时必须保留直边轮廓的亮度。
       vec3 neutralHighlight = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)));
       color = mix(color, neutralHighlight, wideMiddle);
       color *= u_gain;
@@ -255,7 +254,7 @@ export const glassFragmentShader = `
     vec3 channelGain = clamp((2.0 * alpha * color - vec3(alpha * alpha)) * u_gain, 0.0, 1.0);
     // Overlay with Cs=(1+g)/2 gives Cb + g*min(Cb,1-Cb). The increment uses
     // live backdrop energy and remaining highlight headroom: black/zero stay
-    // zero, and pale coloured edges no longer clip all channels to white.
+    // zero, and pale colored edges no longer clip all channels to white.
     vec3 encodedGain = (vec3(1.0) + channelGain) * 0.5;
     gl_FragColor = vec4(encodedGain, 1.0);
   }

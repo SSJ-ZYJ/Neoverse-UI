@@ -7,6 +7,7 @@ import ControlsModule from './modules/ControlsModule.vue';
 import DataDisplayModule from './modules/DataDisplayModule.vue';
 import DockModule from './modules/DockModule.vue';
 import FormsModule from './modules/FormsModule.vue';
+import GiscusModule from './modules/GiscusModule.vue';
 import LayoutShapeModule from './modules/LayoutShapeModule.vue';
 import MaterialsModule from './modules/MaterialsModule.vue';
 import MotionModule from './modules/MotionModule.vue';
@@ -124,6 +125,12 @@ export const labModules = [
     description: moduleCopy.consumerParity.description,
     component: ConsumerParityModule,
   },
+  {
+    id: 'giscus',
+    label: moduleCopy.giscus.label,
+    description: moduleCopy.giscus.description,
+    component: GiscusModule,
+  },
 ] as const satisfies readonly {
   id: string;
   label: LocalizedText;
@@ -183,8 +190,13 @@ export const moduleGroups = [
     id: 'validation',
     label: groupCopy.validation.label,
     description: groupCopy.validation.description,
-    packages: ['@neoverse-ui/vue', '@neoverse-ui/react', '@neoverse-ui/overlay-runtime'],
-    moduleIds: ['consumer-parity'],
+    packages: [
+      '@neoverse-ui/vue',
+      '@neoverse-ui/react',
+      '@neoverse-ui/overlay-runtime',
+      '@neoverse-ui/giscus-theme',
+    ],
+    moduleIds: ['consumer-parity', 'giscus'],
   },
 ] as const satisfies readonly {
   id: string;
@@ -588,6 +600,14 @@ export const labSpecimens = [
     label: localized('Reading composition', '正文阅读组合'),
     apiNames: [],
     tags: ['composition', 'reading', 'content'],
+    kind: 'composition',
+  },
+  {
+    id: 'giscus-themes',
+    moduleId: 'giscus',
+    label: moduleCopy.giscus.label,
+    apiNames: [],
+    tags: ['theme', 'giscus', 'comments', 'iframe', 'consumer'],
     kind: 'composition',
   },
 ] as const satisfies readonly LabSpecimen[];

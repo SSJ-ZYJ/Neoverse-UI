@@ -132,7 +132,7 @@
   /* A native top layer and an explicit CSS edge pass cannot use the document
      canvas, so they retain their ordinary inset fallback. */
   [data-neoverse-glass-renderer='webgl']
-  :where(.ui-input, .ui-textarea, .ui-select):not([data-neoverse-glass-edge-pass='css']) {
+    :where(.ui-input, .ui-textarea, .ui-select):not([data-neoverse-glass-edge-pass='css']) {
     --neoverse-form-control-effective-shadow: var(
       --neoverse-form-control-webgl-shadow,
       var(--neoverse-form-control-shadow)

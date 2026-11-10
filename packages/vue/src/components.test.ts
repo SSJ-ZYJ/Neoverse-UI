@@ -1428,7 +1428,6 @@ describe('Overlay primitives', () => {
     const panel = wrapper.get('.ui-context-menu');
     // A context menu owns a nested submenu popover, so the runtime must own outside
     // dismissal instead of the browser's light dismiss.
-    // 上下文菜单拥有一个嵌套的二级浮层，因此外部关闭由运行时负责，而不是浏览器的轻触关闭。
     expect(panel.attributes('popover')).toBe('manual');
     expect(panel.attributes('role')).toBe('menu');
     expect(panel.attributes('aria-label')).toBe('Page actions');
@@ -1437,7 +1436,6 @@ describe('Overlay primitives', () => {
 
     expect(wrapper.get('.ui-context-menu__heading').text()).toBe('Edit');
     // A native hr carries the separator role without an explicit attribute.
-    // 原生 hr 自带分隔符语义，无需显式 role。
     expect(wrapper.get('.ui-context-menu__separator').element.tagName).toBe('HR');
 
     const items = wrapper.findAll('.ui-context-menu__item');
@@ -1488,7 +1486,6 @@ describe('Overlay primitives', () => {
 
     // The submenu is its own manual popover teleported to the body, so the panel's presence
     // filter cannot become its containing block and the parent rows stay rendered.
-    // 二级菜单是传送到 body 的独立 manual 浮层，面板入场滤镜不会成为它的包含块，父级行保持渲染。
     const submenu = document.querySelector<HTMLElement>('.ui-context-menu__submenu');
     expect(submenu).not.toBeNull();
     expect(submenu?.getAttribute('popover')).toBe('manual');
@@ -1496,7 +1493,6 @@ describe('Overlay primitives', () => {
     expect(submenu?.parentElement).toBe(document.body);
     // The material contract forbids nesting a glass utility, so the column paints the
     // shared overlay recipe from its own stylesheet instead.
-    // 材质契约禁止嵌套玻璃工具类，因此该列改由自身样式表采用共享浮层配方。
     expect(submenu?.classList.contains('ui-context-menu__submenu')).toBe(true);
     expect(rows()).toHaveLength(2);
     expect(opener?.attributes('aria-expanded')).toBe('true');

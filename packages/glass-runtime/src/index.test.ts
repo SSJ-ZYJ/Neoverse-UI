@@ -1000,7 +1000,7 @@ describe('Glass renderer', () => {
     expect(document.querySelector('[data-neoverse-glass-native-defs]')).toBeNull();
   });
 
-  it('repaints the composition when the system colour scheme changes', () => {
+  it('repaints the composition when the system color scheme changes', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const systemScheme = new EventTarget();
@@ -1047,7 +1047,7 @@ describe('Glass renderer', () => {
     expect(removeListener).toHaveBeenCalledWith('change', expect.any(Function));
   });
 
-  it('uses the established luminance fallback when no colour scheme is declared', () => {
+  it('uses the established luminance fallback when no color scheme is declared', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const card = document.createElement('article');
@@ -1360,7 +1360,7 @@ describe('Glass renderer', () => {
     expect(radiiCall).toEqual([expect.objectContaining({ name: 'u_radii' }), 18, 18, 18, 18]);
   });
 
-  it('resolves the released colour response without losing translucent token strength', () => {
+  it('resolves the released color response without losing translucent token strength', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     document.documentElement.style.setProperty(
@@ -1771,7 +1771,7 @@ describe('Glass renderer', () => {
     expect(frames).toHaveLength(0);
   });
 
-  it('ignores colour-only theme transitions instead of scheduling edge repaints', () => {
+  it('ignores color-only theme transitions instead of scheduling edge repaints', () => {
     installCanvasContext({ webgl2: createFakeGl() });
     const page = document.createElement('section');
     const glass = document.createElement('article');

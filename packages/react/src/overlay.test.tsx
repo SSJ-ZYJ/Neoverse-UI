@@ -102,7 +102,6 @@ test('UiContextMenu renders menu rows, separators, headings and checkable state'
     'class="ui-overlay-panel ui-context-menu material-glass-immersive nv-presence"',
   );
   // A context menu owns a nested submenu popover, so the runtime owns outside dismissal.
-  // 上下文菜单拥有一个嵌套的二级浮层，因此外部关闭由运行时负责。
   expect(html).toContain('popover="manual"');
   expect(html).toContain('role="menu"');
   expect(html).toContain('aria-label="Page actions"');

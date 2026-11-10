@@ -36,8 +36,6 @@ const staggerReplay = ref(0);
 // The specimen mirrors the portal header: the lab language is the trigger, so switching it
 // resizes every box at once. Nothing is stored locally — the composable samples the visible
 // widths before the copy swaps and animates them to their natural widths afterwards.
-// 示例对应门户页头：以实验室语言作为触发值，切换时整组盒子一起改变尺寸。这里不保存本地状态——
-// 组合式函数在文案替换前采样可见宽度，替换后播放到自然宽度。
 const widthStage = ref<HTMLElement | null>(null);
 // biome-ignore lint/correctness/useHookAtTopLevel: Vue composables belong at <script setup> top level; the playground's React dependency makes Biome apply React hook rules here.
 useLayoutWidthMotion({
@@ -152,9 +150,11 @@ const variantLabels = computed(() =>
           variant="secondary"
           @click="presenceOn = !presenceOn"
         >
-          {{ presenceOn
+          {{
+            presenceOn
               ? localize(presenceCopy.hide, props.locale)
-              : localize(presenceCopy.visible, props.locale) }}
+              : localize(presenceCopy.visible, props.locale)
+          }}
         </UiButton>
       </template>
 

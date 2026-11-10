@@ -13,14 +13,15 @@ where it lives and how it is maintained.
 docs/                          current state of the repository
   AGENTS.md                    this file
   architecture.md              workspace layout and package responsibilities
+  code-style.md                language, naming, abbreviation and terminology rules
   component-contract-matrix.md component maturity policy and current baseline
   component-requests.md        cross-project component request intake
   consumer-sizing.md           consumer component sizing baseline
-  form-control-contract.md     form control behaviour and accessibility
+  form-control-contract.md     form control behavior and accessibility
   framework-parity.md          Vue / React equivalents
   material-standards.md        Aurora Glass optical and interaction contract
   overlay-contract.md          overlay positioning and dismissal
-  terminal-composition.md      terminal composition and history behaviour
+  terminal-composition.md      terminal composition and history behavior
   releasing.md                 release process, gates and automation
   migration-0.2.0.md           historical upgrade path
   migration-0.3.0.md           current upgrade guide
@@ -48,6 +49,7 @@ to `docs/` that the structure does not list.
 | Fact | Maintained in |
 | --- | --- |
 | Repository engineering constraints and agent intake | [AGENTS.md](../AGENTS.md) |
+| Source language, naming, abbreviations and terminology | [code-style.md](code-style.md) |
 | Project overview, install and usage | [README.md](../README.md) |
 | Workspace layout, package responsibilities, module boundaries | [architecture.md](architecture.md) |
 | Component maturity policy and current status | [component-contract-matrix.md](component-contract-matrix.md) |
@@ -100,5 +102,5 @@ requires repository-relative `evidence` paths in `contracts/component-matrix.jso
 to name files that still exist. It runs as part of `bun run lint` and
 `bun run release:check`.
 
-Documentation that describes a behaviour change ships in the same commit as the
+Documentation that describes a behavior change ships in the same commit as the
 change.

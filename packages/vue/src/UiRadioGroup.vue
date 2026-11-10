@@ -77,9 +77,9 @@ function onOptionChange(value: FormControlValue, event: Event) {
       </span>
       <span class="ui-choice__content">
         <span class="ui-choice__label">{{ option.label }}</span>
-        <span v-if="option.description" class="ui-choice__description"
-          >{{ option.description }}</span
-        >
+        <span v-if="option.description" class="ui-choice__description">{{
+          option.description
+        }}</span>
       </span>
     </label>
   </div>
