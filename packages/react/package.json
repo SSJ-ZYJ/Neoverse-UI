@@ -32,7 +32,8 @@
     "test": "NODE_ENV=test bun test src"
   },
   "peerDependencies": {
-    "react": ">=19.0.0 <20.0.0"
+    "react": ">=19.0.0 <20.0.0",
+    "react-dom": ">=19.0.0 <20.0.0"
   },
   "dependencies": {
     "@neoverse-ui/motion": "^0.2.2",

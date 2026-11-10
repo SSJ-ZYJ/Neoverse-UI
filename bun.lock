@@ -43,7 +43,7 @@
     },
     "packages/glass-runtime": {
       "name": "@neoverse-ui/glass-runtime",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "devDependencies": {
         "happy-dom": "^21.0.4",
         "vitest": "^5.1.0",
@@ -51,22 +51,22 @@
     },
     "packages/motion": {
       "name": "@neoverse-ui/motion",
-      "version": "0.2.1",
+      "version": "0.2.2",
       "dependencies": {
-        "@neoverse-ui/tokens": "^0.3.0",
+        "@neoverse-ui/tokens": "^0.3.1",
       },
     },
     "packages/overlay-runtime": {
       "name": "@neoverse-ui/overlay-runtime",
-      "version": "0.3.0",
+      "version": "0.3.1",
     },
     "packages/react": {
       "name": "@neoverse-ui/react",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
-        "@neoverse-ui/motion": "^0.2.1",
-        "@neoverse-ui/overlay-runtime": "^0.3.0",
-        "@neoverse-ui/tailwind": "^0.3.0",
+        "@neoverse-ui/motion": "^0.2.2",
+        "@neoverse-ui/overlay-runtime": "^0.3.1",
+        "@neoverse-ui/tailwind": "^0.3.1",
       },
       "devDependencies": {
         "@types/react": "^19.2.18",
@@ -77,14 +77,15 @@
       },
       "peerDependencies": {
         "react": ">=19.0.0 <20.0.0",
+        "react-dom": ">=19.0.0 <20.0.0",
       },
     },
     "packages/tailwind": {
       "name": "@neoverse-ui/tailwind",
-      "version": "0.3.0",
+      "version": "0.3.1",
       "dependencies": {
-        "@neoverse-ui/motion": "^0.2.1",
-        "@neoverse-ui/tokens": "^0.3.0",
+        "@neoverse-ui/motion": "^0.2.2",
+        "@neoverse-ui/tokens": "^0.3.1",
       },
       "devDependencies": {
         "@tailwindcss/cli": "4.3.3",
@@ -93,15 +94,15 @@
     },
     "packages/tokens": {
       "name": "@neoverse-ui/tokens",
-      "version": "0.3.0",
+      "version": "0.3.1",
     },
     "packages/vue": {
       "name": "@neoverse-ui/vue",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "dependencies": {
-        "@neoverse-ui/motion": "^0.2.1",
-        "@neoverse-ui/overlay-runtime": "^0.3.0",
-        "@neoverse-ui/tailwind": "^0.3.0",
+        "@neoverse-ui/motion": "^0.2.2",
+        "@neoverse-ui/overlay-runtime": "^0.3.1",
+        "@neoverse-ui/tailwind": "^0.3.1",
       },
       "devDependencies": {
         "@vitejs/plugin-vue": "^6.0.10",
