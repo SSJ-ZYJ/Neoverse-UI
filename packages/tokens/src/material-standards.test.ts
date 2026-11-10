@@ -107,3 +107,29 @@ test('hover and press do not rewrite filled-button optics or dim the whole mater
   expect(css).toContain('> :not(.ui-button__edge-field)');
   expect(css).not.toContain('background-color: var(--neoverse-control-button-filled-hover-fill)');
 });
+
+test('opted-in Glass strokes precede highlights without changing button edges', async () => {
+  const material = await source('material.css');
+  const dark = await source('themes/dark.css');
+  const css = await Bun.file(new URL('../../tailwind/src/theme.css', import.meta.url)).text();
+
+  expect(material).toContain('--neoverse-material-edge-stroke: 0 0 transparent;');
+  expect(dark).toMatch(/--neoverse-material-edge-stroke:\s*inset 0 0 0/);
+  expect(css).toMatch(
+    /:not\(\s*\.ui-button\s*\)\[data-neoverse-glass-edge-stroke\]\s*\{\s*box-shadow:\s*var\(--neoverse-material-edge-stroke\),\s*var\(--neoverse-material-edge-highlight\)/,
+  );
+  expect(css).toMatch(
+    /\[data-neoverse-glass-edge-stroke\]\s*\{\s*box-shadow:\s*var\(--neoverse-material-edge-stroke\),\s*var\(--neoverse-material-shadow\)/,
+  );
+});
+
+test('reduced transparency keeps the opted-in stroke ahead of the fallback shadow', async () => {
+  const css = await Bun.file(new URL('../../tailwind/src/theme.css', import.meta.url)).text();
+  const reduced = css.slice(css.indexOf('@media (prefers-reduced-transparency: reduce)'));
+
+  expect(reduced).toContain('-webkit-backdrop-filter: none;');
+  expect(reduced).toContain('backdrop-filter: none;');
+  expect(reduced).toMatch(
+    /:not\(\s*\.ui-button\s*\)\[data-neoverse-glass-edge-stroke\]\s*\{\s*box-shadow:\s*var\(--neoverse-material-edge-stroke\),\s*var\(--neoverse-material-edge-highlight\)/,
+  );
+});

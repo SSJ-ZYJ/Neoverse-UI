@@ -179,10 +179,14 @@ Reduced transparency disables the renderer. The CSS fallback uses alpha-only
 gradient masks and backdrop brightness. The historical `backend: 'native'`
 option is not a remedy for the problems recorded in the repair guardrails.
 
-The 0.2.0 reference test checks the dark response on grey and pale backdrops;
-light edge continuity and corner emphasis have separate checks. Runtime tests cover theme
-switching, canvas reuse and unchanged body blur; live-canvas tests exercise the
-different light and dark composition models against changing background pixels. The grey backdrop case also bounds how far blue may lead the green and red content, so the cool edge cannot regress into a cast.
+Unit tests verify runtime ownership, composition, scheduling and accessibility
+transitions. Chromium integration tests check tier blur, shared canvas placement,
+painted strokes and the CSS fallback when WebGL is absent. A separate Linux
+Chromium + SwiftShader suite measures lit/unlit pixel deltas, edge continuity,
+corner emphasis and interior leakage in fixed diagnostic scenes. This is an
+optical regression signal, not proof of spatial refraction or final appearance:
+historical 0.2.0 color reference matching, dynamic background response and
+real-device performance remain subject to manual acceptance.
 
 ## Motion
 

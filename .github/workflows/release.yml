@@ -24,6 +24,7 @@ jobs:
       metadata-checks: ${{ steps.scope.outputs.metadata-checks }}
       quality-checks: ${{ steps.scope.outputs.quality-checks }}
       browser-checks: ${{ steps.scope.outputs.browser-checks }}
+      optics-checks: ${{ steps.scope.outputs.optics-checks }}
       ci-verified: ${{ steps.scope.outputs.ci-verified }}
     steps:
       - name: Checkout repository
@@ -129,6 +130,7 @@ jobs:
       # that evidence (direct push, bypassed CI, failed lookup) the browser
       # matrix is the only proof left, so it runs.
       browser-checks: ${{ needs.scope.outputs.ci-verified != 'true' && needs.scope.outputs.browser-checks == 'true' }}
+      optics-checks: ${{ needs.scope.outputs.ci-verified != 'true' && needs.scope.outputs.optics-checks == 'true' }}
       release-assets: ${{ needs.select-mode.outputs.mode == 'publish' }}
 
   pack:

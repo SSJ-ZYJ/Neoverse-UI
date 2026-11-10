@@ -103,10 +103,14 @@ material highlights. The stroke is geometry, not refraction: it does not track
 backdrop color, which is what keeps a nav bar's silhouette readable while it
 scrolls over both empty and content-heavy areas.
 
-Live-pixel tests check light edge continuity and corner emphasis, while the
-0.2.0 reference test checks the dark response on grey and pale backdrops. Runtime tests cover theme
-switching, canvas reuse and unchanged body blur; live-canvas tests exercise the
-different light and dark composition models against changing background pixels. The grey backdrop case also bounds how far blue may lead the green and red content, so the cool edge cannot regress into a cast.
+Token and runtime tests guard tier optics, shader composition, frame scheduling,
+canvas ownership and reduced-transparency transitions. Chromium integration tests
+also verify the CSS blur and fallback when WebGL is unavailable. The isolated
+Linux Chromium + SwiftShader optical suite records actual lit/unlit edge
+pixels across both themes, three tiers and four backdrops; the short CI suite
+checks measurable edge regressions. Historical 0.2.0 color-reference matching,
+true backdrop response and overall appearance are not established by those
+diagnostic measurements and still require manual rendering acceptance.
 
 ### Glass repair guardrails
 

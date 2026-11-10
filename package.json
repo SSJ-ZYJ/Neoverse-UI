@@ -15,6 +15,7 @@
     "build:types": "bun run --filter @neoverse-ui/tokens build && bun run --filter @neoverse-ui/motion build && bun run --filter @neoverse-ui/overlay-runtime build && bun run --filter @neoverse-ui/glass-runtime build && bun run --filter @neoverse-ui/vue build && bun run --filter @neoverse-ui/react build",
     "test:e2e": "bun run build && playwright test",
     "test:e2e:cross-browser": "bun run build && bunx playwright test --config=playwright.cross-browser.config.ts --workers=2 --reporter=line",
+    "test:glass:optics": "bun run build && playwright test --config=playwright.optics.config.ts",
     "lint": "bun run lint:biome && bun run lint:text && bun run lint:language && bun run check:docs && bun run lint:style && bun run lint:tailwind && bun run check:contracts",
     "lint:biome": "biome lint .",
     "lint:text": "bun scripts/check-text-integrity.ts",

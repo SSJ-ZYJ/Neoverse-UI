@@ -3,7 +3,12 @@ import { pathToFileURL } from 'node:url';
 
 // A rendered UI change also needs source quality checks. Unknown paths fail closed.
 export function classifyPaths(paths) {
-  const checks = { metadataChecks: false, qualityChecks: false, browserChecks: false };
+  const checks = {
+    metadataChecks: false,
+    qualityChecks: false,
+    browserChecks: false,
+    opticsChecks: false,
+  };
 
   for (const path of paths) {
     if (!path) continue;
@@ -29,6 +34,14 @@ export function classifyPaths(paths) {
       // metadata gate instead of skipping validation entirely.
       checks.metadataChecks = true;
     } else if (
+      path.startsWith('tests/optics/') ||
+      path === 'tests/support/glass-optics.ts' ||
+      path === 'playwright.optics.config.ts'
+    ) {
+      // The optical harness is validated by its dedicated job; changing it
+      // alone does not require all desktop/mobile interaction shards.
+      checks.qualityChecks = true;
+    } else if (
       path.startsWith('tests/e2e/') ||
       path.startsWith('tests/support/') ||
       path.startsWith('packages/') ||
@@ -51,6 +64,24 @@ export function classifyPaths(paths) {
       checks.qualityChecks = true;
       checks.browserChecks = true;
     }
+
+    // The dedicated software-rendered suite is only needed for changes that
+    // could alter the Glass optical output or its own measurement harness.
+    if (
+      path.startsWith('packages/glass-runtime/') ||
+      path.startsWith('packages/tokens/src/') ||
+      path.startsWith('packages/tailwind/src/') ||
+      path === 'apps/playground/src/glass-runtime.ts' ||
+      path === 'apps/playground/src/modules/GlassModule.vue' ||
+      path.startsWith('tests/optics/') ||
+      path === 'tests/support/glass-optics.ts' ||
+      path === 'playwright.optics.config.ts' ||
+      path === 'package.json' ||
+      path === 'bun.lock'
+    ) {
+      checks.opticsChecks = true;
+      checks.qualityChecks = true;
+    }
   }
 
   return checks;
@@ -61,6 +92,7 @@ export function outputs(checks) {
     `metadata-checks=${checks.metadataChecks}`,
     `quality-checks=${checks.qualityChecks}`,
     `browser-checks=${checks.browserChecks}`,
+    `optics-checks=${checks.opticsChecks}`,
   ].join('\n');
 }
 

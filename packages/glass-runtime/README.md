@@ -56,10 +56,15 @@ that can be underneath those surfaces. The renderer limits each edge pass to six
 occluding rectangles; this marker controls visibility and does not sample or
 refract background pixels.
 
-The 0.2.0 reference test checks the dark response on grey and pale backdrops.
-Light edge continuity and corner emphasis have separate checks. Runtime tests cover theme
-switching, canvas reuse and unchanged body blur; live-canvas tests exercise the
-different light and dark composition models against changing background pixels. The grey backdrop case also bounds how far blue may lead the green and red content, so the cool edge cannot regress into a cast.
+Runtime unit tests cover WebGL selection, context loss and restore, shared canvas
+reuse, frame scheduling and reduced-transparency transitions. Chromium integration
+tests check the retained CSS blur, renderer ownership and no-WebGL fallback.
+An isolated Linux Chromium + SwiftShader suite records lit/unlit pixel deltas
+for edge continuity, corner response and interior leakage across three tiers,
+two themes and four fixed backdrops. It is a diagnostic regression signal, not
+a validated 0.2.0 color-reference comparison or proof of spatial refraction.
+Final appearance, live-backdrop behavior and performance still require
+manual rendering acceptance.
 
 ```sh
 bun add @neoverse-ui/glass-runtime

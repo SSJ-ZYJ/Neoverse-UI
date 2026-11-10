@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import baseConfig from './playwright.config';
 
-const playgroundPort = Number(process.env.NEOVERSE_UI_PLAYWRIGHT_PORT ?? 3100);
+const playgroundPort = Number(process.env.NEOVERSE_UI_PLAYWRIGHT_PORT ?? 3200);
 const playgroundBaseUrl = `http://127.0.0.1:${playgroundPort}`;
 
 export default defineConfig({

@@ -1714,6 +1714,52 @@ describe('Glass renderer', () => {
     );
   });
 
+  it('resizes the backing canvas with the viewport using the capped device pixel ratio', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    let viewportWidth = 640;
+    let viewportHeight = 480;
+    vi.spyOn(window, 'innerWidth', 'get').mockImplementation(() => viewportWidth);
+    vi.spyOn(window, 'innerHeight', 'get').mockImplementation(() => viewportHeight);
+    vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(3);
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+    const frames: FrameRequestCallback[] = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback);
+      return frames.length;
+    });
+
+    const renderer = createTestRenderer();
+    renderer.mount();
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    expect(canvas?.width).toBe(1280);
+    expect(canvas?.height).toBe(960);
+
+    viewportWidth = 800;
+    viewportHeight = 500;
+    window.dispatchEvent(new Event('resize'));
+    window.dispatchEvent(new Event('resize'));
+    expect(frames).toHaveLength(1);
+    frames.shift()?.(32);
+    expect(canvas?.width).toBe(1600);
+    expect(canvas?.height).toBe(1000);
+    expect(gl.viewport).toHaveBeenLastCalledWith(0, 0, 1600, 1000);
+    expect(gl.uniform2f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_viewport' }),
+      800,
+      500,
+    );
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_pixel_ratio' }),
+      2,
+    );
+  });
+
   it('discovers the established Aurora Glass surface alias', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
@@ -1917,6 +1963,90 @@ describe('Glass renderer', () => {
     expect(gl.drawArrays).not.toHaveBeenCalled();
     window.matchMedia = originalMatchMedia;
     renderer.destroy();
+  });
+
+  it('releases and restores one shared canvas when reduced transparency changes', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+
+    let reduced = false;
+    const transparencyListeners = new Set<(event: MediaQueryListEvent) => void>();
+    const originalMatchMedia = window.matchMedia.bind(window);
+    const transparencyMedia = {
+      get matches() {
+        return reduced;
+      },
+      media: '(prefers-reduced-transparency: reduce)',
+      addEventListener: vi.fn((name: string, listener: (event: MediaQueryListEvent) => void) => {
+        if (name === 'change') transparencyListeners.add(listener);
+      }),
+      removeEventListener: vi.fn((name: string, listener: (event: MediaQueryListEvent) => void) => {
+        if (name === 'change') transparencyListeners.delete(listener);
+      }),
+    } as unknown as MediaQueryList;
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) =>
+      query === transparencyMedia.media ? transparencyMedia : originalMatchMedia(query),
+    );
+    const changeTransparency = (matches: boolean) => {
+      reduced = matches;
+      for (const listener of transparencyListeners) {
+        listener({ matches } as MediaQueryListEvent);
+      }
+    };
+    const scheduledFrames: FrameRequestCallback[] = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      scheduledFrames.push(callback);
+      return scheduledFrames.length;
+    });
+    const cancelFrame = vi
+      .spyOn(window, 'cancelAnimationFrame')
+      .mockImplementation(() => undefined);
+
+    const renderer = createTestRenderer();
+    renderer.mount();
+    expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
+    expect(transparencyListeners.size).toBe(1);
+
+    window.dispatchEvent(new Event('scroll'));
+    expect(scheduledFrames).toHaveLength(1);
+    changeTransparency(true);
+    expect(cancelFrame).toHaveBeenCalledTimes(1);
+    expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBeNull();
+    expect(document.documentElement.hasAttribute(glassRendererAttribute)).toBe(false);
+
+    changeTransparency(false);
+    expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
+    expect(document.documentElement.getAttribute(glassRendererAttribute)).toBe('webgl');
+    expect(gl.createProgram).toHaveBeenCalledTimes(2);
+    expect(transparencyListeners.size).toBe(1);
+
+    renderer.destroy();
+    expect(transparencyListeners.size).toBe(0);
+    expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBeNull();
+  });
+
+  it('deduplicates explicit non-forced refreshes without recreating the shader program', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-elevated';
+    setRect(glass, {});
+    document.body.append(glass);
+
+    const renderer = createTestRenderer();
+    renderer.mount();
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    renderer.refresh(false);
+    renderer.refresh(false);
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+
+    renderer.refresh(true);
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+    expect(gl.createProgram).toHaveBeenCalledTimes(1);
   });
 
   it('ignores decorative style mutations outside every Glass surface', async () => {

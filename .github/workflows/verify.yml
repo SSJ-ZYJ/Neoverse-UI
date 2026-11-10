@@ -15,6 +15,10 @@ on:
         description: Run the browser matrix for changes affecting rendered UI.
         type: boolean
         default: true
+      optics-checks:
+        description: Run the SwiftShader optical smoke suite for Glass changes.
+        type: boolean
+        default: false
       release-assets:
         description: Upload the built workspace assets a release job packs.
         type: boolean
@@ -109,7 +113,7 @@ jobs:
       # Release packing consumes the same assets, so upload for that gate too
       # instead of forcing a browser matrix just to obtain them.
       - name: Upload playground assets for browser shards and release packing
-        if: inputs.quality-checks && (inputs.browser-checks || inputs.release-assets)
+        if: inputs.quality-checks && (inputs.browser-checks || inputs.optics-checks || inputs.release-assets)
         uses: actions/upload-artifact@v4
         with:
           name: verified-workspace-assets
@@ -186,10 +190,57 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+  glass-optics-linux:
+    name: Glass optical smoke (Linux)
+    needs: quality-linux
+    if: inputs.optics-checks
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.0
+      - name: Cache Bun package cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ runner.os }}-bun-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-bun-
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+      - name: Reuse validated playground assets
+        uses: actions/download-artifact@v4
+        with:
+          name: verified-workspace-assets
+          path: .
+      - name: Cache Playwright Chromium
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+      - name: Install Chromium
+        run: bunx playwright install --with-deps chromium
+      - name: Run SwiftShader optical smoke
+        run: bunx playwright test --config=playwright.optics.config.ts --grep=@optics-smoke --reporter=list
+      - name: Upload failed optical diagnostics
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: glass-optics-${{ github.run_attempt }}
+          path: test-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
   # Preserve the required Linux aggregate check on all change scopes.
   verify-linux:
     name: Verify workspace (Linux)
-    needs: [metadata-linux, quality-linux, browser-linux]
+    needs: [metadata-linux, quality-linux, browser-linux, glass-optics-linux]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -203,8 +254,11 @@ jobs:
       - name: Require all browser shards
         if: inputs.browser-checks
         run: test "${{ needs.browser-linux.result }}" = "success"
+      - name: Require Glass optical smoke
+        if: inputs.optics-checks
+        run: test "${{ needs.glass-optics-linux.result }}" = "success"
       - name: Complete documentation-only check
-        if: ${{ !inputs.metadata-checks && !inputs.quality-checks && !inputs.browser-checks }}
+        if: ${{ !inputs.metadata-checks && !inputs.quality-checks && !inputs.browser-checks && !inputs.optics-checks }}
         run: echo 'Documentation-only change; no package or browser checks required.'
 
   verify-windows:
