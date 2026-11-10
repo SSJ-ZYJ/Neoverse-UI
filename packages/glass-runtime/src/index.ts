@@ -1625,9 +1625,11 @@ class GlassRendererImpl implements GlassRenderer {
         return;
       }
       if (timestamp > 0) this.lastFrameTime = timestamp;
-      this.render(false);
-      // CSS transforms/opacity do not emit DOM mutations or resize events.
-      // Repaint while affected surfaces move, then clear their final frame.
+      // CSS transforms/opacity emit no DOM mutation or resize event, so the
+      // static scene signature cannot see them. Scan the live animations first:
+      // one that can move or reveal an edge has to repaint this frame rather
+      // than be deduplicated against the previous one. Resting scenes keep the
+      // signature dedup, and the interval cap above still bounds the rate.
       let movingEdges = false;
       for (const element of this.animatedElements) {
         const animations = element.getAnimations?.() ?? [];
@@ -1637,6 +1639,7 @@ class GlassRendererImpl implements GlassRenderer {
           movingEdges = true;
         }
       }
+      this.render(movingEdges);
       // Retain live decorative targets so clip/style changes can make them
       // relevant again, without reserving frames while their edges rest.
       if (movingEdges) this.scheduleRefresh();
