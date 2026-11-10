@@ -74,6 +74,10 @@
      inside element for dismissal. */
   /* 二级菜单是顶层里独立的 manual 浮层，像原生二级菜单那样贴着面板边缘。它直接采用共享浮层配方，
      而不是嵌套玻璃工具类（材质契约禁止嵌套），面板把它登记为内部元素以处理关闭。 */
+  /* The adapter overlaps the column onto the panel edge by one edge width. The
+     shared Glass canvas paints above the top layer, so the column must cover the
+     panel's rim and be picked up by the renderer's occlusion hit test; otherwise
+     the panel edge paints across the column as soon as it opens. */
   .ui-context-menu__submenu {
     position: fixed;
     inset: auto;
@@ -94,7 +98,7 @@
     box-shadow: var(--neoverse-overlay-shadow);
     -webkit-backdrop-filter: var(--neoverse-overlay-filter);
     backdrop-filter: var(--neoverse-overlay-filter);
-    z-index: var(--neoverse-overlay-layer);
+    z-index: calc(var(--neoverse-overlay-layer) + 1);
   }
 
   .ui-context-menu__submenu:popover-open,

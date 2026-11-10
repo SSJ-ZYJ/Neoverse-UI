@@ -227,7 +227,8 @@
   .nv-presence:is(
     :popover-open,
     .ui-overlay-panel--fallback-open,
-    .ui-select__popover--fallback-open
+    .ui-select__popover--fallback-open,
+    .ui-context-menu__submenu--open
   ) {
     transition:
       opacity var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
@@ -246,13 +247,26 @@
     .nv-presence:is(
         :popover-open,
         .ui-overlay-panel--fallback-open,
-        .ui-select__popover--fallback-open
+        .ui-select__popover--fallback-open,
+        .ui-context-menu__submenu--open
       ) {
       opacity: 0;
       translate: var(--neoverse-motion-from-translate, 0 0);
       scale: var(--neoverse-motion-from-scale, 1);
       filter: var(--neoverse-motion-from-filter, blur(0));
     }
+  }
+
+  /* @starting-style only seeds an element's first rendered frame. An adapter
+     that swaps content inside an already-open top layer surface pins this
+     attribute for one frame, then releases it so the same enter transition
+     replays. Declared after the resting rules so the pinned frame wins. */
+  .nv-presence[data-neoverse-motion-replay='from'] {
+    transition: none;
+    opacity: 0;
+    translate: var(--neoverse-motion-from-translate, 0 0);
+    scale: var(--neoverse-motion-from-scale, 1);
+    filter: var(--neoverse-motion-from-filter, blur(0));
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -263,7 +277,8 @@
     .nv-presence:is(
         :popover-open,
         .ui-overlay-panel--fallback-open,
-        .ui-select__popover--fallback-open
+        .ui-select__popover--fallback-open,
+        .ui-context-menu__submenu--open
       ) {
       transition-duration: 1ms;
     }

@@ -28,9 +28,7 @@ const luminance = (hex: string): number => {
     .slice(1)
     .match(/../g)
     ?.map((channel) => Number.parseInt(channel, 16) / 255)
-    .map((channel) =>
-      channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4,
-    );
+    .map((channel) => (channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4));
   if (channels === undefined || channels.length !== 3) throw new Error(`Invalid ${hex}`);
   const [red, green, blue] = channels as [number, number, number];
   return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
@@ -53,10 +51,7 @@ for (const fileName of files) {
 
 for (const target of contrastTargets) {
   const css = await Bun.file(new URL(`../dist/${target.fileName}`, import.meta.url)).text();
-  const ratio = contrast(
-    readHex(css, '--color-fg-subtle'),
-    readHex(css, '--color-canvas-overlay'),
-  );
+  const ratio = contrast(readHex(css, '--color-fg-subtle'), readHex(css, '--color-canvas-overlay'));
   if (ratio < target.floor) {
     throw new Error(
       `${target.fileName}: fg-subtle contrast ${ratio.toFixed(2)}:1 is below ${target.floor}:1`,

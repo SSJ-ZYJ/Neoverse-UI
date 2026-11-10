@@ -116,11 +116,25 @@ focus on open, Escape and selection closing the panel, and focus restoration. Di
 adapter points `data-neoverse-motion-origin` at the opposite edge so entrance motion always grows
 from the resting edge.
 
-A row with `children` opens a submenu on click or ArrowRight, and ArrowLeft or the back row returns
-to the parent. The submenu replaces the top-level rows inside the same panel instead of opening a
-second popover: a second `popover="auto"` would light-dismiss the parent. The panel keeps the width it
-had when the submenu opened, so switching levels does not resize the surface, and the back row is
-separated by the same rule as a heading.
+A row with `children` opens a submenu on click, hover or ArrowRight, and ArrowLeft
+returns focus to the parent row. The submenu is a second `popover="manual"` in the
+top layer beside the panel, so the parent rows stay visible and the panel keeps its
+width. The adapter registers the column with `containedElements` so a pointer press
+inside it does not dismiss the parent. Both surfaces dismiss together.
+
+The column overlaps the panel edge by one Aurora Glass edge width instead of merely
+touching it. The shared Glass edge canvas paints above the top layer, and its
+occlusion hit test samples just inside a surface's bounds: the overlap puts the
+column above the panel's rim and makes the renderer treat the column as an occluder,
+so the panel edge cannot paint across the column. The uncovered parts of the panel
+rim stay continuous.
+
+Opening a column, switching between columns with the pointer, and touch or keyboard
+opens all replay the shared presence entrance. A switch reuses the same popover node,
+so `@starting-style` cannot seed a second entrance: adapters pin
+`data-neoverse-motion-replay="from"` for one frame through `replayPresence()` and
+release it into the same enter transition. Re-entering the row that is already open
+does not restart the animation.
 
 `autoFocus` defaults to true. A pointer open passes `false` so the region keeps focus and an editor
 keeps its selection highlight; arrow keys then enter the panel at its first or last row. A keyboard

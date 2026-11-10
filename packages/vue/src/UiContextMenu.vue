@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { replayPresence } from '@neoverse-ui/motion';
 import {
   type AnchoredOverlayOptions,
   hideAnchoredOverlay,
@@ -33,8 +34,15 @@ const openSubmenu = ref<ContextMenuItem | null>(null);
 const submenuRef = ref<HTMLElement | null>(null);
 // The row that opened the column, kept so the column can follow the panel while it moves.
 let submenuOpener: HTMLButtonElement | null = null;
+// Synchronous counterpart of the open state: a touch sends pointerenter and
+// click before the first nextTick has mounted the column.
+let submenuEntryId: string | null = null;
 let observer: ResizeObserver | null = null;
 const submenuEntries = computed(() => openSubmenu.value?.children ?? []);
+// The column overlaps the panel rim by one Glass edge width. Covering the rim is
+// not enough on its own: the shared Glass edge canvas paints above the top layer,
+// and only an occluder inside the panel's 2px hit-test sample suppresses that rim.
+const submenuEdgeOverlap = 4;
 
 function isItem(entry: ContextMenuEntry): entry is ContextMenuItem {
   return !('type' in entry);
@@ -164,6 +172,10 @@ function selectItem(item: ContextMenuItem) {
  */
 async function enterSubmenu(item: ContextMenuItem, opener: HTMLButtonElement, moveFocus = true) {
   if (item.disabled || !item.children?.length) return;
+  // A touch sends pointerenter before click; replaying the same column would
+  // restart its entrance under the user's finger.
+  const alreadyOpen = submenuEntryId === item.id;
+  submenuEntryId = item.id;
   openSubmenu.value = item;
   submenuOpener = opener;
   await nextTick();
@@ -178,6 +190,10 @@ async function enterSubmenu(item: ContextMenuItem, opener: HTMLButtonElement, mo
   // The column is placed after it is shown so its measured size is real, and re-placed
   // whenever the panel or the page moves: a fixed column must not drift from its panel.
   placeSubmenu(opener);
+  // Switching parents reuses the same popover node, so its first-render
+  // starting-style entrance never fires again. Replay it for every open and
+  // switch, including touch and keyboard opens.
+  if (!alreadyOpen) replayPresence(submenu);
   observer?.disconnect();
   observer = new ResizeObserver(() => placeSubmenu(opener));
   observer.observe(panel);
@@ -196,9 +212,11 @@ function placeSubmenu(opener: HTMLButtonElement) {
   const margin = 8;
   const width = submenu.offsetWidth;
   const height = submenu.offsetHeight;
-  // Flush with the panel edge, flipping to the inline start when the viewport has no room.
+  // Overlap the panel edge, flipping to the inline start when the viewport has no room.
   const toStart = panelRect.right + width > window.innerWidth - margin;
-  const left = toStart ? panelRect.left - width : panelRect.right;
+  const left = toStart
+    ? panelRect.left - width + submenuEdgeOverlap
+    : panelRect.right - submenuEdgeOverlap;
   // The column's own padding sits above its first row, so it is lifted by that amount to put
   // the first row on the parent item, the way a native submenu lines up.
   const paddingTop = Number.parseFloat(getComputedStyle(submenu).paddingTop) || 0;
@@ -229,7 +247,7 @@ function stopTrackingSubmenu() {
 function onItemPointerEnter(entry: ContextMenuItem, event: PointerEvent) {
   if (entry.disabled) return;
   if (entry.children?.length) {
-    if (openSubmenu.value?.id === entry.id) return;
+    if (submenuEntryId === entry.id) return;
     void enterSubmenu(entry, event.currentTarget as HTMLButtonElement, false);
     return;
   }
@@ -240,6 +258,7 @@ function onItemPointerEnter(entry: ContextMenuItem, event: PointerEvent) {
 /** Hides the submenu popover without touching focus or the selected entry. */
 function closeSubmenuPopover() {
   stopTrackingSubmenu();
+  submenuEntryId = null;
   const submenu = submenuRef.value;
   if (submenu === null) return;
   if (supportsPopover(submenu)) {

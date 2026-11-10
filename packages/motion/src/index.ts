@@ -69,6 +69,34 @@ export const presenceClassNames = {
 /** Attribute enabling zero-JS enter/exit on top-layer popover surfaces. */
 export const presenceLayerClassName = 'nv-presence';
 
+/** Attribute pinning an open top-layer surface to its presence enter frame. */
+export const presenceReplayAttribute = 'data-neoverse-motion-replay';
+
+const presenceReplayFrames = new WeakMap<HTMLElement, number>();
+
+/**
+ * Replay the shared presence entrance on an already-open top-layer surface.
+ * `@starting-style` only seeds the first rendered frame, so content swaps and
+ * touch opens pin the enter frame for one frame before releasing it into the
+ * same enter transition; the exit transition stays owned by `.nv-presence`.
+ */
+export function replayPresence(element: HTMLElement): void {
+  const view = element.ownerDocument.defaultView;
+  if (view === null) return;
+
+  const pending = presenceReplayFrames.get(element);
+  if (pending !== undefined) view.cancelAnimationFrame(pending);
+  element.setAttribute(presenceReplayAttribute, 'from');
+  // Releasing the pin in this task would collapse both style states into one
+  // recalculation and no transition would start.
+  void element.offsetWidth;
+  const frame = view.requestAnimationFrame(() => {
+    presenceReplayFrames.delete(element);
+    element.removeAttribute(presenceReplayAttribute);
+  });
+  presenceReplayFrames.set(element, frame);
+}
+
 /**
  * Class for mount-time entrances: the element plays its preset the moment it
  * is first rendered (spinner swap, check marks, tooltips), no adapter needed.

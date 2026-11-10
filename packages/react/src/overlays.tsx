@@ -1,3 +1,4 @@
+import { replayPresence } from '@neoverse-ui/motion';
 import {
   type AnchoredOverlayOptions,
   hideAnchoredOverlay,
@@ -404,6 +405,11 @@ const contextMenuItemRole = (item: UiContextMenuItem): string => {
 const checkableState = (item: UiContextMenuItem): Record<string, string> =>
   item.selection === undefined ? {} : { 'aria-checked': item.checked === true ? 'true' : 'false' };
 
+// The column overlaps the panel rim by one Glass edge width. Covering the rim is
+// not enough on its own: the shared Glass edge canvas paints above the top layer,
+// and only an occluder inside the panel's 2px hit-test sample suppresses that rim.
+const submenuEdgeOverlap = 4;
+
 export function UiContextMenu({
   entries,
   open,
@@ -425,6 +431,10 @@ export function UiContextMenu({
   // The submenu opens as a second column beside the panel instead of replacing the
   // top-level rows, so the parent item stays visible while the column is open.
   const [openSubmenu, setOpenSubmenu] = useState<UiContextMenuItem | null>(null);
+  // Synchronous counterpart of the state: pointerenter and click arrive in one
+  // interaction, before React commits the next render.
+  const submenuEntryId = useRef<string | null>(null);
+  const pendingSubmenu = useRef<{ opener: HTMLElement; moveFocus: boolean } | null>(null);
 
   const resolveOptions = useCallback((): AnchoredOverlayOptions | undefined => {
     const overlay = panelRef.current;
@@ -456,47 +466,6 @@ export function UiContextMenu({
 
   const enabledItems = useCallback(() => rowsOf(panelRef.current), [rowsOf]);
 
-  const enterSubmenu = useCallback(
-    (item: UiContextMenuItem, opener: HTMLElement) => {
-      if (item.disabled || !item.children?.length) return;
-      setOpenSubmenu(item);
-      // The column is its own manual popover flush with the panel edge, the way a native
-      // submenu is: it keeps the parent rows visible and carries its own glass material.
-      requestAnimationFrame(() => {
-        const panel = panelRef.current;
-        const submenu = submenuRef.current;
-        if (!panel || !submenu) return;
-        const panelRect = panel.getBoundingClientRect();
-        const openerRect = opener.getBoundingClientRect();
-        const margin = 8;
-        const width = submenu.offsetWidth;
-        const height = submenu.offsetHeight;
-        const toStart = panelRect.right + width > window.innerWidth - margin;
-        // The column's own padding sits above its first row, so it is lifted by that amount
-        // to put the first row on the parent item.
-        const paddingTop = Number.parseFloat(getComputedStyle(submenu).paddingTop) || 0;
-        submenu.style.setProperty(
-          '--neoverse-overlay-left',
-          `${toStart ? panelRect.left - width : panelRect.right}px`,
-        );
-        submenu.style.setProperty(
-          '--neoverse-overlay-top',
-          `${Math.min(
-            Math.max(margin, openerRect.top - paddingTop),
-            Math.max(margin, window.innerHeight - height - margin),
-          )}px`,
-        );
-        if (supportsPopover(submenu)) {
-          if (!submenu.matches(':popover-open')) submenu.showPopover();
-        } else {
-          submenu.classList.add('ui-context-menu__submenu--open');
-        }
-        rowsOf(submenu)[0]?.focus();
-      });
-    },
-    [rowsOf],
-  );
-
   const closeSubmenuPopover = useCallback(() => {
     const submenu = submenuRef.current;
     if (!submenu) return;
@@ -507,8 +476,86 @@ export function UiContextMenu({
     }
   }, []);
 
+  const enterSubmenu = useCallback(
+    (item: UiContextMenuItem, opener: HTMLElement, moveFocus = true) => {
+      if (item.disabled || !item.children?.length) return;
+      // A touch sends pointerenter before click: focus still has to enter the
+      // column, but replaying the same column would restart its entrance.
+      if (submenuEntryId.current === item.id) {
+        if (moveFocus) rowsOf(submenuRef.current)[0]?.focus();
+        return;
+      }
+      submenuEntryId.current = item.id;
+      pendingSubmenu.current = { opener, moveFocus };
+      setOpenSubmenu(item);
+    },
+    [rowsOf],
+  );
+
+  // A pointer-driven portal commits after the event, so a frame callback can
+  // run before the column exists. Open and place it once React has committed.
+  useEffect(() => {
+    if (openSubmenu === null) return;
+    const pending = pendingSubmenu.current;
+    const panel = panelRef.current;
+    const submenu = submenuRef.current;
+    if (pending === null || panel === null || submenu === null) return;
+    pendingSubmenu.current = null;
+
+    if (supportsPopover(submenu)) {
+      if (!submenu.matches(':popover-open')) submenu.showPopover();
+    } else {
+      submenu.classList.add('ui-context-menu__submenu--open');
+    }
+
+    // Show first so the measured size is real, then rest the column on the panel
+    // edge. It overlaps by one edge width to own that rim instead of letting the
+    // panel's Glass edge paint across it.
+    const panelRect = panel.getBoundingClientRect();
+    const openerRect = pending.opener.getBoundingClientRect();
+    const margin = 8;
+    const width = submenu.offsetWidth;
+    const height = submenu.offsetHeight;
+    const toStart = panelRect.right + width > window.innerWidth - margin;
+    // The column's own padding sits above its first row, so it is lifted by that amount
+    // to put the first row on the parent item.
+    const paddingTop = Number.parseFloat(getComputedStyle(submenu).paddingTop) || 0;
+    submenu.style.setProperty(
+      '--neoverse-overlay-left',
+      `${
+        toStart ? panelRect.left - width + submenuEdgeOverlap : panelRect.right - submenuEdgeOverlap
+      }px`,
+    );
+    submenu.style.setProperty(
+      '--neoverse-overlay-top',
+      `${Math.min(
+        Math.max(margin, openerRect.top - paddingTop),
+        Math.max(margin, window.innerHeight - height - margin),
+      )}px`,
+    );
+    // Switching parents reuses the same popover node, so its first-render
+    // starting-style entrance never fires again. Replay it for every open and
+    // switch, including touch and keyboard opens.
+    replayPresence(submenu);
+    if (pending.moveFocus) rowsOf(submenu)[0]?.focus();
+  }, [openSubmenu, rowsOf]);
+
+  /** Hover opens a column and switches between columns without moving focus. */
+  const onItemPointerEnter = (item: UiContextMenuItem, target: HTMLButtonElement) => {
+    if (item.disabled) return;
+    if (item.children?.length) {
+      if (submenuEntryId.current === item.id) return;
+      enterSubmenu(item, target, false);
+      return;
+    }
+    closeSubmenuPopover();
+    submenuEntryId.current = null;
+    setOpenSubmenu(null);
+  };
+
   const leaveSubmenu = useCallback(() => {
     closeSubmenuPopover();
+    submenuEntryId.current = null;
     setOpenSubmenu(null);
     requestAnimationFrame(() => enabledItems()[0]?.focus());
   }, [closeSubmenuPopover, enabledItems]);
@@ -539,6 +586,7 @@ export function UiContextMenu({
     }
     // The submenu is its own popover, so it must be dismissed with the panel.
     closeSubmenuPopover();
+    submenuEntryId.current = null;
     setOpenSubmenu(null);
     hideAnchoredOverlay(options);
     return () => stopOverlayTracking(options.overlay);
@@ -686,6 +734,7 @@ export function UiContextMenu({
               }
               aria-controls={entry.children?.length ? submenuId : undefined}
               {...checkableState(entry)}
+              onPointerEnter={(event) => onItemPointerEnter(entry, event.currentTarget)}
               onClick={(event) =>
                 entry.children?.length
                   ? enterSubmenu(entry, event.currentTarget)

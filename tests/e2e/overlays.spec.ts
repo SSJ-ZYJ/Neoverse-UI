@@ -25,6 +25,45 @@ async function menuParts(page: Page, adapterName: string) {
   return { shell, trigger, panel: shell.locator('.ui-dropdown-menu__panel') };
 }
 
+type SubmenuMotionLog = { count: number };
+
+function motionLog(page: Page): Promise<SubmenuMotionLog | undefined> {
+  return page.evaluate(
+    () => (window as Window & { __submenuMotions?: SubmenuMotionLog }).__submenuMotions,
+  );
+}
+
+async function recordSubmenuMotion(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const log: SubmenuMotionLog = { count: 0 };
+    (window as Window & { __submenuMotions?: SubmenuMotionLog }).__submenuMotions = log;
+    document.addEventListener(
+      'transitionstart',
+      (event) => {
+        if (
+          event.target instanceof Element &&
+          event.target.matches('.ui-context-menu__submenu') &&
+          (event as TransitionEvent).propertyName === 'opacity'
+        ) {
+          log.count += 1;
+        }
+      },
+      true,
+    );
+  });
+}
+
+async function resetSubmenuMotion(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    const log = (window as Window & { __submenuMotions?: SubmenuMotionLog }).__submenuMotions;
+    if (log !== undefined) log.count = 0;
+  });
+}
+
+async function submenuMotionCount(page: Page): Promise<number> {
+  return (await motionLog(page))?.count ?? 0;
+}
+
 test.describe('overlays', () => {
   for (const adapter of adapters) {
     for (const mode of ['native', 'fallback'] as const) {
@@ -252,6 +291,110 @@ test.describe('overlays', () => {
     await submenu.getByRole('menuitemradio', { name: 'dark' }).click();
     await expect(panel).toBeHidden();
     await expect(page.locator('[data-context-menu-zone]')).toContainText('Theme: dark');
+  });
+
+  for (const adapter of adapters) {
+    test(`${adapter.name}: a cursor submenu keeps the parent rim behind it and animates on open and switch`, async ({
+      page,
+    }) => {
+      await page.goto(adapter.url('light', 'overlays'), { waitUntil: 'domcontentloaded' });
+      const panel = await openContextMenuAtZone(page);
+      await recordSubmenuMotion(page);
+      const submenu = page.locator('.ui-context-menu__submenu');
+
+      await panel.getByRole('menuitem', { name: 'Theme' }).hover();
+      await expect(submenu).toBeVisible();
+      await expect(submenu).toHaveAttribute('aria-label', 'Theme');
+      // The entrance translate is part of the rendered rect, so measure at rest.
+      await expect
+        .poll(() =>
+          submenu.evaluate(
+            (element) => Number.parseFloat(getComputedStyle(element).translate) || 0,
+          ),
+        )
+        .toBe(0);
+
+      const seam = await page.evaluate(() => {
+        const parent = document.querySelector('.ui-context-menu');
+        const column = document.querySelector('.ui-context-menu__submenu');
+        if (parent === null || column === null)
+          throw new Error('Both menu levels must be laid out');
+        const parentRect = parent.getBoundingClientRect();
+        const columnRect = column.getBoundingClientRect();
+        const onStart = columnRect.left < parentRect.left;
+        const seamX = onStart ? parentRect.left + 2 : parentRect.right - 2;
+        const stack = document.elementsFromPoint(seamX, (parentRect.top + parentRect.bottom) / 2);
+        return {
+          overlap: onStart
+            ? columnRect.right - parentRect.left
+            : parentRect.right - columnRect.left,
+          topmost: stack[0]?.className ?? '',
+        };
+      });
+      // One edge width of overlap covers the rim and lands in the Glass occluder sample.
+      expect(seam.overlap).toBeGreaterThanOrEqual(3);
+      expect(seam.overlap).toBeLessThanOrEqual(6);
+      expect(seam.topmost).toContain('ui-context-menu__submenu');
+      await expect.poll(() => submenuMotionCount(page)).toBeGreaterThan(0);
+
+      await resetSubmenuMotion(page);
+      await panel.getByRole('menuitem', { name: 'Language' }).hover();
+      await expect(submenu).toHaveAttribute('aria-label', 'Language');
+      await expect.poll(() => submenuMotionCount(page)).toBeGreaterThan(0);
+
+      // A touch fires pointerenter before click; the running entrance must not restart.
+      await resetSubmenuMotion(page);
+      await panel.getByRole('menuitem', { name: 'Language' }).click();
+      await page.waitForTimeout(150);
+      expect(await submenuMotionCount(page)).toBe(0);
+    });
+  }
+
+  test('a touch opens a cursor submenu with an entrance', async ({ page, hasTouch }) => {
+    test.skip(!hasTouch, 'Touch input is required');
+    await page.goto('/frame?theme=light&lang=en#overlays', { waitUntil: 'domcontentloaded' });
+    const zone = page.locator('[data-context-menu-zone]');
+    await zone.scrollIntoViewIfNeeded();
+    const box = await zone.boundingBox();
+    if (box === null) throw new Error('The context menu zone must be laid out');
+    await zone.evaluate(
+      (element, point) => {
+        element.dispatchEvent(
+          new MouseEvent('contextmenu', {
+            bubbles: true,
+            cancelable: true,
+            clientX: point.x,
+            clientY: point.y,
+          }),
+        );
+      },
+      { x: box.x + 24, y: box.y + 16 },
+    );
+    const panel = page.locator('.ui-context-menu');
+    await expect(panel).toBeVisible();
+    await recordSubmenuMotion(page);
+    await panel.getByRole('menuitem', { name: 'Theme' }).tap();
+    await expect(page.locator('.ui-context-menu__submenu')).toBeVisible();
+    await expect.poll(() => submenuMotionCount(page)).toBeGreaterThan(0);
+  });
+
+  test('a cursor submenu stays visible and animated without the Popover API', async ({
+    page,
+    hasTouch,
+  }) => {
+    await disablePopoverApi(page);
+    await page.goto('/frame?theme=light&lang=en#overlays', { waitUntil: 'domcontentloaded' });
+    const panel = await openContextMenuAtZone(page);
+    await recordSubmenuMotion(page);
+    const themeRow = panel.getByRole('menuitem', { name: 'Theme' });
+    if (hasTouch) await themeRow.tap();
+    else await themeRow.click();
+    const submenu = page.locator('.ui-context-menu__submenu');
+    await expect(submenu).toBeVisible();
+    await expect
+      .poll(() => submenu.evaluate((element) => Number(getComputedStyle(element).opacity)))
+      .toBeGreaterThan(0.9);
+    await expect.poll(() => submenuMotionCount(page)).toBeGreaterThan(0);
   });
 
   test('context menu stays inside the viewport at the bottom-right corner', async ({ page }) => {

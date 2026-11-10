@@ -10,9 +10,11 @@ import {
   presenceDataAttribute,
   presenceLayerClassName,
   presenceOriginAttribute,
+  presenceReplayAttribute,
   presenceStagger,
   presenceTransitionName,
   presenceVariants,
+  replayPresence,
   startViewTransition,
 } from './index.js';
 
@@ -226,4 +228,58 @@ test('startViewTransition interrupts the running transition when called again', 
     await Promise.all([first, second]);
     expect(root.hasAttribute('data-neoverse-view-transitioning')).toBe(false);
   });
+});
+
+test('replayPresence pins and releases the enter frame once per request', () => {
+  const frames = new Map<number, () => void>();
+  let nextFrame = 0;
+  let reflows = 0;
+  const view = {
+    requestAnimationFrame: (callback: () => void) => {
+      nextFrame += 1;
+      frames.set(nextFrame, callback);
+      return nextFrame;
+    },
+    cancelAnimationFrame: (id: number) => {
+      frames.delete(id);
+    },
+  };
+  const attributes = new Map<string, string>();
+  const element = {
+    get offsetWidth() {
+      reflows += 1;
+      return 120;
+    },
+    ownerDocument: { defaultView: view },
+    setAttribute: (name: string, value: string) => {
+      attributes.set(name, value);
+    },
+    removeAttribute: (name: string) => {
+      attributes.delete(name);
+    },
+  } as unknown as HTMLElement;
+
+  replayPresence(element);
+  expect(attributes.get(presenceReplayAttribute)).toBe('from');
+  expect(reflows).toBe(1);
+  expect(frames.size).toBe(1);
+
+  replayPresence(element);
+  expect(attributes.get(presenceReplayAttribute)).toBe('from');
+  expect(frames.size).toBe(1);
+
+  const callback = [...frames.values()][0];
+  if (callback === undefined) throw new Error('A release frame must be scheduled');
+  callback();
+  expect(attributes.has(presenceReplayAttribute)).toBe(false);
+});
+
+test('replayPresence does nothing without a browsing context', () => {
+  const element = {
+    ownerDocument: { defaultView: null },
+    setAttribute: () => {
+      throw new Error('No attribute should be written without a window');
+    },
+  } as unknown as HTMLElement;
+  expect(() => replayPresence(element)).not.toThrow();
 });
