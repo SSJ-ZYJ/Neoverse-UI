@@ -508,36 +508,49 @@ export function UiContextMenu({
       submenu.classList.add('ui-context-menu__submenu--open');
     }
 
-    // Show first so the measured size is real, then rest the column on the panel
-    // edge. It overlaps by one edge width to own that rim instead of letting the
-    // panel's Glass edge paint across it.
-    const panelRect = panel.getBoundingClientRect();
-    const openerRect = pending.opener.getBoundingClientRect();
-    const margin = 8;
-    const width = submenu.offsetWidth;
-    const height = submenu.offsetHeight;
-    const toStart = panelRect.right + width > window.innerWidth - margin;
-    // The column's own padding sits above its first row, so it is lifted by that amount
-    // to put the first row on the parent item.
-    const paddingTop = Number.parseFloat(getComputedStyle(submenu).paddingTop) || 0;
-    submenu.style.setProperty(
-      '--neoverse-overlay-left',
-      `${
-        toStart ? panelRect.left - width + submenuEdgeOverlap : panelRect.right - submenuEdgeOverlap
-      }px`,
-    );
-    submenu.style.setProperty(
-      '--neoverse-overlay-top',
-      `${Math.min(
-        Math.max(margin, openerRect.top - paddingTop),
-        Math.max(margin, window.innerHeight - height - margin),
-      )}px`,
-    );
+    // Position against the parent's *layout* left, not its entrance-scaled
+    // visual rect. The shared overlay tracker may still correct the parent's
+    // position after this effect, so keep the column aligned on style changes.
+    const placeSubmenu = () => {
+      if (!panel.isConnected || !submenu.isConnected || !pending.opener.isConnected) return;
+      const panelLeft = Number.parseFloat(getComputedStyle(panel).left);
+      const panelRight = panelLeft + panel.offsetWidth;
+      const openerRect = pending.opener.getBoundingClientRect();
+      const margin = 8;
+      const width = submenu.offsetWidth;
+      const height = submenu.offsetHeight;
+      const toStart = panelRight + width > window.innerWidth - margin;
+      const paddingTop = Number.parseFloat(getComputedStyle(submenu).paddingTop) || 0;
+      submenu.style.setProperty(
+        '--neoverse-overlay-left',
+        `${toStart ? panelLeft - width + submenuEdgeOverlap : panelRight - submenuEdgeOverlap}px`,
+      );
+      submenu.style.setProperty(
+        '--neoverse-overlay-top',
+        `${Math.min(
+          Math.max(margin, openerRect.top - paddingTop),
+          Math.max(margin, window.innerHeight - height - margin),
+        )}px`,
+      );
+    };
+    placeSubmenu();
     // Switching parents reuses the same popover node, so its first-render
     // starting-style entrance never fires again. Replay it for every open and
     // switch, including touch and keyboard opens.
     replayPresence(submenu);
     if (pending.moveFocus) rowsOf(submenu)[0]?.focus();
+    const positionObserver = new MutationObserver(placeSubmenu);
+    positionObserver.observe(panel, { attributes: true, attributeFilter: ['style'] });
+    const resizeObserver = new ResizeObserver(placeSubmenu);
+    resizeObserver.observe(panel);
+    window.addEventListener('scroll', placeSubmenu, true);
+    window.addEventListener('resize', placeSubmenu);
+    return () => {
+      positionObserver.disconnect();
+      resizeObserver.disconnect();
+      window.removeEventListener('scroll', placeSubmenu, true);
+      window.removeEventListener('resize', placeSubmenu);
+    };
   }, [openSubmenu, rowsOf]);
 
   /** Hover opens a column and switches between columns without moving focus. */

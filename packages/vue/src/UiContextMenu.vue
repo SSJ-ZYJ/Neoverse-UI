@@ -38,6 +38,7 @@ let submenuOpener: HTMLButtonElement | null = null;
 // click before the first nextTick has mounted the column.
 let submenuEntryId: string | null = null;
 let observer: ResizeObserver | null = null;
+let positionObserver: MutationObserver | null = null;
 const submenuEntries = computed(() => openSubmenu.value?.children ?? []);
 // The column overlaps the panel rim by one Glass edge width. Covering the rim is
 // not enough on its own: the shared Glass edge canvas paints above the top layer,
@@ -197,6 +198,9 @@ async function enterSubmenu(item: ContextMenuItem, opener: HTMLButtonElement, mo
   observer?.disconnect();
   observer = new ResizeObserver(() => placeSubmenu(opener));
   observer.observe(panel);
+  positionObserver?.disconnect();
+  positionObserver = new MutationObserver(() => placeSubmenu(opener));
+  positionObserver.observe(panel, { attributes: true, attributeFilter: ['style'] });
   window.addEventListener('scroll', onViewportChange, true);
   window.addEventListener('resize', onViewportChange);
   if (moveFocus) void nextTick(() => rowsOf(submenu)[0]?.focus());
@@ -207,16 +211,18 @@ function placeSubmenu(opener: HTMLButtonElement) {
   const panel = panelRef.value;
   const submenu = submenuRef.value;
   if (panel === null || submenu === null) return;
-  const panelRect = panel.getBoundingClientRect();
+  // Presence scale affects visual bounds during entrance. offsetLeft is relative
+  // to an offsetParent and can include a top-layer offset; use the resolved
+  // fixed-position CSS left instead so the column stays aligned at rest.
+  const panelLeft = Number.parseFloat(getComputedStyle(panel).left);
+  const panelRight = panelLeft + panel.offsetWidth;
   const openerRect = opener.getBoundingClientRect();
   const margin = 8;
   const width = submenu.offsetWidth;
   const height = submenu.offsetHeight;
   // Overlap the panel edge, flipping to the inline start when the viewport has no room.
-  const toStart = panelRect.right + width > window.innerWidth - margin;
-  const left = toStart
-    ? panelRect.left - width + submenuEdgeOverlap
-    : panelRect.right - submenuEdgeOverlap;
+  const toStart = panelRight + width > window.innerWidth - margin;
+  const left = toStart ? panelLeft - width + submenuEdgeOverlap : panelRight - submenuEdgeOverlap;
   // The column's own padding sits above its first row, so it is lifted by that amount to put
   // the first row on the parent item, the way a native submenu lines up.
   const paddingTop = Number.parseFloat(getComputedStyle(submenu).paddingTop) || 0;
@@ -235,6 +241,8 @@ function onViewportChange() {
 function stopTrackingSubmenu() {
   observer?.disconnect();
   observer = null;
+  positionObserver?.disconnect();
+  positionObserver = null;
   window.removeEventListener('scroll', onViewportChange, true);
   window.removeEventListener('resize', onViewportChange);
   submenuOpener = null;

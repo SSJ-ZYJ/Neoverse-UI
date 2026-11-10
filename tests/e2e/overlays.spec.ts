@@ -64,6 +64,25 @@ async function submenuMotionCount(page: Page): Promise<number> {
   return (await motionLog(page))?.count ?? 0;
 }
 
+async function expectSubmenuAtRest(page: Page): Promise<void> {
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const parent = document.querySelector('.ui-context-menu');
+        const column = document.querySelector('.ui-context-menu__submenu');
+        if (parent === null || column === null) return false;
+        return [parent, column].every(
+          (element) =>
+            element.getAttribute('data-neoverse-motion-replay') !== 'from' &&
+            element
+              .getAnimations({ subtree: false })
+              .every((animation) => animation.playState !== 'running'),
+        );
+      }),
+    )
+    .toBe(true);
+}
+
 test.describe('overlays', () => {
   for (const adapter of adapters) {
     for (const mode of ['native', 'fallback'] as const) {
@@ -305,14 +324,10 @@ test.describe('overlays', () => {
       await panel.getByRole('menuitem', { name: 'Theme' }).hover();
       await expect(submenu).toBeVisible();
       await expect(submenu).toHaveAttribute('aria-label', 'Theme');
-      // The entrance translate is part of the rendered rect, so measure at rest.
-      await expect
-        .poll(() =>
-          submenu.evaluate(
-            (element) => Number.parseFloat(getComputedStyle(element).translate) || 0,
-          ),
-        )
-        .toBe(0);
+      // Both menu levels animate their geometry. Waiting only for the column's
+      // translate to reach zero still samples the parent's or column's scale
+      // transition, giving transient gaps or an overlap above the real 4px.
+      await expectSubmenuAtRest(page);
 
       const seam = await page.evaluate(() => {
         const parent = document.querySelector('.ui-context-menu');
@@ -347,6 +362,47 @@ test.describe('overlays', () => {
       await panel.getByRole('menuitem', { name: 'Language' }).click();
       await page.waitForTimeout(150);
       expect(await submenuMotionCount(page)).toBe(0);
+    });
+  }
+
+  for (const adapter of adapters) {
+    test(`${adapter.name}: an open submenu follows a parent positioning correction`, async ({
+      page,
+    }) => {
+      await page.goto(adapter.url('light', 'overlays'), { waitUntil: 'domcontentloaded' });
+      const panel = await openContextMenuAtZone(page);
+      await panel.getByRole('menuitem', { name: 'Theme' }).hover();
+      const submenu = page.locator('.ui-context-menu__submenu');
+      await expect(submenu).toBeVisible();
+      await expectSubmenuAtRest(page);
+
+      const initialLeft = await panel.evaluate((element) =>
+        Number.parseFloat(getComputedStyle(element).left),
+      );
+      // The overlay runtime can correct the parent's CSS position after the
+      // column opened. Its painted rim must remain behind the column.
+      await panel.evaluate((element, left) => {
+        element.style.setProperty('--neoverse-overlay-left', `${left + 14}px`);
+      }, initialLeft);
+      await expect
+        .poll(() => panel.evaluate((element) => element.getBoundingClientRect().left))
+        .toBeGreaterThan(initialLeft + 10);
+      await expect
+        .poll(() =>
+          page.evaluate(() => {
+            const parent = document.querySelector('.ui-context-menu');
+            const column = document.querySelector('.ui-context-menu__submenu');
+            if (parent === null || column === null) return false;
+            const parentRect = parent.getBoundingClientRect();
+            const columnRect = column.getBoundingClientRect();
+            const opensLeft = columnRect.left < parentRect.left;
+            const overlap = opensLeft
+              ? columnRect.right - parentRect.left
+              : parentRect.right - columnRect.left;
+            return overlap >= 3 && overlap <= 6;
+          }),
+        )
+        .toBe(true);
     });
   }
 
