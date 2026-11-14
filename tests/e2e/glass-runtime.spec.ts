@@ -104,12 +104,13 @@ test.describe('Aurora Glass runtime', () => {
         return Reflect.apply(getContext, this, [kind, ...arguments_]);
       } as typeof HTMLCanvasElement.prototype.getContext;
       const probe = Document.prototype.elementsFromPoint;
-      (window as Window & { __occlusionProbes: number }).__occlusionProbes = 0;
+      (window as Window & { __occlusionProbes?: number }).__occlusionProbes = 0;
       Document.prototype.elementsFromPoint = function (
         this: Document,
         ...arguments_: [number, number]
       ) {
-        (window as Window & { __occlusionProbes: number }).__occlusionProbes += 1;
+        const scope = window as Window & { __occlusionProbes?: number };
+        scope.__occlusionProbes = (scope.__occlusionProbes ?? 0) + 1;
         return probe.apply(this, arguments_);
       };
     });
@@ -119,15 +120,20 @@ test.describe('Aurora Glass runtime', () => {
     const surface = page.locator('[data-surface="glass-elevated"]').first();
     await surface.scrollIntoViewIfNeeded();
     await expect(surface).toBeVisible();
-    const readCanvas = () => canvas.evaluate((element) => (element as HTMLCanvasElement).toDataURL());
+    const readCanvas = () =>
+      canvas.evaluate((element) => (element as HTMLCanvasElement).toDataURL());
     const probes = () =>
-      page.evaluate(() => (window as Window & { __occlusionProbes: number }).__occlusionProbes);
+      page.evaluate(
+        () => (window as Window & { __occlusionProbes?: number }).__occlusionProbes ?? 0,
+      );
     await page.waitForFunction(() => '__neoverseGlassRenderer' in window);
     const settleFrames = () =>
       page.evaluate(
         () =>
           new Promise<void>((resolve) =>
-            requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+            requestAnimationFrame(() =>
+              requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+            ),
           ),
       );
     // Let the scroll-triggered repaint land so the captured frame is stable.

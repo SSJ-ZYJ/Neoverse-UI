@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test';
-import { Window, type HTMLElement as HappyHTMLElement } from 'happy-dom';
+import { type HTMLElement as HappyHTMLElement, Window } from 'happy-dom';
 import { act } from 'react';
 import { hydrateRoot, type Root } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';

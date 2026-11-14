@@ -158,7 +158,9 @@ test.describe('navigation', () => {
     const indicatorGeometry = (indicator: Element) => {
       const rect = indicator.getBoundingClientRect();
       const group = indicator.closest('.ui-control-surface__group');
-      const marker = group?.querySelector('.ui-navigation-item--active .ui-navigation-item__indicator');
+      const marker = group?.querySelector(
+        '.ui-navigation-item--active .ui-navigation-item__indicator',
+      );
       if (!marker) throw new Error('Active navigation marker is missing');
       const target = marker.getBoundingClientRect();
       return {
@@ -212,7 +214,9 @@ test.describe('navigation', () => {
           await page.evaluate(
             () =>
               new Promise<void>((resolve) =>
-                requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+                requestAnimationFrame(() =>
+                  requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+                ),
               ),
           );
           const mid = await indicator.evaluate((element) => {
@@ -241,9 +245,9 @@ test.describe('navigation', () => {
           expect(geometry.width).toBeLessThan(0.5);
           expect(geometry.height).toBeLessThan(0.5);
           expect(geometry.radius).toBe(geometry.markerRadius);
-          expect(await indicator.evaluate((element) => (element as HTMLElement).style.left)).not.toBe(
-            flight.left,
-          );
+          expect(
+            await indicator.evaluate((element) => (element as HTMLElement).style.left),
+          ).not.toBe(flight.left);
         };
 
         await settleOn(1);
@@ -274,7 +278,9 @@ test.describe('navigation', () => {
       const indicator = dock.locator('.ui-control-surface__indicator');
       await expect(indicator).toHaveAttribute('data-ready', 'true');
       await dock.locator('.ui-navigation-item').nth(2).click();
-      expect(await indicator.evaluate((element) => (element as HTMLElement).style.transform)).toBe('');
+      expect(await indicator.evaluate((element) => (element as HTMLElement).style.transform)).toBe(
+        '',
+      );
       const geometry = await indicator.evaluate(indicatorGeometry);
       expect(geometry.left).toBeLessThan(0.5);
       expect(geometry.top).toBeLessThan(0.5);
@@ -284,12 +290,18 @@ test.describe('navigation', () => {
 
     test('the compact dock indicator settles on the smaller compact geometry', async ({ page }) => {
       await page.goto('/frame?theme=light&lang=en#dock', { waitUntil: 'domcontentloaded' });
-      const standard = page.locator('[data-dock-specimen="standard"] .ui-control-surface__indicator');
+      const standard = page.locator(
+        '[data-dock-specimen="standard"] .ui-control-surface__indicator',
+      );
       const compact = page.locator('[data-dock-specimen="compact"] .ui-dock');
       const indicator = compact.locator('.ui-control-surface__indicator');
       await expect(indicator).toHaveAttribute('data-ready', 'true');
-      const standardWidth = await standard.evaluate((element) => (element as HTMLElement).offsetWidth);
-      const compactWidth = await indicator.evaluate((element) => (element as HTMLElement).offsetWidth);
+      const standardWidth = await standard.evaluate(
+        (element) => (element as HTMLElement).offsetWidth,
+      );
+      const compactWidth = await indicator.evaluate(
+        (element) => (element as HTMLElement).offsetWidth,
+      );
       expect(compactWidth).toBeLessThan(standardWidth);
       await compact.locator('.ui-navigation-item').nth(3).click();
       await expect
@@ -301,7 +313,9 @@ test.describe('navigation', () => {
       expect(geometry.width).toBeLessThan(0.5);
       expect(geometry.height).toBeLessThan(0.5);
       expect(geometry.radius).toBe(geometry.markerRadius);
-      expect(await indicator.evaluate((element) => (element as HTMLElement).offsetWidth)).toBe(compactWidth);
+      expect(await indicator.evaluate((element) => (element as HTMLElement).offsetWidth)).toBe(
+        compactWidth,
+      );
     });
 
     test('the React dock indicator shares the transform flight contract', async ({ page }) => {

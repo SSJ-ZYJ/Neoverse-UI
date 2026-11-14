@@ -89,8 +89,7 @@
   }
 
   .ui-control-surface__indicator[data-ready='true'] {
-    transition:
-      transform var(--neoverse-control-surface-indicator-duration)
+    transition: transform var(--neoverse-control-surface-indicator-duration)
       var(--neoverse-control-surface-indicator-easing);
   }
 
