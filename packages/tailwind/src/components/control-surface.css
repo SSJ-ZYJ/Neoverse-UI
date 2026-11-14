@@ -72,6 +72,10 @@
     transition: none;
   }
 
+  /* The shared indicator flies between selections on the compositor: the
+     adapters commit left/top/width/height once per settle and express the
+     flight as translate + scale from that base, so a selection never runs
+     per-frame layout inside the glass Dock. */
   .ui-control-surface__indicator {
     position: absolute;
     z-index: 3;
@@ -80,15 +84,13 @@
     border-radius: var(--neoverse-radius-pill);
     background: var(--neoverse-navigation-item-indicator-color);
     pointer-events: none;
+    transform-origin: top left;
+    will-change: transform;
   }
 
   .ui-control-surface__indicator[data-ready='true'] {
     transition:
-      left var(--neoverse-control-surface-indicator-duration)
-      var(--neoverse-control-surface-indicator-easing),
-      top var(--neoverse-control-surface-indicator-duration)
-      var(--neoverse-control-surface-indicator-easing),
-      width var(--neoverse-control-surface-indicator-duration)
+      transform var(--neoverse-control-surface-indicator-duration)
       var(--neoverse-control-surface-indicator-easing);
   }
 

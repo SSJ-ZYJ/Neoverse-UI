@@ -15,12 +15,18 @@ const props = withDefaults(defineProps<ControlSurfaceProps>(), {
 const attrs = useAttrs();
 const slots = useSlots();
 const primary = ref<HTMLElement>();
-const indicatorStyle = ref<Record<string, string>>();
+const indicator = ref<HTMLElement>();
 const indicatorReady = ref(false);
 let resizeObserver: ResizeObserver | undefined;
 let mutationObserver: MutationObserver | undefined;
 let frame = 0;
 let measurementFrame = 0;
+// Committed geometry lives in left/top/width/height; the flight between
+// selections is a compositor translate + scale away from that base, so the
+// indicator never runs per-frame layout inside a glass surface.
+type IndicatorRect = { left: number; top: number; width: number; height: number };
+let indicatorBase: IndicatorRect | undefined;
+let indicatorTarget: IndicatorRect | undefined;
 
 function getCumulativeZoom(element: HTMLElement): number {
   let zoom = 1;
@@ -35,32 +41,105 @@ function getCumulativeZoom(element: HTMLElement): number {
   return zoom;
 }
 
+function sameIndicatorRect(first: IndicatorRect, second: IndicatorRect): boolean {
+  return (
+    first.left === second.left &&
+    first.top === second.top &&
+    first.width === second.width &&
+    first.height === second.height
+  );
+}
+
+function writeIndicatorGeometry(element: HTMLElement, rect: IndicatorRect): void {
+  element.style.left = `${rect.left}px`;
+  element.style.top = `${rect.top}px`;
+  element.style.width = `${rect.width}px`;
+  element.style.height = `${rect.height}px`;
+  element.style.transform = '';
+  element.style.visibility = 'visible';
+}
+
+// The commit must land while the transform transition is disabled; otherwise
+// restoring the base geometry retargets the flight back toward the old item.
+function commitIndicator(element: HTMLElement, rect: IndicatorRect): void {
+  element.style.transition = 'none';
+  writeIndicatorGeometry(element, rect);
+  void element.offsetWidth;
+  element.style.transition = '';
+}
+
+function indicatorTransitionDisabled(element: HTMLElement): boolean {
+  return getComputedStyle(element)
+    .transitionDuration.split(',')
+    .every((value) => Number.parseFloat(value) === 0);
+}
+
 function measureIndicator() {
   if (!props.navigationIndicator || !primary.value) return;
+  const element = indicator.value;
   const marker = primary.value.querySelector<HTMLElement>(
     '.ui-navigation-item--active .ui-navigation-item__indicator',
   );
-  if (!marker) {
-    indicatorStyle.value = undefined;
+  if (!marker || !element) {
+    indicatorBase = undefined;
+    indicatorTarget = undefined;
     indicatorReady.value = false;
+    if (element) {
+      element.style.visibility = 'hidden';
+      element.style.transform = '';
+    }
     return;
   }
   const group = primary.value.getBoundingClientRect();
   const rect = marker.getBoundingClientRect();
   const zoom = getCumulativeZoom(primary.value);
-  indicatorStyle.value = {
-    left: `${(rect.left - group.left) / zoom}px`,
-    top: `${(rect.top - group.top) / zoom}px`,
-    width: `${rect.width / zoom}px`,
-    height: `${rect.height / zoom}px`,
+  const target: IndicatorRect = {
+    left: (rect.left - group.left) / zoom,
+    top: (rect.top - group.top) / zoom,
+    width: rect.width / zoom,
+    height: rect.height / zoom,
   };
-  if (!indicatorReady.value) {
-    void nextTick(() => {
-      frame = requestAnimationFrame(() => {
-        indicatorReady.value = true;
+  indicatorTarget = target;
+  const base = indicatorBase;
+  if (!base) {
+    writeIndicatorGeometry(element, target);
+    indicatorBase = target;
+    if (!indicatorReady.value) {
+      void nextTick().then(() => {
+        frame = requestAnimationFrame(() => {
+          indicatorReady.value = true;
+        });
       });
-    });
+    }
+    return;
   }
+  if (sameIndicatorRect(target, base)) {
+    // Returning to the committed item: CSS interpolates the flight back to none.
+    if (element.style.transform !== '') element.style.transform = '';
+    return;
+  }
+  if (base.width === 0 || base.height === 0 || indicatorTransitionDisabled(element)) {
+    commitIndicator(element, target);
+    indicatorBase = target;
+    return;
+  }
+  const translateX = target.left - base.left;
+  const translateY = target.top - base.top;
+  const scaleX = target.width / base.width;
+  const scaleY = target.height / base.height;
+  element.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+}
+
+function settleIndicator(event: Event) {
+  const transition = event as TransitionEvent;
+  if (transition.propertyName !== 'transform' || transition.target !== indicator.value) return;
+  const element = indicator.value;
+  const target = indicatorTarget;
+  const base = indicatorBase;
+  if (!element || !target || !base) return;
+  if (sameIndicatorRect(target, base) && element.style.transform === '') return;
+  commitIndicator(element, target);
+  indicatorBase = target;
 }
 
 function scheduleIndicatorMeasurement() {
@@ -145,11 +224,13 @@ const forwardedAttrs = computed(() => {
     <div ref="primary" class="ui-control-surface__group ui-control-surface__group--primary">
       <slot />
       <span
-        v-if="props.navigationIndicator && indicatorStyle"
+        v-if="props.navigationIndicator"
+        ref="indicator"
         class="ui-control-surface__indicator"
-        :style="indicatorStyle"
+        style="visibility: hidden"
         :data-ready="indicatorReady"
         aria-hidden="true"
+        @transitionend="settleIndicator"
       />
     </div>
     <template v-if="slots.trailing">

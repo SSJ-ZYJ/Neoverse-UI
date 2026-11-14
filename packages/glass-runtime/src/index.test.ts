@@ -167,6 +167,36 @@ const setRect = (element: HTMLElement, rect: Partial<DOMRect>): void => {
   });
 };
 
+// A cancel-aware frame queue: suspended renderers must be able to withdraw a
+// pending frame, which a plain callback array cannot express.
+const installFrameQueue = () => {
+  const pending = new Map<number, FrameRequestCallback>();
+  let nextId = 1;
+  vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+    const id = nextId;
+    nextId += 1;
+    pending.set(id, callback);
+    return id;
+  });
+  vi.spyOn(window, 'cancelAnimationFrame').mockImplementation((id: number) => {
+    pending.delete(id);
+  });
+  return {
+    flush(timestamp: number) {
+      const callbacks = [...pending.values()];
+      pending.clear();
+      for (const callback of callbacks) callback(timestamp);
+    },
+    size: () => pending.size,
+  };
+};
+
+// happy-dom delivers MutationObserver records on the microtask queue.
+const flushMutations = async (): Promise<void> => {
+  await Promise.resolve();
+  await Promise.resolve();
+};
+
 const mountedRenderers: Array<ReturnType<typeof createGlassRenderer>> = [];
 const createTestRenderer = (...args: Parameters<typeof createGlassRenderer>) => {
   const renderer = createGlassRenderer(...args);
@@ -2214,5 +2244,204 @@ describe('Glass renderer', () => {
     // 20 frames at ~333 Hz should produce at most a handful of 60 Hz repaints.
     expect(gl.clear.mock.calls.length).toBeGreaterThan(0);
     expect(gl.clear.mock.calls.length).toBeLessThanOrEqual(5);
+  });
+
+  it('leaves selection indicator motion to CSS instead of repainting the scene', async () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const dock = document.createElement('nav');
+    dock.className = 'material-glass-elevated';
+    const shared = document.createElement('span');
+    shared.className = 'ui-control-surface__indicator';
+    const marker = document.createElement('span');
+    marker.className = 'ui-navigation-item__indicator';
+    dock.append(shared, marker);
+    document.body.append(dock);
+    setRect(dock, {});
+    const frames = installFrameQueue();
+    const renderer = createTestRenderer();
+    renderer.mount();
+    gl.drawArrays.mockClear();
+
+    for (const indicator of [shared, marker]) {
+      const flight = new Event('transitionrun', { bubbles: true });
+      Object.defineProperty(flight, 'propertyName', { value: 'transform' });
+      indicator.dispatchEvent(flight);
+      indicator.setAttribute('style', 'transform: translate(50px, 0px)');
+    }
+    await flushMutations();
+    frames.flush(16);
+    expect(frames.size()).toBe(0);
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+
+    // The surface itself stays on the tracked animation path.
+    const surfaceFlight = new Event('transitionrun', { bubbles: true });
+    Object.defineProperty(surfaceFlight, 'propertyName', { value: 'transform' });
+    dock.dispatchEvent(surfaceFlight);
+    expect(frames.size()).toBe(1);
+  });
+
+  it('suspend retains the painted frame and resume repaints the settled scene once', async () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-elevated';
+    setRect(glass, { left: 20 });
+    document.body.append(glass);
+    const frames = installFrameQueue();
+    // happy-dom has no elementsFromPoint; the renderer treats its absence as
+    // "no occluders", so install a counting probe for this contract.
+    const hitTest = vi.fn((): Element[] => []);
+    Object.defineProperty(document, 'elementsFromPoint', { configurable: true, value: hitTest });
+    const renderer = createTestRenderer();
+    renderer.mount();
+    gl.drawArrays.mockClear();
+    gl.clear.mockClear();
+    hitTest.mockClear();
+
+    renderer.suspend();
+    setRect(glass, { left: 300 });
+    glass.setAttribute('data-theme', 'dark');
+    window.dispatchEvent(new Event('scroll'));
+    await flushMutations();
+    frames.flush(16);
+    expect(frames.size()).toBe(0);
+    expect(gl.clear).not.toHaveBeenCalled();
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+    expect(hitTest).not.toHaveBeenCalled();
+
+    renderer.resume();
+    expect(gl.clear).toHaveBeenCalledTimes(1);
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    expect(hitTest).toHaveBeenCalled();
+    expect(gl.uniform4f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_rect' }),
+      300,
+      0,
+      240,
+      120,
+    );
+    Reflect.deleteProperty(document, 'elementsFromPoint');
+  });
+
+  it('suspend before mount defers the first paint until resume', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+    const renderer = createTestRenderer();
+    renderer.suspend();
+    renderer.mount();
+    expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+    renderer.resume();
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+  });
+
+  it('explicit refresh still repaints while suspended', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+    const renderer = createTestRenderer();
+    renderer.mount();
+    renderer.suspend();
+    gl.drawArrays.mockClear();
+    setRect(glass, { left: 90 });
+    renderer.refresh();
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    renderer.resume();
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+  });
+
+  it('resume without suspension and repeated suspend stay idempotent', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+    const renderer = createTestRenderer();
+    renderer.mount();
+    gl.drawArrays.mockClear();
+    renderer.resume();
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+    renderer.suspend();
+    renderer.suspend();
+    renderer.resume();
+    renderer.resume();
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+  });
+
+  it('suspend withdraws a scheduled frame and destroy clears the suspension', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+    const frames = installFrameQueue();
+    const renderer = createTestRenderer();
+    renderer.mount();
+    window.dispatchEvent(new Event('scroll'));
+    expect(frames.size()).toBe(1);
+    renderer.suspend();
+    expect(frames.size()).toBe(0);
+    gl.drawArrays.mockClear();
+    frames.flush(16);
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+    renderer.destroy();
+    renderer.mount();
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+  });
+
+  it('reduced transparency releases the canvas even while suspended', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
+    let reduced = false;
+    const transparencyListeners = new Set<(event: MediaQueryListEvent) => void>();
+    const originalMatchMedia = window.matchMedia.bind(window);
+    const transparencyMedia = {
+      get matches() {
+        return reduced;
+      },
+      media: '(prefers-reduced-transparency: reduce)',
+      addEventListener: vi.fn((name: string, listener: (event: MediaQueryListEvent) => void) => {
+        if (name === 'change') transparencyListeners.add(listener);
+      }),
+      removeEventListener: vi.fn((name: string, listener: (event: MediaQueryListEvent) => void) => {
+        if (name === 'change') transparencyListeners.delete(listener);
+      }),
+    } as unknown as MediaQueryList;
+    vi.spyOn(window, 'matchMedia').mockImplementation((query) =>
+      query === transparencyMedia.media ? transparencyMedia : originalMatchMedia(query),
+    );
+    const changeTransparency = (matches: boolean) => {
+      reduced = matches;
+      for (const listener of transparencyListeners) {
+        listener({ matches } as MediaQueryListEvent);
+      }
+    };
+    const renderer = createTestRenderer();
+    renderer.mount();
+    renderer.suspend();
+    gl.drawArrays.mockClear();
+
+    changeTransparency(true);
+    expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBeNull();
+    renderer.resume();
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+
+    changeTransparency(false);
+    expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
   });
 });

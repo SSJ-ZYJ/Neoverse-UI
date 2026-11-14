@@ -98,4 +98,25 @@ describe('native live-backdrop ownership', () => {
     expect(a.style.backdropFilter).toBe('blur(8px)');
     expect(a.style.getPropertyPriority('backdrop-filter')).toBe('important');
   });
+
+  it('suspend defers filter rebuilds and resume applies the settled scene once', () => {
+    const element = surface();
+    renderer.suspend();
+    renderer.mount();
+    expect(element.style.backdropFilter).toBe('blur(18px)');
+    expect(document.querySelector('[data-neoverse-glass-native-defs]')).toBeNull();
+
+    renderer.resume();
+    expect(element.style.backdropFilter).toContain('url(');
+    expect(document.querySelectorAll('feDisplacementMap')).toHaveLength(1);
+    const settledFilter = element.getAttribute('data-neoverse-glass-native-filter');
+
+    // Explicit refresh remains the escape hatch for geometry changes while
+    // suspended; the rebuilt map reflects the new width.
+    renderer.suspend();
+    element.style.cssText =
+      'width:240px;height:80px;box-sizing:border-box;border-radius:16px;backdrop-filter:blur(18px)!important';
+    renderer.refresh();
+    expect(element.getAttribute('data-neoverse-glass-native-filter')).not.toBe(settledFilter);
+  });
 });

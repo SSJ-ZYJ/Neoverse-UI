@@ -482,14 +482,138 @@ describe('UiControlSurface', () => {
     expect(largeSurface.classes()).toContain('ui-control-surface--scale-lg');
   });
 
-  it('keeps the shared navigation indicator opt-in', () => {
+  it('keeps the shared navigation indicator opt-in and hidden without an active item', () => {
+    const plain = mount(UiControlSurface);
+    expect(plain.find('.ui-control-surface__indicator').exists()).toBe(false);
+
     const surface = mount(UiControlSurface, {
       props: { navigationIndicator: true },
       slots: { default: '<a href="/">Home</a>' },
     });
 
     expect(surface.classes()).toContain('ui-control-surface--shared-indicator');
-    expect(surface.find('.ui-control-surface__indicator').exists()).toBe(false);
+    const indicator = surface.get<HTMLElement>('.ui-control-surface__indicator');
+    expect(indicator.element.style.visibility).toBe('hidden');
+    expect(indicator.element.style.left).toBe('');
+  });
+
+  it('flies the shared indicator on transform and commits the settled geometry', async () => {
+    const surface = mount(UiControlSurface, {
+      props: { navigationIndicator: true },
+      slots: {
+        default:
+          '<a class="ui-navigation-item ui-navigation-item--active" href="#first"><span class="ui-navigation-item__indicator"></span>First</a>' +
+          '<a class="ui-navigation-item" href="#second"><span class="ui-navigation-item__indicator"></span>Second</a>',
+      },
+    });
+    const group = surface.get<HTMLElement>('.ui-control-surface__group--primary');
+    const indicator = surface.get<HTMLElement>('.ui-control-surface__indicator');
+    const markers = surface.findAll<HTMLElement>('.ui-navigation-item__indicator');
+    const items = surface.findAll<HTMLElement>('.ui-navigation-item');
+    const firstMarker = markers[0];
+    const secondMarker = markers[1];
+    const firstItem = items[0];
+    const secondItem = items[1];
+    if (!firstMarker || !secondMarker || !firstItem || !secondItem) {
+      throw new Error('Indicator fixture elements are missing');
+    }
+    const rect = (left: number) => ({
+      bottom: 32,
+      height: 2,
+      left,
+      right: left + 20,
+      top: 30,
+      width: 20,
+      x: left,
+      y: 30,
+      toJSON: () => ({}),
+    });
+    vi.spyOn(group.element, 'getBoundingClientRect').mockReturnValue(rect(0));
+    vi.spyOn(firstMarker.element, 'getBoundingClientRect').mockReturnValue(rect(10));
+    vi.spyOn(secondMarker.element, 'getBoundingClientRect').mockReturnValue(rect(60));
+
+    // Mount measured happy-dom's zero-sized layout; an observed attribute
+    // change lets the observer commit the real first geometry before flight.
+    firstItem.element.setAttribute('aria-current', 'page');
+    await nextTick();
+
+    // The first selection commits geometry directly; later selections keep the
+    // committed base and fly on transform so the flight never writes layout.
+    expect(indicator.element.style.left).toBe('10px');
+    expect(indicator.element.style.visibility).toBe('visible');
+
+    firstItem.element.classList.remove('ui-navigation-item--active');
+    secondItem.element.classList.add('ui-navigation-item--active');
+    // happy-dom delivers MutationObserver records on the microtask queue.
+    await nextTick();
+
+    expect(indicator.element.style.transform).toBe('translate(50px, 0px) scale(1, 1)');
+    expect(indicator.element.style.left).toBe('10px');
+
+    await indicator.trigger('transitionend', { propertyName: 'transform' });
+    expect(indicator.element.style.left).toBe('60px');
+    expect(indicator.element.style.width).toBe('20px');
+    expect(indicator.element.style.transform).toBe('');
+
+    secondItem.element.classList.remove('ui-navigation-item--active');
+    firstItem.element.classList.add('ui-navigation-item--active');
+    await nextTick();
+    expect(indicator.element.style.transform).toBe('translate(-50px, 0px) scale(1, 1)');
+    await indicator.trigger('transitionend', { propertyName: 'transform' });
+    expect(indicator.element.style.left).toBe('10px');
+    expect(indicator.element.style.transform).toBe('');
+  });
+
+  it('commits the shared indicator without a flight when motion is reduced', async () => {
+    const surface = mount(UiControlSurface, {
+      props: { navigationIndicator: true },
+      slots: {
+        default:
+          '<a class="ui-navigation-item ui-navigation-item--active" href="#first"><span class="ui-navigation-item__indicator"></span>First</a>' +
+          '<a class="ui-navigation-item" href="#second"><span class="ui-navigation-item__indicator"></span>Second</a>',
+      },
+    });
+    const group = surface.get<HTMLElement>('.ui-control-surface__group--primary');
+    const indicator = surface.get<HTMLElement>('.ui-control-surface__indicator');
+    const markers = surface.findAll<HTMLElement>('.ui-navigation-item__indicator');
+    const items = surface.findAll<HTMLElement>('.ui-navigation-item');
+    const firstMarker = markers[0];
+    const secondMarker = markers[1];
+    const firstItem = items[0];
+    const secondItem = items[1];
+    if (!firstMarker || !secondMarker || !firstItem || !secondItem) {
+      throw new Error('Indicator fixture elements are missing');
+    }
+    const rect = (left: number) => ({
+      bottom: 32,
+      height: 2,
+      left,
+      right: left + 20,
+      top: 30,
+      width: 20,
+      x: left,
+      y: 30,
+      toJSON: () => ({}),
+    });
+    vi.spyOn(group.element, 'getBoundingClientRect').mockReturnValue(rect(0));
+    vi.spyOn(firstMarker.element, 'getBoundingClientRect').mockReturnValue(rect(10));
+    vi.spyOn(secondMarker.element, 'getBoundingClientRect').mockReturnValue(rect(60));
+    const computed = window.getComputedStyle.bind(window);
+    vi.spyOn(window, 'getComputedStyle').mockImplementation(((element: Element) => {
+      const style = computed(element);
+      if (element !== indicator.element) return style;
+      return { zoom: style.zoom, transitionDuration: '0s' } as CSSStyleDeclaration;
+    }) as typeof window.getComputedStyle);
+
+    firstItem.element.setAttribute('aria-current', 'page');
+    await nextTick();
+
+    firstItem.element.classList.remove('ui-navigation-item--active');
+    secondItem.element.classList.add('ui-navigation-item--active');
+    await nextTick();
+
+    expect(indicator.element.style.left).toBe('60px');
+    expect(indicator.element.style.transform).toBe('');
   });
 });
 

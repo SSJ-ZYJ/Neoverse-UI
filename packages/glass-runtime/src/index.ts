@@ -60,6 +60,10 @@ const sceneRelevantAttributes = new Set([
 ]);
 const occluderSelector = '[data-neoverse-glass-occluder]';
 const maxOccluders = 6;
+// Selection indicators are decorative content confined to their surface: their
+// motion cannot move an edge or occlude another surface, so tracking their
+// transitions would repaint the whole scene on every frame of a Dock selection.
+const motionStaticSelector = '.ui-control-surface__indicator, .ui-navigation-item__indicator';
 const staticEdgeFrameProperties = new Set([
   'offset',
   'computedOffset',
@@ -257,6 +261,12 @@ export interface GlassRenderer {
   mount(): void;
   /** Force a repaint by default; pass false to let the frame cache deduplicate. */
   refresh(force?: boolean): void;
+  /** Defer automatic edge repaints and retain the last painted frame until `resume`.
+   * Only position/opacity transitions may run while suspended; size, stacking and
+   * top-layer changes need `refresh` or `resume`. Explicit `refresh` still paints. */
+  suspend(): void;
+  /** End the suspension and repaint the full scene once against the settled DOM. */
+  resume(): void;
   destroy(): void;
 }
 
@@ -1030,6 +1040,7 @@ class GlassRendererImpl implements GlassRenderer {
   private readonly maxDevicePixelRatio: number;
   private mounted = false;
   private active = false;
+  private suspended = false;
   private canvas: HTMLCanvasElement | undefined;
   private chromaCanvas: HTMLCanvasElement | undefined;
   private chromaContext: CanvasRenderingContext2D | undefined;
@@ -1074,6 +1085,9 @@ class GlassRendererImpl implements GlassRenderer {
     ) {
       return;
     }
+    if (target.closest(motionStaticSelector)) {
+      return;
+    }
     this.animatedElements.add(target);
     this.scheduleRefresh();
   };
@@ -1111,7 +1125,8 @@ class GlassRendererImpl implements GlassRenderer {
       target === this.colorProbe ||
       target === this.canvas ||
       target === this.chromaCanvas ||
-      element?.closest('[data-neoverse-particle-capture]')
+      element?.closest('[data-neoverse-particle-capture]') ||
+      element?.closest(motionStaticSelector)
     ) {
       return false;
     }
@@ -1244,12 +1259,27 @@ class GlassRendererImpl implements GlassRenderer {
     }
   }
 
+  public suspend(): void {
+    if (this.suspended) return;
+    this.suspended = true;
+    this.cancelScheduledRefresh();
+    this.animatedElements.clear();
+  }
+
+  public resume(): void {
+    if (!this.suspended) return;
+    this.suspended = false;
+    this.invalidateScene();
+    this.refresh(true);
+  }
+
   public destroy(): void {
     if (!this.mounted) {
       return;
     }
 
     this.mounted = false;
+    this.suspended = false;
     this.transparencyQuery?.removeEventListener('change', this.handleTransparencyChange);
     this.transparencyQuery = undefined;
     this.systemSchemeQuery?.removeEventListener('change', this.handleSystemSchemeChange);
@@ -1363,8 +1393,9 @@ class GlassRendererImpl implements GlassRenderer {
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     this.observe();
     this.active = true;
-    // A fresh GL context has no previous frame to reuse.
-    this.refresh(true);
+    // A fresh GL context has no previous frame to reuse; a suspended mount
+    // still defers its first paint until resume.
+    if (!this.suspended) this.refresh(true);
   }
 
   private removeStaleCanvas(): void {
@@ -1593,7 +1624,7 @@ class GlassRendererImpl implements GlassRenderer {
   }
 
   private scheduleRefresh(): void {
-    if (!this.active || this.animationFrame !== undefined) {
+    if (!this.active || this.suspended || this.animationFrame !== undefined) {
       return;
     }
 

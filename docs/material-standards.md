@@ -89,6 +89,12 @@ repaint by at most one interval and never drops the request; a discarded request
 would leave the rim painting the previous offset, detached from a surface that
 has already scrolled.
 
+Whole-page position/opacity transitions can opt into the renderer's
+`suspend()` / `resume()` lightweight path, which retains the last painted frame
+and defers enumeration and occlusion probes until one full refresh on resume;
+see the [glass-runtime README](../packages/glass-runtime/README.md#pausing-edge-repaints-for-page-transitions)
+for the safety boundary.
+
 ### Painted stroke for window-anchored chrome
 
 The refracted rim only brightens pixels the backdrop already carries, so a
@@ -315,6 +321,13 @@ navigation and embedded segmented labels. Compact Dock remains `md` at 1. These
 are geometry contracts, not material parameters. The original language option
 height, inline/block padding and gap remain unchanged; the previous specimen
 override to `md` and removal of the large type factor were reverted.
+
+The shared Dock/ControlSurface selection indicator flies between items on a
+compositor `transform` (translate + scale from the committed geometry) and
+commits the final left/top/width/height once on settle, so a selection adds no
+per-frame layout inside the glass plate. The runtime treats selection indicators
+as edge-neutral content and does not reserve edge frames for their motion.
+Reduced motion commits the target geometry directly without a flight.
 
 The light segmented selection plate retains its 0.3.0 pale outline and selected
 gradient. The well keeps its tier-owned blur, and inactive options remain

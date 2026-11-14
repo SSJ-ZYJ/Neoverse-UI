@@ -82,4 +82,89 @@ test.describe('Aurora Glass runtime', () => {
     expect(optedIn.filter).toBe(original.filter);
     expect(optedIn.filter).toContain('blur(18px)');
   });
+
+  test('suspend freezes the edge canvas through a page translation and resume realigns it once', async ({
+    page,
+  }) => {
+    // Read back the WebGL canvas after compositing; the drawing buffer is
+    // otherwise cleared before toDataURL runs. Test-only readback aid.
+    await page.addInitScript(() => {
+      const getContext = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function (
+        this: HTMLCanvasElement,
+        kind: string,
+        ...arguments_: unknown[]
+      ) {
+        if (kind === 'webgl' || kind === 'webgl2') {
+          return Reflect.apply(getContext, this, [
+            kind,
+            { ...(arguments_[0] as object), preserveDrawingBuffer: true },
+          ]);
+        }
+        return Reflect.apply(getContext, this, [kind, ...arguments_]);
+      } as typeof HTMLCanvasElement.prototype.getContext;
+      const probe = Document.prototype.elementsFromPoint;
+      (window as Window & { __occlusionProbes: number }).__occlusionProbes = 0;
+      Document.prototype.elementsFromPoint = function (
+        this: Document,
+        ...arguments_: [number, number]
+      ) {
+        (window as Window & { __occlusionProbes: number }).__occlusionProbes += 1;
+        return probe.apply(this, arguments_);
+      };
+    });
+    await page.goto(glassPage, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
+    const canvas = page.locator(canvasSelector);
+    const surface = page.locator('[data-surface="glass-elevated"]').first();
+    await surface.scrollIntoViewIfNeeded();
+    await expect(surface).toBeVisible();
+    const readCanvas = () => canvas.evaluate((element) => (element as HTMLCanvasElement).toDataURL());
+    const probes = () =>
+      page.evaluate(() => (window as Window & { __occlusionProbes: number }).__occlusionProbes);
+    await page.waitForFunction(() => '__neoverseGlassRenderer' in window);
+    const settleFrames = () =>
+      page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+          ),
+      );
+    // Let the scroll-triggered repaint land so the captured frame is stable.
+    await settleFrames();
+
+    const before = await readCanvas();
+    expect(before.length).toBeGreaterThan(1000);
+    await page.evaluate(() => {
+      (
+        window as Window & { __neoverseGlassRenderer?: { suspend(): void } }
+      ).__neoverseGlassRenderer?.suspend();
+    });
+    const probesAtSuspend = await probes();
+    // Shift the surface a modest amount that keeps it inside the viewport on
+    // both desktop and mobile, so its WebGL edge visibly moves on resume.
+    await surface.evaluate((element) => {
+      (element as HTMLElement).style.transform = 'translate(32px, 24px)';
+    });
+    await settleFrames();
+    // No occlusion hit tests and no repaint while the page translation runs.
+    expect(await probes()).toBe(probesAtSuspend);
+    expect(await readCanvas()).toBe(before);
+
+    await page.evaluate(() => {
+      (
+        window as Window & { __neoverseGlassRenderer?: { resume(): void } }
+      ).__neoverseGlassRenderer?.resume();
+    });
+    const after = await readCanvas();
+    expect(after).not.toBe(before);
+    expect(await probes()).toBeGreaterThan(probesAtSuspend);
+    // The resume frame matches a full per-frame refresh of the settled scene.
+    await page.evaluate(() => {
+      (
+        window as Window & { __neoverseGlassRenderer?: { refresh(force?: boolean): void } }
+      ).__neoverseGlassRenderer?.refresh(true);
+    });
+    expect(await readCanvas()).toBe(after);
+  });
 });

@@ -153,4 +153,188 @@ test.describe('navigation', () => {
     await active.focus();
     await expect(active).toBeFocused();
   });
+
+  test.describe('dock shared indicator', () => {
+    const indicatorGeometry = (indicator: Element) => {
+      const rect = indicator.getBoundingClientRect();
+      const group = indicator.closest('.ui-control-surface__group');
+      const marker = group?.querySelector('.ui-navigation-item--active .ui-navigation-item__indicator');
+      if (!marker) throw new Error('Active navigation marker is missing');
+      const target = marker.getBoundingClientRect();
+      return {
+        left: Math.abs(rect.left - target.left),
+        top: Math.abs(rect.top - target.top),
+        width: Math.abs(rect.width - target.width),
+        height: Math.abs(rect.height - target.height),
+        radius: getComputedStyle(indicator).borderRadius,
+        markerRadius: getComputedStyle(marker).borderRadius,
+      };
+    };
+
+    for (const theme of ['light', 'dark'] as const) {
+      test(`the indicator glides on transform and settles on the active item in ${theme}`, async ({
+        page,
+      }) => {
+        const errors: string[] = [];
+        page.on('pageerror', (error) => errors.push(error.message));
+        const client = await page.context().newCDPSession(page);
+        await client.send('Performance.enable');
+        const layoutCount = async () => {
+          const { metrics } = await client.send('Performance.getMetrics');
+          return metrics.find((metric) => metric.name === 'LayoutCount')?.value ?? 0;
+        };
+        await page.goto(`/frame?theme=${theme}&lang=en#dock`, { waitUntil: 'domcontentloaded' });
+        const dock = page.locator('[data-dock-specimen="standard"] .ui-dock');
+        const items = dock.locator('.ui-navigation-item');
+        const indicator = dock.locator('.ui-control-surface__indicator');
+        await expect(indicator).toHaveAttribute('data-ready', 'true');
+        expect(
+          await indicator.evaluate((element) => getComputedStyle(element).transitionProperty),
+        ).toBe('transform');
+
+        const settleOn = async (index: number) => {
+          const layoutAtFlightStart = await layoutCount();
+          await items.nth(index).click();
+          const flight = await indicator.evaluate((element) => {
+            const node = element as HTMLElement;
+            return {
+              transform: node.style.transform,
+              left: node.style.left,
+              offsetLeft: node.offsetLeft,
+              offsetWidth: node.offsetWidth,
+              visualLeft: node.getBoundingClientRect().left,
+            };
+          });
+          expect(flight.transform).toContain('translate');
+          // A few compositor frames into the 420ms flight the visual box has
+          // moved, but the layout box (offsetLeft/offsetWidth exclude transform)
+          // must not: that is precisely "the indicator adds no per-frame layout".
+          await page.evaluate(
+            () =>
+              new Promise<void>((resolve) =>
+                requestAnimationFrame(() => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+              ),
+          );
+          const mid = await indicator.evaluate((element) => {
+            const node = element as HTMLElement;
+            return {
+              transform: node.style.transform,
+              offsetLeft: node.offsetLeft,
+              offsetWidth: node.offsetWidth,
+              visualLeft: node.getBoundingClientRect().left,
+            };
+          });
+          expect(mid.transform).toContain('translate');
+          expect(mid.offsetLeft).toBe(flight.offsetLeft);
+          expect(mid.offsetWidth).toBe(flight.offsetWidth);
+          expect(Math.abs(mid.visualLeft - flight.visualLeft)).toBeGreaterThan(0.5);
+          await expect
+            .poll(() => indicator.evaluate((element) => (element as HTMLElement).style.transform))
+            .toBe('');
+          // The flight spans ~25 frames; per-frame layout would approach that.
+          // A loose bound tolerates the one-time settle commit and ambient page
+          // layout while still rejecting any per-frame growth.
+          expect((await layoutCount()) - layoutAtFlightStart).toBeLessThanOrEqual(12);
+          const geometry = await indicator.evaluate(indicatorGeometry);
+          expect(geometry.left).toBeLessThan(0.5);
+          expect(geometry.top).toBeLessThan(0.5);
+          expect(geometry.width).toBeLessThan(0.5);
+          expect(geometry.height).toBeLessThan(0.5);
+          expect(geometry.radius).toBe(geometry.markerRadius);
+          expect(await indicator.evaluate((element) => (element as HTMLElement).style.left)).not.toBe(
+            flight.left,
+          );
+        };
+
+        await settleOn(1);
+        await settleOn(3);
+
+        // Rapid consecutive selections retarget the flight and settle on the last item.
+        await items.nth(0).click();
+        await items.nth(2).click();
+        await items.nth(1).click();
+        await expect
+          .poll(() => indicator.evaluate((element) => (element as HTMLElement).style.transform))
+          .toBe('');
+        const geometry = await indicator.evaluate(indicatorGeometry);
+        expect(geometry.left).toBeLessThan(0.5);
+        expect(geometry.top).toBeLessThan(0.5);
+        expect(geometry.width).toBeLessThan(0.5);
+        expect(geometry.height).toBeLessThan(0.5);
+        expect(errors).toEqual([]);
+      });
+    }
+
+    test('the indicator commits directly to the active item when motion is reduced', async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto('/frame?theme=light&lang=en#dock', { waitUntil: 'domcontentloaded' });
+      const dock = page.locator('[data-dock-specimen="standard"] .ui-dock');
+      const indicator = dock.locator('.ui-control-surface__indicator');
+      await expect(indicator).toHaveAttribute('data-ready', 'true');
+      await dock.locator('.ui-navigation-item').nth(2).click();
+      expect(await indicator.evaluate((element) => (element as HTMLElement).style.transform)).toBe('');
+      const geometry = await indicator.evaluate(indicatorGeometry);
+      expect(geometry.left).toBeLessThan(0.5);
+      expect(geometry.top).toBeLessThan(0.5);
+      expect(geometry.width).toBeLessThan(0.5);
+      expect(geometry.height).toBeLessThan(0.5);
+    });
+
+    test('the compact dock indicator settles on the smaller compact geometry', async ({ page }) => {
+      await page.goto('/frame?theme=light&lang=en#dock', { waitUntil: 'domcontentloaded' });
+      const standard = page.locator('[data-dock-specimen="standard"] .ui-control-surface__indicator');
+      const compact = page.locator('[data-dock-specimen="compact"] .ui-dock');
+      const indicator = compact.locator('.ui-control-surface__indicator');
+      await expect(indicator).toHaveAttribute('data-ready', 'true');
+      const standardWidth = await standard.evaluate((element) => (element as HTMLElement).offsetWidth);
+      const compactWidth = await indicator.evaluate((element) => (element as HTMLElement).offsetWidth);
+      expect(compactWidth).toBeLessThan(standardWidth);
+      await compact.locator('.ui-navigation-item').nth(3).click();
+      await expect
+        .poll(() => indicator.evaluate((element) => (element as HTMLElement).style.transform))
+        .toBe('');
+      const geometry = await indicator.evaluate(indicatorGeometry);
+      expect(geometry.left).toBeLessThan(0.5);
+      expect(geometry.top).toBeLessThan(0.5);
+      expect(geometry.width).toBeLessThan(0.5);
+      expect(geometry.height).toBeLessThan(0.5);
+      expect(geometry.radius).toBe(geometry.markerRadius);
+      expect(await indicator.evaluate((element) => (element as HTMLElement).offsetWidth)).toBe(compactWidth);
+    });
+
+    test('the React dock indicator shares the transform flight contract', async ({ page }) => {
+      const errors: string[] = [];
+      page.on('pageerror', (error) => errors.push(error.message));
+      await page.goto('/react-fixture?theme=light&lang=en', { waitUntil: 'domcontentloaded' });
+      const dock = page.locator('[data-parity-dock]');
+      const items = dock.locator('.ui-navigation-item');
+      const indicator = dock.locator('.ui-control-surface__indicator');
+      await expect(indicator).toHaveAttribute('data-ready', 'true');
+      expect(
+        await indicator.evaluate((element) => getComputedStyle(element).transitionProperty),
+      ).toBe('transform');
+
+      await items.nth(1).click();
+      const flight = await indicator.evaluate((element) => ({
+        transform: (element as HTMLElement).style.transform,
+        left: (element as HTMLElement).style.left,
+      }));
+      expect(flight.transform).toContain('translate');
+      await expect
+        .poll(() => indicator.evaluate((element) => (element as HTMLElement).style.transform))
+        .toBe('');
+      const geometry = await indicator.evaluate(indicatorGeometry);
+      expect(geometry.left).toBeLessThan(0.5);
+      expect(geometry.top).toBeLessThan(0.5);
+      expect(geometry.width).toBeLessThan(0.5);
+      expect(geometry.height).toBeLessThan(0.5);
+      expect(geometry.radius).toBe(geometry.markerRadius);
+      expect(await indicator.evaluate((element) => (element as HTMLElement).style.left)).not.toBe(
+        flight.left,
+      );
+      expect(errors).toEqual([]);
+    });
+  });
 });

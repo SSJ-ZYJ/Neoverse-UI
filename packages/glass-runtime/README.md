@@ -45,9 +45,39 @@ shared canvas cannot reach them.
 Animation tracking redraws moving edges and occluders. Background-position-only
 effects stay in CSS; transformed or fading descendants also stay in CSS when
 their nearest Glass surface isolates and clips both axes and they contain no
-nested Glass. Unknown effects remain tracked. Hidden subtrees do not sustain a
-frame loop; visibility and clipping mutations trigger reevaluation, including
-animations that are already running. These rules do not change the edge shader.
+nested Glass. Shared selection indicators (`.ui-control-surface__indicator`,
+`.ui-navigation-item__indicator`) are decorative content confined to their
+surface, so their transitions never schedule edge frames. Unknown effects remain
+tracked. Hidden subtrees do not sustain a frame loop; visibility and clipping
+mutations trigger reevaluation, including animations that are already running.
+These rules do not change the edge shader.
+
+## Pausing edge repaints for page transitions
+
+`suspend()` and `resume()` are an incremental, opt-in lightweight path for
+whole-page position/opacity transitions (for example a route slide). While
+suspended, the renderer keeps the last painted frame, withdraws any pending
+frame, and skips automatic repaints: no document-wide surface enumeration, no
+`elementsFromPoint` occlusion probes, no canvas redraw. `resume()` ends the pause
+and runs one full forced refresh so edges, occlusion and theme match the settled
+DOM. Both calls are idempotent, and `mount` / `refresh` / `destroy` keep their
+existing semantics; existing callers upgrade without changes.
+
+```ts
+// Start of a whole-page translate/opacity transition:
+renderer.suspend();
+// When the transition settles (and from a failsafe timeout, in case the
+// transitionend/animationend event never fires in a background tab):
+renderer.resume();
+```
+
+Safety boundary: the lightweight path is only for position and opacity changes.
+The frozen frame does not track geometry, so any size, stacking-order or
+top-layer (popover/modal) change while suspended needs a full refresh — call
+`refresh()` (which still paints while suspended) or `resume()`. Do not suspend
+across transitions that scale surfaces or open overlays. Reduced transparency
+and WebGL context loss still release the canvas while suspended; a suspended
+mount defers its first paint until `resume()`.
 
 Pointer-transparent overlays that are guaranteed to sit above ordinary Glass
 surfaces can opt into edge occlusion with

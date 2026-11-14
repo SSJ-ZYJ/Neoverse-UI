@@ -420,6 +420,8 @@
       "runtime": "validated",
       "evidence": [
         "packages/react/src/parity.test.tsx",
+        "packages/react/src/navigation.test.tsx",
+        "packages/vue/src/components.test.ts",
         "tests/e2e/navigation.spec.ts",
         "docs/framework-parity.md"
       ],
@@ -440,7 +442,13 @@
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": [
+        "packages/vue/src/components.test.ts",
+        "packages/react/src/navigation.test.tsx",
+        "tests/e2e/navigation.spec.ts",
+        "docs/material-standards.md"
+      ]
     },
     {
       "name": "UiNavigationItem",

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261114-19A2E5DE",
+  "kind": "enhancement",
+  "target": "GlassRuntime",
+  "summary": "Glass Runtime 为页面级位移过渡提供轻量重绘或暂停接口",
+  "expected": "当玻璃表面所在的页面或容器做 transform/opacity 过渡（例如路由整页平移）时，共享渲染器当前会在每帧重新枚举全部玻璃元素、重算遮挡并重绘整张边缘画布。期望提供低开销路径：GlassRenderer 增加 suspend/resume 或 refresh 的轻量模式，过渡期间暂停遮挡命中测试并复用上一帧矩形，结束帧执行一次完整刷新使边缘对齐；文档给出整页过渡的推荐写法与安全边界，且不改变现有 mount/refresh/destroy 语义。",
+  "acceptanceCriteria": [
+    "新增公开 API（suspend/resume 或 refresh 轻量模式）为增量变更，现有调用方无需改动即可升级",
+    "整页位移过渡期间不再逐帧调用 elementsFromPoint 遮挡命中测试，或将其限制为固定次数并复用缓存",
+    "过渡结束帧执行一次完整刷新，玻璃边缘、遮挡与明暗表现和逐帧模式的结果一致（截图或像素对比）",
+    "Neoverse 的 /projects → /focus → /pulse 路由过渡启用轻量路径后，不再出现超过 25ms 的长帧（对比启用前基线）",
+    "文档说明轻量路径仅适用于位置/透明度变化；尺寸、层级或 top-layer（popover/modal）变化仍需完整刷新"
+  ],
+  "impact": "normal",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "Neoverse",
+      "location": "app/app.vue",
+      "framework": "vue",
+      "scenario": "Dock 子页之间整页横滑时，玻璃卡片随页面平移；Glass Runtime 每帧重新采样与重绘整张边缘画布，实测切换窗口出现 60–68ms 长任务",
+      "url": "https://github.com/SSJ-ZYJ/Neoverse/blob/main/app/app.vue"
+    }
+  ],
+  "createdAt": "2026-11-14T14:07:24.511Z",
+  "updatedAt": "2026-11-14T15:14:22.258Z",
+  "resolution": "GlassRenderer 新增增量 suspend()/resume() 轻量路径：暂停期保留上一帧、撤回待执行帧、跳过自动重绘（无全文档枚举、无 elementsFromPoint 遮挡命中、无画布重绘）；resume 结束暂停并做一次完整强制刷新使边缘对齐落定 DOM。两者幂等，mount/refresh/destroy 语义不变，显式 refresh 暂停期仍重绘（尺寸/层级/top-layer 逃生口）；suspended mount 延迟首帧至 resume；reduced-transparency/上下文丢失暂停期仍释放画布。WebGL 与 native 后端均实现。文档给出整页过渡推荐写法与安全边界（仅位置/透明度；尺寸/层级/top-layer 需完整刷新）：packages/glass-runtime/README.md、docs/material-standards.md、docs/architecture.md。证据：glass-runtime 166 单测（新增 suspend/resume 8 项 + native 1 项）；tests/e2e/glass-runtime.spec.ts 浏览器 suspend 期画布像素冻结、探针计数不变、resume 帧与完整刷新帧逐像素一致（desktop+mobile，3 轮稳定）；check:docs/contracts 通过。Neoverse app/app.vue 在 route-forward/back 横滑起点 suspend、settleStageAfterEnter 与 1500ms 兜底 resume（主页往返不走轻量路径），file: 同步实测导航窗口 elementsFromPoint 探针 323→96（resume 一次性）、RecalcStyle 309→56，降至无渲染器对照水平（51）。绝对 25ms 帧验收受 headless SwiftShader 软件合成限制（禁用 WebGL 对照仍 100ms 最大帧间隔），渲染器逐帧长任务已消除；真实 GPU 绝对帧率待手动验收。详见 .agents/notes/archives/acceptance-2026-11-14-dock-glass-performance.md。本地交付，未提交/发布。"
+}

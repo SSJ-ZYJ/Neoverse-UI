@@ -6,6 +6,7 @@ import {
   type HTMLAttributes,
   type ReactElement,
   type ReactNode,
+  type TransitionEvent,
   useEffect,
   useRef,
   useState,
@@ -31,6 +32,41 @@ export interface UiControlSurfaceProps extends HTMLAttributes<HTMLElement> {
   trailing?: ReactNode;
 }
 
+type IndicatorRect = { left: number; top: number; width: number; height: number };
+
+// A stable style object keeps React from rewriting the visibility the
+// measurement writes imperatively on every re-render.
+const indicatorHiddenStyle: CSSProperties = { visibility: 'hidden' };
+
+const sameIndicatorRect = (first: IndicatorRect, second: IndicatorRect): boolean =>
+  first.left === second.left &&
+  first.top === second.top &&
+  first.width === second.width &&
+  first.height === second.height;
+
+const writeIndicatorGeometry = (element: HTMLElement, rect: IndicatorRect): void => {
+  element.style.left = `${rect.left}px`;
+  element.style.top = `${rect.top}px`;
+  element.style.width = `${rect.width}px`;
+  element.style.height = `${rect.height}px`;
+  element.style.transform = '';
+  element.style.visibility = 'visible';
+};
+
+// The commit must land while the transform transition is disabled; otherwise
+// restoring the base geometry retargets the flight back toward the old item.
+const commitIndicator = (element: HTMLElement, rect: IndicatorRect): void => {
+  element.style.transition = 'none';
+  writeIndicatorGeometry(element, rect);
+  void element.offsetWidth;
+  element.style.transition = '';
+};
+
+const indicatorTransitionDisabled = (element: HTMLElement): boolean =>
+  getComputedStyle(element)
+    .transitionDuration.split(',')
+    .every((value) => Number.parseFloat(value) === 0);
+
 export function UiControlSurface({
   as = 'div',
   surface = 'glass-subtle',
@@ -44,22 +80,34 @@ export function UiControlSurface({
   ...rest
 }: UiControlSurfaceProps) {
   const primary = useRef<HTMLDivElement>(null);
-  const [bounds, setBounds] = useState<CSSProperties>();
+  const indicator = useRef<HTMLSpanElement>(null);
+  // Committed geometry lives in left/top/width/height; the flight between
+  // selections is a compositor translate + scale away from that base, so the
+  // indicator never runs per-frame layout inside a glass surface.
+  const indicatorBase = useRef<IndicatorRect | undefined>(undefined);
+  const indicatorTarget = useRef<IndicatorRect | undefined>(undefined);
   const [ready, setReady] = useState(false);
   useEffect(() => {
     const group = primary.current;
     setReady(false);
-    setBounds(undefined);
+    indicatorBase.current = undefined;
+    indicatorTarget.current = undefined;
     if (!navigationIndicator || !group) return;
     let frame = 0;
     let readyFrame = 0;
     const measure = () => {
+      const element = indicator.current;
       const marker = group.querySelector<HTMLElement>(
         '.ui-navigation-item--active .ui-navigation-item__indicator',
       );
-      if (!marker) {
-        setBounds(undefined);
+      if (!marker || !element) {
+        indicatorBase.current = undefined;
+        indicatorTarget.current = undefined;
         setReady(false);
+        if (element) {
+          element.style.visibility = 'hidden';
+          element.style.transform = '';
+        }
         return;
       }
       let zoom = 1;
@@ -69,22 +117,36 @@ export function UiControlSurface({
       }
       const origin = group.getBoundingClientRect();
       const rect = marker.getBoundingClientRect();
-      const next = {
+      const target = {
         left: (rect.left - origin.left) / zoom,
         top: (rect.top - origin.top) / zoom,
         width: rect.width / zoom,
         height: rect.height / zoom,
       };
-      setBounds((previous) =>
-        previous?.left === next.left &&
-        previous.top === next.top &&
-        previous.width === next.width &&
-        previous.height === next.height
-          ? previous
-          : next,
-      );
-      cancelAnimationFrame(readyFrame);
-      readyFrame = requestAnimationFrame(() => setReady(true));
+      indicatorTarget.current = target;
+      const base = indicatorBase.current;
+      if (!base) {
+        writeIndicatorGeometry(element, target);
+        indicatorBase.current = target;
+        cancelAnimationFrame(readyFrame);
+        readyFrame = requestAnimationFrame(() => setReady(true));
+        return;
+      }
+      if (sameIndicatorRect(target, base)) {
+        // Returning to the committed item: CSS interpolates the flight back to none.
+        if (element.style.transform !== '') element.style.transform = '';
+        return;
+      }
+      if (base.width === 0 || base.height === 0 || indicatorTransitionDisabled(element)) {
+        commitIndicator(element, target);
+        indicatorBase.current = target;
+        return;
+      }
+      const translateX = target.left - base.left;
+      const translateY = target.top - base.top;
+      const scaleX = target.width / base.width;
+      const scaleY = target.height / base.height;
+      element.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
     };
     const resize = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(measure);
     const observe = () => {
@@ -123,6 +185,16 @@ export function UiControlSurface({
       cancelAnimationFrame(readyFrame);
     };
   }, [navigationIndicator]);
+  const settleIndicator = (event: TransitionEvent<HTMLSpanElement>) => {
+    if (event.propertyName !== 'transform' || event.target !== indicator.current) return;
+    const element = indicator.current;
+    const target = indicatorTarget.current;
+    const base = indicatorBase.current;
+    if (!element || !target || !base) return;
+    if (sameIndicatorRect(target, base) && element.style.transform === '') return;
+    commitIndicator(element, target);
+    indicatorBase.current = target;
+  };
   return createElement(
     as,
     {
@@ -136,12 +208,14 @@ export function UiControlSurface({
     <>
       <div ref={primary} className="ui-control-surface__group ui-control-surface__group--primary">
         {children}
-        {navigationIndicator && bounds ? (
+        {navigationIndicator ? (
           <span
+            ref={indicator}
             className="ui-control-surface__indicator"
-            style={bounds}
+            style={indicatorHiddenStyle}
             data-ready={ready}
             aria-hidden="true"
+            onTransitionEnd={settleIndicator}
           />
         ) : null}
       </div>

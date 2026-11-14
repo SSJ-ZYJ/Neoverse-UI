@@ -179,6 +179,13 @@ Reduced transparency disables the renderer. The CSS fallback uses alpha-only
 gradient masks and backdrop brightness. The historical `backend: 'native'`
 option is not a remedy for the problems recorded in the repair guardrails.
 
+For whole-page position/opacity transitions the renderer exposes an opt-in
+`suspend()` / `resume()` lightweight path: it retains the last painted frame and
+skips per-frame enumeration and occlusion probes until one full refresh on
+resume. Size, stacking and top-layer changes still need a full refresh. The
+contract and recommended wiring live in the
+[glass-runtime README](../packages/glass-runtime/README.md#pausing-edge-repaints-for-page-transitions).
+
 Unit tests verify runtime ownership, composition, scheduling and accessibility
 transitions. Chromium integration tests check tier blur, shared canvas placement,
 painted strokes and the CSS fallback when WebGL is absent. A separate Linux

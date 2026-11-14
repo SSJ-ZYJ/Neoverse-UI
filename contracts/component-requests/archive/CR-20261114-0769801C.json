@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "id": "CR-20261114-0769801C",
+  "kind": "enhancement",
+  "target": "UiDock",
+  "summary": "Dock 共享选中指示器改用合成层动画，避免逐帧布局与玻璃重绘",
+  "expected": "将 UiControlSurface 的共享选中指示器由 left/top/width 过渡改为 transform 位移与缩放：切换时先测量目标项几何，再一次性写入 translate 与 scale，沿用现有 spatial 时长与 easing、指示器圆角与 active 语义；动画期间不触发布局，也不因指示器位于 glass-elevated 容器内而触发 Glass Runtime 的整场景重绘。UiDock 的项尺寸、compact 断点、键盘焦点与 aria-current 行为保持现状。",
+  "acceptanceCriteria": [
+    "选中切换期间该动画不再产生逐帧布局增量（Performance 面板中只有合成层帧，LayoutCount 不随动画帧增长）",
+    "指示器最终位置、尺寸、圆角与现有 md/lg/compact 几何一致，深浅主题视觉回归截图无差异",
+    "UiControlSurface 的 Vue 与 React 契约同步更新，reduced-motion 下仍为无动画",
+    "Design Lab 的 Dock 样例与浏览器用例覆盖相邻项、跨项与快速连点切换",
+    "在 Neoverse 的 /projects → /focus → /pulse 实际导航中记录切换帧间隔基线，不出现超过 25ms 的帧"
+  ],
+  "impact": "normal",
+  "status": "delivered",
+  "consumers": [
+    {
+      "project": "Neoverse",
+      "location": "app/components/navigation/BottomDock.vue",
+      "framework": "vue",
+      "scenario": "从 Dock 在 /projects、/focus、/pulse 之间切换时，选中指示器的 left/top/width 过渡逐帧触发布局，并在 glass-elevated 容器内触发共享渲染器重绘；实测切换窗口 LayoutCount 15–32、RecalcStyleCount 约每帧一次，动画出现掉帧感",
+      "url": "https://github.com/SSJ-ZYJ/Neoverse/blob/main/app/components/navigation/BottomDock.vue"
+    }
+  ],
+  "createdAt": "2026-11-14T14:07:18.317Z",
+  "updatedAt": "2026-11-14T15:14:11.938Z",
+  "resolution": "UiControlSurface 共享指示器改为提交几何 + transform 位移缩放：首次测量写 left/top/width/height，后续切换仅写 translate/scale 由合成层插值，transitionend 一次性提交目标几何（提交期临时关过渡并 flush），reduced-motion/零时长直接提交。Vue 与 React 镜像同一状态机；GlassRuntime 将选中指示器视为边缘中性内容，其过渡不调度边缘帧、style 变更不计场景 mutation。CSS transitionProperty 由 left,top,width 改为 transform，沿用 spatial 时长/easing 与 pill 圆角。证据：glass-runtime 166/Vue 99/React 48 单测通过；tests/e2e/navigation.spec.ts 浏览器 32 项（desktop+mobile，3 轮稳定）覆盖相邻/跨项/快速连点/compact/reduced-motion/双适配，飞行期 offsetLeft/offsetWidth 不变而视觉盒移动证明无逐帧布局；check:docs/contracts/language/style/tailwind/biome 通过。Neoverse 真实消费（file: 同步）落定指示器 left/top/width 误差 0px、transitionProperty=transform，导航窗口 RecalcStyle 309→56、Layout 24→16；深浅色落定截图像素差 0.18%/0.16% 远低于同构建 SwiftShader 噪声 15.8%。绝对 25ms 帧验收受 headless SwiftShader 软件合成限制（无渲染器对照仍 100ms），渲染器逐帧开销已降至无渲染器水平。详见 .agents/notes/archives/acceptance-2026-11-14-dock-glass-performance.md。本地交付，未提交/发布。"
+}

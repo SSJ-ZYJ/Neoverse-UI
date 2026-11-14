@@ -47,6 +47,7 @@ export class NativeGlassRenderer implements GlassRenderer {
   private media: MediaQueryList | undefined;
   private frame: number | undefined;
   private mounted = false;
+  private suspended = false;
   private previous: string | null = null;
   private readonly prefix = `nv-backdrop-${++rendererSequence}-`;
   private sequence = 0;
@@ -108,16 +109,29 @@ export class NativeGlassRenderer implements GlassRenderer {
     view?.addEventListener('resize', this.schedule);
     // No scroll listener or per-frame map updates. CSS local coordinates move
     // with their owner in the same compositor frame as the actual backdrop.
-    this.refresh();
+    if (!this.suspended) this.refresh();
   }
   private readonly schedule = (): void => {
     const view = this.document.defaultView;
-    if (!this.mounted || !view || this.frame !== undefined) return;
+    if (!this.mounted || this.suspended || !view || this.frame !== undefined) return;
     this.frame = view.requestAnimationFrame(() => {
       this.frame = undefined;
       this.refresh();
     });
   };
+  suspend(): void {
+    if (this.suspended) return;
+    this.suspended = true;
+    if (this.frame !== undefined) {
+      this.document.defaultView?.cancelAnimationFrame(this.frame);
+      this.frame = undefined;
+    }
+  }
+  resume(): void {
+    if (!this.suspended) return;
+    this.suspended = false;
+    this.refresh();
+  }
   refresh(): void {
     if (!this.mounted) return;
     if (this.media?.matches) {
@@ -424,6 +438,7 @@ export class NativeGlassRenderer implements GlassRenderer {
   destroy(): void {
     if (!this.mounted) return;
     this.mounted = false;
+    this.suspended = false;
     const view = this.document.defaultView;
     if (this.frame !== undefined) view?.cancelAnimationFrame(this.frame);
     this.frame = undefined;
