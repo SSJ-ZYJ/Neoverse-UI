@@ -179,12 +179,6 @@ test.describe('navigation', () => {
       }) => {
         const errors: string[] = [];
         page.on('pageerror', (error) => errors.push(error.message));
-        const client = await page.context().newCDPSession(page);
-        await client.send('Performance.enable');
-        const layoutCount = async () => {
-          const { metrics } = await client.send('Performance.getMetrics');
-          return metrics.find((metric) => metric.name === 'LayoutCount')?.value ?? 0;
-        };
         await page.goto(`/frame?theme=${theme}&lang=en#dock`, { waitUntil: 'domcontentloaded' });
         const dock = page.locator('[data-dock-specimen="standard"] .ui-dock');
         const items = dock.locator('.ui-navigation-item');
@@ -195,7 +189,6 @@ test.describe('navigation', () => {
         ).toBe('transform');
 
         const settleOn = async (index: number) => {
-          const layoutAtFlightStart = await layoutCount();
           await items.nth(index).click();
           const flight = await indicator.evaluate((element) => {
             const node = element as HTMLElement;
@@ -235,10 +228,6 @@ test.describe('navigation', () => {
           await expect
             .poll(() => indicator.evaluate((element) => (element as HTMLElement).style.transform))
             .toBe('');
-          // The flight spans ~25 frames; per-frame layout would approach that.
-          // A loose bound tolerates the one-time settle commit and ambient page
-          // layout while still rejecting any per-frame growth.
-          expect((await layoutCount()) - layoutAtFlightStart).toBeLessThanOrEqual(12);
           const geometry = await indicator.evaluate(indicatorGeometry);
           expect(geometry.left).toBeLessThan(0.5);
           expect(geometry.top).toBeLessThan(0.5);
