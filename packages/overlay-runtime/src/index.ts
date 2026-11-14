@@ -162,6 +162,31 @@ function resolveMotionOffset(element: HTMLElement, style: CSSStyleDeclaration) {
   };
 }
 
+/**
+ * The CSS left/top of a fallback panel can be relative to a transformed ancestor.
+ * A submenu teleported to the document body instead needs viewport coordinates.
+ * Exclude the panel's own presence motion so the layout bounds stay stable during entry.
+ */
+export function resolveOverlayViewportLayoutBounds(element: HTMLElement): {
+  left: number;
+  right: number;
+  top: number;
+  bottom: number;
+} {
+  const style = getComputedStyle(element);
+  const zoom = resolveEffectiveZoom(element);
+  const rect = element.getBoundingClientRect();
+  const motion = resolveMotionOffset(element, style);
+  const left = rect.left - motion.x * zoom;
+  const top = rect.top - motion.y * zoom;
+  return {
+    left,
+    right: left + element.offsetWidth * zoom,
+    top,
+    bottom: top + element.offsetHeight * zoom,
+  };
+}
+
 export function stopOverlayTracking(overlay: HTMLElement): void {
   overlayCleanup.get(overlay)?.();
   overlayCleanup.delete(overlay);

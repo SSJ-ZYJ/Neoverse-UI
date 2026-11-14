@@ -434,24 +434,41 @@ test.describe('overlays', () => {
     await expect.poll(() => submenuMotionCount(page)).toBeGreaterThan(0);
   });
 
-  test('a cursor submenu stays visible and animated without the Popover API', async ({
-    page,
-    hasTouch,
-  }) => {
-    await disablePopoverApi(page);
-    await page.goto('/frame?theme=light&lang=en#overlays', { waitUntil: 'domcontentloaded' });
-    const panel = await openContextMenuAtZone(page);
-    await recordSubmenuMotion(page);
-    const themeRow = panel.getByRole('menuitem', { name: 'Theme' });
-    if (hasTouch) await themeRow.tap();
-    else await themeRow.click();
-    const submenu = page.locator('.ui-context-menu__submenu');
-    await expect(submenu).toBeVisible();
-    await expect
-      .poll(() => submenu.evaluate((element) => Number(getComputedStyle(element).opacity)))
-      .toBeGreaterThan(0.9);
-    await expect.poll(() => submenuMotionCount(page)).toBeGreaterThan(0);
-  });
+  for (const adapter of adapters) {
+    test(`${adapter.name}: a cursor submenu stays visible and animated without the Popover API`, async ({
+      page,
+      hasTouch,
+    }) => {
+      await disablePopoverApi(page);
+      await page.goto(adapter.url('light', 'overlays'), { waitUntil: 'domcontentloaded' });
+      const panel = await openContextMenuAtZone(page);
+      await recordSubmenuMotion(page);
+      const themeRow = panel.getByRole('menuitem', { name: 'Theme' });
+      if (hasTouch) await themeRow.tap();
+      else await themeRow.click();
+      const submenu = page.locator('.ui-context-menu__submenu');
+      await expect(submenu).toBeVisible();
+      await expectSubmenuAtRest(page);
+      // The body-level submenu must not cover the parent row when the fallback
+      // panel's CSS position is relative to a transformed containing block.
+      const hitCheck = await themeRow.evaluate((row) => {
+        const rect = row.getBoundingClientRect();
+        const hit = document.elementFromPoint(
+          rect.left + rect.width / 2,
+          rect.top + rect.height / 2,
+        );
+        return {
+          clickable: row === hit || row.contains(hit),
+          obstruction: hit?.className,
+        };
+      });
+      expect(hitCheck.clickable, `Theme row is obscured by ${hitCheck.obstruction}`).toBe(true);
+      await expect
+        .poll(() => submenu.evaluate((element) => Number(getComputedStyle(element).opacity)))
+        .toBeGreaterThan(0.9);
+      await expect.poll(() => submenuMotionCount(page)).toBeGreaterThan(0);
+    });
+  }
 
   test('context menu stays inside the viewport at the bottom-right corner', async ({ page }) => {
     await page.goto('/frame?theme=light&lang=en#overlays', { waitUntil: 'domcontentloaded' });

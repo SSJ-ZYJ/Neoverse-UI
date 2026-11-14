@@ -3,7 +3,7 @@ import { Window } from 'happy-dom';
 import { act } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
-import { UiDropdownMenu, UiPopover } from './overlays';
+import { UiContextMenu, UiDropdownMenu, UiPopover } from './overlays';
 
 test('overlay panel associations remain unique and unchanged through SSR hydration and interaction', async () => {
   const browser = new Window();
@@ -35,6 +35,11 @@ test('overlay panel associations remain unique and unchanged through SSR hydrati
         ariaLabel="Actions"
         items={[{ id: 'open', label: 'Open' }]}
       />
+      <UiContextMenu
+        open={false}
+        ariaLabel="Context actions"
+        entries={[{ id: 'copy', label: 'Copy' }]}
+      />
     </main>
   );
   const container = browser.document.createElement('div');
@@ -48,6 +53,7 @@ test('overlay panel associations remain unique and unchanged through SSR hydrati
   const errors: unknown[] = [];
   let root: ReturnType<typeof hydrateRoot> | undefined;
   try {
+    expect(container.querySelector('.ui-context-menu')).not.toBeNull();
     expect(serverIds).toHaveLength(3);
     expect(serverIds.every(Boolean)).toBe(true);
     expect(new Set(serverIds).size).toBe(3);
@@ -59,6 +65,8 @@ test('overlay panel associations remain unique and unchanged through SSR hydrati
         onRecoverableError: (error) => errors.push(error),
       });
     });
+    expect(container.querySelector('.ui-context-menu')).toBeNull();
+    expect(browser.document.body.querySelectorAll('.ui-context-menu')).toHaveLength(1);
     expect(associations()).toEqual(serverIds);
     await act(async () => {
       container.querySelector('button')?.click();

@@ -4,6 +4,7 @@ import {
   type AnchoredOverlayOptions,
   hideAnchoredOverlay,
   isOverlayOpen,
+  resolveOverlayViewportLayoutBounds,
   showAnchoredOverlay,
   stopOverlayTracking,
   supportsPopover,
@@ -211,11 +212,9 @@ function placeSubmenu(opener: HTMLButtonElement) {
   const panel = panelRef.value;
   const submenu = submenuRef.value;
   if (panel === null || submenu === null) return;
-  // Presence scale affects visual bounds during entrance. offsetLeft is relative
-  // to an offsetParent and can include a top-layer offset; use the resolved
-  // fixed-position CSS left instead so the column stays aligned at rest.
-  const panelLeft = Number.parseFloat(getComputedStyle(panel).left);
-  const panelRight = panelLeft + panel.offsetWidth;
+  // Fallback panels can be fixed relative to a transformed ancestor. Their
+  // computed CSS left is not the viewport position of this body-level column.
+  const { left: panelLeft, right: panelRight } = resolveOverlayViewportLayoutBounds(panel);
   const openerRect = opener.getBoundingClientRect();
   const margin = 8;
   const width = submenu.offsetWidth;

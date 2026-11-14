@@ -5,6 +5,7 @@ import {
   isOverlayOpen,
   type OverlayPlacement,
   type OverlayPoint,
+  resolveOverlayViewportLayoutBounds,
   showAnchoredOverlay,
   stopOverlayTracking,
   supportsPopover,
@@ -424,6 +425,10 @@ export function UiContextMenu({
 }: UiContextMenuProps) {
   const panelRef = useRef<HTMLDivElement | null>(null);
   const submenuRef = useRef<HTMLDivElement | null>(null);
+  // Render fallback panels outside clipped or transformed consumer surfaces.
+  // Resolve the host after mount so server rendering and hydration agree.
+  const [portalHost, setPortalHost] = useState<HTMLElement | null>(null);
+  useEffect(() => setPortalHost(document.body), []);
   const restoreTarget = useRef<HTMLElement | null>(null);
   const ignoreNativeClose = useRef(false);
   const panelId = useId();
@@ -508,13 +513,11 @@ export function UiContextMenu({
       submenu.classList.add('ui-context-menu__submenu--open');
     }
 
-    // Position against the parent's *layout* left, not its entrance-scaled
-    // visual rect. The shared overlay tracker may still correct the parent's
-    // position after this effect, so keep the column aligned on style changes.
+    // Use viewport layout bounds rather than the panel's computed CSS left,
+    // which may be relative to a transformed ancestor in fallback mode.
     const placeSubmenu = () => {
       if (!panel.isConnected || !submenu.isConnected || !pending.opener.isConnected) return;
-      const panelLeft = Number.parseFloat(getComputedStyle(panel).left);
-      const panelRight = panelLeft + panel.offsetWidth;
+      const { left: panelLeft, right: panelRight } = resolveOverlayViewportLayoutBounds(panel);
       const openerRect = pending.opener.getBoundingClientRect();
       const margin = 8;
       const width = submenu.offsetWidth;
@@ -574,7 +577,7 @@ export function UiContextMenu({
   }, [closeSubmenuPopover, enabledItems]);
 
   useEffect(() => {
-    const options = resolveOptions();
+    const options = portalHost === null ? undefined : resolveOptions();
     if (options === undefined) return;
     if (open) {
       restoreTarget.current = focusReturn ?? (document.activeElement as HTMLElement | null);
@@ -603,7 +606,7 @@ export function UiContextMenu({
     setOpenSubmenu(null);
     hideAnchoredOverlay(options);
     return () => stopOverlayTracking(options.overlay);
-  }, [autoFocus, closeSubmenuPopover, enabledItems, focusReturn, open, resolveOptions]);
+  }, [autoFocus, closeSubmenuPopover, enabledItems, focusReturn, open, portalHost, resolveOptions]);
 
   const onPanelToggle = (event: SyntheticEvent<HTMLDivElement>) => {
     const panel = event.currentTarget;
@@ -696,7 +699,7 @@ export function UiContextMenu({
     }
   };
 
-  return (
+  const panel = (
     <div
       {...props}
       ref={panelRef}
@@ -809,4 +812,5 @@ export function UiContextMenu({
           )}
     </div>
   );
+  return portalHost === null ? panel : createPortal(panel, portalHost);
 }

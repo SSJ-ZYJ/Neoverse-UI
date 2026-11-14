@@ -1,7 +1,48 @@
 import { expect, test } from 'bun:test';
-import { positionAnchoredOverlay, resolveAnchoredPosition } from './index';
+import {
+  positionAnchoredOverlay,
+  resolveAnchoredPosition,
+  resolveOverlayViewportLayoutBounds,
+} from './index';
 
 const viewport = { width: 1200, height: 800 };
+
+test('submenus use viewport layout bounds when a fallback panel has a transformed containing block', () => {
+  const original = Object.getOwnPropertyDescriptor(globalThis, 'getComputedStyle');
+  const zoom = 1.25;
+  const style = {
+    left: '63px',
+    zoom: String(zoom),
+    fontSize: '16px',
+    scale: '0.96',
+    translate: '0px 8px',
+    transformOrigin: '64px 0px',
+  };
+  const panel = {
+    parentElement: null,
+    offsetWidth: 128,
+    offsetHeight: 200,
+    getBoundingClientRect: () => ({
+      left: 207 + 64 * (1 - Number(style.scale)) * zoom,
+      top: 497 + 8 * zoom,
+    }),
+  } as unknown as HTMLElement;
+  try {
+    Object.defineProperty(globalThis, 'getComputedStyle', {
+      configurable: true,
+      value: () => style,
+    });
+    expect(resolveOverlayViewportLayoutBounds(panel)).toEqual({
+      left: 207,
+      right: 367,
+      top: 497,
+      bottom: 747,
+    });
+  } finally {
+    if (original) Object.defineProperty(globalThis, 'getComputedStyle', original);
+    else Reflect.deleteProperty(globalThis, 'getComputedStyle');
+  }
+});
 
 test('fallback containing-block correction preserves its own entrance scale and translate', () => {
   const saved = ['window', 'document', 'getComputedStyle'].map(
