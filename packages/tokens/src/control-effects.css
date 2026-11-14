@@ -392,9 +392,10 @@
       var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-22),
       transparent
     );
+    /* Both themes keep one hover plate weight so the feedback stays equally legible. */
     --neoverse-effect-hover-field-dark: color-mix(
       in srgb,
-      var(--neoverse-color-accent-primary) var(--neoverse-effect-alpha-quiet),
+      var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-22),
       transparent
     );
     --neoverse-effect-placeholder-edge: inset 0 1px 0
