@@ -1,5 +1,6 @@
 import { expect, test } from 'bun:test';
 import {
+  acquireNativeScrollbarHiding,
   positionAnchoredOverlay,
   resolveAnchoredPosition,
   resolveOverlayViewportLayoutBounds,
@@ -331,4 +332,84 @@ test('positions a point-anchored overlay from the cursor and flips above when ne
       else Reflect.deleteProperty(globalThis, name);
     }
   }
+});
+
+type FakeClassList = {
+  add: (name: string) => void;
+  contains: (name: string) => boolean;
+  has: (name: string) => boolean;
+  remove: (name: string) => void;
+};
+
+function fakeClassList(): FakeClassList {
+  const values = new Set<string>();
+  return {
+    add: (name) => values.add(name),
+    contains: (name) => values.has(name),
+    has: (name) => values.has(name),
+    remove: (name) => values.delete(name),
+  };
+}
+
+function withScrollbarDocument(
+  run: (root: { classList: FakeClassList }, body: { classList: FakeClassList }) => void,
+): void {
+  const root = { classList: fakeClassList() };
+  const body = { classList: fakeClassList() };
+  const original = Object.getOwnPropertyDescriptor(globalThis, 'document');
+  Object.defineProperty(globalThis, 'document', {
+    configurable: true,
+    value: { documentElement: root, body },
+  });
+  try {
+    run(root, body);
+  } finally {
+    if (original) Object.defineProperty(globalThis, 'document', original);
+    else Reflect.deleteProperty(globalThis, 'document');
+  }
+}
+
+test('native scrollbar hiding is reference-counted across overlapping owners', () => {
+  withScrollbarDocument((root, body) => {
+    const releaseFirst = acquireNativeScrollbarHiding();
+    const releaseSecond = acquireNativeScrollbarHiding();
+
+    expect(root.classList.has('ui-scrollbar-target')).toBe(true);
+    expect(body.classList.has('ui-scrollbar-target')).toBe(true);
+
+    releaseFirst();
+    expect(root.classList.has('ui-scrollbar-target')).toBe(true);
+    expect(body.classList.has('ui-scrollbar-target')).toBe(true);
+
+    releaseSecond();
+    expect(root.classList.has('ui-scrollbar-target')).toBe(false);
+    expect(body.classList.has('ui-scrollbar-target')).toBe(false);
+  });
+});
+
+test('native scrollbar hiding preserves a class the page already owned', () => {
+  withScrollbarDocument((root, body) => {
+    root.classList.add('ui-scrollbar-target');
+    body.classList.add('ui-scrollbar-target');
+
+    const release = acquireNativeScrollbarHiding();
+    release();
+    expect(root.classList.has('ui-scrollbar-target')).toBe(true);
+    expect(body.classList.has('ui-scrollbar-target')).toBe(true);
+  });
+});
+
+test('releasing a scrollbar owner more than once cannot drop another owner', () => {
+  withScrollbarDocument((root) => {
+    const releaseFirst = acquireNativeScrollbarHiding();
+    const releaseSecond = acquireNativeScrollbarHiding();
+
+    releaseFirst();
+    releaseFirst();
+    expect(root.classList.has('ui-scrollbar-target')).toBe(true);
+
+    releaseSecond();
+    releaseSecond();
+    expect(root.classList.has('ui-scrollbar-target')).toBe(false);
+  });
 });

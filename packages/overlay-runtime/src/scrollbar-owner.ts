@@ -29,7 +29,10 @@ export function acquireNativeScrollbarHiding(): () => void {
     target.classList.add('ui-scrollbar-target');
   }
 
+  let released = false;
   return () => {
+    if (released) return;
+    released = true;
     for (const target of targets) {
       const owner = owners.get(target);
       if (owner === undefined) continue;
