@@ -99,3 +99,42 @@ test.describe('materials', () => {
     await expectNoPageOverflow(page);
   });
 });
+
+test('the React fixture wires the same three Glass tiers', async ({ page }) => {
+  await page.goto('/react-fixture?theme=light&lang=en&contract-fixtures=1', {
+    waitUntil: 'domcontentloaded',
+  });
+  await expect(page.locator('[data-material-tier-fixtures]')).toBeVisible();
+
+  const expected = [
+    { tier: 'glass-subtle', blur: 12, saturation: 1.32 },
+    { tier: 'glass-elevated', blur: 18, saturation: 1.45 },
+    { tier: 'glass-immersive', blur: 24, saturation: 1.65 },
+  ] as const;
+  for (const tier of expected) {
+    const card = page.locator(`[data-tier-card="${tier.tier}"]`);
+    await expect(card).toBeVisible();
+    const backdrop = await card.evaluate((element) => getComputedStyle(element).backdropFilter);
+    expect(backdrop).toContain(`blur(${tier.blur}px)`);
+    expect(backdrop).toContain(`saturate(${tier.saturation})`);
+  }
+});
+
+test('reduced transparency removes the renderer and the tier blur', async ({ page }) => {
+  const client = await page.context().newCDPSession(page);
+  await client.send('Emulation.setEmulatedMedia', {
+    features: [{ name: 'prefers-reduced-transparency', value: 'reduce' }],
+  });
+  await page.goto('/frame?theme=dark&lang=en#materials', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCount(0);
+
+  const surface = page.locator('[data-surface="glass-elevated"]').first();
+  await expect(surface).toBeVisible();
+  const fallback = await surface.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { filter: style.backdropFilter, background: style.backgroundColor };
+  });
+  expect(fallback.filter).toBe('none');
+  expect(fallback.background).not.toContain('rgba(0, 0, 0, 0)');
+  await expectNoPageOverflow(page);
+});

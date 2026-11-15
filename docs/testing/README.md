@@ -28,15 +28,15 @@ A test asserts an observable user outcome: a panel opens, focus returns, a value
 | `navigation.spec.ts` | Breadcrumb, dock, segmented control, step flow |
 | `surfaces.spec.ts` | Disclosure, table, skeleton, timeline, stat card, scrollbar |
 | `terminal.spec.ts` | Transcript composition, suggestions, IME guard, tail following, reader intent |
-| `motion.spec.ts` | List reorder, entrance replay, reduced motion, layout width on a language switch |
-| `materials.spec.ts` | Aurora Glass previews render, stay readable across themes and reduced transparency, and each tier wires its own blur, saturation and tint |
-| `glass-runtime.spec.ts` | One shared noninteractive renderer canvas, fixed placement, and runtime lifecycle |
-| `layout.spec.ts` | Control size baseline, badge type scale, 24px minimum target, no implicit specimen magnification |
+| `motion.spec.ts` | List reorder, entrance replay, page dissolve, React presence exit, reduced motion, layout width on a language switch |
+| `materials.spec.ts` | Aurora Glass previews render, stay readable across themes, lose blur and canvas under reduced transparency, and each tier wires its own blur, saturation and tint in both adapters |
+| `glass-runtime.spec.ts` | One shared noninteractive renderer canvas, fixed placement, theme stability, context loss/restore, runtime reduced transparency, forced colors and adapter lifecycle |
+| `layout.spec.ts` | Control size baseline in both adapters, badge type scale, 24px minimum target, no implicit specimen magnification |
 | `contrast.spec.ts` | WCAG contrast floors for the primary, secondary and muted text roles in both themes |
 | `playground.spec.ts` | Shell navigation, deep links, drawer, scroll restoration, responsive overflow |
 | `parity.spec.ts` | Every React adapter renders, theme resolution, shared control names |
 
-The cross-browser configuration runs the interaction specs that do not depend on the Chromium-only optical harness. `tests/optics/glass.spec.ts` runs separately under Chromium with SwiftShader and reports optical diagnostics rather than a release pass/fail signal.
+The cross-browser configuration runs the interaction specs that do not depend on the Chromium-only optical harness: forms, overlays, navigation, surfaces, motion and parity. Terminal IME and scroll-tail timing, Glass and materials, layout and contrast probes, and the Playground shell stay Chromium-only because they either depend on that rendering harness or duplicate an existing cross-engine contract at disproportionate CI cost. Extending the list requires running both Firefox and WebKit before the spec enters the registry. `tests/optics/glass.spec.ts` runs separately under Chromium with SwiftShader and reports optical diagnostics rather than a release pass/fail signal.
 
 ## Commands
 
@@ -47,8 +47,9 @@ The cross-browser configuration runs the interaction specs that do not depend on
 | `bun run test:e2e` | Build, then Chromium desktop and touch browser specs |
 | `bun run test:e2e:cross-browser` | Firefox and WebKit interaction specs |
 | `bun run test:glass:optics` | Software-rendered Aurora Glass optical diagnostics |
+| `bun run check:test-registry` | Browser spec and registry agreement |
 
-`tests/support/e2e.ts` owns the shared browser adapters and fixture helpers. Add a new spec only when it covers a module that no existing spec owns, and register it in the table above in the same change.
+`tests/support/e2e.ts` owns the shared browser adapters and fixture helpers. Add a new spec only when it covers a module that no existing spec owns, and register it in the table above in the same change. `bun run check:test-registry` rejects a spec that is missing from this table, a table row whose spec file is gone, and a cross-browser entry that is not registered.
 
 ## Check runner
 

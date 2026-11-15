@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { expectNoPageOverflow } from '../support/e2e';
 
 const glassPage = '/frame?theme=light&lang=en#materials';
 const canvasSelector = '[data-neoverse-glass-renderer-canvas]';
@@ -173,4 +174,134 @@ test.describe('Aurora Glass runtime', () => {
     });
     expect(await readCanvas()).toBe(after);
   });
+});
+
+test('a theme switch keeps the shared renderer canvas', async ({ page }) => {
+  await page.goto(glassPage, { waitUntil: 'domcontentloaded' });
+  const canvas = page.locator(canvasSelector);
+  await expect(canvas).toHaveCount(1);
+
+  await page.evaluate(() => {
+    const current = document.querySelector('[data-neoverse-glass-renderer-canvas]');
+    (window as Window & { __glassCanvas?: Element | null }).__glassCanvas = current;
+    document.documentElement.dataset.theme = 'dark';
+  });
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await expect(
+    page.evaluate(
+      () =>
+        (window as Window & { __glassCanvas?: Element | null }).__glassCanvas ===
+        document.querySelector('[data-neoverse-glass-renderer-canvas]'),
+    ),
+  ).resolves.toBe(true);
+  await expect(canvas).toHaveCount(1);
+});
+
+test('a real context loss falls back to CSS and restore builds one new canvas', async ({
+  page,
+}) => {
+  await page.goto(glassPage, { waitUntil: 'domcontentloaded' });
+  const canvas = page.locator(canvasSelector);
+  await canvas.evaluate((element) => {
+    const gl = (element as HTMLCanvasElement).getContext('webgl2');
+    const extension = gl?.getExtension('WEBGL_lose_context');
+    if (!gl || !extension) throw new Error('The live renderer must expose WEBGL_lose_context');
+    (window as Window & { __glassContext?: WebGL2RenderingContext }).__glassContext = gl;
+    (window as Window & { __glassLoss?: WEBGL_lose_context }).__glassLoss = extension;
+    extension.loseContext();
+  });
+  await expect(canvas).toHaveCSS('display', 'none');
+  await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
+
+  await page.evaluate(() =>
+    (window as Window & { __glassLoss?: WEBGL_lose_context }).__glassLoss?.restoreContext(),
+  );
+  await expect(page.locator(canvasSelector)).toHaveCount(1);
+  await expect(canvas).toHaveCSS('display', 'block');
+  await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
+  expect(
+    await page.evaluate(
+      () =>
+        (window as Window & { __glassContext?: WebGL2RenderingContext }).__glassContext !==
+        document
+          .querySelector<HTMLCanvasElement>('[data-neoverse-glass-renderer-canvas]')
+          ?.getContext('webgl2'),
+    ),
+  ).toBe(true);
+});
+
+test('runtime reduced transparency releases and restores the shared canvas', async ({ page }) => {
+  await page.addInitScript(() => {
+    const original = window.matchMedia.bind(window);
+    const listeners = new Set<(event: MediaQueryListEvent) => void>();
+    let reduced = false;
+    const media = {
+      get matches() {
+        return reduced;
+      },
+      media: '(prefers-reduced-transparency: reduce)',
+      onchange: null,
+      addEventListener(type: string, listener: (event: MediaQueryListEvent) => void) {
+        if (type === 'change') listeners.add(listener);
+      },
+      removeEventListener(type: string, listener: (event: MediaQueryListEvent) => void) {
+        if (type === 'change') listeners.delete(listener);
+      },
+    } as unknown as MediaQueryList;
+    window.matchMedia = (query) =>
+      query === '(prefers-reduced-transparency: reduce)' ? media : original(query);
+    (
+      window as Window & { __setReducedTransparency?: (value: boolean) => void }
+    ).__setReducedTransparency = (value) => {
+      reduced = value;
+      for (const listener of listeners) listener({ matches: value } as MediaQueryListEvent);
+    };
+  });
+  await page.goto(glassPage, { waitUntil: 'domcontentloaded' });
+  const canvas = page.locator(canvasSelector);
+  await expect(canvas).toHaveCount(1);
+
+  await page.evaluate(() =>
+    (
+      window as Window & { __setReducedTransparency?: (value: boolean) => void }
+    ).__setReducedTransparency?.(true),
+  );
+  await expect(canvas).toHaveCount(0);
+  await expect(page.locator('[data-surface="glass-elevated"]').first()).toBeVisible();
+
+  await page.evaluate(() =>
+    (
+      window as Window & { __setReducedTransparency?: (value: boolean) => void }
+    ).__setReducedTransparency?.(false),
+  );
+  await expect(canvas).toHaveCount(1);
+});
+
+test('both adapters mount one shared renderer under reduced motion', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const url of [
+    '/frame?theme=light&lang=en#materials',
+    '/react-fixture?theme=light&lang=en&contract-fixtures=1',
+  ]) {
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
+    await expect(page.locator(canvasSelector)).toHaveCount(1);
+  }
+});
+
+test('forced colors keeps the glass surfaces usable without a page overflow', async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active' });
+  await page.goto(glassPage, { waitUntil: 'domcontentloaded' });
+  const surface = page.locator('[data-surface="glass-elevated"]').first();
+  await expect(surface).toBeVisible();
+  const style = await surface.evaluate((element) => {
+    const computed = getComputedStyle(element);
+    return {
+      color: computed.color,
+      forcedColorAdjust: computed.forcedColorAdjust,
+    };
+  });
+  expect(style.color).not.toBe('rgba(0, 0, 0, 0)');
+  expect(style.forcedColorAdjust).toBe('auto');
+  await expectNoPageOverflow(page);
 });

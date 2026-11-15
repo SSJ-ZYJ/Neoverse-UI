@@ -111,3 +111,22 @@ test.describe('layout', () => {
     }
   });
 });
+
+test('React adapters keep the shared control baseline', async ({ page }) => {
+  await page.goto('/react-fixture?theme=light&lang=en', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('[data-react-adapter="UiButton"]')).toBeVisible();
+
+  const button = await box(page.locator('[data-react-adapter="UiButton"]'));
+  expect(button.height).toBeCloseTo(40, 0);
+  expect(button.fontSize).toBeCloseTo(14, 0);
+  expect(button.zoom).toBe('1');
+
+  const input = await box(page.locator('[data-react-adapter="UiInput"]'));
+  expect(input.height).toBeCloseTo(40, 0);
+  expect(input.fontSize).toBeCloseTo(14, 0);
+
+  const segment = await box(
+    page.locator('[data-react-adapter="UiSegmentedControl"] .ui-segmented-control__option').first(),
+  );
+  expect(segment.height).toBeCloseTo(32, 0);
+});

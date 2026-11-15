@@ -95,7 +95,7 @@ matrix row and fail on both platforms; they were not updated to hide that drift.
 
 A new public component must be added to the matrix in the same change that exports it. Canonical Shared components cannot be marked complete while either Vue or React is missing, and every Canonical Shared React adapter must appear in the browser runtime fixture. A component cannot be promoted to Stable without release visual coverage and real consumer validation.
 
-`bun run check:contracts` validates matrix schema invariants, public Vue/React export coverage, Canonical Shared parity, React runtime fixture markers, Stable maturity requirements, and the presence of a documentation row for every registered component.
+`bun run check:contracts` validates matrix schema invariants, public Vue/React export coverage, Canonical Shared parity, React runtime fixture markers, Stable maturity requirements, unit-test evidence for every `Stable` unit column, and the presence of a documentation row for every registered component. Unit evidence is the component name appearing in a Vue or React test file; it guards existence, not assertion depth.
 
 
 Material tiers, customization, component audit and hover/press policy: [Material standards](material-standards.md).

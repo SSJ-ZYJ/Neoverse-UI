@@ -77,3 +77,46 @@ test.describe('motion', () => {
     await expectNoPageOverflow(page);
   });
 });
+
+test('page dissolve swaps the specimen and clears the particle layer', async ({ page }) => {
+  await page.goto('/frame?theme=light&lang=en#foundation-motion-page', {
+    waitUntil: 'domcontentloaded',
+  });
+  const trigger = page.locator('[data-motion-page-dissolve]');
+  const stage = page.locator('#foundation-motion-page .playground-motion-stage');
+
+  await expect(stage).toContainText('{ dissolveSource }');
+  await trigger.click();
+  await expect(stage).toContainText('{ particle }');
+  await expect(trigger).toBeEnabled();
+  await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-particle-transitioning');
+  await expect(page.locator('.nv-particle-canvas')).toHaveCount(0);
+});
+
+test('page dissolve honors reduced motion without keeping a particle layer', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/frame?theme=light&lang=en#foundation-motion-page', {
+    waitUntil: 'domcontentloaded',
+  });
+  const trigger = page.locator('[data-motion-page-dissolve]');
+  const stage = page.locator('#foundation-motion-page .playground-motion-stage');
+
+  await expect(stage).toContainText('{ dissolveSource }');
+  await trigger.click();
+  await expect(stage).toContainText('{ particle }');
+  await expect(trigger).toBeEnabled();
+  await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-particle-transitioning');
+  await expect(page.locator('.nv-particle-canvas')).toHaveCount(0);
+});
+
+test('React presence removes the exited region and returns it on show', async ({ page }) => {
+  await page.goto('/react-fixture?theme=light&lang=en', { waitUntil: 'domcontentloaded' });
+  const presence = page.locator('[data-react-adapter="UiPresence"]');
+  const toggle = page.locator('[data-react-presence-toggle]');
+
+  await expect(presence).toBeVisible();
+  await toggle.click();
+  await expect(presence).toHaveCount(0);
+  await toggle.click();
+  await expect(presence).toBeVisible();
+});

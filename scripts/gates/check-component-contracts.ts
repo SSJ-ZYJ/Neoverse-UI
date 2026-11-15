@@ -1,3 +1,4 @@
+import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import ts from 'typescript';
 import { collectReactRuntimeAdapters } from './react-runtime-fixture';
@@ -44,6 +45,17 @@ const matrix = (await Bun.file(matrixPath).json()) as ComponentMatrix;
 const vueIndex = await Bun.file(vueIndexPath).text();
 const reactFixture = await Bun.file(reactFixturePath).text();
 const docs = await Bun.file(docsPath).text();
+
+const unitTestCorpus = [resolve(root, 'packages/vue/src'), resolve(root, 'packages/react/src')]
+  .flatMap((directory) =>
+    readdirSync(directory, { recursive: true })
+      .filter(
+        (name): name is string => typeof name === 'string' && /\.test\.(?:ts|tsx)$/.test(name),
+      )
+      .map((name) => resolve(directory, name)),
+  )
+  .map((path) => readFileSync(path, 'utf8'))
+  .join('\n');
 
 const errors: string[] = [];
 
@@ -172,6 +184,10 @@ for (const component of matrix.components) {
     errors.push(
       `${component.name}: runtime is validated but the React runtime fixture has no marker`,
     );
+  }
+
+  if (component.unit === 'stable' && !unitTestCorpus.includes(component.name)) {
+    errors.push(`${component.name}: unit is stable but no unit test references the component`);
   }
 
   if (component.maturity === 'stable') {
