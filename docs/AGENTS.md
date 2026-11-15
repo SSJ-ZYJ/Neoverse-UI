@@ -2,47 +2,50 @@
 
 Status: adopted
 
-This file governs how repository documentation is organised and written. The
-root [AGENTS.md](../AGENTS.md) keeps its engineering constraints; where the two
-overlap, the root file wins. This file does not change what a document says, only
-where it lives and how it is maintained.
+This file governs how repository documentation is organised and written. It applies to every Markdown file, including the root [AGENTS.md](../AGENTS.md), README, package guides and `.agents/notes/`. The root file keeps its engineering constraints; where the two overlap, the root file wins.
 
 ## Directory structure
 
 ```text
 docs/                          current state of the repository
   AGENTS.md                    this file
-  architecture.md              workspace layout and package responsibilities
-  code-style.md                language, naming, abbreviation and terminology rules
-  component-contract-matrix.md component maturity policy and current baseline
-  component-requests.md        cross-project component request intake
-  consumer-sizing.md           consumer component sizing baseline
-  form-control-contract.md     form control behavior and accessibility
-  framework-parity.md          Vue / React equivalents
-  material-standards.md        Aurora Glass optical and interaction contract
-  overlay-contract.md          overlay positioning and dismissal
-  terminal-composition.md      terminal composition and history behavior
-  releasing.md                 release process, gates and automation
-  migration-0.2.0.md           historical upgrade path
-  migration-0.3.0.md           current upgrade guide
-  release-0.3.0.md             published release record
-  release-0.3.1.md             published release record
+  code-style.md                source language, naming and terminology rules
+  translations.json            bilingual source/translation registry
+  architecture/                current architecture and public interaction contracts
+    README.md                  workspace layout, package boundaries and Design Lab
+    component-contract-matrix.md component maturity policy and current baseline
+    component-requests.md      cross-project component request intake
+    consumer-sizing.md         consumer component sizing baseline
+    form-control-contract.md   form control behavior and accessibility
+    framework-parity.md        Vue / React equivalents
+    material-standards.md      Aurora Glass optical and interaction contract
+    overlay-contract.md        overlay positioning and dismissal
+    terminal-composition.md    terminal composition and history behavior
+  releases/                    process records and upgrade paths
+    releasing.md               release process, gates and automation
+    migration-0.2.0.md         historical upgrade path
+    migration-0.3.0.md         current upgrade guide
+    release-0.3.0.md           published release record
+    release-0.3.1.md           published release record
+  testing/
+    README.md                  test layers, browser spec ownership and commands
+  zh-CN/                       Chinese translations of consumer-facing documents
+    README.md                  Chinese documentation index
+    terminology.md             Chinese terminology and wording rules
+    architecture/form-control-contract.md
+    architecture/material-standards.md
+    architecture/overlay-contract.md
+    architecture/terminal-composition.md
+    releases/migration-0.3.0.md
+  images/                      README artwork
 .agents/notes/
   archives/                    dated audits, acceptance runs and incident records
   plans/                       dated implementation plans
 ```
 
-Process material belongs in `.agents/notes/`: audits, acceptance runs, incident
-records, measurement snapshots and implementation plans are records of what
-happened on a date, not descriptions of the current repository. Name them
-`<type>-<date>.md`.
+Process material belongs in `.agents/notes/`: audits, acceptance runs, incident records, measurement snapshots and implementation plans are records of what happened on a date, not descriptions of the current repository. Name them `<type>-<date>.md`.
 
-`docs/` describes what the repository does now. A document that only records a
-past investigation is kept in `.agents/notes/archives/` and linked from the
-current-state document that relies on it.
-
-Register a new topic in the structure above before writing it. Do not add a file
-to `docs/` that the structure does not list.
+The structure block is the registry: a topic that is not listed there cannot be introduced silently. `bun run check:docs` rejects a `docs/` file absent from the block.
 
 ## Content ownership
 
@@ -51,56 +54,61 @@ to `docs/` that the structure does not list.
 | Repository engineering constraints and agent intake | [AGENTS.md](../AGENTS.md) |
 | Source language, naming, abbreviations and terminology | [code-style.md](code-style.md) |
 | Project overview, install and usage | [README.md](../README.md) |
-| Workspace layout, package responsibilities, module boundaries | [architecture.md](architecture.md) |
-| Component maturity policy and current status | [component-contract-matrix.md](component-contract-matrix.md) |
-| Component request schema and intake commands | [component-requests.md](component-requests.md) |
-| Consumer sizing baseline | [consumer-sizing.md](consumer-sizing.md) |
-| Form control contract | [form-control-contract.md](form-control-contract.md) |
-| Vue / React equivalents | [framework-parity.md](framework-parity.md) |
-| Aurora Glass material contract | [material-standards.md](material-standards.md) |
-| Overlay contract | [overlay-contract.md](overlay-contract.md) |
-| Terminal composition contract | [terminal-composition.md](terminal-composition.md) |
-| Release process, gates and automation | [releasing.md](releasing.md) |
-| Upgrade steps between published versions | `migration-*.md`, newest adopted |
-| What a specific release shipped | `release-*.md`, newest adopted |
+| Workspace layout, package responsibilities, module boundaries | [architecture/README.md](architecture/README.md) |
+| Component maturity and current status | [component-contract-matrix.md](architecture/component-contract-matrix.md) |
+| Component request schema and intake | [component-requests.md](architecture/component-requests.md) |
+| Consumer sizing baseline | [consumer-sizing.md](architecture/consumer-sizing.md) |
+| Form control contract | [form-control-contract.md](architecture/form-control-contract.md) |
+| Vue / React equivalents | [framework-parity.md](architecture/framework-parity.md) |
+| Aurora Glass material contract | [material-standards.md](architecture/material-standards.md) |
+| Overlay contract | [overlay-contract.md](architecture/overlay-contract.md) |
+| Terminal composition contract | [terminal-composition.md](architecture/terminal-composition.md) |
+| Test layers, spec ownership and commands | [testing/README.md](testing/README.md) |
+| Release process, gates and automation | [releasing.md](releases/releasing.md) |
+| Upgrade steps between published versions | `releases/migration-*.md`, newest adopted |
+| What a specific release shipped | `releases/release-*.md`, newest adopted |
 
 One fact, one place. Link to the owning document instead of restating it.
 
 ## Status metadata
 
-Every file starts with a level-one heading, a blank line, then a status line:
+Every file starts with a level-one heading, a blank line, then `Status: adopted` or `Status: historical`.
 
-```text
-Status: adopted
-```
+- `adopted` describes the current repository state.
+- `historical` is kept for its design rationale and names the document that replaced it.
 
-- `adopted` — describes the current repository state.
-- `historical` — kept for its design rationale; the file names the document that
-  replaced it.
-
-Current-state documents do not carry dates. A dated observation, baseline or
-verification run is process material and belongs in `.agents/notes/`, which keeps
-the date in the file name and in the record itself.
+Current-state documents do not carry dates. A dated observation, baseline or verification run is process material and belongs in `.agents/notes/`, which keeps the date in the file name and in the record itself.
 
 ## Writing
 
-- One level-one heading per file; keep heading levels consecutive.
-- Lead with the conclusion, then the evidence.
-- Use tables for comparisons and mappings; label code fences with a language.
-- Repository links use relative paths, external links use full URLs, and link
-  text names the target.
-- Write facts, not intentions. An unknown value is written as unverified together
-  with the observation that would settle it.
-- Do not describe a component, script or workflow that the repository does not
-  contain.
+- One level-one heading per file; keep heading levels consecutive. A heading names its subject, not “Overview” or “Misc”.
+- Lead with the conclusion, then the evidence. One paragraph carries one topic. Use numbered steps only for a sequence and tables for comparisons and mappings.
+- Write facts, not intentions or marketing. Write an unknown value as unverified together with the observation that would settle it. Do not use “future”, “probably” or “should support” in place of a fact.
+- A document has exactly one prose language. English contract documents use United States spelling and contain no Chinese prose or Chinese display names; Chinese belongs in the paired `zh-CN` translation. Chinese working records use Chinese prose; identifiers, code, commands and English product names stay in their original form.
+- Chinese prose uses full-width punctuation. Put one space between a Chinese character and a half-width Latin word, digit or unit. Keep `%` and `°` attached to the number. Use “quotes”, not 「brackets」. Dates use `2026-11-15`, times use `14:30`, and ranges use `100–900`.
+- Inline code, links and bold text follow the same CJK spacing rule but receive no extra padding. Use relative paths for repository links and full URLs for external links. Link text names the target.
+- Do not restate another document's rules or checklists. Link to the owning section instead.
+- Historical records name their replacement and keep their original wording. Do not delete a record that still explains a design decision.
+
+## Translations
+
+English remains the source of truth for every public contract and package guide. Chinese translations serve readers; they never become an independent fact owner.
+
+- Each pair is registered in `docs/translations.json`: a source path and a `zh-CN` translation path. `README.zh-CN.md` files pair with the package-level `README.md`.
+- A translation starts with `<!-- Source: <source path> -->` and `<!-- Source-SHA256: <sha256> -->`. The hash covers the source file byte for byte; `bun run check:docs` fails when the source changed without a translation review.
+- Edit the English source first, then update every registered translation and its hash in the same change. A summary translation states its scope and links the English contract for exact values.
+- Translations use Chinese prose, full-width punctuation and the terminology in [docs/zh-CN/terminology.md](zh-CN/terminology.md). Identifiers, code, commands and product names keep their source spelling.
+- Do not register a translation that is not maintained. Consumer-facing guides are translated first; agent governance, source conventions, test registries, release records and `.agents/notes/` stay English.
+
+## Structure and size
+
+- A directory-level `AGENTS.md` describes that directory's structure, file responsibilities and extension rules. It stays at or below 100 lines, with a hard limit of 120. Split a subdirectory's guidance into topic documents rather than raising the limit.
+- A topic document owns one subject. When a document grows to cover independent subjects, split it, register the new files in this structure block, and link both directions.
+- The root `AGENTS.md` carries global constraints and entry links only. Module exceptions live in the nearest directory-level file.
+- Do not create empty templates, placeholder sections or documents that only duplicate an existing owner.
 
 ## Checks
 
-`bun run check:docs` verifies the status line, rejects dated process records
-inside `docs/`, resolves every relative link in `docs/` and `.agents/notes/`, and
-requires repository-relative `evidence` paths in `contracts/component-matrix.json`
-to name files that still exist. It runs as part of `bun run lint` and
-`bun run release:check`.
+`bun run check:docs` verifies the status line, rejects dated process records inside `docs/`, rejects Chinese text in English Markdown, resolves relative links in `docs/`, `.agents/notes/`, translations, every `AGENTS.md` and the root README, enforces the directory-level size limit, validates `docs/translations.json` pairs and source hashes, and requires repository-relative `evidence` paths in `contracts/component-matrix.json` to name files that still exist. It runs as part of `bun run lint` and `bun run release:check`.
 
-Documentation that describes a behavior change ships in the same commit as the
-change.
+Documentation that describes a behavior change ships in the same commit as the change.

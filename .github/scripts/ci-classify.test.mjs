@@ -19,8 +19,11 @@ const optics = { ...browser, opticsChecks: true };
 const opticsOnly = { ...quality, opticsChecks: true };
 
 test('documentation and issue templates need metadata checks but no runtime verification', () => {
-  expectChecks(['README.md', 'docs/releasing.md', '.github/ISSUE_TEMPLATE/bug.md'], metadata);
-  expectChecks(['docs/architecture.md', 'AGENTS.md'], metadata);
+  expectChecks(
+    ['README.md', 'docs/releases/releasing.md', '.github/ISSUE_TEMPLATE/bug.md'],
+    metadata,
+  );
+  expectChecks(['docs/architecture/README.md', 'AGENTS.md'], metadata);
   // Dated process material lives outside docs/ but still takes the metadata
   // gate, so check:docs validates it.
   expectChecks(['.agents/notes/archives/acceptance-2026-11-01-cross-browser.md'], metadata);
@@ -37,8 +40,8 @@ test('changesets, request archives, and workflow edits use lightweight metadata 
 });
 
 test('generated contract document and quality tooling require source checks without browser work', () => {
-  expectChecks(['docs/component-contract-matrix.md'], quality);
-  expectChecks(['scripts/check-changeset-targets.ts'], quality);
+  expectChecks(['docs/architecture/component-contract-matrix.md'], quality);
+  expectChecks(['scripts/release/check-changeset-targets.ts'], quality);
   expectChecks(['tests/contracts.test.ts'], quality);
 });
 
@@ -76,7 +79,7 @@ test('optical source and harness changes run the dedicated SwiftShader gate', ()
   ]) {
     expectChecks([file], opticsOnly);
   }
-  expectChecks(['docs/material-standards.md'], metadata);
+  expectChecks(['docs/architecture/material-standards.md'], metadata);
 });
 
 test('directories that do not exist cannot silently downgrade coverage', () => {
@@ -91,7 +94,7 @@ test('directories that do not exist cannot silently downgrade coverage', () => {
 });
 
 test('mixed changes take the union of required checks', () => {
-  expectChecks(['docs/README.md', '.changeset/patch.md', 'scripts/check-requests.ts'], {
+  expectChecks(['docs/README.md', '.changeset/patch.md', 'scripts/gates/check-requests.ts'], {
     metadataChecks: true,
     qualityChecks: true,
     browserChecks: false,

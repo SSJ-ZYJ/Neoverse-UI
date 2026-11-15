@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "materialStandard": "docs/material-standards.md",
+  "materialStandard": "docs/architecture/material-standards.md",
   "tracks": {
     "canonical-shared": "Framework-shared components that must keep stable Vue and React contracts in lockstep.",
     "consumer-driven": "Components whose framework adapters are added when real consumers require them; framework-count symmetry is not mandatory."
@@ -423,7 +423,7 @@
         "packages/react/src/navigation.test.tsx",
         "packages/vue/src/components.test.ts",
         "tests/e2e/navigation.spec.ts",
-        "docs/framework-parity.md"
+        "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -447,7 +447,7 @@
         "packages/vue/src/components.test.ts",
         "packages/react/src/navigation.test.tsx",
         "tests/e2e/navigation.spec.ts",
-        "docs/material-standards.md"
+        "docs/architecture/material-standards.md"
       ]
     },
     {
@@ -465,7 +465,7 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/e2e/navigation.spec.ts",
-        "docs/framework-parity.md"
+        "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -488,7 +488,7 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/e2e/navigation.spec.ts",
-        "docs/framework-parity.md",
+        "docs/architecture/framework-parity.md",
         "contracts/component-requests/archive/CR-20261030-41A82EFD.json"
       ],
       "reactValidation": {
@@ -512,7 +512,7 @@
       "evidence": [
         "tests/e2e/surfaces.spec.ts",
         "packages/react/src/parity.test.tsx",
-        "docs/framework-parity.md"
+        "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -535,7 +535,7 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/e2e/surfaces.spec.ts",
-        "docs/framework-parity.md"
+        "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -571,7 +571,7 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/e2e/overlays.spec.ts",
-        "docs/framework-parity.md",
+        "docs/architecture/framework-parity.md",
         "../Neoverse/app/components/pulse/ContributionLandscape.vue",
         ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
@@ -596,7 +596,7 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/e2e/surfaces.spec.ts",
-        "docs/framework-parity.md"
+        "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -619,7 +619,7 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/e2e/terminal.spec.ts",
-        "docs/framework-parity.md"
+        "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -643,7 +643,7 @@
         "packages/vue/src/terminal.test.ts",
         "packages/react/src/parity.test.tsx",
         "tests/e2e/terminal.spec.ts",
-        "docs/terminal-composition.md",
+        "docs/architecture/terminal-composition.md",
         "../XCA-Portal/app/features/terminal/components/TerminalTranscript.vue",
         "../XCA-Portal/tests/e2e/terminal-shared-ui.spec.ts",
         "../XCA-Portal/tests/e2e/terminal-visual-acceptance.spec.ts",
@@ -670,10 +670,10 @@
       "evidence": [
         "packages/vue/src/terminal.test.ts",
         "packages/react/src/terminal.test.tsx",
-        "docs/terminal-composition.md",
+        "docs/architecture/terminal-composition.md",
         "packages/react/src/parity.test.tsx",
         "tests/e2e/terminal.spec.ts",
-        "docs/framework-parity.md"
+        "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -696,7 +696,7 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/e2e/terminal.spec.ts",
-        "docs/framework-parity.md"
+        "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -719,7 +719,7 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/e2e/terminal.spec.ts",
-        "docs/framework-parity.md"
+        "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -742,7 +742,7 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/e2e/surfaces.spec.ts",
-        "docs/framework-parity.md"
+        "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -765,7 +765,7 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/e2e/surfaces.spec.ts",
-        "docs/framework-parity.md"
+        "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -788,7 +788,7 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/e2e/navigation.spec.ts",
-        "docs/framework-parity.md"
+        "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -811,7 +811,7 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/e2e/surfaces.spec.ts",
-        "docs/framework-parity.md"
+        "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {
         "runtime": "validated",

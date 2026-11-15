@@ -1,5 +1,7 @@
 # @neoverse-ui/tokens
 
+[Chinese](README.zh-CN.md)
+
 Design tokens, CSS variables, and token-name maps for Neoverse UI.
 
 ```sh
@@ -36,7 +38,7 @@ glassMaterial.tiers.immersive; // { en: 'Immersive', zh: Chinese tier name }
 `tiers` exports short tier names; combine them with `name` when a full material
 label is needed. The `zh` entries hold the localized Chinese names for
 consumers that display them in Chinese. CSS classes, variables, and existing
-TypeScript APIs retain their technical names. See [material standards](../../docs/material-standards.md)
+TypeScript APIs retain their technical names. See [material standards](../../docs/architecture/material-standards.md)
 for optical values and usage.
 
 For architecture, theme contracts, and contribution guidance, see the [Neoverse-UI repository](https://github.com/SSJ-ZYJ/Neoverse-UI).

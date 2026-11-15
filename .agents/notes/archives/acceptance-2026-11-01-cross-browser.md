@@ -92,7 +92,7 @@ have been resolved or explicitly reviewed with their remaining coverage limits.
 Source has since advanced to `8e342b2`, whose ordinary CI is green on Chromium and
 Windows (run 41951145986). The 2026-11-05 re-run below supersedes this section for
 the current candidate; see also the
-[release notes](../../../docs/release-0.3.1.md#verification-and-remaining-release-work).
+[release notes](../../../docs/releases/release-0.3.1.md#verification-and-remaining-release-work).
 
 ## 2026-11-05 re-run on `8e342b2`
 

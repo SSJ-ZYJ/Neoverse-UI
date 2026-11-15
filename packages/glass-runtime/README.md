@@ -1,6 +1,8 @@
 # @neoverse-ui/glass-runtime
 
-Shared optional directional Aurora Glass (极光玻璃) edges for Neoverse UI. Aurora Glass is the single shared glass material; its Light / 轻薄, Standard / 标准, and Immersive / 厚实 tiers share the same name. Obtain display labels from `glassMaterial` in `@neoverse-ui/tokens`; see [material standards](../../docs/material-standards.md). Package and renderer identifiers remain stable.
+[Chinese](README.zh-CN.md)
+
+Shared optional directional Aurora Glass edges for Neoverse UI. Aurora Glass is the single shared glass material; its Light, Standard, and Immersive tiers share the same name. Obtain display labels from `glassMaterial` in `@neoverse-ui/tokens`; see [material standards](../../docs/architecture/material-standards.md). Package and renderer identifiers remain stable.
 
 Light uses a directional edge: the shader combines theme accent
 colours, varies chroma with effective opacity, and caps fragment alpha at 0.34.
@@ -28,7 +30,7 @@ Reduced transparency disables the renderer. The CSS fallback uses alpha-only
 gradient masks and backdrop brightness. The historical `native` backend remains
 an explicit API option, but full-surface SVG displacement must not be made the
 default or used as the Glass repair described in the
-[repair guardrails](../../docs/material-standards.md#glass-repair-guardrails).
+[repair guardrails](../../docs/architecture/material-standards.md#glass-repair-guardrails).
 
 The WebGL renderer also recognizes the shared Input, Textarea, Select, choice
 and Disclosure classes, plus `UiTable`, prose tables and prose details. It draws the table perimeter and

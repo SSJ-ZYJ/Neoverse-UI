@@ -1,5 +1,7 @@
 # @neoverse-ui/motion
 
+[Chinese](README.zh-CN.md)
+
 The single motion contract for Neoverse UI: tokens, the presence engine, and the
 page-change choreography. Everything animated in the library resolves to what is
 shipped here — components never hardcode durations, easings, or keyframes.

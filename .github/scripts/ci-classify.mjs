@@ -13,7 +13,7 @@ export function classifyPaths(paths) {
   for (const path of paths) {
     if (!path) continue;
 
-    if (path === 'docs/component-contract-matrix.md') {
+    if (path === 'docs/architecture/component-contract-matrix.md') {
       checks.qualityChecks = true;
     } else if (path.startsWith('.github/ISSUE_TEMPLATE/')) {
       // Issue forms do not participate in source, package, or release validation.
@@ -54,8 +54,12 @@ export function classifyPaths(paths) {
       checks.browserChecks = true;
       checks.qualityChecks = true;
     } else if (
-      path.startsWith('scripts/check-') ||
-      path.startsWith('scripts/verify-') ||
+      path.startsWith('scripts/gates/') ||
+      path.startsWith('scripts/release/') ||
+      path.startsWith('scripts/requests/') ||
+      path.startsWith('scripts/dev/') ||
+      path.startsWith('scripts/sync/') ||
+      path === 'scripts/check.ts' ||
       path.startsWith('tests/') ||
       /^(?:biome|tsconfig|stylelint|eslint)[\w.-]*\.(?:json|js|cjs|mjs|ts)$/.test(path)
     ) {

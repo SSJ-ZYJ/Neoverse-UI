@@ -1,8 +1,10 @@
 # @neoverse-ui/react
 
-React adapters for Neoverse UI, with Aurora Glass as the shared glass material. Light, Standard, and Immersive are its tiers, not separate styles. Use the [Tokens `glassMaterial` metadata](../tokens/README.md#aurora-glass) for localized display labels; `glass-*` surface identifiers remain stable. See [material standards](../../docs/material-standards.md).
+[Chinese](README.zh-CN.md)
 
-The package provides the same 35 public components as the Vue package, including navigation, forms, feedback, data presentation, terminal composition and document scrollbars. Both adapters use the shared Tokens, Tailwind, Material, Motion and Overlay Runtime. See [framework parity](../../docs/framework-parity.md) for state bindings and validation scope.
+React adapters for Neoverse UI, with Aurora Glass as the shared glass material. Light, Standard, and Immersive are its tiers, not separate styles. Use the [Tokens `glassMaterial` metadata](../tokens/README.md#aurora-glass) for localized display labels; `glass-*` surface identifiers remain stable. See [material standards](../../docs/architecture/material-standards.md).
+
+The package provides the same 37 public components as the Vue package, including navigation, forms, feedback, data presentation, terminal composition and document scrollbars. Both adapters use the shared Tokens, Tailwind, Material, Motion and Overlay Runtime. See [framework parity](../../docs/architecture/framework-parity.md) for state bindings and validation scope.
 
 ## Forms and overlays
 
@@ -133,7 +135,7 @@ Consumers without their own Tailwind build can import `@neoverse-ui/react/index.
 
 ## Terminal and scrollbars
 
-[Terminal composition](../../docs/terminal-composition.md) includes a React example. `UiTerminalSurface` accepts `status` and `actions` content. `UiTerminalTranscript` follows output only while the reader is at the tail, and retains a nested accessible log. `UiTerminalLine` renders escaped text or children.
+[Terminal composition](../../docs/architecture/terminal-composition.md) includes a React example. `UiTerminalSurface` accepts `status` and `actions` content. `UiTerminalTranscript` follows output only while the reader is at the tail, and retains a nested accessible log. `UiTerminalLine` renders escaped text or children.
 
 `UiTerminalPrompt` uses `value/defaultValue/onValueChange` and preserves native `onChange`, keyboard/composition events and an input ref. `suggestion` displays only a matching ghost suffix while focused at the end. `context` and `renderSegment(segment)` customize context content. Command execution and accepting suggestions belong to the application.
 

@@ -1,0 +1,40 @@
+# @neoverse-ui/tokens
+
+[English](README.md)
+
+<!-- Source: packages/tokens/README.md -->
+<!-- Source-SHA256: 048da0f1d635b78ea02791fb6cdd54216f8548f729616d168c55f36de6427e93 -->
+
+Neoverse-UI 的设计变量、CSS 变量与变量名称映射。
+
+```sh
+bun add @neoverse-ui/tokens
+```
+
+通过以下方式使用生成的 CSS 变量：
+
+```css
+@import '@neoverse-ui/tokens/css';
+```
+
+TypeScript 消费项目可以从 `@neoverse-ui/tokens` 导入公开的变量名称映射。
+
+## 极光玻璃
+
+极光玻璃（Aurora Glass）是唯一的共享玻璃材质。轻薄（Light）、标准（Standard）与厚实（Immersive）是它的层级，不是独立样式。稳定的技术 surface 标识仍分别为 `glass-subtle`、`glass-elevated` 与 `glass-immersive`；`glass-*` 不代表另一种玻璃样式。
+
+消费端展示标签时使用共享元数据：
+
+```ts
+import { glassMaterial } from '@neoverse-ui/tokens';
+
+glassMaterial.name.en; // Aurora Glass
+glassMaterial.name.zh; // Chinese display name
+glassMaterial.tiers.subtle; // { en: 'Light', zh: Chinese tier name }
+glassMaterial.tiers.elevated; // { en: 'Standard', zh: Chinese tier name }
+glassMaterial.tiers.immersive; // { en: 'Immersive', zh: Chinese tier name }
+```
+
+`tiers` 导出简短的层级名称；需要完整材质标签时与 `name` 组合使用。`zh` 条目保存供中文界面展示的本地化名称。CSS 类、变量与现有 TypeScript API 保留技术名称。光学数值与使用方式见[材质标准](../../docs/zh-CN/architecture/material-standards.md)。
+
+架构、主题规范与贡献说明见 [Neoverse-UI 仓库](https://github.com/SSJ-ZYJ/Neoverse-UI)。

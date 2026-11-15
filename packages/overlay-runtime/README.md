@@ -1,5 +1,7 @@
 # @neoverse-ui/overlay-runtime
 
+[Chinese](README.zh-CN.md)
+
 Framework-agnostic DOM runtime for Neoverse UI top-layer overlays.
 
 It owns anchored positioning, Popover API fallback, scroll/resize tracking, and fallback light-dismiss behavior. Framework adapters remain responsible for component state, semantics, and focus policy.

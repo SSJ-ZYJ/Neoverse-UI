@@ -16,9 +16,9 @@ comments, JSDoc, test titles, file names, commit messages and branch names.
 Chinese is data, not prose. It is allowed only where the value is displayed to a
 Chinese reader:
 
-- `zh` entries in locale maps such as `name: { zh: '极光玻璃', en: 'Aurora Glass' }`.
+- `zh` entries in locale maps, for example a localized Chinese name paired with its English name.
 - Demo copy inside the playground fixtures when the fixture exists to exercise
-  CJK input, line breaking or IME composition (for example `'你好 release'`).
+  CJK input, line breaking or IME composition, for example CJK text followed by `release`.
 
 A comment is never written twice in two languages. A bilingual pair is the most
 common form of comment rot in this repository: the two halves drift, and the
@@ -118,7 +118,7 @@ new code, comments or documentation.
 
 | Canonical | Meaning | Do not write |
 | --- | --- | --- |
-| Aurora Glass | the material system and its optical contract; `Glass` is the accepted short form after the first mention, and `glass-*` identifiers stay stable | "glass material" as a proper noun, `极光玻璃` in English prose |
+| Aurora Glass | the material system and its optical contract; `Glass` is the accepted short form after the first mention, and `glass-*` identifiers stay stable | "glass material" as a proper noun, the Chinese material name in English prose |
 | surface | the shared `UiSurface` plate and its material | panel, plate, box (when the primitive is meant) |
 | overlay | anything the runtime positions in the top layer | popover (when the runtime is meant) |
 | popover | the native HTML popover API or `UiPopover` | overlay (when the component is meant) |

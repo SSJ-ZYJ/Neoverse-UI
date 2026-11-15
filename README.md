@@ -10,11 +10,20 @@
 
 **Neoverse UI** is a component library for Vue 3 and React, with Aurora Glass surfaces, light and dark themes, and shared interactions. Use it for personal sites, documentation, tools, and pages with terminal or data displays.
 
-[Vue guide](packages/vue/README.md) · [React guide](packages/react/README.md) · [Report an issue](https://github.com/SSJ-ZYJ/Neoverse-UI/issues)
+<p align="center">
+  <a href="https://vuejs.org"><img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42b883?style=flat&amp;labelColor=132134&amp;logo=vue.js&amp;logoColor=f4f8fc"></a>
+  <a href="https://react.dev"><img alt="React 19" src="https://img.shields.io/badge/React-19-61dafb?style=flat&amp;labelColor=132134&amp;logo=react&amp;logoColor=f4f8fc"></a>
+  <a href="https://www.typescriptlang.org"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-8c9bff?style=flat&amp;labelColor=132134&amp;logo=typescript&amp;logoColor=f4f8fc"></a>
+  <a href="https://tailwindcss.com"><img alt="Tailwind CSS 4" src="https://img.shields.io/badge/Tailwind-4-38bdf8?style=flat&amp;labelColor=132134&amp;logo=tailwindcss&amp;logoColor=f4f8fc"></a>
+  <a href="https://bun.sh"><img alt="Bun" src="https://img.shields.io/badge/Bun-runtime-f7df1e?style=flat&amp;labelColor=132134&amp;logo=bun&amp;logoColor=f4f8fc"></a>
+  <a href="https://biomejs.dev"><img alt="Biome" src="https://img.shields.io/badge/Biome-tooling-60a5fa?style=flat&amp;labelColor=132134&amp;logo=biome&amp;logoColor=f4f8fc"></a>
+</p>
+
+[Vue guide](packages/vue/README.md) · [React guide](packages/react/README.md) · [Chinese](README.zh-CN.md) · [Report an issue](https://github.com/SSJ-ZYJ/Neoverse-UI/issues)
 
 </div>
 
-Vue and React provide the same 36 components in the current source, sharing themes, styles, and motion. Use the components directly, or build your own layouts with CSS variables and Tailwind CSS.
+Vue and React provide the same 37 components in the current source, sharing themes, styles, and motion. Use the components directly, or build your own layouts with CSS variables and Tailwind CSS.
 
 ## Installation
 
@@ -113,7 +122,7 @@ All of these components are available in both Vue and React:
 | Surfaces and containers | `UiSurface`, `UiCard`, `UiControlSurface` |
 | Navigation and selection | `UiDock`, `UiNavigationItem`, `UiBreadcrumb`, `UiSegmentedControl` |
 | Forms | `UiField`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch` |
-| Popovers and menus | `UiPopover`, `UiDropdownMenu` |
+| Popovers and menus | `UiPopover`, `UiDropdownMenu`, `UiContextMenu` |
 | Status and feedback | `UiBadge`, `UiStatusIndicator`, `UiNotice`, `UiTooltipSurface`, `UiSkeleton` |
 | Data and progress | `UiTable`, `UiDisclosure`, `UiStatCard`, `UiTimeline`, `UiStepFlow` |
 | Terminal interfaces | `UiTerminalSurface`, `UiTerminalTranscript`, `UiTerminalLine`, `UiTerminalPrompt`, `UiTerminalEcho` |
@@ -123,7 +132,7 @@ Buttons offer `primary`, `secondary`, and `ghost` variants, with `sm`, `md`, and
 
 `UiDock` groups navigation items and trailing controls; your application manages routing and the current destination. Terminal components provide command entry, suggestions, and output display. Output follows the tail as it grows and preserves your position when you scroll up to read history. Your application supplies command execution and completion candidates.
 
-More examples: [Forms](docs/form-control-contract.md) · [Overlays](docs/overlay-contract.md) · [Terminals](docs/terminal-composition.md) · [Vue / React equivalents](docs/framework-parity.md)
+More examples: [Forms](docs/architecture/form-control-contract.md) · [Overlays](docs/architecture/overlay-contract.md) · [Terminals](docs/architecture/terminal-composition.md) · [Vue / React equivalents](docs/architecture/framework-parity.md)
 
 ## Themes and materials
 
@@ -157,7 +166,7 @@ glassMaterial.tiers.elevated; // { en: 'Standard', zh: Chinese tier name }
 glassMaterial.tiers.immersive; // { en: 'Immersive', zh: Chinese tier name }
 ```
 
-Some controls accept only the Aurora Glass presets and `none`; see their component types for available options. Aurora Glass needs visible background content to show its effect. Surfaces remain readable when transparency effects are unavailable or the user prefers reduced transparency. See [material standards](docs/material-standards.md) for the shared optical contract.
+Some controls accept only the Aurora Glass presets and `none`; see their component types for available options. Aurora Glass needs visible background content to show its effect. Surfaces remain readable when transparency effects are unavailable or the user prefers reduced transparency. See [material standards](docs/architecture/material-standards.md) for the shared optical contract.
 
 Components respect the system's reduced-motion preference. Switching themes preserves component dimensions and layout.
 
@@ -188,10 +197,29 @@ You can also install individual packages for the features you need:
 | [`@neoverse-ui/glass-runtime`](packages/glass-runtime/README.md) | Optional Aurora Glass edge rendering enhancement |
 | [`@neoverse-ui/giscus-theme`](packages/giscus-theme/README.md) | Light and dark themes for Giscus comments |
 
-## Documentation and feedback
+## Development
 
-- [Vue guide](packages/vue/README.md) and [React guide](packages/react/README.md): component props and composition examples.
-- [Migration guide](docs/migration-0.3.0.md): changes to consider when upgrading an existing project.
-- [Issues](https://github.com/SSJ-ZYJ/Neoverse-UI/issues): report a bug or request a component. Include your framework, component version, and reproduction steps.
+Requires [Bun](https://bun.sh) 1.4 and Node-compatible tooling. Install the workspace and start the Design Lab:
+
+```sh
+bun install
+bun run dev
+```
+
+| Command | Purpose |
+| --- | --- |
+| `bun run check` | Run all quality gates and print a pass/fail summary |
+| `bun run test` | Workspace unit tests and repository contract tests |
+| `bun run test:e2e` | Build, then run Chromium desktop and touch browser specs |
+| `bun run typecheck` | Build declarations, then typecheck every workspace |
+
+Architecture, contracts, test ownership and the release process live under [docs](docs/AGENTS.md). Changes that affect a package need a Changeset and the verification described in the repository agent instructions.
+
+## Contributing
+
+- [Issues](https://github.com/SSJ-ZYJ/Neoverse-UI/issues): report a bug or request a component. Include your framework, component version, reproduction steps and expected result.
+- [Component requests](docs/architecture/component-requests.md): the record and command workflow used by consumer projects.
+
+## License
 
 Neoverse UI is released under the [MIT license](LICENSE).

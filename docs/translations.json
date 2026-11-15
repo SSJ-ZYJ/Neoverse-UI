@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "pairs": [
+    { "source": "README.md", "translation": "README.zh-CN.md" },
+    {
+      "source": "packages/giscus-theme/README.md",
+      "translation": "packages/giscus-theme/README.zh-CN.md"
+    },
+    {
+      "source": "packages/glass-runtime/README.md",
+      "translation": "packages/glass-runtime/README.zh-CN.md"
+    },
+    { "source": "packages/motion/README.md", "translation": "packages/motion/README.zh-CN.md" },
+    {
+      "source": "packages/overlay-runtime/README.md",
+      "translation": "packages/overlay-runtime/README.zh-CN.md"
+    },
+    { "source": "packages/react/README.md", "translation": "packages/react/README.zh-CN.md" },
+    { "source": "packages/tailwind/README.md", "translation": "packages/tailwind/README.zh-CN.md" },
+    { "source": "packages/tokens/README.md", "translation": "packages/tokens/README.zh-CN.md" },
+    { "source": "packages/vue/README.md", "translation": "packages/vue/README.zh-CN.md" },
+    {
+      "source": "docs/architecture/form-control-contract.md",
+      "translation": "docs/zh-CN/architecture/form-control-contract.md"
+    },
+    {
+      "source": "docs/architecture/material-standards.md",
+      "translation": "docs/zh-CN/architecture/material-standards.md"
+    },
+    {
+      "source": "docs/architecture/overlay-contract.md",
+      "translation": "docs/zh-CN/architecture/overlay-contract.md"
+    },
+    {
+      "source": "docs/architecture/terminal-composition.md",
+      "translation": "docs/zh-CN/architecture/terminal-composition.md"
+    },
+    {
+      "source": "docs/releases/migration-0.3.0.md",
+      "translation": "docs/zh-CN/releases/migration-0.3.0.md"
+    }
+  ]
+}

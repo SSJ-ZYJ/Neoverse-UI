@@ -1,5 +1,7 @@
 # @neoverse-ui/tailwind
 
+[Chinese](README.zh-CN.md)
+
 Tailwind CSS v4 semantic theme and component styles for Neoverse UI.
 
 ```sh

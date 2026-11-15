@@ -1,5 +1,7 @@
 # @neoverse-ui/giscus-theme
 
+[Chinese](README.zh-CN.md)
+
 Standalone light and dark Giscus themes for Neoverse products.
 
 The Giscus widget renders in a cross-origin iframe, so it cannot consume host-page CSS variables directly. This package keeps the iframe theme in the design system and publishes self-contained CSS assets for consumers to copy to a public HTTPS origin.
