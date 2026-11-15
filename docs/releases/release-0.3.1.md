@@ -120,7 +120,7 @@ version rather than saying "upgrade to 0.3.1".
 
 Upgrade adapter JavaScript, Tokens and compiled Tailwind CSS together. Vue still
 requires `>=3.5.0 <4.0.0`, and React requires `>=19.0.0 <20.0.0`. Retain the
-[0.3.0 migration requirements](migration-0.3.0.md) when upgrading from older versions.
+[0.3.0 migration requirements](migration-0.3.0.md) when upgrading from older versions. From the 0.3.0 baseline, use the [0.3.1 migration guide](migration-0.3.1.md).
 
 | Removed name | Replacement or action |
 | --- | --- |

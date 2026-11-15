@@ -39,7 +39,7 @@ Status: adopted
 
 ## 升级
 
-- [从 0.2.x 迁移到 0.3.0](releases/migration-0.3.0.md)
+- [从 0.3.0 迁移到 0.3.1 / 0.4.0](releases/migration-0.3.1.md)
 
 ## 维护
 

@@ -8,7 +8,9 @@
   </picture>
 </h1>
 
-**Neoverse UI** is a component library for Vue 3 and React, with Aurora Glass surfaces, light and dark themes, and shared interactions. Use it for personal sites, documentation, tools, and pages with terminal or data displays.
+**Aurora Glass surfaces for Vue and React.**
+
+One component library with shared Tokens, Tailwind styles, Motion, overlays and terminal primitives.
 
 <p align="center">
   <a href="https://vuejs.org"><img alt="Vue 3" src="https://img.shields.io/badge/Vue-3-42b883?style=flat&amp;labelColor=132134&amp;logo=vue.js&amp;logoColor=f4f8fc"></a>
@@ -16,210 +18,155 @@
   <a href="https://www.typescriptlang.org"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-strict-8c9bff?style=flat&amp;labelColor=132134&amp;logo=typescript&amp;logoColor=f4f8fc"></a>
   <a href="https://tailwindcss.com"><img alt="Tailwind CSS 4" src="https://img.shields.io/badge/Tailwind-4-38bdf8?style=flat&amp;labelColor=132134&amp;logo=tailwindcss&amp;logoColor=f4f8fc"></a>
   <a href="https://bun.sh"><img alt="Bun" src="https://img.shields.io/badge/Bun-runtime-f7df1e?style=flat&amp;labelColor=132134&amp;logo=bun&amp;logoColor=f4f8fc"></a>
-  <a href="https://biomejs.dev"><img alt="Biome" src="https://img.shields.io/badge/Biome-tooling-60a5fa?style=flat&amp;labelColor=132134&amp;logo=biome&amp;logoColor=f4f8fc"></a>
 </p>
 
-[Vue guide](packages/vue/README.md) · [React guide](packages/react/README.md) · [Chinese](README.zh-CN.md) · [Report an issue](https://github.com/SSJ-ZYJ/Neoverse-UI/issues)
+[Vue guide](packages/vue/README.md) · [React guide](packages/react/README.md) · [Documentation](docs/architecture/README.md) · [Chinese](README.zh-CN.md)
 
 </div>
 
-Vue and React provide the same 37 components in the current source, sharing themes, styles, and motion. Use the components directly, or build your own layouts with CSS variables and Tailwind CSS.
+## Design language
 
-## Installation
+| Area | What it gives you |
+| --- | --- |
+| **Aurora Glass** | One shared glass material with Light, Standard and Immersive depth tiers. |
+| **Theme** | `light`, `dark` and `system` through one `data-theme` contract. |
+| **Tokens** | Color, type, spacing, radius and material values as CSS variables. |
+| **Tailwind** | Semantic utilities such as `bg-surface-raised`, `text-primary` and `rounded-control`. |
+| **Motion** | Shared durations, easings, presence and page transitions; reduced motion respected. |
+| **Density** | Compact painted geometry with larger touch hit areas on coarse pointers. |
 
-Requires Vue **3.5+** or React **19**. Install the package for your framework:
+Aurora Glass is one material, not three separate styles:
+
+| Surface | Tier | Use |
+| --- | --- | --- |
+| `glass-subtle` | Light | Buttons, compact controls, thin layers |
+| `glass-elevated` | Standard | Cards, floating navigation, main containers |
+| `glass-immersive` | Immersive | Stronger blur and material depth |
+
+The CSS baseline works without JavaScript. `@neoverse-ui/glass-runtime` is an optional edge renderer; reduced transparency and reduced motion stay readable and usable.
+
+## Install
+
+Requires Vue **3.5+** or React **19**.
 
 ```sh
-# Vue
 npm install @neoverse-ui/vue
-
-# React
 npm install @neoverse-ui/react
 ```
 
-You can also use pnpm, Yarn, or Bun. Shared styling and motion dependencies are installed with the component package.
+Use pnpm, Yarn or Bun if you prefer. Shared styling and motion dependencies arrive with the component package.
 
-This README describes the current source. For a published release, check the package changelog for the features available in your installed version.
+## Quick start
 
-## Using Vue
-
-Import the stylesheet once in your application entry:
+Import the stylesheet once, then use the components.
 
 ```ts
 import '@neoverse-ui/vue/index.css';
 ```
 
-Then use the components:
-
 ```vue
 <script setup lang="ts">
-import { ref } from 'vue';
 import { UiButton, UiCard, UiField, UiInput } from '@neoverse-ui/vue';
-
-const name = ref('');
-const saved = ref(false);
 </script>
 
 <template>
-  <UiCard as="section">
-    <h2>Profile</h2>
-    <UiField control-id="name" label="Display name" description="The name shown on your page">
+  <UiCard surface="glass-elevated">
+    <UiField control-id="name" label="Display name">
       <template #default="{ controlAttrs }">
-        <UiInput v-bind="controlAttrs" v-model="name" placeholder="Enter your name" />
+        <UiInput v-bind="controlAttrs" placeholder="Your name" />
       </template>
     </UiField>
-    <UiButton @click="saved = true">{{ saved ? 'Saved' : 'Save' }}</UiButton>
+    <UiButton>Save</UiButton>
   </UiCard>
 </template>
 ```
 
-## Using React
-
-Import the stylesheet once in your application entry:
-
-```ts
-import '@neoverse-ui/react/index.css';
-```
-
-Components follow React's prop and event conventions:
+React follows the same composition with React props and events:
 
 ```tsx
-import { useState } from 'react';
+import '@neoverse-ui/react/index.css';
 import { UiButton, UiCard, UiField, UiInput } from '@neoverse-ui/react';
 
-export function Profile() {
-  const [name, setName] = useState('');
-  const [saved, setSaved] = useState(false);
-
-  return (
-    <UiCard as="section">
-      <h2>Profile</h2>
-      <UiField controlId="name" label="Display name" description="The name shown on your page">
-        {controlAttrs => (
-          <UiInput
-            {...controlAttrs}
-            value={name}
-            onChange={event => setName(event.currentTarget.value)}
-            placeholder="Enter your name"
-          />
-        )}
-      </UiField>
-      <UiButton onClick={() => setSaved(true)}>{saved ? 'Saved' : 'Save'}</UiButton>
-    </UiCard>
-  );
-}
+<UiCard surface="glass-elevated">
+  <UiField controlId="name" label="Display name">
+    {controlAttrs => <UiInput {...controlAttrs} placeholder="Your name" />}
+  </UiField>
+  <UiButton>Save</UiButton>
+</UiCard>
 ```
-
-With frameworks such as Next.js, place components that use state or event handlers inside a client boundary. Import global styles through the entry point supported by your framework.
 
 ## Components
 
-All of these components are available in both Vue and React:
+The current source exposes the same **37 components** in both frameworks:
 
-| Use case | Components |
+| Group | Components |
 | --- | --- |
-| Buttons and actions | `UiButton`, `UiIconButton`, `UiAction` |
-| Surfaces and containers | `UiSurface`, `UiCard`, `UiControlSurface` |
-| Navigation and selection | `UiDock`, `UiNavigationItem`, `UiBreadcrumb`, `UiSegmentedControl` |
+| Actions | `UiButton`, `UiIconButton`, `UiAction` |
+| Surfaces | `UiSurface`, `UiCard`, `UiControlSurface` |
+| Navigation | `UiDock`, `UiNavigationItem`, `UiBreadcrumb`, `UiSegmentedControl` |
 | Forms | `UiField`, `UiInput`, `UiTextarea`, `UiSelect`, `UiCheckbox`, `UiRadioGroup`, `UiSwitch` |
-| Popovers and menus | `UiPopover`, `UiDropdownMenu`, `UiContextMenu` |
-| Status and feedback | `UiBadge`, `UiStatusIndicator`, `UiNotice`, `UiTooltipSurface`, `UiSkeleton` |
-| Data and progress | `UiTable`, `UiDisclosure`, `UiStatCard`, `UiTimeline`, `UiStepFlow` |
-| Terminal interfaces | `UiTerminalSurface`, `UiTerminalTranscript`, `UiTerminalLine`, `UiTerminalPrompt`, `UiTerminalEcho` |
-| Scrolling and transitions | `UiScrollbar`, `UiPresence` |
+| Overlays | `UiPopover`, `UiDropdownMenu`, `UiContextMenu` |
+| Feedback | `UiBadge`, `UiStatusIndicator`, `UiNotice`, `UiTooltipSurface`, `UiSkeleton` |
+| Data | `UiTable`, `UiDisclosure`, `UiStatCard`, `UiTimeline`, `UiStepFlow` |
+| Terminal | `UiTerminalSurface`, `UiTerminalTranscript`, `UiTerminalLine`, `UiTerminalPrompt`, `UiTerminalEcho` |
+| Scroll and presence | `UiScrollbar`, `UiPresence` |
 
-Buttons offer `primary`, `secondary`, and `ghost` variants, with `sm`, `md`, and `lg` sizes. Icon buttons use `label` for their accessible name. Form controls support disabled, read-only, and validation states. Segmented controls and menus support keyboard navigation.
+Buttons use `primary`, `secondary` and `ghost`; sizes are `sm`, `md` and `lg`. Forms support disabled, read-only and validation states. Menus and segmented controls support keyboard navigation.
 
-`UiDock` groups navigation items and trailing controls; your application manages routing and the current destination. Terminal components provide command entry, suggestions, and output display. Output follows the tail as it grows and preserves your position when you scroll up to read history. Your application supplies command execution and completion candidates.
+## Theme
 
-More examples: [Forms](docs/architecture/form-control-contract.md) · [Overlays](docs/architecture/overlay-contract.md) · [Terminals](docs/architecture/terminal-composition.md) · [Vue / React equivalents](docs/architecture/framework-parity.md)
-
-## Themes and materials
-
-Set `data-theme` on the root element to `light`, `dark`, or `system`:
+Set one attribute on the root:
 
 ```html
 <html lang="en" data-theme="system">...</html>
 ```
 
-The theme also follows the system preference when no value is set.
+Use `light`, `dark` or `system`. Changing the theme preserves component dimensions and layout.
 
-Components with a `surface` prop can use plain surfaces or **Aurora Glass**, the single shared glass material:
+## Tailwind
 
-| `surface` | Use |
-| --- | --- |
-| `none` | Transparent containers |
-| `solid`, `subtle`, `elevated`, `inset` | Content surfaces and layout layers |
-| `glass-subtle` | Light tier — lightweight controls and thin Aurora Glass layers |
-| `glass-elevated` | Standard tier — cards, floating navigation, and main content containers |
-| `glass-immersive` | Immersive tier — stronger background blur and material depth |
-
-These are tiers of Aurora Glass, not separate glass styles. The `glass-*` values are stable technical identifiers. Consumers should obtain the shared display name and tier short names from Tokens rather than defining their own:
-
-```ts
-import { glassMaterial } from '@neoverse-ui/tokens';
-
-glassMaterial.name.en; // Aurora Glass
-glassMaterial.name.zh; // Chinese display name
-glassMaterial.tiers.subtle; // { en: 'Light', zh: Chinese tier name }
-glassMaterial.tiers.elevated; // { en: 'Standard', zh: Chinese tier name }
-glassMaterial.tiers.immersive; // { en: 'Immersive', zh: Chinese tier name }
-```
-
-Some controls accept only the Aurora Glass presets and `none`; see their component types for available options. Aurora Glass needs visible background content to show its effect. Surfaces remain readable when transparency effects are unavailable or the user prefers reduced transparency. See [material standards](docs/architecture/material-standards.md) for the shared optical contract.
-
-Components respect the system's reduced-motion preference. Switching themes preserves component dimensions and layout.
-
-## Styling and customization
-
-The `index.css` imports above include the styles needed by the components, so you can use them without a Tailwind build. The bundle includes utilities used by the components; any additional Tailwind utilities in your application need your own build.
-
-If your project already uses **Tailwind CSS 4**, use these imports to share the theme while generating your application utilities:
+Import the shared theme when your application already builds Tailwind CSS 4:
 
 ```css
 @import 'tailwindcss';
 @import '@neoverse-ui/tokens/css';
 @import '@neoverse-ui/tailwind/theme.css';
 
-/* Adjust the path relative to this stylesheet. Use react instead of vue for React. */
 @source '../node_modules/@neoverse-ui/vue/dist';
 ```
 
-With this setup, you can omit the component package's `index.css` import. Use semantic utilities such as `text-primary`, `bg-surface-raised`, and `rounded-control`, or customize the theme through `--neoverse-*` CSS variables.
+Then omit the component package's `index.css` import. Use semantic utilities or customize through `--neoverse-*` variables.
 
-You can also install individual packages for the features you need:
+## Packages
 
 | Package | Provides |
 | --- | --- |
-| [`@neoverse-ui/tokens`](packages/tokens/README.md) | CSS variables for color, type, spacing, and more, with TypeScript name maps |
-| [`@neoverse-ui/tailwind`](packages/tailwind/README.md) | Tailwind theme, component styles, and reading typography |
-| [`@neoverse-ui/motion`](packages/motion/README.md) | Enter and exit animations, list transitions, and page transitions |
-| [`@neoverse-ui/glass-runtime`](packages/glass-runtime/README.md) | Optional Aurora Glass edge rendering enhancement |
-| [`@neoverse-ui/giscus-theme`](packages/giscus-theme/README.md) | Light and dark themes for Giscus comments |
+| [`@neoverse-ui/vue`](packages/vue/README.md) | Vue 3 components |
+| [`@neoverse-ui/react`](packages/react/README.md) | React 19 adapters |
+| [`@neoverse-ui/tokens`](packages/tokens/README.md) | CSS variables and name maps |
+| [`@neoverse-ui/tailwind`](packages/tailwind/README.md) | Tailwind theme and component styles |
+| [`@neoverse-ui/motion`](packages/motion/README.md) | Motion roles and page transitions |
+| [`@neoverse-ui/overlay-runtime`](packages/overlay-runtime/README.md) | Top-layer positioning and dismissal |
+| [`@neoverse-ui/glass-runtime`](packages/glass-runtime/README.md) | Optional Aurora Glass edge rendering |
+| [`@neoverse-ui/giscus-theme`](packages/giscus-theme/README.md) | Giscus light and dark themes |
+
+## Documentation
+
+- [Vue guide](packages/vue/README.md) and [React guide](packages/react/README.md): APIs and composition examples.
+- [Forms](docs/architecture/form-control-contract.md), [overlays](docs/architecture/overlay-contract.md) and [terminal](docs/architecture/terminal-composition.md): interaction contracts.
+- [Material standards](docs/architecture/material-standards.md): Aurora Glass optics and repair guardrails.
+- [Migration guide](docs/releases/migration-0.3.1.md): upgrading from the 0.3.0 baseline.
+- [Component requests](docs/architecture/component-requests.md): reporting reusable gaps from consumer projects.
 
 ## Development
-
-Requires [Bun](https://bun.sh) 1.4 and Node-compatible tooling. Install the workspace and start the Design Lab:
 
 ```sh
 bun install
 bun run dev
 ```
 
-| Command | Purpose |
-| --- | --- |
-| `bun run check` | Run all quality gates and print a pass/fail summary |
-| `bun run test` | Workspace unit tests and repository contract tests |
-| `bun run test:e2e` | Build, then run Chromium desktop and touch browser specs |
-| `bun run typecheck` | Build declarations, then typecheck every workspace |
-
-Architecture, contracts, test ownership and the release process live under [docs](docs/AGENTS.md). Changes that affect a package need a Changeset and the verification described in the repository agent instructions.
-
-## Contributing
-
-- [Issues](https://github.com/SSJ-ZYJ/Neoverse-UI/issues): report a bug or request a component. Include your framework, component version, reproduction steps and expected result.
-- [Component requests](docs/architecture/component-requests.md): the record and command workflow used by consumer projects.
+`bun run check` runs the quality gates. Architecture, testing and release rules live in [AGENTS.md](AGENTS.md) and [docs](docs/AGENTS.md).
 
 ## License
 
-Neoverse UI is released under the [MIT license](LICENSE).
+Neoverse-UI is released under the [MIT license](LICENSE).

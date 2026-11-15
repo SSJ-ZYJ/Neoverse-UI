@@ -53,7 +53,7 @@ Neoverse-Slides 已接入 `bun run ui:sync`；门户的开发、构建、生成�
 
 ## 2026-10-25 Consumer dependency audit
 
-此处区分安装来源与源码成熟度，不要求所有项目统一使用 npm。当前官方发布基线见[发布说明](../releases/release-0.3.0.md)；相同 manifest 版本不代表本地 `file:` 构建与已发布 tarball 相同。
+此处区分安装来源与源码成熟度，不要求所有项目统一使用 npm。当前官方发布基线见[发布说明](../releases/release-0.3.1.md)；相同 manifest 版本不代表本地 `file:` 构建与已发布 tarball 相同。
 
 | 消费项目 | 直接来源及锁定 / 已安装版本 | 复现边界 |
 | --- | --- | --- |

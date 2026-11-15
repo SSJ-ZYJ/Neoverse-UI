@@ -23,10 +23,9 @@ docs/                          current state of the repository
     terminal-composition.md    terminal composition and history behavior
   releases/                    process records and upgrade paths
     releasing.md               release process, gates and automation
-    migration-0.2.0.md         historical upgrade path
-    migration-0.3.0.md         current upgrade guide
-    release-0.3.0.md           published release record
-    release-0.3.1.md           published release record
+    migration-0.3.0.md         historical upgrade path for 0.2.x
+    migration-0.3.1.md         current upgrade guide
+    release-0.3.1.md           latest published release record
   testing/
     README.md                  test layers, browser spec ownership and commands
   zh-CN/                       Chinese translations of consumer-facing documents
@@ -36,7 +35,7 @@ docs/                          current state of the repository
     architecture/material-standards.md
     architecture/overlay-contract.md
     architecture/terminal-composition.md
-    releases/migration-0.3.0.md
+    releases/migration-0.3.1.md
   images/                      README artwork
 .agents/notes/
   archives/                    dated audits, acceptance runs and incident records
@@ -66,7 +65,8 @@ The structure block is the registry: a topic that is not listed there cannot be 
 | Test layers, spec ownership and commands | [testing/README.md](testing/README.md) |
 | Release process, gates and automation | [releasing.md](releases/releasing.md) |
 | Upgrade steps between published versions | `releases/migration-*.md`, newest adopted |
-| What a specific release shipped | `releases/release-*.md`, newest adopted |
+| What the latest release shipped | [release-0.3.1.md](releases/release-0.3.1.md) |
+| What an older release shipped | `.agents/notes/archives/release-*.md` |
 
 One fact, one place. Link to the owning document instead of restating it.
 

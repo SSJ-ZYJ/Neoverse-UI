@@ -20,7 +20,7 @@ Overlay Runtime at 0.3.0, Motion and Glass Runtime at 0.2.1, and unchanged Giscu
 Theme at 0.2.0. On 2026-10-25 all eight official-registry `latest` versions matched
 these manifests. [Release run 39613361164](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/39613361164)
 completed publication and official-registry installation verification; the seven
-new package tags point to `dfb84a7`. See [release notes](release-0.3.0.md).
+new package tags point to `dfb84a7`. See [release notes](../../.agents/notes/archives/release-0.3.0.md).
 Later source changes and pending Changesets are not part of that published baseline.
 
 The [0.3.1 / 0.4.0 coordinated release](release-0.3.1.md) was published on
@@ -257,9 +257,9 @@ bun changeset
 
 Choose the affected packages and the appropriate SemVer bump. Commit the generated `.changeset/*.md` file with the code change.
 
-For the 0.2.0 line, breaking changes from 0.1.x use a `minor` bump because every public package is still pre-1.0. The migration contract is documented in [migration-0.2.0.md](migration-0.2.0.md).
+For the 0.2.0 line, breaking changes from 0.1.x use a `minor` bump because every public package is still pre-1.0. The migration contract is documented in [migration-0.2.0.md](../../.agents/notes/archives/migration-0.2.0.md).
 
-For migration to the published 0.3.0 baseline, use [migration-0.3.0.md](migration-0.3.0.md).
+For migration to the latest published baseline, use [migration-0.3.1.md](migration-0.3.1.md). Consumers from 0.2.x first apply [migration-0.3.0.md](migration-0.3.0.md).
 Packages are not fixed or linked as one version group: that release used minor bumps
 for Tokens, Tailwind, Overlay Runtime and both adapters, patch bumps for Motion and
 Glass Runtime, and no Giscus Theme bump. Pending Changesets describe later source

@@ -2,7 +2,7 @@
 
 Status: historical
 
-Part of the historical upgrade path; the current migration guide is [Migrating from 0.2.x to the published 0.3.0 baseline](migration-0.3.0.md), which also requires these steps.
+Part of the historical upgrade path; the current migration guide is [Migrating from 0.2.x to the published 0.3.0 baseline](../../../docs/releases/migration-0.3.0.md), which also requires these steps.
 
 Neoverse UI 0.2.0 intentionally removes transitional aliases and compatibility wrappers. Consumers should migrate to the canonical APIs below before switching package versions. No compatibility layer is provided.
 
@@ -31,7 +31,7 @@ Use the `feedback`, `state`, and `spatial` roles instead of reconstructing compo
 
 0.2.0 also makes Motion the single owner of enter/exit presence and page-change choreography. The additive `enter` / `exit` roles, `presenceVariants`, framework Presence adapters, and `startViewTransition()` all consume the same Motion tokens; consumers should not duplicate those durations or keyframes locally.
 
-Vue exports `UiPresence`, `presence`, and `staggerStyle`; React exports `UiPresence` and `useUiPresence`. `startViewTransition(update, options?)` can use Particle Dissolve (`particleDissolvePresets`), View Transition crossfade, or a direct update when reduced motion or browser support requires it. Particle capture is optional; the synthetic pipeline does not reproduce outgoing content. See the [Motion guide](../../packages/motion/README.md) for the public options and fallback contracts.
+Vue exports `UiPresence`, `presence`, and `staggerStyle`; React exports `UiPresence` and `useUiPresence`. `startViewTransition(update, options?)` can use Particle Dissolve (`particleDissolvePresets`), View Transition crossfade, or a direct update when reduced motion or browser support requires it. Particle capture is optional; the synthetic pipeline does not reproduce outgoing content. See the [Motion guide](../../../packages/motion/README.md) for the public options and fallback contracts.
 
 ### @neoverse-ui/tokens
 

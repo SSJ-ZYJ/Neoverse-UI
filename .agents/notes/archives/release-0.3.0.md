@@ -2,7 +2,7 @@
 
 Status: historical
 
-Superseded by the [0.3.1 / 0.4.0 coordinated release notes](release-0.3.1.md).
+Superseded by the [0.3.1 / 0.4.0 coordinated release notes](../../../docs/releases/release-0.3.1.md).
 
 Published on 2026-10-21. [Release run 39613361164](https://github.com/SSJ-ZYJ/Neoverse-UI/actions/runs/39613361164)
 completed npm publication and official-registry installation verification. On
@@ -29,7 +29,7 @@ A Version Packages merge alone is not publication evidence.
 - Bind `UiField`'s `controlAttrs` to its real input. Validation, controlled resets,
   application data and routing remain consumer responsibilities.
 
-See [the migration guide](migration-0.3.0.md) for complete API and upgrade details.
+See [the 0.3.0 migration guide](../../../docs/releases/migration-0.3.0.md) for complete API and upgrade details.
 
 ## Additions and fixes
 
@@ -45,7 +45,7 @@ See [the migration guide](migration-0.3.0.md) for complete API and upgrade detai
   SVG displacement, context recovery and observer ownership cleanup.
 - Motion list-reorder FLIP transitions.
 
-Component maturity remains defined by the [contract matrix](../architecture/component-contract-matrix.md).
+Component maturity remains defined by the [contract matrix](../../../docs/architecture/component-contract-matrix.md).
 Forms and overlays retain Consumer Validation status where real-consumer acceptance
 is incomplete. Terminal/presentation additions were Vue-only in this release;
 later React parity and `UiTerminalEcho` source additions are not included in npm 0.3.0.

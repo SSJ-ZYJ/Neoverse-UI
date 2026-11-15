@@ -1,10 +1,10 @@
 # Migrating from 0.2.x to the published 0.3.0 baseline
 
-Status: adopted
+Status: historical
 
-[Chinese](../zh-CN/releases/migration-0.3.0.md)
+Current Chinese guide: [0.3.0 → 0.3.1 / 0.4.0](../zh-CN/releases/migration-0.3.1.md)
 
-The 0.3.0 baseline was published on 2026-10-21; the official Registry was rechecked on 2026-10-25. The exact versions below are available on npm; later source-only React parity and `UiTerminalEcho` additions are outside this release. See [release evidence](release-0.3.0.md). The previous [0.1.x → 0.2.0 guide](migration-0.2.0.md) remains applicable to older consumers.
+The 0.3.0 baseline was published on 2026-10-21; the official Registry was rechecked on 2026-10-25. This guide remains the prerequisite for 0.2.x consumers; the current guide is [Migrating from 0.3.0 to 0.3.1 / 0.4.0](migration-0.3.1.md). See [release evidence](../../.agents/notes/archives/release-0.3.0.md). The previous [0.1.x → 0.2.0 guide](../../.agents/notes/archives/migration-0.2.0.md) covers older consumers.
 
 ## Package coordination and availability
 
@@ -21,7 +21,7 @@ Packages have independent versions: `.changeset/config.json` has no fixed or lin
 | `@neoverse-ui/motion` | 0.2.1 | Vue list-reorder FLIP motion fix |
 | `@neoverse-ui/giscus-theme` | 0.2.0 (unchanged) | No new publication required |
 
-Do not assign `0.3.0` to every package. The versioned manifests already contain the coordinated internal ranges. A `^0.2.0` range does not admit `0.3.x`, so changing only a top-level adapter while retaining old overrides is not a coordinated upgrade. See [the release notes](release-0.3.0.md) and run `bun run verify:published` after publication to verify the exact registry versions and installation.
+Do not assign `0.3.0` to every package. The versioned manifests already contain the coordinated internal ranges. A `^0.2.0` range does not admit `0.3.x`, so changing only a top-level adapter while retaining old overrides is not a coordinated upgrade. See [the 0.3.0 release notes](../../.agents/notes/archives/release-0.3.0.md) and run `bun run verify:published` after publication to verify the exact registry versions and installation.
 
 Vue and React now depend on Overlay Runtime alongside Motion and Tailwind; Tailwind brings Tokens and Motion. Ordinary adapter consumers do not need to import the runtime themselves. Direct runtime consumers should use its [public guide](../../packages/overlay-runtime/README.md).
 
