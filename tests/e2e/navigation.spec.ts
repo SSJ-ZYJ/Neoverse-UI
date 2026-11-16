@@ -1,10 +1,10 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../support/e2e';
 
 test.describe('navigation', () => {
   test('breadcrumb links navigate and update the current item', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.goto('/react-fixture?theme=light&lang=en', { waitUntil: 'domcontentloaded' });
+    await page.goto('/react-fixture?theme=light&lang=en');
 
     const breadcrumb = page.locator('[data-navigation="default"]');
     await expect(breadcrumb).toHaveAttribute('aria-label', 'Page path');
@@ -37,7 +37,7 @@ test.describe('navigation', () => {
   }) => {
     const errors: string[] = [];
     page.on('pageerror', (error) => errors.push(error.message));
-    await page.goto('/react-fixture?theme=light&lang=zh', { waitUntil: 'domcontentloaded' });
+    await page.goto('/react-fixture?theme=light&lang=zh');
 
     const dock = page.locator('[data-react-adapter="UiDock"]');
     await expect(dock).toHaveAttribute('aria-label', '快捷导航');
@@ -67,9 +67,7 @@ test.describe('navigation', () => {
   test('segmented control supports keyboard selection and skips disabled values', async ({
     page,
   }) => {
-    await page.goto('/react-fixture?theme=light&lang=en&contract-fixtures=1', {
-      waitUntil: 'domcontentloaded',
-    });
+    await page.goto('/react-fixture?theme=light&lang=en&contract-fixtures=1');
     const group = page.locator('[data-react-adapter="UiSegmentedControl"]');
     const radios = group.getByRole('radio');
 
@@ -86,9 +84,7 @@ test.describe('navigation', () => {
   });
 
   test('segmented control reconciles rejected, loading and disabled updates', async ({ page }) => {
-    await page.goto('/react-fixture?theme=light&lang=en&contract-fixtures=1', {
-      waitUntil: 'domcontentloaded',
-    });
+    await page.goto('/react-fixture?theme=light&lang=en&contract-fixtures=1');
     const group = page.locator('[data-react-adapter="UiSegmentedControl"]');
     const radios = group.getByRole('radio');
 
@@ -112,7 +108,7 @@ test.describe('navigation', () => {
   });
 
   test('Vue segmented control selects with pointer and keyboard in one group', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#controls', { waitUntil: 'domcontentloaded' });
+    await page.goto('/frame?theme=light&lang=en#controls');
     const group = page.locator('#controls-segmented-control .ui-segmented-control').first();
     const radios = group.getByRole('radio');
 
@@ -128,9 +124,7 @@ test.describe('navigation', () => {
   });
 
   test('step flow marks exactly one current stage', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#data-display-step-flow', {
-      waitUntil: 'domcontentloaded',
-    });
+    await page.goto('/frame?theme=light&lang=en#data-display-step-flow');
     const flow = page.locator('#data-display-step-flow .ui-step-flow');
 
     await expect(flow).toBeVisible();
@@ -141,7 +135,7 @@ test.describe('navigation', () => {
   test('dock navigation item reports the current page and keeps its links reachable', async ({
     page,
   }) => {
-    await page.goto('/frame?theme=light&lang=en#dock', { waitUntil: 'domcontentloaded' });
+    await page.goto('/frame?theme=light&lang=en#dock');
     const dock = page.locator('#dock .ui-dock').first();
     const links = dock.getByRole('link');
 
@@ -179,7 +173,7 @@ test.describe('navigation', () => {
       }) => {
         const errors: string[] = [];
         page.on('pageerror', (error) => errors.push(error.message));
-        await page.goto(`/frame?theme=${theme}&lang=en#dock`, { waitUntil: 'domcontentloaded' });
+        await page.goto(`/frame?theme=${theme}&lang=en#dock`);
         const dock = page.locator('[data-dock-specimen="standard"] .ui-dock');
         const items = dock.locator('.ui-navigation-item');
         const indicator = dock.locator('.ui-control-surface__indicator');
@@ -204,23 +198,38 @@ test.describe('navigation', () => {
           // A few compositor frames into the 420ms flight the visual box has
           // moved, but the layout box (offsetLeft/offsetWidth exclude transform)
           // must not: that is precisely "the indicator adds no per-frame layout".
-          await page.evaluate(
-            () =>
-              new Promise<void>((resolve) =>
-                requestAnimationFrame(() =>
-                  requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-                ),
-              ),
-          );
-          const mid = await indicator.evaluate((element) => {
-            const node = element as HTMLElement;
-            return {
-              transform: node.style.transform,
-              offsetLeft: node.offsetLeft,
-              offsetWidth: node.offsetWidth,
-              visualLeft: node.getBoundingClientRect().left,
-            };
-          });
+          // Poll the movement itself; three animation frames are not guaranteed
+          // to composite on software-rendered mobile and produced false zeros.
+          let mid:
+            | {
+                transform: string;
+                offsetLeft: number;
+                offsetWidth: number;
+                visualLeft: number;
+              }
+            | undefined;
+          await expect
+            .poll(async () => {
+              const sample = await indicator.evaluate((element) => {
+                const node = element as HTMLElement;
+                return {
+                  transform: node.style.transform,
+                  offsetLeft: node.offsetLeft,
+                  offsetWidth: node.offsetWidth,
+                  visualLeft: node.getBoundingClientRect().left,
+                };
+              });
+              if (
+                sample.transform === '' ||
+                Math.abs(sample.visualLeft - flight.visualLeft) <= 0.5
+              ) {
+                return false;
+              }
+              mid = sample;
+              return true;
+            })
+            .toBe(true);
+          if (mid === undefined) throw new Error('The indicator flight never progressed');
           expect(mid.transform).toContain('translate');
           expect(mid.offsetLeft).toBe(flight.offsetLeft);
           expect(mid.offsetWidth).toBe(flight.offsetWidth);
@@ -262,7 +271,7 @@ test.describe('navigation', () => {
       page,
     }) => {
       await page.emulateMedia({ reducedMotion: 'reduce' });
-      await page.goto('/frame?theme=light&lang=en#dock', { waitUntil: 'domcontentloaded' });
+      await page.goto('/frame?theme=light&lang=en#dock');
       const dock = page.locator('[data-dock-specimen="standard"] .ui-dock');
       const indicator = dock.locator('.ui-control-surface__indicator');
       await expect(indicator).toHaveAttribute('data-ready', 'true');
@@ -278,7 +287,7 @@ test.describe('navigation', () => {
     });
 
     test('the compact dock indicator settles on the smaller compact geometry', async ({ page }) => {
-      await page.goto('/frame?theme=light&lang=en#dock', { waitUntil: 'domcontentloaded' });
+      await page.goto('/frame?theme=light&lang=en#dock');
       const standard = page.locator(
         '[data-dock-specimen="standard"] .ui-control-surface__indicator',
       );
@@ -310,7 +319,7 @@ test.describe('navigation', () => {
     test('the React dock indicator shares the transform flight contract', async ({ page }) => {
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(error.message));
-      await page.goto('/react-fixture?theme=light&lang=en', { waitUntil: 'domcontentloaded' });
+      await page.goto('/react-fixture?theme=light&lang=en');
       const dock = page.locator('[data-parity-dock]');
       const items = dock.locator('.ui-navigation-item');
       const indicator = dock.locator('.ui-control-surface__indicator');

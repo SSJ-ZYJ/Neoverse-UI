@@ -1,10 +1,17 @@
-import { expect, test } from '@playwright/test';
-import { adapters, describedTexts, disablePopoverApi, formValues, themes } from '../support/e2e';
+import {
+  adapters,
+  describedTexts,
+  disablePopoverApi,
+  expect,
+  formValues,
+  test,
+  themes,
+} from '../support/e2e';
 
 test.describe('forms', () => {
   for (const theme of themes) {
     test(`renders every form control in the ${theme} theme`, async ({ page }) => {
-      await page.goto(adapters[0]?.url(theme) ?? '/', { waitUntil: 'domcontentloaded' });
+      await page.goto(adapters[0]?.url(theme) ?? '/');
 
       const form = page.locator('[data-text-contract-form]');
       await expect(form.getByRole('textbox', { name: 'Contract text', exact: true })).toBeVisible();
@@ -23,7 +30,7 @@ test.describe('forms', () => {
     test(`${adapter.name}: field wires its label, description and validation state`, async ({
       page,
     }) => {
-      await page.goto(adapter.url('light'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light'));
 
       const form = page.locator('[data-text-contract-form]');
       const input = form.getByRole('textbox', { name: 'Contract text', exact: true });
@@ -44,7 +51,7 @@ test.describe('forms', () => {
     test(`${adapter.name}: readonly text controls keep their value and cannot be edited`, async ({
       page,
     }) => {
-      await page.goto(adapter.url('light'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light'));
       const form = page.locator('[data-text-contract-form]');
       const input = form.getByRole('textbox', { name: 'Contract text', exact: true });
 
@@ -58,7 +65,7 @@ test.describe('forms', () => {
     });
 
     test(`${adapter.name}: disabled controls are removed from the submission`, async ({ page }) => {
-      await page.goto(adapter.url('light'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light'));
       const form = page.locator('[data-text-contract-form]');
       const input = form.getByRole('textbox', { name: 'Contract text', exact: true });
 
@@ -72,7 +79,7 @@ test.describe('forms', () => {
     test(`${adapter.name}: select supports keyboard entry, selection and focus return`, async ({
       page,
     }) => {
-      await page.goto(adapter.url('light'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light'));
       const trigger = page.getByRole('combobox', { name: 'Contract selection' });
       const shell = trigger.locator('xpath=..');
       const listbox = shell.getByRole('listbox');
@@ -103,7 +110,7 @@ test.describe('forms', () => {
     test(`${adapter.name}: select ignores the disabled option and a rejected change`, async ({
       page,
     }) => {
-      await page.goto(adapter.url('light'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light'));
       const form = page.locator('[data-text-contract-form]');
       const trigger = form.getByRole('combobox', { name: 'Contract selection' });
       const listbox = trigger.locator('xpath=..').getByRole('listbox');
@@ -128,7 +135,7 @@ test.describe('forms', () => {
 
     test(`${adapter.name}: fallback select closes when focus leaves with Tab`, async ({ page }) => {
       await disablePopoverApi(page);
-      await page.goto(adapter.url('light'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light'));
       const trigger = page.getByRole('combobox', { name: 'Contract selection' });
       const listbox = trigger.locator('xpath=..').getByRole('listbox');
 
@@ -143,7 +150,7 @@ test.describe('forms', () => {
     });
 
     test(`${adapter.name}: choice labels activate the native control`, async ({ page }) => {
-      await page.goto(adapter.url('light'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light'));
       const form = page.locator('[data-contract-form]');
       const checkbox = form.locator('[data-contract-checkbox]');
       const switchControl = form.locator('[data-contract-switch]');
@@ -172,7 +179,7 @@ test.describe('forms', () => {
     test(`${adapter.name}: radio keyboard skips disabled options and updates the form state`, async ({
       page,
     }) => {
-      await page.goto(adapter.url('light'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light'));
       const form = page.locator('[data-contract-form]');
       const group = form.getByRole('radiogroup', { name: 'Channel', exact: true });
       const first = group.getByRole('radio', { name: 'First channel', exact: true });
@@ -193,9 +200,10 @@ test.describe('forms', () => {
     test(`${adapter.name}: readonly choices keep submission and return on reset`, async ({
       page,
     }) => {
-      await page.goto(adapter.url('light'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light'));
       const form = page.locator('[data-contract-form]');
       const notifications = form.locator('[data-contract-checkbox]');
+      const sync = form.locator('[data-contract-switch]');
       const lockedCheckbox = form.locator('[data-contract-readonly-checkbox]');
 
       await expect(lockedCheckbox).toHaveAttribute('aria-disabled', 'true');
@@ -203,6 +211,9 @@ test.describe('forms', () => {
       await lockedCheckbox.focus();
       await page.keyboard.press('Space');
       await expect(lockedCheckbox).toBeChecked();
+      // A pointer that misses the readonly row by one row would flip this
+      // controlled switch instead; the submitted record would still look valid.
+      await expect(sync).toBeChecked();
       expect(await formValues(form)).toMatchObject({ locked: 'yes', 'locked-channel': '2' });
 
       await notifications.uncheck();
@@ -216,7 +227,7 @@ test.describe('forms', () => {
     test(`${adapter.name}: controls expose their accessibility roles and names`, async ({
       page,
     }) => {
-      await page.goto(adapter.url('light'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light'));
       const form = page.locator('[data-contract-form]');
 
       await expect(form.locator('[data-contract-checkbox]')).toHaveRole('checkbox');
@@ -237,7 +248,7 @@ test.describe('forms', () => {
   }
 
   test('Vue: a rejected controlled checkbox restores the previous state', async ({ page }) => {
-    await page.goto(adapters[0]?.url('light') ?? '/', { waitUntil: 'domcontentloaded' });
+    await page.goto(adapters[0]?.url('light') ?? '/');
     const input = page.locator('.ui-choice-trap').locator('[data-contract-checkbox-reject]');
 
     await expect(input).toBeChecked();
@@ -247,7 +258,7 @@ test.describe('forms', () => {
   });
 
   test('Vue: IME composition is not committed until composition ends', async ({ page }) => {
-    await page.goto(adapters[0]?.url('light') ?? '/', { waitUntil: 'domcontentloaded' });
+    await page.goto(adapters[0]?.url('light') ?? '/');
     const form = page.locator('[data-text-contract-form]');
     const editor = form.getByRole('textbox', { name: 'Contract text', exact: true });
     const output = form.locator('[data-text-value]');
@@ -273,7 +284,7 @@ test.describe('forms', () => {
   });
 
   test('React: uncontrolled text controls keep edits and reset natively', async ({ page }) => {
-    await page.goto(adapters[1]?.url('light') ?? '/', { waitUntil: 'domcontentloaded' });
+    await page.goto(adapters[1]?.url('light') ?? '/');
     const form = page.locator('[data-text-uncontrolled-form]');
     const input = form.getByRole('textbox', { name: 'Native text', exact: true });
 
@@ -285,7 +296,7 @@ test.describe('forms', () => {
   });
 
   test('Vue: number steps stay in bounds and keep focus on the input', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=zh#controls', { waitUntil: 'domcontentloaded' });
+    await page.goto('/frame?theme=light&lang=zh#controls');
     const input = page.locator('[data-custom-blur]');
     const shell = page.locator('.ui-input-number').filter({ has: input });
 
@@ -305,9 +316,7 @@ test.describe('forms', () => {
   });
 
   test('React: number steps support decimals, bounds and locked states', async ({ page }) => {
-    await page.goto('/react-fixture?lang=en&contract-fixtures=1', {
-      waitUntil: 'domcontentloaded',
-    });
+    await page.goto('/react-fixture?lang=en&contract-fixtures=1');
     const input = page.getByRole('spinbutton', { name: 'Amount', exact: true });
     const shell = page.locator('.ui-input-number').filter({ has: input });
 

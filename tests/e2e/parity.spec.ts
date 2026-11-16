@@ -1,4 +1,5 @@
-import { expect, type Page, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { expect, test } from '../support/e2e';
 
 const adapterNames = [
   'UiBadge',
@@ -31,9 +32,7 @@ test.describe('parity', () => {
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(error.message));
       await page.emulateMedia({ reducedMotion: 'reduce' });
-      await page.goto(`/react-fixture?theme=${theme}&lang=zh&contract-fixtures=1`, {
-        waitUntil: 'domcontentloaded',
-      });
+      await page.goto(`/react-fixture?theme=${theme}&lang=zh&contract-fixtures=1`);
 
       await expect(page.locator('[data-react-parity-fixture]')).toBeVisible();
       for (const name of adapterNames) {
@@ -49,16 +48,16 @@ test.describe('parity', () => {
 
   test('the explicit theme query wins over the system preference', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'dark', reducedMotion: 'reduce' });
-    await page.goto('/react-fixture?theme=light&lang=en', { waitUntil: 'domcontentloaded' });
+    await page.goto('/react-fixture?theme=light&lang=en');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
 
-    await page.goto('/react-fixture?theme=dark&lang=en', { waitUntil: 'domcontentloaded' });
+    await page.goto('/react-fixture?theme=dark&lang=en');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
   });
 
   test('the fixture follows the system theme when no selection exists', async ({ page }) => {
     await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
-    await page.goto('/react-fixture?lang=en', { waitUntil: 'domcontentloaded' });
+    await page.goto('/react-fixture?lang=en');
     await expect(page.locator('html')).not.toHaveAttribute('data-theme');
 
     await page.emulateMedia({ colorScheme: 'dark' });
@@ -72,7 +71,7 @@ test.describe('parity', () => {
     page,
   }) => {
     await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
-    await page.goto('/react-fixture?lang=en', { waitUntil: 'domcontentloaded' });
+    await page.goto('/react-fixture?lang=en');
     const control = page.getByRole('radiogroup', { name: 'Playground theme' });
 
     await expect(control.getByRole('radio')).toHaveCount(3);
@@ -81,13 +80,13 @@ test.describe('parity', () => {
     await expect.poll(() => storedTheme(page)).toBe('dark');
     expect(new URL(page.url()).searchParams.has('theme')).toBe(false);
 
-    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.reload();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
-    await page.goto('/?lang=en', { waitUntil: 'domcontentloaded' });
+    await page.goto('/?lang=en');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
 
-    await page.goto('/react-fixture?lang=en', { waitUntil: 'domcontentloaded' });
+    await page.goto('/react-fixture?lang=en');
     await page
       .getByRole('radiogroup', { name: 'Playground theme' })
       .getByRole('radio', { name: 'System', exact: true })
@@ -102,7 +101,7 @@ test.describe('parity', () => {
         { name: 'Vue', url: `/frame?theme=${theme}&lang=en&contract-fixtures=1#forms` },
         { name: 'React', url: `/react-fixture?theme=${theme}&lang=en&contract-fixtures=1` },
       ]) {
-        await page.goto(adapter.url, { waitUntil: 'domcontentloaded' });
+        await page.goto(adapter.url);
         const form = page.locator('[data-contract-form]');
         await expect(
           form.getByRole('checkbox', { name: 'Notifications', exact: true }),

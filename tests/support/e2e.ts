@@ -1,4 +1,41 @@
-import { expect, type Locator, type Page } from '@playwright/test';
+import { test as base, expect, type Locator, type Page } from '@playwright/test';
+
+/**
+ * Interaction specs must not act while the fixture is still growing.
+ *
+ * The Design Lab mounts its specimen backdrops after `domcontentloaded`; their
+ * heights grow by hundreds of pixels as fonts and inset material measurements
+ * land. Firefox's scroll anchoring then adjusts the click that Playwright has
+ * already aimed at a control, dispatching it to a neighbouring row. Wait for
+ * the document height to stay unchanged across ten animation frames (capped so
+ * a slow external font cannot stall the test) before measuring or clicking.
+ */
+export const test = base.extend({
+  page: async ({ page }, use) => {
+    const navigate = page.goto.bind(page);
+    page.goto = async (url, options) => {
+      const response = await navigate(url, { ...options, waitUntil: 'domcontentloaded' });
+      await page.evaluate(async () => {
+        const deadline = performance.now() + 1_500;
+        let previousHeight = -1;
+        let stableFrames = 0;
+        while (performance.now() < deadline) {
+          const { promise, resolve } = Promise.withResolvers<void>();
+          requestAnimationFrame(() => resolve());
+          await promise;
+          const height = document.documentElement.scrollHeight;
+          stableFrames = height === previousHeight ? stableFrames + 1 : 0;
+          previousHeight = height;
+          if (stableFrames >= 10) return;
+        }
+      });
+      return response;
+    };
+    await use(page);
+  },
+});
+
+export { expect };
 
 export const themes = ['light', 'dark'] as const;
 export type Theme = (typeof themes)[number];

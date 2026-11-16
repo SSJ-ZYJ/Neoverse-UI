@@ -1,10 +1,12 @@
-import { expect, type Page, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import {
   adapters,
   disablePopoverApi,
+  expect,
   expectPanelClosed,
   expectPanelOpen,
   openContextMenuAtZone,
+  test,
 } from '../support/e2e';
 
 async function popoverParts(page: Page, adapterName: string) {
@@ -90,7 +92,7 @@ test.describe('overlays', () => {
         page,
       }) => {
         if (mode === 'fallback') await disablePopoverApi(page);
-        await page.goto(adapter.url('light', 'overlays'), { waitUntil: 'domcontentloaded' });
+        await page.goto(adapter.url('light', 'overlays'));
         const { trigger, panel } = await popoverParts(page, adapter.name);
 
         await trigger.click();
@@ -106,7 +108,7 @@ test.describe('overlays', () => {
         page,
       }) => {
         if (mode === 'fallback') await disablePopoverApi(page);
-        await page.goto(adapter.url('light', 'overlays'), { waitUntil: 'domcontentloaded' });
+        await page.goto(adapter.url('light', 'overlays'));
         const { trigger, panel } = await menuParts(page, adapter.name);
 
         await trigger.click();
@@ -130,7 +132,7 @@ test.describe('overlays', () => {
         page,
       }) => {
         if (mode === 'fallback') await disablePopoverApi(page);
-        await page.goto(adapter.url('light', 'overlays'), { waitUntil: 'domcontentloaded' });
+        await page.goto(adapter.url('light', 'overlays'));
         const popover = await popoverParts(page, adapter.name);
         const menu = await menuParts(page, adapter.name);
 
@@ -148,7 +150,7 @@ test.describe('overlays', () => {
         page,
       }) => {
         if (mode === 'fallback') await disablePopoverApi(page);
-        await page.goto(adapter.url('light', 'overlays'), { waitUntil: 'domcontentloaded' });
+        await page.goto(adapter.url('light', 'overlays'));
         const { trigger, panel } = await menuParts(page, adapter.name);
 
         await trigger.click();
@@ -162,7 +164,7 @@ test.describe('overlays', () => {
     test(`${adapter.name}: a disabled trigger closes its panel and keeps ARIA aligned`, async ({
       page,
     }) => {
-      await page.goto(adapter.url('light', 'overlays'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light', 'overlays'));
       const controlled = page.locator('[data-overlay-controlled-popover]');
       const controlledTrigger = controlled.locator('.ui-popover__trigger');
       const controlledPanel = controlled.locator('.ui-popover__content');
@@ -193,7 +195,7 @@ test.describe('overlays', () => {
     test(`${adapter.name}: a controlled popover rejects dismissal and unmounts cleanly`, async ({
       page,
     }) => {
-      await page.goto(adapter.url('light', 'overlays'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light', 'overlays'));
       const shell = page.locator('[data-overlay-controlled-popover]');
       const trigger = shell.locator('.ui-popover__trigger');
       const panel = shell.locator('.ui-popover__content');
@@ -215,7 +217,7 @@ test.describe('overlays', () => {
 
     test(`${adapter.name}: the panel follows a moving anchor`, async ({ page }) => {
       await page.setViewportSize({ width: 1000, height: 700 });
-      await page.goto(adapter.url('light', 'overlays'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light', 'overlays'));
       const shell = page.locator('[data-overlay-controlled-popover]');
       const trigger = shell.locator('.ui-popover__trigger');
       const panel = shell.locator('.ui-popover__content');
@@ -253,7 +255,7 @@ test.describe('overlays', () => {
   }
 
   test('context menu opens at the pointer and supports keyboard entry', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#overlays', { waitUntil: 'domcontentloaded' });
+    await page.goto('/frame?theme=light&lang=en#overlays');
     const panel = await openContextMenuAtZone(page);
     const items = panel.locator('.ui-context-menu__item');
 
@@ -274,7 +276,7 @@ test.describe('overlays', () => {
   });
 
   test('context menu selection reports the item and closes the panel', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#overlays', { waitUntil: 'domcontentloaded' });
+    await page.goto('/frame?theme=light&lang=en#overlays');
     const panel = await openContextMenuAtZone(page);
 
     await panel.getByRole('menuitem').first().click();
@@ -285,7 +287,7 @@ test.describe('overlays', () => {
   });
 
   test('context menu exposes checkable rows, a submenu and a disabled row', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#overlays', { waitUntil: 'domcontentloaded' });
+    await page.goto('/frame?theme=light&lang=en#overlays');
     const panel = await openContextMenuAtZone(page);
 
     await expect(panel.getByRole('menuitemcheckbox', { name: 'Show details' })).toHaveAttribute(
@@ -316,7 +318,7 @@ test.describe('overlays', () => {
     test(`${adapter.name}: a cursor submenu keeps the parent rim behind it and animates on open and switch`, async ({
       page,
     }) => {
-      await page.goto(adapter.url('light', 'overlays'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light', 'overlays'));
       const panel = await openContextMenuAtZone(page);
       await recordSubmenuMotion(page);
       const submenu = page.locator('.ui-context-menu__submenu');
@@ -369,7 +371,7 @@ test.describe('overlays', () => {
     test(`${adapter.name}: an open submenu follows a parent positioning correction`, async ({
       page,
     }) => {
-      await page.goto(adapter.url('light', 'overlays'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light', 'overlays'));
       const panel = await openContextMenuAtZone(page);
       await panel.getByRole('menuitem', { name: 'Theme' }).hover();
       const submenu = page.locator('.ui-context-menu__submenu');
@@ -408,7 +410,7 @@ test.describe('overlays', () => {
 
   test('a touch opens a cursor submenu with an entrance', async ({ page, hasTouch }) => {
     test.skip(!hasTouch, 'Touch input is required');
-    await page.goto('/frame?theme=light&lang=en#overlays', { waitUntil: 'domcontentloaded' });
+    await page.goto('/frame?theme=light&lang=en#overlays');
     const zone = page.locator('[data-context-menu-zone]');
     await zone.scrollIntoViewIfNeeded();
     const box = await zone.boundingBox();
@@ -440,7 +442,7 @@ test.describe('overlays', () => {
       hasTouch,
     }) => {
       await disablePopoverApi(page);
-      await page.goto(adapter.url('light', 'overlays'), { waitUntil: 'domcontentloaded' });
+      await page.goto(adapter.url('light', 'overlays'));
       const panel = await openContextMenuAtZone(page);
       await recordSubmenuMotion(page);
       const themeRow = panel.getByRole('menuitem', { name: 'Theme' });
@@ -471,7 +473,7 @@ test.describe('overlays', () => {
   }
 
   test('context menu stays inside the viewport at the bottom-right corner', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#overlays', { waitUntil: 'domcontentloaded' });
+    await page.goto('/frame?theme=light&lang=en#overlays');
     const zone = page.locator('[data-context-menu-zone]');
     await zone.scrollIntoViewIfNeeded();
     const viewport = page.viewportSize();
@@ -502,7 +504,7 @@ test.describe('overlays', () => {
   });
 
   test('the page keeps its native menu outside a registered zone', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#overlays', { waitUntil: 'domcontentloaded' });
+    await page.goto('/frame?theme=light&lang=en#overlays');
     const prevented = await page.evaluate(() => {
       const target = document.querySelector('#overlays-context-menu [data-overlay-selection]');
       if (target === null) throw new Error('The selection output is required');
@@ -516,9 +518,7 @@ test.describe('overlays', () => {
   });
 
   test('the tooltip surface renders its message', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#status-feedback-tooltip', {
-      waitUntil: 'domcontentloaded',
-    });
+    await page.goto('/frame?theme=light&lang=en#status-feedback-tooltip');
     const tooltip = page.locator('#status-feedback-tooltip .ui-tooltip-surface').first();
     await expect(tooltip).toBeVisible();
     await expect(tooltip).not.toBeEmpty();

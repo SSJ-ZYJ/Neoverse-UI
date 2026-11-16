@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../support/e2e';
 
 test.describe('surfaces', () => {
   for (const adapter of ['Vue', 'React'] as const) {
@@ -7,7 +7,6 @@ test.describe('surfaces', () => {
         adapter === 'Vue'
           ? '/frame?theme=light&lang=en#data-display-disclosure'
           : '/react-fixture?theme=light&lang=en',
-        { waitUntil: 'domcontentloaded' },
       );
       const disclosure = page
         .locator(
@@ -35,9 +34,7 @@ test.describe('surfaces', () => {
   test('React: table, skeleton, timeline and stat card expose semantic markup', async ({
     page,
   }) => {
-    await page.goto('/react-fixture?theme=light&lang=en&contract-fixtures=1', {
-      waitUntil: 'domcontentloaded',
-    });
+    await page.goto('/react-fixture?theme=light&lang=en&contract-fixtures=1');
 
     const table = page.locator('[data-react-adapter="UiTable"]');
     await expect(table).toHaveRole('table');
@@ -59,9 +56,7 @@ test.describe('surfaces', () => {
   });
 
   test('React: scrollbar reveals, seeks, drags, hides and cleans up', async ({ page }) => {
-    await page.goto('/react-fixture?theme=light&lang=en&contract-fixtures=1', {
-      waitUntil: 'domcontentloaded',
-    });
+    await page.goto('/react-fixture?theme=light&lang=en&contract-fixtures=1');
     const track = page.locator('[data-react-adapter="UiScrollbar"]');
 
     await page.locator('[data-parity-native]').click();
@@ -100,9 +95,7 @@ test.describe('surfaces', () => {
   });
 
   test('Vue: document scrollbar follows scroll and releases its native class', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#scrollbar-component', {
-      waitUntil: 'domcontentloaded',
-    });
+    await page.goto('/frame?theme=light&lang=en#scrollbar-component');
     const track = page.locator('[data-ui-scrollbar-fixture]');
     await expect(page.locator('html')).toHaveClass(/ui-scrollbar-target/);
 
@@ -115,9 +108,7 @@ test.describe('surfaces', () => {
   });
 
   test('Vue: stat card and notice keep their labels and actions', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#data-display-stat-card', {
-      waitUntil: 'domcontentloaded',
-    });
+    await page.goto('/frame?theme=light&lang=en#data-display-stat-card');
     const statCard = page.locator('#data-display-stat-card .ui-stat-card').first();
     await expect(statCard).toBeVisible();
     await expect(statCard).not.toBeEmpty();

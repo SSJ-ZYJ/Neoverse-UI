@@ -1,9 +1,8 @@
-import { expect, test } from '@playwright/test';
-import { expectNoPageOverflow } from '../support/e2e';
+import { expect, expectNoPageOverflow, test } from '../support/e2e';
 
 test.describe('motion', () => {
   test('list reorder moves every item to its new position', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#motion', { waitUntil: 'domcontentloaded' });
+    await page.goto('/frame?theme=light&lang=en#motion');
     const group = page.locator('[data-motion-presence-group]');
     const items = group.locator('[data-motion-presence-group-item]');
 
@@ -20,7 +19,7 @@ test.describe('motion', () => {
 
   test('reduced motion keeps the reorder complete and immediate', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/frame?theme=light&lang=en#motion', { waitUntil: 'domcontentloaded' });
+    await page.goto('/frame?theme=light&lang=en#motion');
     const group = page.locator('[data-motion-presence-group]');
     const items = group.locator('[data-motion-presence-group-item]');
     const original = await items.allTextContents();
@@ -30,7 +29,7 @@ test.describe('motion', () => {
   });
 
   test('replaying the entrance keeps the list content intact', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#motion', { waitUntil: 'domcontentloaded' });
+    await page.goto('/frame?theme=light&lang=en#motion');
     const group = page.locator('[data-motion-presence-group]');
     const items = group.locator('[data-motion-presence-group-item]');
     const original = await items.allTextContents();
@@ -44,7 +43,7 @@ test.describe('motion', () => {
     page,
   }) => {
     await page.setViewportSize({ width: 1440, height: 1000 });
-    await page.goto('/?lang=en#motion', { waitUntil: 'domcontentloaded' });
+    await page.goto('/?lang=en#motion');
     const stage = page.locator('[data-motion-width-stage]');
     await expect(stage).toBeVisible();
     await stage.scrollIntoViewIfNeeded();
@@ -79,9 +78,7 @@ test.describe('motion', () => {
 });
 
 test('page dissolve swaps the specimen and clears the particle layer', async ({ page }) => {
-  await page.goto('/frame?theme=light&lang=en#foundation-motion-page', {
-    waitUntil: 'domcontentloaded',
-  });
+  await page.goto('/frame?theme=light&lang=en#foundation-motion-page');
   const trigger = page.locator('[data-motion-page-dissolve]');
   const stage = page.locator('#foundation-motion-page .playground-motion-stage');
 
@@ -95,9 +92,7 @@ test('page dissolve swaps the specimen and clears the particle layer', async ({ 
 
 test('page dissolve honors reduced motion without keeping a particle layer', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/frame?theme=light&lang=en#foundation-motion-page', {
-    waitUntil: 'domcontentloaded',
-  });
+  await page.goto('/frame?theme=light&lang=en#foundation-motion-page');
   const trigger = page.locator('[data-motion-page-dissolve]');
   const stage = page.locator('#foundation-motion-page .playground-motion-stage');
 
@@ -110,7 +105,7 @@ test('page dissolve honors reduced motion without keeping a particle layer', asy
 });
 
 test('React presence removes the exited region and returns it on show', async ({ page }) => {
-  await page.goto('/react-fixture?theme=light&lang=en', { waitUntil: 'domcontentloaded' });
+  await page.goto('/react-fixture?theme=light&lang=en');
   const presence = page.locator('[data-react-adapter="UiPresence"]');
   const toggle = page.locator('[data-react-presence-toggle]');
 
