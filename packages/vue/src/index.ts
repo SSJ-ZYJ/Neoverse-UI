@@ -37,11 +37,13 @@ export type {
   ControlSurfacePreset,
   ControlSurfaceProps,
   ControlSurfaceScale,
+  DialogProps,
   DisclosureProps,
   DockProps,
   DropdownMenuItem,
   DropdownMenuItemTone,
   DropdownMenuProps,
+  EmptyStateProps,
   FieldControlAttrs,
   FieldProps,
   FormControlStateProps,
@@ -91,6 +93,7 @@ export type {
   TextareaProps,
   TimelineItem,
   TimelineProps,
+  ToastProps,
   TooltipSurfaceProps,
   TooltipSurfaceVariant,
 } from './types';
@@ -102,9 +105,11 @@ export { default as UiCard } from './UiCard.vue';
 export { default as UiCheckbox } from './UiCheckbox.vue';
 export { default as UiContextMenu } from './UiContextMenu.vue';
 export { default as UiControlSurface } from './UiControlSurface.vue';
+export { default as UiDialog } from './UiDialog.vue';
 export { default as UiDisclosure } from './UiDisclosure.vue';
 export { default as UiDock } from './UiDock.vue';
 export { default as UiDropdownMenu } from './UiDropdownMenu.vue';
+export { default as UiEmptyState } from './UiEmptyState.vue';
 export { default as UiField } from './UiField.vue';
 export { default as UiIconButton } from './UiIconButton.vue';
 export { default as UiInput } from './UiInput.vue';
@@ -130,4 +135,5 @@ export { default as UiTerminalSurface } from './UiTerminalSurface.vue';
 export { default as UiTerminalTranscript } from './UiTerminalTranscript.vue';
 export { default as UiTextarea } from './UiTextarea.vue';
 export { default as UiTimeline } from './UiTimeline.vue';
+export { default as UiToast } from './UiToast.vue';
 export { default as UiTooltipSurface } from './UiTooltipSurface.vue';

@@ -374,6 +374,30 @@ const componentCssVariables = {
     itemHoverBackground: '--neoverse-overlay-item-hover-background',
     itemDangerForeground: '--neoverse-overlay-item-danger-foreground',
   },
+  emptyState: {
+    minHeight: '--neoverse-empty-state-min-height',
+    padding: '--neoverse-empty-state-padding',
+    gap: '--neoverse-empty-state-gap',
+    maxWidth: '--neoverse-empty-state-max-width',
+    iconSize: '--neoverse-empty-state-icon-size',
+    iconRadius: '--neoverse-empty-state-icon-radius',
+    iconBackground: '--neoverse-empty-state-icon-background',
+    iconColor: '--neoverse-empty-state-icon-color',
+    titleSize: '--neoverse-empty-state-title-size',
+    descriptionSize: '--neoverse-empty-state-description-size',
+  },
+  dialog: {
+    width: '--neoverse-dialog-width',
+    padding: '--neoverse-dialog-padding',
+    radius: '--neoverse-dialog-radius',
+    scrim: '--neoverse-dialog-scrim',
+  },
+  toast: {
+    width: '--neoverse-toast-width',
+    bottom: '--neoverse-toast-bottom',
+    padding: '--neoverse-toast-padding',
+    accent: '--neoverse-toast-accent',
+  },
   contextMenu: {
     minInlineSize: '--neoverse-context-menu-min-inline-size',
     checkInlineSize: '--neoverse-context-menu-check-inline-size',
@@ -1298,6 +1322,9 @@ export type StatusIndicatorToken = keyof CssVariables['components']['statusIndic
 export type SegmentedControlToken = keyof CssVariables['components']['segmentedControl'];
 export type BadgeToken = keyof CssVariables['components']['badge'];
 export type NoticeToken = keyof CssVariables['components']['notice'];
+export type DialogToken = keyof CssVariables['components']['dialog'];
+export type EmptyStateToken = keyof CssVariables['components']['emptyState'];
+export type ToastToken = keyof CssVariables['components']['toast'];
 export type TooltipToken = keyof CssVariables['components']['tooltip'];
 export type SkeletonToken = keyof CssVariables['components']['skeleton'];
 export type ScrollbarToken = keyof CssVariables['components']['scrollbar'];

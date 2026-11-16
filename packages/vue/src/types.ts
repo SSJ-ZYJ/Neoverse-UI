@@ -6,6 +6,28 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 export type ButtonType = 'button' | 'submit' | 'reset';
 
+export interface DialogProps {
+  open?: boolean;
+  title: string;
+  description?: string;
+  closeOnEscape?: boolean;
+  closeOnBackdrop?: boolean;
+}
+
+export interface EmptyStateProps {
+  title: string;
+  description?: string;
+}
+
+export interface ToastProps {
+  open?: boolean;
+  message: string;
+  dismissLabel: string;
+  variant?: 'neutral' | 'info' | 'success' | 'warning' | 'danger';
+  /** Zero keeps the notice visible until dismissed by the consumer. */
+  duration?: number;
+}
+
 export type SurfacePreset =
   | 'none'
   | 'solid'

@@ -120,7 +120,7 @@ describe('component request registry', () => {
       '--kind',
       'new-component',
       '--target',
-      'UiDialog',
+      'UiHypotheticalDialog',
       '--summary',
       'Need modal confirmation',
       '--expected',

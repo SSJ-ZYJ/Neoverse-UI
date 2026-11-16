@@ -220,6 +220,14 @@ export interface LabSpecimen {
 
 export const labSpecimens = [
   {
+    id: 'data-display-empty-state',
+    moduleId: 'data-display',
+    label: localized('Empty state', '空状态'),
+    apiNames: ['UiEmptyState'],
+    tags: ['empty', 'placeholder', 'action'],
+    kind: 'component',
+  },
+  {
     id: 'data-display-stat-card',
     moduleId: 'data-display',
     label: localized('Metric cards', '指标卡'),
@@ -379,6 +387,14 @@ export const labSpecimens = [
     kind: 'component',
   },
   {
+    id: 'overlays-dialog',
+    moduleId: 'overlays',
+    label: localized('Modal dialog', '模态对话框'),
+    apiNames: ['UiDialog'],
+    tags: ['overlay', 'dialog', 'modal', 'focus'],
+    kind: 'component',
+  },
+  {
     id: 'controls-navigation-item',
     moduleId: 'controls',
     label: moduleCopy.navigationItem.label,
@@ -440,6 +456,14 @@ export const labSpecimens = [
     label: localized('Notice', '提示'),
     apiNames: ['UiNotice'],
     tags: ['notice', 'status', 'feedback'],
+    kind: 'component',
+  },
+  {
+    id: 'status-feedback-toast',
+    moduleId: 'status-feedback',
+    label: localized('Toast', '短暂反馈'),
+    apiNames: ['UiToast'],
+    tags: ['toast', 'status', 'feedback', 'notification'],
     kind: 'component',
   },
   {

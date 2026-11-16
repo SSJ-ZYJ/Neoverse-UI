@@ -1,0 +1,14 @@
+@layer neoverse.tokens {
+  :root {
+    --neoverse-empty-state-min-height: calc(var(--neoverse-space-12) * 3);
+    --neoverse-empty-state-padding: var(--neoverse-space-6);
+    --neoverse-empty-state-gap: var(--neoverse-space-3);
+    --neoverse-empty-state-max-width: var(--neoverse-layout-container-sm);
+    --neoverse-empty-state-icon-size: var(--neoverse-space-12);
+    --neoverse-empty-state-icon-radius: var(--neoverse-radius-card);
+    --neoverse-empty-state-icon-background: var(--neoverse-surface-inset-rest-background);
+    --neoverse-empty-state-icon-color: var(--neoverse-color-text-secondary);
+    --neoverse-empty-state-title-size: var(--neoverse-font-size-md);
+    --neoverse-empty-state-description-size: var(--neoverse-font-size-sm);
+  }
+}

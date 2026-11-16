@@ -65,10 +65,10 @@
       transparent calc(var(--neoverse-space-4) + var(--neoverse-border-width-thin))
     ),
     radial-gradient(
-      circle at 72% 64%,
+      circle at 72% 86%,
       color-mix(in srgb, var(--neoverse-color-accent-secondary) 45%, transparent)
-        var(--neoverse-space-10),
-      transparent calc(var(--neoverse-space-10) + var(--neoverse-border-width-thin))
+        var(--neoverse-space-5),
+      transparent calc(var(--neoverse-space-5) + var(--neoverse-border-width-thin))
     ),
     radial-gradient(
       circle at 62% 28%,

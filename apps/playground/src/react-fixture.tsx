@@ -8,9 +8,11 @@ import {
   UiCheckbox,
   UiContextMenu,
   UiControlSurface,
+  UiDialog,
   UiDisclosure,
   UiDock,
   UiDropdownMenu,
+  UiEmptyState,
   UiField,
   UiIconButton,
   UiInput,
@@ -36,6 +38,7 @@ import {
   UiTerminalTranscript,
   UiTextarea,
   UiTimeline,
+  UiToast,
   UiTooltipSurface,
 } from '@neoverse-ui/react';
 import { Fragment, useCallback, useEffect, useState } from 'react';
@@ -486,6 +489,8 @@ function ReactFixture() {
   const [controlledDisabled, setControlledDisabled] = useState(false);
   const [dropdownDisabled, setDropdownDisabled] = useState(false);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [toastOpen, setToastOpen] = useState(false);
   const [contextMenuPoint, setContextMenuPoint] = useState({ x: 0, y: 0 });
   const [contextMenuAutoFocus, setContextMenuAutoFocus] = useState(false);
   const [contextTheme, setContextTheme] = useState('system');
@@ -706,6 +711,39 @@ function ReactFixture() {
           {copy.notice}
         </UiNotice>
 
+        <div data-react-adapter="UiDialog">
+          <UiButton data-dialog-open onClick={() => setDialogOpen(true)}>
+            Open dialog
+          </UiButton>
+          <UiDialog
+            open={dialogOpen}
+            title="Confirm changes"
+            onOpenChange={setDialogOpen}
+            footer={<UiButton onClick={() => setDialogOpen(false)}>Continue</UiButton>}
+          >
+            Review this action before continuing.
+          </UiDialog>
+        </div>
+        <div data-react-adapter="UiToast">
+          <UiButton data-toast-open onClick={() => setToastOpen(true)}>
+            Show feedback
+          </UiButton>
+          <UiToast
+            open={toastOpen}
+            message="Changes saved successfully."
+            dismissLabel="Dismiss notification"
+            variant="success"
+            duration={0}
+            onOpenChange={setToastOpen}
+          />
+        </div>
+        <UiEmptyState
+          data-react-adapter="UiEmptyState"
+          title="No projects yet"
+          description="Create a project to get started."
+          icon={<span aria-hidden="true">□</span>}
+          action={<UiButton size="sm">Create project</UiButton>}
+        />
         <UiCard as="article" surface="elevated" className="grid gap-2" data-react-adapter="UiCard">
           <h3 className="text-subtitle font-heading tracking-heading text-primary">{copy.card}</h3>
           <p className="text-body text-secondary" data-react-count>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { UiButton, UiNotice, UiTooltipSurface } from '@neoverse-ui/vue';
+import { UiButton, UiNotice, UiToast, UiTooltipSurface } from '@neoverse-ui/vue';
+import { ref } from 'vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
 import { localize, localized, moduleCopy } from '../playground-content';
 import QaPreviewMatrix from '../QaPreviewMatrix.vue';
@@ -9,6 +10,7 @@ import StatusIndicatorModule from './StatusIndicatorModule.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const toastOpen = ref(false);
 const noticeVariants = ['neutral', 'info', 'success', 'warning', 'danger'] as const;
 const copy = {
   notice: {
@@ -112,6 +114,30 @@ const copy = {
           {{ localize(copy.tooltip.accent, props.locale) }}
         </UiTooltipSurface>
       </QaPreviewMatrix>
+    </LabSpecimenSection>
+    <LabSpecimenSection
+      id="status-feedback-toast"
+      :title="localize(localized('Toast', '短暂反馈'), props.locale)"
+      :description="
+        localize(
+          localized(
+            'Temporary feedback uses the shared Glass material.',
+            '短暂反馈使用共享玻璃材质。',
+          ),
+          props.locale,
+        )
+      "
+    >
+      <UiButton data-toast-open @click="toastOpen = true">
+        {{ localize(localized('Show feedback', '显示反馈'), props.locale) }}
+      </UiButton>
+      <UiToast
+        v-model:open="toastOpen"
+        variant="success"
+        :duration="0"
+        :message="localize(localized('Changes saved successfully.', '修改已保存。'), props.locale)"
+        :dismiss-label="localize(localized('Dismiss notification', '关闭通知'), props.locale)"
+      />
     </LabSpecimenSection>
   </div>
 </template>

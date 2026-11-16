@@ -263,6 +263,29 @@
       }
     },
     {
+      "name": "UiEmptyState",
+      "track": "canonical-shared",
+      "maturity": "consumer-validation",
+      "tokens": "stable",
+      "css": "stable",
+      "vue": "stable",
+      "react": "stable",
+      "unit": "stable",
+      "visual": "playground",
+      "consumer": "pending",
+      "runtime": "validated",
+      "evidence": [
+        "packages/vue/src/empty-state.test.ts",
+        "packages/react/src/empty-state.test.tsx",
+        "tests/e2e/surfaces.spec.ts"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
+    },
+    {
       "name": "UiDisclosure",
       "track": "canonical-shared",
       "maturity": "consumer-validation",
@@ -329,6 +352,29 @@
         "../XCA-Portal/app/components/site/SiteHeader.vue",
         "../XCA-Portal/tests/e2e/mobile-header.spec.ts",
         ".agents/notes/archives/consumer-validation-2026-10-25.md"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
+    },
+    {
+      "name": "UiDialog",
+      "track": "canonical-shared",
+      "maturity": "consumer-validation",
+      "tokens": "stable",
+      "css": "stable",
+      "vue": "stable",
+      "react": "stable",
+      "unit": "stable",
+      "visual": "playground",
+      "consumer": "pending",
+      "runtime": "validated",
+      "evidence": [
+        "packages/vue/src/business-interaction.test.ts",
+        "packages/react/src/business-interaction.test.tsx",
+        "tests/e2e/overlays.spec.ts"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -555,6 +601,29 @@
       "visual": "release",
       "consumer": "validated",
       "runtime": "validated"
+    },
+    {
+      "name": "UiToast",
+      "track": "canonical-shared",
+      "maturity": "consumer-validation",
+      "tokens": "stable",
+      "css": "stable",
+      "vue": "stable",
+      "react": "stable",
+      "unit": "stable",
+      "visual": "playground",
+      "consumer": "pending",
+      "runtime": "validated",
+      "evidence": [
+        "packages/vue/src/business-interaction.test.ts",
+        "packages/react/src/business-interaction.test.tsx",
+        "tests/e2e/overlays.spec.ts"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
     },
     {
       "name": "UiTooltipSurface",

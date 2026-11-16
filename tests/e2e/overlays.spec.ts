@@ -9,6 +9,44 @@ import {
   test,
 } from '../support/e2e';
 
+test.describe('modal and transient feedback', () => {
+  for (const adapter of adapters) {
+    for (const theme of ['light', 'dark'] as const) {
+      test(`${adapter.name}: Escape closes the modal and restores focus / ${theme}`, async ({
+        page,
+      }) => {
+        await page.goto(adapter.url(theme, 'overlays'));
+        const trigger =
+          adapter.name === 'Vue'
+            ? page.locator('#overlays-dialog [data-dialog-open]')
+            : page.locator('[data-react-adapter="UiDialog"] [data-dialog-open]');
+        await trigger.click();
+        const dialog = page.locator('dialog.ui-dialog');
+        await expect(dialog).toBeVisible();
+        await expect(dialog).toHaveAttribute('aria-labelledby', /dialog-title|title/);
+        await page.keyboard.press('Escape');
+        await expect(dialog).toBeHidden();
+        await expect(trigger).toBeFocused();
+      });
+
+      test(`${adapter.name}: feedback is announced and can be dismissed / ${theme}`, async ({
+        page,
+      }) => {
+        await page.goto(adapter.url(theme, 'status-feedback'));
+        const trigger =
+          adapter.name === 'Vue'
+            ? page.locator('#status-feedback-toast [data-toast-open]')
+            : page.locator('[data-react-adapter="UiToast"] [data-toast-open]');
+        await trigger.click();
+        const toast = page.locator('.ui-toast[role="status"]');
+        await expect(toast).toBeVisible();
+        await toast.getByRole('button').click();
+        await expect(toast).toBeHidden();
+      });
+    }
+  }
+});
+
 async function popoverParts(page: Page, adapterName: string) {
   const shell =
     adapterName === 'Vue'

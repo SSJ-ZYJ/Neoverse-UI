@@ -1,0 +1,85 @@
+@layer components {
+  .ui-toast-container {
+    position: fixed;
+    z-index: var(--neoverse-layout-layer-toast);
+    bottom: var(--neoverse-toast-bottom);
+    left: 50%;
+    width: min(var(--neoverse-toast-width), calc(100vw - 2 * var(--neoverse-space-4)));
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+
+  .ui-toast {
+    display: flex;
+    align-items: center;
+    gap: var(--neoverse-space-3);
+    padding: var(--neoverse-toast-padding);
+    border-radius: var(--neoverse-radius-card);
+    color: var(--neoverse-color-text-primary);
+    background: var(--neoverse-material-glass-immersive-background);
+    box-shadow: var(--neoverse-material-glass-immersive-shadow);
+    -webkit-backdrop-filter: var(--neoverse-material-glass-immersive-filter);
+    backdrop-filter: var(--neoverse-material-glass-immersive-filter);
+    pointer-events: auto;
+  }
+
+  .ui-toast::before {
+    content: '';
+    flex: none;
+    width: var(--neoverse-space-1);
+    align-self: stretch;
+    border-radius: var(--neoverse-radius-pill);
+    background: var(--neoverse-toast-accent);
+  }
+
+  .ui-toast--info {
+    --neoverse-toast-accent: var(--neoverse-color-status-info);
+  }
+  .ui-toast--success {
+    --neoverse-toast-accent: var(--neoverse-color-status-success);
+  }
+  .ui-toast--warning {
+    --neoverse-toast-accent: var(--neoverse-color-status-warning);
+  }
+  .ui-toast--danger {
+    --neoverse-toast-accent: var(--neoverse-color-status-danger);
+  }
+
+  .ui-toast__message {
+    min-width: 0;
+    flex: 1;
+    font-size: var(--neoverse-font-size-sm);
+    overflow-wrap: anywhere;
+  }
+
+  .ui-toast__dismiss {
+    display: inline-grid;
+    width: var(--neoverse-space-8);
+    height: var(--neoverse-space-8);
+    flex: none;
+    place-items: center;
+    border: 0;
+    border-radius: var(--neoverse-radius-control);
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .ui-toast__dismiss:hover {
+    background: var(--neoverse-control-hover-background);
+  }
+
+  .ui-toast__dismiss:focus-visible {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: var(--neoverse-focus-ring-offset);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    .ui-toast {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background: var(--neoverse-color-surface-overlay);
+    }
+  }
+}

@@ -20,5 +20,9 @@
     --neoverse-notice-success-shadow: var(--neoverse-effect-status-success-shadow);
     --neoverse-notice-warning-shadow: var(--neoverse-effect-status-warning-shadow);
     --neoverse-notice-danger-shadow: var(--neoverse-effect-status-danger-shadow);
+    --neoverse-toast-width: var(--neoverse-layout-container-sm);
+    --neoverse-toast-bottom: var(--neoverse-space-6);
+    --neoverse-toast-padding: var(--neoverse-space-3);
+    --neoverse-toast-accent: var(--neoverse-color-text-muted);
   }
 }

@@ -20,6 +20,7 @@ const sourceFiles = [
   'components/segmented-control.css',
   'components/badge.css',
   'components/notice.css',
+  'components/empty-state.css',
   'components/tooltip.css',
   'components/skeleton.css',
   'components/scrollbar.css',

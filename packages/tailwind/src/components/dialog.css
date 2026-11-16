@@ -1,0 +1,81 @@
+@layer components {
+  /* Native modal interaction keeps the background inert; block document scrolling too. */
+  html:has(.ui-dialog:modal) {
+    overflow: hidden;
+  }
+
+  .ui-dialog {
+    position: fixed;
+    inset: 0;
+    width: min(var(--neoverse-dialog-width), calc(100vw - 2 * var(--neoverse-space-4)));
+    max-height: calc(100dvh - 2 * var(--neoverse-space-4));
+    margin: auto;
+    padding: var(--neoverse-dialog-padding);
+    overflow: auto;
+    border: 0;
+    border-radius: var(--neoverse-dialog-radius);
+    color: var(--neoverse-color-text-primary);
+    background: var(--neoverse-material-glass-elevated-background);
+    box-shadow: var(--neoverse-material-glass-elevated-shadow);
+    -webkit-backdrop-filter: var(--neoverse-material-glass-elevated-filter);
+    backdrop-filter: var(--neoverse-material-glass-elevated-filter);
+  }
+
+  .ui-dialog:not([open]) {
+    display: none;
+  }
+
+  .ui-dialog[open] {
+    animation: nv-appear var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
+      both;
+  }
+
+  .ui-dialog::backdrop {
+    background: var(--neoverse-dialog-scrim);
+  }
+
+  .ui-dialog[open]::backdrop {
+    animation: nv-appear var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
+      both;
+  }
+
+  .ui-dialog__header {
+    display: grid;
+    gap: var(--neoverse-space-2);
+    margin-bottom: var(--neoverse-space-4);
+  }
+
+  .ui-dialog__title {
+    margin: 0;
+    font-size: var(--neoverse-font-size-lg);
+    font-weight: var(--neoverse-font-weight-semibold);
+  }
+
+  .ui-dialog__description {
+    margin: 0;
+    color: var(--neoverse-color-text-secondary);
+    font-size: var(--neoverse-font-size-sm);
+  }
+
+  .ui-dialog__footer {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: var(--neoverse-space-2);
+    margin-top: var(--neoverse-space-4);
+  }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    .ui-dialog {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background: var(--neoverse-color-surface-overlay);
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ui-dialog {
+      outline: var(--neoverse-border-width-strong) solid CanvasText;
+    }
+  }
+}

@@ -1,6 +1,45 @@
 import { expect, test } from '../support/e2e';
 
 test.describe('surfaces', () => {
+  test('Vue: empty state exposes its title and creation action', async ({ page }) => {
+    await page.goto('/frame?theme=light&lang=en#data-display-empty-state');
+    const state = page.locator('#data-display-empty-state .ui-empty-state');
+    await expect(state.getByRole('heading', { name: 'No projects yet' })).toBeVisible();
+    await expect(state.getByRole('button', { name: 'Create project' })).toBeVisible();
+  });
+  test('React: empty state exposes its action and accessible title', async ({ page }) => {
+    await page.goto('/react-fixture?theme=dark&lang=en');
+    const state = page.locator('[data-react-adapter="UiEmptyState"]');
+    const heading = state.getByRole('heading', { name: 'No projects yet' });
+    await expect(heading).toBeVisible();
+    expect(await state.getAttribute('aria-labelledby')).toBe(await heading.getAttribute('id'));
+    await expect(state.getByRole('button', { name: 'Create project' })).toBeVisible();
+  });
+  for (const theme of ['light', 'dark'] as const) {
+    test(`Vue: colored QA target does not intersect the reference card lower rim / ${theme}`, async ({
+      page,
+    }) => {
+      await page.goto(`/frame?theme=${theme}&lang=en#card`);
+      const stage = page.locator('[data-card-qa] [data-qa-stage="gradient"]');
+      await stage.scrollIntoViewIfNeeded();
+      const gap = await stage.evaluate((element) => {
+        const card = element.querySelector('.ui-card');
+        if (!card) throw new Error('Missing reference card');
+        const circle = /circle at 72% ([0-9.]+)%.*? ([0-9.]+)px/.exec(
+          getComputedStyle(element).backgroundImage,
+        );
+        if (!circle) throw new Error('Missing QA colored backdrop target');
+        const stageRect = element.getBoundingClientRect();
+        return (
+          stageRect.top +
+          (stageRect.height * Number(circle[1])) / 100 -
+          Number(circle[2]) -
+          card.getBoundingClientRect().bottom
+        );
+      });
+      expect(gap).toBeGreaterThan(0);
+    });
+  }
   for (const adapter of ['Vue', 'React'] as const) {
     test(`${adapter}: disclosure expands and collapses from its summary`, async ({ page }) => {
       await page.goto(

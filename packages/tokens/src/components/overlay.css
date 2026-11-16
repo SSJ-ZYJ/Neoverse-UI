@@ -21,5 +21,9 @@
     --neoverse-overlay-item-active-background: var(--neoverse-control-active-background);
     --neoverse-overlay-item-danger-foreground: var(--neoverse-effect-status-danger-text);
     --neoverse-overlay-item-disabled-opacity: var(--neoverse-effect-disabled-content-opacity);
+    --neoverse-dialog-width: var(--neoverse-layout-container-sm);
+    --neoverse-dialog-padding: var(--neoverse-space-6);
+    --neoverse-dialog-radius: var(--neoverse-radius-panel);
+    --neoverse-dialog-scrim: var(--neoverse-color-overlay-scrim);
   }
 }

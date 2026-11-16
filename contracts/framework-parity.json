@@ -126,6 +126,12 @@
       "props": ["caption", "striped", "hoverable"]
     },
     {
+      "name": "UiEmptyState",
+      "vueType": "EmptyStateProps",
+      "reactType": "UiEmptyStateProps",
+      "props": ["title", "description"]
+    },
+    {
       "name": "UiDisclosure",
       "vueType": "DisclosureProps",
       "reactType": "UiDisclosureProps",
@@ -150,6 +156,12 @@
         "ariaLabel",
         "triggerVariant"
       ]
+    },
+    {
+      "name": "UiDialog",
+      "vueType": "DialogProps",
+      "reactType": "UiDialogProps",
+      "props": ["open", "title", "description", "closeOnEscape", "closeOnBackdrop"]
     },
     {
       "name": "UiDropdownMenu",
@@ -232,6 +244,12 @@
       "vueType": "NoticeProps",
       "reactType": "UiNoticeProps",
       "props": ["as", "variant"]
+    },
+    {
+      "name": "UiToast",
+      "vueType": "ToastProps",
+      "reactType": "UiToastProps",
+      "props": ["open", "message", "dismissLabel", "variant", "duration"]
     },
     {
       "name": "UiTooltipSurface",

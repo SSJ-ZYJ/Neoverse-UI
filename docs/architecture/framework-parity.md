@@ -2,7 +2,7 @@
 
 Status: adopted
 
-Vue 与 React 现提供相同的 37 个公开组件。两套适配复用 Tokens、Tailwind 组件样式、Motion 与 Overlay Runtime，业务数据和路由仍由使用方管理。
+Vue 与 React 现提供相同的 40 个公开组件。两套适配复用 Tokens、Tailwind 组件样式、Motion 与 Overlay Runtime，业务数据和路由仍由使用方管理。
 
 ## 状态与事件
 
@@ -34,7 +34,7 @@ TerminalPrompt 的 `suggestion` 在两端都只显示匹配的候选后缀；接
 
 ## 验证与边界
 
-- `contracts/framework-parity.json`：37 个组件、9 个数据结构与 21 组字面量类型；已覆盖 consumer-driven 组件，不仅检查 Canonical Shared。
+- `contracts/framework-parity.json`：40 个组件、10 个数据结构与 22 组字面量类型；已覆盖 consumer-driven 组件，不仅检查 Canonical Shared。
 - `packages/react/src/parity.test.tsx`：SSR、原生语义、可访问标签、默认状态与定制内容。
 - `/react-fixture?contract-fixtures`：Design Lab 中的实际 React DOM 与状态示例。
 - `tests/e2e/parity.spec.ts`：桌面和移动端、深浅主题下每个 React 适配器的语义 DOM、主题解析与共享控件名称；键盘选择、受控拒绝、终端补全、输出跟随、滚动条拖拽等交互分别由 `navigation`、`terminal`、`surfaces` 模块覆盖。

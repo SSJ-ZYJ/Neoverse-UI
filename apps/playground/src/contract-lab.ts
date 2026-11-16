@@ -93,6 +93,12 @@ export const interactionContracts = [
     checks: ['open-close', 'keyboard', 'dismiss', 'focus-restore', 'viewport'],
   },
   {
+    specimenId: 'overlays-dialog',
+    apiNames: ['UiDialog'],
+    states: ['default', 'open'],
+    checks: ['open-close', 'keyboard', 'dismiss', 'focus-restore', 'reduced-transparency'],
+  },
+  {
     specimenId: 'forms-input',
     apiNames: ['UiInput'],
     states: ['default', 'disabled'],

@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import {
+  UiButton,
   UiDisclosure,
+  UiEmptyState,
   UiStatCard,
   UiStepFlow,
   UiSurface,
   UiTable,
   UiTimeline,
 } from '@neoverse-ui/vue';
+import LabIcon from '../LabIcon.vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, localized } from '../playground-content';
@@ -132,6 +135,40 @@ const copy = {
             </tbody>
           </UiTable>
         </UiSurface>
+      </MaterialBackdrop>
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="data-display-empty-state"
+      :title="localize(localized('Empty state', '空状态'), props.locale)"
+      :description="
+        localize(
+          localized(
+            'A lightweight placeholder with consumer-owned actions and imagery.',
+            '轻量的空状态占位，操作与插图由消费端提供。',
+          ),
+          props.locale,
+        )
+      "
+    >
+      <MaterialBackdrop edge="inset">
+        <UiEmptyState
+          :title="localize(localized('No projects yet', '暂无项目'), props.locale)"
+          :description="
+            localize(
+              localized('Create a project to get started.', '创建项目后即可在这里查看。'),
+              props.locale,
+            )
+          "
+          data-empty-state-sample
+        >
+          <template #icon><LabIcon name="folder" /></template>
+          <template #action>
+            <UiButton size="sm">
+              {{ localize(localized('Create project', '创建项目'), props.locale) }}
+            </UiButton>
+          </template>
+        </UiEmptyState>
       </MaterialBackdrop>
     </LabSpecimenSection>
 

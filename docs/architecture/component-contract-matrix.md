@@ -50,8 +50,11 @@ Column values:
 | `UiSelect` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiTable` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
 | `UiDisclosure` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
+| `UiEmptyState` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiPresence` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiPopover` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Validated |
+| `UiDialog` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
+| `UiToast` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiDropdownMenu` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiContextMenu` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiBreadcrumb` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
