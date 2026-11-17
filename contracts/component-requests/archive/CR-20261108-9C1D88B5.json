@@ -9,12 +9,12 @@
     "overlay-runtime 提供按指针矩形定位的入口，复用现有上翻、视口夹紧与 CSS 缩放补偿，不新增第二套定位算法",
     "UiContextMenu 在 Vue 与 React 中暴露相同条目模型与 open/select 事件，条目支持 item、separator 与 group",
     "打开后聚焦首个可用项，方向键循环、Home/End 跳到首尾、禁用项被跳过，Escape 与选择后焦点回到打开前元素",
-    "面板使用 popover=auto，回退路径沿用 ui-overlay-panel--fallback-open，深浅主题、减少动态效果与 forced-colors 下可用",
+    "面板与子菜单使用 popover=manual，以保持父面板与子菜单同时打开（popover=auto 会在子菜单交互时关闭父面板）；回退路径沿用 ui-overlay-panel--fallback-open，深浅主题、减少动态效果与 forced-colors 下可用",
     "Design Lab 提供样例，浏览器用例覆盖指针打开、外部关闭、Escape、焦点恢复与视口边缘夹紧",
     "XCA-Portal 终端与首页标题作为真实调用方验证接入"
   ],
   "impact": "normal",
-  "status": "reported",
+  "status": "delivered",
   "consumers": [
     {
       "project": "XCA-Portal",
@@ -24,5 +24,6 @@
     }
   ],
   "createdAt": "2026-11-08T09:17:42.883Z",
-  "updatedAt": "2026-11-08T09:17:42.883Z"
+  "updatedAt": "2026-11-17T15:12:56.485Z",
+  "resolution": "验收条件已按真实需求对账：父子面板使用 popover=manual 以保持父面板与子菜单同时打开（替代原 popover=auto）；实现见 packages/vue/src/UiContextMenu.vue:387,451 与 packages/react/src/overlays.tsx:711,785。UI 单测和 overlays e2e 覆盖指针/键盘打开、方向键与 Home/End、禁用项、Escape/选择后焦点恢复、外部关闭与视口夹紧（Vue 107 passed，React 63 passed，浏览器 11 passed）。XCA-Portal app/features/context-menu/components/ContextMenuHost.vue 已接入；消费端 tests/e2e/site/context-menu.spec.ts 与 context-menu-panel.spec.ts 23 passed，覆盖终端与首页标题、子菜单、明暗主题、reduced motion、forced colors。组件矩阵 consumer 更新为 validated。"
 }

@@ -485,7 +485,7 @@
       "react": "stable",
       "unit": "stable",
       "visual": "playground",
-      "consumer": "pending",
+      "consumer": "validated",
       "runtime": "validated",
       "evidence": [
         "packages/overlay-runtime/src/index.test.ts",

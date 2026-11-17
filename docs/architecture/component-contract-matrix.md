@@ -59,7 +59,7 @@ Column values:
 | `UiDialog` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiToast` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiDropdownMenu` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
-| `UiContextMenu` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
+| `UiContextMenu` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Validated |
 | `UiBreadcrumb` | Consumer Driven | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
 | `UiControlSurface` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiDock` | Consumer Driven | Stable | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
