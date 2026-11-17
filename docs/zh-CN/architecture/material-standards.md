@@ -5,7 +5,7 @@ Status: adopted
 [English](../../architecture/material-standards.md)
 
 <!-- Source: docs/architecture/material-standards.md -->
-<!-- Source-SHA256: 78318bdfc6b4bc90daa0efcfd7489471c68a246bc6a721ecfbdd381a563b9c7f -->
+<!-- Source-SHA256: 838d3b3055c38b198720570ccc2832844a22b633cc35facefa5d30a5a3feb556 -->
 
 本文是[英文材质标准](../../architecture/material-standards.md)的中文摘要，覆盖消费项目最常用的材质、层级、嵌套与修复边界。具体光学数值、逐组件审计与历史验收记录以英文原文为准。
 

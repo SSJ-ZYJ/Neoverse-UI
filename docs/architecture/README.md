@@ -105,6 +105,9 @@ UiDropdownMenu
 UiContextMenu
 UiTable
 UiDisclosure
+UiTabs
+UiAvatar
+UiPagination
 UiEmptyState
 UiBadge
 UiStatusIndicator
@@ -127,11 +130,11 @@ They compose shared Tailwind classes, expose semantic props and slots, and prese
 
 ## React components
 
-The current source of `@neoverse-ui/react` provides the same 40 components listed above, including consumer-driven navigation, feedback, terminal, presentation and scrollbar adapters. This is a source inventory, not an assertion that all adapters exist in npm React 0.3.0 or have real React product acceptance; see [framework parity](framework-parity.md) and the [published baseline](../releases/release-0.3.1.md).
+The current source of `@neoverse-ui/react` provides the same 43 components listed above, including consumer-driven navigation, feedback, terminal, presentation and scrollbar adapters. This is a source inventory, not an assertion that all adapters exist in npm React 0.3.0 or have real React product acceptance; see [framework parity](framework-parity.md) and the [published baseline](../releases/release-0.3.1.md).
 
 React adapters share the same Tailwind component selectors, Surface presets, native interaction semantics, and accessibility expectations as Vue. Canonical Shared and Consumer Driven remain distinct maturity tracks even where both adapters now exist. `UiAction` supports `asChild` routing composition, `UiBreadcrumb` exposes a custom item renderer seam, and `UiDock` shares ControlSurface's navigation indicator while leaving navigation content and active state to the consumer. Native controls preserve refs and platform attributes. Form controls share the state and accessibility rules documented in [`form-control-contract.md`](./form-control-contract.md). Top-layer controls share the positioning and dismiss rules documented in [`overlay-contract.md`](./overlay-contract.md).
 
-Framework parity is declared in `contracts/framework-parity.json` and validated by `scripts/gates/check-framework-parity.ts`. The current contract covers all 40 components, shared option/item structures, and shared literal unions, including Consumer Driven adapters. Framework-native binding names are normalized explicitly—for example Vue `modelValue` maps to React `value`/`checked`, while Vue `readonly` maps to React `readOnly`. This parity does not promote maturity or replace real consumer evidence. The React Runtime Fixture is checked against `component-matrix.json` rather than a handwritten component list, so a newly runtime-validated adapter cannot silently miss browser coverage.
+Framework parity is declared in `contracts/framework-parity.json` and validated by `scripts/gates/check-framework-parity.ts`. The current contract covers all 43 components, shared option/item structures, and shared literal unions, including Consumer Driven adapters. Framework-native binding names are normalized explicitly—for example Vue `modelValue` maps to React `value`/`checked`, while Vue `readonly` maps to React `readOnly`. This parity does not promote maturity or replace real consumer evidence. The React Runtime Fixture is checked against `component-matrix.json` rather than a handwritten component list, so a newly runtime-validated adapter cannot silently miss browser coverage.
 
 ## Overlay runtime
 

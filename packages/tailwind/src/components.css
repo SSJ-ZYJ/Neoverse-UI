@@ -12,6 +12,9 @@
 @import './components/tooltip.css';
 @import './components/badge.css';
 @import './components/segmented-control.css';
+@import './components/tabs.css';
+@import './components/avatar.css';
+@import './components/pagination.css';
 @import './components/skeleton.css';
 @import './components/scrollbar.css';
 @import './components/table.css';

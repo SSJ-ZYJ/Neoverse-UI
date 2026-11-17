@@ -7,12 +7,11 @@
 /* biome-ignore lint/suspicious/noUnknownAtRules: build-only source marker is stripped by copy-css.ts */
 @neoverse-dark-tokens {
   color-scheme: dark;
-  /* Restore the existing luminous outline when System resolves to Dark;
-     the default Light mapping intentionally uses directional catches alone. */
-  --neoverse-disclosure-edge-rest:
-    var(--neoverse-surface-inset-outline-rest), var(--neoverse-surface-inset-edge-rest);
-  --neoverse-disclosure-edge-active:
-    var(--neoverse-surface-inset-outline-active), var(--neoverse-surface-inset-edge-active);
+  /* Disclosure uses the same directional Aurora Glass catches as every other
+     dark inset surface. The generic inset outline turns its boundary into a
+     uniform luminous ring that does not match those refraction edges. */
+  --neoverse-disclosure-edge-rest: var(--neoverse-surface-inset-edge-rest);
+  --neoverse-disclosure-edge-active: var(--neoverse-surface-inset-edge-active);
   --neoverse-material-edge-refraction-gain: 1;
   --neoverse-material-edge-refraction-blend: overlay;
   --neoverse-material-edge-filter-subtle: brightness(125%);

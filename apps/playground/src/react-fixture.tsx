@@ -1,6 +1,7 @@
 import {
   type TerminalPromptSegment,
   UiAction,
+  UiAvatar,
   UiBadge,
   UiBreadcrumb,
   UiButton,
@@ -18,6 +19,7 @@ import {
   UiInput,
   UiNavigationItem,
   UiNotice,
+  UiPagination,
   UiPopover,
   UiPresence,
   UiRadioGroup,
@@ -31,6 +33,7 @@ import {
   UiSurface,
   UiSwitch,
   UiTable,
+  UiTabs,
   UiTerminalEcho,
   UiTerminalLine,
   UiTerminalPrompt,
@@ -490,6 +493,10 @@ function ReactFixture() {
   const [dropdownDisabled, setDropdownDisabled] = useState(false);
   const [contextMenuOpen, setContextMenuOpen] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [selectedTab, setSelectedTab] = useState('overview');
+  const [currentPage, setCurrentPage] = useState(4);
+  const avatarName = 'Shenshijun';
+  const avatarFallback = 'SSJ';
   const [toastOpen, setToastOpen] = useState(false);
   const [contextMenuPoint, setContextMenuPoint] = useState({ x: 0, y: 0 });
   const [contextMenuAutoFocus, setContextMenuAutoFocus] = useState(false);
@@ -737,6 +744,48 @@ function ReactFixture() {
             onOpenChange={setToastOpen}
           />
         </div>
+        <UiTabs
+          data-react-adapter="UiTabs"
+          options={[
+            { value: 'overview', label: 'Overview' },
+            { value: 'blocked', label: 'Blocked', disabled: true },
+            { value: 'activity', label: 'Activity' },
+          ]}
+          ariaLabel="Member sections"
+          value={selectedTab}
+          onValueChange={setSelectedTab}
+        >
+          {(value) => <span data-tabs-panel-state>{value}</span>}
+        </UiTabs>
+        <div className="flex flex-wrap items-center gap-3">
+          <UiAvatar name={avatarName} fallback={avatarFallback} size="sm" />
+          <UiAvatar
+            data-react-adapter="UiAvatar"
+            name={avatarName}
+            fallback={avatarFallback}
+            size="md"
+          />
+          <UiAvatar name={avatarName} fallback={avatarFallback} size="lg" />
+          <UiAvatar name={avatarName} fallback={avatarFallback} size="sm" shape="circle" />
+          <UiAvatar
+            name={avatarName}
+            fallback={avatarFallback}
+            size="md"
+            shape="circle"
+            data-avatar-sample
+          />
+          <UiAvatar name={avatarName} fallback={avatarFallback} size="lg" shape="circle" />
+        </div>
+        <UiPagination
+          data-react-adapter="UiPagination"
+          page={currentPage}
+          totalPages={18}
+          ariaLabel="Member list pages"
+          previousLabel="Previous page"
+          nextLabel="Next page"
+          pageLabel="Page"
+          onPageChange={setCurrentPage}
+        />
         <UiEmptyState
           data-react-adapter="UiEmptyState"
           title="No projects yet"

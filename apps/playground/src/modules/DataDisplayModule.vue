@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import {
+  UiAvatar,
   UiButton,
   UiDisclosure,
   UiEmptyState,
+  UiPagination,
   UiStatCard,
   UiStepFlow,
   UiSurface,
   UiTable,
+  UiTabs,
   UiTimeline,
 } from '@neoverse-ui/vue';
+import { ref } from 'vue';
 import LabIcon from '../LabIcon.vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
@@ -17,6 +21,15 @@ import DataDisplayVisualFixture from './DataDisplayVisualFixture.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const selectedTab = ref('overview');
+const currentPage = ref(4);
+const avatarName = 'Shenshijun';
+const avatarFallback = 'SSJ';
+const tabOptions = [
+  { value: 'overview', label: 'Overview / 概览' },
+  { value: 'disabled', label: 'Disabled / 未启用', disabled: true },
+  { value: 'activity', label: 'Activity / 动态' },
+] as const;
 const visualFixtureEnabled =
   new URLSearchParams(window.location.search).get('visual-fixture') === '1';
 const milestones = [
@@ -107,6 +120,80 @@ const copy = {
 <template>
   <DataDisplayVisualFixture v-if="visualFixtureEnabled" :locale="props.locale" />
   <div v-else class="grid gap-grid">
+    <LabSpecimenSection
+      id="data-display-tabs"
+      :title="localize(localized('Tabs', '标签页'), props.locale)"
+      :description="
+        localize(
+          localized(
+            'Keyboard tabs with a labelled panel and an existing Glass surface.',
+            '键盘可操作的标签页，共享玻璃材质并关联内容面板。',
+          ),
+          props.locale,
+        )
+      "
+    >
+      <UiTabs
+        v-model="selectedTab"
+        :options="tabOptions"
+        :aria-label="localize(localized('Member sections', '成员页面分区'), props.locale)"
+        v-slot="{ value }"
+        data-tabs-sample
+      >
+        <p class="text-body-sm text-secondary" data-tabs-panel-state>{{ value }}</p>
+      </UiTabs>
+    </LabSpecimenSection>
+    <LabSpecimenSection
+      id="data-display-avatar"
+      :title="localize(localized('Avatar', '头像'), props.locale)"
+      :description="
+        localize(
+          localized(
+            'Image or initials with accessible identity, size and circle or rounded-square shapes.',
+            '支持图片、首字母回退、多种尺寸与圆形或圆角方形样式。',
+          ),
+          props.locale,
+        )
+      "
+    >
+      <div class="flex flex-wrap items-center gap-3">
+        <UiAvatar :name="avatarName" :fallback="avatarFallback" size="sm" data-avatar-rounded />
+        <UiAvatar :name="avatarName" :fallback="avatarFallback" size="md" />
+        <UiAvatar :name="avatarName" :fallback="avatarFallback" size="lg" />
+        <UiAvatar :name="avatarName" :fallback="avatarFallback" size="sm" shape="circle" />
+        <UiAvatar
+          :name="avatarName"
+          :fallback="avatarFallback"
+          size="md"
+          shape="circle"
+          data-avatar-sample
+        />
+        <UiAvatar :name="avatarName" :fallback="avatarFallback" size="lg" shape="circle" />
+      </div>
+    </LabSpecimenSection>
+    <LabSpecimenSection
+      id="data-display-pagination"
+      :title="localize(localized('Pagination', '分页'), props.locale)"
+      :description="
+        localize(
+          localized(
+            'Controlled page navigation with compact visible ranges.',
+            '受控页码导航，按需折叠过长页码列表。',
+          ),
+          props.locale,
+        )
+      "
+    >
+      <UiPagination
+        v-model:page="currentPage"
+        :total-pages="18"
+        :aria-label="localize(localized('Member list pages', '成员列表页码'), props.locale)"
+        :previous-label="localize(localized('Previous page', '上一页'), props.locale)"
+        :next-label="localize(localized('Next page', '下一页'), props.locale)"
+        :page-label="localize(localized('Page', '第'), props.locale)"
+        data-pagination-sample
+      />
+    </LabSpecimenSection>
     <LabSpecimenSection
       id="data-display-table"
       :title="localize(copy.table.label, props.locale)"

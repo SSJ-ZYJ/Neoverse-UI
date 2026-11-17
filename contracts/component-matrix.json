@@ -263,6 +263,75 @@
       }
     },
     {
+      "name": "UiTabs",
+      "track": "canonical-shared",
+      "maturity": "consumer-validation",
+      "tokens": "stable",
+      "css": "stable",
+      "vue": "stable",
+      "react": "stable",
+      "unit": "stable",
+      "visual": "playground",
+      "consumer": "pending",
+      "runtime": "validated",
+      "evidence": [
+        "packages/vue/src/portal-components.test.ts",
+        "packages/react/src/portal-components.test.tsx",
+        "tests/e2e/surfaces.spec.ts"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
+    },
+    {
+      "name": "UiAvatar",
+      "track": "canonical-shared",
+      "maturity": "consumer-validation",
+      "tokens": "stable",
+      "css": "stable",
+      "vue": "stable",
+      "react": "stable",
+      "unit": "stable",
+      "visual": "playground",
+      "consumer": "pending",
+      "runtime": "validated",
+      "evidence": [
+        "packages/vue/src/portal-components.test.ts",
+        "packages/react/src/portal-components.test.tsx",
+        "tests/e2e/surfaces.spec.ts"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
+    },
+    {
+      "name": "UiPagination",
+      "track": "canonical-shared",
+      "maturity": "consumer-validation",
+      "tokens": "stable",
+      "css": "stable",
+      "vue": "stable",
+      "react": "stable",
+      "unit": "stable",
+      "visual": "playground",
+      "consumer": "pending",
+      "runtime": "validated",
+      "evidence": [
+        "packages/vue/src/portal-components.test.ts",
+        "packages/react/src/portal-components.test.tsx",
+        "tests/e2e/surfaces.spec.ts"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
+    },
+    {
       "name": "UiEmptyState",
       "track": "canonical-shared",
       "maturity": "consumer-validation",

@@ -123,6 +123,21 @@ test('opted-in Glass strokes precede highlights without changing button edges', 
   );
 });
 
+test('disclosure boundaries use the shared directional inset edge in both themes', async () => {
+  for (const theme of ['light', 'dark']) {
+    const css = await source(`themes/${theme}.css`);
+    expect(css).toContain(
+      '--neoverse-disclosure-edge-rest: var(--neoverse-surface-inset-edge-rest);',
+    );
+    expect(css).toContain(
+      '--neoverse-disclosure-edge-active: var(--neoverse-surface-inset-edge-active);',
+    );
+    expect(css).not.toMatch(
+      /--neoverse-disclosure-edge-(?:rest|active):\s*var\(--neoverse-surface-inset-outline/,
+    );
+  }
+});
+
 test('reduced transparency keeps the opted-in stroke ahead of the fallback shadow', async () => {
   const css = await Bun.file(new URL('../../tailwind/src/theme.css', import.meta.url)).text();
   const reduced = css.slice(css.indexOf('@media (prefers-reduced-transparency: reduce)'));

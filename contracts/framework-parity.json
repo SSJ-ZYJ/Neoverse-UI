@@ -126,6 +126,27 @@
       "props": ["caption", "striped", "hoverable"]
     },
     {
+      "name": "UiTabs",
+      "vueType": "TabsProps",
+      "reactType": "UiTabsProps",
+      "props": ["options", "ariaLabel", "defaultValue"],
+      "aliases": {
+        "value": ["modelValue", "value"]
+      }
+    },
+    {
+      "name": "UiAvatar",
+      "vueType": "AvatarProps",
+      "reactType": "UiAvatarProps",
+      "props": ["name", "src", "fallback", "size", "shape"]
+    },
+    {
+      "name": "UiPagination",
+      "vueType": "PaginationProps",
+      "reactType": "UiPaginationProps",
+      "props": ["page", "totalPages", "ariaLabel", "previousLabel", "nextLabel", "pageLabel"]
+    },
+    {
       "name": "UiEmptyState",
       "vueType": "EmptyStateProps",
       "reactType": "UiEmptyStateProps",
@@ -444,6 +465,11 @@
       "name": "BadgeSize",
       "vueType": "BadgeSize",
       "reactType": "BadgeSize"
+    },
+    {
+      "name": "AvatarShape",
+      "vueType": "AvatarShape",
+      "reactType": "UiAvatarShape"
     },
     {
       "name": "StatusIndicatorStatus",

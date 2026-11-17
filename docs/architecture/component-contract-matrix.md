@@ -50,6 +50,9 @@ Column values:
 | `UiSelect` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Validated |
 | `UiTable` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
 | `UiDisclosure` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Release | Pending |
+| `UiTabs` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
+| `UiAvatar` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
+| `UiPagination` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiEmptyState` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiPresence` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Pending |
 | `UiPopover` | Canonical Shared | Consumer Validation | Stable | Stable | Stable | Stable | Stable | Validated | Playground | Validated |

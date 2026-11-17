@@ -1,0 +1,12 @@
+@layer neoverse.tokens {
+  :root {
+    --neoverse-avatar-size-sm: var(--neoverse-space-8);
+    --neoverse-avatar-size-md: var(--neoverse-space-10);
+    --neoverse-avatar-size-lg: var(--neoverse-space-12);
+    --neoverse-avatar-radius: var(--neoverse-radius-pill);
+    --neoverse-avatar-rounded-radius: var(--neoverse-radius-sm);
+    --neoverse-avatar-fallback-background: var(--neoverse-surface-inset-rest-background);
+    --neoverse-avatar-fallback-foreground: var(--neoverse-color-text-primary);
+    --neoverse-avatar-font-size: var(--neoverse-font-size-sm);
+  }
+}

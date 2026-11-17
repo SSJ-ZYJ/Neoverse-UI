@@ -374,6 +374,40 @@ const componentCssVariables = {
     itemHoverBackground: '--neoverse-overlay-item-hover-background',
     itemDangerForeground: '--neoverse-overlay-item-danger-foreground',
   },
+  tabs: {
+    listGap: '--neoverse-tabs-list-gap',
+    listPadding: '--neoverse-tabs-list-padding',
+    listRadius: '--neoverse-tabs-list-radius',
+    tabRadius: '--neoverse-tabs-tab-radius',
+    tabHeight: '--neoverse-tabs-tab-height',
+    tabPadding: '--neoverse-tabs-tab-padding',
+    tabFontSize: '--neoverse-tabs-tab-font-size',
+    selectedBackgroundImage: '--neoverse-tabs-selected-background-image',
+    selectedBackgroundColor: '--neoverse-tabs-selected-background-color',
+    selectedBorder: '--neoverse-tabs-selected-border',
+    selectedShadow: '--neoverse-tabs-selected-shadow',
+    panelPaddingBlock: '--neoverse-tabs-panel-padding-block',
+  },
+  avatar: {
+    sizeSm: '--neoverse-avatar-size-sm',
+    sizeMd: '--neoverse-avatar-size-md',
+    sizeLg: '--neoverse-avatar-size-lg',
+    radius: '--neoverse-avatar-radius',
+    roundedRadius: '--neoverse-avatar-rounded-radius',
+    fallbackBackground: '--neoverse-avatar-fallback-background',
+    fallbackForeground: '--neoverse-avatar-fallback-foreground',
+    fontSize: '--neoverse-avatar-font-size',
+  },
+  pagination: {
+    gap: '--neoverse-pagination-gap',
+    buttonSize: '--neoverse-pagination-button-size',
+    buttonRadius: '--neoverse-pagination-button-radius',
+    buttonFontSize: '--neoverse-pagination-button-font-size',
+    currentBackgroundImage: '--neoverse-pagination-current-background-image',
+    currentBackgroundColor: '--neoverse-pagination-current-background-color',
+    currentBorder: '--neoverse-pagination-current-border',
+    currentShadow: '--neoverse-pagination-current-shadow',
+  },
   emptyState: {
     minHeight: '--neoverse-empty-state-min-height',
     padding: '--neoverse-empty-state-padding',
@@ -397,6 +431,8 @@ const componentCssVariables = {
     bottom: '--neoverse-toast-bottom',
     padding: '--neoverse-toast-padding',
     accent: '--neoverse-toast-accent',
+    background: '--neoverse-toast-background',
+    foreground: '--neoverse-toast-foreground',
   },
   contextMenu: {
     minInlineSize: '--neoverse-context-menu-min-inline-size',
@@ -1324,6 +1360,9 @@ export type BadgeToken = keyof CssVariables['components']['badge'];
 export type NoticeToken = keyof CssVariables['components']['notice'];
 export type DialogToken = keyof CssVariables['components']['dialog'];
 export type EmptyStateToken = keyof CssVariables['components']['emptyState'];
+export type TabsToken = keyof CssVariables['components']['tabs'];
+export type AvatarToken = keyof CssVariables['components']['avatar'];
+export type PaginationToken = keyof CssVariables['components']['pagination'];
 export type ToastToken = keyof CssVariables['components']['toast'];
 export type TooltipToken = keyof CssVariables['components']['tooltip'];
 export type SkeletonToken = keyof CssVariables['components']['skeleton'];

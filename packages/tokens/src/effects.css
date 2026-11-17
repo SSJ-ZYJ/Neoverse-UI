@@ -399,6 +399,14 @@
     );
   }
 
+  /* Transient feedback floats over an unpredictable, often empty backdrop. The
+     Immersive edge and shadow remain, but the notification owns an overlay plane
+     and must not blur the page behind it. */
+  .ui-toast {
+    --neoverse-material-glass-immersive-background: var(--neoverse-toast-background);
+    --neoverse-material-glass-immersive-filter: none;
+  }
+
   @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
     :where(.ui-badge) {
       --neoverse-badge-backdrop-filter: none;

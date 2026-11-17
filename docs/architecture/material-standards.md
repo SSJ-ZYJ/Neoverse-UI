@@ -261,10 +261,11 @@ ink on these fields. Text-only validation, terminal feedback and destructive men
 items use shared `status-*-text` effect roles so pale fields do not turn into
 illegible text. Dark status colors and text-only feedback retain their palette.
 
-Disclosure panels use the shared inset outline roles in every state, together
-with the shared control shadow. The inset outline separates the panel from pale
-or textured backdrops without changing its dimensions, Aurora Glass fill or blur. Vue,
-React and prose `details` consume the same styles.
+Disclosure panels use the shared directional inset edge roles in every state,
+together with the shared control shadow. The directional catches separate the
+panel from pale or textured backdrops without a uniform inset ring, and they do
+not change its dimensions, Aurora Glass fill or blur. Vue, React and prose
+`details` consume the same styles.
 
 Timeline and StepFlow use `UiSurface` with the Light tier of Aurora Glass for their markers and content.
 Timeline dates precede each title; thin rails remain continuous between markers.
@@ -572,8 +573,9 @@ standard without changing component maturity or claiming consumer delivery.
 ### Light Disclosure edge correction (2026-10-16)
 
 - The light Disclosure composed a dark 1px inset outline over its Aurora Glass catches.
-  Its light theme now aliases the shared directional edge roles directly; the
-  existing dark outline is explicitly retained for both Dark and System modes.
+  Its light theme aliases the shared directional edge roles directly; the dark
+  outline was retained at the time and was later aligned with the same roles
+  (2026-11-17).
   Fill, blur, inner glow, geometry, and native disclosure interactions are unchanged.
 - The focused edge regression first reproduced the light-only dark ring, then
   passed all 8 desktop/mobile, Light/Dark, and explicit/System cases. It checks
@@ -584,3 +586,16 @@ standard without changing component maturity or claiming consumer delivery.
   viewport projects because it expects a per-cell blur. The current table samples
   its backdrop once at the table, leaving cell filters as `none`; this correction
   does not change the table or its test.
+
+### Dark Disclosure edge alignment (2026-11-17)
+
+- The dark Disclosure still composed the generic 1px inset outline over its
+  Aurora Glass catches. It read as a uniform luminous ring, unlike the
+  directional refraction silhouette shared by every other dark inset surface.
+- Dark and System modes now use the same directional inset edge roles as light.
+  The boundary comes from the shared refraction field, the directional catches
+  and the float shadow; the outline is absent from the closed, hover and open
+  recipes. Fill, blur, geometry and native disclosure interactions are unchanged.
+- Verified in both themes and closed/open states: the computed edge recipe has no
+  uniform inset ring, the top, bottom and side catches remain continuous, and the
+  rendered dark panel keeps its silhouette over the patterned Playground backdrop.

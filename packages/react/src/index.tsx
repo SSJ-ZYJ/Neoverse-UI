@@ -33,14 +33,17 @@ import {
   resolveAriaInvalid,
 } from './internal';
 
+export * from './avatar';
 export * from './dialog';
 export * from './display';
 export * from './empty-state';
 export * from './navigation';
 export * from './overlays';
+export * from './pagination';
 export type { UiPresenceProps, UiPresenceState } from './presence';
 export { UiPresence, useUiPresence } from './presence';
 export * from './scrollbar';
+export * from './tabs';
 export * from './terminal';
 export * from './toast';
 

@@ -539,7 +539,13 @@
     /* Keep the environmental refraction field behind the material content.
        It should tint the surface, never wash out readable text or controls. */
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
-      > :not(.ui-button__edge-field, .ui-button__tone-field, .ui-navigation-item__indicator) {
+      > :not(
+        .ui-button__edge-field,
+        .ui-button__tone-field,
+        .ui-navigation-item__indicator,
+        .ui-tabs__indicator,
+        .ui-pagination__indicator
+      ) {
       position: relative;
       z-index: 1;
     }

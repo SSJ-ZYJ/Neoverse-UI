@@ -220,6 +220,30 @@ export interface LabSpecimen {
 
 export const labSpecimens = [
   {
+    id: 'data-display-tabs',
+    moduleId: 'data-display',
+    label: localized('Tabs', '标签页'),
+    apiNames: ['UiTabs'],
+    tags: ['tabs', 'panel', 'keyboard'],
+    kind: 'component',
+  },
+  {
+    id: 'data-display-avatar',
+    moduleId: 'data-display',
+    label: localized('Avatar', '头像'),
+    apiNames: ['UiAvatar'],
+    tags: ['avatar', 'identity', 'image'],
+    kind: 'component',
+  },
+  {
+    id: 'data-display-pagination',
+    moduleId: 'data-display',
+    label: localized('Pagination', '分页'),
+    apiNames: ['UiPagination'],
+    tags: ['pagination', 'navigation', 'list'],
+    kind: 'component',
+  },
+  {
     id: 'data-display-empty-state',
     moduleId: 'data-display',
     label: localized('Empty state', '空状态'),

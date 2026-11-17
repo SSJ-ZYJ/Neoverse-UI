@@ -121,8 +121,8 @@ const copy = {
       :description="
         localize(
           localized(
-            'Temporary feedback uses the shared Glass material.',
-            '短暂反馈使用共享玻璃材质。',
+            'Temporary feedback uses a readable overlay plane with the shared Glass edge.',
+            '短暂反馈使用可读浮层表面与共享玻璃边缘。',
           ),
           props.locale,
         )

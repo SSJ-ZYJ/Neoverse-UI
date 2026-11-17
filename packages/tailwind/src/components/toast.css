@@ -15,8 +15,8 @@
     gap: var(--neoverse-space-3);
     padding: var(--neoverse-toast-padding);
     border-radius: var(--neoverse-radius-card);
-    color: var(--neoverse-color-text-primary);
-    background: var(--neoverse-material-glass-immersive-background);
+    color: var(--neoverse-toast-foreground);
+    background: var(--neoverse-toast-background);
     box-shadow: var(--neoverse-material-glass-immersive-shadow);
     -webkit-backdrop-filter: var(--neoverse-material-glass-immersive-filter);
     backdrop-filter: var(--neoverse-material-glass-immersive-filter);

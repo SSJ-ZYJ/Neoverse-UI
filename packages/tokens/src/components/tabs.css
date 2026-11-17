@@ -1,0 +1,16 @@
+@layer neoverse.tokens {
+  :root {
+    --neoverse-tabs-list-gap: var(--neoverse-space-1);
+    --neoverse-tabs-list-padding: var(--neoverse-space-1);
+    --neoverse-tabs-list-radius: var(--neoverse-control-corner-radius);
+    --neoverse-tabs-tab-radius: var(--neoverse-control-compact-radius);
+    --neoverse-tabs-tab-height: var(--neoverse-control-surface-control-height);
+    --neoverse-tabs-tab-padding: var(--neoverse-space-3);
+    --neoverse-tabs-tab-font-size: var(--neoverse-font-size-sm);
+    --neoverse-tabs-selected-background-image: var(--neoverse-control-segmented-active-background);
+    --neoverse-tabs-selected-background-color: var(--neoverse-control-segmented-active-fill);
+    --neoverse-tabs-selected-border: var(--neoverse-control-segmented-active-border);
+    --neoverse-tabs-selected-shadow: var(--neoverse-control-segmented-active-shadow);
+    --neoverse-tabs-panel-padding-block: var(--neoverse-space-4);
+  }
+}

@@ -1,0 +1,44 @@
+@layer components {
+  .ui-avatar {
+    position: relative;
+    display: inline-grid;
+    flex: none;
+    width: var(--neoverse-avatar-size-md);
+    height: var(--neoverse-avatar-size-md);
+    place-items: center;
+    overflow: hidden;
+    border-radius: var(--neoverse-avatar-rounded-radius);
+    vertical-align: middle;
+    color: var(--neoverse-avatar-fallback-foreground);
+    background: var(--neoverse-avatar-fallback-background);
+  }
+  .ui-avatar--rounded {
+    border-radius: var(--neoverse-avatar-rounded-radius);
+  }
+  .ui-avatar--circle {
+    border-radius: var(--neoverse-avatar-radius);
+  }
+  .ui-avatar--sm {
+    width: var(--neoverse-avatar-size-sm);
+    height: var(--neoverse-avatar-size-sm);
+  }
+  .ui-avatar--lg {
+    width: var(--neoverse-avatar-size-lg);
+    height: var(--neoverse-avatar-size-lg);
+  }
+  .ui-avatar__image {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .ui-avatar__fallback {
+    position: relative;
+    z-index: 1;
+    font-size: var(--neoverse-avatar-font-size);
+    font-weight: var(--neoverse-font-weight-semibold);
+    user-select: none;
+  }
+}

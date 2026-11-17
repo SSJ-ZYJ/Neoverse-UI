@@ -14,6 +14,34 @@ export interface DialogProps {
   closeOnBackdrop?: boolean;
 }
 
+export interface TabOption {
+  value: string;
+  label: string;
+  disabled?: boolean;
+}
+export interface TabsProps {
+  options: readonly TabOption[];
+  ariaLabel: string;
+  modelValue?: string;
+  defaultValue?: string;
+}
+export type AvatarShape = 'circle' | 'rounded';
+export interface AvatarProps {
+  name: string;
+  src?: string;
+  fallback?: string;
+  size?: 'sm' | 'md' | 'lg';
+  shape?: AvatarShape;
+}
+export interface PaginationProps {
+  page: number;
+  totalPages: number;
+  ariaLabel: string;
+  previousLabel: string;
+  nextLabel: string;
+  pageLabel: string;
+}
+
 export interface EmptyStateProps {
   title: string;
   description?: string;

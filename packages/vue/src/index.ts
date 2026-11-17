@@ -17,6 +17,8 @@ export type {
   ActionProps,
   ActionScale,
   ActionSize,
+  AvatarProps,
+  AvatarShape,
   BadgeProps,
   BadgeSize,
   BadgeVariant,
@@ -56,6 +58,7 @@ export type {
   NavigationItemProps,
   NoticeProps,
   NoticeVariant,
+  PaginationProps,
   PopoverProps,
   PresenceProps,
   RadioGroupProps,
@@ -83,6 +86,8 @@ export type {
   SurfaceProps,
   SwitchProps,
   TableProps,
+  TabOption,
+  TabsProps,
   TerminalEchoProps,
   TerminalLineProps,
   TerminalPromptProps,
@@ -98,6 +103,7 @@ export type {
   TooltipSurfaceVariant,
 } from './types';
 export { default as UiAction } from './UiAction.vue';
+export { default as UiAvatar } from './UiAvatar.vue';
 export { default as UiBadge } from './UiBadge.vue';
 export { default as UiBreadcrumb } from './UiBreadcrumb.vue';
 export { default as UiButton } from './UiButton.vue';
@@ -115,6 +121,7 @@ export { default as UiIconButton } from './UiIconButton.vue';
 export { default as UiInput } from './UiInput.vue';
 export { default as UiNavigationItem } from './UiNavigationItem.vue';
 export { default as UiNotice } from './UiNotice.vue';
+export { default as UiPagination } from './UiPagination.vue';
 export { default as UiPopover } from './UiPopover.vue';
 export { default as UiPresence } from './UiPresence.vue';
 export { default as UiRadioGroup } from './UiRadioGroup.vue';
@@ -128,6 +135,7 @@ export { default as UiStepFlow } from './UiStepFlow.vue';
 export { default as UiSurface } from './UiSurface.vue';
 export { default as UiSwitch } from './UiSwitch.vue';
 export { default as UiTable } from './UiTable.vue';
+export { default as UiTabs } from './UiTabs.vue';
 export { default as UiTerminalEcho } from './UiTerminalEcho.vue';
 export { default as UiTerminalLine } from './UiTerminalLine.vue';
 export { default as UiTerminalPrompt } from './UiTerminalPrompt.vue';

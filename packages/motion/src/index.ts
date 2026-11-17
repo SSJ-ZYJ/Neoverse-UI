@@ -19,6 +19,7 @@ export {
   motionEasings,
   motionRoles,
 } from './motion-tokens';
+export { attachSelectionIndicator } from './selection-indicator';
 
 /**
  * Presence presets. Each value maps 1:1 to a CSS variant defined by the
