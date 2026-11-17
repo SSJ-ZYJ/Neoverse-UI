@@ -136,7 +136,7 @@ const copy = {
       <UiTabs
         v-model="selectedTab"
         :options="tabOptions"
-        :aria-label="localize(localized('Member sections', '成员页面分区'), props.locale)"
+        v-bind="{ ariaLabel: localize(localized('Member sections', '成员页面分区'), props.locale) }"
         v-slot="{ value }"
         data-tabs-sample
       >
@@ -187,7 +187,9 @@ const copy = {
       <UiPagination
         v-model:page="currentPage"
         :total-pages="18"
-        :aria-label="localize(localized('Member list pages', '成员列表页码'), props.locale)"
+        v-bind="{
+          ariaLabel: localize(localized('Member list pages', '成员列表页码'), props.locale),
+        }"
         :previous-label="localize(localized('Previous page', '上一页'), props.locale)"
         :next-label="localize(localized('Next page', '下一页'), props.locale)"
         :page-label="localize(localized('Page', '第'), props.locale)"
