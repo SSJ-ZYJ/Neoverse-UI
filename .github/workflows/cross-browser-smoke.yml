@@ -65,7 +65,13 @@ jobs:
           persist-credentials: false
 
       - name: Setup Bun
-        uses: oven-sh/setup-bun@v2.2.0
+        # Use the Linux binary package: the image has npm, not unzip.
+        run: |
+          bun_version=$(node -p "require('./package.json').packageManager.replace(/^bun@/, '')")
+          npm install --prefix "$RUNNER_TEMP/bun" --ignore-scripts --registry=https://registry.npmjs.org "@oven/bun-linux-x64@$bun_version"
+          bun_bin="$RUNNER_TEMP/bun/node_modules/@oven/bun-linux-x64/bin"
+          ln -s bun "$bun_bin/bunx"
+          echo "$bun_bin" >> "$GITHUB_PATH"
 
       - name: Install dependencies
         run: bun install --frozen-lockfile
