@@ -167,6 +167,12 @@ Contract-matrix documentation and non-browser quality scripts run source
 verification, but not Playwright. Unknown file types conservatively select both
 source and browser gates.
 
+CI and Release install the Bun version declared in the root `package.json`.
+Cross-browser smoke runs Firefox and WebKit under Xvfb in the official Ubuntu
+24.04 Playwright image. The image supplies browser binaries and system
+libraries, so shards do not depend on package mirrors during setup. Update
+the image tag and digest alongside `@playwright/test`.
+
 Release also scopes ordinary `main` pushes, but does not repeat a browser matrix
 that already ran: CI gated the pull request that produced the commit, and Release
 repacks that exact tree. Once mode selection succeeds with a mode other than

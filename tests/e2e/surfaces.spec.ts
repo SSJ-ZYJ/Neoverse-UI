@@ -30,6 +30,7 @@ test.describe('surfaces', () => {
       test(`${adapter}: tabs skip disabled sections and reveal the matching panel / ${theme}`, async ({
         page,
       }) => {
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
         await page.goto(
           adapter === 'Vue'
             ? `/frame?theme=${theme}&lang=en#data-display-tabs`
@@ -88,6 +89,7 @@ test.describe('surfaces', () => {
       test(`${adapter}: pagination moves between pages without leaving the valid range / ${theme}`, async ({
         page,
       }) => {
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
         await page.goto(
           adapter === 'Vue'
             ? `/frame?theme=${theme}&lang=en#data-display-pagination`

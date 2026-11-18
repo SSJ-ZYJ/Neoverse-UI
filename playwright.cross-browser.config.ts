@@ -9,6 +9,7 @@ export default defineConfig({
   // The component stylesheets already disable the Playground's infinite
   // shimmer/pulse/spinner animations for this media preference, which keeps the
   // software compositor responsive enough for interaction checks.
+  // Tests that assert a transition explicitly opt back into normal motion.
   use: { reducedMotion: 'reduce' },
   testMatch: [
     '**/forms.spec.ts',

@@ -47,7 +47,7 @@ jobs:
       browser-checks: ${{ steps.scope.outputs.browser-checks }}
       optics-checks: ${{ steps.scope.outputs.optics-checks }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7.0.1
         with:
           fetch-depth: 0
           persist-credentials: false

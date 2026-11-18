@@ -171,6 +171,7 @@ test.describe('navigation', () => {
       test(`the indicator glides on transform and settles on the active item in ${theme}`, async ({
         page,
       }) => {
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
         const errors: string[] = [];
         page.on('pageerror', (error) => errors.push(error.message));
         await page.goto(`/frame?theme=${theme}&lang=en#dock`);
@@ -317,6 +318,7 @@ test.describe('navigation', () => {
     });
 
     test('the React dock indicator shares the transform flight contract', async ({ page }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
       const errors: string[] = [];
       page.on('pageerror', (error) => errors.push(error.message));
       await page.goto('/react-fixture?theme=light&lang=en');
