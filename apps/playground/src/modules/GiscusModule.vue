@@ -3,10 +3,13 @@ import darkCss from '@neoverse-ui/giscus-theme/dark.css?raw';
 import lightCss from '@neoverse-ui/giscus-theme/light.css?raw';
 import { computed } from 'vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
+import { injectSpecimenSelection } from '../lab-specimen-scope';
+import { resolvedTheme } from '../theme-state';
 import { localize, localized } from '../playground-content';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const { isFocused } = injectSpecimenSelection();
 
 const copy = {
   title: localized('Giscus widget theme', 'Giscus 评论主题'),
@@ -170,6 +173,12 @@ const previews = computed<readonly Preview[]>(() => [
   },
 ]);
 
+const visiblePreviews = computed(() =>
+  isFocused.value
+    ? previews.value.filter((preview) => preview.id === resolvedTheme.value)
+    : previews.value,
+);
+
 const documentFor = (preview: Preview): string => {
   const language = props.locale === 'zh' ? 'zh-CN' : 'en';
   return `<!doctype html><html lang="${language}"><head><meta charset="utf-8"><style>${preview.css}</style><style>${baseCss(preview.canvas)}</style></head><body>${bodyHtml()}</body></html>`;
@@ -184,7 +193,7 @@ const documentFor = (preview: Preview): string => {
   >
     <div class="grid gap-4 xl:grid-cols-2">
       <figure
-        v-for="preview in previews"
+        v-for="preview in visiblePreviews"
         :key="preview.id"
         class="grid min-w-0 gap-2"
         :data-giscus-theme="preview.id"

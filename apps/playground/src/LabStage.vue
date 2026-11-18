@@ -2,7 +2,16 @@
 import { glassMaterial } from '@neoverse-ui/tokens';
 import { UiButton, UiSegmentedControl, UiSurface } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
-import { type LabModule, labModules, labSpecimens, type ModuleId } from './lab-modules';
+import {
+  type LabModule,
+  type LabSpecimen,
+  labModules,
+  labSpecimens,
+  type ModuleId,
+  type SpecimenId,
+} from './lab-modules';
+import type { SpecimenSession } from './lab-specimen-config';
+import { provideSpecimenSelection } from './lab-specimen-scope';
 import {
   appCopy,
   formatLocalized,
@@ -16,8 +25,12 @@ const props = defineProps<{
   locale: Locale;
   module: LabModule | undefined;
   category: LocalizedText | undefined;
+  specimen: LabSpecimen | undefined;
+  session: SpecimenSession | undefined;
 }>();
-const emit = defineEmits<{ navigate: [module: ModuleId] }>();
+const emit = defineEmits<{ navigate: [module: ModuleId | SpecimenId] }>();
+const LiveSpecimen = () => props.session?.render(props.locale);
+provideSpecimenSelection(computed(() => props.specimen?.id));
 
 const copy = {
   label: localized('Preview Stage', '预览舞台'),
@@ -46,13 +59,67 @@ function setShowcaseSurface(value: string): void {
 </script>
 
 <template>
-  <div data-playground-page class="playground-stage">
+  <div
+    data-playground-page
+    class="playground-stage"
+    :data-specimen-kind="specimen?.kind"
+    :class="{ 'playground-stage--focused': specimen }"
+  >
     <p class="playground-stage__label text-label-sm font-label text-secondary">
       <span aria-hidden="true" />
       {{ localize(copy.label, locale) }}
     </p>
 
-    <section v-if="module" aria-labelledby="stage-title" class="playground-stage__module">
+    <section
+      v-if="session && specimen"
+      :id="specimen.id"
+      :key="specimen.id"
+      tabindex="-1"
+      aria-labelledby="stage-title"
+      data-design-lab-region="specimen"
+      class="playground-stage__specimen"
+    >
+      <header class="playground-stage__heading">
+        <p v-if="module" class="text-label-sm font-label text-secondary">
+          {{ localize(module.label, locale) }}
+        </p>
+        <h2 id="stage-title" class="text-heading font-heading tracking-heading text-primary">
+          {{ localize(specimen.label, locale) }}
+        </h2>
+      </header>
+      <div class="playground-stage__specimen-content">
+        <LiveSpecimen />
+      </div>
+    </section>
+
+    <section
+      v-else-if="specimen && module"
+      :key="specimen.id"
+      aria-labelledby="stage-title"
+      class="playground-stage__specimen"
+    >
+      <header class="playground-stage__heading">
+        <p class="text-label-sm font-label text-secondary">
+          {{ localize(module.label, locale) }}
+        </p>
+        <h2
+          id="stage-title"
+          tabindex="-1"
+          data-stage-heading
+          class="text-heading font-heading tracking-heading text-primary"
+        >
+          {{ localize(specimen.label, locale) }}
+        </h2>
+      </header>
+      <div
+        data-design-lab-region="specimen"
+        class="playground-stage__specimen-content playground-stage__legacy-content"
+      >
+        <component :is="module.component" :key="specimen.id" :locale="locale" />
+      </div>
+    </section>
+
+    <section v-else-if="module" aria-labelledby="stage-title" class="playground-stage__specimen">
       <header :key="module.id" class="playground-stage__heading">
         <p v-if="category" class="text-label-sm font-label text-secondary">
           {{ localize(category, locale) }}
@@ -122,14 +189,14 @@ function setShowcaseSurface(value: string): void {
             <p class="text-body-sm text-secondary">{{ localize(copy.detail, locale) }}</p>
           </div>
           <div class="flex flex-wrap items-center gap-2">
-            <UiButton size="sm" @click="emit('navigate', 'controls')">
+            <UiButton size="sm" @click="emit('navigate', 'controls-button')">
               {{ localize(copy.components, locale) }}
             </UiButton>
             <UiButton
               size="sm"
               variant="ghost"
               surface="none"
-              @click="emit('navigate', 'materials')"
+              @click="emit('navigate', 'materials-surface')"
             >
               {{ localize(copy.materials, locale) }}
             </UiButton>

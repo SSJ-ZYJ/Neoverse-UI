@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import MaterialLegend from './MaterialLegend.vue';
+import { injectSpecimenSelection } from './lab-specimen-scope';
 import type { Locale } from './playground-content';
 import { localize, localized } from './playground-content';
 
@@ -8,6 +9,7 @@ interface QaPreviewMatrixProps {
 }
 
 const props = defineProps<QaPreviewMatrixProps>();
+const { isFocused } = injectSpecimenSelection();
 const contexts = [
   {
     id: 'gradient',
@@ -31,7 +33,8 @@ const contexts = [
 </script>
 
 <template>
-  <div class="playground-qa-matrix" data-qa-matrix>
+  <div v-if="isFocused" class="playground-qa-matrix--focused"><slot context="neutral" /></div>
+  <div v-else class="playground-qa-matrix" data-qa-matrix>
     <article
       v-for="context in contexts"
       :key="context.id"

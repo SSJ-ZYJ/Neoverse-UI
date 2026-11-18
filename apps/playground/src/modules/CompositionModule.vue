@@ -7,12 +7,23 @@ import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.composition;
+const relatedScenes = [
+  'composition-control-cluster',
+  'composition-project-card',
+  'composition-floating-toolbar',
+  'composition-docs-article-header',
+  'composition-docs-navigation-group',
+  'composition-docs-toolbar',
+  'composition-docs-content-surface',
+  'composition-reading',
+] as const;
 </script>
 
 <template>
   <div class="grid gap-6">
     <LabSpecimenSection
       id="composition-standard-mode"
+      :selection-ids="relatedScenes"
       :title="localize(copy.previewModes.standard.label, props.locale)"
       :description="localize(copy.previewModes.standard.description, props.locale)"
     >

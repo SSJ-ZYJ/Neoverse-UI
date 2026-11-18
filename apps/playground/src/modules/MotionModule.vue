@@ -123,6 +123,7 @@ const variantLabels = computed(() =>
   <div id="foundation-motion" class="scroll-mt-24 grid gap-grid">
     <LabSpecimenSection
       id="motion-primitive"
+      selection-id="foundation-motion"
       :title="localize(moduleCopy.motion.primitive.label, props.locale)"
       :description="localize(moduleCopy.motion.primitive.description, props.locale)"
     >
@@ -193,6 +194,7 @@ const variantLabels = computed(() =>
 
     <LabSpecimenSection
       id="foundation-motion-presence-group"
+      selection-id="foundation-motion-presence"
       :title="localize(presenceCopy.stagger, props.locale)"
       :description="localize(presenceCopy.staggerDescription, props.locale)"
     >

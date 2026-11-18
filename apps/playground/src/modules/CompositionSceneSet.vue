@@ -11,12 +11,15 @@ import {
 } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
 import LabIcon from '../LabIcon.vue';
+import { injectSpecimenSelection } from '../lab-specimen-scope';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, moduleCopy } from '../playground-content';
 import ReadingComposition from './ReadingComposition.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const { selectedId, matches } = injectSpecimenSelection();
+const showScene = (id: string) => selectedId.value === 'composition-standard-mode' || matches(id);
 const copy = moduleCopy.composition;
 const controlClusterMode = ref('focus');
 const docsToolbarMode = ref('read');
@@ -92,8 +95,13 @@ const navigationItems = computed(() => [
 
 <template>
   <MaterialBackdrop>
-    <div class="grid gap-grid md:grid-cols-2" data-composition-mode="glass">
+    <div
+      class="grid gap-grid md:grid-cols-2"
+      :class="{ 'md:!grid-cols-1': selectedId && selectedId !== 'composition-standard-mode' }"
+      data-composition-mode="glass"
+    >
       <section
+        v-if="showScene('composition-control-cluster')"
         id="composition-control-cluster"
         class="grid gap-2"
         aria-labelledby="composition-control-cluster-title"
@@ -149,6 +157,7 @@ const navigationItems = computed(() => [
       </section>
 
       <section
+        v-if="showScene('composition-project-card')"
         id="composition-project-card"
         class="grid gap-2"
         aria-labelledby="composition-project-card-title"
@@ -220,6 +229,7 @@ const navigationItems = computed(() => [
       </section>
 
       <section
+        v-if="showScene('composition-floating-toolbar')"
         id="composition-floating-toolbar"
         class="grid gap-2 md:col-span-2"
         aria-labelledby="composition-floating-toolbar-title"
@@ -299,6 +309,7 @@ const navigationItems = computed(() => [
       </section>
 
       <section
+        v-if="showScene('composition-docs-article-header')"
         id="composition-docs-article-header"
         class="grid gap-2 md:col-span-2"
         aria-labelledby="composition-docs-article-header-title"
@@ -356,6 +367,7 @@ const navigationItems = computed(() => [
       </section>
 
       <section
+        v-if="showScene('composition-docs-navigation-group')"
         id="composition-docs-navigation-group"
         class="grid gap-2"
         aria-labelledby="composition-docs-navigation-group-title"
@@ -409,6 +421,7 @@ const navigationItems = computed(() => [
       </section>
 
       <section
+        v-if="showScene('composition-docs-toolbar')"
         id="composition-docs-toolbar"
         class="grid gap-2"
         aria-labelledby="composition-docs-toolbar-title"
@@ -465,6 +478,7 @@ const navigationItems = computed(() => [
       </section>
 
       <section
+        v-if="showScene('composition-docs-content-surface')"
         id="composition-docs-content-surface"
         class="grid gap-2 md:col-span-2"
         aria-labelledby="composition-docs-content-surface-title"
@@ -524,7 +538,7 @@ const navigationItems = computed(() => [
           </div>
         </UiSurface>
       </section>
-      <ReadingComposition :locale="props.locale" />
+      <ReadingComposition v-if="showScene('composition-reading')" :locale="props.locale" />
     </div>
   </MaterialBackdrop>
 </template>

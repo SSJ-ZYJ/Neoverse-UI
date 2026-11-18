@@ -23,12 +23,20 @@ const noResults = localized(
 const search = ref('');
 const terms = computed(() => search.value.toLowerCase().trim().split(/\s+/).filter(Boolean));
 const collapsed = reactive(new Set<string>());
+const expandedModules = reactive(new Set<string>(props.route ? [props.route.moduleId] : []));
 
 const groups = moduleGroups.map((group) => ({
   ...group,
   modules: group.moduleIds.flatMap((id) => {
     const module = labModules.find((entry) => entry.id === id);
-    return module === undefined ? [] : [{ ...module, specimens: specimensForModule(id) }];
+    return module === undefined
+      ? []
+      : [
+          {
+            ...module,
+            specimens: specimensForModule(id).filter((specimen) => specimen.browse !== false),
+          },
+        ];
   }),
 }));
 
@@ -38,11 +46,10 @@ function matches(values: readonly string[]): boolean {
 }
 
 const results = computed(() => {
-  const activeModule = props.route?.moduleId;
   return groups.flatMap((group) => {
     const modules = group.modules.flatMap((module) => {
       if (terms.value.length === 0) {
-        return [{ ...module, specimens: module.id === activeModule ? module.specimens : [] }];
+        return [{ ...module, specimens: module.specimens }];
       }
       const names = [module.id, module.label.en, module.label.zh, group.label.en, group.label.zh];
       const specimens = module.specimens.filter((specimen) =>
@@ -75,11 +82,20 @@ watch(
   (id) => {
     const group = groups.find((entry) => entry.modules.some((module) => module.id === id));
     if (group !== undefined) collapsed.delete(group.id);
+    if (id !== undefined) expandedModules.add(id);
   },
 );
 
 function toggle(id: string): void {
   if (!collapsed.delete(id)) collapsed.add(id);
+}
+
+function moduleExpanded(id: string): boolean {
+  return terms.value.length > 0 || expandedModules.has(id);
+}
+
+function toggleModule(id: string): void {
+  if (!expandedModules.delete(id)) expandedModules.add(id);
 }
 </script>
 
@@ -154,17 +170,40 @@ function toggle(id: string): void {
       </h3>
       <ul v-show="!collapsed.has(group.id)" :id="`explorer-items-${group.id}`">
         <li v-for="module in group.modules" :key="module.id">
+          <UiButton
+            v-if="module.specimens.length > 0"
+            :id="`explorer-module-${module.id}`"
+            :aria-controls="`explorer-specimens-${module.id}`"
+            :aria-expanded="moduleExpanded(module.id)"
+            variant="ghost"
+            surface="none"
+            size="sm"
+            stretch
+            class="playground-explorer__module-toggle"
+            @click="toggleModule(module.id)"
+          >
+            {{ localize(module.label, locale) }}
+            <template #trailing
+              ><LabIcon name="chevron" class="playground-explorer__chevron" /></template
+            >
+          </UiButton>
           <UiNavigationItem
+            v-else
             :href="`#${module.id}`"
             tabindex="0"
             :label="localize(module.label, locale)"
-            :active="route?.moduleId === module.id && route.specimenId === undefined"
+            :active="route?.moduleId === module.id"
             stretch
             indicator-placement="start"
             class="playground-explorer__link"
             @click="emit('navigate', $event, module.id)"
           />
-          <ul v-if="module.specimens.length > 0" class="playground-explorer__specimens">
+          <ul
+            v-if="module.specimens.length > 0"
+            v-show="moduleExpanded(module.id)"
+            :id="`explorer-specimens-${module.id}`"
+            class="playground-explorer__specimens"
+          >
             <li v-for="specimen in module.specimens" :key="specimen.id">
               <UiNavigationItem
                 :href="`#${specimen.id}`"

@@ -192,6 +192,7 @@ export interface LabSpecimen {
   readonly apiNames: readonly string[];
   readonly tags: readonly string[];
   readonly kind: SpecimenKind;
+  readonly browse?: boolean;
 }
 
 export const labSpecimens = [
@@ -281,6 +282,47 @@ export const labSpecimens = [
     label: moduleCopy.layoutShape.label,
     apiNames: [],
     tags: ['foundation', 'layout', 'geometry'],
+    browse: false,
+    kind: 'foundation',
+  },
+  {
+    id: 'layout-shape-spacing',
+    moduleId: 'layout-shape',
+    label: moduleCopy.spacing.label,
+    apiNames: [],
+    tags: ['foundation', 'spacing', 'tokens'],
+    kind: 'foundation',
+  },
+  {
+    id: 'layout-shape-radius',
+    moduleId: 'layout-shape',
+    label: moduleCopy.radius.label,
+    apiNames: [],
+    tags: ['foundation', 'radius', 'tokens'],
+    kind: 'foundation',
+  },
+  {
+    id: 'layout-shape-border',
+    moduleId: 'layout-shape',
+    label: moduleCopy.border.label,
+    apiNames: [],
+    tags: ['foundation', 'border', 'tokens'],
+    kind: 'foundation',
+  },
+  {
+    id: 'shadow-primitive',
+    moduleId: 'shadow',
+    label: moduleCopy.shadow.primitive.label,
+    apiNames: [],
+    tags: ['foundation', 'shadow', 'primitive', 'tokens'],
+    kind: 'foundation',
+  },
+  {
+    id: 'shadow-alias',
+    moduleId: 'shadow',
+    label: moduleCopy.shadow.aliases.label,
+    apiNames: [],
+    tags: ['foundation', 'shadow', 'semantic', 'tokens'],
     kind: 'foundation',
   },
   {
@@ -324,6 +366,14 @@ export const labSpecimens = [
     kind: 'component',
   },
 
+  {
+    id: 'materials-glass',
+    moduleId: 'materials',
+    label: moduleCopy.glass.label,
+    apiNames: ['UiSurface'],
+    tags: ['material', 'glass', 'refraction', 'optics'],
+    kind: 'foundation',
+  },
   {
     id: 'terminal-composition',
     moduleId: 'terminal',
@@ -373,9 +423,17 @@ export const labSpecimens = [
   {
     id: 'overlays-popover',
     moduleId: 'overlays',
-    label: localized('Popover & dropdown', '弹层与下拉菜单'),
-    apiNames: ['UiPopover', 'UiDropdownMenu'],
-    tags: ['overlay', 'popover', 'menu', 'top-layer'],
+    label: localized('Popover', '弹出层'),
+    apiNames: ['UiPopover'],
+    tags: ['overlay', 'popover', 'top-layer'],
+    kind: 'component',
+  },
+  {
+    id: 'overlays-dropdown-menu',
+    moduleId: 'overlays',
+    label: localized('Dropdown menu', '下拉菜单'),
+    apiNames: ['UiDropdownMenu'],
+    tags: ['overlay', 'dropdown', 'menu', 'top-layer'],
     kind: 'component',
   },
   {
@@ -504,6 +562,31 @@ export const labSpecimens = [
     label: localized('Choice controls', '选择控件'),
     apiNames: ['UiCheckbox', 'UiRadioGroup', 'UiSwitch'],
     tags: ['form', 'checkbox', 'radio', 'switch', 'selection', 'control'],
+    browse: false,
+    kind: 'component',
+  },
+  {
+    id: 'forms-checkbox',
+    moduleId: 'forms',
+    label: localized('Checkbox', '复选框'),
+    apiNames: ['UiCheckbox'],
+    tags: ['form', 'checkbox', 'selection'],
+    kind: 'component',
+  },
+  {
+    id: 'forms-radio-group',
+    moduleId: 'forms',
+    label: localized('Radio group', '单选组'),
+    apiNames: ['UiRadioGroup'],
+    tags: ['form', 'radio', 'selection'],
+    kind: 'component',
+  },
+  {
+    id: 'forms-switch',
+    moduleId: 'forms',
+    label: localized('Switch', '开关'),
+    apiNames: ['UiSwitch'],
+    tags: ['form', 'switch', 'selection'],
     kind: 'component',
   },
   {

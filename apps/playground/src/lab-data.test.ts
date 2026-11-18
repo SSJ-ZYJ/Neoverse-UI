@@ -140,10 +140,16 @@ test('keeps the foundation modules represented in the specimen catalogue', () =>
     ['foundation-typography', 'typography'],
     ['foundation-prose', 'typography'],
     ['foundation-layout-shape', 'layout-shape'],
+    ['layout-shape-spacing', 'layout-shape'],
+    ['layout-shape-radius', 'layout-shape'],
+    ['layout-shape-border', 'layout-shape'],
+    ['shadow-primitive', 'shadow'],
+    ['shadow-alias', 'shadow'],
     ['foundation-motion', 'motion'],
     ['foundation-motion-presence', 'motion'],
     ['foundation-motion-width', 'motion'],
     ['foundation-motion-page', 'motion'],
+    ['materials-glass', 'materials'],
   ]);
 });
 

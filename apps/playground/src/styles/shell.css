@@ -20,9 +20,7 @@
   grid-template: 'toolbar' auto 'stage' minmax(0, 1fr) / minmax(0, 1fr);
   gap: var(--neoverse-playground-shell-gap);
   padding: var(--neoverse-playground-shell-inset);
-  background:
-    radial-gradient(ellipse at 15% 0%, var(--neoverse-color-accent-soft), transparent 58%),
-    var(--neoverse-color-surface-canvas);
+  background: var(--neoverse-color-surface-canvas);
 }
 
 .playground-shell[data-persistent] {
@@ -221,6 +219,7 @@
 }
 
 .playground-explorer__category,
+.playground-explorer__module-toggle,
 .playground-explorer__link,
 .playground-inspector__frame-link {
   justify-content: start;
@@ -236,7 +235,8 @@
   transition: rotate var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
 }
 
-.playground-explorer__category[aria-expanded='true'] .playground-explorer__chevron {
+.playground-explorer__category[aria-expanded='true'] .playground-explorer__chevron,
+.playground-explorer__module-toggle[aria-expanded='true'] .playground-explorer__chevron {
   rotate: 90deg;
 }
 
@@ -291,18 +291,7 @@
 .playground-shell__workspace {
   grid-area: stage;
   border-radius: var(--neoverse-radius-panel);
-  background:
-    radial-gradient(
-      ellipse at 82% 24%,
-      color-mix(in srgb, var(--neoverse-color-accent-secondary) 25%, transparent),
-      transparent 64%
-    ),
-    radial-gradient(
-      ellipse at 15% 92%,
-      color-mix(in srgb, var(--neoverse-color-accent-primary) 22%, transparent),
-      transparent 69%
-    ),
-    var(--neoverse-color-surface-canvas);
+  background: var(--neoverse-color-surface-canvas);
 }
 
 .playground-stage {
@@ -336,6 +325,90 @@
   gap: var(--neoverse-layout-grid-gap);
 }
 
+.playground-stage__specimen {
+  display: grid;
+  min-inline-size: 0;
+  grid-template-rows: auto minmax(min-content, 1fr);
+  gap: var(--neoverse-layout-grid-gap);
+}
+
+/* Daily previews use a quiet, uniform canvas. Optical and state comparison
+   backdrops remain available only in the isolated /frame validation route. */
+[data-playground-view='shell']
+  :is(
+    .playground-specimen-preview,
+    .playground-material-backdrop,
+    .playground-overview-hero__stage,
+    .playground-specimen-panel,
+    .playground-refraction-scene,
+    .playground-qa-stage--gradient
+  ) {
+  background: var(--neoverse-color-surface-canvas);
+}
+/* Selected specimens own only their real component surface. The stage is
+   a plain canvas; diagnostic comparison backdrops remain in isolated frames. */
+.playground-stage--focused {
+  max-inline-size: none;
+}
+
+.playground-stage__legacy-content {
+  width: 100%;
+  min-block-size: 0;
+}
+
+.playground-stage__legacy-content > * {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.playground-specimen-section--focused,
+.playground-material-backdrop--focused,
+.playground-qa-matrix--focused {
+  display: grid;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  align-items: center;
+  justify-items: center;
+  gap: var(--neoverse-space-3);
+}
+
+.playground-specimen-section--focused {
+  inline-size: 100%;
+  max-inline-size: var(--neoverse-layout-reading-wide-width);
+  margin-inline: auto;
+}
+
+.playground-state-row--focused {
+  display: flex;
+  min-inline-size: 0;
+  max-inline-size: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: var(--neoverse-space-3);
+}
+
+.playground-stage__specimen-content {
+  display: grid;
+  min-inline-size: 0;
+  place-items: center;
+  padding-block: var(--neoverse-space-8);
+  animation: playground-specimen-enter var(--neoverse-motion-spatial-duration)
+    var(--neoverse-motion-spatial-easing) backwards;
+}
+
+.playground-stage__dock {
+  max-inline-size: 100%;
+  overflow-x: auto;
+  padding: var(--neoverse-space-3);
+}
+
+@keyframes playground-specimen-enter {
+  from {
+    transform: translateY(var(--neoverse-space-2));
+  }
+}
+
 .playground-stage__heading {
   display: grid;
   gap: var(--neoverse-space-2);
@@ -351,7 +424,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .playground-stage__heading {
+  .playground-stage__heading,
+  .playground-stage__specimen-content {
     animation: none;
   }
 
@@ -1010,4 +1084,16 @@
     var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);
   box-shadow: var(--neoverse-shadow-inset);
+}
+
+.playground-stage--focused[data-specimen-kind='component'] .playground-preview-columns {
+  display: flex;
+  max-inline-size: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.playground-stage--focused .playground-specimen-grid,
+.playground-stage--focused .playground-token-grid {
+  grid-template-columns: minmax(0, 1fr);
 }

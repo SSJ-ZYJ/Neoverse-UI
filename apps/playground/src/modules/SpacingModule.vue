@@ -12,6 +12,7 @@ const props = defineProps<LabModuleProps>();
   <div class="grid gap-grid">
     <LabSpecimenSection
       id="spacing-primitive"
+      :selection-ids="['layout-shape-spacing', 'foundation-layout-shape']"
       :title="localize(moduleCopy.spacing.primitive.label, props.locale)"
       :description="localize(moduleCopy.spacing.primitive.description, props.locale)"
     >
@@ -29,6 +30,7 @@ const props = defineProps<LabModuleProps>();
 
     <LabSpecimenSection
       id="spacing-alias"
+      :selection-ids="['foundation-layout-shape']"
       :title="localize(moduleCopy.spacing.aliases.label, props.locale)"
       :description="localize(moduleCopy.spacing.aliases.description, props.locale)"
     >
@@ -47,6 +49,7 @@ const props = defineProps<LabModuleProps>();
 
     <LabSpecimenSection
       id="layout-role"
+      :selection-ids="['foundation-layout-shape']"
       :title="localize(moduleCopy.spacing.roles.label, props.locale)"
       :description="localize(moduleCopy.spacing.roles.description, props.locale)"
     >

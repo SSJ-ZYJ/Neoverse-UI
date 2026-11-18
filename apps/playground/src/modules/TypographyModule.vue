@@ -41,6 +41,7 @@ const scaleCopy = {
   <div id="foundation-typography" class="scroll-mt-24 grid gap-grid">
     <LabSpecimenSection
       id="typography-scale"
+      selection-id="foundation-typography"
       :title="localize(scaleCopy.title, props.locale)"
       :description="localize(scaleCopy.description, props.locale)"
     >

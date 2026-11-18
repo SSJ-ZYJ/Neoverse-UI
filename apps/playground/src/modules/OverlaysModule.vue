@@ -2,12 +2,14 @@
 import { UiButton, UiDialog, UiNavigationItem, UiSurface } from '@neoverse-ui/vue';
 import { ref } from 'vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
+import { injectSpecimenSelection } from '../lab-specimen-scope';
 import { localize, localized, moduleCopy } from '../playground-content';
 import ContextMenuModule from './ContextMenuModule.vue';
 import OverlayModule from './OverlayModule.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const { isFocused } = injectSpecimenSelection();
 const dialogOpen = ref(false);
 const copy = moduleCopy.overlays;
 const popoverCopy = {
@@ -46,6 +48,7 @@ const sections = [
 <template>
   <div class="grid gap-grid">
     <UiSurface
+      v-if="!isFocused"
       as="nav"
       surface="glass-subtle"
       content-overflow="visible"
@@ -64,6 +67,7 @@ const sections = [
 
     <LabSpecimenSection
       id="overlays-popover"
+      :selection-ids="['overlays-dropdown-menu']"
       :title="localize(popoverCopy.label, props.locale)"
       :description="localize(popoverCopy.description, props.locale)"
     >

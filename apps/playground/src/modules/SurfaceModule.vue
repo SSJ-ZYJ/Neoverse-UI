@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { type SurfacePreset, surfaceClasses, UiSurface } from '@neoverse-ui/vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
+import { injectSpecimenSelection } from '../lab-specimen-scope';
 import { localize, localized, tokenCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const { isFocused } = injectSpecimenSelection();
 const presets: readonly SurfacePreset[] = [
   'none',
   'solid',
@@ -29,7 +31,10 @@ const copy = {
 </script>
 
 <template>
-  <MaterialBackdrop>
+  <UiSurface v-if="isFocused" surface="glass-subtle" class="rounded-card p-5">
+    {{ localize(glassLabels['glass-subtle'], props.locale) }}
+  </UiSurface>
+  <MaterialBackdrop v-else>
     <div class="grid gap-3">
       <p class="max-w-container-lg text-caption text-secondary">
         {{ localize(copy.description, props.locale) }}

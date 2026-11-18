@@ -2,10 +2,12 @@
 import { UiDropdownMenu, UiPopover } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
+import { injectSpecimenSelection } from '../lab-specimen-scope';
 import { localize, localized } from '../playground-content';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const { matches } = injectSpecimenSelection();
 
 const selectedAction = ref('');
 const contractMode = new URLSearchParams(window.location.search).has('contract-fixtures');
@@ -47,6 +49,7 @@ const menuItems = computed(() => [
   <MaterialBackdrop edge="inset">
     <div class="flex min-h-40 flex-wrap items-start gap-4" data-contract-state="default">
       <UiPopover
+        v-if="matches('overlays-popover')"
         v-bind="{ ariaLabel: localize(copy.popoverLabel, props.locale) }"
         data-overlay-popover
       >
@@ -60,6 +63,8 @@ const menuItems = computed(() => [
       </UiPopover>
 
       <UiDropdownMenu
+        v-if="matches('overlays-dropdown-menu')"
+        id="overlays-dropdown-menu"
         v-bind="{ ariaLabel: localize(copy.menuLabel, props.locale) }"
         :items="menuItems"
         :disabled="dropdownDisabled"
@@ -71,7 +76,12 @@ const menuItems = computed(() => [
         </template>
       </UiDropdownMenu>
 
-      <output class="w-full text-caption text-secondary" aria-live="polite" data-overlay-selection>
+      <output
+        v-if="matches('overlays-dropdown-menu')"
+        class="w-full text-caption text-secondary"
+        aria-live="polite"
+        data-overlay-selection
+      >
         {{ localize(copy.selected, props.locale) }}: {{ selectedAction || '—' }}
       </output>
       <div v-if="contractMode" data-overlay-controlled>

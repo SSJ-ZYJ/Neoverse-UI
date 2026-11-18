@@ -4,6 +4,7 @@ import { UiCard, UiScrollbar, UiSurface } from '@neoverse-ui/vue';
 import { ref } from 'vue';
 import { localize, localized, moduleCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
+import { injectSpecimenSelection } from '../lab-specimen-scope';
 
 const props = defineProps<LabModuleProps>();
 const owners = ref([0, 1]);
@@ -103,6 +104,7 @@ const tokenRows = [
   },
   { label: copy.tokens.edge, variable: cssVariables.components.scrollbar.immersive.thumbEdge },
 ] as const;
+const { isFocused } = injectSpecimenSelection();
 </script>
 
 <template>
@@ -114,7 +116,7 @@ const tokenRows = [
         Unmount one scrollbar
       </button>
     </div>
-    <section class="grid gap-3" aria-labelledby="scrollbar-preview-title">
+    <section v-if="!isFocused" class="grid gap-3" aria-labelledby="scrollbar-preview-title">
       <header class="grid gap-1">
         <h2 id="scrollbar-preview-title" class="text-subtitle font-heading tracking-heading">
           {{ localize(copy.preview.label, props.locale) }}

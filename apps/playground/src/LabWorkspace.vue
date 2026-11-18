@@ -6,6 +6,7 @@ import LabExplorer from './LabExplorer.vue';
 import LabInspector from './LabInspector.vue';
 import LabStage from './LabStage.vue';
 import LabToolbar from './LabToolbar.vue';
+import { openSpecimenSession } from './lab-interactive-specimens';
 import { labModules, moduleGroups, resolveLabHash, specimenById } from './lab-modules';
 import { isLocale, type Locale } from './playground-content';
 import { readPreferences, writePreferences } from './playground-preferences';
@@ -41,10 +42,11 @@ const module = computed(() => labModules.find(({ id }) => id === route.value?.mo
 const category = computed(() =>
   moduleGroups.find((group) => group.moduleIds.some((id) => id === route.value?.moduleId)),
 );
-const specimen = computed(() => {
-  const id = route.value?.specimenId;
-  return id === undefined ? undefined : specimenById(id);
-});
+const specimenId = computed(() => route.value?.specimenId);
+const specimen = computed(() =>
+  specimenId.value === undefined ? undefined : specimenById(specimenId.value),
+);
+const session = computed(() => openSpecimenSession(specimenId.value));
 
 const preferences = readPreferences();
 const parameters = new URLSearchParams(window.location.search);
@@ -143,8 +145,9 @@ function focusRoute(): void {
     const target = id === undefined ? null : document.getElementById(id);
     if (target !== null && stage.contains(target)) {
       // Scroll only the stage, never the viewport or a neighboring panel.
-      const top =
-        stage.scrollTop + target.getBoundingClientRect().top - stage.getBoundingClientRect().top;
+      const top = session.value
+        ? 0
+        : stage.scrollTop + target.getBoundingClientRect().top - stage.getBoundingClientRect().top;
       stage.scrollTo({ top, left: 0, behavior: 'instant' });
       if (!target.hasAttribute('tabindex')) target.tabIndex = -1;
       target.focus({ preventScroll: true });
@@ -260,6 +263,8 @@ onBeforeUnmount(() => {
         :locale="locale"
         :module="module"
         :category="category?.label"
+        :specimen="specimen"
+        :session="session"
         @navigate="navigate"
       />
     </main>
@@ -281,6 +286,7 @@ onBeforeUnmount(() => {
         :module="module"
         :category="category?.label"
         :specimen="specimen"
+        :session="session"
         @close="closePanel()"
       />
     </dialog>

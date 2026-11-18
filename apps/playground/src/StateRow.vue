@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { UiSurface } from '@neoverse-ui/vue';
+import { Comment, useSlots as readSlots } from 'vue';
 import type { ContractStateId } from './contract-lab';
+import { injectRepresentativeRow, injectSpecimenSelection } from './lab-specimen-scope';
 import MaterialLegend from './MaterialLegend.vue';
 import type { Locale, LocalizedText } from './playground-content';
 import { localize } from './playground-content';
@@ -14,9 +16,22 @@ interface StateRowProps {
 }
 
 const props = defineProps<StateRowProps>();
+const { isFocused } = injectSpecimenSelection();
+const representative = injectRepresentativeRow();
+const slots = readSlots();
+const FocusedContent = () => slots.default?.().find((node) => node.type !== Comment) ?? null;
 </script>
 <template>
+  <div
+    v-if="isFocused && representative"
+    class="playground-state-row--focused"
+    :aria-label="localize(props.label, props.locale)"
+    data-focused-state-row
+  >
+    <FocusedContent />
+  </div>
   <UiSurface
+    v-else-if="!isFocused"
     as="article"
     surface="none"
     class="playground-specimen-row grid gap-3"

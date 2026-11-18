@@ -15,12 +15,14 @@ import {
 import { ref } from 'vue';
 import LabIcon from '../LabIcon.vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
+import { injectSpecimenSelection } from '../lab-specimen-scope';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, localized } from '../playground-content';
 import DataDisplayVisualFixture from './DataDisplayVisualFixture.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const { isFocused } = injectSpecimenSelection();
 const selectedTab = ref('overview');
 const currentPage = ref(4);
 const avatarName = 'Shenshijun';
@@ -156,7 +158,16 @@ const copy = {
         )
       "
     >
-      <div class="flex flex-wrap items-center gap-3">
+      <div v-if="isFocused" class="flex items-center justify-center">
+        <UiAvatar
+          :name="avatarName"
+          :fallback="avatarFallback"
+          size="md"
+          shape="circle"
+          data-avatar-sample
+        />
+      </div>
+      <div v-else class="flex flex-wrap items-center gap-3">
         <UiAvatar :name="avatarName" :fallback="avatarFallback" size="sm" data-avatar-rounded />
         <UiAvatar :name="avatarName" :fallback="avatarFallback" size="md" />
         <UiAvatar :name="avatarName" :fallback="avatarFallback" size="lg" />
@@ -266,7 +277,16 @@ const copy = {
       :title="localize(copy.disclosure.label, props.locale)"
       :description="localize(copy.disclosure.description, props.locale)"
     >
-      <MaterialBackdrop edge="inset">
+      <UiDisclosure
+        v-if="isFocused"
+        :summary="localize(copy.disclosure.closed, props.locale)"
+        data-data-display-disclosure="closed"
+      >
+        <p class="text-body-sm text-secondary">
+          {{ localize(copy.disclosure.closedBody, props.locale) }}
+        </p>
+      </UiDisclosure>
+      <MaterialBackdrop v-else edge="inset">
         <div class="playground-preview-columns">
           <UiDisclosure
             :summary="localize(copy.disclosure.closed, props.locale)"
@@ -312,9 +332,25 @@ const copy = {
             unit="ms"
             footnote="Native value, including zero"
           />
-          <UiStatCard label="Coverage / 覆盖率" :value="98.6" unit="%" trend="+2.4% this month" />
-          <UiStatCard label="Packages / 包" :value="8" footnote="Shared design system" />
-          <UiStatCard label="Consumers / 消费项目" :value="4" trend="Vue presentation primitives" />
+          <UiStatCard
+            v-if="!isFocused"
+            label="Coverage / 覆盖率"
+            :value="98.6"
+            unit="%"
+            trend="+2.4% this month"
+          />
+          <UiStatCard
+            v-if="!isFocused"
+            label="Packages / 包"
+            :value="8"
+            footnote="Shared design system"
+          />
+          <UiStatCard
+            v-if="!isFocused"
+            label="Consumers / 消费项目"
+            :value="4"
+            trend="Vue presentation primitives"
+          />
         </div>
       </MaterialBackdrop>
     </LabSpecimenSection>

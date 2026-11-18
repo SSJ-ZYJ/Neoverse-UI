@@ -11,6 +11,7 @@ import {
 import { computed, ref } from 'vue';
 import FormContractFixture from '../FormContractFixture.vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
+import { injectSpecimenSelection } from '../lab-specimen-scope';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, localized } from '../playground-content';
 import QaPreviewMatrix from '../QaPreviewMatrix.vue';
@@ -21,6 +22,8 @@ const contractMode = new URLSearchParams(window.location.search).has('contract-f
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const { selectedId, matches, isFocused } = injectSpecimenSelection();
+const showChoice = (id: string) => selectedId.value === 'forms-choice-controls' || matches(id);
 const email = ref('');
 const filledEmail = ref('studio@neoverse.dev');
 const notes = ref('');
@@ -152,7 +155,7 @@ const releaseChannelOptions = computed(() => [
           </div>
         </MaterialBackdrop>
 
-        <div class="grid gap-2" data-forms-qa>
+        <div v-if="!isFocused" class="grid gap-2" data-forms-qa>
           <div class="grid gap-1 px-1">
             <h4 class="text-label-sm font-label text-primary">
               {{ localize(copy.qa.label, props.locale) }}
@@ -188,7 +191,15 @@ const releaseChannelOptions = computed(() => [
       :title="localize(copy.textarea, props.locale)"
       :description="localize(copy.textareaDescription, props.locale)"
     >
-      <MaterialBackdrop edge="inset">
+      <UiTextarea
+        v-if="isFocused"
+        id="forms-notes"
+        v-model="notes"
+        :aria-label="localize(copy.notes, props.locale)"
+        :placeholder="localize(copy.notesPlaceholder, props.locale)"
+        rows="4"
+      />
+      <MaterialBackdrop v-else edge="inset">
         <div class="playground-preview-columns">
           <label for="forms-notes" class="grid gap-2 text-body-sm text-secondary">
             <span class="text-label-sm text-muted">{{
@@ -236,7 +247,14 @@ const releaseChannelOptions = computed(() => [
       :title="localize(copy.select, props.locale)"
       :description="localize(copy.selectDescription, props.locale)"
     >
-      <MaterialBackdrop edge="inset">
+      <UiSelect
+        v-if="isFocused"
+        id="forms-runtime"
+        v-model="runtime"
+        :aria-label="localize(copy.runtime, props.locale)"
+        :options="runtimeOptions"
+      />
+      <MaterialBackdrop v-else edge="inset">
         <div class="playground-preview-columns">
           <div class="grid gap-2 text-body-sm text-secondary">
             <span class="text-label-sm text-muted">{{
@@ -299,12 +317,15 @@ const releaseChannelOptions = computed(() => [
 
     <LabSpecimenSection
       id="forms-choice-controls"
+      :selection-ids="['forms-checkbox', 'forms-radio-group', 'forms-switch']"
       :title="localize(copy.choices, props.locale)"
       :description="localize(copy.choicesDescription, props.locale)"
     >
       <MaterialBackdrop edge="inset">
         <div class="playground-preview-columns">
           <UiCheckbox
+            v-if="showChoice('forms-checkbox')"
+            id="forms-checkbox"
             v-model="releaseNotifications"
             data-form-checkbox
             data-contract-state="default"
@@ -313,6 +334,8 @@ const releaseChannelOptions = computed(() => [
           </UiCheckbox>
 
           <UiRadioGroup
+            v-if="showChoice('forms-radio-group')"
+            id="forms-radio-group"
             v-model="releaseChannel"
             name="forms-release-channel"
             :aria-label="localize(copy.releaseChannel, props.locale)"
@@ -321,7 +344,13 @@ const releaseChannelOptions = computed(() => [
             data-contract-state="default"
           />
 
-          <UiSwitch v-model="autoSync" data-form-switch data-contract-state="default">
+          <UiSwitch
+            v-if="showChoice('forms-switch')"
+            id="forms-switch"
+            v-model="autoSync"
+            data-form-switch
+            data-contract-state="default"
+          >
             {{ localize(copy.autoSync, props.locale) }}
           </UiSwitch>
         </div>
@@ -333,7 +362,23 @@ const releaseChannelOptions = computed(() => [
       :title="localize(copy.fieldStates, props.locale)"
       :description="localize(copy.fieldStatesDescription, props.locale)"
     >
-      <MaterialBackdrop edge="inset">
+      <UiField
+        v-if="isFocused"
+        v-slot="{ controlAttrs }"
+        control-id="forms-validation-error"
+        :label="localize(copy.email, props.locale)"
+        :message="localize(copy.invalidEmail, props.locale)"
+        validation="error"
+        required
+      >
+        <UiInput
+          v-bind="controlAttrs"
+          model-value="invalid-address"
+          validation="error"
+          type="email"
+        />
+      </UiField>
+      <MaterialBackdrop v-else edge="inset">
         <div class="playground-preview-columns">
           <UiField
             v-slot="{ controlAttrs }"

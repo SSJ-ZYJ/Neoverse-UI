@@ -13,6 +13,7 @@ const props = defineProps<LabModuleProps>();
   <div id="foundation-layout-shape" class="scroll-mt-24 grid gap-grid">
     <LabSpecimenSection
       id="layout-shape-spacing"
+      selection-id="foundation-layout-shape"
       :title="localize(moduleCopy.spacing.label, props.locale)"
       :description="localize(moduleCopy.spacing.description, props.locale)"
     >
@@ -21,6 +22,7 @@ const props = defineProps<LabModuleProps>();
 
     <LabSpecimenSection
       id="layout-shape-radius"
+      selection-id="foundation-layout-shape"
       :title="localize(moduleCopy.radius.label, props.locale)"
       :description="localize(moduleCopy.radius.description, props.locale)"
     >
@@ -29,6 +31,7 @@ const props = defineProps<LabModuleProps>();
 
     <LabSpecimenSection
       id="layout-shape-border"
+      selection-id="foundation-layout-shape"
       :title="localize(moduleCopy.border.label, props.locale)"
       :description="localize(moduleCopy.border.description, props.locale)"
     >
