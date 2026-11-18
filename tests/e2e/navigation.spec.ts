@@ -1,4 +1,143 @@
+import type { Locator } from '@playwright/test';
 import { expect, test } from '../support/e2e';
+
+/** The committed layout box of the indicator, independent of any flight. */
+type IndicatorBox = {
+  left: string;
+  width: string;
+  offsetLeft: number;
+  offsetWidth: number;
+};
+
+/** One style write of the indicator while a flight is running. */
+type FlightSample = IndicatorBox & { transform: string };
+
+/** The committed layout box the flight landed on. */
+type FlightCommit = { box: IndicatorBox };
+
+type FlightRecorder = {
+  committed: () => FlightCommit | undefined;
+  stop: () => { samples: FlightSample[]; commit: FlightCommit };
+};
+
+type FlightHost = Window & { __neoverseIndicatorFlight?: FlightRecorder };
+
+/** Reads the committed layout box; the flight lives only in the transform. */
+const readIndicatorBox = (indicator: Locator): Promise<IndicatorBox> =>
+  indicator.evaluate((element) => {
+    const node = element as HTMLElement;
+    return {
+      left: node.style.left,
+      width: node.style.width,
+      offsetLeft: node.offsetLeft,
+      offsetWidth: node.offsetWidth,
+    };
+  });
+
+/**
+ * A click under software rendering can take longer than the 420ms indicator
+ * flight, so reading `style.transform` after `click()` resolves samples a
+ * flight that has already committed and cleared itself. Record the flight in
+ * the page instead, from the write that sets the transform to the commit that
+ * clears it, and assert on the recording. The recorder freezes at the commit:
+ * a follow-up measurement may start another short flight, and that belongs to
+ * the next interaction, not this one.
+ */
+const clickAndRecordIndicatorFlight = async (
+  indicator: Locator,
+  target: Locator,
+): Promise<{ samples: FlightSample[]; commit: FlightCommit }> => {
+  await indicator.evaluate((element) => {
+    const node = element as HTMLElement;
+    const samples: FlightSample[] = [];
+    let started = false;
+    let commit: FlightCommit | undefined;
+    const readBox = (): IndicatorBox => ({
+      left: node.style.left,
+      width: node.style.width,
+      offsetLeft: node.offsetLeft,
+      offsetWidth: node.offsetWidth,
+    });
+    const record = () => {
+      if (commit) return;
+      const box = readBox();
+      samples.push({ ...box, transform: node.style.transform });
+      if (node.style.transform !== '') {
+        started = true;
+        return;
+      }
+      if (!started) return;
+      commit = { box };
+    };
+    const changes = new MutationObserver(record);
+    changes.observe(node, { attributes: true, attributeFilter: ['style'] });
+    (window as unknown as FlightHost).__neoverseIndicatorFlight = {
+      committed: () => commit,
+      stop: () => {
+        changes.disconnect();
+        delete (window as unknown as FlightHost).__neoverseIndicatorFlight;
+        if (!commit) throw new Error('The indicator flight never committed');
+        return { samples, commit };
+      },
+    };
+  });
+  const page = indicator.page();
+  await target.click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          (window as unknown as FlightHost).__neoverseIndicatorFlight?.committed() !== undefined,
+      ),
+    )
+    .toBe(true);
+  return page.evaluate(() => {
+    const recorder = (window as unknown as FlightHost).__neoverseIndicatorFlight;
+    if (!recorder) throw new Error('The indicator flight recorder is not installed');
+    return recorder.stop();
+  });
+};
+
+/**
+ * The flight must be a compositor transform of the committed layout box, and
+ * its final vector must equal the geometry the commit lands on. Sampling
+ * painted frames is not part of the proof: the software compositor starves
+ * requestAnimationFrame during a WebKit click, so only the style writes are
+ * deterministic across engines.
+ */
+const expectTransformFlight = (samples: FlightSample[], commit: FlightCommit): void => {
+  const flying = samples.filter((sample) => sample.transform.includes('translate'));
+  if (flying.length === 0) throw new Error('The indicator never started a transform flight');
+  for (const sample of flying) {
+    // The layout box (left/width and offsetLeft/offsetWidth) excludes the
+    // transform, so it must stay at the committed geometry while the plate
+    // flies: a per-frame layout would move it with the animation.
+    expect(
+      Math.abs(sample.offsetLeft - Math.round(Number.parseFloat(sample.left))),
+    ).toBeLessThanOrEqual(1);
+    expect(
+      Math.abs(sample.offsetWidth - Math.round(Number.parseFloat(sample.width))),
+    ).toBeLessThanOrEqual(1);
+  }
+  const last = flying[flying.length - 1];
+  if (last === undefined) throw new Error('The indicator flight has no samples');
+  // WebKit serializes a zero Y component away: translate(88px) scale(1, 1).
+  const flight = /translate\(([-\d.]+)px(?:, ([-\d.]+)px)?\) scale\(([-\d.]+), ([-\d.]+)\)/.exec(
+    last.transform,
+  );
+  if (!flight) throw new Error(`Unexpected indicator flight transform: ${last.transform}`);
+  const [, translateX, translateY = '0', scaleX, scaleY] = flight;
+  expect(
+    Math.abs(
+      Number(translateX) - (Number.parseFloat(commit.box.left) - Number.parseFloat(last.left)),
+    ),
+  ).toBeLessThan(0.5);
+  expect(Math.abs(Number(translateY))).toBeLessThan(0.5);
+  expect(
+    Math.abs(Number(scaleX) - Number.parseFloat(commit.box.width) / Number.parseFloat(last.width)),
+  ).toBeLessThan(0.01);
+  expect(Math.abs(Number(scaleY) - 1)).toBeLessThan(0.01);
+};
 
 test.describe('navigation', () => {
   test('breadcrumb links navigate and update the current item', async ({ page }) => {
@@ -167,6 +306,21 @@ test.describe('navigation', () => {
       };
     };
 
+    /**
+     * The committed geometry can still land a sub-pixel correction after the
+     * transition ends, so convergence is polled instead of sampled once.
+     */
+    const expectIndicatorOnActiveMarker = async (indicator: Locator): Promise<void> => {
+      await expect
+        .poll(async () => {
+          const geometry = await indicator.evaluate(indicatorGeometry);
+          return Math.max(geometry.left, geometry.top, geometry.width, geometry.height);
+        })
+        .toBeLessThan(0.5);
+      const geometry = await indicator.evaluate(indicatorGeometry);
+      expect(geometry.radius).toBe(geometry.markerRadius);
+    };
+
     for (const theme of ['light', 'dark'] as const) {
       test(`the indicator glides on transform and settles on the active item in ${theme}`, async ({
         page,
@@ -184,69 +338,15 @@ test.describe('navigation', () => {
         ).toBe('transform');
 
         const settleOn = async (index: number) => {
-          await items.nth(index).click();
-          const flight = await indicator.evaluate((element) => {
-            const node = element as HTMLElement;
-            return {
-              transform: node.style.transform,
-              left: node.style.left,
-              offsetLeft: node.offsetLeft,
-              offsetWidth: node.offsetWidth,
-              visualLeft: node.getBoundingClientRect().left,
-            };
-          });
-          expect(flight.transform).toContain('translate');
-          // A few compositor frames into the 420ms flight the visual box has
-          // moved, but the layout box (offsetLeft/offsetWidth exclude transform)
-          // must not: that is precisely "the indicator adds no per-frame layout".
-          // Poll the movement itself; three animation frames are not guaranteed
-          // to composite on software-rendered mobile and produced false zeros.
-          let mid:
-            | {
-                transform: string;
-                offsetLeft: number;
-                offsetWidth: number;
-                visualLeft: number;
-              }
-            | undefined;
-          await expect
-            .poll(async () => {
-              const sample = await indicator.evaluate((element) => {
-                const node = element as HTMLElement;
-                return {
-                  transform: node.style.transform,
-                  offsetLeft: node.offsetLeft,
-                  offsetWidth: node.offsetWidth,
-                  visualLeft: node.getBoundingClientRect().left,
-                };
-              });
-              if (
-                sample.transform === '' ||
-                Math.abs(sample.visualLeft - flight.visualLeft) <= 0.5
-              ) {
-                return false;
-              }
-              mid = sample;
-              return true;
-            })
-            .toBe(true);
-          if (mid === undefined) throw new Error('The indicator flight never progressed');
-          expect(mid.transform).toContain('translate');
-          expect(mid.offsetLeft).toBe(flight.offsetLeft);
-          expect(mid.offsetWidth).toBe(flight.offsetWidth);
-          expect(Math.abs(mid.visualLeft - flight.visualLeft)).toBeGreaterThan(0.5);
-          await expect
-            .poll(() => indicator.evaluate((element) => (element as HTMLElement).style.transform))
-            .toBe('');
-          const geometry = await indicator.evaluate(indicatorGeometry);
-          expect(geometry.left).toBeLessThan(0.5);
-          expect(geometry.top).toBeLessThan(0.5);
-          expect(geometry.width).toBeLessThan(0.5);
-          expect(geometry.height).toBeLessThan(0.5);
-          expect(geometry.radius).toBe(geometry.markerRadius);
-          expect(
-            await indicator.evaluate((element) => (element as HTMLElement).style.left),
-          ).not.toBe(flight.left);
+          const before = await readIndicatorBox(indicator);
+          const { samples, commit } = await clickAndRecordIndicatorFlight(
+            indicator,
+            items.nth(index),
+          );
+          expectTransformFlight(samples, commit);
+          // The commit clears the transform and writes the settled geometry.
+          expect(commit.box).not.toEqual(before);
+          await expectIndicatorOnActiveMarker(indicator);
         };
 
         await settleOn(1);
@@ -259,11 +359,7 @@ test.describe('navigation', () => {
         await expect
           .poll(() => indicator.evaluate((element) => (element as HTMLElement).style.transform))
           .toBe('');
-        const geometry = await indicator.evaluate(indicatorGeometry);
-        expect(geometry.left).toBeLessThan(0.5);
-        expect(geometry.top).toBeLessThan(0.5);
-        expect(geometry.width).toBeLessThan(0.5);
-        expect(geometry.height).toBeLessThan(0.5);
+        await expectIndicatorOnActiveMarker(indicator);
         expect(errors).toEqual([]);
       });
     }
@@ -280,11 +376,7 @@ test.describe('navigation', () => {
       expect(await indicator.evaluate((element) => (element as HTMLElement).style.transform)).toBe(
         '',
       );
-      const geometry = await indicator.evaluate(indicatorGeometry);
-      expect(geometry.left).toBeLessThan(0.5);
-      expect(geometry.top).toBeLessThan(0.5);
-      expect(geometry.width).toBeLessThan(0.5);
-      expect(geometry.height).toBeLessThan(0.5);
+      await expectIndicatorOnActiveMarker(indicator);
     });
 
     test('the compact dock indicator settles on the smaller compact geometry', async ({ page }) => {
@@ -306,12 +398,7 @@ test.describe('navigation', () => {
       await expect
         .poll(() => indicator.evaluate((element) => (element as HTMLElement).style.transform))
         .toBe('');
-      const geometry = await indicator.evaluate(indicatorGeometry);
-      expect(geometry.left).toBeLessThan(0.5);
-      expect(geometry.top).toBeLessThan(0.5);
-      expect(geometry.width).toBeLessThan(0.5);
-      expect(geometry.height).toBeLessThan(0.5);
-      expect(geometry.radius).toBe(geometry.markerRadius);
+      await expectIndicatorOnActiveMarker(indicator);
       expect(await indicator.evaluate((element) => (element as HTMLElement).offsetWidth)).toBe(
         compactWidth,
       );
@@ -330,24 +417,11 @@ test.describe('navigation', () => {
         await indicator.evaluate((element) => getComputedStyle(element).transitionProperty),
       ).toBe('transform');
 
-      await items.nth(1).click();
-      const flight = await indicator.evaluate((element) => ({
-        transform: (element as HTMLElement).style.transform,
-        left: (element as HTMLElement).style.left,
-      }));
-      expect(flight.transform).toContain('translate');
-      await expect
-        .poll(() => indicator.evaluate((element) => (element as HTMLElement).style.transform))
-        .toBe('');
-      const geometry = await indicator.evaluate(indicatorGeometry);
-      expect(geometry.left).toBeLessThan(0.5);
-      expect(geometry.top).toBeLessThan(0.5);
-      expect(geometry.width).toBeLessThan(0.5);
-      expect(geometry.height).toBeLessThan(0.5);
-      expect(geometry.radius).toBe(geometry.markerRadius);
-      expect(await indicator.evaluate((element) => (element as HTMLElement).style.left)).not.toBe(
-        flight.left,
-      );
+      const before = await readIndicatorBox(indicator);
+      const { samples, commit } = await clickAndRecordIndicatorFlight(indicator, items.nth(1));
+      expectTransformFlight(samples, commit);
+      expect(commit.box).not.toEqual(before);
+      await expectIndicatorOnActiveMarker(indicator);
       expect(errors).toEqual([]);
     });
   });
