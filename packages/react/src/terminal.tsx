@@ -7,8 +7,8 @@ import {
   useRef,
   useState,
 } from 'react';
-import { slideCaret } from './caret-motion';
-import { type SurfacePreset, UiSurface } from './index';
+import { slideCaret } from './caret-motion.js';
+import { type SurfacePreset, UiSurface } from './index.js';
 
 export type TerminalPromptTone = 'host' | 'path' | 'branch' | 'runtime' | 'time';
 export interface TerminalPromptSegment {

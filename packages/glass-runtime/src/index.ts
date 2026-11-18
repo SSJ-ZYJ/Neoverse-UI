@@ -1,7 +1,7 @@
-import { createProgram, type GlassGl } from './gl-program';
-import { NativeGlassRenderer, supportsNativeRefraction } from './native';
-import { type Color, parseColor } from './style-colors';
-import { getTableGridEdges, getTableOuterRect } from './table-edges';
+import { createProgram, type GlassGl } from './gl-program.js';
+import { NativeGlassRenderer, supportsNativeRefraction } from './native.js';
+import { type Color, parseColor } from './style-colors.js';
+import { getTableGridEdges, getTableOuterRect } from './table-edges.js';
 
 export const glassRendererAttribute = 'data-neoverse-glass-renderer';
 

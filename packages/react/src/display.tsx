@@ -6,7 +6,7 @@ import {
   type HTMLAttributes,
   type ReactNode,
 } from 'react';
-import { type SurfacePreset, UiSurface } from './index';
+import { type SurfacePreset, UiSurface } from './index.js';
 
 export type BadgeVariant = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 export type BadgeSize = 'sm' | 'md' | 'lg';

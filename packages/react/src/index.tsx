@@ -25,33 +25,33 @@ import {
   useRef,
   useState,
 } from 'react';
-import { slideCaret } from './caret-motion';
+import { slideCaret } from './caret-motion.js';
 import {
   type ButtonVariant,
   buttonVariantClasses,
   mergeClassNames,
   resolveAriaInvalid,
-} from './internal';
+} from './internal.js';
 
-export * from './avatar';
-export * from './dialog';
-export * from './display';
-export * from './empty-state';
-export * from './navigation';
-export * from './overlays';
-export * from './pagination';
-export type { UiPresenceProps, UiPresenceState } from './presence';
-export { UiPresence, useUiPresence } from './presence';
-export * from './scrollbar';
-export * from './tabs';
-export * from './terminal';
-export * from './toast';
+export * from './avatar.js';
+export * from './dialog.js';
+export * from './display.js';
+export * from './empty-state.js';
+export * from './navigation.js';
+export * from './overlays.js';
+export * from './pagination.js';
+export type { UiPresenceProps, UiPresenceState } from './presence.js';
+export { UiPresence, useUiPresence } from './presence.js';
+export * from './scrollbar.js';
+export * from './tabs.js';
+export * from './terminal.js';
+export * from './toast.js';
 
-import { UiControlSurface } from './navigation';
-import { type SurfacePreset, surfaceClasses } from './surface';
+import { UiControlSurface } from './navigation.js';
+import { type SurfacePreset, surfaceClasses } from './surface.js';
 
-export type { ButtonVariant } from './internal';
-export type { SurfacePreset } from './surface';
+export type { ButtonVariant } from './internal.js';
+export type { SurfacePreset } from './surface.js';
 export type NoticeVariant = 'neutral' | 'info' | 'success' | 'warning' | 'danger';
 export type FormControlValidation = 'none' | 'error' | 'warning' | 'success';
 export type ActionSize = 'sm' | 'md' | 'lg';

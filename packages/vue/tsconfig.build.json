@@ -2,7 +2,9 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "noEmit": false
+    "noEmit": false,
+    "outDir": "dist/types",
+    "tsBuildInfoFile": "tsconfig.build.tsbuildinfo"
   },
   "exclude": ["src/**/*.test.ts"]
 }

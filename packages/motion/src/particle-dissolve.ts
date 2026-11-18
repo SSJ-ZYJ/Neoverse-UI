@@ -5,7 +5,7 @@
 // pass. Both paths erode the page into particles that sample the source and
 // drift away on a smoke plume. Browsers without WebGL2 use the CSS choreography.
 
-import { prefersReducedMotion } from './reduced-motion';
+import { prefersReducedMotion } from './reduced-motion.js';
 
 export interface ParticleDissolvePreset {
   /** Grid spacing in CSS pixels; smaller = denser dust. */

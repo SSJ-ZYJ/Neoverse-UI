@@ -402,4 +402,4 @@ export function hideAnchoredOverlay(options: AnchoredOverlayOptions): void {
 }
 
 // Shared document-level owner used by UiScrollbar in both adapters.
-export { acquireNativeScrollbarHiding } from './scrollbar-owner';
+export { acquireNativeScrollbarHiding } from './scrollbar-owner.js';

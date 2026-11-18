@@ -262,7 +262,11 @@ try {
   const localTarballsDir = join(consumerDir, 'packages');
   await mkdir(localTarballsDir, { recursive: true });
 
-  const dependencies: Record<string, string> = { react: '^19.2.0', vue: '^3.5.0' };
+  const dependencies: Record<string, string> = {
+    react: '^19.2.0',
+    'react-dom': '^19.2.0',
+    vue: '^3.5.0',
+  };
   if (published) {
     for (const expected of releasePackages) dependencies[expected.name] = expected.version;
   }
@@ -284,7 +288,12 @@ try {
         type: 'module',
         dependencies,
         ...(published ? {} : { overrides }),
-        devDependencies: { '@types/node': '^22.0.0', typescript: '^5.6.0' },
+        devDependencies: {
+          '@types/node': '^24.0.0',
+          '@types/react': '^19.2.0',
+          '@types/react-dom': '^19.2.0',
+          typescript: '^5.9.3',
+        },
       },
       null,
       2,
@@ -305,6 +314,10 @@ try {
       `import { cssVariables } from '@neoverse-ui/tokens';\n` +
       `import { createGlassRenderer } from '@neoverse-ui/glass-runtime';\n` +
       `import { startViewTransition, createParticleDissolve, particleDissolvePresets, presenceVariants } from '@neoverse-ui/motion';\n` +
+      `import { createElement } from 'react';\n` +
+      `import { renderToString } from 'react-dom/server';\n` +
+      `const ssr = renderToString(createElement(ReactUiAction, { as: 'button', children: 'Release SSR smoke' }));\n` +
+      `if (!ssr.startsWith('<button') || !ssr.includes('Release SSR smoke')) throw new Error('React SSR did not render the action button');\n` +
       `if (!ReactUiAction || !UiButton || !UiNotice || !UiTooltipSurface || !cssVariables || !createGlassRenderer) throw new Error('public JS exports are incomplete');\n` +
       `if (![ReactUiCheckbox, ReactUiRadioGroup, ReactUiSwitch, ReactUiField, ReactUiPopover, ReactUiDropdownMenu, VueUiCheckbox, VueUiRadioGroup, VueUiSwitch, VueUiField, VueUiPopover, VueUiDropdownMenu].every(Boolean)) throw new Error('public form/overlay exports are incomplete');\n` +
       `if (![UiTerminalSurface, UiTerminalLine, UiTerminalTranscript, UiTerminalPrompt].every(Boolean)) throw new Error('public terminal exports are incomplete');\n` +
@@ -339,10 +352,9 @@ try {
       {
         compilerOptions: {
           target: 'ES2022',
-          module: 'ESNext',
-          moduleResolution: 'Bundler',
+          module: 'NodeNext',
+          moduleResolution: 'NodeNext',
           strict: true,
-          skipLibCheck: true,
           lib: ['ES2022', 'DOM'],
           noEmit: true,
         },
@@ -364,8 +376,21 @@ try {
   }
   await run(['bun', 'install', ...registryArgs], consumerDir);
   if (published) await verifyInstalledPackages(consumerDir, releasePackages);
-  await run(['bun', 'smoke.ts'], consumerDir);
+  await run(['node', 'smoke.ts'], consumerDir);
   await run(['bunx', 'tsc', '--project', 'tsconfig.json'], consumerDir);
+  await run(
+    [
+      'bunx',
+      'tsc',
+      '--project',
+      'tsconfig.json',
+      '--module',
+      'Node16',
+      '--moduleResolution',
+      'Node16',
+    ],
+    consumerDir,
+  );
 
   console.log(
     `${published ? 'Published registry' : 'Release'} package verification passed for ${packageDirs.length} package(s).`,

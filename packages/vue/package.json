@@ -27,7 +27,7 @@
     "**/*.css"
   ],
   "scripts": {
-    "build": "rm -rf dist tsconfig.build.tsbuildinfo && vue-tsc --project tsconfig.build.json --emitDeclarationOnly && vite build && bun ./scripts/copy-css.ts",
+    "build": "rm -rf dist tsconfig.build.tsbuildinfo && vue-tsc --project tsconfig.build.json --emitDeclarationOnly && rollup --config rollup.types.config.mjs && rm -rf dist/types && vite build && bun ./scripts/copy-css.ts",
     "typecheck": "vue-tsc --noEmit",
     "test": "vitest run"
   },
@@ -43,6 +43,8 @@
     "@vitejs/plugin-vue": "^6.0.10",
     "@vue/test-utils": "^2.5.1",
     "happy-dom": "^21.0.4",
+    "rollup": "^4.68.5",
+    "rollup-plugin-dts": "^6.5.1",
     "vite": "^8.3.7",
     "vitest": "^5.1.0",
     "vue": "^3.5.45",

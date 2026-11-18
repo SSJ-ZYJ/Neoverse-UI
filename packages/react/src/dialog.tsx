@@ -7,7 +7,7 @@ import {
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { mergeClassNames } from './internal';
+import { mergeClassNames } from './internal.js';
 
 export interface UiDialogProps
   extends Omit<ComponentPropsWithRef<'dialog'>, 'title' | 'open' | 'onCancel' | 'onClose'> {

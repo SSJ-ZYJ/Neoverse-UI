@@ -19,8 +19,8 @@ import {
   UiAction,
   type UiActionProps,
   UiPresence,
-} from './index';
-import { surfaceClasses } from './surface';
+} from './index.js';
+import { surfaceClasses } from './surface.js';
 
 export interface UiControlSurfaceProps extends HTMLAttributes<HTMLElement> {
   as?: ElementType;

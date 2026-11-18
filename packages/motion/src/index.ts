@@ -7,19 +7,23 @@
  * preset they need, and this package decides how it moves.
  */
 
-import { createParticleDissolve, type ParticleDissolveHandle } from './particle-dissolve';
-import { prefersReducedMotion } from './reduced-motion';
+import { createParticleDissolve, type ParticleDissolveHandle } from './particle-dissolve.js';
+import { prefersReducedMotion } from './reduced-motion.js';
 
-export type { LayoutWidthAnimation, LayoutWidthOptions, LayoutWidthSample } from './layout-width';
-export { animateLayoutWidths, captureLayoutWidths } from './layout-width';
-export type { MotionDistance, MotionDuration, MotionEasing, MotionRole } from './motion-tokens';
+export type {
+  LayoutWidthAnimation,
+  LayoutWidthOptions,
+  LayoutWidthSample,
+} from './layout-width.js';
+export { animateLayoutWidths, captureLayoutWidths } from './layout-width.js';
+export type { MotionDistance, MotionDuration, MotionEasing, MotionRole } from './motion-tokens.js';
 export {
   motionDistances,
   motionDurations,
   motionEasings,
   motionRoles,
-} from './motion-tokens';
-export { attachSelectionIndicator } from './selection-indicator';
+} from './motion-tokens.js';
+export { attachSelectionIndicator } from './selection-indicator.js';
 
 /**
  * Presence presets. Each value maps 1:1 to a CSS variant defined by the
@@ -145,15 +149,15 @@ export type {
   ParticleDissolveOptions,
   ParticleDissolvePreset,
   ParticleDissolvePresetName,
-} from './particle-dissolve';
+} from './particle-dissolve.js';
 export {
   createParticleDissolve,
   particleDissolvePresets,
   prewarmParticleDissolve,
   supportsParticleCapture,
   supportsParticleDissolve,
-} from './particle-dissolve';
-export { prefersReducedMotion } from './reduced-motion';
+} from './particle-dissolve.js';
+export { prefersReducedMotion } from './reduced-motion.js';
 
 export interface ViewTransitionOptions {
   /** Skip the animation entirely under prefers-reduced-motion (DOM update still runs). */

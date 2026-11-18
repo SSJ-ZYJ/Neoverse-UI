@@ -23,8 +23,8 @@
  * the box height mid-animation.
  */
 
-import { motionRoles } from './motion-tokens';
-import { prefersReducedMotion } from './reduced-motion';
+import { motionRoles } from './motion-tokens.js';
+import { prefersReducedMotion } from './reduced-motion.js';
 
 /** One box's rendered width, sampled before a layout-changing update. */
 export interface LayoutWidthSample {

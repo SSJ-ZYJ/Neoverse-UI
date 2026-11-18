@@ -7,8 +7,8 @@ import {
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
-import type { NoticeVariant } from './index';
-import { UiPresence } from './presence';
+import type { NoticeVariant } from './index.js';
+import { UiPresence } from './presence.js';
 
 export interface UiToastProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
   open: boolean;

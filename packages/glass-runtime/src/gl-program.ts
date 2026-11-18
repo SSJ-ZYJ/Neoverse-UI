@@ -1,4 +1,4 @@
-import { glassFragmentShader, glassVertexShader } from './shader';
+import { glassFragmentShader, glassVertexShader } from './shader.js';
 
 export type GlassGl = WebGLRenderingContext | WebGL2RenderingContext;
 

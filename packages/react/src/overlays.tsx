@@ -22,7 +22,7 @@ import {
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
-import { type ButtonVariant, buttonVariantClasses, mergeClassNames } from './internal';
+import { type ButtonVariant, buttonVariantClasses, mergeClassNames } from './internal.js';
 
 interface AnchoredOverlayControllerOptions {
   open?: boolean;

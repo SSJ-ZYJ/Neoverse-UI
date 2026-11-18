@@ -92,16 +92,31 @@ git diff --check
 bun changeset status
 ```
 
-`release:check` runs non-mutating Biome checks, text/style/Tailwind checks, typechecks, tests, and build. It verifies every public package, rejects leaked `workspace:` protocols and source/test/playground artifacts, and checks that packed internal runtime dependency ranges include the corresponding workspace release versions before installing local overrides. It then installs the generated package contents into a temporary clean consumer for JS, CSS, and TypeScript smoke tests. Local overrides prove package usability, not npm availability. The full Playwright gate must also finish with zero failures; conditional skips must have a documented design reason. The release workflow runs these browser gates before packing.
+`release:check` runs non-mutating Biome checks, text/style/Tailwind checks,
+typechecks, tests, and build. It verifies every public package, rejects leaked
+`workspace:` protocols and source/test/playground artifacts, and checks that
+packed internal runtime dependency ranges include the corresponding workspace
+release versions before installing local overrides. Local overrides prove
+package usability, not npm availability. The full Playwright gate must also
+finish with zero failures; conditional skips must have a documented design
+reason. The release workflow runs these browser gates before packing.
+
+Package verification installs the artifacts in a temporary clean consumer.
+Use Node.js 24 for this gate: it loads the public JavaScript entries through
+the native ESM loader and renders a React action with `react-dom/server`.
+CSS entries are resolved to files, not executed as JavaScript. TypeScript
+checks the installed declarations under both `NodeNext` and `Node16` without
+`skipLibCheck`. Vue's build bundles the declarations from `vue-tsc` so Node
+consumers do not need Vue-specific resolution for `.vue` imports.
 
 `verify:published` selects API checks from each package's exact manifest version.
 Registry packages at 0.3.1 or later must expose React parity, Vue `UiTerminalEcho`,
 the React terminal header type, material names and the new token-map entries.
 Published 0.3.0 packages retain their older API baseline. Local tarballs always
 exercise the new assertions, including before manifest versioning. Both modes
-retain JS/CSS/type checks, and published mode still verifies exact versions and
-the resolved dependency graph. Future API additions must extend this shared,
-version-aware baseline rather than remain excluded from published verification.
+run the native Node, CSS, and TypeScript checks above. Published mode also
+verifies exact versions and the resolved dependency graph. Future API additions
+must extend this shared, version-aware baseline rather than remain excluded from published verification.
 
 Run release gates in an isolated checkout/copy when another `bun dev` is active.
 The development watcher intentionally writes readable CSS to the same `dist`
@@ -264,6 +279,10 @@ Packages are not fixed or linked as one version group: that release used minor b
 for Tokens, Tailwind, Overlay Runtime and both adapters, patch bumps for Motion and
 Glass Runtime, and no Giscus Theme bump. Pending Changesets describe later source
 changes; inspect their actual release plan rather than assigning one version to every dependency.
+
+When an internal runtime fix is required by its adapters, include the runtime
+and both adapters in the same release. The `updateInternalDependencies: "patch"`
+policy raises the adapters' dependency floors when Changesets versions that release.
 
 During release-candidate work, validate the pending release plan with:
 
