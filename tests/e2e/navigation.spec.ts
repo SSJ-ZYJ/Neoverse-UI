@@ -121,22 +121,30 @@ const expectTransformFlight = (samples: FlightSample[], commit: FlightCommit): v
   }
   const last = flying[flying.length - 1];
   if (last === undefined) throw new Error('The indicator flight has no samples');
-  // WebKit serializes a zero Y component away: translate(88px) scale(1, 1).
-  const flight = /translate\(([-\d.]+)px(?:, ([-\d.]+)px)?\) scale\(([-\d.]+), ([-\d.]+)\)/.exec(
-    last.transform,
+  // Every engine drops defaulted components when it serializes the inline
+  // transform: WebKit writes translate(88px) scale(1, 1), Firefox writes
+  // translate(88px) scale(1). Parse the function list instead of one shape.
+  const parts = Array.from(
+    last.transform.matchAll(/([a-z]+)\(([^)]*)\)/g),
+    ([, name = '', args = '']) => ({
+      name,
+      args: args.split(',').map((arg) => Number.parseFloat(arg)),
+    }),
   );
-  if (!flight) throw new Error(`Unexpected indicator flight transform: ${last.transform}`);
-  const [, translateX, translateY = '0', scaleX, scaleY] = flight;
+  const translate = parts.find((part) => part.name === 'translate');
+  const scale = parts.find((part) => part.name === 'scale');
+  if (!translate || !scale)
+    throw new Error(`Unexpected indicator flight transform: ${last.transform}`);
+  const [translateX = Number.NaN, translateY = 0] = translate.args;
+  const [scaleX = Number.NaN, scaleY = scaleX] = scale.args;
   expect(
-    Math.abs(
-      Number(translateX) - (Number.parseFloat(commit.box.left) - Number.parseFloat(last.left)),
-    ),
+    Math.abs(translateX - (Number.parseFloat(commit.box.left) - Number.parseFloat(last.left))),
   ).toBeLessThan(0.5);
-  expect(Math.abs(Number(translateY))).toBeLessThan(0.5);
+  expect(Math.abs(translateY)).toBeLessThan(0.5);
   expect(
-    Math.abs(Number(scaleX) - Number.parseFloat(commit.box.width) / Number.parseFloat(last.width)),
+    Math.abs(scaleX - Number.parseFloat(commit.box.width) / Number.parseFloat(last.width)),
   ).toBeLessThan(0.01);
-  expect(Math.abs(Number(scaleY) - 1)).toBeLessThan(0.01);
+  expect(Math.abs(scaleY - 1)).toBeLessThan(0.01);
 };
 
 test.describe('navigation', () => {
