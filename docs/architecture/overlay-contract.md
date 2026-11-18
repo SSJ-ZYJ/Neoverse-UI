@@ -102,7 +102,15 @@ existing interaction suites.
 rect, so a cursor menu reuses the same flip, viewport clamp and zoom compensation; `placement: 'auto'`
 still opens below the pointer and flips above when the lower viewport cannot fit the panel. `trigger`
 is optional, and `focusReturn` names the element that receives focus when a point-anchored overlay
-closes, because a cursor open has no trigger to return to.
+closes, because a cursor open has no trigger to return to. `previousFocus` reports the element that
+held focus before the panel opened, which the adapter records at show time.
+
+A closed manual popover keeps keyboard focus inside itself in Firefox: the engine only drops focus on
+its own schedule, leaving a menu row focused in a hidden surface. Chromium and WebKit move focus out
+during `hidePopover()`. A manual overlay is the case where the runtime already owns dismissal, so it
+owns the matching focus release: `hideAnchoredOverlay` returns focus to `focusReturn`, then
+`trigger`, then `previousFocus`, and blurs the closed row when no owner exists. Light-dismissed
+overlays leave focus to the engine.
 
 The fallback containing-block correction reads the panel's own layout box. A panel that has not been
 laid out reports an all-zero rect, which would turn the correction into a duplicate offset, so the

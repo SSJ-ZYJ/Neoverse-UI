@@ -70,6 +70,9 @@ function overlayOptions(): AnchoredOverlayOptions | undefined {
   return {
     ...(props.point === undefined ? {} : { point: props.point }),
     ...(props.focusReturn === undefined ? {} : { focusReturn: props.focusReturn }),
+    // A cursor open has no trigger, so the remembered owner is the only
+    // element focus can return to when the panel closes.
+    previousFocus: () => restoreTarget,
     overlay,
     gapVariable: '--neoverse-overlay-gap',
     leftVariable: '--neoverse-overlay-left',

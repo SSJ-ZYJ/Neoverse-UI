@@ -1,6 +1,7 @@
 import { expect, test } from 'bun:test';
 import {
   acquireNativeScrollbarHiding,
+  hideAnchoredOverlay,
   positionAnchoredOverlay,
   resolveAnchoredPosition,
   resolveOverlayViewportLayoutBounds,
@@ -411,5 +412,89 @@ test('releasing a scrollbar owner more than once cannot drop another owner', () 
     releaseSecond();
     releaseSecond();
     expect(root.classList.has('ui-scrollbar-target')).toBe(false);
+  });
+});
+
+test('a closed manual overlay releases focus it still owns', () => {
+  const focused = {
+    focus: () => undefined,
+    blur: () => {
+      released = true;
+    },
+  };
+  let released = false;
+  const panel = {
+    ownerDocument: { activeElement: focused },
+    contains: (node: unknown) => node === focused,
+    matches: () => false,
+    hidePopover: () => undefined,
+    classList: { remove: () => undefined },
+  } as unknown as HTMLElement;
+  hideAnchoredOverlay({
+    manual: true,
+    overlay: panel,
+    gapVariable: '--gap',
+    leftVariable: '--left',
+    topVariable: '--top',
+    fallbackOpenClass: 'is-open',
+  });
+  expect(released).toBe(true);
+});
+
+test('a closed manual overlay returns focus to the remembered owner', () => {
+  const ownerDocument: { activeElement: unknown } = { activeElement: null };
+  const owner = {
+    isConnected: true,
+    focus: () => {
+      ownerDocument.activeElement = owner;
+    },
+  };
+  const focused = {
+    focus: () => undefined,
+    blur: () => {
+      throw new Error('the owner took focus');
+    },
+  };
+  ownerDocument.activeElement = focused;
+  const panel = {
+    ownerDocument,
+    contains: (node: unknown) => node === focused,
+    matches: () => false,
+    hidePopover: () => undefined,
+    classList: { remove: () => undefined },
+  } as unknown as HTMLElement;
+  hideAnchoredOverlay({
+    manual: true,
+    overlay: panel,
+    focusReturn: owner as unknown as HTMLElement,
+    previousFocus: () => owner as unknown as HTMLElement,
+    gapVariable: '--gap',
+    leftVariable: '--left',
+    topVariable: '--top',
+    fallbackOpenClass: 'is-open',
+  });
+  expect(ownerDocument.activeElement).toBe(owner);
+});
+
+test('a light-dismissed overlay leaves focus to the engine', () => {
+  const focused = {
+    focus: () => undefined,
+    blur: () => {
+      throw new Error('the engine owns this close');
+    },
+  };
+  const panel = {
+    ownerDocument: { activeElement: focused },
+    contains: (node: unknown) => node === focused,
+    matches: () => false,
+    hidePopover: () => undefined,
+    classList: { remove: () => undefined },
+  } as unknown as HTMLElement;
+  hideAnchoredOverlay({
+    overlay: panel,
+    gapVariable: '--gap',
+    leftVariable: '--left',
+    topVariable: '--top',
+    fallbackOpenClass: 'is-open',
   });
 });

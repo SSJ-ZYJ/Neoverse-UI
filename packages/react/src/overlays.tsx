@@ -448,6 +448,9 @@ export function UiContextMenu({
     return {
       ...(point === undefined ? {} : { point }),
       ...(focusReturn === undefined || focusReturn === null ? {} : { focusReturn }),
+      // A cursor open has no trigger, so the remembered owner is the only
+      // element focus can return to when the panel closes.
+      previousFocus: () => restoreTarget.current,
       overlay,
       gapVariable: '--neoverse-overlay-gap',
       leftVariable: '--neoverse-overlay-left',

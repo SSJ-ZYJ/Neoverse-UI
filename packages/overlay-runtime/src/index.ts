@@ -44,6 +44,13 @@ export interface AnchoredOverlayOptions {
   point?: OverlayPoint;
   /** Element that receives focus when the overlay closes; defaults to `trigger`. */
   focusReturn?: HTMLElement;
+  /**
+   * Element that received focus before a point-anchored overlay opened. Firefox
+   * does not move focus out of a manual popover when it closes, so the runtime
+   * returns focus itself; this is the fallback when `focusReturn` is unset and
+   * `trigger` does not exist.
+   */
+  previousFocus?: () => HTMLElement | null;
   overlay: HTMLElement;
   gapVariable: string;
   leftVariable: string;
@@ -392,6 +399,31 @@ export function showAnchoredOverlay(options: AnchoredOverlayOptions): void {
   });
 }
 
+/**
+ * A closed manual popover keeps keyboard focus inside itself in Firefox: the
+ * engine drops focus on its own schedule, which leaves a menu row focused in a
+ * hidden surface. Chromium and WebKit move focus out during `hidePopover()`.
+ * A manual overlay is the case where the runtime owns dismissal, so it owns
+ * the matching focus release: return focus to the remembered owner, or release
+ * it to the document when the menu was opened from a pointer with no owner.
+ */
+function releaseOverlayFocus(options: AnchoredOverlayOptions): void {
+  if (options.manual !== true) return;
+  const active = options.overlay.ownerDocument.activeElement;
+  // The runtime also runs without a DOM (SSR, tests), so focusability is
+  // checked structurally instead of with `instanceof HTMLElement`.
+  if (active === null || typeof (active as HTMLElement).focus !== 'function') return;
+  const focused = active as HTMLElement;
+  const inside = (element: HTMLElement | null | undefined) => element?.contains(focused) === true;
+  if (!inside(options.overlay) && !(options.containedElements?.() ?? []).some(inside)) return;
+  const target = options.focusReturn ?? options.trigger ?? options.previousFocus?.();
+  if (target?.isConnected === true && !options.overlay.contains(target)) {
+    target.focus({ preventScroll: true });
+    if (!options.overlay.contains(options.overlay.ownerDocument.activeElement)) return;
+  }
+  focused.blur();
+}
+
 export function hideAnchoredOverlay(options: AnchoredOverlayOptions): void {
   if (supportsPopover(options.overlay)) {
     if (options.overlay.matches(':popover-open')) options.overlay.hidePopover();
@@ -399,6 +431,7 @@ export function hideAnchoredOverlay(options: AnchoredOverlayOptions): void {
     options.overlay.classList.remove(options.fallbackOpenClass);
   }
   stopOverlayTracking(options.overlay);
+  releaseOverlayFocus(options);
 }
 
 // Shared document-level owner used by UiScrollbar in both adapters.

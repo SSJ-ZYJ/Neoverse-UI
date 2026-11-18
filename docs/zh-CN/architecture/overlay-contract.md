@@ -5,7 +5,7 @@ Status: adopted
 [English](../../architecture/overlay-contract.md)
 
 <!-- Source: docs/architecture/overlay-contract.md -->
-<!-- Source-SHA256: b07ccfec63ef78ca16f426999cfcea75890634d8bb99d58b55b7a3dd6fd15dce -->
+<!-- Source-SHA256: 6c7b095947ade1e6557bd6da28c0834f8d9d0769e93a69e73a297433ed91e042 -->
 
 Neoverse-UI 对锚定的顶层界面使用同一套浮层行为规则。Popover、DropdownMenu 与 Select 共享同一个与框架无关的定位运行时和同一套极光玻璃深度语言。
 
@@ -84,7 +84,9 @@ Neoverse-UI 对锚定的顶层界面使用同一套浮层行为规则。Popover�
 
 ## 光标锚定菜单
 
-`AnchoredOverlayOptions` 接受 `trigger` 元素或 `point`。点是零尺寸矩形，因此光标菜单复用相同的翻转、视口限制与缩放补偿；`placement: 'auto'` 仍会在指针下方打开，下方视口无法容纳时向上翻转。`trigger` 可选，`focusReturn` 指定点锚定浮层关闭时接收焦点的元素，因为光标打开没有可返回的触发器。
+`AnchoredOverlayOptions` 接受 `trigger` 元素或 `point`。点是零尺寸矩形，因此光标菜单复用相同的翻转、视口限制与缩放补偿；`placement: 'auto'` 仍会在指针下方打开，下方视口无法容纳时向上翻转。`trigger` 可选，`focusReturn` 指定点锚定浮层关闭时接收焦点的元素，因为光标打开没有可返回的触发器。`previousFocus` 报告面板打开前持有焦点的元素，由适配器在展示时记录。
+
+已关闭的手动 popover 在 Firefox 中会把键盘焦点留在自身内部：该引擎只按自己的节奏移除焦点，从而把一个菜单行留在已隐藏的表面上。Chromium 与 WebKit 在 `hidePopover()` 期间就把焦点移出。手动浮层正是运行时已经接管关闭的场合，因此也接管配套的焦点释放：`hideAnchoredOverlay` 依次尝试 `focusReturn`、`trigger`、`previousFocus` 归还焦点，没有归属时则让已关闭的行失焦。轻关闭的浮层仍把焦点交给引擎处理。
 
 回退包含块修正读取面板自身的布局盒。尚未布局的面板会报告全零矩形，这会把修正变成重复偏移，因此这种情况下跳过修正。原生 popover 不受影响。
 
