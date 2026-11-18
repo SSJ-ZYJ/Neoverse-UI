@@ -65,34 +65,119 @@ test.describe('playground', () => {
       await expect
         .poll(() => specimen.evaluate((element) => document.activeElement === element))
         .toBe(true);
+      await expect(page.getByRole('banner')).toBeInViewport({ ratio: 1 });
+      expect(await page.evaluate(() => window.scrollY)).toBe(0);
     }
   });
 
-  test('the drawer navigation is inert when closed and restores focus on Escape', async ({
+  test('each drawer traps focus when open and restores focus on Escape', async ({
     page,
   }, testInfo) => {
     test.skip(
       testInfo.project.name !== 'mobile',
       'The drawer only exists below the xl breakpoint.',
     );
-    await page.goto('/?lang=en', { waitUntil: 'domcontentloaded' });
-    const navigation = page.locator('#design-lab-navigation');
-    const trigger = page.locator('[data-playground-nav-trigger]');
+    await page.goto('/?lang=en#controls-button', { waitUntil: 'domcontentloaded' });
+    for (const [name, triggerAttribute] of [
+      ['Explorer', 'data-playground-nav-trigger'],
+      ['Inspector', 'data-playground-inspector-trigger'],
+    ] as const) {
+      const trigger = page.locator(`[${triggerAttribute}]`);
+      const drawer = page.getByRole('dialog', { name });
+      await expect(trigger).toBeVisible();
+      await expect(drawer).toBeHidden();
 
-    await expect(trigger).toBeVisible();
-    expect(await navigation.evaluate((element) => (element as HTMLElement).inert)).toBe(true);
+      await trigger.press('Enter');
+      await expect(drawer).toBeVisible();
+      await expect(drawer.getByRole('button', { name: `Close ${name}` })).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(drawer.locator(':focus')).toHaveCount(1);
+      await page.keyboard.press('Shift+Tab');
+      await page.keyboard.press('Shift+Tab');
+      await expect(page.locator('header.playground-shell__toolbar :focus')).toHaveCount(0);
 
-    await trigger.click();
-    expect(await navigation.evaluate((element) => (element as HTMLElement).inert)).toBe(false);
-    expect(await navigation.evaluate((element) => element.contains(document.activeElement))).toBe(
-      true,
-    );
+      await page.keyboard.press('Escape');
+      await expect(drawer).toBeHidden();
+      await expect(trigger).toBeFocused();
 
-    await page.keyboard.press('Escape');
-    expect(await navigation.evaluate((element) => (element as HTMLElement).inert)).toBe(true);
-    await expect
-      .poll(() => trigger.evaluate((element) => element === document.activeElement))
-      .toBe(true);
+      await trigger.click();
+      await expect(drawer).toBeVisible();
+      const outsideX = name === 'Explorer' ? 380 : 10;
+      await page.mouse.click(outsideX, 400);
+      await expect(drawer).toBeHidden();
+      await expect(trigger).toBeFocused();
+    }
+  });
+
+  test('the Explorer finds specimens by API and browser history restores focus and selection', async ({
+    page,
+  }, testInfo) => {
+    await page.goto('/?lang=en#forms', { waitUntil: 'domcontentloaded' });
+    const mobile = testInfo.project.name === 'mobile';
+    if (mobile) await page.getByRole('button', { name: 'Open Explorer' }).click();
+    const explorer = page.locator('[data-playground-navigation]');
+    const components = explorer.getByRole('button', { name: 'Components' });
+    await components.press('Enter');
+    await expect(components).toHaveAttribute('aria-expanded', 'false');
+    await expect(explorer.locator('a[href="#forms"]')).toBeHidden();
+
+    const search = explorer.getByRole('searchbox');
+    await search.fill('no matching specimen');
+    await expect(explorer.getByRole('status')).toContainText('No modules or specimens');
+    await search.fill('UiSelect');
+    const select = explorer.locator('a[href="#forms-select"]');
+    await select.press('Enter');
+    await expect(page).toHaveURL(/#forms-select$/);
+    await expect(page.locator('#forms-select')).toBeFocused();
+
+    if (mobile) await page.getByRole('button', { name: 'Open Inspector' }).click();
+    const inspector = page.locator('#design-lab-inspector');
+    await expect(inspector.getByText('UiSelect', { exact: true })).toBeVisible();
+    if (mobile) await page.keyboard.press('Escape');
+    await page.goBack();
+    await expect(page).toHaveURL(/#forms$/);
+    await expect(page.locator('[data-stage-heading]')).toBeFocused();
+    await page.goForward();
+    await expect(page).toHaveURL(/#forms-select$/);
+    await expect(page.locator('#forms-select')).toBeFocused();
+    if (mobile) await page.getByRole('button', { name: 'Open Explorer' }).click();
+    await expect(select).toHaveAttribute('aria-current', 'location');
+  });
+
+  test('the Inspector opens the selected specimen in an isolated frame', async ({
+    page,
+  }, testInfo) => {
+    await page.goto('/?theme=dark&lang=en#controls-button', { waitUntil: 'domcontentloaded' });
+    if (testInfo.project.name === 'mobile') {
+      await page.getByRole('button', { name: 'Open Inspector' }).click();
+    }
+    await page.getByRole('link', { name: 'Open isolated preview' }).click();
+    await expect(page).toHaveURL(/\/frame\?theme=dark&lang=en#controls-button$/);
+    await expect(page.locator('#controls-button')).toBeVisible();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('[data-design-lab-workspace]')).toHaveCount(0);
+  });
+
+  test('the desktop toolbar switches theme and language without resizing the stage', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto('/?theme=light&lang=en#controls', { waitUntil: 'domcontentloaded' });
+    const stage = page.locator('[data-design-lab-workspace]');
+    const original = await stage.boundingBox();
+    await page
+      .getByRole('radiogroup', { name: 'Playground theme' })
+      .getByRole('radio', { name: 'Dark' })
+      .click();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await page
+      .getByRole('radiogroup', { name: 'Language' })
+      .getByRole('radio', { name: '中文' })
+      .click();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
+    await expect(page).toHaveURL(/theme=light&lang=zh#controls$/);
+    await expect(page.getByRole('complementary', { name: '检查器' })).toBeVisible();
+    expect(await stage.boundingBox()).toEqual(original);
   });
 
   test('the mobile toolbar cycles the theme and switches the language', async ({
@@ -175,11 +260,29 @@ test.describe('playground', () => {
     }
   });
 
-  for (const width of [390, 1024, 1440]) {
+  for (const width of [390, 1024, 1440, 1920]) {
     test(`the shell keeps its content inside the viewport at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto('/?lang=en#controls', { waitUntil: 'domcontentloaded' });
       await expect(page.locator('[data-design-lab-region="module"]')).toBeVisible();
+      const stage = page.locator('[data-design-lab-workspace]');
+      expect(
+        await stage.evaluate((element) => element.scrollWidth - element.clientWidth),
+      ).toBeLessThanOrEqual(1);
+      if (width >= 1280) {
+        const explorer = page.getByRole('complementary', { name: 'Explorer' });
+        const inspector = page.getByRole('complementary', { name: 'Inspector' });
+        await expect(explorer).toBeVisible();
+        await expect(inspector).toBeVisible();
+        const bounds = await stage.boundingBox();
+        expect(bounds?.width).toBeGreaterThan((await explorer.boundingBox())?.width ?? Infinity);
+        expect(bounds?.width).toBeGreaterThan((await inspector.boundingBox())?.width ?? Infinity);
+        expect((await explorer.boundingBox())?.height).toBe(bounds?.height);
+        expect((await inspector.boundingBox())?.height).toBe(bounds?.height);
+      } else {
+        await expect(page.getByRole('button', { name: 'Open Explorer' })).toBeVisible();
+        await expect(page.getByRole('button', { name: 'Open Inspector' })).toBeVisible();
+      }
       await expectNoPageOverflow(page);
       expect(await page.evaluate(() => window.scrollY)).toBe(0);
     });

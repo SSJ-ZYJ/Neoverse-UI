@@ -6,7 +6,9 @@ Read this file before changing the Design Lab. Global constraints are in [AGENTS
 apps/playground/
   src/index.ts              Bun.serve shell, /frame document, health endpoint, port selection
   src/main.ts               Vite browser entry: Vue app, shell styles, Glass mount
-  src/App.vue               Design Lab shell and responsive navigation
+  src/App.vue               selects the shell or the isolated frame
+  src/LabWorkspace.vue      shell route, preferences, drawer and scroll coordination
+  src/Lab{Toolbar,Explorer,Stage,Inspector}.vue  persistent chrome and preview regions
   src/modules/              one module per Design Lab area; not public API
   src/contract-lab.ts       maturity, parity and runtime status derived from contracts
   src/theme-runtime.ts      framework-neutral theme resolution and persistence

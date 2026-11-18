@@ -15,168 +15,357 @@
 }
 
 .playground-shell {
-  isolation: isolate;
+  display: grid;
+  block-size: 100dvh;
+  grid-template: 'toolbar' auto 'stage' minmax(0, 1fr) / minmax(0, 1fr);
   gap: var(--neoverse-playground-shell-gap);
   padding: var(--neoverse-playground-shell-inset);
   background:
-    radial-gradient(ellipse at 78% -25%, var(--neoverse-color-accent-soft), transparent 52%),
+    radial-gradient(ellipse at 15% 0%, var(--neoverse-color-accent-soft), transparent 58%),
     var(--neoverse-color-surface-canvas);
 }
 
-.playground-shell__navigation {
-  inset-block: var(--neoverse-playground-shell-drawer-inset);
-  inset-inline-start: var(--neoverse-playground-shell-drawer-inset);
-  max-height: calc(100dvh - var(--neoverse-playground-shell-drawer-inset) * 2);
-  padding: var(--neoverse-playground-navigation-inset);
-  /* Glass defines visual transitions; the drawer must also animate its position. */
-  transition: transform var(--neoverse-motion-duration-standard)
-    var(--neoverse-motion-easing-standard);
+.playground-shell[data-persistent] {
+  grid-template:
+    'toolbar toolbar toolbar' auto
+    'explorer stage inspector' minmax(0, 1fr)
+    / var(--neoverse-playground-explorer-width) minmax(0, 1fr) var(
+      --neoverse-playground-inspector-width
+    );
 }
 
-/* Paint the scrim above the Glass sampling layer, with a rounded opening
-   that follows the drawer. The transparent dismiss button handles outside clicks. */
-.playground-shell::after {
-  position: fixed;
-  z-index: var(--neoverse-layout-layer-modal);
-  inset-block: var(--neoverse-playground-shell-drawer-inset);
-  inset-inline-start: var(--neoverse-playground-shell-drawer-inset);
-  width: var(--neoverse-layout-sidebar-drawer-width);
+.playground-shell__toolbar {
+  grid-area: toolbar;
+  display: flex;
+  min-block-size: var(--neoverse-playground-toolbar-min-height);
+  min-inline-size: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--neoverse-space-2);
   border-radius: var(--neoverse-radius-panel);
-  box-shadow: 0 0 0 100vmax var(--neoverse-color-overlay-scrim);
-  content: '';
-  opacity: 0;
-  pointer-events: none;
-  transform: translateX(calc(-100% - var(--neoverse-playground-shell-drawer-inset)));
-  transition:
-    transform var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-standard),
-    opacity var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-standard);
+  padding-inline: var(--neoverse-space-3);
 }
 
-.playground-shell--nav-open::after {
-  opacity: 1;
-  transform: translateX(0);
+.playground-shell__identity,
+.playground-shell__toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--neoverse-space-1);
 }
 
-.playground-shell__navigation--open {
-  transform: translateX(0);
+.playground-shell__identity {
+  min-inline-size: 0;
 }
 
-.playground-shell__navigation--closed {
-  transform: translateX(calc(-100% - var(--neoverse-playground-shell-drawer-inset)));
-}
-
-.playground-shell__navigation-header {
-  position: relative;
-  z-index: var(--neoverse-layout-layer-sticky);
+.playground-shell__toolbar-actions {
   flex: none;
-  padding-block-end: var(--neoverse-space-4);
+}
+
+.playground-shell__toolbar-actions,
+.playground-overview-hero__stage {
+  --neoverse-control-segmented-active-foreground: var(--neoverse-color-text-primary);
 }
 
 .playground-shell__brand-wordmark {
   display: block;
-  inline-size: 6rem;
+  inline-size: clamp(4.75rem, 20vw, 6rem);
   block-size: 2rem;
   flex: none;
   background-color: currentColor;
-  -webkit-mask-position: center;
   mask-position: center;
-  -webkit-mask-repeat: no-repeat;
   mask-repeat: no-repeat;
-  -webkit-mask-size: contain;
   mask-size: contain;
 }
 
-.playground-shell__navigation-header::after {
-  position: absolute;
-  z-index: var(--neoverse-layout-layer-base);
-  inset-block-start: calc(100% - var(--neoverse-playground-navigation-fade-overlap));
-  inset-inline: calc(var(--neoverse-playground-navigation-inset) * -1);
-  height: calc(
-    var(--neoverse-playground-navigation-fade-size) +
-    var(--neoverse-playground-navigation-fade-overlap)
-  );
-  background: transparent;
-  content: '';
-  pointer-events: none;
-  -webkit-backdrop-filter: blur(var(--neoverse-material-glass-elevated-blur));
-  backdrop-filter: blur(var(--neoverse-material-glass-elevated-blur));
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgb(0 0 0 / 32%) 20%,
-    rgb(0 0 0 / 72%) 42%,
-    rgb(0 0 0 / 62%) 60%,
-    rgb(0 0 0 / 28%) 80%,
-    transparent 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0%,
-    rgb(0 0 0 / 32%) 20%,
-    rgb(0 0 0 / 72%) 42%,
-    rgb(0 0 0 / 62%) 60%,
-    rgb(0 0 0 / 28%) 80%,
-    transparent 100%
-  );
+.playground-shell__name {
+  overflow: hidden;
+  margin-inline-start: var(--neoverse-space-1);
+  border-inline-start: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+  padding-inline-start: var(--neoverse-space-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.playground-shell__navigation-scroll {
-  margin-block-start: calc(var(--neoverse-playground-navigation-fade-overlap) * -1);
-  padding-block-start: var(--neoverse-playground-navigation-fade-size);
-  -webkit-mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    rgb(0 0 0 / 12%) calc(var(--neoverse-playground-navigation-fade-size) * 0.2),
-    rgb(0 0 0 / 42%) calc(var(--neoverse-playground-navigation-fade-size) * 0.4),
-    rgb(0 0 0 / 75%) calc(var(--neoverse-playground-navigation-fade-size) * 0.65),
-    rgb(0 0 0 / 92%) calc(var(--neoverse-playground-navigation-fade-size) * 0.85),
-    black var(--neoverse-playground-navigation-fade-size),
-    black 100%
-  );
-  mask-image: linear-gradient(
-    to bottom,
-    transparent 0,
-    rgb(0 0 0 / 12%) calc(var(--neoverse-playground-navigation-fade-size) * 0.2),
-    rgb(0 0 0 / 42%) calc(var(--neoverse-playground-navigation-fade-size) * 0.4),
-    rgb(0 0 0 / 75%) calc(var(--neoverse-playground-navigation-fade-size) * 0.65),
-    rgb(0 0 0 / 92%) calc(var(--neoverse-playground-navigation-fade-size) * 0.85),
-    black var(--neoverse-playground-navigation-fade-size),
-    black 100%
-  );
-}
-
-.playground-shell__content,
-.playground-shell__workspace {
-  min-width: 0;
+.playground-shell__panel {
+  min-inline-size: 0;
+  min-block-size: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 0;
   border-radius: var(--neoverse-radius-panel);
+  padding: 0;
+  color: var(--neoverse-color-text-primary);
 }
 
+.playground-shell__panel[open] {
+  display: flex;
+}
+
+.playground-shell__explorer {
+  grid-area: explorer;
+  --neoverse-playground-drawer-offset: -1;
+  --neoverse-playground-drawer-width: var(--neoverse-layout-sidebar-drawer-width);
+}
+
+.playground-shell__inspector {
+  grid-area: inspector;
+  --neoverse-playground-drawer-offset: 1;
+  --neoverse-playground-drawer-width: calc(
+    var(--neoverse-layout-sidebar-drawer-width) +
+    var(--neoverse-space-6)
+  );
+}
+
+.playground-shell[data-persistent] .playground-shell__panel {
+  position: relative;
+  inset: auto;
+  inline-size: auto;
+  block-size: 100%;
+  max-inline-size: none;
+  max-block-size: none;
+  margin: 0;
+}
+
+.playground-shell:not([data-persistent]) .playground-shell__panel {
+  position: fixed;
+  inset: var(--neoverse-playground-shell-drawer-inset) auto
+    var(--neoverse-playground-shell-drawer-inset) var(--neoverse-playground-shell-drawer-inset);
+  inline-size: min(
+    var(--neoverse-playground-drawer-width),
+    calc(100% - var(--neoverse-playground-shell-drawer-inset) * 2 - var(--neoverse-space-8))
+  );
+  block-size: auto;
+  max-inline-size: none;
+  max-block-size: none;
+  margin: 0;
+  translate: calc(
+    var(--neoverse-playground-drawer-offset) *
+    (100% + var(--neoverse-playground-shell-drawer-inset))
+  );
+  transition:
+    translate var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
+    overlay var(--neoverse-motion-spatial-duration) allow-discrete,
+    display var(--neoverse-motion-spatial-duration) allow-discrete;
+}
+
+.playground-shell:not([data-persistent]) .playground-shell__inspector {
+  inset-inline: auto var(--neoverse-playground-shell-drawer-inset);
+}
+
+.playground-shell:not([data-persistent]) .playground-shell__panel[open] {
+  translate: 0;
+}
+
+.playground-shell__panel::backdrop {
+  background: var(--neoverse-color-overlay-scrim);
+  opacity: 0;
+  transition:
+    opacity var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+    overlay var(--neoverse-motion-spatial-duration) allow-discrete,
+    display var(--neoverse-motion-spatial-duration) allow-discrete;
+}
+
+.playground-shell__panel[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  .playground-shell:not([data-persistent]) .playground-shell__panel[open] {
+    translate: calc(
+      var(--neoverse-playground-drawer-offset) *
+      (100% + var(--neoverse-playground-shell-drawer-inset))
+    );
+  }
+
+  .playground-shell__panel[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+.playground-shell__panel-header {
+  display: grid;
+  min-inline-size: 0;
+  flex: none;
+  gap: var(--neoverse-space-3);
+  padding: var(--neoverse-playground-navigation-inset);
+  padding-block-end: var(--neoverse-space-2);
+}
+
+.playground-shell__panel-title {
+  display: flex;
+  min-block-size: var(--neoverse-space-8);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--neoverse-space-2);
+}
+
+.playground-shell__panel-body,
 .playground-shell__workspace {
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
   scrollbar-gutter: stable;
 }
 
-.playground-shell__toolbar {
-  isolation: isolate;
-  min-height: var(--neoverse-playground-toolbar-min-height);
-  box-shadow: var(--neoverse-shadow-sm);
+.playground-shell__panel-body {
+  display: grid;
+  flex: auto;
+  align-content: start;
+  padding: var(--neoverse-space-2) var(--neoverse-playground-navigation-inset)
+    var(--neoverse-playground-navigation-inset);
 }
 
-.playground-shell__toolbar-actions > .ui-segmented-control {
-  flex: 0 0 auto;
+.playground-explorer {
+  gap: var(--neoverse-space-2);
 }
 
-.playground-navigation-group {
-  box-shadow: var(--neoverse-shadow-none);
+.playground-explorer__category,
+.playground-explorer__link,
+.playground-inspector__frame-link {
+  justify-content: start;
+  text-align: start;
 }
 
-.playground-navigation-group--plain + .playground-navigation-group--plain {
-  background-image: linear-gradient(
-    var(--neoverse-color-border-subtle),
-    var(--neoverse-color-border-subtle)
-  );
-  background-position: center top;
-  background-size: calc(100% - var(--neoverse-space-4)) var(--neoverse-border-width-thin);
-  background-repeat: no-repeat;
+.playground-explorer__category {
+  justify-content: space-between;
+  color: var(--neoverse-color-text-secondary);
+}
+
+.playground-explorer__chevron {
+  transition: rotate var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+}
+
+.playground-explorer__category[aria-expanded='true'] .playground-explorer__chevron {
+  rotate: 90deg;
+}
+
+.playground-explorer__link {
+  inline-size: 100%;
+  --neoverse-navigation-item-active-foreground: var(--neoverse-color-text-primary);
+  --neoverse-navigation-item-active-background: none;
+  --neoverse-navigation-item-active-fill: var(--neoverse-color-accent-soft);
+  --neoverse-navigation-item-active-shadow: var(--neoverse-shadow-none);
+}
+
+.playground-explorer__specimens {
+  margin-inline-start: var(--neoverse-space-3);
+  border-inline-start: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+  padding-inline-start: var(--neoverse-space-1);
+}
+
+.playground-inspector,
+.playground-inspector section {
+  display: grid;
+  gap: var(--neoverse-space-3);
+}
+
+.playground-inspector section {
+  padding-block: var(--neoverse-space-3);
+  border-block-start: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-subtle);
+}
+
+.playground-inspector__label {
+  color: var(--neoverse-color-text-secondary);
+  font-size: var(--neoverse-typography-label-sm-size);
+  font-weight: var(--neoverse-font-weight-semibold);
+}
+
+.playground-inspector__details {
+  display: grid;
+  min-inline-size: 0;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--neoverse-space-2) var(--neoverse-space-3);
+  overflow-wrap: anywhere;
+}
+
+.playground-inspector__details dt {
+  color: var(--neoverse-color-text-secondary);
+}
+
+.playground-inspector__frame-link {
+  justify-self: start;
+}
+
+.playground-shell__workspace {
+  grid-area: stage;
+  border-radius: var(--neoverse-radius-panel);
+  background:
+    radial-gradient(
+      ellipse at 82% 24%,
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 25%, transparent),
+      transparent 64%
+    ),
+    radial-gradient(
+      ellipse at 15% 92%,
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 22%, transparent),
+      transparent 69%
+    ),
+    var(--neoverse-color-surface-canvas);
+}
+
+.playground-stage {
+  display: grid;
+  min-block-size: 100%;
+  min-inline-size: 0;
+  max-inline-size: var(--neoverse-layout-content-max-width);
+  grid-template-rows: auto 1fr;
+  gap: var(--neoverse-space-5);
+  margin-inline: auto;
+  padding: clamp(var(--neoverse-space-3), 2vw, var(--neoverse-space-8));
+}
+
+.playground-stage__label {
+  display: flex;
+  align-items: center;
+  gap: var(--neoverse-space-2);
+}
+
+.playground-stage__label > span {
+  inline-size: var(--neoverse-space-2);
+  block-size: var(--neoverse-space-2);
+  border-radius: var(--neoverse-radius-pill);
+  background: var(--neoverse-color-accent-secondary);
+}
+
+.playground-stage__module {
+  display: grid;
+  min-inline-size: 0;
+  align-content: start;
+  gap: var(--neoverse-layout-grid-gap);
+}
+
+.playground-stage__heading {
+  display: grid;
+  gap: var(--neoverse-space-2);
+  animation: playground-stage-title var(--neoverse-motion-state-duration)
+    var(--neoverse-motion-state-easing) both;
+}
+
+/* Do not fade the specimen tree: that creates a backdrop root around its Glass. */
+@keyframes playground-stage-title {
+  from {
+    opacity: 0.55;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playground-stage__heading {
+    animation: none;
+  }
+
+  .playground-shell:not([data-persistent]) .playground-shell__panel,
+  .playground-shell__panel::backdrop,
+  .playground-explorer__chevron {
+    transition: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .playground-shell__panel {
+    border: var(--neoverse-border-width-thin) solid CanvasText;
+  }
 }
 
 .playground-floating-interaction-surface {
@@ -185,33 +374,6 @@
 
 .playground-floating-interaction-surface:is(:hover, :focus-within) {
   z-index: var(--neoverse-layout-layer-raised);
-}
-
-@media (prefers-reduced-transparency: reduce) {
-  .playground-shell__navigation-header::after {
-    background: linear-gradient(
-      to bottom,
-      var(--neoverse-material-glass-elevated-background-fallback),
-      var(--neoverse-color-transparent)
-    );
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-
-  .playground-shell__navigation-scroll {
-    -webkit-mask-image: none;
-    mask-image: none;
-  }
-}
-
-[data-design-lab-workspace] {
-  scrollbar-gutter: stable;
-}
-
-.playground-navigation-item--flat-active {
-  --neoverse-navigation-item-active-background: none;
-  --neoverse-navigation-item-active-fill: var(--neoverse-color-accent-soft);
-  --neoverse-navigation-item-active-shadow: var(--neoverse-shadow-none);
 }
 
 .playground-token-grid {
@@ -721,30 +883,39 @@
 }
 
 .playground-overview-hero {
-  position: relative;
-  overflow: hidden;
-  background:
-    radial-gradient(ellipse at 90% 0%, var(--neoverse-color-accent-soft), transparent 65%),
-    var(--neoverse-color-surface-subtle);
+  display: grid;
+  grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--neoverse-playground-showcase-card-width)), 1fr)
+    );
+  align-content: center;
+  align-items: center;
+  gap: clamp(var(--neoverse-space-6), 5vw, var(--neoverse-space-12));
+  padding-block: var(--neoverse-space-6) var(--neoverse-space-12);
+}
+
+.playground-overview-hero__intro {
+  max-inline-size: var(--neoverse-layout-reading-width);
+  gap: var(--neoverse-space-4);
+}
+
+.playground-overview-hero__intro h2 {
+  max-inline-size: 12ch;
+  font-size: var(--neoverse-typography-display-lg-size);
+  line-height: var(--neoverse-typography-display-lg-line-height);
+  letter-spacing: var(--neoverse-typography-display-lg-letter-spacing);
+  text-wrap: balance;
 }
 
 .playground-overview-hero__stage {
-  position: relative;
-  isolation: isolate;
   display: grid;
-  min-height: var(--neoverse-playground-showcase-min-height);
-  align-content: center;
   justify-items: center;
-  gap: var(--neoverse-space-4);
-  border: 1px solid var(--neoverse-color-border-subtle);
-  border-radius: var(--neoverse-radius-panel);
-  background: var(--neoverse-playground-stage-gradient), var(--neoverse-color-surface-canvas);
-  padding: var(--neoverse-space-5);
+  gap: var(--neoverse-space-3);
 }
 
 .playground-overview-hero__sample {
-  width: min(100%, var(--neoverse-playground-showcase-card-width));
-  box-shadow: var(--neoverse-shadow-raised);
+  inline-size: 100%;
+  max-inline-size: calc(var(--neoverse-playground-showcase-card-width) + var(--neoverse-space-12));
 }
 
 .playground-dock-preview {
@@ -839,19 +1010,4 @@
     var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);
   box-shadow: var(--neoverse-shadow-inset);
-}
-
-/* --- One continuous take -----------------------------------------------
-   Module navigation runs inside a View Transition started by
-   @neoverse-ui/motion. The chrome keeps a stable snapshot name so it never
-   flashes; the page content is dissolved into WebGL particles by the engine,
-   with a plain crossfade as the terminal fallback. The names only exist for
-   the duration of a transition, so theme switches (which use their own
-   attribute) are unaffected. --- */
-:root[data-neoverse-view-transitioning] .playground-shell__toolbar {
-  view-transition-name: playground-toolbar;
-}
-
-:root[data-neoverse-view-transitioning] .playground-shell__navigation {
-  view-transition-name: playground-navigation;
 }

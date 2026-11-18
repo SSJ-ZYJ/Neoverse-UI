@@ -17,7 +17,7 @@ import ShadowModule from './modules/ShadowModule.vue';
 import StatusFeedbackModule from './modules/StatusFeedbackModule.vue';
 import TerminalModule from './modules/TerminalModule.vue';
 import TypographyModule from './modules/TypographyModule.vue';
-import { groupCopy, type LocalizedText, localized, moduleCopy } from './playground-content';
+import { type LocalizedText, localized, moduleCopy } from './playground-content';
 
 export const labModules = [
   {
@@ -143,31 +143,8 @@ export type LabModule = (typeof labModules)[number];
 
 export const moduleGroups = [
   {
-    id: 'tokens',
-    label: groupCopy.tokens.label,
-    description: groupCopy.tokens.description,
-    packages: ['@neoverse-ui/tokens'],
-    moduleIds: ['colors', 'typography', 'layout-shape', 'shadow'],
-  },
-  {
-    id: 'materials',
-    label: groupCopy.materials.label,
-    description: groupCopy.materials.description,
-    packages: ['@neoverse-ui/tailwind', '@neoverse-ui/glass-runtime'],
-    moduleIds: ['materials'],
-  },
-  {
-    id: 'motion',
-    label: groupCopy.motion.label,
-    description: groupCopy.motion.description,
-    packages: ['@neoverse-ui/motion'],
-    moduleIds: ['motion'],
-  },
-  {
     id: 'components',
-    label: groupCopy.components.label,
-    description: groupCopy.components.description,
-    packages: ['@neoverse-ui/vue', '@neoverse-ui/react'],
+    label: localized('Components', '组件'),
     moduleIds: [
       'controls',
       'overlays',
@@ -180,29 +157,28 @@ export const moduleGroups = [
     ],
   },
   {
-    id: 'patterns',
-    label: groupCopy.patterns.label,
-    description: groupCopy.patterns.description,
-    packages: ['@neoverse-ui/vue', '@neoverse-ui/react', '@neoverse-ui/tailwind'],
+    id: 'foundations',
+    label: localized('Foundations', '设计基础'),
+    moduleIds: ['colors', 'typography', 'layout-shape', 'shadow', 'motion'],
+  },
+  {
+    id: 'compositions',
+    label: localized('Compositions', '组合场景'),
     moduleIds: ['composition', 'terminal'],
   },
   {
+    id: 'presets',
+    label: localized('Presets', '预设'),
+    moduleIds: ['materials'],
+  },
+  {
     id: 'validation',
-    label: groupCopy.validation.label,
-    description: groupCopy.validation.description,
-    packages: [
-      '@neoverse-ui/vue',
-      '@neoverse-ui/react',
-      '@neoverse-ui/overlay-runtime',
-      '@neoverse-ui/giscus-theme',
-    ],
+    label: localized('Validation', '验证'),
     moduleIds: ['consumer-parity', 'giscus'],
   },
 ] as const satisfies readonly {
   id: string;
   label: LocalizedText;
-  description: LocalizedText;
-  packages: readonly string[];
   moduleIds: readonly ModuleId[];
 }[];
 

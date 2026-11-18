@@ -3,20 +3,21 @@
   --neoverse-playground-shell-gap: var(--neoverse-space-3);
   --neoverse-playground-shell-drawer-inset: var(--neoverse-space-2);
   --neoverse-playground-navigation-inset: var(--neoverse-space-4);
-  --neoverse-playground-navigation-fade-size: var(--neoverse-space-12);
-  --neoverse-playground-navigation-fade-overlap: calc(
-    var(--neoverse-playground-navigation-fade-size) /
-    2
+  --neoverse-playground-toolbar-min-height: var(--neoverse-layout-header-min-height);
+  --neoverse-playground-explorer-width: clamp(
+    var(--neoverse-layout-sidebar-width),
+    16vw,
+    calc(var(--neoverse-layout-sidebar-drawer-width) - var(--neoverse-space-3))
   );
-  --neoverse-playground-toolbar-min-height: calc(
-    var(--neoverse-control-surface-control-height) +
-    var(--neoverse-space-4)
+  --neoverse-playground-inspector-width: clamp(
+    var(--neoverse-layout-sidebar-width),
+    20vw,
+    calc(var(--neoverse-layout-sidebar-drawer-width) + var(--neoverse-space-10))
   );
-  --neoverse-playground-consumer-dock-compact-breakpoint: 32.5rem;
   --neoverse-playground-token-card-min-width: 18rem;
+  --neoverse-playground-consumer-dock-compact-breakpoint: 32.5rem;
   --neoverse-playground-specimen-card-min-width: 30rem;
   --neoverse-playground-preview-column-min-width: 14rem;
-  --neoverse-playground-showcase-min-height: calc(var(--neoverse-space-12) * 5);
   --neoverse-playground-showcase-card-width: calc(var(--neoverse-space-12) * 6);
   --neoverse-playground-preview-stage-height: calc(var(--neoverse-space-12) * 3);
   --neoverse-playground-layout-preview-inline-size: calc(var(--neoverse-space-12) * 2);

@@ -5,11 +5,13 @@ type LabIconName =
   | 'article'
   | 'bookmark'
   | 'check'
+  | 'chevron'
   | 'close'
   | 'folder'
   | 'github'
   | 'globe'
   | 'home'
+  | 'inspector'
   | 'mail'
   | 'menu'
   | 'message'
@@ -29,6 +31,7 @@ const paths: Record<LabIconName, string> = {
   article: 'M6 3h9l3 3v15H6V3Zm3 6h6M9 13h6M9 17h4',
   bookmark: 'M7 4h10v16l-5-3-5 3V4Z',
   check: 'm5 12 4 4L19 6',
+  chevron: 'm9 5 7 7-7 7',
   close: 'm6 6 12 12M18 6 6 18',
   folder: 'M3 6h7l2 2h9v10H3V6Z',
   github:
@@ -36,6 +39,7 @@ const paths: Record<LabIconName, string> = {
   globe:
     'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-18c2.2 2.5 3.3 5.5 3.3 9S14.2 18.5 12 21c-2.2-2.5-3.3-5.5-3.3-9S9.8 5.5 12 3ZM3 12h18',
   home: 'm4 10 8-7 8 7v10h-5v-6H9v6H4V10Z',
+  inspector: 'M3 5h18v14H3V5Zm12 0v14',
   mail: 'M3 6h18v12H3V6Zm1 1 8 6 8-6',
   menu: 'M4 7h16M4 12h16M4 17h16',
   message: 'M4 5h16v11H8l-4 4V5Z',

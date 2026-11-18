@@ -33,16 +33,17 @@ export const appCopy = {
   framePageTitle: localized('{title} — {theme}', '{title} — {theme}'),
   brand: localized('Neoverse UI', 'Neoverse UI'),
   designLab: localized('Design Lab', '设计实验室'),
-  sidebarDescription: localized(
-    'A visual calibration surface for tokens, materials, motion, and core components.',
-    '用于校准设计令牌、材质、动效与核心组件的视觉参考界面。',
-  ),
   navigation: {
-    label: localized('Design Lab navigation', '设计实验室导航'),
+    label: localized('Explorer', '资源浏览'),
     modulesLabel: localized('Design Lab modules', '设计实验室模块'),
-    open: localized('Open navigation', '打开导航'),
-    close: localized('Close navigation', '关闭导航'),
+    open: localized('Open Explorer', '打开资源浏览'),
+    close: localized('Close Explorer', '关闭资源浏览'),
     overview: localized('Overview', '总览'),
+  },
+  inspector: {
+    label: localized('Inspector', '检查器'),
+    open: localized('Open Inspector', '打开检查器'),
+    close: localized('Close Inspector', '关闭检查器'),
   },
   overview: {
     eyebrow: localized('Workspace overview', '工作区总览'),
@@ -51,11 +52,8 @@ export const appCopy = {
       'Explore tokens, components, and patterns in one interactive workspace.',
       '在同一个工作区中探索设计变量、组件与组合场景。',
     ),
-    moduleCount: localized('{count} modules', '{count} 个模块'),
-    openGroup: localized('Open {group}', '打开{group}'),
   },
   module: {
-    backToOverview: localized('Back to overview', '返回总览'),
     frameTitle: localized('{label} {theme} theme preview', '{label} {theme}主题预览'),
     themeNames: {
       light: localized('Light', '浅色'),
@@ -87,51 +85,6 @@ export const appCopy = {
     assetsLabel: localized('Design Lab assets', '设计实验室资源'),
     assetsUnavailable: localized('{asset} has not been built yet.', '{asset} 尚未构建。'),
     notFound: localized('Not found', '未找到。'),
-  },
-} as const;
-
-export const groupCopy = {
-  tokens: {
-    label: localized('Design Tokens', '设计令牌'),
-    description: localized(
-      'Color, typography, layout geometry, and elevation from the shared token package.',
-      '共享令牌包中的色彩、字体、布局几何与阴影层级。',
-    ),
-  },
-  materials: {
-    label: localized('Materials & Styles', '材质与样式'),
-    description: localized(
-      'Tailwind surface styles and the optional Aurora Glass runtime enhancement.',
-      'Tailwind 表面样式与可选的极光玻璃运行时增强。',
-    ),
-  },
-  motion: {
-    label: localized('Motion', '动效'),
-    description: localized(
-      'Motion roles, Presence transitions, and page-transition choreography.',
-      '动效角色、Presence 过渡与页面转场编排。',
-    ),
-  },
-  components: {
-    label: localized('UI Components', 'UI 组件'),
-    description: localized(
-      'Framework components, ordered from controls and forms to content and navigation.',
-      '框架组件，按控件、表单、反馈、内容与导航的使用顺序排列。',
-    ),
-  },
-  patterns: {
-    label: localized('Compositions', '组合场景'),
-    description: localized(
-      'Multi-component interface patterns and the terminal composition, rather than standalone package APIs.',
-      '多组件界面模式与终端组合，而非独立的包级组件 API。',
-    ),
-  },
-  validation: {
-    label: localized('Contract Lab', '契约实验室'),
-    description: localized(
-      'Contract coverage, framework parity, runtime behavior, and audited consumer fixtures share one validation area.',
-      '契约覆盖、框架一致性、Runtime 行为与真实消费端校验集中在同一验证区域。',
-    ),
   },
 } as const;
 
