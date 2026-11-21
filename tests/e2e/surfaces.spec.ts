@@ -47,21 +47,27 @@ test.describe('surfaces', () => {
         await expect(indicator).toHaveCSS('opacity', '1');
         await expect(indicator).not.toHaveCSS('background-image', 'none');
         const activeTab = tabs.locator('[role="tab"][aria-selected="true"]');
-        const [indicatorBox, activeBox] = await Promise.all([
-          indicator.boundingBox(),
-          activeTab.boundingBox(),
-        ]);
-        expect(indicatorBox).not.toBeNull();
-        expect(activeBox).not.toBeNull();
-        if (indicatorBox !== null && activeBox !== null) {
-          // Glass content positioning must not turn the selection plate into a
-          // flex item: that shifts both the tabs and the plate out of the tab.
-          expect(Math.abs(indicatorBox.x - activeBox.x)).toBeLessThanOrEqual(1);
-          expect(Math.abs(indicatorBox.y - activeBox.y)).toBeLessThanOrEqual(1);
-          expect(
-            Math.abs(indicatorBox.x + indicatorBox.width / 2 - (activeBox.x + activeBox.width / 2)),
-          ).toBeLessThanOrEqual(1);
-        }
+        await page.evaluate(() => document.fonts.ready.then(() => undefined));
+        // Compare the final plate with the tab after any resize from font loading.
+        await expect(async () => {
+          const [indicatorBox, activeBox] = await Promise.all([
+            indicator.boundingBox(),
+            activeTab.boundingBox(),
+          ]);
+          expect(indicatorBox).not.toBeNull();
+          expect(activeBox).not.toBeNull();
+          if (indicatorBox !== null && activeBox !== null) {
+            // Glass content positioning must not turn the selection plate into a
+            // flex item: that shifts both the tabs and the plate out of the tab.
+            expect(Math.abs(indicatorBox.x - activeBox.x)).toBeLessThanOrEqual(1);
+            expect(Math.abs(indicatorBox.y - activeBox.y)).toBeLessThanOrEqual(1);
+            expect(
+              Math.abs(
+                indicatorBox.x + indicatorBox.width / 2 - (activeBox.x + activeBox.width / 2),
+              ),
+            ).toBeLessThanOrEqual(1);
+          }
+        }).toPass({ timeout: 2_000 });
         expect(
           await indicator.evaluate((element) =>
             getComputedStyle(element)

@@ -2,12 +2,10 @@
 import { type SurfacePreset, UiButton, UiIconButton, UiSurface } from '@neoverse-ui/vue';
 import { glassVariantLabels, glassVariants } from '../lab-data';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
-import { injectSpecimenSelection } from '../lab-specimen-scope';
 import { localize, localized, moduleCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
-const { isFocused } = injectSpecimenSelection();
 const glassSurfaces = {
   subtle: 'glass-subtle',
   elevated: 'glass-elevated',
@@ -16,10 +14,7 @@ const glassSurfaces = {
 </script>
 
 <template>
-  <UiSurface v-if="isFocused" surface="glass-subtle" class="rounded-card p-5">
-    {{ localize(glassVariantLabels.subtle, props.locale) }}
-  </UiSurface>
-  <div v-else class="playground-token-grid">
+  <div class="playground-token-grid">
     <MaterialBackdrop
       v-for="variant in glassVariants"
       :key="variant"

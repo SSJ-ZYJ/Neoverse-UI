@@ -1,4 +1,6 @@
 import type { Component } from 'vue';
+import * as interactive from './lab-interactive-specimens';
+import type { FocusedPreview } from './lab-specimen-config';
 import CardModule from './modules/CardModule.vue';
 import ColorsModule from './modules/ColorsModule.vue';
 import CompositionModule from './modules/CompositionModule.vue';
@@ -18,6 +20,10 @@ import StatusFeedbackModule from './modules/StatusFeedbackModule.vue';
 import TerminalModule from './modules/TerminalModule.vue';
 import TypographyModule from './modules/TypographyModule.vue';
 import { type LocalizedText, localized, moduleCopy } from './playground-content';
+import * as components from './previews/components';
+import * as compositions from './previews/compositions';
+import * as foundations from './previews/foundations';
+import * as overlays from './previews/overlays';
 
 export const labModules = [
   {
@@ -192,12 +198,14 @@ export interface LabSpecimen {
   readonly apiNames: readonly string[];
   readonly tags: readonly string[];
   readonly kind: SpecimenKind;
+  readonly preview: FocusedPreview;
   readonly browse?: boolean;
 }
 
 export const labSpecimens = [
   {
     id: 'data-display-tabs',
+    preview: components.tabs,
     moduleId: 'data-display',
     label: localized('Tabs', '标签页'),
     apiNames: ['UiTabs'],
@@ -206,6 +214,7 @@ export const labSpecimens = [
   },
   {
     id: 'data-display-avatar',
+    preview: components.avatar,
     moduleId: 'data-display',
     label: localized('Avatar', '头像'),
     apiNames: ['UiAvatar'],
@@ -214,6 +223,7 @@ export const labSpecimens = [
   },
   {
     id: 'data-display-pagination',
+    preview: components.pagination,
     moduleId: 'data-display',
     label: localized('Pagination', '分页'),
     apiNames: ['UiPagination'],
@@ -222,6 +232,7 @@ export const labSpecimens = [
   },
   {
     id: 'data-display-empty-state',
+    preview: components.emptyState,
     moduleId: 'data-display',
     label: localized('Empty state', '空状态'),
     apiNames: ['UiEmptyState'],
@@ -230,6 +241,7 @@ export const labSpecimens = [
   },
   {
     id: 'data-display-stat-card',
+    preview: components.statCard,
     moduleId: 'data-display',
     label: localized('Metric cards', '指标卡'),
     apiNames: ['UiStatCard'],
@@ -238,6 +250,7 @@ export const labSpecimens = [
   },
   {
     id: 'data-display-timeline',
+    preview: components.timeline,
     moduleId: 'data-display',
     label: localized('Timeline', '时间线'),
     apiNames: ['UiTimeline'],
@@ -246,6 +259,7 @@ export const labSpecimens = [
   },
   {
     id: 'data-display-step-flow',
+    preview: components.stepFlow,
     moduleId: 'data-display',
     label: localized('Step flow', '步骤流'),
     apiNames: ['UiStepFlow'],
@@ -254,6 +268,7 @@ export const labSpecimens = [
   },
   {
     id: 'foundation-colors',
+    preview: foundations.colors,
     moduleId: 'colors',
     label: moduleCopy.colors.label,
     apiNames: [],
@@ -262,6 +277,7 @@ export const labSpecimens = [
   },
   {
     id: 'foundation-typography',
+    preview: foundations.typography,
     moduleId: 'typography',
     label: moduleCopy.typography.label,
     apiNames: [],
@@ -270,6 +286,7 @@ export const labSpecimens = [
   },
   {
     id: 'foundation-prose',
+    preview: foundations.prose,
     moduleId: 'typography',
     label: localized('Prose & content semantics', '正文与内容语义'),
     apiNames: [],
@@ -278,6 +295,7 @@ export const labSpecimens = [
   },
   {
     id: 'foundation-layout-shape',
+    preview: foundations.layoutShape,
     moduleId: 'layout-shape',
     label: moduleCopy.layoutShape.label,
     apiNames: [],
@@ -287,6 +305,7 @@ export const labSpecimens = [
   },
   {
     id: 'layout-shape-spacing',
+    preview: foundations.spacing,
     moduleId: 'layout-shape',
     label: moduleCopy.spacing.label,
     apiNames: [],
@@ -295,6 +314,7 @@ export const labSpecimens = [
   },
   {
     id: 'layout-shape-radius',
+    preview: foundations.radius,
     moduleId: 'layout-shape',
     label: moduleCopy.radius.label,
     apiNames: [],
@@ -303,6 +323,7 @@ export const labSpecimens = [
   },
   {
     id: 'layout-shape-border',
+    preview: foundations.border,
     moduleId: 'layout-shape',
     label: moduleCopy.border.label,
     apiNames: [],
@@ -311,6 +332,7 @@ export const labSpecimens = [
   },
   {
     id: 'shadow-primitive',
+    preview: foundations.shadowPrimitive,
     moduleId: 'shadow',
     label: moduleCopy.shadow.primitive.label,
     apiNames: [],
@@ -319,6 +341,7 @@ export const labSpecimens = [
   },
   {
     id: 'shadow-alias',
+    preview: foundations.shadowAlias,
     moduleId: 'shadow',
     label: moduleCopy.shadow.aliases.label,
     apiNames: [],
@@ -327,6 +350,7 @@ export const labSpecimens = [
   },
   {
     id: 'foundation-motion',
+    preview: foundations.motion,
     moduleId: 'motion',
     label: moduleCopy.motion.label,
     apiNames: [],
@@ -335,6 +359,7 @@ export const labSpecimens = [
   },
   {
     id: 'foundation-motion-presence',
+    preview: foundations.motionPresence,
     moduleId: 'motion',
     label: moduleCopy.motion.presence.label,
     apiNames: ['UiPresence'],
@@ -343,6 +368,7 @@ export const labSpecimens = [
   },
   {
     id: 'foundation-motion-width',
+    preview: foundations.motionWidth,
     moduleId: 'motion',
     label: moduleCopy.motion.width.label,
     apiNames: [],
@@ -351,6 +377,7 @@ export const labSpecimens = [
   },
   {
     id: 'foundation-motion-page',
+    preview: foundations.motionPage,
     moduleId: 'motion',
     label: moduleCopy.motion.page.label,
     apiNames: [],
@@ -359,6 +386,7 @@ export const labSpecimens = [
   },
   {
     id: 'materials-surface',
+    preview: foundations.surface,
     moduleId: 'materials',
     label: localized('Surface presets', '表面预设'),
     apiNames: ['UiSurface'],
@@ -368,6 +396,7 @@ export const labSpecimens = [
 
   {
     id: 'materials-glass',
+    preview: foundations.glass,
     moduleId: 'materials',
     label: moduleCopy.glass.label,
     apiNames: ['UiSurface'],
@@ -376,6 +405,7 @@ export const labSpecimens = [
   },
   {
     id: 'terminal-composition',
+    preview: foundations.terminal,
     moduleId: 'terminal',
     label: localized('Terminal composition', '终端组件组合'),
     apiNames: [
@@ -390,6 +420,7 @@ export const labSpecimens = [
   },
   {
     id: 'controls-button',
+    preview: interactive.button,
     moduleId: 'controls',
     label: moduleCopy.button.label,
     apiNames: ['UiButton'],
@@ -398,6 +429,7 @@ export const labSpecimens = [
   },
   {
     id: 'controls-icon-button',
+    preview: components.iconButton,
     moduleId: 'controls',
     label: moduleCopy.iconButton.label,
     apiNames: ['UiIconButton'],
@@ -406,6 +438,7 @@ export const labSpecimens = [
   },
   {
     id: 'controls-action',
+    preview: components.action,
     moduleId: 'controls',
     label: moduleCopy.action.label,
     apiNames: ['UiAction'],
@@ -414,6 +447,7 @@ export const labSpecimens = [
   },
   {
     id: 'controls-breadcrumb',
+    preview: components.breadcrumb,
     moduleId: 'controls',
     label: localized('Breadcrumb', '面包屑导航'),
     apiNames: ['UiBreadcrumb'],
@@ -422,6 +456,7 @@ export const labSpecimens = [
   },
   {
     id: 'overlays-popover',
+    preview: overlays.popover,
     moduleId: 'overlays',
     label: localized('Popover', '弹出层'),
     apiNames: ['UiPopover'],
@@ -430,6 +465,7 @@ export const labSpecimens = [
   },
   {
     id: 'overlays-dropdown-menu',
+    preview: overlays.dropdownMenu,
     moduleId: 'overlays',
     label: localized('Dropdown menu', '下拉菜单'),
     apiNames: ['UiDropdownMenu'],
@@ -438,6 +474,7 @@ export const labSpecimens = [
   },
   {
     id: 'overlays-context-menu',
+    preview: overlays.contextMenu,
     moduleId: 'overlays',
     label: localized('Context menu', '右键菜单'),
     apiNames: ['UiContextMenu'],
@@ -446,6 +483,7 @@ export const labSpecimens = [
   },
   {
     id: 'overlays-dialog',
+    preview: overlays.dialog,
     moduleId: 'overlays',
     label: localized('Modal dialog', '模态对话框'),
     apiNames: ['UiDialog'],
@@ -454,6 +492,7 @@ export const labSpecimens = [
   },
   {
     id: 'controls-navigation-item',
+    preview: components.navigationItem,
     moduleId: 'controls',
     label: moduleCopy.navigationItem.label,
     apiNames: ['UiNavigationItem'],
@@ -462,6 +501,7 @@ export const labSpecimens = [
   },
   {
     id: 'controls-segmented-control',
+    preview: interactive.segmented,
     moduleId: 'controls',
     label: moduleCopy.segmentedControl.label,
     apiNames: ['UiSegmentedControl'],
@@ -470,6 +510,7 @@ export const labSpecimens = [
   },
   {
     id: 'controls-surface',
+    preview: components.controlSurface,
     moduleId: 'controls',
     label: moduleCopy.controlSurface.label,
     apiNames: ['UiControlSurface'],
@@ -478,6 +519,7 @@ export const labSpecimens = [
   },
   {
     id: 'dock-component',
+    preview: interactive.dock,
     moduleId: 'dock',
     label: moduleCopy.dock.label,
     apiNames: ['UiDock'],
@@ -486,6 +528,7 @@ export const labSpecimens = [
   },
   {
     id: 'status-feedback-badge',
+    preview: components.badge,
     moduleId: 'status-feedback',
     label: moduleCopy.badge.label,
     apiNames: ['UiBadge'],
@@ -494,6 +537,7 @@ export const labSpecimens = [
   },
   {
     id: 'status-feedback-indicator',
+    preview: components.indicator,
     moduleId: 'status-feedback',
     label: moduleCopy.statusIndicator.label,
     apiNames: ['UiStatusIndicator'],
@@ -502,6 +546,7 @@ export const labSpecimens = [
   },
   {
     id: 'status-feedback-skeleton',
+    preview: components.skeleton,
     moduleId: 'status-feedback',
     label: moduleCopy.skeleton.label,
     apiNames: ['UiSkeleton'],
@@ -510,6 +555,7 @@ export const labSpecimens = [
   },
   {
     id: 'status-feedback-notice',
+    preview: components.notice,
     moduleId: 'status-feedback',
     label: localized('Notice', '提示'),
     apiNames: ['UiNotice'],
@@ -518,6 +564,7 @@ export const labSpecimens = [
   },
   {
     id: 'status-feedback-toast',
+    preview: components.toast,
     moduleId: 'status-feedback',
     label: localized('Toast', '短暂反馈'),
     apiNames: ['UiToast'],
@@ -526,6 +573,7 @@ export const labSpecimens = [
   },
   {
     id: 'status-feedback-tooltip',
+    preview: components.tooltip,
     moduleId: 'status-feedback',
     label: localized('Tooltip surface', '工具提示表面'),
     apiNames: ['UiTooltipSurface'],
@@ -534,6 +582,7 @@ export const labSpecimens = [
   },
   {
     id: 'forms-input',
+    preview: interactive.input,
     moduleId: 'forms',
     label: localized('Text input', '文本输入'),
     apiNames: ['UiInput'],
@@ -542,6 +591,7 @@ export const labSpecimens = [
   },
   {
     id: 'forms-textarea',
+    preview: components.textarea,
     moduleId: 'forms',
     label: localized('Textarea', '多行文本'),
     apiNames: ['UiTextarea'],
@@ -550,6 +600,7 @@ export const labSpecimens = [
   },
   {
     id: 'forms-select',
+    preview: components.select,
     moduleId: 'forms',
     label: localized('Select', '选择框'),
     apiNames: ['UiSelect'],
@@ -558,6 +609,7 @@ export const labSpecimens = [
   },
   {
     id: 'forms-choice-controls',
+    preview: components.choiceControls,
     moduleId: 'forms',
     label: localized('Choice controls', '选择控件'),
     apiNames: ['UiCheckbox', 'UiRadioGroup', 'UiSwitch'],
@@ -567,6 +619,7 @@ export const labSpecimens = [
   },
   {
     id: 'forms-checkbox',
+    preview: components.checkbox,
     moduleId: 'forms',
     label: localized('Checkbox', '复选框'),
     apiNames: ['UiCheckbox'],
@@ -575,6 +628,7 @@ export const labSpecimens = [
   },
   {
     id: 'forms-radio-group',
+    preview: components.radioGroup,
     moduleId: 'forms',
     label: localized('Radio group', '单选组'),
     apiNames: ['UiRadioGroup'],
@@ -583,6 +637,7 @@ export const labSpecimens = [
   },
   {
     id: 'forms-switch',
+    preview: components.switchControl,
     moduleId: 'forms',
     label: localized('Switch', '开关'),
     apiNames: ['UiSwitch'],
@@ -591,6 +646,7 @@ export const labSpecimens = [
   },
   {
     id: 'forms-field-states',
+    preview: components.field,
     moduleId: 'forms',
     label: localized('Field states', '字段状态'),
     apiNames: ['UiField'],
@@ -599,6 +655,7 @@ export const labSpecimens = [
   },
   {
     id: 'data-display-table',
+    preview: components.table,
     moduleId: 'data-display',
     label: localized('Table', '表格'),
     apiNames: ['UiTable'],
@@ -607,6 +664,7 @@ export const labSpecimens = [
   },
   {
     id: 'data-display-disclosure',
+    preview: components.disclosure,
     moduleId: 'data-display',
     label: localized('Disclosure', '渐进披露'),
     apiNames: ['UiDisclosure'],
@@ -615,6 +673,7 @@ export const labSpecimens = [
   },
   {
     id: 'card-card',
+    preview: interactive.card,
     moduleId: 'card',
     label: moduleCopy.card.label,
     apiNames: ['UiCard'],
@@ -623,6 +682,7 @@ export const labSpecimens = [
   },
   {
     id: 'scrollbar-component',
+    preview: foundations.scrollbar,
     moduleId: 'scrollbar',
     label: moduleCopy.scrollbar.label,
     apiNames: ['UiScrollbar'],
@@ -631,6 +691,7 @@ export const labSpecimens = [
   },
   {
     id: 'composition-standard-mode',
+    preview: compositions.standardComposition,
     moduleId: 'composition',
     label: moduleCopy.composition.previewModes.standard.label,
     apiNames: [],
@@ -639,6 +700,7 @@ export const labSpecimens = [
   },
   {
     id: 'composition-accessibility-mode',
+    preview: compositions.accessibleComposition,
     moduleId: 'composition',
     label: moduleCopy.composition.previewModes.accessibility.label,
     apiNames: [],
@@ -647,6 +709,7 @@ export const labSpecimens = [
   },
   {
     id: 'composition-control-cluster',
+    preview: compositions.controlCluster,
     moduleId: 'composition',
     label: moduleCopy.composition.scenes.controlCluster.label,
     apiNames: [],
@@ -655,6 +718,7 @@ export const labSpecimens = [
   },
   {
     id: 'composition-project-card',
+    preview: compositions.projectCard,
     moduleId: 'composition',
     label: moduleCopy.composition.scenes.projectCard.label,
     apiNames: [],
@@ -663,6 +727,7 @@ export const labSpecimens = [
   },
   {
     id: 'composition-floating-toolbar',
+    preview: compositions.floatingToolbar,
     moduleId: 'composition',
     label: moduleCopy.composition.scenes.floatingToolbar.label,
     apiNames: [],
@@ -671,6 +736,7 @@ export const labSpecimens = [
   },
   {
     id: 'composition-docs-article-header',
+    preview: compositions.docsArticleHeader,
     moduleId: 'composition',
     label: moduleCopy.composition.scenes.docsArticleHeader.label,
     apiNames: [],
@@ -679,6 +745,7 @@ export const labSpecimens = [
   },
   {
     id: 'composition-docs-navigation-group',
+    preview: compositions.docsNavigationGroup,
     moduleId: 'composition',
     label: moduleCopy.composition.scenes.docsNavigationGroup.label,
     apiNames: [],
@@ -687,6 +754,7 @@ export const labSpecimens = [
   },
   {
     id: 'composition-docs-toolbar',
+    preview: compositions.docsToolbar,
     moduleId: 'composition',
     label: moduleCopy.composition.scenes.docsToolbar.label,
     apiNames: [],
@@ -695,6 +763,7 @@ export const labSpecimens = [
   },
   {
     id: 'composition-docs-content-surface',
+    preview: compositions.docsContentSurface,
     moduleId: 'composition',
     label: moduleCopy.composition.scenes.docsContentSurface.label,
     apiNames: [],
@@ -703,6 +772,7 @@ export const labSpecimens = [
   },
   {
     id: 'composition-reading',
+    preview: compositions.reading,
     moduleId: 'composition',
     label: localized('Reading composition', '正文阅读组合'),
     apiNames: [],
@@ -711,6 +781,7 @@ export const labSpecimens = [
   },
   {
     id: 'giscus-themes',
+    preview: compositions.giscus,
     moduleId: 'giscus',
     label: moduleCopy.giscus.label,
     apiNames: [],

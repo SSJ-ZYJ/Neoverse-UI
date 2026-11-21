@@ -11,7 +11,6 @@ import {
   type SpecimenId,
 } from './lab-modules';
 import type { SpecimenSession } from './lab-specimen-config';
-import { provideSpecimenSelection } from './lab-specimen-scope';
 import {
   appCopy,
   formatLocalized,
@@ -29,8 +28,12 @@ const props = defineProps<{
   session: SpecimenSession | undefined;
 }>();
 const emit = defineEmits<{ navigate: [module: ModuleId | SpecimenId] }>();
-const LiveSpecimen = () => props.session?.render(props.locale);
-provideSpecimenSelection(computed(() => props.specimen?.id));
+const FocusedSpecimen = () => {
+  const preview = props.specimen?.preview;
+  return typeof preview === 'function'
+    ? preview(props.locale)
+    : props.session?.render(props.locale);
+};
 
 const copy = {
   label: localized('Preview Stage', '预览舞台'),
@@ -62,7 +65,6 @@ function setShowcaseSurface(value: string): void {
   <div
     data-playground-page
     class="playground-stage"
-    :data-specimen-kind="specimen?.kind"
     :class="{ 'playground-stage--focused': specimen }"
   >
     <p class="playground-stage__label text-label-sm font-label text-secondary">
@@ -71,7 +73,7 @@ function setShowcaseSurface(value: string): void {
     </p>
 
     <section
-      v-if="session && specimen"
+      v-if="specimen"
       :id="specimen.id"
       :key="specimen.id"
       tabindex="-1"
@@ -83,43 +85,19 @@ function setShowcaseSurface(value: string): void {
         <p v-if="module" class="text-label-sm font-label text-secondary">
           {{ localize(module.label, locale) }}
         </p>
-        <h2 id="stage-title" class="text-heading font-heading tracking-heading text-primary">
-          {{ localize(specimen.label, locale) }}
-        </h2>
-      </header>
-      <div class="playground-stage__specimen-content">
-        <LiveSpecimen />
-      </div>
-    </section>
-
-    <section
-      v-else-if="specimen && module"
-      :key="specimen.id"
-      aria-labelledby="stage-title"
-      class="playground-stage__specimen"
-    >
-      <header class="playground-stage__heading">
-        <p class="text-label-sm font-label text-secondary">
-          {{ localize(module.label, locale) }}
-        </p>
         <h2
           id="stage-title"
-          tabindex="-1"
-          data-stage-heading
-          class="text-heading font-heading tracking-heading text-primary"
+          class="playground-stage__specimen-title text-heading font-heading tracking-heading text-primary"
         >
           {{ localize(specimen.label, locale) }}
         </h2>
       </header>
-      <div
-        data-design-lab-region="specimen"
-        class="playground-stage__specimen-content playground-stage__legacy-content"
-      >
-        <component :is="module.component" :key="specimen.id" :locale="locale" />
+      <div class="playground-stage__specimen-content">
+        <FocusedSpecimen />
       </div>
     </section>
 
-    <section v-else-if="module" aria-labelledby="stage-title" class="playground-stage__specimen">
+    <section v-else-if="module" aria-labelledby="stage-title" class="playground-stage__module">
       <header :key="module.id" class="playground-stage__heading">
         <p v-if="category" class="text-label-sm font-label text-secondary">
           {{ localize(category, locale) }}

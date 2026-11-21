@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { UiContextMenu } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
-import MaterialBackdrop from '../MaterialBackdrop.vue';
+import type { LabModuleProps } from '../modules/types';
 import { localize, localized } from '../playground-content';
-import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
 
@@ -14,6 +13,7 @@ const selectedAction = ref('');
 const contextTheme = ref('system');
 const contextLocale = ref('en');
 const contextShowDetails = ref(true);
+const zone = ref<HTMLElement | null>(null);
 
 function openContextMenu(event: MouseEvent) {
   event.preventDefault();
@@ -25,8 +25,7 @@ function openContextMenu(event: MouseEvent) {
 }
 
 function openContextMenuFromKeyboard() {
-  const zone = document.querySelector<HTMLElement>('[data-context-menu-zone]');
-  const rect = zone?.getBoundingClientRect();
+  const rect = zone.value?.getBoundingClientRect();
   contextMenuPoint.value = { x: (rect?.left ?? 0) + 24, y: (rect?.top ?? 0) + 24 };
   contextMenuAutoFocus.value = true;
   contextMenuOpen.value = true;
@@ -112,44 +111,43 @@ function applySelection(id: string) {
 </script>
 
 <template>
-  <MaterialBackdrop edge="inset">
-    <div class="grid gap-4" data-contract-state="default">
-      <section
-        class="rounded-control border border-subtle p-4 text-caption text-secondary"
-        data-context-menu-zone
-        :aria-label="localize(copy.zone, props.locale)"
-        @contextmenu="openContextMenu"
+  <div class="grid gap-4" data-contract-state="default">
+    <section
+      ref="zone"
+      class="rounded-control border border-subtle p-4 text-caption text-secondary"
+      data-context-menu-zone
+      :aria-label="localize(copy.zone, props.locale)"
+      @contextmenu="openContextMenu"
+    >
+      <p class="m-0">{{ localize(copy.zone, props.locale) }}</p>
+      <p class="m-0 mt-2">
+        {{ localize(copy.theme, props.locale) }}: {{ contextTheme }} ·
+        {{ localize(copy.locale, props.locale) }}: {{ contextLocale }} ·
+        {{ localize(copy.details, props.locale) }}: {{ contextShowDetails ? 'on' : 'off' }}
+      </p>
+      <button
+        class="mt-2 rounded-control border border-default px-2 py-1 text-caption"
+        type="button"
+        data-context-menu-keyboard
+        @click="openContextMenuFromKeyboard"
       >
-        <p class="m-0">{{ localize(copy.zone, props.locale) }}</p>
-        <p class="m-0 mt-2">
-          {{ localize(copy.theme, props.locale) }}: {{ contextTheme }} ·
-          {{ localize(copy.locale, props.locale) }}: {{ contextLocale }} ·
-          {{ localize(copy.details, props.locale) }}: {{ contextShowDetails ? 'on' : 'off' }}
-        </p>
-        <button
-          class="mt-2 rounded-control border border-default px-2 py-1 text-caption"
-          type="button"
-          data-context-menu-keyboard
-          @click="openContextMenuFromKeyboard"
-        >
-          {{ localize(copy.keyboard, props.locale) }}
-        </button>
-      </section>
+        {{ localize(copy.keyboard, props.locale) }}
+      </button>
+    </section>
 
-      <UiContextMenu
-        :open="contextMenuOpen"
-        v-bind="{ ariaLabel: localize(copy.label, props.locale) }"
-        :point="contextMenuPoint"
-        :auto-focus="contextMenuAutoFocus"
-        :entries="entries"
-        data-overlay-context-menu
-        @update:open="contextMenuOpen = $event"
-        @select="applySelection($event.id)"
-      />
+    <UiContextMenu
+      :open="contextMenuOpen"
+      v-bind="{ ariaLabel: localize(copy.label, props.locale) }"
+      :point="contextMenuPoint"
+      :auto-focus="contextMenuAutoFocus"
+      :entries="entries"
+      data-overlay-context-menu
+      @update:open="contextMenuOpen = $event"
+      @select="applySelection($event.id)"
+    />
 
-      <output class="text-caption text-secondary" aria-live="polite" data-overlay-selection>
-        {{ localize(copy.selected, props.locale) }}: {{ selectedAction || '—' }}
-      </output>
-    </div>
-  </MaterialBackdrop>
+    <output class="text-caption text-secondary" aria-live="polite" data-overlay-selection>
+      {{ localize(copy.selected, props.locale) }}: {{ selectedAction || '—' }}
+    </output>
+  </div>
 </template>

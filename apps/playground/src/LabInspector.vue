@@ -40,8 +40,8 @@ const copy = {
     '模块属性为只读。选择单个示例即可查看可用控件。',
   ),
   fixedSpecimen: localized(
-    'This specimen is read-only. Its original examples are available in the stage.',
-    '此示例为只读。可在舞台中查看原有示例。',
+    'This specimen is read-only. Use the stage to interact with it.',
+    '此示例为只读。可在舞台中体验实际交互。',
   ),
   editable: localized(
     'Only the listed fields can be edited. Other parameters stay as provided by the specimen or component.',
@@ -50,8 +50,8 @@ const copy = {
   reset: localized('Reset specimen', '重置示例'),
   states: localized('Variants and states', '变体与状态'),
   statesDescription: localized(
-    'Use the examples in the Preview Stage to try the available states.',
-    '可在预览舞台的示例中体验不同状态。',
+    'Open the isolated preview to compare the available states.',
+    '打开独立预览以对比可用状态。',
   ),
 } as const;
 const selection = computed(() => props.specimen ?? props.module);

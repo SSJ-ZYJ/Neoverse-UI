@@ -14,12 +14,7 @@ import {
 } from '@neoverse-ui/vue';
 import { h } from 'vue';
 import LabIcon from './LabIcon.vue';
-import type { SpecimenId } from './lab-modules';
-import {
-  defineSpecimen,
-  type SpecimenDefinition,
-  type SpecimenSession,
-} from './lab-specimen-config';
+import { defineSpecimen } from './lab-specimen-config';
 import {
   formatLocalized,
   type Locale,
@@ -42,7 +37,8 @@ const activeOption = localized('Selected option', '所选选项');
 
 const buttonLabel = localized('Try action', '体验操作');
 const buttonClicks = localized('Activations: {count}', '触发次数：{count}');
-const button = defineSpecimen<ButtonProps, { clicks: number }>()({
+/** The editable Button specimen */
+export const button = defineSpecimen<ButtonProps, { clicks: number }>()({
   initialProps: { variant: 'secondary', size: 'sm', disabled: false, loading: false },
   initialState: () => ({ clicks: 0 }),
   controls: {
@@ -96,7 +92,8 @@ function segmentOptions(locale: Locale): SegmentedControlProps['options'] {
 }
 
 const localizedSegments = { en: segmentOptions('en'), zh: segmentOptions('zh') };
-const segmented = defineSpecimen<
+/** The editable SegmentedControl specimen */
+export const segmented = defineSpecimen<
   Pick<SegmentedControlProps, 'disabled' | 'loading' | 'surface'>,
   { modelValue: SegmentValue }
 >()({
@@ -130,7 +127,8 @@ const segmented = defineSpecimen<
 
 const inputLabel = localized('Preview text input', '预览文本输入框');
 const inputPlaceholder = localized('Enter a project name', '输入项目名称');
-const input = defineSpecimen<
+/** The editable Input specimen */
+export const input = defineSpecimen<
   Pick<InputProps, 'disabled' | 'readonly' | 'validation'>,
   { modelValue: Extract<InputProps['modelValue'], string> }
 >()({
@@ -171,7 +169,8 @@ const cardBody = localized(
   'Compare surface presets on the same backdrop without changing the content.',
   '在同一背景上对比表面预设，卡片内容保持不变。',
 );
-const card = defineSpecimen<CardProps>()({
+/** The editable Card specimen */
+export const card = defineSpecimen<CardProps>()({
   initialProps: { as: 'article' },
   initialState: () => ({}),
   controls: {
@@ -215,7 +214,8 @@ const dockItems = [
 ] as const;
 type DockDestination = (typeof dockItems)[number]['value'];
 
-const dock = defineSpecimen<DockProps, { destination: DockDestination }>()({
+/** The editable Dock specimen */
+export const dock = defineSpecimen<DockProps, { destination: DockDestination }>()({
   initialProps: { compact: false, scale: 'md', navigationIndicator: true },
   initialState: () => ({ destination: 'home' }),
   controls: {
@@ -266,16 +266,3 @@ const dock = defineSpecimen<DockProps, { destination: DockDestination }>()({
       ]),
     ]),
 });
-
-const definitions: Partial<Record<SpecimenId, SpecimenDefinition>> = {
-  'controls-button': button,
-  'controls-segmented-control': segmented,
-  'forms-input': input,
-  'card-card': card,
-  'dock-component': dock,
-};
-
-/** Open a fresh session for an opted-in catalogue entry, or retain its module preview */
-export function openSpecimenSession(id: SpecimenId | undefined): SpecimenSession | undefined {
-  return id === undefined ? undefined : definitions[id]?.createSession();
-}

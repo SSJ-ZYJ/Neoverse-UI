@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { UiNavigationItem, UiSurface } from '@neoverse-ui/vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
-import { injectSpecimenSelection } from '../lab-specimen-scope';
 import { localize, localized, moduleCopy } from '../playground-content';
 import ActionModule from './ActionModule.vue';
 import BreadcrumbModule from './BreadcrumbModule.vue';
@@ -14,7 +13,6 @@ import SegmentedControlModule from './SegmentedControlModule.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
-const { isFocused } = injectSpecimenSelection();
 const copy = moduleCopy.controls;
 const breadcrumbCopy = {
   label: localized('Breadcrumb', '面包屑导航'),
@@ -38,7 +36,6 @@ const sections = [
 <template>
   <div class="grid gap-grid">
     <UiSurface
-      v-if="!isFocused"
       as="nav"
       surface="glass-subtle"
       content-overflow="visible"

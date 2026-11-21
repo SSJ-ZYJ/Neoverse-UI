@@ -50,6 +50,9 @@ export interface SpecimenDefinition {
   createSession(): SpecimenSession;
 }
 
+/** A focused renderer, or the existing definition that opens its editable session */
+export type FocusedPreview = ((locale: Locale) => VNode) | SpecimenDefinition;
+
 interface RenderContext<Props, State> {
   readonly locale: Locale;
   readonly props: Readonly<Partial<Props>>;

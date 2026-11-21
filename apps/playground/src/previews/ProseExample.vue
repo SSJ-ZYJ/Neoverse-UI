@@ -1,0 +1,26 @@
+<script setup lang="ts">
+import { UiSurface } from '@neoverse-ui/vue';
+import type { LabModuleProps } from '../modules/types';
+import { localize } from '../playground-content';
+import { proseCopy } from './prose-copy';
+
+const props = defineProps<LabModuleProps>();
+</script>
+
+<template>
+  <UiSurface as="article" surface="none" class="playground-specimen-panel">
+    <div data-foundation-prose class="neoverse-prose max-w-reading">
+      <h3>{{ localize(proseCopy.prose, props.locale) }}</h3>
+      <p>{{ localize(proseCopy.proseBody, props.locale) }}</p>
+      <blockquote>{{ localize(proseCopy.proseQuote, props.locale) }}</blockquote>
+      <ul>
+        <li>{{ localize(proseCopy.proseItemOne, props.locale) }}</li>
+        <li>{{ localize(proseCopy.proseItemTwo, props.locale) }}</li>
+      </ul>
+      <p><code>.neoverse-prose</code>+<code>max-w-reading</code></p>
+      <p>
+        <a href="#composition-reading">{{ localize(proseCopy.proseLink, props.locale) }}</a>
+      </p>
+    </div>
+  </UiSurface>
+</template>

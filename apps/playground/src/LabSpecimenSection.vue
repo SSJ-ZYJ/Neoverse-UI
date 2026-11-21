@@ -1,42 +1,22 @@
 <script setup lang="ts">
 import { UiSurface } from '@neoverse-ui/vue';
 import { computed } from 'vue';
-import { injectSpecimenSelection, provideRepresentativeRows } from './lab-specimen-scope';
 
 interface LabSpecimenSectionProps {
   id: string;
   title: string;
   description: string;
   headingLevel?: 2 | 3;
-  selectionId?: string;
-  selectionIds?: readonly string[];
 }
 
 const props = withDefaults(defineProps<LabSpecimenSectionProps>(), {
   headingLevel: 3,
 });
 const headingTag = computed(() => `h${props.headingLevel}`);
-const { isFocused, matches } = injectSpecimenSelection();
-const isVisible = computed(() =>
-  matches(props.id, [
-    ...(props.selectionId ? [props.selectionId] : []),
-    ...(props.selectionIds ?? []),
-  ]),
-);
-provideRepresentativeRows();
 </script>
 
 <template>
-  <section
-    v-if="isFocused && isVisible"
-    :id="props.id"
-    class="playground-specimen-section--focused"
-    :aria-label="props.title"
-  >
-    <slot />
-  </section>
   <UiSurface
-    v-else-if="isVisible"
     as="section"
     surface="glass-subtle"
     content-overflow="visible"

@@ -6,7 +6,6 @@ import LabExplorer from './LabExplorer.vue';
 import LabInspector from './LabInspector.vue';
 import LabStage from './LabStage.vue';
 import LabToolbar from './LabToolbar.vue';
-import { openSpecimenSession } from './lab-interactive-specimens';
 import { labModules, moduleGroups, resolveLabHash, specimenById } from './lab-modules';
 import { isLocale, type Locale } from './playground-content';
 import { readPreferences, writePreferences } from './playground-preferences';
@@ -46,7 +45,10 @@ const specimenId = computed(() => route.value?.specimenId);
 const specimen = computed(() =>
   specimenId.value === undefined ? undefined : specimenById(specimenId.value),
 );
-const session = computed(() => openSpecimenSession(specimenId.value));
+const session = computed(() => {
+  const preview = specimen.value?.preview;
+  return typeof preview === 'object' ? preview.createSession() : undefined;
+});
 
 const preferences = readPreferences();
 const parameters = new URLSearchParams(window.location.search);
@@ -141,18 +143,12 @@ function focusRoute(): void {
   focusFrame = requestAnimationFrame(() => {
     const stage = workspace.value;
     if (stage === null || route.value !== selectedRoute) return;
-    const id = selectedRoute?.specimenId;
-    const target = id === undefined ? null : document.getElementById(id);
-    if (target !== null && stage.contains(target)) {
-      // Scroll only the stage, never the viewport or a neighboring panel.
-      const top = session.value
-        ? 0
-        : stage.scrollTop + target.getBoundingClientRect().top - stage.getBoundingClientRect().top;
-      stage.scrollTo({ top, left: 0, behavior: 'instant' });
-      if (!target.hasAttribute('tabindex')) target.tabIndex = -1;
-      target.focus({ preventScroll: true });
+    stage.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+    if (selectedRoute?.specimenId !== undefined) {
+      stage.querySelector<HTMLElement>('[data-design-lab-region="specimen"]')?.focus({
+        preventScroll: true,
+      });
     } else {
-      stage.scrollTo({ top: 0, left: 0, behavior: 'instant' });
       stage.querySelector<HTMLElement>('[data-stage-heading]')?.focus({ preventScroll: true });
     }
   });

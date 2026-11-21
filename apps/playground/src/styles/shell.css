@@ -332,6 +332,20 @@
   gap: var(--neoverse-layout-grid-gap);
 }
 
+/* Keep visible keyboard focus on the title without outlining the whole canvas. */
+.playground-stage__specimen:focus {
+  outline: none;
+}
+
+.playground-stage__specimen-title {
+  justify-self: start;
+}
+
+.playground-stage__specimen:focus-visible .playground-stage__specimen-title {
+  outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+  outline-offset: var(--neoverse-focus-ring-offset);
+}
+
 /* Daily previews use a quiet, uniform canvas. Optical and state comparison
    backdrops remain available only in the isolated /frame validation route. */
 [data-playground-view='shell']
@@ -351,46 +365,10 @@
   max-inline-size: none;
 }
 
-.playground-stage__legacy-content {
-  width: 100%;
-  min-block-size: 0;
-}
-
-.playground-stage__legacy-content > * {
-  inline-size: 100%;
-  max-inline-size: 100%;
-  min-inline-size: 0;
-}
-
-.playground-specimen-section--focused,
-.playground-material-backdrop--focused,
-.playground-qa-matrix--focused {
-  display: grid;
-  min-inline-size: 0;
-  max-inline-size: 100%;
-  align-items: center;
-  justify-items: center;
-  gap: var(--neoverse-space-3);
-}
-
-.playground-specimen-section--focused {
-  inline-size: 100%;
-  max-inline-size: var(--neoverse-layout-reading-wide-width);
-  margin-inline: auto;
-}
-
-.playground-state-row--focused {
-  display: flex;
-  min-inline-size: 0;
-  max-inline-size: 100%;
-  align-items: center;
-  justify-content: center;
-  gap: var(--neoverse-space-3);
-}
-
 .playground-stage__specimen-content {
   display: grid;
   min-inline-size: 0;
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   padding-block: var(--neoverse-space-8);
   animation: playground-specimen-enter var(--neoverse-motion-spatial-duration)
@@ -1084,16 +1062,4 @@
     var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);
   box-shadow: var(--neoverse-shadow-inset);
-}
-
-.playground-stage--focused[data-specimen-kind='component'] .playground-preview-columns {
-  display: flex;
-  max-inline-size: 100%;
-  align-items: center;
-  justify-content: center;
-}
-
-.playground-stage--focused .playground-specimen-grid,
-.playground-stage--focused .playground-token-grid {
-  grid-template-columns: minmax(0, 1fr);
 }

@@ -12,6 +12,75 @@ async function chooseOption(inspector: Locator, field: string, name: string): Pr
   await editor.getByRole('option', { name, exact: true }).click();
 }
 
+test('every Explorer specimen opens a nonempty, independently sized preview', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?theme=system&lang=en', { waitUntil: 'domcontentloaded' });
+  const explorer = page.locator('[data-playground-navigation]');
+  const links = explorer.locator('.playground-explorer__specimens a[href^="#"]');
+  await expect(links.first()).toBeAttached();
+  const hashes = await links.evaluateAll((items) =>
+    items.flatMap((item) => (item instanceof HTMLAnchorElement ? [item.hash] : [])),
+  );
+  const stage = page.locator('[data-design-lab-workspace]');
+  for (const hash of [...hashes, '#foundation-layout-shape', '#forms-choice-controls']) {
+    await test.step(hash, async () => {
+      await page.goto(`/?theme=system&lang=en${hash}`, { waitUntil: 'domcontentloaded' });
+      const specimen = stage.locator(`[data-design-lab-region="specimen"]${hash}`);
+      await expect(specimen).toBeVisible();
+      await expect(page.locator(hash)).toHaveCount(1);
+      await expect(
+        stage.locator('[data-design-lab-region="module"], [data-qa-matrix]'),
+      ).toHaveCount(0);
+      expect(
+        await specimen.locator('.playground-stage__specimen-content').evaluate((content) => {
+          const { height, width } = content.getBoundingClientRect();
+          return (
+            width > 0 &&
+            height > 0 &&
+            Array.from(content.children).some((child) => {
+              const rect = child.getBoundingClientRect();
+              return rect.width > 0 && rect.height > 0;
+            })
+          );
+        }),
+      ).toBe(true);
+      expect(
+        await stage.evaluate((element) => element.scrollWidth - element.clientWidth),
+      ).toBeLessThanOrEqual(1);
+    });
+  }
+});
+
+test('a focused overlay stays anchored and unmounts on navigation without mounting QA controls', async ({
+  page,
+}) => {
+  const url = '/?lang=en&contract-fixtures=1';
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto(`${url}#overlays-dropdown-menu`, { waitUntil: 'domcontentloaded' });
+  const stage = page.locator('[data-design-lab-workspace]');
+  const trigger = stage.getByRole('button', { name: 'Open menu' });
+  await expect(trigger).toBeVisible();
+  await expect(stage.locator('[data-overlay-controlled-popover]')).toHaveCount(0);
+  await expect(stage.locator('[data-overlay-popover]')).toHaveCount(0);
+  await trigger.press('Enter');
+  const menu = stage.getByRole('menu');
+  await expect(menu).toBeVisible();
+  await expect(menu).toBeInViewport({ ratio: 1 });
+  expect(await menu.evaluate((element) => element.matches(':popover-open'))).toBe(true);
+  const anchor = await trigger.boundingBox();
+  const panel = await menu.boundingBox();
+  if (!anchor || !panel) throw new Error('The open menu must have an anchor and a panel');
+  expect(Math.abs(panel.y - anchor.y - anchor.height)).toBeLessThan(16);
+  expect(Math.abs(panel.x - anchor.x)).toBeLessThan(2);
+
+  await page.goto(`${url}#overlays-popover`);
+  await expect(stage.locator('#overlays-popover')).toBeFocused();
+  await expect(page.locator('.ui-dropdown-menu')).toHaveCount(0);
+  await page.goBack();
+  await expect(trigger).toHaveAttribute('aria-expanded', 'false');
+  await expect(menu).toHaveCount(0);
+});
+
 test.describe('playground', () => {
   test('the explorer lists actual specimens before opening their modules', async ({
     page,
@@ -60,7 +129,7 @@ test.describe('playground', () => {
     ['composition-project-card', 'composition-control-cluster'],
     ['composition-reading', 'composition-docs-content-surface'],
   ] as const) {
-    test(`opens only the selected legacy specimen: ${selected}`, async ({ page }) => {
+    test(`opens only the selected specimen: ${selected}`, async ({ page }) => {
       await page.goto(`/?lang=en#${selected}`, { waitUntil: 'domcontentloaded' });
       await expect(page.locator('[data-design-lab-region="specimen"]')).toBeVisible();
       await expect(page.locator(`#${selected}`)).toBeVisible();

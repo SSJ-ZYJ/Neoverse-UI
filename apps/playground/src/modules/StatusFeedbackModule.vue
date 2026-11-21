@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { UiButton, UiNotice, UiToast, UiTooltipSurface } from '@neoverse-ui/vue';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
-import { injectSpecimenSelection } from '../lab-specimen-scope';
 import { localize, localized, moduleCopy } from '../playground-content';
 import QaPreviewMatrix from '../QaPreviewMatrix.vue';
 import BadgeModule from './BadgeModule.vue';
@@ -11,12 +10,8 @@ import StatusIndicatorModule from './StatusIndicatorModule.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
-const { isFocused } = injectSpecimenSelection();
 const toastOpen = ref(false);
 const noticeVariants = ['neutral', 'info', 'success', 'warning', 'danger'] as const;
-const visibleNoticeVariants = computed(() =>
-  isFocused.value ? noticeVariants.slice(0, 1) : noticeVariants,
-);
 const copy = {
   notice: {
     label: localized('Notice', '提示'),
@@ -90,7 +85,7 @@ const copy = {
     >
       <div class="grid gap-2">
         <UiNotice
-          v-for="variant in visibleNoticeVariants"
+          v-for="variant in noticeVariants"
           :key="variant"
           :variant="variant"
           :as="variant === 'success' ? 'section' : 'div'"
@@ -115,7 +110,7 @@ const copy = {
         <UiTooltipSurface variant="neutral" role="tooltip">
           {{ localize(copy.tooltip.neutral, props.locale) }}
         </UiTooltipSurface>
-        <UiTooltipSurface v-if="!isFocused" variant="accent" role="tooltip">
+        <UiTooltipSurface variant="accent" role="tooltip">
           {{ localize(copy.tooltip.accent, props.locale) }}
         </UiTooltipSurface>
       </QaPreviewMatrix>

@@ -10,6 +10,7 @@ apps/playground/
   src/LabWorkspace.vue      shell route, preferences, drawer and scroll coordination
   src/Lab{Toolbar,Explorer,Stage,Inspector}.vue  persistent chrome and preview regions
   src/modules/              one module per Design Lab area; not public API
+  src/previews/              focused renderers and scenes shared with QA galleries
   src/contract-lab.ts       maturity, parity and runtime status derived from contracts
   src/theme-runtime.ts      framework-neutral theme resolution and persistence
   src/theme-state.ts        Vue binding over the shared theme runtime
@@ -35,6 +36,6 @@ apps/playground/
 
 - Commands come from `apps/playground/package.json`. The root `bun run dev` sequences build, server and watchers; do not start a second server on an occupied port.
 - The shell uses `PORT` (default 3000) and selects the next available port. Playwright starts its own server on `NEOVERSE_UI_PLAYWRIGHT_PORT` (default 3200) or reuses an existing one.
-- A new Design Lab module is registered in `lab-modules.ts`, deep-linked through the specimen catalogue, and covered by a browser spec when it asserts a contract.
+- Register each focused renderer on its existing `labSpecimens` entry in `lab-modules.ts`. Keep complete galleries and stable fixture anchors in `modules/`; the Stage does not mount a module to render a specimen.
 - Shell CSS belongs in `src/styles/`; shared component styling belongs in `packages/tailwind`. Do not fix a shared component from the shell.
 - Browser checks assert observable behavior and deterministic geometry or contrast contracts. Optical acceptance remains manual against [Material standards](../docs/architecture/material-standards.md).
