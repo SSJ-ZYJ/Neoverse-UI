@@ -38,6 +38,12 @@ test.describe('Aurora Glass optical diagnostics', () => {
             }
             const { upperLeft, upperRight, lowerLeft, lowerRight } = captures.metrics.corners;
             expect(upperLeft + lowerRight).toBeGreaterThan(upperRight + lowerLeft);
+            if (theme === 'dark' && backdrop === 'neutral') {
+              // A bright lower-right catch must not hide a dim upper-left catch.
+              const quietCorner = Math.max(upperRight, lowerLeft);
+              expect(upperLeft, 'upper-left catch').toBeGreaterThanOrEqual(1.04 * quietCorner);
+              expect(lowerRight, 'lower-right catch').toBeGreaterThanOrEqual(1.44 * quietCorner);
+            }
             if (theme === 'light' && backdrop === 'pale') {
               // Both catches need enough volume to stand apart from the quiet corners.
               expect(Math.min(upperLeft, lowerRight)).toBeGreaterThan(

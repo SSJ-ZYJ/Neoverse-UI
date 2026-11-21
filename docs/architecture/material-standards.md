@@ -73,8 +73,9 @@ Opacity, clipping, and overlay occlusion still apply. On large light surfaces,
 the upper-left and lower-right catches taper in width independently of the
 lighting direction. The lighting also eases from each straight edge into its
 arc, so the join does not create a second highlight. The lower-right catch
-retains the narrower inward falloff. Compact controls and dark surfaces retain
-their existing profiles.
+retains the narrower inward falloff. Dark corners use the same fine contour,
+with a modest exposure lift on the upper-left and lower-right arcs that tapers
+to zero at the straight edges.
 Reduced transparency disables the renderer. The CSS fallback uses alpha-only
 gradient masks and backdrop brightness. The historical `backend: 'native'`
 option remains available for compatibility, but must not be used as the repair

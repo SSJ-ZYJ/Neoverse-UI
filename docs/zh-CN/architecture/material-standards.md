@@ -5,7 +5,7 @@ Status: adopted
 [English](../../architecture/material-standards.md)
 
 <!-- Source: docs/architecture/material-standards.md -->
-<!-- Source-SHA256: 7ca596421382c09f89c0ef4d92564f1615955ab99075440f4516e4057aebf858 -->
+<!-- Source-SHA256: bccdbb380ee8d1f59263bee198e6ad9ef792939d1c6009cbcde410da73db6f2b -->
 
 本文是[英文材质标准](../../architecture/material-standards.md)的中文摘要，覆盖消费项目最常用的材质、层级、嵌套与修复边界。具体光学数值、逐组件审计与历史验收记录以英文原文为准。
 
@@ -28,6 +28,7 @@ Status: adopted
 - 极光玻璃提供完整 CSS 基线：不透明回退、着色、背景采样、饱和度、方向性折射场、阴影与减少透明度行为。
 - 浅色边缘在支持时按比例提亮实际底色。右下角在通道饱和前抑制过强的提亮，并借现有饱和度通道增强圆弧附近的底色；不会添加固定颜色。深色与不支持该混合方式的浏览器继续使用叠加合成。
 - 浅色大面的左上角与右下角高光按位置收窄，光照方向从直边到圆弧平滑变化。右下角向内扩展的范围比左上角窄，紧凑控件不受影响。
+- 深色模式略微提亮左上、右下圆弧，并在与直边相接处渐回原亮度；边缘宽度不变。
 - 边缘响应正下方像素，不采样或偏移邻近像素，因此不是空间折射。主体色调、模糊与阴影仍由 CSS 负责。
 - 普通 Surface 的 `solid`、`subtle` 与 `elevated` 走 Tailwind 组合；极光玻璃只用于需要共享玻璃材质的表面。
 

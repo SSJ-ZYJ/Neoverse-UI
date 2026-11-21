@@ -289,9 +289,15 @@ export const glassFragmentShader = `
       vec3 neutralHighlight = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)));
       color = mix(color, neutralHighlight, wideMiddle);
     }
+    float exposure = u_gain;
+    if (lightSurface <= 0.5) {
+      // Lift the diagonal arcs, with zero slope where they meet the straight edges.
+      float catchMask = 2.0 * max(leftCatch * topCatch, rightCatch * bottomCatch);
+      exposure *= 1.0 + 0.16 * catchMask * catchMask * (1.0 - roundButton);
+    }
     // Match the former release response at middle gray without adding RGB
     // independently of the backdrop. Gain scales the completed response.
-    vec3 channelGain = clamp((2.0 * alpha * color - vec3(alpha * alpha)) * u_gain, 0.0, 1.0);
+    vec3 channelGain = clamp((2.0 * alpha * color - vec3(alpha * alpha)) * exposure, 0.0, 1.0);
     // Overlay with Cs=(1+g)/2 gives Cb + g*min(Cb,1-Cb).
     // Each live backdrop channel contributes only its available headroom;
     // a colored pale backdrop can brighten without clipping to a white rim.
