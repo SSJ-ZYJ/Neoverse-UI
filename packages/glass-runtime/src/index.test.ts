@@ -512,10 +512,6 @@ describe('Glass renderer', () => {
     createTestRenderer().mount();
 
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
-    expect(
-      document.querySelector<HTMLCanvasElement>('[data-neoverse-glass-renderer-canvas]')?.style
-        .mixBlendMode,
-    ).toBe(theme === 'dark' ? 'overlay' : 'normal');
     expect(gl.uniform1f).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'u_opacity' }),
       theme === 'dark' ? 0.5 : 0.16,
@@ -575,11 +571,11 @@ describe('Glass renderer', () => {
   });
 
   it.each([
-    ['ui-card', 'light', 'normal'],
-    ['ui-card', 'dark', 'overlay'],
-    ['ui-surface', 'light', 'normal'],
-    ['ui-surface', 'dark', 'overlay'],
-  ])('keeps %s on the %s WebGL edge pass', (className, theme, blendMode) => {
+    ['ui-card', 'light', 1],
+    ['ui-card', 'dark', 0],
+    ['ui-surface', 'light', 1],
+    ['ui-surface', 'dark', 0],
+  ])('keeps %s on the %s WebGL edge pass', (className, theme, lightSurface) => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const glass = document.createElement('article');
@@ -591,10 +587,10 @@ describe('Glass renderer', () => {
     createTestRenderer().mount();
 
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
-    expect(
-      document.querySelector<HTMLCanvasElement>('[data-neoverse-glass-renderer-canvas]')?.style
-        .mixBlendMode,
-    ).toBe(blendMode);
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_light_surface' }),
+      lightSurface,
+    );
   });
 
   it('masks a Glass edge wherever an overlay paints above the surface', () => {
@@ -949,7 +945,7 @@ describe('Glass renderer', () => {
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
   });
 
-  it('switches between the 0.2.0 light composition and the existing dark composition', () => {
+  it('applies a consumer edge gain and refreshes it on the same canvas', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const card = document.createElement('div');
@@ -960,45 +956,15 @@ describe('Glass renderer', () => {
     document.documentElement.style.setProperty('--neoverse-material-edge-refraction-gain', '2.5');
     const renderer = createTestRenderer();
     renderer.mount();
-    const canvas = document.querySelector<HTMLCanvasElement>(
-      '[data-neoverse-glass-renderer-canvas]',
-    );
-    const fragmentSource = gl.shaderSource.mock.calls
-      .map(([, source]) => source as string)
-      .find((source) => source.includes('u_light_surface'));
-    expect(fragmentSource).toContain('smoothstep(0.3, 0.5, u_opacity)');
-    expect(fragmentSource).toContain('color *= u_gain;');
-    expect(fragmentSource).toContain('gl_FragColor = vec4(color, alpha);');
-    expect(canvas?.style.mixBlendMode).toBe('normal');
-    expect(gl.blendFuncSeparate).toHaveBeenLastCalledWith(
-      gl.SRC_ALPHA,
-      gl.ONE_MINUS_SRC_ALPHA,
-      gl.SRC_ALPHA,
-      gl.ONE_MINUS_SRC_ALPHA,
-    );
+    const canvas = document.querySelector('[data-neoverse-glass-renderer-canvas]');
     expect(gl.uniform1f).toHaveBeenCalledWith(expect.objectContaining({ name: 'u_gain' }), 2.5);
     document.documentElement.style.colorScheme = 'dark';
     document.documentElement.style.setProperty('--neoverse-material-edge-refraction-gain', '1');
     renderer.refresh();
-    expect(canvas?.style.mixBlendMode).toBe('overlay');
-    expect(gl.blendFuncSeparate).toHaveBeenLastCalledWith(
-      gl.SRC_ALPHA,
-      gl.ONE_MINUS_SRC_ALPHA,
-      gl.ONE,
-      gl.ONE_MINUS_SRC_ALPHA,
-    );
+    expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBe(canvas);
     expect(
       gl.uniform1f.mock.calls.filter(([location]) => location?.name === 'u_gain').at(-1)?.[1],
     ).toBe(1);
-    document.documentElement.style.colorScheme = 'light';
-    renderer.refresh();
-    expect(canvas?.style.mixBlendMode).toBe('normal');
-    expect(gl.blendFuncSeparate).toHaveBeenLastCalledWith(
-      gl.SRC_ALPHA,
-      gl.ONE_MINUS_SRC_ALPHA,
-      gl.SRC_ALPHA,
-      gl.ONE_MINUS_SRC_ALPHA,
-    );
   });
 
   it('keeps a translucent light contour and the existing dark response on one canvas', () => {
@@ -1033,6 +999,11 @@ describe('Glass renderer', () => {
   it('repaints the composition when the system color scheme changes', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
+    const css = window.CSS;
+    vi.spyOn(css, 'supports').mockImplementation(
+      (...args: string[]) => args[0] === 'mix-blend-mode' && args[1] === 'color-dodge',
+    );
+    vi.spyOn(window, 'CSS', 'get').mockReturnValue(css);
     const systemScheme = new EventTarget();
     const removeListener = vi.spyOn(systemScheme, 'removeEventListener');
     const originalMatchMedia = window.matchMedia.bind(window);
@@ -1067,12 +1038,21 @@ describe('Glass renderer', () => {
     const canvas = document.querySelector<HTMLCanvasElement>(
       '[data-neoverse-glass-renderer-canvas]',
     );
-    expect(canvas?.style.mixBlendMode).toBe('normal');
+    expect(canvas?.style.mixBlendMode).toBe('color-dodge');
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_light_surface' }),
+      1,
+    );
 
     // A media-query change updates computed CSS without mutating the DOM.
     computedScheme = 'dark';
     systemScheme.dispatchEvent(new Event('change'));
     expect(canvas?.style.mixBlendMode).toBe('overlay');
+    expect(
+      gl.uniform1f.mock.calls
+        .filter(([location]) => location?.name === 'u_light_surface')
+        .at(-1)?.[1],
+    ).toBe(0);
     renderer.destroy();
     expect(removeListener).toHaveBeenCalledWith('change', expect.any(Function));
   });
@@ -1087,10 +1067,10 @@ describe('Glass renderer', () => {
     document.documentElement.style.setProperty('--neoverse-color-edge-light', 'rgb(255 255 255)');
     const renderer = createTestRenderer();
     renderer.mount();
-    const canvas = document.querySelector<HTMLCanvasElement>(
-      '[data-neoverse-glass-renderer-canvas]',
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_corner_focus' }),
+      0.4,
     );
-    expect(canvas?.style.mixBlendMode).toBe('normal');
     expect(gl.uniform1f).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'u_light_surface' }),
       -1,
@@ -1098,13 +1078,11 @@ describe('Glass renderer', () => {
 
     document.documentElement.style.setProperty('--neoverse-color-edge-light', 'rgb(0 0 0)');
     renderer.refresh();
-    expect(canvas?.style.mixBlendMode).toBe('overlay');
-    expect(gl.blendFuncSeparate).toHaveBeenLastCalledWith(
-      gl.SRC_ALPHA,
-      gl.ONE_MINUS_SRC_ALPHA,
-      gl.ONE,
-      gl.ONE_MINUS_SRC_ALPHA,
-    );
+    expect(
+      gl.uniform1f.mock.calls
+        .filter(([location]) => location?.name === 'u_corner_focus')
+        .at(-1)?.[1],
+    ).toBe(0);
   });
 
   it('keeps a continuous light contour with a moderate corner focus and retains the dark button profile', () => {
@@ -1516,6 +1494,9 @@ describe('Glass renderer', () => {
     setRect(glass, {});
     document.body.append(glass);
     document.documentElement.style.colorScheme = 'light';
+    const css = window.CSS;
+    vi.spyOn(css, 'supports').mockReturnValue(false);
+    vi.spyOn(window, 'CSS', 'get').mockReturnValue(css);
     const renderer = createTestRenderer();
     renderer.mount();
 
@@ -1538,13 +1519,7 @@ describe('Glass renderer', () => {
     expect(restoredCanvas).not.toBeNull();
     expect(restoredCanvas).not.toBe(canvas);
     expect(restoredCanvas?.style.display).toBe('block');
-    expect(restoredCanvas?.style.mixBlendMode).toBe('normal');
-    expect(gl.blendFuncSeparate).toHaveBeenLastCalledWith(
-      gl.SRC_ALPHA,
-      gl.ONE_MINUS_SRC_ALPHA,
-      gl.SRC_ALPHA,
-      gl.ONE_MINUS_SRC_ALPHA,
-    );
+    expect(restoredCanvas?.style.mixBlendMode).toBe('overlay');
     expect(document.documentElement.getAttribute(glassRendererAttribute)).toBe('webgl');
     expect(gl.drawArrays).toHaveBeenCalledTimes(2);
   });

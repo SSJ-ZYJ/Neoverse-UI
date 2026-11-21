@@ -33,6 +33,7 @@ export const glassFragmentShader = `
   uniform float u_softness;
   uniform float u_opacity;
   uniform float u_light_surface;
+  uniform float u_color_dodge;
   uniform float u_corner_focus;
   uniform float u_chroma;
   uniform float u_gain;
@@ -92,12 +93,27 @@ export const glassFragmentShader = `
       - edgeDistance(point - vec2(0.0, sampleStep.y), halfSize, u_radii);
     vec2 normal = normalize(vec2(distanceX, distanceY) + vec2(0.0001));
 
+    float edgeLightLuminance = dot(u_edge_light, vec3(0.2126, 0.7152, 0.0722));
+    float lightSurface = u_light_surface >= 0.0
+      ? u_light_surface
+      : smoothstep(0.55, 0.88, edgeLightLuminance);
+    float shortSide = min(u_rect_size.x, u_rect_size.y);
+    float aspect = max(u_rect_size.x, u_rect_size.y) / max(shortSide, 1.0);
+    float smallestRadius = min(min(u_radii.x, u_radii.y), min(u_radii.z, u_radii.w));
+    float roundButton = step(shortSide * 0.45, smallestRadius) * (1.0 - smoothstep(1.02, 1.2, aspect));
+    float volumeScale = lightSurface > 0.5
+      ? smoothstep(64.0, 144.0, shortSide) * (1.0 - roundButton)
+      : 0.0;
+    if (volumeScale > 0.0) {
+      // Ease the lighting normal near the axes so the catch leaves each
+      // straight edge tangentially, without a kink at the start of the arc.
+      normal = normalize(mix(normal, normal * abs(normal), volumeScale));
+    }
+
     float inside = 1.0 - smoothstep(-antiAlias, antiAlias, distance);
     // Softness only anti-aliases the silhouette. A large blur must not turn
     // into a second, visibly painted border.
     float edgeFalloff = clamp(u_softness * 0.05, 0.2, 0.42);
-    float edge = 1.0 - smoothstep(0.0, u_edge_width + edgeFalloff, -distance);
-    float edgeMask = inside * edge;
 
     vec2 topLeftDirection = normalize(vec2(-0.58, -0.82));
     vec2 bottomRightDirection = normalize(vec2(0.68, 0.74));
@@ -122,10 +138,6 @@ export const glassFragmentShader = `
     // Edge width controls light gain while the perimeter stays narrow.
     float thicknessScale = clamp(0.82 + (u_edge_width * 0.55), 0.9, 1.65);
     float chromaticStrength = clamp(0.9 + ((thicknessScale - 1.0) * 1.4), 0.9, 1.8);
-    float edgeLightLuminance = dot(u_edge_light, vec3(0.2126, 0.7152, 0.0722));
-    float lightSurface = u_light_surface >= 0.0
-      ? u_light_surface
-      : smoothstep(0.55, 0.88, edgeLightLuminance);
     float chromaticVisibility = mix(1.0, 1.34, lightSurface);
 
     // Restore the established Aurora Glass chromatic edge field. The surface body
@@ -186,15 +198,13 @@ export const glassFragmentShader = `
     // Broader opposing catches extend along the adjacent edges. Round buttons
     // follow their normals instead of distances to absent bounding-box corners.
     float cornerReach = max(min(u_rect_size.x * 0.65, u_rect_size.y * 2.4), 16.0);
-    float topLeftFocus = 1.0 - smoothstep(cornerReach * 0.3, cornerReach, length(point + halfSize));
-    float bottomRightFocus = 1.0 - smoothstep(cornerReach * 0.3, cornerReach, length(point - halfSize));
+    float topLeftDistance = length(point + halfSize);
+    float bottomRightDistance = length(point - halfSize);
+    float topLeftFocus = 1.0 - smoothstep(cornerReach * 0.3, cornerReach, topLeftDistance);
+    float bottomRightFocus = 1.0 - smoothstep(cornerReach * 0.3, cornerReach, bottomRightDistance);
     // Keep a broad catch from reaching the opposite corners on short rectangles.
     topLeftFocus *= 1.0 - smoothstep(0.65, 1.0, max(v_local.x, v_local.y));
     bottomRightFocus *= 1.0 - smoothstep(0.65, 1.0, max(1.0 - v_local.x, 1.0 - v_local.y));
-    float shortSide = min(u_rect_size.x, u_rect_size.y);
-    float aspect = max(u_rect_size.x, u_rect_size.y) / max(shortSide, 1.0);
-    float smallestRadius = min(min(u_radii.x, u_radii.y), min(u_radii.z, u_radii.w));
-    float roundButton = step(shortSide * 0.45, smallestRadius) * (1.0 - smoothstep(1.02, 1.2, aspect));
     topLeftFocus = mix(topLeftFocus, 1.0, roundButton);
     bottomRightFocus = mix(bottomRightFocus, 1.0, roundButton);
     float cornerAlpha = pow(topLeftLight, 2.0) * topLeftFocus * 0.72
@@ -203,7 +213,19 @@ export const glassFragmentShader = `
     // corner focus must not erase the middle of a button's vertical contour.
     cornerAlpha += leftCatch * 0.1 + rightCatch * 0.12;
     directionalAlpha = mix(directionalAlpha, cornerAlpha, u_corner_focus);
-    float alpha = edgeMask * u_opacity * directionalAlpha * thicknessScale;
+    float bottomRightVolume = 0.0;
+    if (volumeScale > 0.0) {
+      // Taper width by position, independently of the turning light normal.
+      float volumeReach = min(shortSide * 0.36, 96.0);
+      float topLeftVolume = volumeScale *
+        (1.0 - smoothstep(volumeReach * 0.25, volumeReach, topLeftDistance));
+      bottomRightVolume = volumeScale *
+        (1.0 - smoothstep(volumeReach * 0.25, volumeReach, bottomRightDistance));
+      edgeFalloff += 0.78 * topLeftVolume + 0.44 * bottomRightVolume;
+      directionalAlpha += 0.24 * (topLeftLight * topLeftVolume + bottomRightScatter * bottomRightVolume);
+    }
+    float edge = 1.0 - smoothstep(0.0, u_edge_width + edgeFalloff, -distance);
+    float alpha = inside * edge * u_opacity * directionalAlpha * thicknessScale;
     alpha = clamp(alpha, 0.0, 0.34);
 
     // The shared canvas paints above every overlay, so an edge would pierce
@@ -226,11 +248,36 @@ export const glassFragmentShader = `
       occlusionMask *= smoothstep(-antiAlias, 0.0, occluderDistance);
     }
     alpha *= occlusionMask;
+    if (alpha <= 0.0001) discard;
+    if (u_color_dodge > 0.5) {
+      // Encode a proportional backdrop lift rather than raising its RGB floor.
+      // Partial coverage retains the original backdrop near channel clipping.
+      float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
+      float edgeGain = max(2.0 * alpha * luminance - alpha * alpha, 0.0) * u_gain;
+      float lift = min(0.25 * edgeGain, 0.074);
+      float coverage = min(4.0 * edgeGain, 0.67);
+      if (volumeScale > 0.0) {
+        // Lift the stronger catches without a flat cutoff or a hotter
+        // straight middle. Keep part of the original color at clipping.
+        float exposure = edgeGain * (0.25 + 0.23 * smoothstep(0.23, 0.50, edgeGain));
+        float shoulder = max(exposure - 0.074, 0.0);
+        float softLift = exposure - shoulder + 0.065 * shoulder / (0.065 + shoulder);
+        float remaining = 1.0 - min(edgeGain / 0.34, 1.0);
+        lift = mix(lift, softLift, volumeScale);
+        coverage = mix(coverage, 0.8 * (1.0 - remaining * remaining), volumeScale);
+      }
+      if (lift <= 0.0) discard;
+      // Covered dodge yields lift = coverage * dodge / (1 - dodge) before clipping.
+      float dodge = lift / (coverage + lift);
+      // Roll off the dodge source at the lower-right catch before the
+      // compositor clips it. The chroma pass supplies the stronger color.
+      float excess = max(dodge - 0.036, 0.0);
+      dodge -= bottomRightVolume * excess * excess / (0.011 + excess);
+      gl_FragColor = vec4(vec3(dodge), coverage);
+      return;
+    }
 
     if (lightSurface > 0.5) {
-      // 0.2.0 uses the translucent directional color directly with normal
-      // canvas composition and SRC_ALPHA for both WebGL blend channels.
-      // The shared gain still permits an explicit exposure adjustment.
       // On long straight surfaces, reduce the theme tint in the middle so it
       // does not overpower the composited backdrop's own warm or cool color.
       // The existing directional corners and compact controls are unchanged.
@@ -241,20 +288,13 @@ export const glassFragmentShader = `
       // Removing theme chroma must preserve luminance along the straight rim.
       vec3 neutralHighlight = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)));
       color = mix(color, neutralHighlight, wideMiddle);
-      color *= u_gain;
-      gl_FragColor = vec4(color, alpha);
-      return;
     }
-    if (alpha <= 0.0001) discard;
-    // The release composited alpha*color + (1-alpha^2)*backdrop. Preserve that
-    // RGB response at middle grey, including its neutral contribution, rather
-    // than subtracting the minimum channel and renormalizing its hue.
-    // Exposure scales the completed RGB response, after alpha limiting. Raising
-    // opacity alone would hit the alpha cap and leave pale highlights unchanged.
+    // Match the former release response at middle gray without adding RGB
+    // independently of the backdrop. Gain scales the completed response.
     vec3 channelGain = clamp((2.0 * alpha * color - vec3(alpha * alpha)) * u_gain, 0.0, 1.0);
-    // Overlay with Cs=(1+g)/2 gives Cb + g*min(Cb,1-Cb). The increment uses
-    // live backdrop energy and remaining highlight headroom: black/zero stay
-    // zero, and pale colored edges no longer clip all channels to white.
+    // Overlay with Cs=(1+g)/2 gives Cb + g*min(Cb,1-Cb).
+    // Each live backdrop channel contributes only its available headroom;
+    // a colored pale backdrop can brighten without clipping to a white rim.
     vec3 encodedGain = (vec3(1.0) + channelGain) * 0.5;
     gl_FragColor = vec4(encodedGain, 1.0);
   }

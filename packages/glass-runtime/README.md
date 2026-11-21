@@ -4,25 +4,10 @@
 
 Shared optional directional Aurora Glass edges for Neoverse UI. Aurora Glass is the single shared glass material; its Light, Standard, and Immersive tiers share the same name. Obtain display labels from `glassMaterial` in `@neoverse-ui/tokens`; see [material standards](../../docs/architecture/material-standards.md). Package and renderer identifiers remain stable.
 
-Light uses a directional edge: the shader combines theme accent
-colours, varies chroma with effective opacity, and caps fragment alpha at 0.34.
-The light canvas uses normal composition and the release's WebGL blend factors;
-large surfaces use edge opacities 0.36 / 0.38 / 0.40, and no extra light alpha
-gain multiplies the tier value. Chroma and gain remain optional multipliers,
-both defaulting to 1 in light mode.
-
-The light fragment keeps 30% of that theme mix and resolves the rest toward the
-neutral edge light, so a pale backdrop's own hue is not overlaid by a saturated
-cyan band. Light keeps that tinted direction but caps its cool excess: 72% of
-the blue lead over the red/green content is trimmed, so the right catch stays
-cool without the release's threefold margin that read as a blue band on pale
-pages. The cap applies to light surfaces only; dark composition is unchanged.
-
-This is a translucent, theme-coloured highlight composited over the backdrop,
-not a sampled or displaced image of the background. Its apparent colour and
-contrast depend on both the theme accents and the pixels underneath. Dark
-retains its overlay response. Both themes share one canvas; CSS continues to
-own the body tint, blur and shadows.
+In light mode, the WebGL rim brightens the underlying colors proportionally
+instead of washing them toward white. The edge does not sample or displace
+neighboring pixels. CSS still owns the surface tint, blur, and shadows;
+see [edge reflection](../../docs/architecture/material-standards.md#aurora-glass-edge-reflection).
 
 Opacity, clipping and overlay occlusion still apply. Light has a moderate
 upper-left and lower-right focus; dark buttons retain their focused catches.

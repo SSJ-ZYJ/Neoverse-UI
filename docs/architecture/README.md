@@ -162,31 +162,10 @@ Independent Aurora Glass surfaces must render their own tint, border, backdrop f
 | Standard (`elevated`) | CSS baseline | automatically discovered when the renderer is mounted |
 | Immersive (`immersive`) | CSS baseline | automatically discovered when the renderer is mounted |
 
-Light restores the 0.2.0 directional edge: the shader combines theme accent
-colors, varies chroma with effective opacity, and caps fragment alpha at 0.34.
-The light canvas uses normal composition and the release's WebGL blend factors;
-large surfaces use edge opacities 0.36 / 0.38 / 0.40, and no extra light alpha
-gain multiplies the tier value. Chroma and gain remain optional multipliers,
-both defaulting to 1 in light mode.
-
-The light fragment keeps 30% of that theme mix and resolves the rest toward the
-neutral edge light, so a pale backdrop's own hue is not overlaid by a saturated
-cyan band. Light keeps that tinted direction but caps its cool excess: 72% of
-the blue lead over the red/green content is trimmed, so the right catch stays
-cool without the release's threefold margin that read as a blue band on pale
-pages. The cap applies to light surfaces only; dark composition is unchanged.
-
-This is a translucent, theme-colored highlight composited over the backdrop,
-not a sampled or displaced image of the background. Its apparent color and
-contrast depend on both the theme accents and the pixels underneath. Dark
-retains its overlay response. Both themes share one canvas; CSS continues to
-own the body tint, blur and shadows.
-
-Opacity, clipping and overlay occlusion still apply. Light moderately focuses the
-upper-left and lower-right catches; dark buttons retain their focused catches.
-Reduced transparency disables the renderer. The CSS fallback uses alpha-only
-gradient masks and backdrop brightness. The historical `backend: 'native'`
-option is not a remedy for the problems recorded in the repair guardrails.
+The WebGL edge blends with live backdrop pixels instead of sampling or
+displacing neighboring pixels. CSS owns the body tint, blur, and shadows.
+For directional lighting, fallback behavior, and optical limits, see
+[Aurora Glass edge reflection](material-standards.md#aurora-glass-edge-reflection).
 
 For whole-page position/opacity transitions the renderer exposes an opt-in
 `suspend()` / `resume()` lightweight path: it retains the last painted frame and

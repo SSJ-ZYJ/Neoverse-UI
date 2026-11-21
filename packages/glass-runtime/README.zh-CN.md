@@ -3,15 +3,11 @@
 [English](README.md)
 
 <!-- Source: packages/glass-runtime/README.md -->
-<!-- Source-SHA256: eb1ae1ad36ec31be2e456a01e7574df5c2c8877e9cc8ecf0929a66326b1fa54b -->
+<!-- Source-SHA256: 0672343d2ae15d6fda8296126bbfa908c64345fefc0ec76011cb01504a54c4b1 -->
 
 Neoverse-UI 的共享、可选、方向性极光玻璃（Aurora Glass）边缘增强。极光玻璃是唯一的共享玻璃材质；Light / 轻薄、Standard / 标准与 Immersive / 厚实层级共享同一名称。展示标签从 `@neoverse-ui/tokens` 的 `glassMaterial` 获取；详见[材质标准](../../docs/zh-CN/architecture/material-standards.md)。包与渲染器标识保持稳定。
 
-Light 使用方向性边缘：着色器混合主题强调色，根据有效不透明度变化色度，并把片段 alpha 上限设为 0.34。浅色画布使用常规合成与发布版的 WebGL 混合因子；大面积表面使用 0.36 / 0.38 / 0.40 的边缘不透明度，不再叠加额外的浅色 alpha 增益去乘层级数值。色度与增益仍是可选乘数，在浅色模式下默认都为 1。
-
-浅色片段保留 30% 的主题混合，其余部分向中性边缘光收敛，因此浅色背景自身的色相不会被高饱和青色带覆盖。Light 保留这一带色方向，但限制其冷色过量：红/绿内容之上的蓝色领先幅度削减 72%，右侧高光保持偏冷，同时避免发布版三倍余量在浅色页面上读成蓝带。该上限只作用于浅色表面；深色合成不变。
-
-这是叠加在背景上的半透明主题色高光，不是对背景的采样或位移图像。它的表观颜色与对比度同时取决于主题强调色和下方像素。深色保留其叠加响应。两种主题共享一块画布；主体色调、模糊与阴影仍由 CSS 负责。
+浅色模式下，WebGL 边缘按比例提亮下方实际颜色，而不是把底色推向白色。边缘不采样或偏移邻近像素；表面色调、模糊与阴影仍由 CSS 负责。详见[材质标准](../../docs/zh-CN/architecture/material-standards.md#光学与主题)。
 
 不透明度、裁剪与浮层遮挡仍然生效。Light 对左上与右下做适度聚焦；深色按钮保留其聚焦高光。减少透明度会禁用渲染器。CSS 回退使用仅含 alpha 的渐变遮罩与背景亮度。历史 `native` 后端仍是显式 API 选项，但不得把全表面 SVG 位移设为默认，也不得用它进行[修复守则](../../docs/zh-CN/architecture/material-standards.md#glass-修复守则)所述的 Glass 修复。
 

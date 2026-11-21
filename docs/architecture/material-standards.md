@@ -48,38 +48,35 @@ have no independent plate. Reduced transparency uses an opaque tint and no blur.
 
 ## Aurora Glass edge reflection
 
-Light uses a directional edge: the shader combines theme accent
-colors, varies chroma with effective opacity, and caps fragment alpha at 0.34.
-The light canvas uses normal composition and the release's WebGL blend factors;
-large surfaces use edge opacities 0.36 / 0.38 / 0.40, and no extra light alpha
-gain multiplies the tier value. Chroma and gain remain optional multipliers,
-both defaulting to 1 in light mode. The upper-left tinted catch reads strongest;
-the lower-right indigo catch stays above the straight middle. It does not reach
-parity with the upper-left by raising the ceiling, because a raised ceiling
-thickens the whole pale rim instead of only that corner.
+The light shader retains its directional edge profile and 0.34 edge-response
+ceiling. Large light surfaces use edge opacities 0.36 / 0.38 / 0.40 without an
+extra light alpha gain.
 
-The light fragment keeps only 30% of that theme mix and resolves the rest toward
-the neutral edge light. A pale backdrop already carries the page's cool hue, so
-the previous full-saturation mix added a visible cyan band on top of it; the
-neutral majority keeps the rim translucent and lets the backdrop's own color
-show through. The theme accents remain visible as the minority tint and at the
-directional corners.
+In light mode, the shared WebGL canvas encodes a neutral, partially covered
+color-dodge signal. The compositor lifts the existing backdrop channels
+proportionally rather than lifting the weaker channels toward white. On large
+surfaces, the stronger catches have a soft exposure shoulder instead of a
+hard cutoff. The lower-right catch limits the dodge signal before channels
+clip, rather than masking the clipped result with lower coverage. The existing
+saturation pass strengthens the live backdrop's hue near that arc and fades
+back to its regular profile on the adjoining edges. Neither pass adds a
+fixed highlight hue.
 
-Light keeps that tinted direction but caps its cool excess: 72% of the blue lead
-over the red/green content is trimmed, so the right catch stays cool without the
-release's threefold margin that read as a blue band on pale pages. The cap
-applies to light surfaces only; dark composition is unchanged.
+Dark surfaces and browsers without color dodge keep the overlay transfer.
+CSS still owns the body tint, blur, and shadows.
 
-This is a translucent, theme-colored highlight composited over the backdrop,
-not a sampled or displaced image of the background. Its apparent color and
-contrast depend on both the theme accents and the pixels underneath. Dark
-retains its overlay response. Both themes share one canvas; CSS continues to
-own the body tint, blur and shadows.
+The edge reacts to the pixels immediately underneath it, but does not sample
+neighboring pixels or bend their position. This is backdrop-dependent
+compositing, not spatial refraction.
 
-Opacity, clipping and overlay occlusion still apply. Light retains a continuous
-fine edge while moderately emphasizing the upper-left and lower-right corners;
-dark buttons retain their focused catches. Reduced transparency disables the renderer. The CSS fallback uses
-alpha-only gradient masks and backdrop brightness. The historical `backend: 'native'`
+Opacity, clipping, and overlay occlusion still apply. On large light surfaces,
+the upper-left and lower-right catches taper in width independently of the
+lighting direction. The lighting also eases from each straight edge into its
+arc, so the join does not create a second highlight. The lower-right catch
+retains the narrower inward falloff. Compact controls and dark surfaces retain
+their existing profiles.
+Reduced transparency disables the renderer. The CSS fallback uses alpha-only
+gradient masks and backdrop brightness. The historical `backend: 'native'`
 option remains available for compatibility, but must not be used as the repair
 approach prohibited below.
 
@@ -97,9 +94,8 @@ for the safety boundary.
 
 ### Painted stroke for window-anchored chrome
 
-The refracted rim only brightens pixels the backdrop already carries, so a
-surface sitting on an empty page area has no rim to show. Surfaces anchored to
-the window edge, where that is the normal case, opt into a painted stroke with
+The runtime rim cannot add light where the backdrop provides no color signal.
+Surfaces anchored to the window edge can opt into a painted stroke with
 `data-neoverse-glass-edge-stroke`. The stroke comes from
 `--neoverse-material-edge-stroke`, which is `0 0 transparent` by default and
 therefore inert for every other surface; dark themes resolve it to the strong

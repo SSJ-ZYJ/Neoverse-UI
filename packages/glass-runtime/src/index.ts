@@ -232,6 +232,7 @@ type ProgramLocations = {
   softness: WebGLUniformLocation | null;
   opacity: WebGLUniformLocation | null;
   lightSurface: WebGLUniformLocation | null;
+  colorDodge: WebGLUniformLocation | null;
   cornerFocus: WebGLUniformLocation | null;
   chroma: WebGLUniformLocation | null;
   gain: WebGLUniformLocation | null;
@@ -278,6 +279,7 @@ interface SceneColors {
   tertiary: Color;
   lightSurface: number;
   isLight: boolean;
+  colorDodge: boolean;
 }
 
 const activeRenderers = new WeakMap<Document, GlassRenderer>();
@@ -514,6 +516,7 @@ const paintBackdropChroma = (
   viewport: CanvasViewport,
   occluders: readonly Occluder[],
   gain: number,
+  colorDodge: boolean,
 ): void => {
   const opacity = Math.min(style.opacity * 0.7 * gain, 0.55);
   if (opacity <= 0) return;
@@ -572,14 +575,28 @@ const paintBackdropChroma = (
   }
   // Only the saturation of this signal is used; its hue is never painted.
   context.lineWidth = Math.max(style.edgeWidth, 0.75);
-  context.globalAlpha = opacity;
   const reach = Math.max(Math.min(width * 0.5, height * 1.25), 16);
-  for (const [cx = 0, cy = 0] of [
-    [x, y],
-    [x + width, y + height + style.pointer[2]],
-  ]) {
+  const shortSide = Math.min(style.rect.width, style.rect.height);
+  const size = colorDodge ? Math.min(Math.max((shortSide - 64) / 80, 0), 1) : 0;
+  const cornerBoost = size * size * (3 - 2 * size) * 1.5;
+  const boostEnd = Math.min(shortSide * 0.36, 96) / reach;
+  for (let corner = 0; corner < 2; corner += 1) {
+    const lowerRight = corner === 1;
+    const cx = lowerRight ? x + width : x;
+    const cy = lowerRight ? y + height + style.pointer[2] : y;
     const gradient = context.createRadialGradient(cx, cy, 0, cx, cy, reach);
     gradient.addColorStop(0, 'rgb(255 0 0)');
+    if (lowerRight && cornerBoost > 0) {
+      // Return to the original gradient beyond the arc's lighting footprint.
+      const boostedOpacity = Math.min(opacity * (1 + cornerBoost), 0.68);
+      context.globalAlpha = boostedOpacity;
+      gradient.addColorStop(
+        boostEnd,
+        `rgb(255 0 0 / ${(opacity / boostedOpacity) * (1 - boostEnd)})`,
+      );
+    } else {
+      context.globalAlpha = opacity;
+    }
     gradient.addColorStop(1, 'rgb(255 0 0 / 0%)');
     context.strokeStyle = gradient;
     context.stroke(path);
@@ -1324,6 +1341,7 @@ class GlassRendererImpl implements GlassRenderer {
     canvas.style.height = '100%';
     canvas.style.pointerEvents = 'none';
     canvas.style.zIndex = '2147483646';
+    canvas.style.mixBlendMode = 'overlay';
 
     const gl = this.getContext(canvas);
     if (gl === undefined) {
@@ -1351,6 +1369,7 @@ class GlassRendererImpl implements GlassRenderer {
       softness: gl.getUniformLocation(program, 'u_softness'),
       opacity: gl.getUniformLocation(program, 'u_opacity'),
       lightSurface: gl.getUniformLocation(program, 'u_light_surface'),
+      colorDodge: gl.getUniformLocation(program, 'u_color_dodge'),
       cornerFocus: gl.getUniformLocation(program, 'u_corner_focus'),
       chroma: gl.getUniformLocation(program, 'u_chroma'),
       gain: gl.getUniformLocation(program, 'u_gain'),
@@ -1389,7 +1408,6 @@ class GlassRendererImpl implements GlassRenderer {
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, quadPositions, gl.STATIC_DRAW);
     gl.enable(gl.BLEND);
-    // The draw pass selects the theme-specific alpha factors before painting.
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     this.observe();
     this.active = true;
@@ -1685,7 +1703,7 @@ class GlassRendererImpl implements GlassRenderer {
    * per repaint, and keeps the probe out of the mutation stream. */
   private resolveSceneColors(
     rootStyle: CSSStyleDeclaration,
-    view: Window,
+    view: GlassWindow,
     probe: HTMLElement,
   ): SceneColors {
     this.signatureHash = 2166136261;
@@ -1761,6 +1779,7 @@ class GlassRendererImpl implements GlassRenderer {
       tertiary,
       lightSurface,
       isLight,
+      colorDodge: isLight && view.CSS?.supports('mix-blend-mode', 'color-dodge') === true,
     };
     this.colorSignature = signature;
     this.sceneColors = colors;
@@ -1880,7 +1899,7 @@ class GlassRendererImpl implements GlassRenderer {
     gl.uniform1f(locations.pixelRatio, pixelRatio);
 
     const rootStyle = view.getComputedStyle(this.ownerDocument.documentElement);
-    const { gain, edgeLight, primary, secondary, tertiary, lightSurface, isLight } =
+    const { gain, edgeLight, primary, secondary, tertiary, lightSurface, isLight, colorDodge } =
       this.resolveSceneColors(rootStyle, view, this.colorProbe);
     gl.uniform1f(locations.gain, gain);
     if (isLight) this.ensureChromaCanvas();
@@ -1904,17 +1923,10 @@ class GlassRendererImpl implements GlassRenderer {
         this.chromaContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
       }
     }
-    const blendMode = isLight ? 'normal' : 'overlay';
-    if (this.canvas.style.mixBlendMode !== blendMode) this.canvas.style.mixBlendMode = blendMode;
-    // The 0.2.0 light renderer used blendFunc(SRC_ALPHA, ONE_MINUS_SRC_ALPHA),
-    // including SRC_ALPHA for alpha itself. Dark retains its current coverage.
-    gl.blendFuncSeparate(
-      gl.SRC_ALPHA,
-      gl.ONE_MINUS_SRC_ALPHA,
-      isLight ? gl.SRC_ALPHA : gl.ONE,
-      gl.ONE_MINUS_SRC_ALPHA,
-    );
     gl.uniform1f(locations.lightSurface, lightSurface);
+    const blendMode = colorDodge ? 'color-dodge' : 'overlay';
+    if (this.canvas.style.mixBlendMode !== blendMode) this.canvas.style.mixBlendMode = blendMode;
+    gl.uniform1f(locations.colorDodge, colorDodge ? 1 : 0);
 
     gl.enable(gl.SCISSOR_TEST);
     const occluderRects = new Float32Array(maxOccluders * 4);
@@ -2005,7 +2017,7 @@ class GlassRendererImpl implements GlassRenderer {
       );
       uploadOccluders(occluders);
       if (isLight && this.chromaContext) {
-        paintBackdropChroma(this.chromaContext, style, viewport, occluders, gain);
+        paintBackdropChroma(this.chromaContext, style, viewport, occluders, gain, colorDodge);
       }
       for (const strip of getEdgeScissors(
         style,
