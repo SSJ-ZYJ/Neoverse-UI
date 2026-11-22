@@ -2,18 +2,28 @@
 
 Status: adopted
 
-This file is the registry for repository test layers, the browser spec ownership, and the commands that run them. Package implementations own their unit tests; this document owns only how the layers are organized and verified.
+This file is the registry for repository test scope, the browser spec ownership, and the commands that run them. Package implementations own their unit tests; this document owns only how test files are registered and verified.
 
-## Layers
+## Scope registry
 
-| Layer | Location | Contract |
-| --- | --- | --- |
-| Unit and contract | `packages/*/src/*.test.ts`, `apps/playground/src/*.test.ts` | Public behavior and package-local invariants |
-| Repository tooling | `scripts/*.test.ts` | Contract checks, release tooling, request intake and docs rules |
-| Browser end-to-end | `tests/e2e/` | Observable user outcomes in the Design Lab |
-| Cross-browser | `playwright.cross-browser.config.ts` | Firefox and WebKit interaction coverage |
-| Optical diagnostics | `tests/optics/` | Software-rendered Aurora Glass measurements |
-| Checks | `scripts/gates/` | Static repository contracts such as docs, parity and materials |
+The table is the single declaration of test scope. A test file must fall inside a registered scope, and a registered scope must match at least one file. `Level` is `unit` for pure logic, `module` for cross-module work or temporary directories, and `system` for browser behavior on a production build. `Runner` is `bun-test` or `playwright`. `Metadata` requires per-file mechanical evidence: `browser` requires the playwright runner, `isolated` requires a `mkdtemp` call, `scene` requires an `@cinematic` tag, and `snapshot` requires `toHaveScreenshot` plus a PNG baseline. Every file in a scope must carry declared evidence, and no file may carry undeclared evidence; malformed or duplicate rows also fail `check:test-registry`.
+
+Registration does not execute a test. Every `bun-test` or `vitest` file must additionally be covered by a `bun test` or `vitest` command reachable from the root `test` script. The checker follows `bun run` calls, expands `--filter` workspace patterns, and stops at cycles; an orphan script that the root entry never calls does not cover a test. Commands resolve against their own package directory, and both runners apply the same rule: with no file target a command covers that package's tests, with an explicit file or directory target it covers only those files. Playwright specs are covered by their config instead.
+
+| Scope | Level | Runner | Args | Metadata |
+| --- | --- | --- | --- | --- |
+| `packages/*/src/*.test.ts` | unit | bun-test | — | — |
+| `packages/*/src/*.test.tsx` | unit | bun-test | — | — |
+| `apps/playground/src/*.test.ts` | unit | bun-test | — | — |
+| `scripts/dev/*.test.ts` | unit | bun-test | — | — |
+| `scripts/gates/*.test.ts` | unit | bun-test | — | — |
+| `scripts/release/*.test.ts` | module | bun-test | — | isolated |
+| `scripts/requests/*.test.ts` | module | bun-test | — | isolated |
+| `scripts/sync/*.test.ts` | module | bun-test | — | isolated |
+| `tests/e2e/*.spec.ts` | system | playwright | — | browser |
+| `tests/optics/*.spec.ts` | system | playwright | — | browser |
+
+Cross-browser coverage is declared in `playwright.cross-browser.config.ts` and checked against the `tests/e2e` rows. The `scripts/gates/` checks are static repository checks, not tests; their inventory lives in [scripts/AGENTS.md](../../scripts/AGENTS.md).
 
 A test asserts an observable user outcome: a panel opens, focus returns, a value is submitted, a link navigates, a control keeps its token size. Geometry, color contrast and material-tier wiring stay as computed-style assertions because they are deterministic across engines and describe a contract. Pixel probes, screenshot baselines and animation-frame accounting were removed: genuine optical quality (directional light, chroma retention, refraction) is verified by manual acceptance against [Material standards](../architecture/material-standards.md), not by the e2e gate. Tests use both Playwright projects (1920×1080 desktop and 390px touch), and a test that only applies to one layout skips itself with a stated reason.
 
@@ -57,4 +67,4 @@ These specs import the `test` fixture from `tests/support/e2e.ts`, which keeps n
 
 `bun run check` executes `scripts/check.ts`. The runner runs every stage sequentially without stopping at the first failure, then prints a PASS/FAIL summary with durations and totals. Full stdout and stderr go to per-stage files in the printed temporary log directory; failed stages include exit codes and standalone rerun commands. Any failed stage produces a nonzero overall exit code. Individual check scripts and `release:check` remain independently callable.
 
-The stages cover Biome auto-fix, text integrity, source language, documentation standards, Stylelint, Tailwind usage, material standards, component contracts, framework parity, component requests, changeset targets, typecheck with builds, and all unit and contract tests.
+The stages cover Biome auto-fix, text integrity, source language, documentation standards, Stylelint, Tailwind usage, material standards, component contracts, framework parity, component requests, test registry, changeset targets, typecheck with builds, and all unit and contract tests.

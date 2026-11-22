@@ -106,7 +106,8 @@ The Playground uses `PORT` (default 3000) and moves to the next available port. 
 | Component maturity and evidence | `contracts/component-matrix.json`, [component matrix](docs/architecture/component-contract-matrix.md) |
 | Vue / React parity | `contracts/framework-parity.json`, `scripts/gates/check-framework-parity.ts` |
 | Material values and optical policy | `packages/tokens/src`, [Material standards](docs/architecture/material-standards.md) |
-| Test scope and spec ownership | [Testing](docs/testing/README.md), `playwright*.config.ts` |
+| Test scope, spec ownership and metadata evidence | [Testing](docs/testing/README.md), `playwright*.config.ts`, `scripts/gates/check-test-registry.ts` |
+| Scale limits and exceptions | `scripts/gates/quality-budgets.json`, `scripts/gates/check-budgets.ts` |
 | Release state and automation | [Releasing](docs/releases/releasing.md), `docs/releases/release-*.md`, `.github/workflows/` |
 
 Source, configuration and current user decisions override stale documentation. Verify a contradiction before correcting either side.
@@ -115,7 +116,7 @@ Source, configuration and current user decisions override stale documentation. V
 
 | Change | Run |
 | --- | --- |
-| Documentation only | `bun run check:docs`, `bun run lint:language` |
+| Documentation only | `bun run check:docs`, `bun run check:budgets`, `bun run lint:language` |
 | Tokens, Tailwind, Motion, runtime or adapter source | `bun run test`, `bun run typecheck`, relevant `tests/e2e/` spec |
 | Public component or contract | component matrix, framework parity, unit tests, Design Lab, `tests/e2e/parity.spec.ts` |
 | Browser interaction or layout | `bun run test:e2e`; cross-browser suite for engine-sensitive behavior |

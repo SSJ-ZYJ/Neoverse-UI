@@ -14,6 +14,8 @@ const checks = [
   { name: 'Component contracts', args: ['scripts/gates/check-component-contracts.ts'] },
   { name: 'Framework parity', args: ['scripts/gates/check-framework-parity.ts'] },
   { name: 'Component requests', args: ['check:requests'] },
+  { name: 'Test registry', args: ['check:test-registry'] },
+  { name: 'Scale budgets', args: ['check:budgets'] },
   { name: 'Changeset targets', args: ['check:changesets'] },
   { name: 'Typecheck (with builds)', args: ['typecheck'] },
   { name: 'Unit and contract tests', args: ['test'] },

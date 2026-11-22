@@ -18,11 +18,16 @@ Only the `check.ts` entry stays at the root. Every other script belongs to the d
 
 | File | Responsibility |
 | --- | --- |
+| `check-budgets.ts` | Source, CSS and test line budgets with REVIEW/NEAR/AT LIMIT bands and dated exceptions |
+| `check-budgets.test.ts` | Covers classification, content units, severity bands and exception validation |
+| `quality-budgets.json` | Single owner of limit values and exception records |
 | `check-docs.ts` | Docs structure registry, status lines, links, translation pairs and hashes, English-only prose and contract evidence paths |
 | `check-component-contracts.ts` | Matrix schema, public exports, React runtime coverage, evidence and docs rows |
 | `check-framework-parity.ts` | Vue/React components, structures, literal unions and normalized binding names |
 | `check-material-standards.ts` | Shared component selectors must reference token-owned material variables |
 | `check-source-language.ts` | English comments and identifiers; Chinese only in localized values |
+| `check-test-registry.ts` | Test scope registry, metadata evidence, browser spec table and cross-browser config agree |
+| `check-test-registry.test.ts` | Covers registry parsing, glob rules and two-way metadata evidence |
 | `check-tailwind-usage.ts` | Application source must use semantic utilities instead of primitive values |
 | `check-text-integrity.ts` | UTF-8 text, line endings, BOM and replacement-character integrity |
 | `react-runtime-fixture.ts` | Collects React adapter markers from the Design Lab fixture |
@@ -70,6 +75,7 @@ Only the `check.ts` entry stays at the root. Every other script belongs to the d
 
 - A new static check belongs in `gates/`, a release-only check or verifier in `release/`, request tooling in `requests/`, development orchestration in `dev/` and consumer synchronization in `sync/`.
 - Wire a new gate into `scripts/check.ts` and `package.json` in the same change, and add it to the table above.
+- Scale limits and exceptions live only in `gates/quality-budgets.json`. An exception carries a date, a ceiling the file must stay within, and a removal condition; a file back inside the hard limit loses its exception.
 - Scripts resolve the repository root with `../..` from their domain directory. Do not use the current working directory for repository paths.
 - Use Bun APIs and Node built-ins already present. Do not add a dependency for one check.
 - A script that writes to the repository must be lock-protected, idempotent and tested against a temporary directory.

@@ -42,9 +42,7 @@ docs/                          current state of the repository
   plans/                       dated implementation plans
 ```
 
-Process material belongs in `.agents/notes/`: audits, acceptance runs, incident records, measurement snapshots and implementation plans are records of what happened on a date, not descriptions of the current repository. Name them `<type>-<date>.md`.
-
-The structure block is the registry: a topic that is not listed there cannot be introduced silently. `bun run check:docs` rejects a `docs/` file absent from the block.
+Process material — audits, acceptance runs, incident records, measurement snapshots and plans — belongs in `.agents/notes/` as `<type>-<date>.md`. The structure block above is the registry: `bun run check:docs` rejects a `docs/` file absent from it.
 
 ## Content ownership
 
@@ -68,44 +66,31 @@ The structure block is the registry: a topic that is not listed there cannot be 
 | What the latest release shipped | [release-0.3.1.md](releases/release-0.3.1.md) |
 | What an older release shipped | `.agents/notes/archives/release-*.md` |
 
-One fact, one place. Link to the owning document instead of restating it.
-
 ## Status metadata
 
-Every file starts with a level-one heading, a blank line, then `Status: adopted` or `Status: historical`.
-
-- `adopted` describes the current repository state.
-- `historical` is kept for its design rationale and names the document that replaced it.
-
-Current-state documents do not carry dates. A dated observation, baseline or verification run is process material and belongs in `.agents/notes/`, which keeps the date in the file name and in the record itself.
+Every file starts with a level-one heading, a blank line, then `Status: adopted` for current state or `Status: historical` for a design rationale that names its replacement. Current-state documents do not carry dates; a dated observation, baseline or verification run is process material in `.agents/notes/`, with the date in the file name and in the record.
 
 ## Writing
 
-- One level-one heading per file; keep heading levels consecutive. A heading names its subject, not “Overview” or “Misc”.
-- Lead with the conclusion, then the evidence. One paragraph carries one topic. Use numbered steps only for a sequence and tables for comparisons and mappings.
-- Write facts, not intentions or marketing. Write an unknown value as unverified together with the observation that would settle it. Do not use “future”, “probably” or “should support” in place of a fact.
+- One level-one heading and consecutive heading levels per file. A heading names its subject, not "Overview" or "Misc". Lead with the conclusion, then the evidence; one paragraph carries one topic. Use numbered steps only for a sequence and tables for comparisons and mappings.
+- Write facts, not intentions or marketing. Write an unknown value as unverified together with the observation that would settle it. Do not use "future", "probably" or "should support" in place of a fact.
 - A document has exactly one prose language. English contract documents use United States spelling and contain no Chinese prose or Chinese display names; Chinese belongs in the paired `zh-CN` translation. Chinese working records use Chinese prose; identifiers, code, commands and English product names stay in their original form.
-- Chinese prose uses full-width punctuation. Put one space between a Chinese character and a half-width Latin word, digit or unit. Keep `%` and `°` attached to the number. Use “quotes”, not 「brackets」. Dates use `2026-11-15`, times use `14:30`, and ranges use `100–900`.
-- Inline code, links and bold text follow the same CJK spacing rule but receive no extra padding. Use relative paths for repository links and full URLs for external links. Link text names the target.
-- Do not restate another document's rules or checklists. Link to the owning section instead.
-- Historical records name their replacement and keep their original wording. Do not delete a record that still explains a design decision.
+- Chinese prose uses full-width punctuation, one space between a Chinese character and a half-width Latin word, digit or unit, and "quotes" rather than 「brackets」. Dates use `2026-11-15`, times `14:30`, ranges `100–900`; `%` and `°` stay attached to the number. Inline code, links and bold text follow the same CJK spacing rule without extra padding. Use relative paths for repository links and full URLs for external links; link text names the target.
+- One fact, one place: do not restate another document's rules or checklists, and link to the owning section instead. A historical record names its replacement, keeps its original wording, and is not deleted while it still explains a design decision.
 
 ## Translations
 
-English remains the source of truth for every public contract and package guide. Chinese translations serve readers; they never become an independent fact owner.
+English remains the source of truth for every public contract and package guide; Chinese translations serve readers and never become an independent fact owner. Each pair is registered in `docs/translations.json`: a source path and a `zh-CN` translation path, with `README.zh-CN.md` files pairing with the package-level `README.md`.
 
-- Each pair is registered in `docs/translations.json`: a source path and a `zh-CN` translation path. `README.zh-CN.md` files pair with the package-level `README.md`.
-- A translation starts with `<!-- Source: <source path> -->` and `<!-- Source-SHA256: <sha256> -->`. The hash covers the source file byte for byte; `bun run check:docs` fails when the source changed without a translation review.
-- Edit the English source first, then update every registered translation and its hash in the same change. A summary translation states its scope and links the English contract for exact values.
+- A translation starts with `<!-- Source: <source path> -->` and `<!-- Source-SHA256: <sha256> -->`; the hash covers the source byte for byte, and `bun run check:docs` fails when the source changed without a translation review.
+- Edit the English source first, then update every registered translation and hash in the same change. A summary translation states its scope and links the English contract for exact values.
 - Translations use Chinese prose, full-width punctuation and the terminology in [docs/zh-CN/terminology.md](zh-CN/terminology.md). Identifiers, code, commands and product names keep their source spelling.
 - Do not register a translation that is not maintained. Consumer-facing guides are translated first; agent governance, source conventions, test registries, release records and `.agents/notes/` stay English.
 
 ## Structure and size
 
-- A directory-level `AGENTS.md` describes that directory's structure, file responsibilities and extension rules. It stays at or below 100 lines, with a hard limit of 120. Split a subdirectory's guidance into topic documents rather than raising the limit.
-- A topic document owns one subject. When a document grows to cover independent subjects, split it, register the new files in this structure block, and link both directions.
-- The root `AGENTS.md` carries global constraints and entry links only. Module exceptions live in the nearest directory-level file.
-- Do not create empty templates, placeholder sections or documents that only duplicate an existing owner.
+- A directory-level `AGENTS.md` describes that directory's structure, file responsibilities and extension rules at or below 100 lines, with a hard limit of 120; split a subdirectory's guidance into topic documents rather than raising the limit. The root `AGENTS.md` carries global constraints and entry links only. Do not create empty templates, placeholder sections or documents that only duplicate an existing owner.
+- A topic document owns one subject. When it grows to cover independent subjects, split it, register the new files in this structure block and link both directions.
 
 ## Checks
 
