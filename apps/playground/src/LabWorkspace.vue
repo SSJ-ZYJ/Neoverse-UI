@@ -6,10 +6,15 @@ import LabExplorer from './LabExplorer.vue';
 import LabInspector from './LabInspector.vue';
 import LabStage from './LabStage.vue';
 import LabToolbar from './LabToolbar.vue';
-import { labModules, moduleGroups, resolveLabHash, specimenById } from './lab-modules';
+import { labModules, moduleGroupFor, resolveLabHash, specimenById } from './lab-modules';
 import { isLocale, type Locale } from './playground-content';
 import { readPreferences, writePreferences } from './playground-preferences';
 import { restoreScrollPosition, saveScrollPosition } from './scroll-restoration';
+import {
+  defaultStageBackground,
+  isStageBackground,
+  type StageBackground,
+} from './stage-background';
 import {
   applyThemeMode,
   isThemeMode,
@@ -39,7 +44,7 @@ if (window.location.hash !== '' && route.value?.canonicalHash !== initialHash) {
 let lastHash = window.location.hash;
 const module = computed(() => labModules.find(({ id }) => id === route.value?.moduleId));
 const category = computed(() =>
-  moduleGroups.find((group) => group.moduleIds.some((id) => id === route.value?.moduleId)),
+  route.value === null ? undefined : moduleGroupFor(route.value.moduleId),
 );
 const specimenId = computed(() => route.value?.specimenId);
 const specimen = computed(() =>
@@ -65,6 +70,11 @@ const locale = ref<Locale>(
 );
 const theme = ref(resolveInitialThemeMode());
 applyThemeMode(theme.value, false);
+const stageBackground = ref<StageBackground>(
+  isStageBackground(preferences.stageBackground)
+    ? preferences.stageBackground
+    : defaultStageBackground,
+);
 document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en';
 
 function setTheme(value: string): void {
@@ -72,6 +82,12 @@ function setTheme(value: string): void {
   theme.value = value;
   applyThemeMode(value);
   persistThemeMode(value);
+}
+
+function setStageBackground(value: string): void {
+  if (!isStageBackground(value)) return;
+  stageBackground.value = value;
+  writePreferences({ stageBackground: value });
 }
 
 function setLocale(value: string): void {
@@ -91,6 +107,10 @@ const openPanel = ref<Panel | null>(null);
 const explorer = ref<HTMLDialogElement | null>(null);
 const inspector = ref<HTMLDialogElement | null>(null);
 const workspace = ref<HTMLElement | null>(null);
+// Focus moves to the stage for deep links and history too. Only keyboard
+// navigation should paint the focus ring, so the shell tracks the modality
+// instead of relying on the browser's programmatic-focus heuristic.
+const focusReveal = ref(false);
 let returnFocus: HTMLElement | null = null;
 let focusFrame = 0;
 
@@ -117,6 +137,14 @@ function syncPanels(): void {
 }
 
 watch([persistent, openPanel], syncPanels, { flush: 'post' });
+
+function revealFocus(): void {
+  focusReveal.value = true;
+}
+
+function concealFocus(): void {
+  focusReveal.value = false;
+}
 
 function showPanel(panel: Panel, event: MouseEvent): void {
   if (persistent.value) return;
@@ -199,6 +227,8 @@ onMounted(() => {
   syncPanels();
   stopThemeObservation = observeSystemTheme();
   desktopQuery.addEventListener('change', syncLayout);
+  window.addEventListener('pointerdown', concealFocus, true);
+  window.addEventListener('keydown', revealFocus, true);
   window.addEventListener('popstate', syncLocation);
   window.addEventListener('hashchange', syncLocation);
   window.addEventListener('pagehide', saveWorkspace);
@@ -209,6 +239,8 @@ onMounted(() => {
 onBeforeUnmount(() => {
   stopThemeObservation?.();
   desktopQuery.removeEventListener('change', syncLayout);
+  window.removeEventListener('pointerdown', concealFocus, true);
+  window.removeEventListener('keydown', revealFocus, true);
   window.removeEventListener('popstate', syncLocation);
   window.removeEventListener('hashchange', syncLocation);
   window.removeEventListener('pagehide', saveWorkspace);
@@ -217,7 +249,11 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="playground-shell" :data-persistent="persistent || undefined">
+  <div
+    class="playground-shell"
+    :data-persistent="persistent || undefined"
+    :data-focus-reveal="focusReveal || undefined"
+  >
     <LabToolbar
       :locale="locale"
       :theme="theme"
@@ -253,6 +289,7 @@ onBeforeUnmount(() => {
       ref="workspace"
       data-design-lab-workspace
       class="playground-shell__workspace scrollbar-immersive"
+      :data-stage-background="stageBackground"
       aria-labelledby="stage-title"
     >
       <LabStage
@@ -261,7 +298,9 @@ onBeforeUnmount(() => {
         :category="category?.label"
         :specimen="specimen"
         :session="session"
+        :background="stageBackground"
         @navigate="navigate"
+        @background="setStageBackground"
       />
     </main>
     <dialog

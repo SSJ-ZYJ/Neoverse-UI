@@ -168,7 +168,9 @@
   --neoverse-control-secondary-border: var(--neoverse-color-border-subtle);
   --neoverse-control-segmented-foreground: var(--neoverse-color-text-secondary);
   --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
-  --neoverse-control-segmented-border: var(--neoverse-control-button-border);
+  /* The segmented well keeps its refraction-only silhouette; the compact
+     control hairline belongs to buttons and choice controls. */
+  --neoverse-control-segmented-border: transparent;
   --neoverse-control-segmented-shadow: var(--neoverse-effect-choice-rest-shadow);
   /* Dark segmented controls use the same Aurora Glass edge field as system-dark.
      Lower its opacity instead of disabling it: no hard monochrome outline. */
@@ -209,7 +211,9 @@
   --neoverse-control-ghost-hover-foreground: var(--neoverse-color-text-primary);
   --neoverse-control-ghost-active-foreground: var(--neoverse-color-text-primary);
   --neoverse-control-ghost-border: transparent;
-  --neoverse-control-button-border: transparent;
+  /* Dark keeps the validated glass rim as its compact-control silhouette. */
+  --neoverse-control-silhouette: var(--neoverse-color-border-subtle);
+  --neoverse-switch-thumb-background: var(--neoverse-color-neutral-50);
   --neoverse-control-button-edge: var(--neoverse-control-button-filled-shadow);
   --neoverse-control-button-edge-active: var(--neoverse-effect-command-hover-shadow);
   --neoverse-control-button-edge-hover: var(--neoverse-effect-command-hover-shadow);

@@ -499,7 +499,7 @@ try {
     '.ui-icon-button--stretch {',
     '.ui-icon-button__content {',
     'border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)',
-    'var(--neoverse-material-border);',
+    'var(--neoverse-control-silhouette);',
     'background-clip: padding-box;',
     'overflow: hidden;',
     '.ui-button > .ui-button__edge-field',

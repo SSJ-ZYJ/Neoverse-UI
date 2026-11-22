@@ -37,7 +37,7 @@ const sections = [
   <div class="grid gap-grid">
     <UiSurface
       as="nav"
-      surface="glass-subtle"
+      surface="glass-elevated"
       content-overflow="visible"
       class="playground-floating-interaction-surface flex flex-wrap gap-1 rounded-card p-2"
       :aria-label="localize(copy.label, props.locale)"

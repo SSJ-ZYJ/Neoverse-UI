@@ -147,46 +147,60 @@ export const labModules = [
 export type ModuleId = (typeof labModules)[number]['id'];
 export type LabModule = (typeof labModules)[number];
 
+/**
+ * Explorer sections follow one rule: a section states design intent, a module is
+ * a family that can be read on its own, and the utility section holds lab
+ * tooling rather than design content. Modules therefore appear exactly once.
+ */
 export const moduleGroups = [
-  {
-    id: 'components',
-    label: localized('Components', '组件'),
-    moduleIds: [
-      'controls',
-      'overlays',
-      'forms',
-      'status-feedback',
-      'card',
-      'data-display',
-      'dock',
-      'scrollbar',
-    ],
-  },
   {
     id: 'foundations',
     label: localized('Foundations', '设计基础'),
-    moduleIds: ['colors', 'typography', 'layout-shape', 'shadow', 'motion'],
+    kind: 'design',
+    moduleIds: ['colors', 'typography', 'layout-shape', 'motion'],
+  },
+  {
+    id: 'materials',
+    label: localized('Materials & elevation', '材质与层级'),
+    kind: 'design',
+    moduleIds: ['materials', 'shadow'],
+  },
+  {
+    id: 'components',
+    label: localized('Components', '组件'),
+    kind: 'design',
+    moduleIds: [
+      'controls',
+      'forms',
+      'overlays',
+      'status-feedback',
+      'data-display',
+      'card',
+      'dock',
+      'scrollbar',
+      'terminal',
+    ],
   },
   {
     id: 'compositions',
     label: localized('Compositions', '组合场景'),
-    moduleIds: ['composition', 'terminal'],
+    kind: 'design',
+    moduleIds: ['composition'],
   },
   {
-    id: 'presets',
-    label: localized('Presets', '预设'),
-    moduleIds: ['materials'],
-  },
-  {
-    id: 'validation',
-    label: localized('Validation', '验证'),
+    id: 'tools',
+    label: localized('Lab tools', '实验室工具'),
+    kind: 'utility',
     moduleIds: ['consumer-parity', 'giscus'],
   },
 ] as const satisfies readonly {
   id: string;
   label: LocalizedText;
+  kind: 'design' | 'utility';
   moduleIds: readonly ModuleId[];
 }[];
+
+export type ModuleGroup = (typeof moduleGroups)[number];
 
 export const specimenKinds = ['foundation', 'component', 'composition'] as const;
 export type SpecimenKind = (typeof specimenKinds)[number];
@@ -270,7 +284,7 @@ export const labSpecimens = [
     id: 'foundation-colors',
     preview: foundations.colors,
     moduleId: 'colors',
-    label: moduleCopy.colors.label,
+    label: localized('Color scales and roles', '色彩刻度与语义角色'),
     apiNames: [],
     tags: ['foundation', 'color', 'tokens'],
     kind: 'foundation',
@@ -279,7 +293,7 @@ export const labSpecimens = [
     id: 'foundation-typography',
     preview: foundations.typography,
     moduleId: 'typography',
-    label: moduleCopy.typography.label,
+    label: localized('Type scale', '字号刻度'),
     apiNames: [],
     tags: ['foundation', 'typography', 'tokens'],
     kind: 'foundation',
@@ -352,7 +366,7 @@ export const labSpecimens = [
     id: 'foundation-motion',
     preview: foundations.motion,
     moduleId: 'motion',
-    label: moduleCopy.motion.label,
+    label: localized('Motion tokens', '动效令牌'),
     apiNames: [],
     tags: ['foundation', 'motion', 'tokens'],
     kind: 'foundation',
@@ -806,6 +820,20 @@ export function specimenById(id: string): LabSpecimen | undefined {
 
 export function specimensForModule(moduleId: ModuleId): readonly LabSpecimen[] {
   return labSpecimens.filter((specimen) => specimen.moduleId === moduleId);
+}
+
+/** Specimens the Explorer may link to; aggregate comparisons stay out of the tree. */
+export function browsableSpecimens(moduleId: ModuleId): readonly LabSpecimen[] {
+  return specimensForModule(moduleId).filter((specimen) => specimen.browse !== false);
+}
+
+/** A family needs a disclosure only when it holds more than one browsable specimen. */
+export function isExpandableModule(moduleId: ModuleId): boolean {
+  return browsableSpecimens(moduleId).length > 1;
+}
+
+export function moduleGroupFor(moduleId: ModuleId): ModuleGroup | undefined {
+  return moduleGroups.find((group) => group.moduleIds.some((id) => id === moduleId));
 }
 
 export interface ResolvedLabHash {

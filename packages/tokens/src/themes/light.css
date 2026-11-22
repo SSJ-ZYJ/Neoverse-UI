@@ -313,7 +313,11 @@
   --neoverse-control-button-edge-active: var(--neoverse-effect-command-hover-shadow);
   --neoverse-control-primary-shadow: var(--neoverse-effect-primary-rest-shadow);
   --neoverse-control-primary-hover-shadow: var(--neoverse-effect-primary-hover-shadow);
-  --neoverse-control-button-border: color-mix(
+  /* Light glass planes keep their transparent material border, but a compact
+     control cannot rely on a sampled silhouette: the pale canvas leaves a
+     32px button or a 44px switch track with no readable boundary. The shared
+     control silhouette therefore starts from a fine border-role hairline. */
+  --neoverse-control-silhouette: color-mix(
     in srgb,
     var(--neoverse-color-border-default) var(--neoverse-effect-alpha-intense),
     transparent

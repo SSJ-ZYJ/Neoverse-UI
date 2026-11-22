@@ -15,6 +15,7 @@ type LabIconName =
   | 'mail'
   | 'menu'
   | 'message'
+  | 'move'
   | 'plus'
   | 'spark'
   | 'target';
@@ -43,6 +44,7 @@ const paths: Record<LabIconName, string> = {
   mail: 'M3 6h18v12H3V6Zm1 1 8 6 8-6',
   menu: 'M4 7h16M4 12h16M4 17h16',
   message: 'M4 5h16v11H8l-4 4V5Z',
+  move: 'M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3',
   plus: 'M12 5v14M5 12h14',
   spark: 'm12 3 1.6 6.4L20 11l-6.4 1.6L12 19l-1.6-6.4L4 11l6.4-1.6L12 3Z',
   target: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-5a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0-4h.01',

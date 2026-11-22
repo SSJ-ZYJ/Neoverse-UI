@@ -663,8 +663,14 @@
     border-radius: var(--neoverse-choice-control-radius);
     color: var(--neoverse-choice-control-active-foreground);
     background: var(--neoverse-choice-control-background);
+    /* An unchecked control keeps the glass plate, which has no rim in Light.
+       The shared compact-control silhouette is painted as an inset ring so the
+       box, radio and switch track stay readable on the pale canvas without
+       changing their tokenized size. */
     box-shadow:
-      var(--neoverse-choice-control-effective-shadow), var(--neoverse-choice-validation-shadow);
+      var(--neoverse-choice-control-effective-shadow),
+      var(--neoverse-choice-validation-shadow),
+      inset 0 0 0 var(--neoverse-border-width-thin) var(--neoverse-control-silhouette);
     -webkit-backdrop-filter: var(--neoverse-form-control-filter);
     backdrop-filter: var(--neoverse-form-control-filter);
     transition:
@@ -746,7 +752,9 @@
     color: var(--neoverse-form-control-disabled-foreground);
     background: var(--neoverse-form-control-disabled-background);
     box-shadow:
-      var(--neoverse-choice-control-effective-shadow), var(--neoverse-choice-validation-shadow);
+      var(--neoverse-choice-control-effective-shadow),
+      var(--neoverse-choice-validation-shadow),
+      inset 0 0 0 var(--neoverse-border-width-thin) var(--neoverse-control-silhouette);
   }
 
   :where(.ui-choice[data-disabled='true'])

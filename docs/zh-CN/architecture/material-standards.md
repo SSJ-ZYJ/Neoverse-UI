@@ -5,7 +5,7 @@ Status: adopted
 [English](../../architecture/material-standards.md)
 
 <!-- Source: docs/architecture/material-standards.md -->
-<!-- Source-SHA256: bccdbb380ee8d1f59263bee198e6ad9ef792939d1c6009cbcde410da73db6f2b -->
+<!-- Source-SHA256: cd416d269a0f68f0632aa2f09ef81ea7c54d77514c5f26a16e31a73cc426faa8 -->
 
 本文是[英文材质标准](../../architecture/material-standards.md)的中文摘要，覆盖消费项目最常用的材质、层级、嵌套与修复边界。具体光学数值、逐组件审计与历史验收记录以英文原文为准。
 
@@ -31,6 +31,7 @@ Status: adopted
 - 深色模式略微提亮左上、右下圆弧，并在与直边相接处渐回原亮度；边缘宽度不变。
 - 边缘响应正下方像素，不采样或偏移邻近像素，因此不是空间折射。主体色调、模糊与阴影仍由 CSS 负责。
 - 普通 Surface 的 `solid`、`subtle` 与 `elevated` 走 Tailwind 组合；极光玻璃只用于需要共享玻璃材质的表面。
+- 紧凑控件（按钮、复选框、单选与开关轨道）通过 `--neoverse-control-silhouette` 拥有 1px 轮廓：浅色解析为细发丝边，深色复用已验证的玻璃边缘。浅色开关滑块使用白色瓷面，避免与浅色轨道混同；玻璃平面、卡片与分段控件的边框策略保持不变。
 
 ## 嵌套
 

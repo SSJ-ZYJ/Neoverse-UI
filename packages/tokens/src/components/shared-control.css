@@ -14,7 +14,11 @@
     /* Secondary and segmented controls share tier optics in both themes.
        Ghost retains a transparent plane and shared interaction effects. */
     --neoverse-control-secondary-border: var(--neoverse-color-border-default);
-    --neoverse-control-button-border: var(--neoverse-color-border-default);
+    /* Compact controls own one 1px silhouette instead of borrowing the tier
+       material border. Light substitutes a fine hairline because its pale
+       canvas cannot separate a transparent plate; Dark keeps the glass rim. */
+    --neoverse-control-silhouette: var(--neoverse-color-border-subtle);
+    --neoverse-control-button-border: var(--neoverse-control-silhouette);
     --neoverse-control-secondary-background: none;
     /* The plate uses one background-color; no full-surface gradient. */
     --neoverse-control-secondary-fill: var(--neoverse-material-glass-subtle-background);

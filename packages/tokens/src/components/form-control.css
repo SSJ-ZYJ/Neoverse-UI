@@ -74,7 +74,10 @@
       (var(--neoverse-switch-block-size) - var(--neoverse-switch-thumb-size)) /
       2
     );
-    --neoverse-switch-thumb-background: var(--neoverse-color-neutral-50);
+    /* The thumb is the control's only movable shape. Light places it on a pale
+       track, so the porcelain fill must stay lighter than the canvas; Dark
+       remaps this role to its existing porcelain. */
+    --neoverse-switch-thumb-background: var(--neoverse-color-white);
     --neoverse-switch-thumb-active-background: var(--neoverse-color-white);
     --neoverse-switch-thumb-shadow: var(--neoverse-shadow-control);
     --neoverse-field-gap: var(--neoverse-space-2);

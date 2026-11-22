@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { glassMaterial } from '@neoverse-ui/tokens';
 import { UiButton, UiSegmentedControl, UiSurface } from '@neoverse-ui/vue';
-import { computed, ref } from 'vue';
+import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import LabIcon from './LabIcon.vue';
 import {
   type LabModule,
   type LabSpecimen,
@@ -19,6 +20,7 @@ import {
   localize,
   localized,
 } from './playground-content';
+import { type StageBackground, stageBackgrounds } from './stage-background';
 
 const props = defineProps<{
   locale: Locale;
@@ -26,8 +28,12 @@ const props = defineProps<{
   category: LocalizedText | undefined;
   specimen: LabSpecimen | undefined;
   session: SpecimenSession | undefined;
+  background: StageBackground;
 }>();
-const emit = defineEmits<{ navigate: [module: ModuleId | SpecimenId] }>();
+const emit = defineEmits<{
+  navigate: [module: ModuleId | SpecimenId];
+  background: [value: string];
+}>();
 const FocusedSpecimen = () => {
   const preview = props.specimen?.preview;
   return typeof preview === 'function'
@@ -49,7 +55,113 @@ const copy = {
   surfaceLabel: localized('Preview material', '预览材质'),
   components: localized('Components', '查看组件'),
   materials: localized('Materials', '浏览材质'),
+  move: localized('Move preview', '移动预览'),
+  moveHint: localized(
+    'Drag, or use the arrow keys. Press Home to recenter.',
+    '拖拽或使用方向键移动，按 Home 复位。',
+  ),
 } as const;
+
+// The specimen moves inside the stage so the same component can be judged
+// against different parts of the backdrop. The grip owns the gesture: dragging
+// the component itself would fight its own press, focus and text selection.
+const content = ref<HTMLElement | null>(null);
+const offset = ref({ x: 0, y: 0 });
+const dragging = ref(false);
+const edgeGap = 8;
+// A translate keeps the move out of layout. It is not a backdrop root, so
+// nested Aurora Glass keeps sampling the stage; the preview also stays the
+// direct grid child, so a `w-full` component still resolves against the stage
+// column instead of collapsing into a shrink-wrapped wrapper.
+const contentStyle = computed(() => ({
+  '--stage-offset-x': `${offset.value.x}px`,
+  '--stage-offset-y': `${offset.value.y}px`,
+}));
+
+function clampOffset(x: number, y: number): { x: number; y: number } {
+  const area = content.value?.getBoundingClientRect();
+  const box = content.value?.firstElementChild?.getBoundingClientRect();
+  if (area === undefined || box === undefined) return { x: 0, y: 0 };
+  const maxX = Math.max(0, (area.width - box.width) / 2 - edgeGap);
+  const maxY = Math.max(0, (area.height - box.height) / 2 - edgeGap);
+  return {
+    x: Math.min(maxX, Math.max(-maxX, x)),
+    y: Math.min(maxY, Math.max(-maxY, y)),
+  };
+}
+
+let dragOrigin: { pointerX: number; pointerY: number; x: number; y: number } | null = null;
+
+function startDrag(event: PointerEvent): void {
+  if (event.button !== 0) return;
+  event.preventDefault();
+  dragOrigin = {
+    pointerX: event.clientX,
+    pointerY: event.clientY,
+    x: offset.value.x,
+    y: offset.value.y,
+  };
+  dragging.value = true;
+  (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
+}
+
+function dragMove(event: PointerEvent): void {
+  if (dragOrigin === null) return;
+  offset.value = clampOffset(
+    dragOrigin.x + event.clientX - dragOrigin.pointerX,
+    dragOrigin.y + event.clientY - dragOrigin.pointerY,
+  );
+}
+
+function endDrag(event: PointerEvent): void {
+  if (dragOrigin === null) return;
+  dragOrigin = null;
+  dragging.value = false;
+  const target = event.currentTarget as HTMLElement;
+  if (target.hasPointerCapture(event.pointerId)) target.releasePointerCapture(event.pointerId);
+}
+
+const nudgeSteps: Record<string, readonly [number, number] | undefined> = {
+  ArrowLeft: [-1, 0],
+  ArrowRight: [1, 0],
+  ArrowUp: [0, -1],
+  ArrowDown: [0, 1],
+};
+
+function nudge(event: KeyboardEvent): void {
+  if (event.key === 'Home') {
+    event.preventDefault();
+    resetPosition();
+    return;
+  }
+  const direction = nudgeSteps[event.key];
+  if (direction === undefined) return;
+  event.preventDefault();
+  const step = event.shiftKey ? 24 : 8;
+  offset.value = clampOffset(
+    offset.value.x + direction[0] * step,
+    offset.value.y + direction[1] * step,
+  );
+}
+
+function resetPosition(): void {
+  offset.value = { x: 0, y: 0 };
+}
+
+function reclampPosition(): void {
+  if (offset.value.x === 0 && offset.value.y === 0) return;
+  offset.value = clampOffset(offset.value.x, offset.value.y);
+}
+
+watch(() => props.specimen?.id, resetPosition);
+onMounted(() => window.addEventListener('resize', reclampPosition));
+onBeforeUnmount(() => window.removeEventListener('resize', reclampPosition));
+const backgroundOptions = computed(() =>
+  stageBackgrounds.map((value) => ({
+    value,
+    label: localize(appCopy.stageBackground.options[value], props.locale),
+  })),
+);
 const showcaseSurface = ref<'glass-subtle' | 'glass-elevated'>('glass-subtle');
 const showcaseOptions = computed(() => [
   { value: 'glass-subtle', label: localize(glassMaterial.tiers.subtle, props.locale) },
@@ -65,12 +177,48 @@ function setShowcaseSurface(value: string): void {
   <div
     data-playground-page
     class="playground-stage"
-    :class="{ 'playground-stage--focused': specimen }"
+    :class="{
+      'playground-stage--focused': specimen,
+      'playground-stage--composition': specimen?.kind === 'composition',
+    }"
   >
-    <p class="playground-stage__label text-label-sm font-label text-secondary">
-      <span aria-hidden="true" />
-      {{ localize(copy.label, locale) }}
-    </p>
+    <div class="playground-stage__chrome">
+      <div class="playground-stage__identity">
+        <p class="playground-stage__label text-label-sm font-label text-secondary">
+          <span aria-hidden="true" />
+          {{ localize(copy.label, locale) }}
+        </p>
+        <button
+          type="button"
+          class="playground-stage__grip"
+          data-stage-move-handle
+          :aria-label="localize(copy.move, locale)"
+          :title="localize(copy.moveHint, locale)"
+          :data-dragging="dragging || undefined"
+          @pointerdown="startDrag"
+          @pointermove="dragMove"
+          @pointerup="endDrag"
+          @pointercancel="endDrag"
+          @lostpointercapture="endDrag"
+          @keydown="nudge"
+          @dblclick="resetPosition"
+        >
+          <LabIcon name="move" />
+        </button>
+      </div>
+      <UiSurface surface="elevated" class="playground-stage__background">
+        <span class="hidden text-label-sm font-label text-secondary sm:inline" aria-hidden="true">
+          {{ localize(appCopy.stageBackground.shortLabel, locale) }}
+        </span>
+        <UiSegmentedControl
+          :aria-label="localize(appCopy.stageBackground.label, locale)"
+          :model-value="props.background"
+          :options="backgroundOptions"
+          surface="none"
+          @update:model-value="emit('background', $event)"
+        />
+      </UiSurface>
+    </div>
 
     <section
       v-if="specimen"
@@ -92,7 +240,12 @@ function setShowcaseSurface(value: string): void {
           {{ localize(specimen.label, locale) }}
         </h2>
       </header>
-      <div class="playground-stage__specimen-content">
+      <div
+        ref="content"
+        class="playground-stage__specimen-content"
+        :style="contentStyle"
+        :data-dragging="dragging || undefined"
+      >
         <FocusedSpecimen />
       </div>
     </section>

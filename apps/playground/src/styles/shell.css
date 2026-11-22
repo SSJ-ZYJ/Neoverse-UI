@@ -215,28 +215,152 @@
 }
 
 .playground-explorer {
-  gap: var(--neoverse-space-2);
+  display: grid;
+  align-content: start;
+  gap: 0;
 }
 
-.playground-explorer__category,
-.playground-explorer__module-toggle,
-.playground-explorer__link,
+.playground-explorer__overview {
+  margin-block-end: var(--neoverse-space-2);
+  font-weight: var(--neoverse-font-weight-medium);
+}
+
+/* Three levels, three visual weights: a muted 12px section label, a 14px
+   primary module destination, and a 13px secondary specimen below a rail. */
+.playground-explorer__section {
+  margin-block-start: var(--neoverse-space-4);
+}
+
+.playground-explorer__section:first-of-type {
+  margin-block-start: var(--neoverse-space-1);
+}
+
+.playground-explorer__section[data-kind='utility'] {
+  margin-block-start: var(--neoverse-space-5);
+  border-block-start: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+  padding-block-start: var(--neoverse-space-3);
+}
+
+.playground-explorer__section-toggle {
+  display: flex;
+  block-size: var(--neoverse-space-8);
+  inline-size: auto;
+  align-items: center;
+  gap: var(--neoverse-space-2);
+  margin-inline: calc(-1 * var(--neoverse-space-2));
+  border: 0;
+  border-radius: var(--neoverse-radius-control-inner);
+  padding-inline: var(--neoverse-space-2);
+  background: none;
+  color: var(--neoverse-color-text-muted);
+  font-family: var(--neoverse-font-family-sans);
+  font-size: var(--neoverse-font-size-2xs);
+  font-weight: var(--neoverse-font-weight-medium);
+  letter-spacing: var(--neoverse-letter-spacing-wide);
+  text-align: start;
+  cursor: pointer;
+}
+
+.playground-explorer__section[data-active] .playground-explorer__section-toggle {
+  color: var(--neoverse-color-text-secondary);
+}
+
+.playground-explorer__section-label {
+  overflow: hidden;
+  flex: 1 1 auto;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playground-explorer__heading {
+  margin: 0;
+}
+
+.playground-explorer__list,
+.playground-explorer__specimens {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.playground-explorer__module-row {
+  display: flex;
+  align-items: center;
+  gap: var(--neoverse-space-1);
+}
+
+.playground-explorer__module-link,
+.playground-explorer__leaf,
+.playground-explorer__overview,
 .playground-inspector__frame-link {
   justify-content: start;
   text-align: start;
 }
 
-.playground-explorer__category {
-  justify-content: space-between;
-  color: var(--neoverse-color-text-secondary);
+.playground-explorer__module-link {
+  flex: 1 1 auto;
+  color: var(--neoverse-color-text-primary);
+  font-weight: var(--neoverse-font-weight-medium);
+}
+
+.playground-explorer__module[data-active] .playground-explorer__module-link {
+  color: var(--neoverse-color-accent-primary);
+}
+
+.playground-explorer__disclosure {
+  display: inline-flex;
+  min-inline-size: var(--neoverse-space-8);
+  block-size: var(--neoverse-space-8);
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--neoverse-space-1);
+  border: 0;
+  border-radius: var(--neoverse-radius-control-inner);
+  padding-inline: var(--neoverse-space-2);
+  background: none;
+  color: var(--neoverse-color-text-muted);
+  font-family: var(--neoverse-font-family-sans);
+  cursor: pointer;
+}
+
+.playground-explorer__count {
+  color: var(--neoverse-color-text-muted);
+  font-size: var(--neoverse-font-size-2xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--neoverse-font-weight-regular);
+}
+
+@media (hover: hover) {
+  .playground-explorer__section-toggle:hover,
+  .playground-explorer__disclosure:hover {
+    background-color: var(--neoverse-effect-hover-field);
+    color: var(--neoverse-color-text-secondary);
+  }
+
+  .playground-explorer__section[data-active] .playground-explorer__section-toggle:hover {
+    color: var(--neoverse-color-text-primary);
+  }
+}
+
+.playground-explorer__section-toggle:focus-visible,
+.playground-explorer__disclosure:focus-visible {
+  outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+  outline-offset: var(--neoverse-focus-ring-offset);
 }
 
 .playground-explorer__chevron {
+  flex: none;
   transition: rotate var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
 }
 
-.playground-explorer__category[aria-expanded='true'] .playground-explorer__chevron,
-.playground-explorer__module-toggle[aria-expanded='true'] .playground-explorer__chevron {
+.playground-explorer__section-toggle .playground-explorer__chevron {
+  inline-size: 0.75rem;
+  block-size: 0.75rem;
+}
+
+.playground-explorer__section-toggle[aria-expanded='true'] .playground-explorer__chevron,
+.playground-explorer__disclosure[aria-expanded='true'] .playground-explorer__chevron {
   rotate: 90deg;
 }
 
@@ -248,10 +372,16 @@
   --neoverse-navigation-item-active-shadow: var(--neoverse-shadow-none);
 }
 
+.playground-explorer__leaf {
+  color: var(--neoverse-color-text-secondary);
+  font-size: var(--neoverse-font-size-xs);
+  font-weight: var(--neoverse-font-weight-regular);
+}
+
 .playground-explorer__specimens {
-  margin-inline-start: var(--neoverse-space-3);
+  margin-inline-start: var(--neoverse-space-2);
   border-inline-start: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
-  padding-inline-start: var(--neoverse-space-1);
+  padding-inline-start: var(--neoverse-space-2);
 }
 
 .playground-inspector,
@@ -294,6 +424,25 @@
   background: var(--neoverse-color-surface-canvas);
 }
 
+/* The stage backdrop is a local inspection aid, not a page theme. The default
+   stays the flat semantic canvas; the remaining modes reuse the Playground
+   field tokens so a component can be judged on a tinted or optical plane
+   without opening the isolated /frame route. */
+.playground-shell__workspace[data-stage-background='tint'] {
+  background-color: var(--neoverse-color-accent-soft);
+}
+
+.playground-shell__workspace[data-stage-background='gradient'] {
+  background-color: var(--neoverse-color-surface-canvas);
+  background-image: var(--neoverse-playground-stage-color-field);
+}
+
+.playground-shell__workspace[data-stage-background='optical'] {
+  background-color: var(--neoverse-color-surface-canvas);
+  background-image: var(--neoverse-playground-stage-optical-field);
+  background-size: var(--neoverse-playground-stage-optical-size);
+}
+
 .playground-stage {
   display: grid;
   min-block-size: 100%;
@@ -305,10 +454,37 @@
   padding: clamp(var(--neoverse-space-3), 2vw, var(--neoverse-space-8));
 }
 
+.playground-stage__chrome {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--neoverse-space-3);
+}
+
 .playground-stage__label {
   display: flex;
   align-items: center;
   gap: var(--neoverse-space-2);
+}
+
+/* The background switch must stay legible on every backdrop it selects, so it
+   owns a raised plate instead of borrowing the stage surface. */
+.playground-stage__background {
+  display: flex;
+  min-inline-size: 0;
+  align-items: center;
+  gap: var(--neoverse-space-3);
+  border-radius: var(--neoverse-radius-control);
+  padding: var(--neoverse-space-1) var(--neoverse-space-2);
+}
+
+/* The visible group label is dropped below the small breakpoint; the leading
+   padding follows it so the control stays optically centred in its plate. */
+@media (min-width: 40rem) {
+  .playground-stage__background {
+    padding-inline-start: var(--neoverse-space-3);
+  }
 }
 
 .playground-stage__label > span {
@@ -332,8 +508,11 @@
   gap: var(--neoverse-layout-grid-gap);
 }
 
-/* Keep visible keyboard focus on the title without outlining the whole canvas. */
-.playground-stage__specimen:focus {
+/* Deep links and history moves focus to the stage for assistive technology.
+   The visible ring is reserved for keyboard navigation: on a pointer or an
+   initial load, a ring around a static title reads as a rendering defect. */
+.playground-stage__specimen:focus,
+.playground-stage__heading > [data-stage-heading]:focus {
   outline: none;
 }
 
@@ -341,7 +520,14 @@
   justify-self: start;
 }
 
-.playground-stage__specimen:focus-visible .playground-stage__specimen-title {
+/* Keep the heading box on its text measure so the keyboard focus ring hugs the
+   title instead of drawing a full-width field around the heading. */
+.playground-stage__heading > [data-stage-heading] {
+  justify-self: start;
+}
+
+[data-focus-reveal] .playground-stage__specimen:focus-visible .playground-stage__specimen-title,
+[data-focus-reveal] .playground-stage__heading > [data-stage-heading]:focus-visible {
   outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
   outline-offset: var(--neoverse-focus-ring-offset);
 }
@@ -359,6 +545,13 @@
   ) {
   background: var(--neoverse-color-surface-canvas);
 }
+
+/* The overview's live sample is a stage, not a quiet well: once a backdrop is
+   selected it must show through instead of leaving a canvas rectangle. */
+[data-design-lab-workspace]:not([data-stage-background='canvas']) .playground-overview-hero__stage {
+  background: transparent;
+}
+
 /* Selected specimens own only their real component surface. The stage is
    a plain canvas; diagnostic comparison backdrops remain in isolated frames. */
 .playground-stage--focused {
@@ -695,8 +888,9 @@
   border: 0;
   border-radius: var(--neoverse-radius-control);
   background:
-    var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
+    var(--neoverse-playground-stage-optical-field), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);
+  background-size: var(--neoverse-playground-stage-optical-size);
   padding: var(--neoverse-space-6) var(--neoverse-space-4);
   box-shadow: var(--neoverse-shadow-inset);
 }
@@ -704,8 +898,9 @@
 .playground-material-backdrop {
   border: 0;
   background:
-    var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
+    var(--neoverse-playground-stage-optical-field), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);
+  background-size: var(--neoverse-playground-stage-optical-size);
 }
 
 /* Scene content belongs to the specimen; all control optics remain shared. */
@@ -883,8 +1078,9 @@
 
 .playground-qa-stage--gradient {
   background:
-    var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
+    var(--neoverse-playground-stage-optical-field), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);
+  background-size: var(--neoverse-playground-stage-optical-size);
 }
 
 .playground-qa-stage--neutral {
@@ -995,8 +1191,9 @@
   border: 0;
   border-radius: var(--neoverse-radius-control);
   background:
-    var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
+    var(--neoverse-playground-stage-optical-field), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);
+  background-size: var(--neoverse-playground-stage-optical-size);
   padding-inline: var(--neoverse-space-3);
   padding-block: var(--neoverse-space-2);
   box-shadow: var(--neoverse-shadow-inset);
@@ -1075,7 +1272,109 @@
   justify-items: center;
   border-radius: var(--neoverse-radius-control);
   background:
-    var(--neoverse-playground-stage-gradient), var(--neoverse-playground-stage-underlay),
+    var(--neoverse-playground-stage-optical-field), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);
+  background-size: var(--neoverse-playground-stage-optical-size);
   box-shadow: var(--neoverse-shadow-inset);
+}
+
+/* The shell shows product specimens; the computed-material readout is a
+   diagnostic for the isolated QA frame. */
+[data-playground-view='shell'] [data-material-legend] {
+  display: none;
+}
+
+/* The move handle lives in the stage chrome, so it never joins the specimen's
+   own tab order or changes how a component resolves its width. The preview
+   itself is translated; a translate is not a backdrop root, so nested glass
+   keeps sampling the stage. */
+.playground-stage__identity {
+  display: flex;
+  min-inline-size: 0;
+  align-items: center;
+  gap: var(--neoverse-space-2);
+}
+
+.playground-stage__specimen-content > * {
+  translate: var(--stage-offset-x, 0px) var(--stage-offset-y, 0px);
+}
+
+/* Do not add a translate transition here: the preview owns its own transition
+   (the composition preset animates padding), and a shorthand here would
+   replace it. */
+.playground-stage__specimen-content[data-dragging] {
+  user-select: none;
+}
+
+.playground-stage__grip {
+  position: relative;
+  display: inline-flex;
+  inline-size: var(--neoverse-space-6);
+  block-size: var(--neoverse-space-6);
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+  border-radius: var(--neoverse-radius-pill);
+  background-color: var(--neoverse-color-surface-raised);
+  color: var(--neoverse-color-text-secondary);
+  box-shadow: var(--neoverse-shadow-sm);
+  cursor: grab;
+  opacity: 0.75;
+  touch-action: none;
+  transition:
+    opacity var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+    box-shadow var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
+}
+
+.playground-stage__grip:hover,
+.playground-stage__grip:focus-visible,
+.playground-stage__grip[data-dragging] {
+  opacity: 1;
+}
+
+.playground-stage__grip:focus-visible {
+  outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+  outline-offset: var(--neoverse-focus-ring-offset);
+}
+
+.playground-stage__grip:active {
+  cursor: grabbing;
+  box-shadow: var(--neoverse-effect-press-shadow);
+}
+
+@media (pointer: coarse) {
+  .playground-stage__grip::before {
+    position: absolute;
+    inset: calc(var(--neoverse-control-touch-hit-area) * -1);
+    border-radius: inherit;
+    content: '';
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playground-stage__grip {
+    transition: none;
+  }
+}
+
+/* A composition is a product scene, not a control on a studio plinth. Give it
+   the reading measure and start it under the heading instead of centering a
+   workspace in the middle of an empty canvas. */
+.playground-stage--composition .playground-stage__specimen-content {
+  align-items: start;
+  padding-block: var(--neoverse-space-6) var(--neoverse-space-12);
+}
+
+.playground-stage--composition .playground-stage__specimen-content > * {
+  inline-size: 100%;
+  max-inline-size: var(--neoverse-layout-reading-width);
+}
+
+/* A sidebar preview stays a sidebar; stretching it to the reading measure makes
+   every navigation row read as a full-page banner. */
+.playground-stage--composition
+  .playground-stage__specimen-content
+  > [data-composition-measure='narrow'] {
+  max-inline-size: var(--neoverse-playground-scene-narrow-width);
 }

@@ -19,6 +19,8 @@
   --neoverse-playground-specimen-card-min-width: 30rem;
   --neoverse-playground-preview-column-min-width: 14rem;
   --neoverse-playground-showcase-card-width: calc(var(--neoverse-space-12) * 6);
+  /* Sidebar-like scene previews keep their narrow measure in a focused stage. */
+  --neoverse-playground-scene-narrow-width: calc(var(--neoverse-space-12) * 7);
   --neoverse-playground-preview-stage-height: calc(var(--neoverse-space-12) * 3);
   --neoverse-playground-layout-preview-inline-size: calc(var(--neoverse-space-12) * 2);
   --neoverse-playground-layout-preview-block-size: calc(
@@ -57,38 +59,25 @@
       color-mix(in srgb, var(--neoverse-color-accent-secondary) 20%, transparent),
       transparent 67%
     );
-  /* Sharp circles, a ring, and grid lines belong to the actual material stage. */
-  --neoverse-playground-stage-gradient:
+  /* The optical stage backdrop is a fine dot matrix over two soft aurora
+     glows. The matrix gives the eye an edge and alignment reference without a
+     graph-paper grid, and the glows let tint and blur read without competing
+     with the specimen. */
+  --neoverse-playground-stage-optical-field:
     radial-gradient(
-      circle at 24% 46%,
-      color-mix(in srgb, var(--neoverse-color-accent-primary) 55%, transparent)
-        var(--neoverse-space-4),
-      transparent calc(var(--neoverse-space-4) + var(--neoverse-border-width-thin))
-    ),
-    radial-gradient(
-      circle at 72% 86%,
-      color-mix(in srgb, var(--neoverse-color-accent-secondary) 45%, transparent)
-        var(--neoverse-space-5),
-      transparent calc(var(--neoverse-space-5) + var(--neoverse-border-width-thin))
+      circle at 1px 1px,
+      color-mix(in srgb, var(--neoverse-color-text-primary) 10%, transparent) 1px,
+      transparent 0
     ),
     radial-gradient(
-      circle at 62% 28%,
-      transparent var(--neoverse-space-6),
-      color-mix(in srgb, var(--neoverse-color-accent-tertiary) 55%, transparent)
-        calc(var(--neoverse-space-6) + var(--neoverse-border-width-thin)) var(--neoverse-space-7),
-      transparent calc(var(--neoverse-space-7) + var(--neoverse-border-width-thin))
+      70% 60% at 16% 8%,
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 20%, transparent),
+      transparent 74%
     ),
-    repeating-linear-gradient(
-      0deg,
-      color-mix(in srgb, var(--neoverse-color-text-primary) 9%, transparent) 0
-        var(--neoverse-border-width-thin),
-      transparent var(--neoverse-border-width-thin) var(--neoverse-space-8)
-    ),
-    repeating-linear-gradient(
-      90deg,
-      color-mix(in srgb, var(--neoverse-color-text-primary) 9%, transparent) 0
-        var(--neoverse-border-width-thin),
-      transparent var(--neoverse-border-width-thin) var(--neoverse-space-8)
-    ),
-    var(--neoverse-playground-stage-color-field);
+    radial-gradient(
+      60% 55% at 88% 92%,
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 18%, transparent),
+      transparent 76%
+    );
+  --neoverse-playground-stage-optical-size: 24px 24px, auto, auto;
 }

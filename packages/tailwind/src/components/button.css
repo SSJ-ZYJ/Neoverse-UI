@@ -154,8 +154,12 @@
   }
 
   .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+    /* A compact control needs a boundary of its own: the tier material border is
+       transparent in Light, where the pale canvas leaves the plate unreadable.
+       The control silhouette is theme-owned and resolves to that same tier rim
+       in Dark. */
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
-      var(--neoverse-material-border);
+      var(--neoverse-control-silhouette);
     background: var(--neoverse-material-background);
     background-clip: padding-box;
     box-shadow: var(--neoverse-material-shadow);

@@ -75,6 +75,16 @@ export const appCopy = {
       zh: localized('中文', '中文'),
     },
   },
+  stageBackground: {
+    label: localized('Stage background', '舞台背景'),
+    shortLabel: localized('Background', '背景'),
+    options: {
+      canvas: localized('Solid', '纯色'),
+      tint: localized('Tint', '淡色'),
+      gradient: localized('Gradient', '渐变'),
+      optical: localized('Optical', '光学'),
+    },
+  },
   frame: {
     invalidTheme: localized(
       'Frame theme must be "light" or "dark".',
@@ -863,7 +873,7 @@ export const moduleCopy = {
     },
   },
   composition: {
-    label: localized('Composition', '组合场景'),
+    label: localized('Scenes and modes', '场景与模式'),
     description: localized(
       'Real interface compositions combine type, surface, material, spacing, and core controls in one calibration view.',
       '真实界面组合在同一个校准视图中结合字体、表面、材质、间距与核心控件。',

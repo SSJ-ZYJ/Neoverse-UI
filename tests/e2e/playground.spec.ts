@@ -678,21 +678,37 @@ test('a focused overlay stays anchored and unmounts on navigation without mounti
 });
 
 test.describe('playground', () => {
-  test('the explorer lists actual specimens before opening their modules', async ({
+  test('the explorer opens a module overview before disclosing its specimens', async ({
     page,
   }, testInfo) => {
     await page.goto('/?lang=en', { waitUntil: 'domcontentloaded' });
-    if (testInfo.project.name === 'mobile') {
-      await page.getByRole('button', { name: 'Open Explorer' }).click();
-    }
+    const mobile = testInfo.project.name === 'mobile';
+    const openExplorer = async () => {
+      if (mobile) await page.getByRole('button', { name: 'Open Explorer' }).click();
+    };
+    await openExplorer();
     const explorer = page.locator('[data-playground-navigation]');
-    await explorer.locator('#explorer-module-data-display').click();
+    await expect(explorer.locator('a[href="#data-display-tabs"]')).toBeHidden();
+
+    await explorer.locator('a[href="#data-display"]').click();
+    await expect(page).toHaveURL(/#data-display$/);
+    await expect(page.locator('[data-design-lab-region="module"]')).toBeVisible();
+
+    await openExplorer();
     await expect(explorer.locator('a[href="#data-display-tabs"]')).toBeVisible();
     await explorer.locator('a[href="#data-display-tabs"]').click();
     await expect(page).toHaveURL(/#data-display-tabs$/);
     await expect(page.locator('[data-design-lab-region="specimen"]')).toBeVisible();
     await expect(page.locator('#data-display-tabs')).toBeVisible();
     await expect(page.locator('#data-display-avatar')).toHaveCount(0);
+
+    // A module with one browsable specimen is a single destination instead of
+    // a disclosure that would repeat the same label one level deeper.
+    await openExplorer();
+    await expect(explorer.locator('#explorer-module-card')).toHaveCount(0);
+    await explorer.locator('a[href="#card"]').click();
+    await expect(page).toHaveURL(/#card$/);
+    await expect(page.locator('[data-design-lab-region="module"]')).toBeVisible();
   });
 
   test('Explorer hides redundant aggregate comparisons while preserving individual component entries', async ({
@@ -754,6 +770,69 @@ test.describe('playground', () => {
       await expect(workspace.locator('.ui-textarea')).toHaveCount(1);
       await expect(workspace.locator('.ui-input, .ui-select')).toHaveCount(0);
     }
+  });
+
+  test('the stage background switcher repaints the workspace and survives a reload', async ({
+    page,
+  }) => {
+    await page.goto('/?theme=light&lang=en#forms-textarea', { waitUntil: 'domcontentloaded' });
+    const workspace = page.locator('[data-design-lab-workspace]');
+    const control = page.getByRole('radiogroup', { name: 'Stage background' });
+    await expect(control).toBeVisible();
+    await expect(workspace).toHaveAttribute('data-stage-background', 'canvas');
+    expect(await workspace.evaluate((element) => getComputedStyle(element).backgroundImage)).toBe(
+      'none',
+    );
+
+    await control.getByRole('radio', { name: 'Gradient' }).click();
+    await expect(workspace).toHaveAttribute('data-stage-background', 'gradient');
+    expect(
+      await workspace.evaluate((element) => getComputedStyle(element).backgroundImage),
+    ).toContain('radial-gradient');
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(workspace).toHaveAttribute('data-stage-background', 'gradient');
+    await expect(control.getByRole('radio', { name: 'Gradient' })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+
+    await control.getByRole('radio', { name: 'Solid' }).click();
+    await expect(workspace).toHaveAttribute('data-stage-background', 'canvas');
+  });
+
+  test('the stage move handle moves the specimen and Home recenters it', async ({ page }) => {
+    // The entrance animation offsets the content for its first frames; reduced
+    // motion keeps the measured centre stable for the recenter assertion.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/?theme=light&lang=en#controls-button', { waitUntil: 'domcontentloaded' });
+    const movable = page.locator('.playground-stage__specimen-content > *');
+    const grip = page.locator('[data-stage-move-handle]');
+    await expect(grip).toBeVisible();
+    const before = await movable.boundingBox();
+    const handle = await grip.boundingBox();
+    if (before === null || handle === null) throw new Error('Missing stage geometry');
+
+    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(handle.x + handle.width / 2 + 48, handle.y + handle.height / 2 + 36, {
+      steps: 6,
+    });
+    await page.mouse.up();
+
+    const moved = await movable.boundingBox();
+    expect(moved?.x ?? 0).toBeGreaterThan(before.x + 24);
+    expect(moved?.y ?? 0).toBeGreaterThan(before.y + 16);
+
+    await grip.focus();
+    await page.keyboard.press('Home');
+    await expect
+      .poll(async () => {
+        const box = await movable.boundingBox();
+        if (box === null) return Number.POSITIVE_INFINITY;
+        return Math.max(Math.abs(box.x - before.x), Math.abs(box.y - before.y));
+      })
+      .toBeLessThan(2);
   });
 
   for (const [id, selector] of [
@@ -1013,7 +1092,7 @@ test.describe('playground', () => {
     const mobile = testInfo.project.name === 'mobile';
     await page.goto('/?theme=light&lang=en#controls-button', { waitUntil: 'domcontentloaded' });
     const live = page.locator('[data-design-lab-region="specimen"]');
-    const button = live.locator('button');
+    const button = live.locator('.ui-button');
     const inspector = page.locator('#design-lab-inspector');
     await expect(live).toBeFocused();
     await expect(page.locator('[data-design-lab-region="module"]')).toHaveCount(0);

@@ -36,6 +36,7 @@ const navigationItems = computed(() => [
     surface="glass-elevated"
     class="grid gap-3 rounded-card p-3"
     data-composition-surface
+    data-composition-measure="narrow"
     :aria-label="localize(copy.scenes.docsNavigationGroup.navigationLabel, props.locale)"
   >
     <div class="flex items-center justify-between gap-2">

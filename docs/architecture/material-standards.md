@@ -288,10 +288,12 @@ selected controls. White marks remain readable. Reduced transparency restores an
 opaque selected field. Both themes use a porcelain Switch thumb. A quiet top catch adds
 depth. The Switch
 keeps the same outer footprint, with a smaller thumb and even inset. Unchecked
-controls retain their neutral Aurora Glass plate; disabled controls use neutral plates
-and muted indicators. The selection field and keyboard focus are component tokens,
-independent of Button labels and secondary accent colors. Native state semantics
-remain unchanged.
+controls retain their neutral Aurora Glass plate with the shared 1px control
+silhouette; disabled controls use neutral plates and muted indicators. The Switch
+thumb keeps a white porcelain fill in Light so it stays lighter than the pale
+track; Dark retains its existing neutral porcelain. The selection field and
+keyboard focus are component tokens, independent of Button labels and secondary
+accent colors. Native state semantics remain unchanged.
 
 Light error and success text feedback uses coral and mint midtones rather than
 the deep foreground colors intended for pastel status fields. Field messages,
@@ -313,6 +315,12 @@ The decorative field owns no backdrop filter, layout or hit testing;
 disabled/loading retain the resting field while content alone is attenuated.
 Ghost and `surface="none"` hide this field. The Aurora Glass owner continues to use one
 tier background alpha and the compact sampling filter.
+
+Compact controls own a 1px silhouette through `--neoverse-control-silhouette`:
+Light resolves it to a fine border-role hairline because a 32px button or a
+44px switch track has no sampled backdrop to define it on the pale canvas,
+while Dark resolves it to the validated glass rim. Glass planes, cards and
+segmented wells keep their existing border policy.
 
 Dock's original desktop `lg` scale is 1.3, with a 0.9 optical type factor for
 navigation and embedded segmented labels. Compact Dock remains `md` at 1. These

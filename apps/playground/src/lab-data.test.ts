@@ -16,11 +16,15 @@ import {
   typographyTokens,
 } from './lab-data';
 import {
+  browsableSpecimens,
+  isExpandableModule,
   labModules,
   labSpecimens,
+  moduleGroups,
   resolveLabHash,
   specimenById,
   specimenKinds,
+  specimensForModule,
 } from './lab-modules';
 import { localize, moduleCopy } from './playground-content';
 
@@ -98,6 +102,60 @@ test('registers consolidated controls, the reusable dock, and the parity composi
   );
   expect(moduleIds).not.toEqual(
     expect.arrayContaining(['action', 'navigation-item', 'status-indicator', 'control-surface']),
+  );
+});
+
+test('keeps every module in exactly one Explorer section', () => {
+  const listed = moduleGroups.flatMap((group) => [...group.moduleIds]);
+
+  expect(new Set(listed).size).toBe(listed.length);
+  expect([...listed].sort()).toEqual(labModules.map((module) => module.id).sort());
+});
+
+test('orders Explorer sections from foundations to lab tooling', () => {
+  expect(moduleGroups.map((group) => group.id)).toEqual([
+    'foundations',
+    'materials',
+    'components',
+    'compositions',
+    'tools',
+  ]);
+  expect(moduleGroups.filter((group) => group.kind === 'utility')).toHaveLength(1);
+  expect(moduleGroups.at(-1)?.kind).toBe('utility');
+
+  for (const group of moduleGroups) {
+    expect(localize(group.label, 'en')).not.toBe('');
+    expect(localize(group.label, 'zh')).not.toBe('');
+    expect(group.moduleIds.length).toBeGreaterThan(0);
+  }
+  const labels = moduleGroups.map((group) => localize(group.label, 'en'));
+  expect(new Set(labels).size).toBe(labels.length);
+});
+
+test('keeps lab tooling out of the design sections', () => {
+  const tooling = moduleGroups.find((group) => group.kind === 'utility');
+  expect(tooling).toBeDefined();
+
+  for (const moduleId of tooling?.moduleIds ?? []) {
+    const publicApi = specimensForModule(moduleId).flatMap((specimen) =>
+      specimen.apiNames.filter((name) => name.startsWith('Ui')),
+    );
+    expect(publicApi, moduleId).toEqual([]);
+  }
+});
+
+test('keeps a disclosure only on modules with more than one browsable specimen', () => {
+  for (const module of labModules) {
+    const browsable = browsableSpecimens(module.id);
+
+    expect(
+      browsable.every((specimen) => specimen.moduleId === module.id),
+      module.id,
+    ).toBe(true);
+    expect(isExpandableModule(module.id), module.id).toBe(browsable.length > 1);
+  }
+  expect(browsableSpecimens('forms').map((specimen) => specimen.id)).not.toContain(
+    'forms-choice-controls',
   );
 });
 
