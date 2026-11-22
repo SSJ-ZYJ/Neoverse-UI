@@ -51,6 +51,41 @@ test('every Explorer specimen opens a nonempty, independently sized preview', as
   }
 });
 
+test('focused compositions and foundations keep the full galleries in the isolated frame', async ({
+  page,
+}) => {
+  await page.goto('/?lang=en#composition-standard-mode', { waitUntil: 'domcontentloaded' });
+  const composition = page.locator('[data-design-lab-region="specimen"]#composition-standard-mode');
+  await expect(composition.locator('[data-composition-surface]')).toHaveCount(2);
+  await expect(composition.getByRole('heading', { name: 'Atlas workspace' })).toBeVisible();
+  await expect(composition.getByRole('heading', { name: 'Aurora Atlas' })).toBeVisible();
+  await expect(composition.locator('#composition-reading')).toHaveCount(0);
+  await expect(composition.locator('#composition-control-cluster')).toHaveCount(0);
+
+  await page.goto('/?lang=en#foundation-layout-shape', { waitUntil: 'domcontentloaded' });
+  const geometry = page.locator('[data-design-lab-region="specimen"]#foundation-layout-shape');
+  for (const preview of ['space', 'radius', 'border']) {
+    await expect(geometry.locator(`[data-token-preview="${preview}"]`).first()).toBeVisible();
+  }
+  await expect(geometry.locator('[data-token-preview="layout"]')).toHaveCount(0);
+  await expect(geometry.locator('#spacing-alias, #radius-alias, #border-style')).toHaveCount(0);
+
+  await page.goto('/frame?theme=light&lang=en#composition-standard-mode', {
+    waitUntil: 'domcontentloaded',
+  });
+  await expect(page.locator('#composition-reading')).toBeVisible();
+  await expect(page.locator('#composition-control-cluster')).toBeVisible();
+  await expect(page.locator('#composition-floating-toolbar')).toBeVisible();
+
+  await page.goto('/frame?theme=light&lang=en#foundation-layout-shape', {
+    waitUntil: 'domcontentloaded',
+  });
+  for (const id of ['spacing-alias', 'radius-alias', 'border-style']) {
+    await expect(page.locator(`#${id}`)).toBeVisible();
+  }
+  await expect(page.locator('[data-token-preview="layout"]').first()).toBeVisible();
+});
+
 test('a focused overlay stays anchored and unmounts on navigation without mounting QA controls', async ({
   page,
 }) => {
@@ -489,7 +524,7 @@ test.describe('playground', () => {
     await expect(overview).toBeChecked();
   });
 
-  test('Input edits stay live but are discarded when Explorer history changes specimen', async ({
+  test('preview and Inspector edits are discarded when Explorer history changes specimen', async ({
     page,
   }, testInfo) => {
     const mobile = testInfo.project.name === 'mobile';
@@ -524,6 +559,11 @@ test.describe('playground', () => {
     ).toBeVisible();
     await expect(inspector.locator('[data-specimen-control]')).toHaveCount(0);
     if (mobile) await page.keyboard.press('Escape');
+    const runtime = live.getByRole('combobox');
+    await expect(runtime).toHaveText('Native');
+    await runtime.press('Enter');
+    await live.getByRole('option', { name: 'Remote' }).click();
+    await expect(runtime).toHaveText('Remote');
     await page.goBack();
     await expect(page).toHaveURL(/#forms-input$/);
     await expect(live).toBeFocused();
@@ -533,6 +573,7 @@ test.describe('playground', () => {
     await page.goForward();
     await expect(page).toHaveURL(/#forms-select$/);
     await expect(page.locator('#forms-select')).toBeFocused();
+    await expect(runtime).toHaveText('Native');
   });
 
   test('Card surface edits restore the component default and respect reduced transparency', async ({

@@ -9,10 +9,7 @@ import {
   primitiveSpacingTokens,
   semanticShadowTokens,
 } from '../lab-data';
-import BorderModule from '../modules/BorderModule.vue';
-import RadiusModule from '../modules/RadiusModule.vue';
-import SpacingModule from '../modules/SpacingModule.vue';
-import { type Locale, localize, tokenCopy } from '../playground-content';
+import { type Locale, localize, moduleCopy, tokenCopy } from '../playground-content';
 import TokenRow from '../TokenRow.vue';
 import ColorPalettesExample from './ColorPalettesExample.vue';
 import MotionPageExample from './MotionPageExample.vue';
@@ -54,11 +51,21 @@ export function prose(locale: Locale): VNode {
 }
 
 export function layoutShape(locale: Locale): VNode {
-  return h('div', { class: ['grid gap-grid', previewWidth] }, [
-    h(SpacingModule, { locale }),
-    h(RadiusModule, { locale }),
-    h(BorderModule, { locale }),
-  ]);
+  const groups = [
+    { label: moduleCopy.spacing.label, render: spacing },
+    { label: moduleCopy.radius.label, render: radius },
+    { label: moduleCopy.border.label, render: border },
+  ];
+  return h(
+    'div',
+    { class: ['grid gap-grid', previewWidth] },
+    groups.map(({ label, render }) =>
+      h('section', { key: label.en, class: 'grid min-w-0 gap-3' }, [
+        h('h3', { class: 'text-title-sm font-title text-primary' }, localize(label, locale)),
+        render(locale),
+      ]),
+    ),
+  );
 }
 
 export function spacing(locale: Locale): VNode {

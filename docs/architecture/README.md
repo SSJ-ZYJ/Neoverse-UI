@@ -203,6 +203,12 @@ Every entry in `labSpecimens` declares a `FocusedPreview`: either a localized re
 
 Module URLs and `/frame` render the full QA galleries, including fixed state matrices and optical fixtures. The isolated frame retains the diagnostic comparison backdrops. The Inspector opens that gallery at the specimen anchor, without transferring local edits. `/react-fixture` remains the React contract host. Neither isolated entry mounts the shell.
 
+Focused compositions may reuse individual scenes from QA, but do not mount the
+gallery containing them. Aurora Glass mode shows one Atlas workspace composed
+of the control cluster and project card. The older `#foundation-layout-shape`
+link remains a read-only overview of the three focused geometry groups; the full
+token sets and comparison anchors remain in the layout and shape QA gallery.
+
 The focused Scrollbar specimen demonstrates `scrollbar-immersive` on a local scroll container. The document-bound `UiScrollbar` and its ownership checks stay in the frame; the focused renderer does not bind the shell document to demonstrate a container scrollbar.
 
 Effective props are the session's overrides over the specimen's explicit initial props. Omitted props are resolved by the component, not the Playground. The Inspector marks changed values and can remove an override to inherit the component default where the specimen leaves the prop unset. Preview events and the editor share one specimen-owned value for controlled inputs and selections. Reset clears overrides and restores the specimen's initial interaction state without remounting its component. Leaving a specimen discards its session; navigation history restores selection, not edits. Locale, theme, and browser hover, focus, and press do not participate in this session.

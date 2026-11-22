@@ -1,5 +1,4 @@
 import { h, type VNode } from 'vue';
-import CompositionSceneSet from '../modules/CompositionSceneSet.vue';
 import ReadingComposition from '../modules/ReadingComposition.vue';
 import ReducedTransparencyComposition from '../modules/ReducedTransparencyComposition.vue';
 import type { Locale } from '../playground-content';
@@ -14,7 +13,14 @@ import GiscusTheme from './scenes/GiscusTheme.vue';
 import ProjectCard from './scenes/ProjectCard.vue';
 
 export function standardComposition(locale: Locale): VNode {
-  return h(CompositionSceneSet, { locale });
+  return h(
+    'div',
+    {
+      class: 'grid w-full min-w-0 max-w-reading-wide gap-grid',
+      'data-composition-mode': 'glass',
+    },
+    [h(ControlCluster, { locale }), h(ProjectCard, { locale })],
+  );
 }
 
 export function accessibleComposition(locale: Locale): VNode {
