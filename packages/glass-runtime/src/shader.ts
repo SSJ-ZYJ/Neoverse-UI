@@ -273,6 +273,14 @@ export const glassFragmentShader = `
       // compositor clips it. The chroma pass supplies the stronger color.
       float excess = max(dodge - 0.036, 0.0);
       dodge -= bottomRightVolume * excess * excess / (0.011 + excess);
+      if (shortSide > 192.0 && volumeScale > 0.0 && topLeftFocus > 0.0) {
+        // The stronger catch on large light surfaces can wash out pale
+        // backdrops. Follow its lighting envelope so the lift does not peak
+        // again just outside the rounded corner.
+        float topLeftRolloff = smoothstep(192.0, 384.0, shortSide) * volumeScale * topLeftFocus;
+        float topLeftExcess = max(dodge - 0.03, 0.0);
+        dodge -= topLeftRolloff * topLeftExcess * topLeftExcess / (0.006 + topLeftExcess);
+      }
       gl_FragColor = vec4(vec3(dodge), coverage);
       return;
     }

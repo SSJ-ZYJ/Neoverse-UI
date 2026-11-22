@@ -49,7 +49,7 @@ test.describe('Aurora Glass optical diagnostics', () => {
               expect(Math.min(upperLeft, lowerRight)).toBeGreaterThan(
                 2.25 * Math.max(upperRight, lowerLeft),
               );
-              expect(captures.metrics.lowerRightBlueRetention).toBeGreaterThanOrEqual(0.85);
+              expect(captures.metrics.blueRetention.lowerRight).toBeGreaterThanOrEqual(0.85);
             }
           } catch (error) {
             await attachOpticalFailure(testInfo, captures);
@@ -76,7 +76,33 @@ test.describe('Aurora Glass optical diagnostics', () => {
       expect(captures.metrics.corners.lowerRight).toBeGreaterThan(
         captures.metrics.corners.lowerLeft,
       );
-      expect(captures.metrics.lowerRightBlueRetention).toBeGreaterThanOrEqual(0.65);
+      expect(captures.metrics.blueRetention.lowerRight).toBeGreaterThanOrEqual(0.65);
+    } catch (error) {
+      await attachOpticalFailure(testInfo, captures);
+      throw error;
+    }
+  });
+
+  test('the light terminal rim keeps its upper-left tint on a pale backdrop @optics-smoke', async ({
+    page,
+  }, testInfo) => {
+    const graphics = await installOpticsProbe(page, 'light', 'elevated', 'terminal-pale');
+    const captures = await measureOptics(
+      page,
+      testInfo,
+      'light',
+      'elevated',
+      'terminal-pale',
+      graphics,
+    );
+    try {
+      const { blueRetention, corners, sides } = captures.metrics;
+      expect(blueRetention.upperLeft).toBeGreaterThanOrEqual(0.65);
+      expect(corners.upperLeft).toBeGreaterThan(Math.max(corners.upperRight, corners.lowerLeft));
+      for (const side of Object.values(sides)) {
+        expect(side.p10).toBeGreaterThanOrEqual(2);
+        expect(side.widthP90).toBeLessThanOrEqual(6);
+      }
     } catch (error) {
       await attachOpticalFailure(testInfo, captures);
       throw error;

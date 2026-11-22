@@ -4,7 +4,7 @@ import { expect } from '@playwright/test';
 
 export type OpticsTheme = 'light' | 'dark';
 export type OpticsTier = 'subtle' | 'elevated' | 'immersive';
-export type OpticsBackdrop = 'neutral' | 'pale' | 'pale-blue' | 'cool' | 'warm';
+export type OpticsBackdrop = 'neutral' | 'pale' | 'pale-blue' | 'terminal-pale' | 'cool' | 'warm';
 
 export const opticsThemes: readonly OpticsTheme[] = ['light', 'dark'];
 export const opticsTiers: readonly OpticsTier[] = ['subtle', 'elevated', 'immersive'];
@@ -15,18 +15,16 @@ const backgrounds: Record<OpticsBackdrop, string> = {
   pale: 'rgb(218 229 235)',
   // Sampled from just inside the reported lower-right Glass rim.
   'pale-blue': 'rgb(233 241 251)',
+  // Sampled just outside the reported XCA-Portal terminal's upper-left rim.
+  'terminal-pale': 'rgb(229 239 246)',
   cool: 'linear-gradient(125deg, rgb(38 95 160), rgb(122 194 207))',
   warm: 'linear-gradient(125deg, rgb(171 86 53), rgb(235 177 115))',
 };
 
 const probe = { left: 224, top: 208, width: 320, height: 180, radius: 24 };
 const padding = 12;
-const clip = {
-  x: probe.left - padding,
-  y: probe.top - padding,
-  width: probe.width + 2 * padding,
-  height: probe.height + 2 * padding,
-};
+const probeFor = (backdrop: OpticsBackdrop) =>
+  backdrop === 'terminal-pale' ? { ...probe, width: 640, height: 384, radius: 20 } : probe;
 
 export type EdgeMetrics = {
   p10: number;
@@ -47,7 +45,7 @@ export type OpticsMetrics = {
   bodyFilter: string;
   sides: Record<'top' | 'right' | 'bottom' | 'left', EdgeMetrics>;
   corners: Record<'upperLeft' | 'upperRight' | 'lowerLeft' | 'lowerRight', number>;
-  lowerRightBlueRetention: number;
+  blueRetention: Record<'upperLeft' | 'lowerRight', number>;
   interior: { mean: number; p95: number };
 };
 
@@ -62,7 +60,7 @@ export async function installOpticsProbe(
   });
   await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
   await page.evaluate(
-    ({ surfaceTier, background, position }) => {
+    ({ surfaceTier, background, position, terminal }) => {
       const app = document.querySelector<HTMLElement>('#app');
       if (app) app.style.display = 'none';
       for (const previous of document.querySelectorAll(
@@ -82,7 +80,7 @@ export async function installOpticsProbe(
       });
       const surface = document.createElement('div');
       surface.dataset.neoverseOpticsProbe = '';
-      surface.className = `material-glass-${surfaceTier}`;
+      surface.className = `${terminal ? 'ui-surface ' : ''}material-glass-${surfaceTier}`;
       Object.assign(surface.style, {
         position: 'fixed',
         left: `${position.left}px`,
@@ -95,7 +93,12 @@ export async function installOpticsProbe(
       });
       document.body.append(backdropElement, surface);
     },
-    { surfaceTier: tier, background: backgrounds[backdrop], position: probe },
+    {
+      surfaceTier: tier,
+      background: backgrounds[backdrop],
+      position: probeFor(backdrop),
+      terminal: backdrop === 'terminal-pale',
+    },
   );
 
   const surface = page.locator('[data-neoverse-optics-probe]');
@@ -155,6 +158,13 @@ export async function measureOptics(
   backdrop: OpticsBackdrop,
   graphics: { renderer: string; vendor: string; bodyFilter: string },
 ): Promise<{ metrics: OpticsMetrics; lit: Buffer; unlit: Buffer }> {
+  const position = probeFor(backdrop);
+  const clip = {
+    x: position.left - padding,
+    y: position.top - padding,
+    width: position.width + 2 * padding,
+    height: position.height + 2 * padding,
+  };
   const lit = await page.screenshot({ clip, animations: 'disabled', caret: 'hide' });
   const canvasSelector =
     '[data-neoverse-glass-renderer-canvas], [data-neoverse-glass-chroma-canvas]';
@@ -288,30 +298,37 @@ export async function measureOptics(
         }
         return average(values);
       };
-      const lowerRightX = inset + position.width - position.radius - 4;
-      const lowerRightY = inset + position.height - position.radius - 4;
-      let lowerRightPeak = 0;
-      for (let y = lowerRightY; y < lowerRightY + position.radius + 8; y += 1) {
-        for (let x = lowerRightX; x < lowerRightX + position.radius + 8; x += 1) {
-          lowerRightPeak = Math.max(lowerRightPeak, delta(x, y));
+      const cornerBlueRetention = (xOrigin: number, yOrigin: number) => {
+        const endX = xOrigin + position.radius + 8;
+        const endY = yOrigin + position.radius + 8;
+        let peak = 0;
+        for (let y = yOrigin; y < endY; y += 1) {
+          for (let x = xOrigin; x < endX; x += 1) {
+            peak = Math.max(peak, delta(x, y));
+          }
         }
-      }
-      const blueRetention: number[] = [];
-      for (let y = lowerRightY; y < lowerRightY + position.radius + 8; y += 1) {
-        for (let x = lowerRightX; x < lowerRightX + position.radius + 8; x += 1) {
-          if (delta(x, y) < Math.max(2, lowerRightPeak * 0.8)) continue;
-          const offset = (y * screenshotWidth + x) * 4;
-          const unlitBlueLead = (unlitPixels[offset + 2] ?? 0) - (unlitPixels[offset] ?? 0);
-          if (unlitBlueLead < 8) continue;
-          const litBlueLead = (litPixels[offset + 2] ?? 0) - (litPixels[offset] ?? 0);
-          blueRetention.push(litBlueLead / unlitBlueLead);
+        const retention: number[] = [];
+        for (let y = yOrigin; y < endY; y += 1) {
+          for (let x = xOrigin; x < endX; x += 1) {
+            if (delta(x, y) < Math.max(2, peak * 0.8)) continue;
+            const offset = (y * screenshotWidth + x) * 4;
+            const unlitBlueLead = (unlitPixels[offset + 2] ?? 0) - (unlitPixels[offset] ?? 0);
+            if (unlitBlueLead < 8) continue;
+            const litBlueLead = (litPixels[offset + 2] ?? 0) - (litPixels[offset] ?? 0);
+            retention.push(litBlueLead / unlitBlueLead);
+          }
         }
-      }
+        return percentile(retention, 0.5);
+      };
+      const left = inset - 4;
+      const top = inset - 4;
+      const right = inset + position.width - position.radius - 4;
+      const bottom = inset + position.height - position.radius - 4;
       const corners = {
-        upperLeft: cornerSignal(inset - 4, inset - 4),
-        upperRight: cornerSignal(inset + position.width - position.radius - 4, inset - 4),
-        lowerLeft: cornerSignal(inset - 4, inset + position.height - position.radius - 4),
-        lowerRight: cornerSignal(lowerRightX, lowerRightY),
+        upperLeft: cornerSignal(left, top),
+        upperRight: cornerSignal(right, top),
+        lowerLeft: cornerSignal(left, bottom),
+        lowerRight: cornerSignal(right, bottom),
       };
       const interiorValues: number[] = [];
       for (let y = inset + 36; y < inset + position.height - 36; y += 4) {
@@ -322,7 +339,10 @@ export async function measureOptics(
       return {
         sides,
         corners,
-        lowerRightBlueRetention: percentile(blueRetention, 0.5),
+        blueRetention: {
+          upperLeft: cornerBlueRetention(left, top),
+          lowerRight: cornerBlueRetention(right, bottom),
+        },
         interior: { mean: average(interiorValues), p95: percentile(interiorValues, 0.95) },
       };
     },
@@ -330,7 +350,7 @@ export async function measureOptics(
       first: lit.toString('base64'),
       second: unlit.toString('base64'),
       inset: padding,
-      position: probe,
+      position,
       screenshotWidth: clip.width,
       screenshotHeight: clip.height,
     },

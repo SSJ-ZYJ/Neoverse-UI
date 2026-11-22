@@ -61,6 +61,9 @@ clip, rather than masking the clipped result with lower coverage. The existing
 saturation pass strengthens the live backdrop's hue near that arc and fades
 back to its regular profile on the adjoining edges. Neither pass adds a
 fixed highlight hue.
+On larger light surfaces, the upper-left catch also rolls off before clipping,
+with a softer peak that fades along the adjoining edges. The rolloff changes
+the dodge signal without changing rim width or coverage.
 
 Dark surfaces and browsers without color dodge keep the overlay transfer.
 CSS still owns the body tint, blur, and shadows.
