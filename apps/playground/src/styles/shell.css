@@ -381,6 +381,21 @@
   padding: var(--neoverse-space-3);
 }
 
+.playground-composition-density {
+  padding: var(--neoverse-space-4);
+  transition: padding var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
+}
+
+.playground-composition-density[data-compact] {
+  padding: var(--neoverse-space-2);
+}
+
+.playground-composition-progress {
+  inline-size: 100%;
+  block-size: var(--neoverse-space-2);
+  accent-color: var(--neoverse-color-accent-primary);
+}
+
 @keyframes playground-specimen-enter {
   from {
     transform: translateY(var(--neoverse-space-2));
@@ -409,7 +424,8 @@
 
   .playground-shell:not([data-persistent]) .playground-shell__panel,
   .playground-shell__panel::backdrop,
-  .playground-explorer__chevron {
+  .playground-explorer__chevron,
+  .playground-composition-density {
     transition: none;
   }
 }

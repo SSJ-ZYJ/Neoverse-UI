@@ -1,16 +1,23 @@
 import {
   type ButtonProps,
   type CardProps,
+  type CheckboxProps,
   type DockProps,
+  type FormControlValue,
   type InputProps,
   type SegmentedControlProps,
+  type SelectProps,
+  type TabsProps,
   UiBadge,
   UiButton,
   UiCard,
+  UiCheckbox,
   UiDock,
   UiInput,
   UiNavigationItem,
   UiSegmentedControl,
+  UiSelect,
+  UiTabs,
 } from '@neoverse-ui/vue';
 import { h } from 'vue';
 import LabIcon from './LabIcon.vue';
@@ -26,6 +33,7 @@ import {
 
 const disabled = { kind: 'boolean', label: localized('Disabled', '禁用') } as const;
 const loading = { kind: 'boolean', label: localized('Loading', '加载中') } as const;
+const readonly = { kind: 'boolean', label: localized('Read-only', '只读') } as const;
 const glassOptions = [
   { value: 'none', label: localized('None', '无') },
   { value: 'glass-subtle', label: tokenCopy.glassVariants.subtle },
@@ -137,7 +145,7 @@ export const input = defineSpecimen<
   controls: {
     props: {
       disabled,
-      readonly: { kind: 'boolean', label: localized('Read-only', '只读') },
+      readonly,
       validation: {
         kind: 'select',
         label: localized('Validation', '校验'),
@@ -162,6 +170,120 @@ export const input = defineSpecimen<
         'onUpdate:modelValue': (value: string) => setState('modelValue', value),
       }),
     ]),
+});
+
+const runtimeLabel = localized('Runtime', '运行时');
+const runtimes = [
+  { value: 'native', label: localized('Native', '原生') },
+  { value: 'remote', label: localized('Remote', '远程') },
+] as const;
+type Runtime = (typeof runtimes)[number]['value'];
+
+function runtimeOptions(locale: Locale): SelectProps['options'] {
+  return runtimes.map(({ value, label }) => ({ value, label: localize(label, locale) }));
+}
+
+const localizedRuntimes = { en: runtimeOptions('en'), zh: runtimeOptions('zh') };
+
+/** The editable Select specimen */
+export const select = defineSpecimen<
+  Pick<SelectProps, 'disabled' | 'readonly'>,
+  { modelValue: Runtime }
+>()({
+  initialProps: { disabled: false, readonly: false },
+  initialState: () => ({ modelValue: 'native' }),
+  controls: {
+    props: { disabled, readonly },
+    state: { modelValue: { kind: 'select', label: localized('Value', '值'), options: runtimes } },
+  },
+  stateDisabled: (props) => props.disabled === true || props.readonly === true,
+  render: ({ props, state, setState, locale }) =>
+    h(UiSelect, {
+      ...props,
+      id: 'forms-runtime',
+      class: 'w-full max-w-container-sm',
+      modelValue: state.modelValue,
+      'onUpdate:modelValue': (value: FormControlValue) => {
+        const option = runtimes.find((entry) => entry.value === value);
+        if (option !== undefined) setState('modelValue', option.value);
+      },
+      'aria-label': localize(runtimeLabel, locale),
+      options: localizedRuntimes[locale],
+      'data-form-select': '',
+    }),
+});
+
+const releaseNotifications = localized('Release notifications', '版本发布通知');
+
+/** The editable Checkbox specimen */
+export const checkbox = defineSpecimen<Pick<CheckboxProps, 'disabled'>, { modelValue: boolean }>()({
+  initialProps: { disabled: false },
+  initialState: () => ({ modelValue: true }),
+  controls: {
+    props: { disabled },
+    state: { modelValue: { kind: 'boolean', label: localized('Checked', '已勾选') } },
+  },
+  stateDisabled: (props) => props.disabled === true,
+  render: ({ props, state, setState, locale }) =>
+    h(
+      UiCheckbox,
+      {
+        ...props,
+        modelValue: state.modelValue,
+        'onUpdate:modelValue': (value: boolean) => setState('modelValue', value),
+        'data-form-checkbox': '',
+        'data-contract-state': 'default',
+      },
+      () => localize(releaseNotifications, locale),
+    ),
+});
+
+const tabsLabel = localized('Member sections', '成员页面分区');
+const tabOptions = [
+  { value: 'overview', label: localized('Overview', '概览'), disabled: false },
+  { value: 'disabled', label: localized('Disabled', '未启用'), disabled: true },
+  { value: 'activity', label: localized('Activity', '动态'), disabled: false },
+] as const;
+const enabledTabs = tabOptions.filter((option) => !option.disabled);
+type TabValue = (typeof enabledTabs)[number]['value'];
+
+function memberTabOptions(locale: Locale): TabsProps['options'] {
+  return tabOptions.map(({ label, ...option }) => ({ ...option, label: localize(label, locale) }));
+}
+
+const localizedTabs = { en: memberTabOptions('en'), zh: memberTabOptions('zh') };
+
+/** The editable Tabs specimen */
+export const tabs = defineSpecimen<TabsProps, { modelValue: TabValue }>()({
+  initialProps: {},
+  initialState: () => ({ modelValue: 'overview' }),
+  controls: {
+    state: {
+      modelValue: {
+        kind: 'select',
+        label: localized('Selected Tab', '所选标签页'),
+        options: enabledTabs,
+      },
+    },
+  },
+  render: ({ state, setState, locale }) =>
+    h(
+      UiTabs,
+      {
+        modelValue: state.modelValue,
+        'onUpdate:modelValue': (value: string) => {
+          const option = enabledTabs.find((entry) => entry.value === value);
+          if (option !== undefined) setState('modelValue', option.value);
+        },
+        options: localizedTabs[locale],
+        ariaLabel: localize(tabsLabel, locale),
+        'data-tabs-sample': '',
+      },
+      {
+        default: ({ value }: { value: string }) =>
+          h('p', { class: 'text-body-sm text-secondary', 'data-tabs-panel-state': '' }, value),
+      },
+    ),
 });
 
 const cardCopy = moduleCopy.card;

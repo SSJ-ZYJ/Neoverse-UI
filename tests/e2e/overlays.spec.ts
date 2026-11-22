@@ -20,7 +20,11 @@ test.describe('modal and transient feedback', () => {
           adapter.name === 'Vue'
             ? page.locator('#overlays-dialog [data-dialog-open]')
             : page.locator('[data-react-adapter="UiDialog"] [data-dialog-open]');
-        await trigger.click();
+        // WebKit does not move focus to a button on pointer activation, so a
+        // clicked trigger never owned focus for the dialog to return. Keyboard
+        // activation exercises the return-to-invoker contract on every engine.
+        await trigger.focus();
+        await trigger.press('Enter');
         const dialog = page.locator('dialog.ui-dialog');
         await expect(dialog).toBeVisible();
         await expect(dialog).toHaveAttribute('aria-labelledby', /dialog-title|title/);

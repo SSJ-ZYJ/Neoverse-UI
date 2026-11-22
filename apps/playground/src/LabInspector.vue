@@ -4,7 +4,7 @@ import { computed } from 'vue';
 import LabIcon from './LabIcon.vue';
 import LabInspectorField from './LabInspectorField.vue';
 import type { LabModule, LabSpecimen } from './lab-modules';
-import type { SpecimenSession } from './lab-specimen-config';
+import type { SpecimenField, SpecimenSession } from './lab-specimen-config';
 import {
   appCopy,
   type Locale,
@@ -54,6 +54,21 @@ const copy = {
     '打开独立预览以对比可用状态。',
   ),
 } as const;
+const groupLabels = {
+  layout: localized('Layout', '布局'),
+  appearance: localized('Appearance', '外观'),
+  content: localized('Content', '内容'),
+  interaction: localized('Interaction', '交互'),
+};
+const fieldGroups = computed(() => {
+  const groups = new Map<SpecimenField['group'], SpecimenField[]>();
+  for (const field of props.session?.fields ?? []) {
+    const fields = groups.get(field.group);
+    if (fields) fields.push(field);
+    else groups.set(field.group, [field]);
+  }
+  return [...groups];
+});
 const selection = computed(() => props.specimen ?? props.module);
 const frameHref = computed(() => {
   if (selection.value === undefined) return undefined;
@@ -132,13 +147,24 @@ const frameHref = computed(() => {
         <p v-if="session.note" class="text-body-sm text-secondary">
           {{ localize(session.note, locale) }}
         </p>
-        <LabInspectorField
-          v-for="field in session.fields"
-          :key="`${specimen?.id}-${field.source}-${field.key}`"
-          :field="field"
-          :locale="locale"
-          @edit="session.edit(field.source, field.key, $event)"
-        />
+        <div
+          v-for="[ group, fields ] in fieldGroups"
+          :key="group ?? 'ungrouped'"
+          class="grid min-w-0 gap-3"
+          :role="group ? 'group' : undefined"
+          :aria-labelledby="group ? `inspector-group-${group}` : undefined"
+        >
+          <h4 v-if="group" :id="`inspector-group-${group}`" class="playground-inspector__label">
+            {{ localize(groupLabels[group], locale) }}
+          </h4>
+          <LabInspectorField
+            v-for="field in fields"
+            :key="`${specimen?.id}-${field.source}-${field.key}`"
+            :field="field"
+            :locale="locale"
+            @edit="session.edit(field.source, field.key, $event)"
+          />
+        </div>
         <UiButton variant="secondary" size="sm" class="justify-self-start" @click="session.reset()">
           {{ localize(copy.reset, locale) }}
         </UiButton>

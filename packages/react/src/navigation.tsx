@@ -370,6 +370,11 @@ export function UiSegmentedControl({
       aria-label={ariaLabel ?? rest['aria-label']}
       aria-disabled={disabled || loading || undefined}
       aria-busy={loading || rest['aria-busy']}
+      onBlur={(event) => {
+        const next = event.relatedTarget;
+        if (next instanceof Node && event.currentTarget.contains(next)) return;
+        setFocused(null);
+      }}
       data-surface={surface}
       data-neoverse-glass-edge-pass={surface.startsWith('glass-') ? 'css' : undefined}
       data-neoverse-surface-hover="static"

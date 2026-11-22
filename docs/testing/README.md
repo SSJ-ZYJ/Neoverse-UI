@@ -25,7 +25,7 @@ A test asserts an observable user outcome: a panel opens, focus returns, a value
 | --- | --- |
 | `forms.spec.ts` | Field wiring, text submission and IME, Select keyboard and controlled rejection, choice controls, number inputs, accessibility roles |
 | `overlays.spec.ts` | Popover, dropdown and context menu lifecycle, dismissal, focus return, anchor tracking, viewport clamping, tooltip content |
-| `navigation.spec.ts` | Breadcrumb, dock, segmented control, step flow |
+| `navigation.spec.ts` | Breadcrumb, dock, segmented control direction keys and roving tab stop, step flow |
 | `surfaces.spec.ts` | Disclosure, table, skeleton, timeline, stat card, scrollbar |
 | `terminal.spec.ts` | Transcript composition, suggestions, IME guard, tail following, reader intent |
 | `motion.spec.ts` | List reorder, entrance replay, page dissolve, React presence exit, reduced motion, layout width on a language switch |
@@ -33,7 +33,7 @@ A test asserts an observable user outcome: a panel opens, focus returns, a value
 | `glass-runtime.spec.ts` | One shared noninteractive renderer canvas, fixed placement, theme stability, context loss/restore, runtime reduced transparency, forced colors and adapter lifecycle |
 | `layout.spec.ts` | Control size baseline in both adapters, badge type scale, 24px minimum target, no implicit specimen magnification |
 | `contrast.spec.ts` | WCAG contrast floors for the primary, secondary and muted text roles in both themes |
-| `playground.spec.ts` | Explorer search and full catalogue previews, overlay isolation and cleanup, interactive editing and reset, focused composition and foundation isolation from QA galleries, browser history and scroll restoration, keyboard focus, theme and language, responsive overflow |
+| `playground.spec.ts` | Explorer search and full catalogue previews, overlay isolation and cleanup, bidirectional Inspector edits, composition presets and reset without remounting, dynamic focus fallback, focused preview and QA gallery isolation, browser history and scroll restoration, keyboard focus, theme and language, responsive overflow and reduced motion |
 | `parity.spec.ts` | Every React adapter renders, theme resolution, shared control names |
 
 The cross-browser configuration runs the interaction specs that do not depend on the Chromium-only optical harness: forms, overlays, navigation, surfaces, motion and parity. Terminal IME and scroll-tail timing, Glass and materials, layout and contrast probes, and the Playground shell stay Chromium-only because they either depend on that rendering harness or duplicate an existing cross-engine contract at disproportionate CI cost. Extending the list requires running both Firefox and WebKit before the spec enters the registry. `tests/optics/glass.spec.ts` runs separately under Chromium with SwiftShader and reports optical diagnostics rather than a release pass/fail signal.

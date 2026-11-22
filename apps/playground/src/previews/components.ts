@@ -6,7 +6,6 @@ import {
   UiBadge,
   UiBreadcrumb,
   UiButton,
-  UiCheckbox,
   UiControlSurface,
   UiDisclosure,
   UiEmptyState,
@@ -17,14 +16,12 @@ import {
   UiNotice,
   UiPagination,
   UiRadioGroup,
-  UiSelect,
   UiSkeleton,
   UiStatCard,
   UiStatusIndicator,
   UiStepFlow,
   UiSwitch,
   UiTable,
-  UiTabs,
   UiTextarea,
   UiTimeline,
   UiToast,
@@ -32,6 +29,7 @@ import {
 } from '@neoverse-ui/vue';
 import { computed, defineComponent, h, type PropType, ref, type VNode } from 'vue';
 import LabIcon from '../LabIcon.vue';
+import { checkbox } from '../lab-interactive-specimens';
 import {
   formatLocalized,
   type Locale,
@@ -237,10 +235,6 @@ export function tooltip(locale: Locale): VNode {
 const formCopy = {
   notes: localized('Project notes', '项目备注'),
   notesPlaceholder: localized('Describe the next iteration…', '描述下一轮迭代…'),
-  runtime: localized('Runtime', '运行时'),
-  native: localized('Native', '原生'),
-  remote: localized('Remote', '远程'),
-  releaseNotifications: localized('Release notifications', '版本发布通知'),
   releaseChannel: localized('Release channel', '发布通道'),
   stable: localized('Stable', '稳定版'),
   preview: localized('Preview', '预览版'),
@@ -273,63 +267,21 @@ export function textarea(locale: Locale): VNode {
   return h(TextareaPreview, { locale });
 }
 
-const SelectPreview = defineComponent({
+const ChoiceControlsPreview = defineComponent({
   props: previewProps,
   setup(props) {
-    const runtime = ref<FormControlValue>('native');
-    const options = computed(() => [
-      { value: 'native', label: localize(formCopy.native, props.locale) },
-      { value: 'remote', label: localize(formCopy.remote, props.locale) },
-    ]);
+    const session = checkbox.createSession();
     return () =>
-      h(UiSelect, {
-        id: 'forms-runtime',
-        class: 'w-full max-w-container-sm',
-        modelValue: runtime.value,
-        'onUpdate:modelValue': (value: FormControlValue) => {
-          runtime.value = value;
-        },
-        'aria-label': localize(formCopy.runtime, props.locale),
-        options: options.value,
-        'data-form-select': '',
-      });
+      h('div', { class: 'grid justify-items-start gap-3' }, [
+        session.render(props.locale),
+        radioGroup(props.locale),
+        switchControl(props.locale),
+      ]);
   },
 });
-
-export function select(locale: Locale): VNode {
-  return h(SelectPreview, { locale });
-}
 
 export function choiceControls(locale: Locale): VNode {
-  return h('div', { class: 'grid justify-items-start gap-3' }, [
-    checkbox(locale),
-    radioGroup(locale),
-    switchControl(locale),
-  ]);
-}
-
-const CheckboxPreview = defineComponent({
-  props: previewProps,
-  setup(props) {
-    const checked = ref(true);
-    return () =>
-      h(
-        UiCheckbox,
-        {
-          modelValue: checked.value,
-          'onUpdate:modelValue': (value: boolean) => {
-            checked.value = value;
-          },
-          'data-form-checkbox': '',
-          'data-contract-state': 'default',
-        },
-        () => localize(formCopy.releaseNotifications, props.locale),
-      );
-  },
-});
-
-export function checkbox(locale: Locale): VNode {
-  return h(CheckboxPreview, { locale });
+  return h(ChoiceControlsPreview, { locale });
 }
 
 const RadioGroupPreview = defineComponent({
@@ -416,46 +368,6 @@ const FieldPreview = defineComponent({
 
 export function field(locale: Locale): VNode {
   return h(FieldPreview, { locale });
-}
-
-const tabOptions = [
-  { value: 'overview', label: localized('Overview', '概览') },
-  { value: 'disabled', label: localized('Disabled', '未启用'), disabled: true },
-  { value: 'activity', label: localized('Activity', '动态') },
-];
-const tabsLabel = localized('Member sections', '成员页面分区');
-const TabsPreview = defineComponent({
-  props: previewProps,
-  setup(props) {
-    const selected = ref('overview');
-    const options = computed(() =>
-      tabOptions.map(({ label, ...option }) => ({
-        ...option,
-        label: localize(label, props.locale),
-      })),
-    );
-    return () =>
-      h(
-        UiTabs,
-        {
-          modelValue: selected.value,
-          'onUpdate:modelValue': (value: string) => {
-            selected.value = value;
-          },
-          options: options.value,
-          ariaLabel: localize(tabsLabel, props.locale),
-          'data-tabs-sample': '',
-        },
-        {
-          default: ({ value }: { value: string }) =>
-            h('p', { class: 'text-body-sm text-secondary', 'data-tabs-panel-state': '' }, value),
-        },
-      );
-  },
-});
-
-export function tabs(locale: Locale): VNode {
-  return h(TabsPreview, { locale });
 }
 
 export function avatar(_locale: Locale): VNode {

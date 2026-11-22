@@ -1,8 +1,29 @@
 import { h, type VNode } from 'vue';
+import { defineComposition } from '../lab-specimen-config';
 import ReadingComposition from '../modules/ReadingComposition.vue';
 import ReducedTransparencyComposition from '../modules/ReducedTransparencyComposition.vue';
-import type { Locale } from '../playground-content';
+import { type Locale, localized } from '../playground-content';
 import { resolvedTheme } from '../theme-state';
+import {
+  type ControlClusterConfiguration,
+  type ControlClusterMode,
+  compactControl,
+  controlClusterMode,
+  controlClusterPresets,
+  type DocsToolbarMode,
+  docsToolbarMode,
+  docsToolbarPresets,
+  type FloatingToolbarMode,
+  floatingToolbarMode,
+  floatingToolbarPresets,
+  type ProjectCardConfiguration,
+  projectCardPresets,
+  projectContentControl,
+  projectStatusControl,
+  showActionsControl,
+  surfaceControl,
+  type ToolbarConfiguration,
+} from './composition-settings';
 import ControlCluster from './scenes/ControlCluster.vue';
 import DocsArticleHeader from './scenes/DocsArticleHeader.vue';
 import DocsContentSurface from './scenes/DocsContentSurface.vue';
@@ -27,17 +48,69 @@ export function accessibleComposition(locale: Locale): VNode {
   return h(ReducedTransparencyComposition, { locale });
 }
 
-export function controlCluster(locale: Locale): VNode {
-  return h(ControlCluster, { locale });
-}
+export const controlCluster = defineComposition<
+  ControlClusterConfiguration,
+  { mode: ControlClusterMode }
+>()({
+  presets: controlClusterPresets,
+  controls: {
+    props: {
+      compact: compactControl,
+      surface: surfaceControl,
+      showStatus: {
+        kind: 'boolean',
+        group: 'content',
+        label: localized('Show status', '显示状态'),
+      },
+    },
+    state: { mode: controlClusterMode },
+  },
+  render: ({ locale, props, state, setState }) =>
+    h(ControlCluster, {
+      locale,
+      configuration: props,
+      modelValue: state.mode,
+      'onUpdate:modelValue': (mode) => setState('mode', mode),
+    }),
+});
 
-export function projectCard(locale: Locale): VNode {
-  return h(ProjectCard, { locale });
-}
+export const projectCard = defineComposition<ProjectCardConfiguration>()({
+  presets: projectCardPresets,
+  controls: {
+    props: {
+      content: projectContentControl,
+      surface: surfaceControl,
+      status: projectStatusControl,
+      progress: {
+        kind: 'number',
+        group: 'content',
+        label: localized('Delivery progress', '交付进度'),
+        min: 0,
+        max: 100,
+      },
+    },
+    state: {},
+  },
+  render: ({ locale, props }) => h(ProjectCard, { locale, configuration: props }),
+});
 
-export function floatingToolbar(locale: Locale): VNode {
-  return h(FloatingToolbar, { locale });
-}
+export const floatingToolbar = defineComposition<
+  ToolbarConfiguration,
+  { mode: FloatingToolbarMode }
+>()({
+  presets: floatingToolbarPresets,
+  controls: {
+    props: { compact: compactControl, surface: surfaceControl, showActions: showActionsControl },
+    state: { mode: floatingToolbarMode },
+  },
+  render: ({ locale, props, state, setState }) =>
+    h(FloatingToolbar, {
+      locale,
+      configuration: props,
+      modelValue: state.mode,
+      'onUpdate:modelValue': (mode) => setState('mode', mode),
+    }),
+});
 
 export function docsArticleHeader(locale: Locale): VNode {
   return h(DocsArticleHeader, { locale });
@@ -47,9 +120,24 @@ export function docsNavigationGroup(locale: Locale): VNode {
   return h(DocsNavigationGroup, { locale });
 }
 
-export function docsToolbar(locale: Locale): VNode {
-  return h(DocsToolbar, { locale });
-}
+export const docsToolbar = defineComposition<ToolbarConfiguration, { mode: DocsToolbarMode }>()({
+  presets: docsToolbarPresets,
+  controls: {
+    props: {
+      compact: compactControl,
+      surface: surfaceControl,
+      showActions: { ...showActionsControl, label: localized('Show copy link', '显示复制链接') },
+    },
+    state: { mode: docsToolbarMode },
+  },
+  render: ({ locale, props, state, setState }) =>
+    h(DocsToolbar, {
+      locale,
+      configuration: props,
+      modelValue: state.mode,
+      'onUpdate:modelValue': (mode) => setState('mode', mode),
+    }),
+});
 
 export function docsContentSurface(locale: Locale): VNode {
   return h(DocsContentSurface, { locale });

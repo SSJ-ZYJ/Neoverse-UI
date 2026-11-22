@@ -247,6 +247,12 @@ function handleKeydown(event: KeyboardEvent, index: number): void {
   }
 }
 
+function handleFocusOut(event: FocusEvent): void {
+  const next = event.relatedTarget;
+  if (next instanceof Node && optionsElement.value?.contains(next)) return;
+  focusedIndex.value = null;
+}
+
 function setOptionRef(element: Element | ComponentPublicInstance | null, index: number): void {
   optionRefs.value[index] = element as HTMLButtonElement | null;
 }
@@ -273,7 +279,7 @@ function optionClasses(option: SegmentOption): string[] {
     :aria-disabled="props.disabled || props.loading || undefined"
     :aria-busy="ariaBusy"
   >
-    <span ref="optionsElement" class="ui-segmented-control__options">
+    <span ref="optionsElement" class="ui-segmented-control__options" @focusout="handleFocusOut">
       <span
         v-if="activeIndex >= 0"
         class="ui-segmented-control__slider"

@@ -1353,6 +1353,26 @@ describe('UiSegmentedControl', () => {
     await wrapper.setProps({ modelValue: 'activity' });
     expect(buttons[2]?.attributes('aria-checked')).toBe('true');
   });
+  it('returns the tab stop to the controlled value after focus leaves the group', async () => {
+    const wrapper = mount(UiSegmentedControl, {
+      attachTo: document.body,
+      props: { options, modelValue: 'overview' },
+    });
+    const buttons = wrapper.findAll('button');
+    const group = wrapper.get('.ui-segmented-control__options');
+
+    await buttons[0]?.trigger('focus');
+    expect(buttons[0]?.attributes('tabindex')).toBe('0');
+    await group.trigger('focusout', { relatedTarget: buttons[2]?.element });
+    expect(buttons[0]?.attributes('tabindex')).toBe('0');
+
+    await group.trigger('focusout', { relatedTarget: document.body });
+    await wrapper.setProps({ modelValue: 'activity' });
+    expect(buttons[2]?.attributes('tabindex')).toBe('0');
+    expect(buttons[0]?.attributes('tabindex')).toBe('-1');
+    wrapper.unmount();
+  });
+
   it('marks the group busy and blocks selection while loading', async () => {
     const wrapper = mount(UiSegmentedControl, {
       props: { options, defaultValue: 'overview', loading: true },

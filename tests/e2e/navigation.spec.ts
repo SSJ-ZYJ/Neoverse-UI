@@ -270,6 +270,39 @@ test.describe('navigation', () => {
     await expect(radios.first()).toHaveAttribute('aria-checked', 'true');
   });
 
+  test('a blurred segmented control keeps the checked option as the only tab stop', async ({
+    page,
+  }) => {
+    await page.goto('/react-fixture?theme=light&lang=en&contract-fixtures=1');
+    const group = page.locator('[data-react-adapter="UiSegmentedControl"]');
+    const radios = group.getByRole('radio');
+
+    await page.locator('[data-parity-reject]').click();
+    await radios.nth(2).click();
+    await expect(radios.first()).toHaveAttribute('aria-checked', 'true');
+    await expect(radios.nth(2)).toBeFocused();
+
+    await page.keyboard.press('Tab');
+    await expect(radios.first()).toHaveAttribute('tabindex', '0');
+    await expect(radios.nth(2)).toHaveAttribute('tabindex', '-1');
+  });
+
+  test('the Vue segmented control restores its checked option when focus returns', async ({
+    page,
+  }) => {
+    await page.goto('/frame?theme=light&lang=en#controls');
+    const group = page.locator('#controls-segmented-control .ui-segmented-control').first();
+    const radios = group.getByRole('radio');
+
+    await radios.nth(2).click();
+    await expect(radios.nth(2)).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(radios.nth(2)).toHaveAttribute('tabindex', '0');
+    await expect(radios.first()).toHaveAttribute('tabindex', '-1');
+    await page.keyboard.press('Shift+Tab');
+    await expect(radios.nth(2)).toBeFocused();
+  });
+
   test('step flow marks exactly one current stage', async ({ page }) => {
     await page.goto('/frame?theme=light&lang=en#data-display-step-flow');
     const flow = page.locator('#data-display-step-flow .ui-step-flow');

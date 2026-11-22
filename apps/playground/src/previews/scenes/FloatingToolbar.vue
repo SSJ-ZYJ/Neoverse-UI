@@ -1,86 +1,107 @@
 <script setup lang="ts">
-import type { SegmentOption } from '@neoverse-ui/vue';
 import { UiButton, UiIconButton, UiSegmentedControl, UiSurface } from '@neoverse-ui/vue';
-import { computed } from 'vue';
+import { computed, ref, watch } from 'vue';
 import LabIcon from '../../LabIcon.vue';
 import type { LabModuleProps } from '../../modules/types';
 import { localize, moduleCopy } from '../../playground-content';
+import {
+  type FloatingToolbarMode,
+  floatingToolbarMode,
+  floatingToolbarPresets,
+  type ToolbarConfiguration,
+} from '../composition-settings';
+import { elementOf, focusAfterRemoval } from '../scene-focus';
 
-const props = defineProps<LabModuleProps>();
-const copy = moduleCopy.composition;
-const floatingToolbarOptions = computed<readonly SegmentOption[]>(() => [
-  {
-    value: 'canvas',
-    label: localize(copy.scenes.floatingToolbar.modes.canvas, props.locale),
+const props = withDefaults(
+  defineProps<LabModuleProps & { configuration?: Readonly<ToolbarConfiguration> }>(),
+  { configuration: () => floatingToolbarPresets[0].props },
+);
+const mode = defineModel<FloatingToolbarMode>({ default: floatingToolbarPresets[0].state.mode });
+const actions = ref<HTMLElement | null>(null);
+const fallback = ref<{ $el?: unknown } | null>(null);
+// Hiding can unmount the control that owns focus when an activation does not
+// move focus itself, such as a platform-level click or assistant action.
+watch(
+  () => props.configuration.showActions,
+  (showActions) => {
+    if (showActions) return;
+    focusAfterRemoval(actions.value, elementOf(fallback.value), document.activeElement);
   },
-  {
-    value: 'inspect',
-    label: localize(copy.scenes.floatingToolbar.modes.inspect, props.locale),
-  },
-  {
-    value: 'history',
-    label: localize(copy.scenes.floatingToolbar.modes.history, props.locale),
-  },
-]);
+  { flush: 'pre' },
+);
+const copy = moduleCopy.composition.scenes.floatingToolbar;
+const options = computed(() =>
+  floatingToolbarMode.options.map(({ value, label }) => ({
+    value,
+    label: localize(label, props.locale),
+  })),
+);
+
+function selectMode(value: string): void {
+  const choice = floatingToolbarMode.options.find((option) => option.value === value);
+  if (choice) mode.value = choice.value;
+}
 </script>
 
 <template>
   <UiSurface
-    surface="glass-immersive"
-    class="rounded-card p-4"
+    :surface="props.configuration.surface"
+    class="playground-composition-density rounded-card"
+    :data-compact="props.configuration.compact || undefined"
     data-composition-surface
     role="toolbar"
-    :aria-label="localize(copy.scenes.floatingToolbar.modesLabel, props.locale)"
+    :aria-label="localize(copy.modesLabel, props.locale)"
   >
-    <div class="flex flex-wrap items-center justify-between gap-3">
+    <div
+      class="flex flex-wrap items-center justify-between"
+      :class="props.configuration.compact ? 'gap-2' : 'gap-3'"
+    >
       <div
-        class="flex w-full min-w-0 shrink-0 basis-full flex-1 flex-wrap items-center gap-2 md:w-auto md:shrink md:basis-auto"
+        class="flex min-w-0 flex-1 flex-wrap items-center gap-2"
+        :class="props.configuration.compact ? 'basis-auto' : 'basis-full md:basis-auto'"
       >
         <div class="flex items-center gap-1">
-          <UiIconButton
-            variant="ghost"
-            size="sm"
-            :label="localize(copy.scenes.floatingToolbar.highlight, props.locale)"
-          >
+          <UiIconButton variant="ghost" size="sm" :label="localize(copy.highlight, props.locale)">
             <LabIcon name="spark" />
           </UiIconButton>
-          <UiIconButton
-            variant="ghost"
-            size="sm"
-            :label="localize(copy.scenes.floatingToolbar.add, props.locale)"
-          >
+          <UiIconButton variant="ghost" size="sm" :label="localize(copy.add, props.locale)">
             <LabIcon name="plus" />
           </UiIconButton>
-          <UiIconButton
-            variant="ghost"
-            size="sm"
-            :label="localize(copy.scenes.floatingToolbar.confirm, props.locale)"
-          >
+          <UiIconButton variant="ghost" size="sm" :label="localize(copy.confirm, props.locale)">
             <LabIcon name="check" />
           </UiIconButton>
           <UiIconButton
+            ref="fallback"
             variant="ghost"
             size="sm"
-            :label="localize(copy.scenes.floatingToolbar.more, props.locale)"
+            :label="localize(copy.more, props.locale)"
           >
             <LabIcon name="menu" />
           </UiIconButton>
         </div>
-        <div class="w-full shrink-0 basis-full md:w-auto md:basis-auto">
+        <div :class="props.configuration.compact ? 'shrink-0' : 'basis-full md:basis-auto'">
           <UiSegmentedControl
-            class="w-full shrink-0 md:w-auto"
-            :aria-label="localize(copy.scenes.floatingToolbar.modesLabel, props.locale)"
-            :options="floatingToolbarOptions"
+            :model-value="mode"
+            :class="props.configuration.compact ? '' : 'w-full md:w-auto'"
+            :aria-label="localize(copy.modesLabel, props.locale)"
+            :options="options"
+            @update:model-value="selectMode"
           />
         </div>
       </div>
 
-      <div class="flex w-full items-center gap-2 md:w-auto">
+      <div
+        v-if="props.configuration.showActions"
+        ref="actions"
+        class="flex items-center gap-2"
+        :class="{ 'w-full md:w-auto': !props.configuration.compact }"
+        data-specimen-extra-actions
+      >
         <UiButton variant="secondary" size="sm">
-          {{ localize(copy.scenes.floatingToolbar.share, props.locale) }}
+          {{ localize(copy.share, props.locale) }}
         </UiButton>
         <UiButton size="sm">
-          {{ localize(copy.scenes.floatingToolbar.publish, props.locale) }}
+          {{ localize(copy.publish, props.locale) }}
         </UiButton>
       </div>
     </div>

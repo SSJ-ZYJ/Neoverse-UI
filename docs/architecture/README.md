@@ -126,7 +126,7 @@ UiTimeline
 UiStepFlow
 ```
 
-They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. Components that own a visual plane consume the shared `surface` contract instead of hard-coding Aurora Glass as an intrinsic component trait. `UiButton`, `UiAction`, `UiIconButton`, and `UiSegmentedControl` use `glass-subtle` as their canonical default, while `UiNavigationItem` defaults to `none` so grouped navigation inherits the parent chrome rather than creating nested Aurora Glass. `UiSegmentedControl` keeps its active slider and keyboard interaction independent from the outer Surface, so `surface="none"` can be used inside a composition that already owns the chrome. `UiSurface` is the generic polymorphic material primitive. `UiCard` owns standard card geometry (`rounded-card` + base card padding) while consuming the same `surface` contract; standard cards should therefore use `UiCard surface="..."` rather than rebuilding card geometry around `UiSurface`. `UiControlSurface` owns one grouped-control chrome boundary and optional trailing separation. It also owns grouped-surface behavior policy: `hoverMode="static"` keeps parent material stable while descendants hover, and `edgeMode="local"` requests a locally rendered Aurora Glass edge without exposing renderer attributes to consumers. `UiDock` defaults to `glass-elevated`, while `UiControlSurface` defaults to `glass-subtle`; the separate `chrome` preset and `ui-surface-chrome` renderer have been removed without an alias. `UiDock` specializes that contract for reusable floating navigation: it owns Dock layout, chrome, scale, compact composition, and trailing separation while route data, destination state, icons, and trailing controls stay consumer-owned. `UiStatusIndicator` leaves live-region announcements to the caller. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities.
+They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. Components that own a visual plane consume the shared `surface` contract instead of hard-coding Aurora Glass as an intrinsic component trait. `UiButton`, `UiAction`, `UiIconButton`, and `UiSegmentedControl` use `glass-subtle` as their canonical default, while `UiNavigationItem` defaults to `none` so grouped navigation inherits the parent chrome rather than creating nested Aurora Glass. `UiSegmentedControl` keeps its active slider and keyboard interaction independent from the outer Surface, so `surface="none"` can be used inside a composition that already owns the chrome. Its roving tab stop follows the checked option whenever focus is outside the group. `UiSurface` is the generic polymorphic material primitive. `UiCard` owns standard card geometry (`rounded-card` + base card padding) while consuming the same `surface` contract; standard cards should therefore use `UiCard surface="..."` rather than rebuilding card geometry around `UiSurface`. `UiControlSurface` owns one grouped-control chrome boundary and optional trailing separation. It also owns grouped-surface behavior policy: `hoverMode="static"` keeps parent material stable while descendants hover, and `edgeMode="local"` requests a locally rendered Aurora Glass edge without exposing renderer attributes to consumers. `UiDock` defaults to `glass-elevated`, while `UiControlSurface` defaults to `glass-subtle`; the separate `chrome` preset and `ui-surface-chrome` renderer have been removed without an alias. `UiDock` specializes that contract for reusable floating navigation: it owns Dock layout, chrome, scale, compact composition, and trailing separation while route data, destination state, icons, and trailing controls stay consumer-owned. `UiStatusIndicator` leaves live-region announcements to the caller. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities.
 
 ## React components
 
@@ -199,7 +199,7 @@ Design Lab 2.0 keeps its toolbar fixed above three independently scrollable area
 
 The ordinary Design Lab shell and its Stage use a flat semantic canvas. A specimen route mounts exactly the preview declared by that catalogue entry. The keyed Stage section owns the deep-link anchor and focus target; leaving the route unmounts the instance. A preview may be a single Vue adapter or a deliberately composed scene. It does not select children from a gallery or use CSS to hide sibling specimens.
 
-Every entry in `labSpecimens` declares a `FocusedPreview`: either a localized renderer for a read-only Inspector or a `SpecimenDefinition` that opens one editable `SpecimenSession`. A read-only preview still supports native interactions and can own local Vue state without creating an Inspector session. Button, SegmentedControl, Input, Card, and Dock retain editable sessions. To add a specimen, register its explicit renderer on the catalogue entry and retain its stable QA anchor in the owning module. Interactive definitions provide typed initial props, an initial state factory, and editable controls. The session rejects undeclared edits, invalid values, and edits to temporarily disabled fields.
+Every entry in `labSpecimens` declares a `FocusedPreview`: either a localized renderer for a read-only Inspector or a `SpecimenDefinition` that opens one editable `SpecimenSession`. A read-only preview can still support native interactions without exposing a session to the Inspector. Button, SegmentedControl, Input, Select, Checkbox, Tabs, Card, and Dock have editable sessions. To add a specimen, register its explicit renderer on the catalogue entry and retain its stable QA anchor in the owning module. Interactive definitions provide typed initial props, an initial state factory, and editable controls. The session rejects undeclared edits, invalid values, and edits to temporarily disabled fields.
 
 Module URLs and `/frame` render the full QA galleries, including fixed state matrices and optical fixtures. The isolated frame retains the diagnostic comparison backdrops. The Inspector opens that gallery at the specimen anchor, without transferring local edits. `/react-fixture` remains the React contract host. Neither isolated entry mounts the shell.
 
@@ -212,6 +212,49 @@ token sets and comparison anchors remain in the layout and shape QA gallery.
 The focused Scrollbar specimen demonstrates `scrollbar-immersive` on a local scroll container. The document-bound `UiScrollbar` and its ownership checks stay in the frame; the focused renderer does not bind the shell document to demonstrate a container scrollbar.
 
 Effective props are the session's overrides over the specimen's explicit initial props. Omitted props are resolved by the component, not the Playground. The Inspector marks changed values and can remove an override to inherit the component default where the specimen leaves the prop unset. Preview events and the editor share one specimen-owned value for controlled inputs and selections. Reset clears overrides and restores the specimen's initial interaction state without remounting its component. Leaving a specimen discards its session; navigation history restores selection, not edits. Locale, theme, and browser hover, focus, and press do not participate in this session.
+
+Select and Checkbox suspend their value editors while the specimen is disabled;
+Select does the same while read-only. Neither clears the current value. The
+Tabs editor lists enabled tabs only; the preview retains its disabled tab so
+keyboard navigation still demonstrates skipping it.
+
+### Composition presets
+
+Control Cluster, Floating Toolbar, Project Card, and Docs Toolbar use the same
+`SpecimenSession` and Inspector as editable components. A composition's ID is
+its existing `labSpecimens` ID. Its definition binds one real scene renderer to
+declared field controls and a nonempty list of `CompositionPreset<Id, Props, State>`
+baselines. The first preset is the default. Preset IDs are stable, unique within
+the scene, and independent of their localized labels.
+
+A composition preset specifies its complete scene configuration and initial
+controlled state, not the defaults of its public child components. The session
+validates the baselines against the declared field controls and keeps immutable
+copies. Inspector edits remain in session-local overrides and controlled state.
+Selecting a preset clears both editable layers in one update. Reset does the
+same without changing the selected preset. Neither operation remounts the
+scene root or its persistent controls; optional sections mount and unmount as
+their configuration changes.
+
+| Composition | Built-in presets (default first) | Editable fields |
+| --- | --- | --- |
+| Control Cluster | Default Workspace, Compact Workspace | Density, surface, status visibility, Focus / Review / Archive |
+| Floating Toolbar | Standard Toolbar, Compact Toolbar | Density, surface, Share / Publish group visibility, Canvas / Inspect / History |
+| Project Card | Detailed Card, Overview Card | Content detail, card surface, status badge, delivery progress (0–100) |
+| Docs Toolbar | Reading Toolbar, Editing Toolbar | Density, surface, Copy link visibility, Read / Edit / Preview |
+
+Modes are controlled by the focused composition session; the isolated scenes
+use their default configuration and own their mode locally without an
+Inspector. Project Card uses one value for its percent label and native
+progress element. Compact layouts use token spacing and the same component
+sizes. The padding transition uses the spatial motion role and is disabled
+when reduced motion is requested.
+
+A configuration change moves focus only when it removes the control that owns
+it: the scene focuses a stable control in the same action group, and otherwise
+leaves focus where it is. Inspector-driven changes therefore keep focus in the
+Inspector, while Reset keeps focus on a surviving scene control. The scenes do
+not poll focus or observe the document; the policy runs once per hide.
 
 At the shared `xl` / 1280px breakpoint, the Explorer and Inspector become persistent columns. Below it, the same panels open as native modal dialogs with the background inert, keyboard focus inside the dialog, and focus returned to the opening control on dismissal. Selecting an item closes the drawer and moves focus to the module heading or specimen without creating a history entry for the drawer itself.
 

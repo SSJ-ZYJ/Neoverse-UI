@@ -205,7 +205,7 @@ export interface LabSpecimen {
 export const labSpecimens = [
   {
     id: 'data-display-tabs',
-    preview: components.tabs,
+    preview: interactive.tabs,
     moduleId: 'data-display',
     label: localized('Tabs', '标签页'),
     apiNames: ['UiTabs'],
@@ -600,7 +600,7 @@ export const labSpecimens = [
   },
   {
     id: 'forms-select',
-    preview: components.select,
+    preview: interactive.select,
     moduleId: 'forms',
     label: localized('Select', '选择框'),
     apiNames: ['UiSelect'],
@@ -619,7 +619,7 @@ export const labSpecimens = [
   },
   {
     id: 'forms-checkbox',
-    preview: components.checkbox,
+    preview: interactive.checkbox,
     moduleId: 'forms',
     label: localized('Checkbox', '复选框'),
     apiNames: ['UiCheckbox'],
