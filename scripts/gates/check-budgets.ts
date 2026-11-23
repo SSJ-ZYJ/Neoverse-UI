@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 // Scale budgets, described in scripts/AGENTS.md and docs/AGENTS.md. Soft limits
@@ -64,6 +64,13 @@ export interface BudgetInput {
   budgets: Budgets;
 }
 
+// `git ls-files --cached` also reports files deleted from the working tree but
+// not yet staged. Measuring one would crash on ENOENT, so the gate measures only
+// paths that still exist.
+export function existingFiles(files: string[], exists: (file: string) => boolean): string[] {
+  return files.filter((file) => file.length > 0 && exists(file));
+}
+
 export function checkBudgets(input: BudgetInput): { errors: string[]; findings: Finding[] } {
   const { files, sizes, budgets } = input;
   const errors: string[] = [];
@@ -113,12 +120,15 @@ export function checkBudgets(input: BudgetInput): { errors: string[]; findings: 
 
 function main(): void {
   const budgets = JSON.parse(readFileSync(configPath, 'utf8')) as Budgets;
-  const files = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], {
-    cwd: root,
-    encoding: 'utf8',
-  })
-    .split('\n')
-    .filter(Boolean);
+  // `--cached` also lists files deleted from the working tree but not yet
+  // staged; measuring them would crash on ENOENT. Measure only what exists.
+  const files = existingFiles(
+    execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard'], {
+      cwd: root,
+      encoding: 'utf8',
+    }).split('\n'),
+    (file) => existsSync(resolve(root, file)),
+  );
   const sizes = new Map(
     files
       .filter((file) => categoryOf(file))

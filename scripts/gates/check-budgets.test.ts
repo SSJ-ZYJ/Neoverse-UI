@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'bun:test';
-import { type Budgets, categoryOf, checkBudgets, lineCount, severityOf } from './check-budgets';
+import {
+  type Budgets,
+  categoryOf,
+  checkBudgets,
+  existingFiles,
+  lineCount,
+  severityOf,
+} from './check-budgets';
 
 const budgets = (exceptions: Budgets['exceptions'] = {}): Budgets => ({
   limits: { source: [300, 500], css: [400, 600], test: [400, 700] },
@@ -20,6 +27,15 @@ describe('category classification', () => {
     expect(categoryOf('a/b.ts')).toBe('source');
     expect(categoryOf('a/b.vue')).toBe('source');
     expect(categoryOf('a/b.md')).toBeNull();
+  });
+});
+
+describe('working-tree file list', () => {
+  test('drops blank entries and paths deleted from the working tree', () => {
+    const present = new Set(['a.ts', 'b.css']);
+    expect(
+      existingFiles(['a.ts', '', 'b.css', 'deleted.vue'], (file) => present.has(file)),
+    ).toEqual(['a.ts', 'b.css']);
   });
 });
 
