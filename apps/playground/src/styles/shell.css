@@ -88,102 +88,6 @@
   white-space: nowrap;
 }
 
-.playground-shell__panel {
-  min-inline-size: 0;
-  min-block-size: 0;
-  flex-direction: column;
-  overflow: hidden;
-  border: 0;
-  border-radius: var(--neoverse-radius-panel);
-  padding: 0;
-  color: var(--neoverse-color-text-primary);
-}
-
-.playground-shell__panel[open] {
-  display: flex;
-}
-
-.playground-shell__explorer {
-  grid-area: explorer;
-  --neoverse-playground-drawer-offset: -1;
-  --neoverse-playground-drawer-width: var(--neoverse-layout-sidebar-drawer-width);
-}
-
-.playground-shell__inspector {
-  grid-area: inspector;
-  --neoverse-playground-drawer-offset: 1;
-  --neoverse-playground-drawer-width: calc(
-    var(--neoverse-layout-sidebar-drawer-width) +
-    var(--neoverse-space-6)
-  );
-}
-
-.playground-shell[data-persistent] .playground-shell__panel {
-  position: relative;
-  inset: auto;
-  inline-size: auto;
-  block-size: 100%;
-  max-inline-size: none;
-  max-block-size: none;
-  margin: 0;
-}
-
-.playground-shell:not([data-persistent]) .playground-shell__panel {
-  position: fixed;
-  inset: var(--neoverse-playground-shell-drawer-inset) auto
-    var(--neoverse-playground-shell-drawer-inset) var(--neoverse-playground-shell-drawer-inset);
-  inline-size: min(
-    var(--neoverse-playground-drawer-width),
-    calc(100% - var(--neoverse-playground-shell-drawer-inset) * 2 - var(--neoverse-space-8))
-  );
-  block-size: auto;
-  max-inline-size: none;
-  max-block-size: none;
-  margin: 0;
-  translate: calc(
-    var(--neoverse-playground-drawer-offset) *
-    (100% + var(--neoverse-playground-shell-drawer-inset))
-  );
-  transition:
-    translate var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
-    overlay var(--neoverse-motion-spatial-duration) allow-discrete,
-    display var(--neoverse-motion-spatial-duration) allow-discrete;
-}
-
-.playground-shell:not([data-persistent]) .playground-shell__inspector {
-  inset-inline: auto var(--neoverse-playground-shell-drawer-inset);
-}
-
-.playground-shell:not([data-persistent]) .playground-shell__panel[open] {
-  translate: 0;
-}
-
-.playground-shell__panel::backdrop {
-  background: var(--neoverse-color-overlay-scrim);
-  opacity: 0;
-  transition:
-    opacity var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
-    overlay var(--neoverse-motion-spatial-duration) allow-discrete,
-    display var(--neoverse-motion-spatial-duration) allow-discrete;
-}
-
-.playground-shell__panel[open]::backdrop {
-  opacity: 1;
-}
-
-@starting-style {
-  .playground-shell:not([data-persistent]) .playground-shell__panel[open] {
-    translate: calc(
-      var(--neoverse-playground-drawer-offset) *
-      (100% + var(--neoverse-playground-shell-drawer-inset))
-    );
-  }
-
-  .playground-shell__panel[open]::backdrop {
-    opacity: 0;
-  }
-}
-
 .playground-shell__panel-header {
   display: grid;
   min-inline-size: 0;
@@ -569,26 +473,6 @@
   outline-offset: var(--neoverse-focus-ring-offset);
 }
 
-/* Daily previews use a quiet, uniform canvas. Optical and state comparison
-   backdrops remain available only in the isolated /frame validation route. */
-[data-playground-view='shell']
-  :is(
-    .playground-specimen-preview,
-    .playground-material-backdrop,
-    .playground-overview-hero__stage,
-    .playground-specimen-panel,
-    .playground-refraction-scene,
-    .playground-qa-stage--gradient
-  ) {
-  background: var(--neoverse-color-surface-canvas);
-}
-
-/* The overview's live sample is a stage, not a quiet well: once a backdrop is
-   selected it must show through instead of leaving a canvas rectangle. */
-[data-design-lab-workspace]:not([data-stage-background='canvas']) .playground-overview-hero__stage {
-  background: transparent;
-}
-
 /* Selected specimens own only their real component surface. The stage is
    a plain canvas; diagnostic comparison backdrops remain in isolated frames. */
 .playground-stage--focused {
@@ -652,17 +536,9 @@
     animation: none;
   }
 
-  .playground-shell:not([data-persistent]) .playground-shell__panel,
-  .playground-shell__panel::backdrop,
   .playground-explorer__chevron,
   .playground-composition-density {
     transition: none;
-  }
-}
-
-@media (forced-colors: active) {
-  .playground-shell__panel {
-    border: var(--neoverse-border-width-thin) solid CanvasText;
   }
 }
 
@@ -866,6 +742,15 @@
 .playground-specimen-section {
   display: grid;
   gap: var(--neoverse-space-5);
+}
+
+/* Keep section boundaries without putting another material between the
+   stage and the specimens. The isolated frame owns its diagnostic surfaces. */
+[data-playground-view='shell'] .playground-specimen-section {
+  outline: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-subtle);
+}
+
+[data-playground-view='frame'] .playground-specimen-section {
   box-shadow: var(--neoverse-shadow-sm);
 }
 
@@ -892,9 +777,12 @@
   min-width: 0;
   align-content: start;
   grid-template-rows: auto auto;
-  border-radius: var(--neoverse-radius-card);
   padding: var(--neoverse-space-3);
   border: 0;
+}
+
+[data-playground-view='frame'] .playground-specimen-row {
+  border-radius: var(--neoverse-radius-card);
   background-color: var(--neoverse-color-surface-subtle);
   box-shadow: var(--neoverse-shadow-inset);
 }
@@ -923,21 +811,31 @@
   gap: var(--neoverse-space-3);
   overflow-x: auto;
   border: 0;
+  padding: var(--neoverse-space-6) var(--neoverse-space-4);
+}
+
+[data-playground-view='frame'] .playground-specimen-preview {
   border-radius: var(--neoverse-radius-control);
   background:
     var(--neoverse-playground-stage-optical-field), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);
   background-size: var(--neoverse-playground-stage-optical-size);
-  padding: var(--neoverse-space-6) var(--neoverse-space-4);
   box-shadow: var(--neoverse-shadow-inset);
 }
 
-.playground-material-backdrop {
-  border: 0;
+[data-playground-view='frame'] .playground-material-backdrop {
+  border-radius: var(--neoverse-radius-card);
+  padding: var(--neoverse-space-4);
   background:
     var(--neoverse-playground-stage-optical-field), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);
   background-size: var(--neoverse-playground-stage-optical-size);
+}
+
+@media (min-width: 48rem) {
+  [data-playground-view='frame'] .playground-material-backdrop {
+    padding: var(--neoverse-space-5);
+  }
 }
 
 /* Scene content belongs to the specimen; all control optics remain shared. */
@@ -945,7 +843,7 @@
   grid-column: 1 / -1;
 }
 
-.playground-refraction-scene {
+[data-playground-view='frame'] .playground-refraction-scene {
   /* Accent colours are tuned for foreground emphasis. Mix them into the
      themed canvas so the observation field stays pale in light mode and
      subdued in dark mode instead of reversing the surrounding contrast. */
@@ -982,7 +880,7 @@
 }
 
 /* Paint observation shapes once, inside the stage rather than behind its headings. */
-.playground-material-backdrop:has(
+[data-playground-view='frame'] .playground-material-backdrop:has(
   :is(
       .playground-specimen-preview,
       .playground-qa-stage,
@@ -996,17 +894,17 @@
     var(--neoverse-playground-stage-color-field), var(--neoverse-playground-stage-underlay);
 }
 
-.playground-material-backdrop--framed {
+[data-playground-view='frame'] .playground-material-backdrop--framed {
   box-shadow: var(--neoverse-shadow-sm);
 }
 
-.playground-material-backdrop--inset {
+[data-playground-view='frame'] .playground-material-backdrop--inset {
   position: relative;
   isolation: isolate;
   box-shadow: var(--neoverse-material-glass-subtle-shadow);
 }
 
-.playground-material-backdrop--inset::before {
+[data-playground-view='frame'] .playground-material-backdrop--inset::before {
   position: absolute;
   z-index: 0;
   inset: 0;
@@ -1022,7 +920,7 @@
   backdrop-filter: var(--neoverse-material-glass-subtle-edge-filter);
 }
 
-.playground-material-backdrop--inset > * {
+[data-playground-view='frame'] .playground-material-backdrop--inset > * {
   position: relative;
   z-index: 1;
 }
@@ -1108,23 +1006,26 @@
   gap: var(--neoverse-space-3);
   overflow-x: auto;
   border: 0;
-  border-radius: var(--neoverse-radius-control);
   padding: var(--neoverse-space-5) var(--neoverse-space-4);
+}
+
+[data-playground-view='frame'] .playground-qa-stage {
+  border-radius: var(--neoverse-radius-control);
   box-shadow: var(--neoverse-shadow-inset);
 }
 
-.playground-qa-stage--gradient {
+[data-playground-view='frame'] .playground-qa-stage--gradient {
   background:
     var(--neoverse-playground-stage-optical-field), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);
   background-size: var(--neoverse-playground-stage-optical-size);
 }
 
-.playground-qa-stage--neutral {
+[data-playground-view='frame'] .playground-qa-stage--neutral {
   background: var(--neoverse-color-surface-canvas);
 }
 
-.playground-qa-stage--reduced {
+[data-playground-view='frame'] .playground-qa-stage--reduced {
   background: var(--neoverse-color-surface-subtle);
 }
 
@@ -1226,13 +1127,16 @@
   align-items: center;
   overflow-x: auto;
   border: 0;
+  padding-inline: var(--neoverse-space-3);
+  padding-block: var(--neoverse-space-2);
+}
+
+[data-playground-view='frame'] .playground-dock-preview {
   border-radius: var(--neoverse-radius-control);
   background:
     var(--neoverse-playground-stage-optical-field), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);
   background-size: var(--neoverse-playground-stage-optical-size);
-  padding-inline: var(--neoverse-space-3);
-  padding-block: var(--neoverse-space-2);
   box-shadow: var(--neoverse-shadow-inset);
 }
 
@@ -1299,16 +1203,21 @@
 }
 
 .playground-specimen-panel {
-  border-radius: var(--neoverse-radius-card);
   padding: var(--neoverse-space-4);
 }
 
-/* Presence demo stage: a quiet inset stage so enter/exit travel reads clearly. */
+[data-playground-view='frame'] .playground-specimen-panel {
+  border-radius: var(--neoverse-radius-card);
+}
+
 .playground-motion-stage {
   display: grid;
   min-height: var(--neoverse-playground-preview-stage-height);
   align-items: center;
   justify-items: center;
+}
+
+[data-playground-view='frame'] .playground-motion-stage {
   border-radius: var(--neoverse-radius-control);
   background:
     var(--neoverse-playground-stage-optical-field), var(--neoverse-playground-stage-underlay),

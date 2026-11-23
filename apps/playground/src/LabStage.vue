@@ -45,7 +45,7 @@ const FocusedSpecimen = () => {
 };
 
 const copy = {
-  label: localized('Preview Stage', '预览舞台'),
+  label: localized('Preview Stage', '预览区'),
   summary: localized(
     '{modules} modules · {specimens} specimens',
     '{modules} 个模块 · {specimens} 个示例',

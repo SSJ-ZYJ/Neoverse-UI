@@ -1,0 +1,145 @@
+.playground-shell__panel {
+  min-inline-size: 0;
+  min-block-size: 0;
+  flex-direction: column;
+  overflow: hidden;
+  border: 0;
+  border-radius: var(--neoverse-radius-panel);
+  padding: 0;
+  color: var(--neoverse-color-text-primary);
+}
+
+.playground-shell__panel[open] {
+  display: flex;
+}
+
+.playground-shell__explorer {
+  grid-area: explorer;
+  --neoverse-drawer-origin: var(--neoverse-playground-shell-drawer-inset);
+  --neoverse-drawer-side: -1;
+  --neoverse-drawer-width: var(--neoverse-layout-sidebar-drawer-width);
+}
+
+.playground-shell__inspector {
+  grid-area: inspector;
+  --neoverse-drawer-origin: calc(100vw - var(--neoverse-drawer-size) - var(--neoverse-drawer-inset));
+  --neoverse-drawer-side: 1;
+  --neoverse-drawer-width: calc(var(--neoverse-layout-sidebar-drawer-width) + var(--neoverse-space-6));
+}
+
+.playground-shell[data-persistent] .playground-shell__panel {
+  position: relative;
+  inset: auto;
+  inline-size: auto;
+  block-size: 100%;
+  max-inline-size: none;
+  max-block-size: none;
+  margin: 0;
+}
+
+.playground-shell:not([data-persistent]) .playground-shell__panel {
+  --neoverse-drawer-inset: var(--neoverse-playground-shell-drawer-inset);
+  --neoverse-drawer-size: min(
+    var(--neoverse-drawer-width),
+    calc(100vw - var(--neoverse-drawer-inset) * 2 - var(--neoverse-space-8))
+  );
+  --neoverse-drawer-travel: calc(
+    var(--neoverse-drawer-side) * (var(--neoverse-drawer-size) + var(--neoverse-drawer-inset))
+  );
+  --neoverse-drawer-shift: var(--neoverse-drawer-travel);
+  position: fixed;
+  inset: var(--neoverse-drawer-inset) auto var(--neoverse-drawer-inset) var(--neoverse-drawer-origin);
+  inline-size: var(--neoverse-drawer-size);
+  block-size: auto;
+  max-inline-size: none;
+  max-block-size: none;
+  margin: 0;
+  translate: var(--neoverse-drawer-shift);
+  transition:
+    translate var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
+    overlay var(--neoverse-motion-spatial-duration) allow-discrete,
+    display var(--neoverse-motion-spatial-duration) allow-discrete;
+}
+
+.playground-shell:not([data-persistent]) .playground-shell__panel[open] {
+  --neoverse-drawer-shift: 0px;
+}
+
+/* The cutout shares the drawer's dimensions and travel so its Glass always
+   samples the page, not the scrim. Keep the native top layer for dismissal. */
+.playground-shell:not([data-persistent]) .playground-shell__panel::backdrop {
+  --neoverse-drawer-cutout-left: calc(var(--neoverse-drawer-origin) + var(--neoverse-drawer-shift));
+  --neoverse-drawer-cutout-right: calc(var(--neoverse-drawer-cutout-left) + var(--neoverse-drawer-size));
+  --neoverse-drawer-cutout-bottom: calc(100% - var(--neoverse-drawer-inset));
+  background: var(--neoverse-color-overlay-scrim);
+  backdrop-filter: blur(4px);
+  clip-path: polygon(
+    evenodd,
+    0 0, 100% 0, 100% 100%, 0 100%, 0 0,
+    var(--neoverse-drawer-cutout-left) var(--neoverse-drawer-inset),
+    var(--neoverse-drawer-cutout-right) var(--neoverse-drawer-inset),
+    var(--neoverse-drawer-cutout-right) var(--neoverse-drawer-cutout-bottom),
+    var(--neoverse-drawer-cutout-left) var(--neoverse-drawer-cutout-bottom),
+    var(--neoverse-drawer-cutout-left) var(--neoverse-drawer-inset),
+    0 0
+  );
+  opacity: 0;
+  transition:
+    clip-path var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
+    opacity var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+    overlay var(--neoverse-motion-spatial-duration) allow-discrete,
+    display var(--neoverse-motion-spatial-duration) allow-discrete;
+}
+
+@supports (clip-path: shape(evenodd from 0 0, hline to 100%, close)) {
+  .playground-shell:not([data-persistent]) .playground-shell__panel::backdrop {
+    --neoverse-drawer-corner: var(--neoverse-radius-panel);
+    clip-path: shape(
+      evenodd from 0 0, hline to 100%, vline to 100%, hline to 0, close,
+      move to calc(var(--neoverse-drawer-cutout-left) + var(--neoverse-drawer-corner)) var(--neoverse-drawer-inset),
+      hline to calc(var(--neoverse-drawer-cutout-right) - var(--neoverse-drawer-corner)),
+      arc by var(--neoverse-drawer-corner) var(--neoverse-drawer-corner) of var(--neoverse-drawer-corner) cw,
+      vline to calc(var(--neoverse-drawer-cutout-bottom) - var(--neoverse-drawer-corner)),
+      arc by calc(-1 * var(--neoverse-drawer-corner)) var(--neoverse-drawer-corner) of var(--neoverse-drawer-corner) cw,
+      hline to calc(var(--neoverse-drawer-cutout-left) + var(--neoverse-drawer-corner)),
+      arc by calc(-1 * var(--neoverse-drawer-corner)) calc(-1 * var(--neoverse-drawer-corner)) of var(--neoverse-drawer-corner) cw,
+      vline to calc(var(--neoverse-drawer-inset) + var(--neoverse-drawer-corner)),
+      arc by var(--neoverse-drawer-corner) calc(-1 * var(--neoverse-drawer-corner)) of var(--neoverse-drawer-corner) cw,
+      close
+    );
+  }
+}
+
+.playground-shell:not([data-persistent]) .playground-shell__panel[open]::backdrop {
+  opacity: 1;
+}
+
+@starting-style {
+  .playground-shell:not([data-persistent]) .playground-shell__panel[open],
+  .playground-shell:not([data-persistent]) .playground-shell__panel[open]::backdrop {
+    --neoverse-drawer-shift: var(--neoverse-drawer-travel);
+  }
+
+  .playground-shell:not([data-persistent]) .playground-shell__panel[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playground-shell:not([data-persistent]) .playground-shell__panel,
+  .playground-shell:not([data-persistent]) .playground-shell__panel::backdrop {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+  .playground-shell:not([data-persistent]) .playground-shell__panel::backdrop {
+    backdrop-filter: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .playground-shell__panel {
+    border: var(--neoverse-border-width-thin) solid CanvasText;
+  }
+}

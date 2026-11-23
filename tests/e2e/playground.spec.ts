@@ -118,6 +118,30 @@ test('Markdown headings step down through six distinct sizes', async ({ page }) 
   }
 });
 
+test('specimen titles share a clear section and subsection hierarchy across modules', async ({
+  page,
+}) => {
+  for (const [route, sectionId, subsection] of [
+    ['/?lang=zh#typography', 'typography-scale', '[data-markdown-headings]'],
+    ['/?lang=zh#controls', 'controls-button', '[data-specimen-state-row]'],
+    ['/frame?theme=light&lang=zh#materials', 'materials-surface', null],
+  ] as const) {
+    await page.goto(route, { waitUntil: 'domcontentloaded' });
+    const section = page.locator(`section#${sectionId}`);
+    const sectionHeader = section.locator(':scope > header');
+    await expect(sectionHeader.getByRole('heading')).toHaveCSS('font-size', '20px');
+    await expect(sectionHeader.locator('p')).toHaveCSS('font-size', '16px');
+    if (subsection) {
+      const subsectionHeader = section.locator(subsection).first().locator(':scope > header');
+      await expect(subsectionHeader.getByRole('heading')).toHaveCSS('font-size', '18px');
+      await expect(subsectionHeader.locator('p')).toHaveCSS('font-size', '14px');
+    }
+    expect(
+      await sectionHeader.evaluate((header) => header.scrollWidth - header.clientWidth),
+    ).toBeLessThanOrEqual(1);
+  }
+});
+
 test('Markdown inline styles stay distinct in rendered combinations', async ({ page }) => {
   await page.goto('/?lang=en#foundation-typography', { waitUntil: 'domcontentloaded' });
   const panel = page.locator('[data-markdown-inline]');
@@ -127,7 +151,6 @@ test('Markdown inline styles stay distinct in rendered combinations', async ({ p
     panel.locator(`[data-markdown-inline-row="${row}"] ${selector}`).evaluate((element) => {
       const style = getComputedStyle(element);
       return {
-        background: style.backgroundColor,
         color: style.color,
         fontFamily: style.fontFamily,
         fontWeight: style.fontWeight === 'normal' ? 400 : Number(style.fontWeight),
@@ -150,7 +173,6 @@ test('Markdown inline styles stay distinct in rendered combinations', async ({ p
 
   const code = await read('code', 'p > code');
   expect(code.fontFamily).not.toBe(body.fontFamily);
-  expect(code.background).not.toBe('rgba(0, 0, 0, 0)');
   const codeBold = await read('code-bold', 'strong > code');
   expect(codeBold.fontFamily).toBe(code.fontFamily);
   expect(codeBold.fontWeight).toBeGreaterThan(body.fontWeight);
@@ -179,26 +201,113 @@ test('Markdown inline styles stay distinct in rendered combinations', async ({ p
   ).toBeLessThanOrEqual(1);
 });
 
-test('shell specimen panels avoid a second glass card layer', async ({ page }) => {
-  for (const hash of ['typography', 'status-feedback', 'motion']) {
-    await page.goto(`/?lang=en#${hash}`, { waitUntil: 'domcontentloaded' });
-    const panels = page.locator('[data-design-lab-region="module"] .playground-specimen-panel');
-    expect(await panels.count(), `${hash} must render specimen panels`).toBeGreaterThan(0);
-    const treatments = await panels.evaluateAll((elements) =>
-      elements.map((element) => {
-        const style = getComputedStyle(element);
-        return {
-          backdrop: style.backdropFilter,
-          border: style.borderWidth,
-          shadow: style.boxShadow,
-        };
-      }),
-    );
-    for (const treatment of treatments) {
-      expect(treatment.backdrop).toBe('none');
-      expect(treatment.border).toBe('0px');
-      expect(treatment.shadow).toBe('none');
+test('plain, bold, and struck links stay underlined and darken on hover', async ({
+  page,
+}, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const [theme, backdrop] of [
+    ['light', '#d8e8ef'],
+    ['dark', '#112832'],
+  ]) {
+    await page.goto(`/?theme=${theme}&lang=en#foundation-typography`, {
+      waitUntil: 'domcontentloaded',
+    });
+    const panel = page.locator('[data-markdown-inline]');
+    for (const row of ['link', 'link-bold', 'link-strike']) {
+      const link = panel.locator(`[data-markdown-inline-row="${row}"]`).getByRole('link');
+      await expect(link).toHaveCSS('text-decoration-line', 'underline');
+      const readUnderline = () =>
+        link.evaluate((element, background) => {
+          const context = new OffscreenCanvas(1, 1).getContext('2d');
+          if (!context) throw new Error('Cannot resolve the underline color without a canvas');
+          const luminance = () => {
+            const channels = context.getImageData(0, 0, 1, 1).data.slice(0, 3);
+            const [red, green, blue] = Array.from(channels, (channel) => {
+              const value = channel / 255;
+              return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+            });
+            return 0.2126 * (red ?? 0) + 0.7152 * (green ?? 0) + 0.0722 * (blue ?? 0);
+          };
+          context.fillStyle = background;
+          context.fillRect(0, 0, 1, 1);
+          const base = luminance();
+          context.fillStyle = getComputedStyle(element).textDecorationColor;
+          context.fillRect(0, 0, 1, 1);
+          const stroke = luminance();
+          return {
+            stroke,
+            contrast: (Math.max(base, stroke) + 0.05) / (Math.min(base, stroke) + 0.05),
+          };
+        }, backdrop);
+      const rest = await readUnderline();
+      expect
+        .soft(rest.contrast, `${row} underline contrasts with the ${theme} backdrop`)
+        .toBeGreaterThanOrEqual(theme === 'light' ? 2.4 : 3);
+      if (theme === 'light') expect.soft(rest.contrast).toBeLessThan(3);
+      if (row === 'link' && !testInfo.project.use.hasTouch) {
+        await link.hover();
+        const hover = await readUnderline();
+        expect.soft(hover.stroke, `${theme} hover darkens the underline`).toBeLessThan(rest.stroke);
+        expect.soft(hover.contrast).toBeGreaterThanOrEqual(theme === 'light' ? 2.8 : 3);
+        await page.mouse.move(0, 0);
+      }
     }
+  }
+});
+
+test('plain and bold inline code remain distinct on a quiet canvas without a border', async ({
+  page,
+}) => {
+  for (const theme of ['light', 'dark'] as const) {
+    await page.goto(`/?theme=${theme}&lang=en#foundation-typography`, {
+      waitUntil: 'domcontentloaded',
+    });
+    const panel = page.locator('[data-markdown-inline]');
+    for (const row of ['code', 'code-bold']) {
+      const code = panel.locator(`[data-markdown-inline-row="${row}"] p code`);
+      await expect(code).toHaveCSS('border-width', '0px');
+      const separation = await code.evaluate((element) => {
+        const style = getComputedStyle(element);
+        const context = new OffscreenCanvas(1, 1).getContext('2d');
+        if (!context) throw new Error('Cannot resolve the inline code colors without a canvas');
+        const brightness = () => {
+          const [red = 0, green = 0, blue = 0] = context.getImageData(0, 0, 1, 1).data;
+          return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+        };
+        context.fillStyle = style.getPropertyValue('--neoverse-color-surface-canvas').trim();
+        context.fillRect(0, 0, 1, 1);
+        const backdrop = brightness();
+        context.fillStyle = style.backgroundColor;
+        context.fillRect(0, 0, 1, 1);
+        return Math.abs(brightness() - backdrop);
+      });
+      expect
+        .soft(separation, `${row} separates from the ${theme} canvas`)
+        .toBeGreaterThanOrEqual(12);
+    }
+  }
+});
+
+test('specimens sit on the stage without a painted card around them', async ({ page }) => {
+  for (const [hash, selector] of [
+    ['materials', '[data-surface-preset="glass-immersive"]'],
+    ['forms', '[data-form-input]'],
+    ['controls', '[data-qa-stage="gradient"] button'],
+    ['motion', '[data-neoverse-dissolve]'],
+    ['colors', '.color-gallery__role-list'],
+  ]) {
+    await page.goto(`/?lang=en#${hash}`, { waitUntil: 'domcontentloaded' });
+    const specimen = page.locator(selector).first();
+    const layer = await specimen.evaluate((element) => {
+      for (let node = element.parentElement; node; node = node.parentElement) {
+        if (node.hasAttribute('data-design-lab-workspace')) return null;
+        const css = getComputedStyle(node);
+        if (css.backgroundColor !== 'rgba(0, 0, 0, 0)') return node.className;
+        const effects = [css.backgroundImage, css.backdropFilter, css.boxShadow];
+        if (effects.some((value) => value !== 'none')) return node.className;
+      }
+    });
+    expect(layer, hash).toBeNull();
   }
 });
 
@@ -1199,7 +1308,6 @@ test.describe('playground', () => {
     ] as const) {
       const trigger = page.locator(`[${triggerAttribute}]`);
       const drawer = page.getByRole('dialog', { name });
-      await expect(trigger).toBeVisible();
       await expect(drawer).toBeHidden();
 
       await trigger.press('Enter');
@@ -1217,6 +1325,13 @@ test.describe('playground', () => {
 
       await trigger.click();
       await expect(drawer).toBeVisible();
+      const scrim = await drawer.evaluate((el) => {
+        const { backgroundColor, backdropFilter, clipPath } = getComputedStyle(el, '::backdrop');
+        return { backgroundColor, backdropFilter, clipPath };
+      });
+      expect(scrim.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+      expect(scrim.backdropFilter).toMatch(/^blur\(/);
+      expect(scrim.clipPath).toContain('evenodd');
       const outsideX = name === 'Explorer' ? 380 : 10;
       await page.mouse.click(outsideX, 400);
       await expect(drawer).toBeHidden();

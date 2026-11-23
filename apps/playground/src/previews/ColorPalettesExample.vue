@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { UiSurface } from '@neoverse-ui/vue';
 import ColorSwatchCell from '../ColorSwatchCell.vue';
+import { frameView } from '../frame-state';
 import { primitiveColorGroups, semanticColorGroups } from '../lab-data';
 import type { LabModuleProps } from '../modules/types';
 import { localize, moduleCopy } from '../playground-content';
@@ -65,7 +66,7 @@ const props = defineProps<LabModuleProps>();
           v-for="group in semanticColorGroups"
           :key="group.label.en"
           as="article"
-          surface="subtle"
+          :surface="frameView ? 'subtle' : 'none'"
           class="color-gallery__role-group"
         >
           <h3 class="text-label-lg font-label text-primary">

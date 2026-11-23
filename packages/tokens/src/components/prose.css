@@ -14,8 +14,6 @@
     --neoverse-prose-strong-foreground: var(--neoverse-color-text-primary);
     --neoverse-prose-link-foreground: var(--neoverse-color-text-primary);
     --neoverse-prose-link-hover-foreground: var(--neoverse-color-accent-primary);
-    --neoverse-prose-link-decoration: var(--neoverse-color-accent-soft);
-    --neoverse-prose-link-hover-decoration: var(--neoverse-color-accent-primary);
     --neoverse-prose-marker-foreground: var(--neoverse-color-text-muted);
 
     --neoverse-prose-quote-foreground: var(--neoverse-color-text-primary);

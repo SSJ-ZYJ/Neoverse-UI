@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { UiSurface } from '@neoverse-ui/vue';
 import { computed } from 'vue';
+import LabSpecimenHeader from '../LabSpecimenHeader.vue';
 import type { LabModuleProps } from '../modules/types';
 import { localize, moduleCopy } from '../playground-content';
 
@@ -19,14 +20,10 @@ const link = computed(() => localize(copy.link, props.locale));
       class="playground-specimen-panel grid gap-4"
       data-markdown-inline
     >
-      <header class="grid gap-1">
-        <h3 class="text-label-md font-label text-primary">
-          {{ localize(copy.label, props.locale) }}
-        </h3>
-        <p class="text-caption text-secondary">
-          {{ localize(copy.description, props.locale) }}
-        </p>
-      </header>
+      <LabSpecimenHeader
+        :title="localize(copy.label, props.locale)"
+        :description="localize(copy.description, props.locale)"
+      />
 
       <ol class="grid gap-3">
         <li class="markdown-inline-row" data-markdown-inline-row="bold">

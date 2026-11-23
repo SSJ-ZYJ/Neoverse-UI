@@ -2,6 +2,7 @@
 import { cssVariables } from '@neoverse-ui/tokens';
 import { UiCard, UiScrollbar, UiSurface } from '@neoverse-ui/vue';
 import { ref } from 'vue';
+import LabSpecimenHeader from '../LabSpecimenHeader.vue';
 import { localize, localized, moduleCopy } from '../playground-content';
 import ScrollbarViewportExample from '../previews/ScrollbarViewportExample.vue';
 import { scrollbarItems } from '../previews/scrollbar-items';
@@ -67,14 +68,10 @@ const tokenRows = [
         <ScrollbarViewportExample :locale="props.locale" />
 
         <UiCard as="article" class="grid gap-3 p-5" data-scrollbar-preview-card>
-          <header class="grid gap-1">
-            <h3 class="text-label font-label text-primary">
-              {{ localize(copy.tokens.label, props.locale) }}
-            </h3>
-            <p class="text-caption text-secondary">
-              {{ localize(copy.tokens.description, props.locale) }}
-            </p>
-          </header>
+          <LabSpecimenHeader
+            :title="localize(copy.tokens.label, props.locale)"
+            :description="localize(copy.tokens.description, props.locale)"
+          />
 
           <dl class="grid divide-y divide-subtle">
             <div

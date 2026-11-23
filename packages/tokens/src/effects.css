@@ -10,6 +10,16 @@
     --neoverse-effect-alpha-intense: 60%;
     --neoverse-effect-alpha-dominant: 80%;
     --neoverse-effect-alpha-full: 100%;
+    --neoverse-prose-link-decoration: color-mix(
+      in srgb,
+      var(--neoverse-color-blue-400) var(--neoverse-effect-alpha-strong),
+      var(--neoverse-color-blue-600)
+    );
+    --neoverse-prose-link-hover-decoration: color-mix(
+      in srgb,
+      var(--neoverse-color-blue-400) var(--neoverse-effect-alpha-subtle),
+      var(--neoverse-color-blue-600)
+    );
     /* Text-only feedback stays readable when the status field is pastel. */
     --neoverse-effect-status-info-text: var(--neoverse-color-status-info);
     --neoverse-effect-status-success-text: var(--neoverse-color-status-success);
@@ -182,7 +192,6 @@
     --neoverse-prose-code-block-background: var(--neoverse-material-glass-subtle-background);
     --neoverse-prose-code-block-filter: var(--neoverse-material-glass-subtle-filter);
     --neoverse-prose-kbd-background: var(--neoverse-material-glass-subtle-background);
-    --neoverse-prose-inline-code-background: var(--neoverse-material-glass-subtle-background);
     --neoverse-effect-label-neutral-background: color-mix(
       in srgb,
       var(--neoverse-color-text-secondary) var(--neoverse-effect-label-fill-strength),
@@ -396,6 +405,25 @@
       in srgb,
       var(--neoverse-color-status-danger) var(--neoverse-material-glass-subtle-transparency),
       transparent
+    );
+  }
+
+  /* Give the explicit Inset preset a distinct plane without changing the
+     shared inset material used by inputs, tables, and disclosure panels. */
+  :where(.ui-surface-inset) {
+    --neoverse-surface-inset-preset-background: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) var(--neoverse-effect-alpha-faint),
+      var(--neoverse-surface-inset-rest-background)
+    );
+  }
+
+  /* A small tone shift gives inline code a readable shape on pale backdrops. */
+  :where(.neoverse-prose :not(pre) > code) {
+    --neoverse-prose-inline-code-background: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) var(--neoverse-effect-strength-7),
+      var(--neoverse-material-glass-subtle-background)
     );
   }
 

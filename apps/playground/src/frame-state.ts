@@ -2,6 +2,9 @@ import { ref } from 'vue';
 import { isLocale, type Locale } from './playground-content';
 import { syncResolvedThemeFromDocument } from './theme-state';
 
+/** Whether the current document is the isolated diagnostic view */
+export const frameView = window.location.pathname === '/frame';
+
 /* The isolated frame keeps content alive across theme and language switches by
    observing this document's attributes. Theme resolution itself is shared
    with the main Playground shell. */

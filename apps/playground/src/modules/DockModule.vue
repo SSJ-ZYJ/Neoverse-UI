@@ -2,6 +2,7 @@
 import { UiDock, UiNavigationItem, UiSegmentedControl } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
 import LabIcon from '../LabIcon.vue';
+import LabSpecimenHeader from '../LabSpecimenHeader.vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, moduleCopy } from '../playground-content';
 import type { LabModuleProps } from './types';
@@ -36,14 +37,10 @@ const languageOptions = computed(() => [
     <MaterialBackdrop>
       <div class="grid gap-6">
         <section class="grid gap-3" data-dock-specimen="standard">
-          <header class="grid gap-1">
-            <h3 class="text-label-lg font-label text-primary">
-              {{ localize(copy.states.standard.label, props.locale) }}
-            </h3>
-            <p class="max-w-reading-wide text-body-sm text-secondary">
-              {{ localize(copy.states.standard.hint, props.locale) }}
-            </p>
-          </header>
+          <LabSpecimenHeader
+            :title="localize(copy.states.standard.label, props.locale)"
+            :description="localize(copy.states.standard.hint, props.locale)"
+          />
           <div class="playground-dock-preview scrollbar-immersive" data-dock-preview>
             <div class="playground-dock-preview__content">
               <UiDock scale="md" :aria-label="localize(copy.ariaLabel, props.locale)">
@@ -72,14 +69,10 @@ const languageOptions = computed(() => [
         </section>
 
         <section class="grid gap-3" data-dock-specimen="compact">
-          <header class="grid gap-1">
-            <h3 class="text-label-lg font-label text-primary">
-              {{ localize(copy.states.compact.label, props.locale) }}
-            </h3>
-            <p class="max-w-reading-wide text-body-sm text-secondary">
-              {{ localize(copy.states.compact.hint, props.locale) }}
-            </p>
-          </header>
+          <LabSpecimenHeader
+            :title="localize(copy.states.compact.label, props.locale)"
+            :description="localize(copy.states.compact.hint, props.locale)"
+          />
           <div class="playground-dock-preview scrollbar-immersive" data-dock-preview>
             <div class="playground-dock-preview__content">
               <UiDock compact scale="md" :aria-label="localize(copy.ariaLabel, props.locale)">

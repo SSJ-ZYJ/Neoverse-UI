@@ -37,7 +37,7 @@
 
   .ui-surface-inset {
     border: 0;
-    background: var(--neoverse-surface-inset-rest-background);
+    background: var(--neoverse-surface-inset-preset-background);
     box-shadow: var(--neoverse-shadow-inset);
     -webkit-backdrop-filter: var(--neoverse-surface-inset-filter);
     backdrop-filter: var(--neoverse-surface-inset-filter);

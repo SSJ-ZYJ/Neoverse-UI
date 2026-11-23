@@ -18,6 +18,51 @@ test.describe('materials', () => {
       await expectNoPageOverflow(page);
     });
 
+    test(`the inset preset separates from the canvas without a border in ${theme}`, async ({
+      page,
+    }) => {
+      await page.goto(`/frame?theme=${theme}&lang=en#materials-surface`, {
+        waitUntil: 'domcontentloaded',
+      });
+      const inset = page.locator('[data-surface-preset="inset"]');
+      await expect(inset).toBeVisible();
+      await expect.soft(inset).toHaveCSS('border-width', '0px', { timeout: 500 });
+      const toneDifference = await inset.evaluate((element) => {
+        const style = getComputedStyle(element);
+        const context = new OffscreenCanvas(1, 1).getContext('2d');
+        if (!context) throw new Error('Cannot resolve the preset colors without a canvas');
+        const luminance = () => {
+          const [red = 0, green = 0, blue = 0] = context.getImageData(0, 0, 1, 1).data;
+          return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+        };
+        context.fillStyle = style.getPropertyValue('--neoverse-color-surface-canvas').trim();
+        context.fillRect(0, 0, 1, 1);
+        const canvasTone = luminance();
+        context.fillStyle = style.backgroundColor;
+        context.fillRect(0, 0, 1, 1);
+        return luminance() - canvasTone;
+      });
+      const separation = theme === 'light' ? -toneDifference : toneDifference;
+      expect(separation).toBeGreaterThanOrEqual(9);
+      expect(separation).toBeLessThanOrEqual(17);
+      await expect(inset).toHaveCSS('backdrop-filter', /blur\(12px\)/);
+
+      for (const preset of ['none', 'solid', 'subtle', 'elevated']) {
+        await expect(page.locator(`[data-surface-preset="${preset}"]`)).toHaveCSS(
+          'border-width',
+          '0px',
+        );
+      }
+      if (theme === 'light') {
+        for (const preset of ['glass-subtle', 'glass-elevated', 'glass-immersive']) {
+          await expect(page.locator(`[data-surface-preset="${preset}"]`)).toHaveCSS(
+            'border-color',
+            'rgba(0, 0, 0, 0)',
+          );
+        }
+      }
+    });
+
     test(`Aurora Glass previews survive scrolling in the ${theme} theme`, async ({ page }) => {
       await page.goto(`/frame?theme=${theme}&lang=en#materials`, { waitUntil: 'domcontentloaded' });
       const stage = page.locator('[data-glass-variant]').last();

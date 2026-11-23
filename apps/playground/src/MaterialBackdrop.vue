@@ -13,7 +13,7 @@ const props = withDefaults(defineProps<MaterialBackdropProps>(), {
 
 <template>
   <div
-    class="playground-material-backdrop min-w-0 overflow-visible rounded-card p-4 md:p-5"
+    class="playground-material-backdrop min-w-0 overflow-visible"
     :class="
       props.edge === 'inset'
         ? 'playground-material-backdrop--inset'

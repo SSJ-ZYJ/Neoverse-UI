@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { UiSurface } from '@neoverse-ui/vue';
-import { computed } from 'vue';
+import { frameView } from './frame-state';
+import LabSpecimenHeader from './LabSpecimenHeader.vue';
 
 interface LabSpecimenSectionProps {
   id: string;
@@ -12,35 +13,29 @@ interface LabSpecimenSectionProps {
 const props = withDefaults(defineProps<LabSpecimenSectionProps>(), {
   headingLevel: 3,
 });
-const headingTag = computed(() => `h${props.headingLevel}`);
 </script>
 
 <template>
   <UiSurface
     as="section"
-    surface="glass-subtle"
+    :surface="frameView ? 'glass-subtle' : 'none'"
     content-overflow="visible"
     :id="props.id"
     class="playground-specimen-section playground-floating-interaction-surface scroll-mt-24 rounded-panel p-4 md:p-5"
     :aria-labelledby="`${props.id}-title`"
   >
-    <header class="playground-specimen-section__header">
-      <div class="grid min-w-0 gap-1">
-        <component
-          :is="headingTag"
-          :id="`${props.id}-title`"
-          class="text-title-sm font-title text-primary"
-        >
-          {{ props.title }}
-        </component>
-        <p class="max-w-reading-wide text-body-sm text-secondary">
-          {{ props.description }}
-        </p>
-      </div>
-      <div v-if="$slots.action" class="shrink-0">
+    <LabSpecimenHeader
+      class="playground-specimen-section__header"
+      size="section"
+      :heading-level="props.headingLevel"
+      :title-id="`${props.id}-title`"
+      :title="props.title"
+      :description="props.description"
+    >
+      <template v-if="$slots.action" #action>
         <slot name="action" />
-      </div>
-    </header>
+      </template>
+    </LabSpecimenHeader>
     <div class="grid gap-2">
       <slot />
     </div>

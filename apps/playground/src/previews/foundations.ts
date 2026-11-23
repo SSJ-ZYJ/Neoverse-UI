@@ -1,4 +1,5 @@
 import { h, type VNode } from 'vue';
+import LabSpecimenHeader from '../LabSpecimenHeader.vue';
 import {
   borderWidthTokens,
   type NamedToken,
@@ -59,7 +60,7 @@ export function layoutShape(locale: Locale): VNode {
     { class: ['grid gap-grid', previewWidth] },
     groups.map(({ label, render }) =>
       h('section', { key: label.en, class: 'grid min-w-0 gap-3' }, [
-        h('h3', { class: 'text-title-sm font-title text-primary' }, localize(label, locale)),
+        h(LabSpecimenHeader, { title: localize(label, locale) }),
         render(locale),
       ]),
     ),
@@ -73,10 +74,10 @@ export function spacing(locale: Locale): VNode {
     (['aliases', 'primitive'] as const).map((group) => {
       const { label, description } = moduleCopy.spacing[group];
       return h('section', { key: group, class: 'grid min-w-0 gap-3' }, [
-        h('header', { class: 'grid gap-1' }, [
-          h('h3', { class: 'text-title-sm font-title text-primary' }, localize(label, locale)),
-          h('p', { class: 'text-caption text-secondary' }, localize(description, locale)),
-        ]),
+        h(LabSpecimenHeader, {
+          title: localize(label, locale),
+          description: localize(description, locale),
+        }),
         h(SpacingExample, { locale, kind: group === 'primitive' ? 'scale' : 'usage' }),
       ]);
     }),

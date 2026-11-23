@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { UiSurface } from '@neoverse-ui/vue';
 import type { ContractStateId } from './contract-lab';
+import LabSpecimenHeader from './LabSpecimenHeader.vue';
 import MaterialLegend from './MaterialLegend.vue';
 import type { Locale, LocalizedText } from './playground-content';
 import { localize } from './playground-content';
@@ -26,14 +27,12 @@ const props = defineProps<StateRowProps>();
     :data-specimen-layout="props.layout ?? 'auto'"
     :aria-label="localize(props.label, props.locale)"
   >
-    <div class="playground-specimen-row__heading min-w-0" data-specimen-copy>
-      <h3 class="text-label-lg font-label text-primary">
-        {{ localize(props.label, props.locale) }}
-      </h3>
-      <p v-if="props.hint" class="mt-1 text-body-sm text-secondary">
-        {{ localize(props.hint, props.locale) }}
-      </p>
-    </div>
+    <LabSpecimenHeader
+      class="playground-specimen-row__heading"
+      data-specimen-copy
+      :title="localize(props.label, props.locale)"
+      :description="props.hint && localize(props.hint, props.locale)"
+    />
     <div class="playground-specimen-preview scrollbar-immersive" data-specimen-preview>
       <div class="playground-specimen-preview__content flex flex-wrap items-center gap-3">
         <slot />

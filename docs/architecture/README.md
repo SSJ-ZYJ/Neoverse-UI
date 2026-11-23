@@ -215,9 +215,13 @@ A focused specimen exposes a move handle in the stage header: drag it, or use th
 
 Every entry in `labSpecimens` declares a `FocusedPreview`: either a localized renderer for a read-only Inspector or a `SpecimenDefinition` that opens one editable `SpecimenSession`. A read-only preview can still support native interactions without exposing a session to the Inspector. Every component specimen whose public API exposes an appearance variant has an editable session: Button, IconButton, Action, SegmentedControl, NavigationItem, ControlSurface, Dock, Badge, StatusIndicator, Skeleton, Notice, Toast, TooltipSurface, Avatar, Table, Disclosure, StatCard, Surface (including the three Aurora Glass tiers), Card, Input, Textarea, Select, Checkbox, RadioGroup, Switch, Field and Tabs. Data-only specimens (Breadcrumb, Pagination, EmptyState, Timeline, StepFlow) and the four overlay specimens stay read-only; overlays own focus, placement and light dismiss, which an Inspector value cannot reproduce. To add a specimen, register its explicit renderer on the catalogue entry and retain its stable QA anchor in the owning module. Interactive definitions live in the `lab-specimens/` family files and are re-exported through `lab-interactive-specimens.ts`; they provide typed initial props, an initial state factory, and editable controls. The session rejects undeclared edits, invalid values, and edits to temporarily disabled fields.
 
-The shell keeps one glass plate per section. `LabSpecimenSection` owns that plate; nested `.playground-specimen-panel` wrappers render with `surface="none"` on the canvas, so a gallery never stacks a second card silhouette. Component specimens that demonstrate glass keep their own material. The isolated `/frame` route keeps its QA backdrops unchanged.
+The Stage paints the shared backdrop for both module galleries and focused
+specimens. Section outlines, state rows, and preview wrappers organize the
+gallery without painting an intermediate surface. Actual component specimens
+retain their configured materials. Only the isolated `/frame` paints the
+diagnostic comparison backdrops.
 
-Module URLs and `/frame` render the full QA galleries, including fixed state matrices and optical fixtures. The isolated frame retains the diagnostic comparison backdrops. The Inspector opens that gallery at the specimen anchor, without transferring local edits. `/react-fixture` remains the React contract host. Neither isolated entry mounts the shell.
+Module URLs and `/frame` render the full QA galleries, including fixed state matrices and optical fixtures. The Inspector opens the isolated gallery at the specimen anchor without transferring local edits. `/react-fixture` remains the React contract host. Neither isolated entry mounts the shell.
 
 Focused compositions may reuse individual scenes from QA, but do not mount the
 gallery containing them. Aurora Glass mode shows one Atlas workspace composed
@@ -251,9 +255,8 @@ titles such as `.ui-step-flow__title` and `.ui-timeline__title` use `title-sm`.
 The inline syntax rows below the heading scale place each Markdown marker beside
 its rendered semantic element. Bold, italic, bold italic, inline code,
 strikethrough and links share the one `.neoverse-prose` layer; bold and deleted
-text nested in a link keep the link color, so link decoration and nested states
-remain readable together. The heading rows and the type scale below them keep
-their original layout.
+text nested in a link keep the link color, and all three forms use a light
+blue underline that deepens on hover in both themes.
 
 The focused Scrollbar specimen demonstrates `scrollbar-immersive` on a local scroll container. The document-bound `UiScrollbar` and its ownership checks stay in the frame; the focused renderer does not bind the shell document to demonstrate a container scrollbar.
 
@@ -304,9 +307,13 @@ not poll focus or observe the document; the policy runs once per hide.
 
 At the shared `xl` / 1280px breakpoint, the Explorer and Inspector become persistent columns. Below it, the same panels open as native modal dialogs with the background inert, keyboard focus inside the dialog, and focus returned to the opening control on dismissal. Selecting an item closes the drawer and moves focus to the module heading or specimen without creating a history entry for the drawer itself.
 
+The native backdrop dims and blurs the page outside the drawer, with a cutout
+that follows the panel as it moves. The panel keeps its own Glass blur and does
+not sample the scrim. Reduced transparency removes the backdrop blur.
+
 Explorer and Inspector links explicitly join the tab order so the same navigation is available in WebKit when it skips links with implicit tab stops.
 
-Playground-only composition helpers keep specimen structure consistent without becoming consumer API. `LabSpecimenSection` owns subsection heading, description, spacing, and optional action placement. `playground-token-grid` and `playground-specimen-grid` use the available content width rather than fixed viewport column counts, while `playground-specimen-panel` and `playground-specimen-row` provide shared specimen geometry. Module specimens select material through `UiSurface surface=\"...\"` instead of directly attaching Aurora Glass implementation classes; the toolbar and side panels are application chrome boundaries. `StateRow` exposes stable `data-specimen-state-row` markers only for Design Lab validation; these markers are not public component API.
+Playground-only composition helpers keep specimen structure consistent without becoming consumer API. `LabSpecimenSection` owns section spacing and the header divider. `LabSpecimenHeader` owns specimen typography across module sections, nested examples and state rows: section headings use `title-lg` (20px) with `body-md` descriptions, and nested headings use `title-md` (18px) with `body-sm` descriptions. This does not change the type scale inside the examples. `playground-token-grid` and `playground-specimen-grid` use the available content width rather than fixed viewport column counts, while `playground-specimen-panel` and `playground-specimen-row` provide shared specimen geometry. Module specimens select material through `UiSurface surface="..."` instead of directly attaching Aurora Glass implementation classes; the toolbar and side panels are application chrome boundaries. `StateRow` exposes stable `data-specimen-state-row` markers only for Design Lab validation; these markers are not public component API.
 
 The Motion module's `foundation-motion-width` specimen demonstrates the shared layout width motion with real content: the Design Lab language control is the trigger, and `useLayoutWidthMotion` keeps the brand, navigation, and preference boxes on one `spatial` curve without scaling text. The stage stacks its boxes below the `md` breakpoint so a width change cannot switch the flex-wrap row count mid-animation. It is registered in the specimen catalogue, so deep links cover it.
 

@@ -187,7 +187,10 @@ Dock defaults to `glass-elevated`; ControlSurface defaults to `glass-subtle`. Th
 The `--neoverse-control-chrome-*` and `--neoverse-effect-floating-chrome-*` tokens
 and their TypeScript exports are removed. Customize the selected Aurora Glass tier for
 material and `--neoverse-control-surface-*` for grouping geometry instead.
-`inset` uses Light optics; status colors use shared semantic
+The `inset` preset on Surface and Card keeps the Light-tier filter and soft
+inset shadow. A translucent, theme-aware fill separates it from the canvas
+without a border. This fill belongs to the preset, not to other components
+that share the inset material. Status colors use shared semantic
 effect roles. Typography, geometry, and native control semantics remain independent.
 
 ```vue
@@ -268,6 +271,10 @@ together with the shared control shadow. The directional catches separate the
 panel from pale or textured backdrops without a uniform inset ring, and they do
 not change its dimensions, Aurora Glass fill or blur. Vue, React and prose
 `details` consume the same styles.
+
+Inline code in prose uses a quiet, theme-aware tint to stay distinct from
+the surrounding text, including when nested in bold text. It keeps the
+existing soft edge and adds no border; code blocks use their own material.
 
 Timeline and StepFlow use `UiSurface` with the Light tier of Aurora Glass for their markers and content.
 Timeline dates precede each title; thin rails remain continuous between markers.

@@ -1,13 +1,14 @@
 import { createApp } from 'vue';
 import App from './App.vue';
 import siteIconUrl from './assets/neoverse-site-icon.png';
+import { frameView } from './frame-state';
 import { mountPlaygroundGlass } from './glass-runtime';
+import './styles/drawers.css';
 import './styles/playground-tokens.css';
 import './styles/scroll-ports.css';
 import './styles/shell.css';
 
-document.documentElement.dataset.playgroundView =
-  window.location.pathname === '/frame' ? 'frame' : 'shell';
+document.documentElement.dataset.playgroundView = frameView ? 'frame' : 'shell';
 
 const favicon =
   document.querySelector<HTMLLinkElement>('link[rel~="icon"]') ?? document.createElement('link');
