@@ -73,6 +73,14 @@ that can be underneath those surfaces. The renderer limits each edge pass to six
 occluding rectangles; this marker controls visibility and does not sample or
 refract background pixels.
 
+During a repaint, edges in the same scrolling region share ancestor clipping
+measurements. The renderer remeasures clipping on the next paint so nested
+scrolling neither exposes edges outside a scrollport nor leaves stale edges behind.
+
+Browser zoom and viewport resizing share the normal edge repaint limit. The
+last resize stays queued, and its paint uses the latest geometry and pixel
+ratio. Palette entries remain cached when the resolved root tokens are unchanged.
+
 Runtime unit tests cover WebGL selection, context loss and restore, shared canvas
 reuse, frame scheduling and reduced-transparency transitions. Chromium integration
 tests check the retained CSS blur, renderer ownership and no-WebGL fallback.

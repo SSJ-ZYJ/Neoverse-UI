@@ -34,6 +34,7 @@ const props = defineProps<ColorSwatchCellProps>();
   gap: var(--neoverse-space-3);
   align-items: start;
   padding-block: var(--neoverse-space-2);
+  contain: layout style;
 }
 
 .color-role + .color-role {
@@ -47,6 +48,7 @@ const props = defineProps<ColorSwatchCellProps>();
   border: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
   border-radius: var(--neoverse-radius-control-inner);
   background-color: var(--neoverse-color-surface-canvas);
+  contain: strict;
 }
 
 .color-role__details {

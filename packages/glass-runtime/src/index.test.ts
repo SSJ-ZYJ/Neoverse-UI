@@ -1,157 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { createFakeGl, installCanvasContext } from './fake-webgl.test-support';
 import { collectOccluders, createGlassRenderer, glassRendererAttribute } from './index';
-
-type FakeGl = {
-  ARRAY_BUFFER: number;
-  BLEND: number;
-  COLOR_BUFFER_BIT: number;
-  COMPILE_STATUS: number;
-  FRAGMENT_SHADER: number;
-  FLOAT: number;
-  LINK_STATUS: number;
-  SRC_ALPHA: number;
-  ONE: number;
-  ONE_MINUS_SRC_ALPHA: number;
-  TEXTURE0: number;
-  TEXTURE_2D: number;
-  TEXTURE_MIN_FILTER: number;
-  TEXTURE_MAG_FILTER: number;
-  TEXTURE_WRAP_S: number;
-  TEXTURE_WRAP_T: number;
-  LINEAR: number;
-  CLAMP_TO_EDGE: number;
-  RGBA: number;
-  UNSIGNED_BYTE: number;
-  activeTexture: ReturnType<typeof vi.fn>;
-  bindTexture: ReturnType<typeof vi.fn>;
-  createTexture: ReturnType<typeof vi.fn>;
-  deleteTexture: ReturnType<typeof vi.fn>;
-  texParameteri: ReturnType<typeof vi.fn>;
-  texImage2D: ReturnType<typeof vi.fn>;
-  uniform1i: ReturnType<typeof vi.fn>;
-  SCISSOR_TEST: number;
-  STATIC_DRAW: number;
-  TRIANGLE_STRIP: number;
-  VERTEX_SHADER: number;
-  attachShader: ReturnType<typeof vi.fn>;
-  bindBuffer: ReturnType<typeof vi.fn>;
-  blendFunc: ReturnType<typeof vi.fn>;
-  blendFuncSeparate: ReturnType<typeof vi.fn>;
-  bufferData: ReturnType<typeof vi.fn>;
-  clear: ReturnType<typeof vi.fn>;
-  clearColor: ReturnType<typeof vi.fn>;
-  compileShader: ReturnType<typeof vi.fn>;
-  createBuffer: ReturnType<typeof vi.fn>;
-  createProgram: ReturnType<typeof vi.fn>;
-  createShader: ReturnType<typeof vi.fn>;
-  deleteBuffer: ReturnType<typeof vi.fn>;
-  deleteProgram: ReturnType<typeof vi.fn>;
-  deleteShader: ReturnType<typeof vi.fn>;
-  drawArrays: ReturnType<typeof vi.fn>;
-  disable: ReturnType<typeof vi.fn>;
-  enable: ReturnType<typeof vi.fn>;
-  enableVertexAttribArray: ReturnType<typeof vi.fn>;
-  getAttribLocation: ReturnType<typeof vi.fn>;
-  getProgramParameter: ReturnType<typeof vi.fn>;
-  getShaderParameter: ReturnType<typeof vi.fn>;
-  getUniformLocation: ReturnType<typeof vi.fn>;
-  linkProgram: ReturnType<typeof vi.fn>;
-  shaderSource: ReturnType<typeof vi.fn>;
-  scissor: ReturnType<typeof vi.fn>;
-  uniform1f: ReturnType<typeof vi.fn>;
-  uniform2f: ReturnType<typeof vi.fn>;
-  uniform3f: ReturnType<typeof vi.fn>;
-  uniform4f: ReturnType<typeof vi.fn>;
-  uniform4fv: ReturnType<typeof vi.fn>;
-  uniform1fv: ReturnType<typeof vi.fn>;
-  useProgram: ReturnType<typeof vi.fn>;
-  vertexAttribPointer: ReturnType<typeof vi.fn>;
-  viewport: ReturnType<typeof vi.fn>;
-};
-
-const createFakeGl = (): FakeGl => {
-  const gl = {
-    ARRAY_BUFFER: 0x8892,
-    BLEND: 0x0be2,
-    COLOR_BUFFER_BIT: 0x4000,
-    COMPILE_STATUS: 0x8b81,
-    FRAGMENT_SHADER: 0x8b30,
-    FLOAT: 0x1406,
-    LINK_STATUS: 0x8b82,
-    SRC_ALPHA: 0x0302,
-    ONE: 1,
-    ONE_MINUS_SRC_ALPHA: 0x0303,
-    TEXTURE0: 0x84c0,
-    TEXTURE_2D: 0x0de1,
-    TEXTURE_MIN_FILTER: 0x2801,
-    TEXTURE_MAG_FILTER: 0x2800,
-    TEXTURE_WRAP_S: 0x2802,
-    TEXTURE_WRAP_T: 0x2803,
-    LINEAR: 0x2601,
-    CLAMP_TO_EDGE: 0x812f,
-    RGBA: 0x1908,
-    UNSIGNED_BYTE: 0x1401,
-    activeTexture: vi.fn(),
-    bindTexture: vi.fn(),
-    createTexture: vi.fn(() => ({})),
-    deleteTexture: vi.fn(),
-    texParameteri: vi.fn(),
-    texImage2D: vi.fn(),
-    uniform1i: vi.fn(),
-    SCISSOR_TEST: 0x0c11,
-    STATIC_DRAW: 0x88e4,
-    TRIANGLE_STRIP: 0x0005,
-    VERTEX_SHADER: 0x8b31,
-    attachShader: vi.fn(),
-    bindBuffer: vi.fn(),
-    blendFunc: vi.fn(),
-    blendFuncSeparate: vi.fn(),
-    bufferData: vi.fn(),
-    clear: vi.fn(),
-    clearColor: vi.fn(),
-    compileShader: vi.fn(),
-    createBuffer: vi.fn(() => ({})),
-    createProgram: vi.fn(() => ({})),
-    createShader: vi.fn(() => ({})),
-    deleteBuffer: vi.fn(),
-    deleteProgram: vi.fn(),
-    deleteShader: vi.fn(),
-    drawArrays: vi.fn(),
-    disable: vi.fn(),
-    enable: vi.fn(),
-    enableVertexAttribArray: vi.fn(),
-    getAttribLocation: vi.fn(() => 0),
-    getProgramParameter: vi.fn(() => true),
-    getShaderParameter: vi.fn(() => true),
-    getUniformLocation: vi.fn((_, name: string) => ({ name })),
-    linkProgram: vi.fn(),
-    shaderSource: vi.fn(),
-    scissor: vi.fn(),
-    uniform1f: vi.fn(),
-    uniform2f: vi.fn(),
-    uniform3f: vi.fn(),
-    uniform4f: vi.fn(),
-    uniform4fv: vi.fn(),
-    uniform1fv: vi.fn(),
-    useProgram: vi.fn(),
-    vertexAttribPointer: vi.fn(),
-    viewport: vi.fn(),
-  } satisfies FakeGl;
-
-  return gl;
-};
-
-const installCanvasContext = (contexts: { webgl2?: FakeGl; webgl?: FakeGl } = {}): void => {
-  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation((kind) => {
-    if (kind === 'webgl2') {
-      return (contexts.webgl2 ?? null) as never;
-    }
-    if (kind === 'webgl') {
-      return (contexts.webgl ?? null) as never;
-    }
-    return null as never;
-  });
-};
 
 const setRect = (element: HTMLElement, rect: Partial<DOMRect>): void => {
   vi.spyOn(element, 'getBoundingClientRect').mockReturnValue({
@@ -1243,6 +1092,64 @@ describe('Glass renderer', () => {
     expect(gl.scissor).toHaveBeenLastCalledWith(20, 70, 80, 50);
   });
 
+  it('keeps sibling Glass edges clipped as a shared ancestor scrolls', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const scroller = document.createElement('section');
+    scroller.style.overflow = 'auto';
+    setRect(scroller, { left: 20, top: 30, width: 120, height: 70 });
+    const clip = document.createElement('div');
+    clip.style.overflow = 'hidden';
+    setRect(clip, { left: 35, top: 60, width: 110, height: 50 });
+    for (const left of [25, 90]) {
+      const glass = document.createElement('article');
+      glass.className = 'material-glass-subtle';
+      setRect(glass, { left, top: 10, width: 50, height: 120 });
+      clip.append(glass);
+    }
+    scroller.append(clip);
+    document.body.append(scroller);
+
+    const frames = installFrameQueue();
+    const renderer = createTestRenderer({ maxDevicePixelRatio: 1 });
+    renderer.mount();
+    const canvas = document.querySelector<HTMLCanvasElement>(
+      '[data-neoverse-glass-renderer-canvas]',
+    );
+    if (canvas === null) throw new Error('Missing Glass renderer canvas');
+    setRect(canvas, { left: 0, top: 0, width: 200, height: 150 });
+
+    for (const [timestamp, top, scissors] of [
+      [
+        1000,
+        60,
+        [
+          [35, 50, 40, 40],
+          [90, 50, 50, 40],
+        ],
+      ],
+      [
+        1030,
+        45,
+        [
+          [35, 55, 40, 50],
+          [90, 55, 50, 50],
+        ],
+      ],
+    ] as const) {
+      setRect(clip, { left: 35, top, width: 110, height: 50 });
+      gl.scissor.mockClear();
+      vi.mocked(scroller.getBoundingClientRect).mockClear();
+      vi.mocked(clip.getBoundingClientRect).mockClear();
+      scroller.dispatchEvent(new Event('scroll'));
+      frames.flush(timestamp);
+
+      expect(gl.scissor.mock.calls).toEqual(scissors);
+      expect(scroller.getBoundingClientRect).toHaveBeenCalledTimes(1);
+      expect(clip.getBoundingClientRect).toHaveBeenCalledTimes(1);
+    }
+  });
+
   it('extends the tooltip contour to its resolved pointer while preserving zoom and clipping', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
@@ -1719,23 +1626,19 @@ describe('Glass renderer', () => {
     );
   });
 
-  it('resizes the backing canvas with the viewport using the capped device pixel ratio', () => {
+  it('coalesces rapid zoom changes without losing the final canvas size and edge position', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     let viewportWidth = 640;
     let viewportHeight = 480;
     vi.spyOn(window, 'innerWidth', 'get').mockImplementation(() => viewportWidth);
     vi.spyOn(window, 'innerHeight', 'get').mockImplementation(() => viewportHeight);
-    vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(3);
+    const ratio = vi.spyOn(window, 'devicePixelRatio', 'get').mockReturnValue(3);
     const glass = document.createElement('article');
     glass.className = 'material-glass-subtle';
     setRect(glass, {});
     document.body.append(glass);
-    const frames: FrameRequestCallback[] = [];
-    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
-      frames.push(callback);
-      return frames.length;
-    });
+    const frames = installFrameQueue();
 
     const renderer = createTestRenderer();
     renderer.mount();
@@ -1749,8 +1652,7 @@ describe('Glass renderer', () => {
     viewportHeight = 500;
     window.dispatchEvent(new Event('resize'));
     window.dispatchEvent(new Event('resize'));
-    expect(frames).toHaveLength(1);
-    frames.shift()?.(32);
+    frames.flush(1000);
     expect(canvas?.width).toBe(1600);
     expect(canvas?.height).toBe(1000);
     expect(gl.viewport).toHaveBeenLastCalledWith(0, 0, 1600, 1000);
@@ -1763,6 +1665,31 @@ describe('Glass renderer', () => {
       expect.objectContaining({ name: 'u_pixel_ratio' }),
       2,
     );
+
+    gl.clear.mockClear();
+    viewportWidth = 720;
+    viewportHeight = 450;
+    ratio.mockReturnValue(1.5);
+    setRect(glass, { left: 36, top: 24 });
+    window.dispatchEvent(new Event('resize'));
+    frames.flush(1008);
+    expect(gl.clear).not.toHaveBeenCalled();
+
+    frames.flush(1016);
+    expect(gl.viewport).toHaveBeenLastCalledWith(0, 0, 1080, 675);
+    expect(gl.uniform1f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_pixel_ratio' }),
+      1.5,
+    );
+    expect(gl.uniform4f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_rect' }),
+      36,
+      24,
+      240,
+      120,
+    );
+    expect(gl.clear).toHaveBeenCalledTimes(1);
+    expect(frames.size()).toBe(0);
   });
 
   it('discovers the established Aurora Glass surface alias', () => {
@@ -2191,6 +2118,42 @@ describe('Glass renderer', () => {
       120,
     );
     expect(frames, 'a resting scene stops reserving frames').toHaveLength(0);
+  });
+
+  it('does not repaint or schedule frames when an unrelated container without glass scrolls', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, { left: 20, top: 200 });
+    document.body.append(glass);
+
+    const plainContainer = document.createElement('div');
+    plainContainer.className = 'plain-scroll-container';
+    const child = document.createElement('p');
+    child.textContent = 'content';
+    plainContainer.append(child);
+    document.body.append(plainContainer);
+
+    const frames: Array<(time: number) => void> = [];
+    vi.spyOn(window, 'requestAnimationFrame').mockImplementation((callback) => {
+      frames.push(callback as (time: number) => void);
+      return frames.length;
+    });
+
+    const renderer = createTestRenderer();
+    renderer.mount();
+    frames.length = 0;
+    gl.drawArrays.mockClear();
+
+    plainContainer.dispatchEvent(new Event('scroll'));
+    expect(frames).toHaveLength(0);
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+
+    // When the container contains a glass surface, scrolling it must repaint.
+    plainContainer.append(glass);
+    plainContainer.dispatchEvent(new Event('scroll'));
+    expect(frames).not.toHaveLength(0);
   });
 
   it('caps repaints on high-refresh displays instead of rendering every RAF', () => {

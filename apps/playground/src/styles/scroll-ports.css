@@ -1,0 +1,25 @@
+[data-playground-view='shell'],
+[data-playground-view='shell'] body,
+[data-playground-view='shell'] #app {
+  height: 100%;
+}
+
+[data-playground-view='shell'],
+[data-playground-view='shell'] body {
+  overflow: hidden;
+}
+
+.playground-shell__panel-body,
+.playground-shell__workspace {
+  min-inline-size: 0;
+  min-block-size: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+html[data-playground-view='frame'],
+.playground-shell__panel-body,
+.playground-shell__workspace {
+  will-change: scroll-position;
+}

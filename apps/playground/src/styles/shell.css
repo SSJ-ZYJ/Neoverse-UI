@@ -3,17 +3,6 @@
   font-size: 1rem;
 }
 
-[data-playground-view='shell'],
-[data-playground-view='shell'] body,
-[data-playground-view='shell'] #app {
-  height: 100%;
-}
-
-[data-playground-view='shell'],
-[data-playground-view='shell'] body {
-  overflow: hidden;
-}
-
 .playground-shell {
   display: grid;
   block-size: 100dvh;
@@ -210,15 +199,6 @@
   align-items: center;
   justify-content: space-between;
   gap: var(--neoverse-space-2);
-}
-
-.playground-shell__panel-body,
-.playground-shell__workspace {
-  min-inline-size: 0;
-  min-block-size: 0;
-  overflow: auto;
-  overscroll-behavior: contain;
-  scrollbar-gutter: stable;
 }
 
 /* The panel clips at a 24px corner while a native rail runs to its own bottom

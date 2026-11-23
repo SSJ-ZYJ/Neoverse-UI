@@ -1,5 +1,6 @@
 import { createProgram, type GlassGl } from './gl-program.js';
 import { NativeGlassRenderer, supportsNativeRefraction } from './native.js';
+import { type ClipRect, clipSurfaceRect, type OverflowClipCache } from './overflow-clip.js';
 import { type Color, parseColor } from './style-colors.js';
 import { getTableGridEdges, getTableOuterRect } from './table-edges.js';
 
@@ -172,15 +173,6 @@ type GlassStyle = {
   opacity: number;
   chroma: number;
   carrier: Color;
-};
-
-type ClipRect = {
-  left: number;
-  top: number;
-  right: number;
-  bottom: number;
-  width: number;
-  height: number;
 };
 
 type CanvasViewport = {
@@ -604,9 +596,6 @@ const paintBackdropChroma = (
   context.restore();
 };
 
-const clipsOverflowAxis = (value: string): boolean =>
-  value === 'auto' || value === 'clip' || value === 'hidden' || value === 'scroll';
-
 // The shared edge canvas paints above every overlay, so an edge must be
 // masked wherever an overlay covers its surface. Hit-test a small grid of
 // points against the real paint order: everything stacked above the surface
@@ -772,41 +761,6 @@ export const collectOccluders = (
     .slice(0, maxOccluders);
 };
 
-const getAncestorClipRect = (element: HTMLElement, rect: ClipRect, view: Window): ClipRect => {
-  let left = rect.left;
-  let top = rect.top;
-  let right = rect.right;
-  let bottom = rect.bottom;
-
-  for (let ancestor = element.parentElement; ancestor !== null; ancestor = ancestor.parentElement) {
-    const style = view.getComputedStyle(ancestor);
-    const overflowX = style.overflowX || style.overflow;
-    const overflowY = style.overflowY || style.overflow;
-    const clipX = clipsOverflowAxis(overflowX);
-    const clipY = clipsOverflowAxis(overflowY);
-    if (!clipX && !clipY) continue;
-
-    const ancestorRect = ancestor.getBoundingClientRect();
-    if (clipX) {
-      left = Math.max(left, ancestorRect.left);
-      right = Math.min(right, ancestorRect.right);
-    }
-    if (clipY) {
-      top = Math.max(top, ancestorRect.top);
-      bottom = Math.min(bottom, ancestorRect.bottom);
-    }
-  }
-
-  return {
-    left,
-    top,
-    right,
-    bottom,
-    width: Math.max(right - left, 0),
-    height: Math.max(bottom - top, 0),
-  };
-};
-
 const mixColorHash = (hash: number, text: string): number => {
   let value = hash;
   for (let index = 0; index < text.length; index += 1) {
@@ -933,11 +887,11 @@ const readStyle = (
   view: Window,
   colorProbe: HTMLElement,
   viewport: CanvasViewport,
-  measuredRect?: DOMRect,
-  opacityCache?: Map<Element, number | null>,
+  rect: DOMRect,
+  opacityCache: Map<Element, number | null>,
+  overflowClips: OverflowClipCache,
 ): GlassStyle | undefined => {
   const style = view.getComputedStyle(element);
-  const rect = measuredRect ?? element.getBoundingClientRect();
   if (
     rect.width <= 0 ||
     rect.height <= 0 ||
@@ -982,15 +936,6 @@ const readStyle = (
       pointer[2] = arrowHeight;
     }
   }
-  const paintRect = {
-    left: rect.left,
-    top: rect.top,
-    right: rect.right,
-    bottom: rect.bottom + pointer[2],
-    width: rect.width,
-    height: rect.height + pointer[2],
-  };
-
   const variant = getVariant(element) ?? 'subtle';
   const defaults = getDefaultEdgeValues(variant);
   const edgeWidth =
@@ -1032,7 +977,7 @@ const readStyle = (
 
   return {
     rect,
-    clipRect: getAncestorClipRect(element, paintRect, view),
+    clipRect: clipSurfaceRect(element, rect, pointer[2], view, overflowClips),
     radii: getRadii(style, surfaceScale, rect.width, rect.height),
     pointer,
     edgeWidth,
@@ -1110,10 +1055,36 @@ class GlassRendererImpl implements GlassRenderer {
   };
   private previousRendererAttribute: string | null = null;
   private readonly handleResize = (): void => {
-    this.invalidateScene();
+    // Responsive colors are checked against the root tokens when we paint.
+    // Geometry changes must not discard them or restart the frame clock.
+    this.invalidateFrame();
     this.scheduleRefresh();
   };
-  private readonly handleScroll = (): void => {
+  private readonly handleScroll = (event?: Event): void => {
+    const target = event?.target;
+    const isRootScroll =
+      event === undefined ||
+      target === null ||
+      target === this.ownerDocument ||
+      target === this.ownerDocument?.documentElement ||
+      target === this.ownerDocument?.body ||
+      target === this.ownerDocument?.defaultView;
+
+    if (!isRootScroll && target && typeof (target as Element).matches === 'function') {
+      const element = target as Element;
+      const hasGlassOrOccluder =
+        element.matches(glassSelector) ||
+        element.matches(occluderSelector) ||
+        element.closest(glassSelector) !== null ||
+        element.closest(occluderSelector) !== null ||
+        element.querySelector(glassSelector) !== null ||
+        element.querySelector(occluderSelector) !== null;
+
+      if (!hasGlassOrOccluder) {
+        return;
+      }
+    }
+
     this.invalidateFrame();
     this.scheduleRefresh();
   };
@@ -1499,7 +1470,7 @@ class GlassRendererImpl implements GlassRenderer {
     this.lastFrameTime = 0;
   }
 
-  /** A scroll is an explicit geometry change; keep the palette cache but repaint. */
+  /** Keep the palette and frame clock when scrolling or resizing changes geometry. */
   private invalidateFrame(): void {
     this.sceneSignature = 0;
   }
@@ -1875,10 +1846,8 @@ class GlassRendererImpl implements GlassRenderer {
     this.sceneSignature = sceneSignature;
     const drawingWidth = Math.max(Math.round(width * pixelRatio), 1);
     const drawingHeight = Math.max(Math.round(height * pixelRatio), 1);
-    if (this.canvas.width !== drawingWidth || this.canvas.height !== drawingHeight) {
-      this.canvas.width = drawingWidth;
-      this.canvas.height = drawingHeight;
-    }
+    if (this.canvas.width !== drawingWidth) this.canvas.width = drawingWidth;
+    if (this.canvas.height !== drawingHeight) this.canvas.height = drawingHeight;
     const gl = this.gl;
     const locations = this.locations;
     gl.viewport(0, 0, drawingWidth, drawingHeight);
@@ -1913,15 +1882,19 @@ class GlassRendererImpl implements GlassRenderer {
       if (this.chromaCanvas.style.display !== display) this.chromaCanvas.style.display = display;
       this.syncChromaVisibility();
       if (backdropChroma) {
-        if (
-          this.chromaCanvas.width !== drawingWidth ||
-          this.chromaCanvas.height !== drawingHeight
-        ) {
+        let resized = false;
+        if (this.chromaCanvas.width !== drawingWidth) {
           this.chromaCanvas.width = drawingWidth;
-          this.chromaCanvas.height = drawingHeight;
+          resized = true;
         }
-        this.chromaContext.setTransform(1, 0, 0, 1, 0, 0);
-        this.chromaContext.clearRect(0, 0, drawingWidth, drawingHeight);
+        if (this.chromaCanvas.height !== drawingHeight) {
+          this.chromaCanvas.height = drawingHeight;
+          resized = true;
+        }
+        if (!resized) {
+          this.chromaContext.resetTransform();
+          this.chromaContext.clearRect(0, 0, drawingWidth, drawingHeight);
+        }
         this.chromaContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
       }
     }
@@ -1933,6 +1906,7 @@ class GlassRendererImpl implements GlassRenderer {
     gl.enable(gl.SCISSOR_TEST);
     const occluderRects = new Float32Array(maxOccluders * 4);
     const occluderRadii = new Float32Array(maxOccluders);
+    const overflowClips: OverflowClipCache = new Map();
     const visibleTableCells = new Set<HTMLElement>();
     const uploadOccluders = (occluders: readonly Occluder[]): void => {
       if (locations.occluders === null || locations.occluderCount === null) return;
@@ -1962,7 +1936,15 @@ class GlassRendererImpl implements GlassRenderer {
       // a document-wide refresh otherwise resolves computed style and the
       // ancestor opacity chain for every offscreen control.
       if (!intersectsViewport(rect, viewport)) continue;
-      const style = readStyle(element, view, this.colorProbe, viewport, rect, opacityCache);
+      const style = readStyle(
+        element,
+        view,
+        this.colorProbe,
+        viewport,
+        rect,
+        opacityCache,
+        overflowClips,
+      );
       if (style === undefined) {
         continue;
       }

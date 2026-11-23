@@ -3,6 +3,7 @@ import App from './App.vue';
 import siteIconUrl from './assets/neoverse-site-icon.png';
 import { mountPlaygroundGlass } from './glass-runtime';
 import './styles/playground-tokens.css';
+import './styles/scroll-ports.css';
 import './styles/shell.css';
 
 document.documentElement.dataset.playgroundView =

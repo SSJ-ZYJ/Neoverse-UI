@@ -100,6 +100,11 @@ const props = defineProps<LabModuleProps>();
   gap: var(--neoverse-space-4);
 }
 
+.color-gallery__scales > article {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 110px;
+}
+
 .color-gallery__scale-heading {
   display: flex;
   flex-wrap: wrap;
@@ -134,6 +139,7 @@ const props = defineProps<LabModuleProps>();
   overflow: hidden;
   border: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
   border-radius: var(--neoverse-radius-control-inner);
+  contain: strict;
 }
 
 .color-gallery__chip[data-transparent] {
@@ -159,6 +165,8 @@ const props = defineProps<LabModuleProps>();
 
 .color-gallery__role-group {
   padding: var(--neoverse-space-3);
+  content-visibility: auto;
+  contain-intrinsic-size: auto 340px;
 }
 
 .color-gallery__role-list {
