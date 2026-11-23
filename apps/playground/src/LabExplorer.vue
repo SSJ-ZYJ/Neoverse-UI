@@ -2,6 +2,7 @@
 import { glassMaterial } from '@neoverse-ui/tokens';
 import { UiIconButton, UiInput, UiNavigationItem } from '@neoverse-ui/vue';
 import { computed, reactive, ref, watch } from 'vue';
+import CatalogueLabel from './CatalogueLabel.vue';
 import LabIcon from './LabIcon.vue';
 import {
   browsableSpecimens,
@@ -12,7 +13,14 @@ import {
   moduleGroups,
   type ResolvedLabHash,
 } from './lab-modules';
-import { appCopy, formatLocalized, type Locale, localize, localized } from './playground-content';
+import {
+  appCopy,
+  catalogueSecondary,
+  formatLocalized,
+  type Locale,
+  localize,
+  localized,
+} from './playground-content';
 
 type ExplorerModule = LabModule & { readonly specimens: readonly LabSpecimen[] };
 type ExplorerSection = ModuleGroup & { readonly modules: readonly ExplorerModule[] };
@@ -188,7 +196,7 @@ function toggleModule(id: string): void {
           @click="toggle(group.id)"
         >
           <span class="playground-explorer__section-label">
-            {{ localize(group.label, locale) }}
+            <CatalogueLabel :label="group.label" :locale="locale" />
           </span>
           <span v-if="groupCount(group) > 0" class="playground-explorer__count" aria-hidden="true">
             {{ groupCount(group) }}
@@ -214,7 +222,13 @@ function toggleModule(id: string): void {
               indicator-placement="start"
               class="playground-explorer__link playground-explorer__module-link"
               @click="emit('navigate', $event, module.id)"
-            />
+            >
+              <template v-if="catalogueSecondary(module.label, locale)" #suffix>
+                <span class="playground-catalogue-label__secondary" lang="en" aria-hidden="true">
+                  {{ catalogueSecondary(module.label, locale) }}
+                </span>
+              </template>
+            </UiNavigationItem>
             <button
               v-if="module.specimens.length > 1 && !searching"
               :id="`explorer-module-${module.id}`"
@@ -252,7 +266,13 @@ function toggleModule(id: string): void {
                 indicator-placement="start"
                 class="playground-explorer__link playground-explorer__leaf"
                 @click="emit('navigate', $event, specimen.id)"
-              />
+              >
+                <template v-if="catalogueSecondary(specimen.label, locale)" #suffix>
+                  <span class="playground-catalogue-label__secondary" lang="en" aria-hidden="true">
+                    {{ catalogueSecondary(specimen.label, locale) }}
+                  </span>
+                </template>
+              </UiNavigationItem>
             </li>
           </ul>
         </li>

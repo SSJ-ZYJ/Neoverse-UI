@@ -101,7 +101,9 @@ const frameHref = computed(() => {
         {{ localize(copy.information, locale) }}
       </h3>
       <template v-if="selection && module">
-        <p class="text-title-sm font-title text-primary">{{ localize(selection.label, locale) }}</p>
+        <p class="text-title-sm font-title text-primary">
+          {{ localize(selection.label, locale) }}
+        </p>
         <p v-if="!specimen" class="text-body-sm text-secondary">
           {{ localize(module.description, locale) }}
         </p>

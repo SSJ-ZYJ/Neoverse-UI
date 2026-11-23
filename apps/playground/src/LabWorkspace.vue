@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { layoutBreakpoints } from '@neoverse-ui/tokens';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
-import FpsOverlay from './FpsOverlay.vue';
 import LabExplorer from './LabExplorer.vue';
 import LabInspector from './LabInspector.vue';
 import LabStage from './LabStage.vue';
@@ -10,6 +9,17 @@ import { labModules, moduleGroupFor, resolveLabHash, specimenById } from './lab-
 import { isLocale, type Locale } from './playground-content';
 import { readPreferences, writePreferences } from './playground-preferences';
 import { restoreScrollPosition, saveScrollPosition } from './scroll-restoration';
+import {
+  defaultShowcaseSurface,
+  isShowcaseSurface,
+  type ShowcaseSurface,
+} from './showcase-surface';
+import {
+  clearSpecimenSession,
+  persistSpecimenSession,
+  restoreSpecimenSession,
+  snapshotSpecimenSession,
+} from './specimen-session-storage';
 import {
   defaultStageBackground,
   isStageBackground,
@@ -50,15 +60,41 @@ const specimenId = computed(() => route.value?.specimenId);
 const specimen = computed(() =>
   specimenId.value === undefined ? undefined : specimenById(specimenId.value),
 );
+let restoredInitialSession = false;
 const session = computed(() => {
   const preview = specimen.value?.preview;
-  return typeof preview === 'object' ? preview.createSession() : undefined;
+  const id = specimenId.value;
+  if (typeof preview !== 'object' || id === undefined) return undefined;
+  const created = preview.createSession();
+  if (!restoredInitialSession) {
+    restoredInitialSession = true;
+    restoreSpecimenSession(created, id);
+  }
+  return {
+    ...created,
+    reset() {
+      created.reset();
+      clearSpecimenSession(id);
+    },
+  };
 });
+watch(
+  () => {
+    const id = specimenId.value;
+    const current = session.value;
+    return id === undefined || current === undefined
+      ? null
+      : { id, edits: snapshotSpecimenSession(current) };
+  },
+  (value) => {
+    if (value !== null) persistSpecimenSession(value.id, value.edits);
+  },
+);
 
 const preferences = readPreferences();
 const parameters = new URLSearchParams(window.location.search);
 const queryLocale = parameters.get('lang');
-const showFps = parameters.get('fps') === '1';
+const showFps = parameters.get('fps') !== '0';
 const locale = ref<Locale>(
   isLocale(queryLocale)
     ? queryLocale
@@ -75,6 +111,11 @@ const stageBackground = ref<StageBackground>(
     ? preferences.stageBackground
     : defaultStageBackground,
 );
+const showcaseSurface = ref<ShowcaseSurface>(
+  isShowcaseSurface(preferences.showcaseSurface)
+    ? preferences.showcaseSurface
+    : defaultShowcaseSurface,
+);
 document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en';
 
 function setTheme(value: string): void {
@@ -88,6 +129,12 @@ function setStageBackground(value: string): void {
   if (!isStageBackground(value)) return;
   stageBackground.value = value;
   writePreferences({ stageBackground: value });
+}
+
+function setShowcaseSurface(value: string): void {
+  if (!isShowcaseSurface(value)) return;
+  showcaseSurface.value = value;
+  writePreferences({ showcaseSurface: value });
 }
 
 function setLocale(value: string): void {
@@ -259,6 +306,7 @@ onBeforeUnmount(() => {
       :theme="theme"
       :persistent="persistent"
       :open-panel="openPanel"
+      :show-fps="showFps"
       @theme="setTheme"
       @locale="setLocale"
       @panel="showPanel"
@@ -299,8 +347,10 @@ onBeforeUnmount(() => {
         :specimen="specimen"
         :session="session"
         :background="stageBackground"
+        :surface="showcaseSurface"
         @navigate="navigate"
         @background="setStageBackground"
+        @surface="setShowcaseSurface"
       />
     </main>
     <dialog
@@ -325,6 +375,5 @@ onBeforeUnmount(() => {
         @close="closePanel()"
       />
     </dialog>
-    <FpsOverlay v-if="showFps" />
   </div>
 </template>

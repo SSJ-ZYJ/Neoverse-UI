@@ -20,6 +20,7 @@ import {
   localize,
   localized,
 } from './playground-content';
+import { type ShowcaseSurface, showcaseSurfaces } from './showcase-surface';
 import { type StageBackground, stageBackgrounds } from './stage-background';
 
 const props = defineProps<{
@@ -29,10 +30,12 @@ const props = defineProps<{
   specimen: LabSpecimen | undefined;
   session: SpecimenSession | undefined;
   background: StageBackground;
+  surface: ShowcaseSurface;
 }>();
 const emit = defineEmits<{
   navigate: [module: ModuleId | SpecimenId];
   background: [value: string];
+  surface: [value: string];
 }>();
 const FocusedSpecimen = () => {
   const preview = props.specimen?.preview;
@@ -162,15 +165,15 @@ const backgroundOptions = computed(() =>
     label: localize(appCopy.stageBackground.options[value], props.locale),
   })),
 );
-const showcaseSurface = ref<'glass-subtle' | 'glass-elevated'>('glass-subtle');
-const showcaseOptions = computed(() => [
-  { value: 'glass-subtle', label: localize(glassMaterial.tiers.subtle, props.locale) },
-  { value: 'glass-elevated', label: localize(glassMaterial.tiers.elevated, props.locale) },
-]);
-
-function setShowcaseSurface(value: string): void {
-  if (value === 'glass-subtle' || value === 'glass-elevated') showcaseSurface.value = value;
-}
+const showcaseOptions = computed(() =>
+  showcaseSurfaces.map((value) => ({
+    value,
+    label: localize(
+      value === 'glass-subtle' ? glassMaterial.tiers.subtle : glassMaterial.tiers.elevated,
+      props.locale,
+    ),
+  })),
+);
 </script>
 
 <template>
@@ -308,7 +311,7 @@ function setShowcaseSurface(value: string): void {
           {{ localize(copy.caption, locale) }}
         </p>
         <UiSurface
-          :surface="showcaseSurface"
+          :surface="props.surface"
           data-neoverse-surface-hover="static"
           content-overflow="visible"
           class="playground-overview-hero__sample grid gap-4 rounded-card p-5"
@@ -335,10 +338,10 @@ function setShowcaseSurface(value: string): void {
         </UiSurface>
         <UiSegmentedControl
           :aria-label="localize(copy.surfaceLabel, locale)"
-          :model-value="showcaseSurface"
+          :model-value="props.surface"
           :options="showcaseOptions"
           surface="glass-subtle"
-          @update:model-value="setShowcaseSurface"
+          @update:model-value="emit('surface', $event)"
         />
       </div>
     </section>

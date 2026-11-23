@@ -23,7 +23,7 @@ const options = computed<readonly SegmentOption[]>(() => [
       v-for="profile in profiles"
       :key="profile"
       as="article"
-      surface="glass-subtle"
+      surface="none"
       class="playground-specimen-panel grid gap-3"
       :data-pointer-profile="profile"
     >

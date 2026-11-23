@@ -309,6 +309,22 @@ describe('UiNavigationItem', () => {
     );
   });
 
+  it('renders a suffix inside the label and keeps the selection indicator', () => {
+    const wrapper = mount(UiNavigationItem, {
+      props: { label: 'Colors' },
+      slots: {
+        suffix: '<span class="catalogue-suffix" aria-hidden="true">色彩</span>',
+        decoration: '<span class="catalogue-decoration" />',
+      },
+    });
+    const label = wrapper.get('.ui-navigation-item__label');
+
+    expect(label.get('.catalogue-suffix').text()).toBe('色彩');
+    expect(label.text()).toBe('Colors色彩');
+    expect(wrapper.find('.catalogue-decoration').exists()).toBe(true);
+    expect(wrapper.find('.ui-navigation-item__indicator').exists()).toBe(true);
+  });
+
   it('marks stretched compact items so grouped layouts can fill their track', () => {
     const wrapper = mount(UiNavigationItem, {
       props: { label: 'Projects', compact: true, stretch: true },

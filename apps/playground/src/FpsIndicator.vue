@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { UiSurface } from '@neoverse-ui/vue';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 
 const fps = ref<number | null>(null);
@@ -52,16 +51,8 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <Teleport to="body">
-    <UiSurface
-      data-playground-fps
-      data-neoverse-glass-occluder="topmost"
-      aria-live="off"
-      surface="glass-elevated"
-      class="pointer-events-none fixed left-2 top-2 z-layer-toast min-w-20 rounded-control px-2 py-1 font-mono text-caption text-primary tabular-nums"
-    >
-      {{ fps ?? '—' }}
-      FPS
-    </UiSurface>
-  </Teleport>
+  <span data-playground-fps aria-live="off" class="playground-shell__fps text-code text-secondary">
+    <span>FPS</span>
+    <span class="playground-shell__fps-value">{{ fps ?? '—' }}</span>
+  </span>
 </template>

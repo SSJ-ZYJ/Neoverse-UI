@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiBadge, UiButton, UiIconButton, UiSurface } from '@neoverse-ui/vue';
+import { UiBadge, UiButton, UiIconButton } from '@neoverse-ui/vue';
 import LabIcon from '../../LabIcon.vue';
 import type { LabModuleProps } from '../../modules/types';
 import { localize, moduleCopy } from '../../playground-content';
@@ -9,7 +9,7 @@ const copy = moduleCopy.composition;
 </script>
 
 <template>
-  <UiSurface surface="glass-elevated" class="rounded-card p-4" data-composition-surface>
+  <header class="min-w-0 p-4" data-composition-surface>
     <div class="grid gap-4">
       <div class="flex flex-wrap items-start justify-between gap-3">
         <div class="min-w-0 max-w-container-lg">
@@ -44,5 +44,5 @@ const copy = moduleCopy.composition;
         <span>{{ localize(copy.scenes.docsArticleHeader.author, props.locale) }}</span>
       </div>
     </div>
-  </UiSurface>
+  </header>
 </template>

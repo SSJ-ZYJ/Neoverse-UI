@@ -61,8 +61,8 @@ const surfaceCopy = {
 const qaCopy = {
   label: localized('Canonical QA', '规范 QA'),
   hint: localized(
-    'Compare the same button hierarchy across gradient, neutral, and reduced-transparency contexts.',
-    '在渐变、中性与降低透明度环境中对比同一组按钮层级。',
+    'Compare the pale or muted blue command, neutral secondary, and quiet action over each backdrop. Hover or hold without changing the base blur.',
+    '对比浅雾蓝主按钮、中性次按钮与轻量操作。悬停或按住按钮不会改变主体模糊。',
   ),
 } as const;
 </script>
@@ -251,7 +251,9 @@ const qaCopy = {
     </div>
   </StateRow>
   <StateRow :label="surfaceCopy.label" :hint="surfaceCopy.hint" :locale="props.locale">
-    <UiButton surface="none">{{ localize(copy.controls.default, props.locale) }}</UiButton>
+    <UiButton surface="none" data-contract-button="unplated">{{
+      localize(copy.controls.default, props.locale)
+    }}</UiButton>
     <UiButton surface="none" variant="secondary">
       {{ localize(copy.controls.secondary, props.locale) }}
     </UiButton>
@@ -261,9 +263,13 @@ const qaCopy = {
   </StateRow>
   <StateRow :label="qaCopy.label" :hint="qaCopy.hint" :locale="props.locale">
     <QaPreviewMatrix :locale="props.locale">
-      <UiButton>{{ localize(copy.controls.default, props.locale) }}</UiButton>
-      <UiButton variant="secondary">{{ localize(copy.controls.secondary, props.locale) }}</UiButton>
-      <UiButton variant="ghost">{{ localize(copy.controls.ghost, props.locale) }}</UiButton>
+      <UiButton data-contract-button="primary">{{
+        props.locale === 'zh' ? '保存' : 'Save'
+      }}</UiButton>
+      <UiButton variant="secondary">{{ props.locale === 'zh' ? '预览' : 'Preview' }}</UiButton>
+      <UiButton variant="ghost" data-contract-button="ghost">{{
+        props.locale === 'zh' ? '取消' : 'Cancel'
+      }}</UiButton>
     </QaPreviewMatrix>
   </StateRow>
 </template>

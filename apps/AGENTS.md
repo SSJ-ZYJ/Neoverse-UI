@@ -16,6 +16,7 @@ apps/playground/
   src/theme-state.ts        Vue binding over the shared theme runtime
   src/react-fixture.tsx     React runtime fixture and contract-lab entry
   src/lab-*.ts              specimen catalogue, module metadata and content
+  src/lab-specimens/         editable specimen definitions grouped by component family
   src/playground-*.ts       shell preferences, content and shared types
   src/*.vue                 shell, specimen and fixture components
   src/styles/               shell CSS and Playground-only token overrides

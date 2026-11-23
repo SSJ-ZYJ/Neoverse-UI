@@ -7,6 +7,7 @@ import {
 } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
 import brandWordmarkUrl from './assets/neoverse-wordmark.svg';
+import FpsIndicator from './FpsIndicator.vue';
 import LabIcon from './LabIcon.vue';
 import { appCopy, type Locale, localize, localized } from './playground-content';
 import type { ThemeMode } from './playground-types';
@@ -17,6 +18,7 @@ const props = defineProps<{
   theme: ThemeMode;
   persistent: boolean;
   openPanel: 'explorer' | 'inspector' | null;
+  showFps: boolean;
 }>();
 const emit = defineEmits<{
   theme: [value: string];
@@ -89,6 +91,7 @@ function cycleTheme(): void {
       </h1>
     </div>
     <div ref="actions" class="playground-shell__toolbar-actions">
+      <FpsIndicator v-if="showFps" />
       <UiIconButton
         data-toolbar-width-target
         class="sm:hidden"

@@ -3,7 +3,7 @@
 [English](README.md)
 
 <!-- Source: packages/vue/README.md -->
-<!-- Source-SHA256: d69b27f3541f354a7be4dc0e06619beb8dd9f17793f6325d569eb9fd572b41d0 -->
+<!-- Source-SHA256: f95023a15e4579adac86a527b1586d2cead23d34de28303a12cfb4886963f2e8 -->
 
 Neoverse-UI 设计系统的 Vue 3 组件，以极光玻璃作为共享玻璃材质。Light、Standard 与 Immersive 是它的层级，不是独立样式。展示标签使用 [Tokens 的 `glassMaterial` 元数据](../tokens/README.zh-CN.md#极光玻璃)；`glass-*` surface 标识保持稳定。详见[材质标准](../../docs/zh-CN/architecture/material-standards.md)。
 
@@ -21,7 +21,7 @@ import { UiButton, UiCard, UiDisclosure, UiDock, UiNotice, UiTable, UiTooltipSur
 @import '@neoverse-ui/vue/index.css';
 ```
 
-`UiDock` 是构建在共享 `UiControlSurface` 行为上的公开浮动导航外壳。消费项目提供自己的 `UiNavigationItem` 子节点、路由状态、图标与可选 `trailing` 控件；Dock 负责外观、缩放、紧凑布局、分隔线几何与共享导航指示器行为。
+`UiDock` 是构建在共享 `UiControlSurface` 行为上的公开浮动导航外壳。消费项目提供自己的 `UiNavigationItem` 子节点、路由状态、图标与可选 `trailing` 控件；Dock 负责外观、缩放、紧凑布局、分隔线几何与共享导航指示器行为。`UiNavigationItem` 还在标签内提供 `suffix` 插槽，用于需要与主文字共用基线的次要文本；`decoration` 插槽会与内置的选中指示条一同渲染。
 
 Vue `>=3.5 <4` 是必需的 peer dependency。Field 与选择控件的 ID 使用 [Vue 3.5 引入的 SSR 稳定 `useId` API](https://blog.vuejs.org/posts/vue-3-5#useid)。共享的 Tailwind、Motion、Tokens 与 Overlay Runtime 层通过包依赖图安装。
 

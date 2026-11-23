@@ -50,10 +50,11 @@ const ariaCurrent = computed(() => attrs['aria-current'] ?? (props.active ? 'pag
     :style="attrs.style"
   >
     <template v-if="$slots.icon" #leading><slot name="icon" /></template>
-    <span class="ui-navigation-item__label" :class="{ 'sr-only': props.compact }">
-      {{ props.label }}
-    </span>
+    <span class="ui-navigation-item__label" :class="{ 'sr-only': props.compact }"
+      >{{ props.label }}<slot name="suffix" /></span
+    >
     <template #decoration>
+      <slot name="decoration" />
       <span class="ui-navigation-item__indicator" aria-hidden="true" />
     </template>
   </UiAction>

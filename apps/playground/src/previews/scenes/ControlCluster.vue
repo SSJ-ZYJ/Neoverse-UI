@@ -11,10 +11,10 @@ import {
   controlClusterPresets,
 } from '../composition-settings';
 
-const props = withDefaults(
-  defineProps<LabModuleProps & { configuration?: Readonly<ControlClusterConfiguration> }>(),
-  { configuration: () => controlClusterPresets[0].props },
-);
+const props = defineProps<
+  LabModuleProps & { configuration?: Readonly<ControlClusterConfiguration> }
+>();
+const configuration = computed(() => props.configuration ?? controlClusterPresets[0].props);
 const mode = defineModel<ControlClusterMode>({ default: controlClusterPresets[0].state.mode });
 const copy = moduleCopy.composition.scenes.controlCluster;
 const options = computed(() =>
@@ -32,12 +32,12 @@ function selectMode(value: string): void {
 
 <template>
   <UiSurface
-    :surface="props.configuration.surface"
+    :surface="props.configuration?.surface ?? 'none'"
     class="playground-composition-density rounded-card"
-    :data-compact="props.configuration.compact || undefined"
+    :data-compact="configuration.compact || undefined"
     data-composition-surface
   >
-    <div class="grid" :class="props.configuration.compact ? 'gap-2' : 'gap-3'">
+    <div class="grid" :class="configuration.compact ? 'gap-2' : 'gap-3'">
       <div class="flex flex-wrap items-start justify-between gap-2">
         <div class="min-w-0">
           <p class="text-caption text-muted">Neoverse UI</p>
@@ -46,7 +46,7 @@ function selectMode(value: string): void {
           </h4>
         </div>
         <div class="flex items-center gap-2">
-          <UiBadge v-if="props.configuration.showStatus" variant="success" data-specimen-status>
+          <UiBadge v-if="configuration.showStatus" variant="success" data-specimen-status>
             {{ localize(copy.status, props.locale) }}
           </UiBadge>
           <UiIconButton variant="ghost" size="sm" :label="localize(copy.more, props.locale)">
@@ -59,6 +59,7 @@ function selectMode(value: string): void {
         <UiSegmentedControl
           :model-value="mode"
           class="shrink-0"
+          surface="none"
           :aria-label="localize(copy.modesLabel, props.locale)"
           :options="options"
           @update:model-value="selectMode"

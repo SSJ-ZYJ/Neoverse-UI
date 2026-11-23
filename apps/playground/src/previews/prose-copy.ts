@@ -4,7 +4,7 @@ export const proseCopy = {
   prose: localized('Prose & content semantics', '正文与内容语义'),
   proseDescription: localized(
     'The prose foundation styles semantic content without owning article width or product layout.',
-    '正文 Foundation 只负责语义内容排版，不接管文章宽度或产品布局。',
+    'Prose 负责标题、段落等内容的排版，不决定文章宽度或页面布局。',
   ),
   proseBody: localized(
     'Use one semantic content layer for headings, paragraphs, links, lists, code, quotes, tables, and disclosures.',

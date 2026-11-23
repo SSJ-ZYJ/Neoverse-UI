@@ -29,7 +29,7 @@ const presenceOn = ref(true);
     </template>
 
     <UiSurface
-      surface="glass-subtle"
+      surface="none"
       class="playground-specimen-panel grid gap-3 md:grid-cols-3 xl:grid-cols-4"
     >
       <div v-for="(variant, index) in presenceVariants" :key="variant" class="grid gap-2">

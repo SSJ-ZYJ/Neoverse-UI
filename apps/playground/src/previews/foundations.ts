@@ -1,15 +1,12 @@
-import { UiSurface } from '@neoverse-ui/vue';
 import { h, type VNode } from 'vue';
 import {
   borderWidthTokens,
-  glassVariantLabels,
   type NamedToken,
   primitiveRadiusTokens,
   primitiveShadowTokens,
-  primitiveSpacingTokens,
   semanticShadowTokens,
 } from '../lab-data';
-import { type Locale, localize, moduleCopy, tokenCopy } from '../playground-content';
+import { type Locale, localize, moduleCopy } from '../playground-content';
 import TokenRow from '../TokenRow.vue';
 import ColorPalettesExample from './ColorPalettesExample.vue';
 import MotionPageExample from './MotionPageExample.vue';
@@ -19,6 +16,7 @@ import MotionStaggerExample from './MotionStaggerExample.vue';
 import MotionWidthExample from './MotionWidthExample.vue';
 import ProseExample from './ProseExample.vue';
 import ScrollbarViewportExample from './ScrollbarViewportExample.vue';
+import SpacingExample from './SpacingExample.vue';
 import TerminalTranscriptExample from './TerminalTranscriptExample.vue';
 import TypographyScaleExample from './TypographyScaleExample.vue';
 
@@ -27,7 +25,7 @@ const previewWidth = 'w-full min-w-0 max-w-reading-wide';
 function tokenGrid(
   locale: Locale,
   tokens: readonly NamedToken[],
-  preview: 'space' | 'radius' | 'border' | 'shadow',
+  preview: 'radius' | 'border' | 'shadow',
 ): VNode {
   return h(
     'div',
@@ -52,7 +50,7 @@ export function prose(locale: Locale): VNode {
 
 export function layoutShape(locale: Locale): VNode {
   const groups = [
-    { label: moduleCopy.spacing.label, render: spacing },
+    { label: moduleCopy.spacing.label, render: () => h(SpacingExample, { locale, kind: 'scale' }) },
     { label: moduleCopy.radius.label, render: radius },
     { label: moduleCopy.border.label, render: border },
   ];
@@ -69,7 +67,20 @@ export function layoutShape(locale: Locale): VNode {
 }
 
 export function spacing(locale: Locale): VNode {
-  return tokenGrid(locale, primitiveSpacingTokens, 'space');
+  return h(
+    'div',
+    { class: ['grid gap-grid', previewWidth] },
+    (['aliases', 'primitive'] as const).map((group) => {
+      const { label, description } = moduleCopy.spacing[group];
+      return h('section', { key: group, class: 'grid min-w-0 gap-3' }, [
+        h('header', { class: 'grid gap-1' }, [
+          h('h3', { class: 'text-title-sm font-title text-primary' }, localize(label, locale)),
+          h('p', { class: 'text-caption text-secondary' }, localize(description, locale)),
+        ]),
+        h(SpacingExample, { locale, kind: group === 'primitive' ? 'scale' : 'usage' }),
+      ]);
+    }),
+  );
 }
 
 export function radius(locale: Locale): VNode {
@@ -105,22 +116,6 @@ export function motionWidth(locale: Locale): VNode {
 
 export function motionPage(locale: Locale): VNode {
   return h(MotionPageExample, { locale });
-}
-
-export function surface(locale: Locale): VNode {
-  return h(
-    UiSurface,
-    { surface: 'glass-subtle', class: 'rounded-card p-5', 'data-surface-preset': 'glass-subtle' },
-    () => localize(tokenCopy.glassVariants.subtle, locale),
-  );
-}
-
-export function glass(locale: Locale): VNode {
-  return h(
-    UiSurface,
-    { surface: 'glass-subtle', class: 'rounded-card p-5', 'data-glass-variant': 'subtle' },
-    () => localize(glassVariantLabels.subtle, locale),
-  );
 }
 
 export function terminal(locale: Locale): VNode {

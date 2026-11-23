@@ -59,6 +59,21 @@
   flex: none;
 }
 
+.playground-shell__fps {
+  display: inline-flex;
+  gap: var(--neoverse-space-1);
+  align-items: baseline;
+  margin-inline-end: var(--neoverse-space-1);
+  padding-inline-end: var(--neoverse-space-2);
+  border-inline-end: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+  font-variant-numeric: tabular-nums;
+}
+
+.playground-shell__fps-value {
+  min-inline-size: 3ch;
+  text-align: end;
+}
+
 .playground-shell__toolbar-actions,
 .playground-overview-hero__stage {
   --neoverse-control-segmented-active-foreground: var(--neoverse-color-text-primary);
@@ -206,10 +221,18 @@
   scrollbar-gutter: stable;
 }
 
+/* The panel clips at a 24px corner while a native rail runs to its own bottom
+   edge, cutting the thumb cap; the block-end inset keeps the rail on the
+   straight edge, reusing the document overlay rail's inset. The stage is
+   excluded because its plate carries its own backdrop. */
 .playground-shell__panel-body {
   display: grid;
+  /* Implicit grid tracks are auto, so one unbreakable row widens the track past
+     the panel and adds a horizontal scrollbar. */
+  grid-template-columns: minmax(0, 1fr);
   flex: auto;
   align-content: start;
+  margin-block-end: var(--neoverse-scrollbar-overlay-inset-block);
   padding: var(--neoverse-space-2) var(--neoverse-playground-navigation-inset)
     var(--neoverse-playground-navigation-inset);
 }
@@ -243,13 +266,16 @@
 
 .playground-explorer__section-toggle {
   display: flex;
-  block-size: var(--neoverse-space-8);
+  min-block-size: var(--neoverse-space-8);
   inline-size: auto;
-  align-items: center;
+  /* The group heading is two lines; the count and chevron belong to the
+     primary line, not to the vertical centre of the whole label. */
+  align-items: baseline;
   gap: var(--neoverse-space-2);
   margin-inline: calc(-1 * var(--neoverse-space-2));
   border: 0;
   border-radius: var(--neoverse-radius-control-inner);
+  padding-block: var(--neoverse-space-1);
   padding-inline: var(--neoverse-space-2);
   background: none;
   color: var(--neoverse-color-text-muted);
@@ -266,10 +292,41 @@
 }
 
 .playground-explorer__section-label {
-  overflow: hidden;
+  min-width: 0;
   flex: 1 1 auto;
+}
+
+.playground-catalogue-label {
+  display: inline-flex;
+  max-width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--neoverse-space-1);
+}
+
+.playground-catalogue-label > span {
+  max-width: 100%;
+  overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.playground-catalogue-label__secondary {
+  color: var(--neoverse-color-text-muted);
+  font-size: 0.85em;
+  font-weight: var(--neoverse-font-weight-regular);
+  letter-spacing: normal;
+}
+
+/* A link suffix shares the label's line box, so the smaller language sits on
+   the primary text baseline instead of being centred as a flex child. */
+.playground-explorer__link .playground-catalogue-label__secondary {
+  display: inline;
+  max-width: none;
+  margin-inline-start: var(--neoverse-space-1);
+  overflow: visible;
+  vertical-align: baseline;
 }
 
 .playground-explorer__heading {
@@ -1207,7 +1264,9 @@
 }
 
 .playground-reduced-transparency-preview
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    .ui-button--ghost
+  ) {
   background-color: var(--neoverse-material-background-fallback);
   background-image: none;
   box-shadow:

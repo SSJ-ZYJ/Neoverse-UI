@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { UiBadge, UiNavigationItem, UiSurface } from '@neoverse-ui/vue';
+import { UiBadge, UiNavigationItem } from '@neoverse-ui/vue';
 import { computed } from 'vue';
 import type { LabModuleProps } from '../../modules/types';
 import { localize, moduleCopy } from '../../playground-content';
@@ -31,10 +31,8 @@ const navigationItems = computed(() => [
 </script>
 
 <template>
-  <UiSurface
-    as="nav"
-    surface="glass-elevated"
-    class="grid gap-3 rounded-card p-3"
+  <nav
+    class="grid min-w-0 gap-3 p-3"
     data-composition-surface
     data-composition-measure="narrow"
     :aria-label="localize(copy.scenes.docsNavigationGroup.navigationLabel, props.locale)"
@@ -65,5 +63,5 @@ const navigationItems = computed(() => [
         />
       </li>
     </ul>
-  </UiSurface>
+  </nav>
 </template>

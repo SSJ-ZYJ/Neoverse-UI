@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 import type { ButtonProps } from '@neoverse-ui/vue';
-import { h, watchSyncEffect } from 'vue';
+import { h, type VNode, watchSyncEffect } from 'vue';
 import { specimenById } from './lab-modules';
 import { defineComposition, defineSpecimen } from './lab-specimen-config';
 
@@ -257,4 +257,134 @@ test('the Tabs session accepts only enabled tabs and resets the selected tab', (
   session.reset();
   expect(session.render('en').props?.modelValue).toBe('overview');
   expect(selected?.edited).toBe(false);
+});
+
+/** Each entry is one appearance variant the Inspector must be able to switch. */
+const variantEdits = [
+  ['controls-icon-button', 'variant', 'ghost'],
+  ['controls-action', 'variant', 'ghost'],
+  ['controls-navigation-item', 'active', false],
+  ['controls-surface', 'surface', 'glass-immersive'],
+  ['status-feedback-badge', 'variant', 'danger'],
+  ['status-feedback-indicator', 'status', 'danger'],
+  ['status-feedback-skeleton', 'variant', 'circle'],
+  ['status-feedback-notice', 'variant', 'warning'],
+  ['status-feedback-toast', 'variant', 'danger'],
+  ['status-feedback-tooltip', 'variant', 'accent'],
+  ['data-display-avatar', 'size', 'lg'],
+  ['data-display-table', 'striped', false],
+  ['data-display-stat-card', 'surface', 'solid'],
+  ['materials-surface', 'surface', 'elevated'],
+  ['materials-glass', 'surface', 'glass-immersive'],
+  ['card-card', 'surface', 'solid'],
+] as const;
+
+/** Wrapper nodes own layout, so read the props of every rendered node. */
+function renderedProps(vnode: VNode): Array<Record<string, unknown>> {
+  const queue: VNode[] = [vnode];
+  const found: Array<Record<string, unknown>> = [];
+  while (queue.length > 0) {
+    const node = queue.pop();
+    if (node === undefined) continue;
+    if (node.props) found.push(node.props as Record<string, unknown>);
+    if (Array.isArray(node.children)) queue.push(...(node.children as VNode[]));
+  }
+  return found;
+}
+
+test('every appearance variant is editable and returns to its specimen default', () => {
+  for (const [id, key, value] of variantEdits) {
+    const session = openSession(id);
+    expect(session.fields.some(({ key: fieldKey }) => fieldKey === key)).toBe(true);
+    expect(renderedProps(session.render('en')).every((props) => props[key] !== value)).toBe(true);
+    expect(session.edit('props', key, value)).toBe(true);
+    expect(renderedProps(session.render('en')).some((props) => props[key] === value)).toBe(true);
+    session.reset();
+    expect(renderedProps(session.render('en')).every((props) => props[key] !== value)).toBe(true);
+  }
+});
+
+test('switching a variant is rejected when the value is not a declared option', () => {
+  const session = openSession('status-feedback-badge');
+  for (const value of ['brand', 'Neutral', '', undefined, 1]) {
+    expect(session.edit('props', 'variant', value)).toBe(false);
+  }
+  expect(session.render('en').props?.variant).toBe('neutral');
+});
+
+test('the IconButton session switches the variant on its rendered control', () => {
+  const session = openSession('controls-icon-button');
+  const control = (vnode: ReturnType<typeof session.render>) =>
+    Array.isArray(vnode.children) ? (vnode.children[0] as VNode) : undefined;
+  expect(control(session.render('en'))?.props?.variant).toBe('primary');
+  expect(session.edit('props', 'variant', 'ghost')).toBe(true);
+  expect(control(session.render('en'))?.props?.variant).toBe('ghost');
+  session.reset();
+  expect(control(session.render('en'))?.props?.variant).toBe('primary');
+});
+
+test('the Disclosure session owns its expanded state and toggles from the stage', () => {
+  const session = openSession('data-display-disclosure');
+  const expanded = session.fields.find(({ key }) => key === 'open');
+  expect(session.render('en').props?.open).toBe(false);
+  const toggle = session.render('en').props?.['onUpdate:open'];
+  if (typeof toggle !== 'function') throw new Error('Missing disclosure toggle');
+  toggle(true);
+  expect(session.render('en').props?.open).toBe(true);
+  expect(expanded?.value).toBe(true);
+  expect(session.edit('state', 'open', false)).toBe(true);
+  expect(session.render('en').props?.open).toBe(false);
+  session.reset();
+  expect(session.render('en').props?.open).toBe(false);
+});
+
+test('the Toast session keeps its variant while the visibility control opens it', () => {
+  const session = openSession('status-feedback-toast');
+  const toast = (vnode: ReturnType<typeof session.render>) =>
+    Array.isArray(vnode.children) ? (vnode.children[1] as VNode) : undefined;
+  expect(toast(session.render('en'))?.props).toMatchObject({ open: false, variant: 'success' });
+  expect(session.edit('props', 'variant', 'warning')).toBe(true);
+  expect(session.edit('state', 'open', true)).toBe(true);
+  expect(toast(session.render('en'))?.props).toMatchObject({ open: true, variant: 'warning' });
+  const dismiss = toast(session.render('en'))?.props?.['onUpdate:open'];
+  if (typeof dismiss !== 'function') throw new Error('Missing toast dismissal');
+  dismiss(false);
+  expect(toast(session.render('en'))?.props?.open).toBe(false);
+  session.reset();
+  expect(toast(session.render('en'))?.props).toMatchObject({ open: false, variant: 'success' });
+});
+
+test('the form-state sessions share validation and lock their value while blocked', () => {
+  const textarea = openSession('forms-textarea');
+  expect(textarea.render('en').props).toMatchObject({ disabled: false, readonly: false });
+  expect(textarea.edit('state', 'modelValue', 'Draft notes')).toBe(true);
+  expect(textarea.edit('props', 'validation', 'error')).toBe(true);
+  expect(textarea.render('en').props).toMatchObject({
+    modelValue: 'Draft notes',
+    validation: 'error',
+  });
+  expect(textarea.edit('props', 'readonly', true)).toBe(true);
+  expect(textarea.fields.find(({ key }) => key === 'modelValue')?.disabled).toBe(true);
+  expect(textarea.edit('state', 'modelValue', 'Blocked')).toBe(false);
+  expect(textarea.render('en').props?.modelValue).toBe('Draft notes');
+
+  const radio = openSession('forms-radio-group');
+  expect(radio.render('en').props?.modelValue).toBe('stable');
+  expect(radio.edit('props', 'disabled', true)).toBe(true);
+  expect(radio.edit('state', 'modelValue', 'preview')).toBe(false);
+  expect(radio.render('en').props?.modelValue).toBe('stable');
+
+  const toggle = openSession('forms-switch');
+  expect(toggle.edit('state', 'modelValue', false)).toBe(true);
+  expect(toggle.edit('props', 'validation', 'warning')).toBe(true);
+  expect(toggle.render('en').props).toMatchObject({ modelValue: false, validation: 'warning' });
+  expect(toggle.edit('props', 'readonly', true)).toBe(true);
+  expect(toggle.edit('state', 'modelValue', true)).toBe(false);
+
+  const field = openSession('forms-field-states');
+  expect(field.render('en').props?.message).toBe('Enter a valid release email.');
+  expect(field.edit('props', 'validation', 'none')).toBe(true);
+  expect(field.render('en').props?.message).toBeUndefined();
+  expect(field.edit('props', 'required', false)).toBe(true);
+  expect(field.render('en').props?.required).toBe(false);
 });

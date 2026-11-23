@@ -264,7 +264,12 @@ test('keeps every registered specimen backed by a stable module fixture id', asy
   const source = moduleSources.join('\n');
 
   for (const specimen of labSpecimens) {
-    expect(source.includes(`id="${specimen.id}"`), specimen.id).toBe(true);
+    // A fixture id is either written as an attribute on the section, or held in
+    // a data list that a `:id` binding renders. Both keep the id literal in the
+    // module source, so a renamed catalogue entry still fails here.
+    const declared =
+      source.includes(`id="${specimen.id}"`) || source.includes(`id: '${specimen.id}'`);
+    expect(declared, specimen.id).toBe(true);
   }
 });
 

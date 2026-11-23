@@ -81,7 +81,7 @@ async function replayDissolve(): Promise<void> {
       </UiButton>
     </template>
 
-    <UiSurface surface="glass-subtle" class="playground-specimen-panel grid gap-3">
+    <UiSurface surface="none" class="playground-specimen-panel grid gap-3">
       <!-- Stable header grid: the label owns a fixed one-line slot (it
            truncates instead of wrapping) and the control keeps its own
            column, so switching pipelines never reflows the stage below. -->

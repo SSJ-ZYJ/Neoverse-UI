@@ -83,6 +83,7 @@ function selectMode(value: string): void {
           <UiSegmentedControl
             :model-value="mode"
             :class="props.configuration.compact ? '' : 'w-full md:w-auto'"
+            surface="none"
             :aria-label="localize(copy.modesLabel, props.locale)"
             :options="options"
             @update:model-value="selectMode"

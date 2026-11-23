@@ -31,12 +31,12 @@ const copy = moduleCopy.composition;
       <p class="text-body text-secondary">
         {{ localize(copy.scenes.docsContentSurface.detail, props.locale) }}
       </p>
-      <UiSurface surface="inset" class="grid gap-2 rounded-control p-3">
+      <div class="grid gap-2 p-3">
         <p class="text-caption text-muted">
           {{ localize(copy.scenes.docsContentSurface.reference, props.locale) }}
         </p>
         <code class="break-all text-code text-secondary">--neoverse-color-text-primary</code>
-      </UiSurface>
+      </div>
     </div>
 
     <div class="flex flex-wrap items-center justify-between gap-2 border-t border-subtle pt-3">

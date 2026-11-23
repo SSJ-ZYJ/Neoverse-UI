@@ -6,28 +6,24 @@
   },
   "exceptions": {
     "apps/playground/src/lab-data.ts": {
-      "ceiling": 519,
-      "reason": "2026-11-22: Specimen catalogue data; split into per-module files when the Design Lab adds a new module group."
+      "ceiling": 523,
+      "reason": "2026-11-23: Specimen catalogue data with data-driven color families; split into per-module files when the Design Lab adds a new module group."
     },
     "apps/playground/src/lab-modules.ts": {
-      "ceiling": 864,
-      "reason": "2026-11-22: Design Lab module registry; remove when module metadata moves to per-module files."
+      "ceiling": 865,
+      "reason": "2026-11-23: Design Lab module registry with interactive preview routing; remove when module metadata moves to per-module files."
     },
     "apps/playground/src/playground-content.ts": {
-      "ceiling": 1127,
-      "reason": "2026-11-22: Centralized specimen content; remove when content is split by product area."
-    },
-    "apps/playground/src/previews/components.ts": {
-      "ceiling": 605,
-      "reason": "2026-11-22: Preview composition registry; remove when previews migrate into their modules."
+      "ceiling": 1170,
+      "reason": "2026-11-23: Centralized specimen content with Markdown heading and inline syntax copy; remove when content is split by product area."
     },
     "apps/playground/src/react-fixture.tsx": {
       "ceiling": 1257,
       "reason": "2026-11-22: React contract fixture; remove when the fixture is split per component family."
     },
     "apps/playground/src/styles/shell.css": {
-      "ceiling": 1380,
-      "reason": "2026-11-22: Playground shell styling; remove when shell regions are split into separate stylesheets."
+      "ceiling": 1440,
+      "reason": "2026-11-23: Playground shell styling, including stacked bilingual Explorer headings and baseline-aligned link suffixes; remove when shell regions are split into separate stylesheets."
     },
     "packages/glass-runtime/src/index.test.ts": {
       "ceiling": 2422,

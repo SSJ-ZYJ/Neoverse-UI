@@ -171,7 +171,7 @@ function onTabKey(event: KeyboardEvent) {
         </p>
       </div>
     </UiSurface>
-    <UiSurface as="article" surface="glass-elevated" class="min-w-0 p-4 md:p-5">
+    <article class="min-w-0 p-4 md:p-5">
       <div data-reading-prose class="neoverse-prose max-w-reading">
         <h4>{{ copy.content }}</h4>
         <p>
@@ -202,7 +202,7 @@ function onTabKey(event: KeyboardEvent) {
           </template>
         </dl>
 
-        <UiSurface surface="none" class="playground-data-table-surface my-5 rounded-card p-4">
+        <div class="playground-data-table-surface my-5 rounded-card p-4">
           <UiTable :caption="copy.tableCaption" :aria-label="copy.tableCaption" data-reading-table>
             <thead>
               <tr>
@@ -217,7 +217,7 @@ function onTabKey(event: KeyboardEvent) {
               </tr>
             </tbody>
           </UiTable>
-        </UiSurface>
+        </div>
 
         <UiDisclosure
           class="playground-data-disclosure"
@@ -231,6 +231,6 @@ function onTabKey(event: KeyboardEvent) {
           <a data-reading-surface-link href="#materials-surface">{{ copy.next }}</a>
         </p>
       </div>
-    </UiSurface>
+    </article>
   </section>
 </template>

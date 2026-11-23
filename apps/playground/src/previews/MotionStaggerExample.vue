@@ -41,7 +41,7 @@ function shuffleStagger(): void {
       </div>
     </template>
 
-    <UiSurface surface="glass-subtle" class="playground-specimen-panel">
+    <UiSurface surface="none" class="playground-specimen-panel">
       <TransitionGroup
         :key="staggerReplay"
         appear

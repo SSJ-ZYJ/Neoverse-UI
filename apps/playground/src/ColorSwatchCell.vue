@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { UiSurface } from '@neoverse-ui/vue';
 import type { Locale, LocalizedText } from './playground-content';
 import { localize } from './playground-content';
 
@@ -7,45 +6,52 @@ interface ColorSwatchCellProps {
   label: LocalizedText;
   locale: Locale;
   variable: string;
-  className?: string;
+  className: string;
 }
 
 const props = defineProps<ColorSwatchCellProps>();
 </script>
 
 <template>
-  <UiSurface
-    as="article"
-    surface="glass-subtle"
-    data-color-swatch-cell
-    class="w-32 shrink-0 overflow-hidden rounded-control"
-  >
-    <div
-      class="h-12 w-full border-b border-subtle"
-      :style="{ backgroundColor: `var(${props.variable})` }"
-      aria-hidden="true"
-    />
-    <div class="grid gap-0.5 px-2 py-2">
-      <span
-        data-color-swatch-label
-        class="whitespace-normal break-words text-label font-label text-primary"
-      >
+  <li data-color-swatch-cell class="color-role">
+    <span class="color-role__sample" aria-hidden="true">
+      <span :style="{ backgroundColor: `var(${props.variable})` }" />
+    </span>
+    <div class="color-role__details">
+      <span data-color-swatch-label class="text-label font-label text-primary">
         {{ localize(props.label, props.locale) }}
       </span>
-      <code
-        data-color-swatch-variable
-        class="whitespace-normal break-words font-mono text-2xs leading-normal text-secondary"
-        >{{
-          props.variable
-        }}</code
-      >
-      <code
-        v-if="props.className"
-        data-color-swatch-class
-        class="whitespace-normal break-words font-mono text-2xs leading-normal text-muted"
-      >
-        {{ props.className }}
-      </code>
+      <code data-color-swatch-variable class="text-code text-secondary">{{ props.variable }}</code>
+      <code data-color-swatch-class class="text-code text-muted">{{ props.className }}</code>
     </div>
-  </UiSurface>
+  </li>
 </template>
+
+<style scoped>
+.color-role {
+  display: grid;
+  grid-template-columns: var(--neoverse-space-8) minmax(0, 1fr);
+  gap: var(--neoverse-space-3);
+  align-items: start;
+  padding-block: var(--neoverse-space-2);
+}
+
+.color-role + .color-role {
+  border-block-start: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-subtle);
+}
+
+.color-role__sample {
+  display: grid;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+  border-radius: var(--neoverse-radius-control-inner);
+  background-color: var(--neoverse-color-surface-canvas);
+}
+
+.color-role__details {
+  display: grid;
+  gap: var(--neoverse-space-1);
+  overflow-wrap: anywhere;
+}
+</style>

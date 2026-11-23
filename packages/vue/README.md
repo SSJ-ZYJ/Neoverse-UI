@@ -18,7 +18,7 @@ Consumers without their own Tailwind build can import the packaged design-system
 @import '@neoverse-ui/vue/index.css';
 ```
 
-`UiDock` is a public floating-navigation shell built on the shared `UiControlSurface` contract. Consumers provide their own `UiNavigationItem` children, route state, icons, and optional `trailing` controls; the Dock owns chrome, scale, compact layout, divider geometry, and shared navigation-indicator behavior.
+`UiDock` is a public floating-navigation shell built on the shared `UiControlSurface` contract. Consumers provide their own `UiNavigationItem` children, route state, icons, and optional `trailing` controls; the Dock owns chrome, scale, compact layout, divider geometry, and shared navigation-indicator behavior. `UiNavigationItem` also exposes a `suffix` slot inside its label for secondary text that must share the primary text baseline, and forwards a `decoration` slot alongside its built-in selection indicator.
 
 Vue `>=3.5 <4` is required as a peer dependency. Field and choice-control IDs use the [SSR-stable `useId` API introduced in Vue 3.5](https://blog.vuejs.org/posts/vue-3-5#useid). The shared Tailwind, Motion, Tokens, and Overlay Runtime layers are installed through the package dependency graph.
 

@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import LabSpecimenSection from '../LabSpecimenSection.vue';
-import MaterialBackdrop from '../MaterialBackdrop.vue';
+import MaterialLegend from '../MaterialLegend.vue';
 import { localize, moduleCopy } from '../playground-content';
 import CompositionSceneSet from './CompositionSceneSet.vue';
 import ReducedTransparencyComposition from './ReducedTransparencyComposition.vue';
@@ -8,28 +7,35 @@ import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.composition;
+const modes = [
+  { id: 'composition-standard-mode', copy: copy.previewModes.standard, scene: CompositionSceneSet },
+  {
+    id: 'composition-accessibility-mode',
+    copy: copy.previewModes.accessibility,
+    scene: ReducedTransparencyComposition,
+  },
+] as const;
 </script>
 
 <template>
   <div class="grid gap-6">
-    <LabSpecimenSection
-      id="composition-standard-mode"
-      :title="localize(copy.previewModes.standard.label, props.locale)"
-      :description="localize(copy.previewModes.standard.description, props.locale)"
+    <section
+      v-for="mode in modes"
+      :id="mode.id"
+      :key="mode.id"
+      class="scroll-mt-24 grid min-w-0 gap-5"
+      :aria-labelledby="`${mode.id}-title`"
     >
-      <MaterialBackdrop>
-        <CompositionSceneSet :locale="props.locale" />
-      </MaterialBackdrop>
-    </LabSpecimenSection>
-
-    <LabSpecimenSection
-      id="composition-accessibility-mode"
-      :title="localize(copy.previewModes.accessibility.label, props.locale)"
-      :description="localize(copy.previewModes.accessibility.description, props.locale)"
-    >
-      <MaterialBackdrop>
-        <ReducedTransparencyComposition :locale="props.locale" />
-      </MaterialBackdrop>
-    </LabSpecimenSection>
+      <header class="grid gap-1 border-b border-subtle pb-3">
+        <h3 :id="`${mode.id}-title`" class="text-title-sm font-title text-primary">
+          {{ localize(mode.copy.label, props.locale) }}
+        </h3>
+        <p class="max-w-reading-wide text-body-sm text-secondary">
+          {{ localize(mode.copy.description, props.locale) }}
+        </p>
+      </header>
+      <component :is="mode.scene" :locale="props.locale" />
+      <MaterialLegend :locale="props.locale" />
+    </section>
   </div>
 </template>

@@ -13,8 +13,18 @@ export interface LocalizedText {
 
 export const localized = (en: string, zh: string): LocalizedText => ({ en, zh });
 
+export const localizedTerm = (en: string, zh: string): LocalizedText =>
+  localized(en, `${en} · ${zh}`);
+
 export function localize(value: LocalizedText, locale: Locale): string {
   return value[locale];
+}
+
+/* The muted second line is a reading aid for Chinese labels only: an English
+   interface shows the English name alone instead of pairing it with Chinese. */
+export function catalogueSecondary(label: LocalizedText, locale: Locale): string | undefined {
+  if (locale !== 'zh' || label.en === label.zh) return undefined;
+  return label.en;
 }
 
 export function formatLocalized(
@@ -119,7 +129,7 @@ export const moduleCopy = {
     label: localized('Layout & Shape', '布局与几何'),
     description: localized(
       'Spacing, radius, and border tokens are calibrated together because they jointly define component geometry.',
-      '将间距、圆角与边框集中校准，因为它们共同决定组件的几何结构。',
+      '对照间距、圆角与边框如何影响布局和组件轮廓。',
     ),
   },
   materials: {
@@ -147,52 +157,77 @@ export const moduleCopy = {
     label: localized('Colors', '色彩'),
     description: localized(
       'Primitive color scales and semantic roles from @neoverse-ui/tokens.',
-      '来自 @neoverse-ui/tokens 的基础色彩刻度与语义角色。',
+      '对照 @neoverse-ui/tokens 的基础色板与语义色彩角色。',
     ),
     primitive: {
-      label: localized('Primitive color scales', '基础色彩刻度'),
+      label: localized('Primitive palettes', '基础色板'),
       description: localized(
-        'Primitive palettes provide neutral, blue, cyan, mint, red, amber, green, and utility colors.',
-        '基础色板提供 neutral、blue、cyan、mint、red、amber、green 与实用色。',
+        'Compare shades from light to dark. Each family shows the CSS variable pattern once.',
+        '按色系从浅到深对照色阶。每组只标一次 CSS 变量格式。',
       ),
     },
     aliases: {
       label: localized('Semantic color roles', '语义色彩角色'),
       description: localized(
-        'Semantic roles map surfaces, text, borders, accents, actions, statuses, focus, and overlay behavior to the primitive palette.',
-        '语义角色将表面、文本、边框、强调色、操作、状态、焦点与遮罩映射到基础色板。',
+        'Look up each role by purpose, with its current theme color, CSS variable, and Tailwind utility.',
+        '按用途查看语义色在当前主题下的颜色、CSS 变量和 Tailwind 工具类。',
       ),
     },
   },
   typography: {
-    label: localized('Typography', '字体排印'),
+    label: localized('Typography', '排版'),
     description: localized(
-      'Typography roles preserve the token-defined size, weight, leading, and tracking.',
-      '字体排印角色保留令牌定义的字号、字重、行高与字距。',
+      'Compare typography roles by font size, weight, line height, and letter spacing.',
+      '对照各排版角色的字号、字重、行高和字距。',
     ),
+    scale: {
+      label: localized('Type scale', '排版层级'),
+      description: localized(
+        'Compare Display, Title, Body, Label, Caption, and Code on the same line of text.',
+        '用同一句文字对照 Display、Title、Body、Label、Caption 和 Code 的排版效果。',
+      ),
+    },
     sample: localized(
       'Neoverse UI keeps hierarchy legible across themes.',
       'Neoverse UI 在不同主题下始终保持清晰的层级关系。',
     ),
+    headings: {
+      label: localized('Markdown headings', 'Markdown 标题'),
+      description: localized(
+        'Prose headings render at six distinct sizes owned by the prose roles, so a page heading never inherits an interface title size.',
+        '正文标题按六个层级区分字号，全部由正文角色控制，页面标题不会继承界面标题的字号。',
+      ),
+      sample: localized('Heading level sample', '标题层级示例'),
+    },
+    inlineSyntax: {
+      label: localized('Markdown inline syntax', 'Markdown 行内语法'),
+      description: localized(
+        'Bold, italic, bold italic, inline code, strikethrough and links render from the same prose layer without overriding each other.',
+        '加粗、倾斜、加粗倾斜、行内代码、删除线与链接共用同一层正文样式，互不覆盖。',
+      ),
+      sample: localized('Inline sample', '行内示例'),
+      code: localized('inline-code', '行内代码'),
+      link: localized('Inline link', '行内链接'),
+    },
   },
   spacing: {
     label: localized('Spacing', '间距'),
     description: localized(
-      'Base spacing tokens and layout aliases used by the workspace.',
-      '工作区使用基础间距刻度与布局别名。',
+      'See where padding and gaps apply in a layout, then compare actual spacing lengths.',
+      '先看内边距和元素间隔加在哪里，再对照各级间距的实际长度。',
     ),
     primitive: {
       label: localized('Base spacing scale', '基础间距刻度'),
       description: localized(
-        'The four-pixel base scale runs from 0 through 32.',
-        '基础间距刻度采用 4px 节奏，从 0 到 32。',
+        'The rulers share one start. The --neoverse-space-* values advance by 0.25rem (4px at a 16px root).',
+        '标尺从同一条线起算。--neoverse-space-* 每级增加 0.25rem，根字号为 16px 时相差 4px。',
       ),
     },
     aliases: {
-      label: localized('Layout aliases', '布局别名'),
+      label: localized('Spacing in layouts', '布局中的间距'),
       description: localized(
-        'Layout aliases: px-gutter-inline=responsive, py-gutter-block=responsive, gap-grid=space-4.',
-        '布局别名对应：px-gutter-inline=响应式、py-gutter-block=响应式、gap-grid=space-4。',
+        'Gutters leave space inside the container and respond to the viewport. Grid gap separates items.',
+        '内边距留在容器边界与内容之间，随视口变化；网格间隔留在相邻元素之间。',
       ),
     },
     roles: {
@@ -797,7 +832,7 @@ export const moduleCopy = {
     },
   },
   dock: {
-    label: localized('Dock', 'Dock 导航栏'),
+    label: localized('Dock', '导航栏'),
     description: localized(
       'A reusable floating navigation shell built from ControlSurface, NavigationItem, and optional trailing controls.',
       '由 ControlSurface、NavigationItem 与可选尾部控件组成的可复用悬浮导航外壳。',
@@ -1036,49 +1071,49 @@ export const moduleCopy = {
 
 export const tokenCopy = {
   colorGroups: {
-    surface: localized('Surface', '表面'),
-    text: localized('Text', '文本'),
-    border: localized('Border', '边框'),
-    accent: localized('Accent', '强调色'),
-    action: localized('Action', '操作'),
-    status: localized('Status', '状态'),
-    focusOverlay: localized('Focus / Overlay', '焦点 / 遮罩'),
+    surface: localizedTerm('Surface', '表面'),
+    text: localizedTerm('Text', '文字'),
+    border: localizedTerm('Border', '边框'),
+    accent: localizedTerm('Accent', '强调色'),
+    action: localizedTerm('Action', '操作'),
+    status: localizedTerm('Status', '状态'),
+    focusOverlay: localizedTerm('Focus / Overlay', '焦点与浮层'),
   },
   colors: {
-    canvas: localized('Canvas', '画布'),
-    subtle: localized('Subtle', '弱化'),
-    raised: localized('Raised', '抬升'),
-    glass: glassMaterial.name,
-    overlay: localized('Overlay', '覆盖层'),
-    primary: localized('Primary', '主要'),
-    secondary: localized('Secondary', '次要'),
-    muted: localized('Muted', '弱化'),
-    disabled: localized('Disabled', '禁用'),
-    inverse: localized('Inverse', '反色'),
-    onAccent: localized('On accent', '强调色前景'),
-    default: localized('Default', '默认'),
-    strong: localized('Strong', '强'),
-    interactive: localized('Interactive', '交互'),
-    primaryForeground: localized('Primary foreground', '主色前景'),
-    secondaryForeground: localized('Secondary foreground', '次要色前景'),
-    tertiary: localized('Tertiary', '三级'),
-    tertiaryForeground: localized('Tertiary foreground', '三级色前景'),
-    soft: localized('Soft', '柔和'),
-    primaryHover: localized('Primary hover', '主色悬停'),
-    primaryActive: localized('Primary active', '主色按下'),
-    secondaryHover: localized('Secondary hover', '次要色悬停'),
-    secondaryActive: localized('Secondary active', '次要色按下'),
-    disabledForeground: localized('Disabled foreground', '禁用色前景'),
-    info: localized('Info', '信息'),
-    infoForeground: localized('Info foreground', '信息色前景'),
-    success: localized('Success', '成功'),
-    successForeground: localized('Success foreground', '成功色前景'),
-    warning: localized('Warning', '警告'),
-    warningForeground: localized('Warning foreground', '警告色前景'),
-    danger: localized('Danger', '危险'),
-    dangerForeground: localized('Danger foreground', '危险色前景'),
-    focusRing: localized('Focus ring', '焦点环'),
-    scrim: localized('Scrim', '遮罩'),
+    canvas: localizedTerm('Canvas', '画布'),
+    subtle: localizedTerm('Subtle', '低强调'),
+    raised: localizedTerm('Raised', '抬升'),
+    glass: localizedTerm(glassMaterial.name.en, glassMaterial.name.zh),
+    overlay: localizedTerm('Overlay', '浮层'),
+    primary: localizedTerm('Primary', '主要'),
+    secondary: localizedTerm('Secondary', '次要'),
+    muted: localizedTerm('Muted', '弱化'),
+    disabled: localizedTerm('Disabled', '禁用'),
+    inverse: localizedTerm('Inverse', '反色'),
+    onAccent: localizedTerm('On accent', '强调色上的文字'),
+    default: localizedTerm('Default', '默认'),
+    strong: localizedTerm('Strong', '加深'),
+    interactive: localizedTerm('Interactive', '交互'),
+    primaryForeground: localizedTerm('Primary foreground', '主色前景'),
+    secondaryForeground: localizedTerm('Secondary foreground', '次色前景'),
+    tertiary: localizedTerm('Tertiary', '第三强调色'),
+    tertiaryForeground: localizedTerm('Tertiary foreground', '第三强调色前景'),
+    soft: localizedTerm('Soft', '柔和'),
+    primaryHover: localizedTerm('Primary hover', '主操作悬停'),
+    primaryActive: localizedTerm('Primary active', '主操作按下'),
+    secondaryHover: localizedTerm('Secondary hover', '次操作悬停'),
+    secondaryActive: localizedTerm('Secondary active', '次操作按下'),
+    disabledForeground: localizedTerm('Disabled foreground', '禁用前景'),
+    info: localizedTerm('Info', '信息'),
+    infoForeground: localizedTerm('Info foreground', '信息前景'),
+    success: localizedTerm('Success', '成功'),
+    successForeground: localizedTerm('Success foreground', '成功前景'),
+    warning: localizedTerm('Warning', '警告'),
+    warningForeground: localizedTerm('Warning foreground', '警告前景'),
+    danger: localizedTerm('Danger', '危险'),
+    dangerForeground: localizedTerm('Danger foreground', '危险前景'),
+    focusRing: localizedTerm('Focus ring', '焦点环'),
+    scrim: localizedTerm('Scrim', '遮罩'),
   },
   typography: {
     display: localized('Display', '展示'),
@@ -1086,13 +1121,13 @@ export const tokenCopy = {
     subtitle: localized('Subtitle', '副标题'),
     body: localized('Body', '正文'),
     label: localized('Label', '标签'),
-    caption: localized('Caption', '辅助说明'),
-    code: localized('Code', '代码'),
+    caption: localizedTerm('Caption', '辅助说明'),
+    code: localizedTerm('Code', '代码'),
   },
   spacing: {
-    inlineGutter: localized('Inline gutter', '行内留白'),
-    blockGutter: localized('Block gutter', '块级留白'),
-    gridGap: localized('Grid gap', '网格间距'),
+    inlineGutter: localizedTerm('Inline gutter', '横向内边距'),
+    blockGutter: localizedTerm('Block gutter', '纵向内边距'),
+    gridGap: localizedTerm('Grid gap', '网格间隔'),
   },
   surface: {
     canvas: localized('Canvas', '画布'),

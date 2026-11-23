@@ -1,6 +1,6 @@
 import { motionDistances, motionDurations, motionEasings } from '@neoverse-ui/motion';
 import { cssVariables } from '@neoverse-ui/tokens';
-import { type LocalizedText, localized, tokenCopy } from './playground-content';
+import { type LocalizedText, localized, localizedTerm, tokenCopy } from './playground-content';
 import type { LayoutPreviewRole } from './playground-types';
 
 export interface ColorToken {
@@ -40,23 +40,21 @@ const primitiveColorFamilies = [
   'amber',
   'green',
 ] as const;
-const primitiveColorGroup = (
-  family: (typeof primitiveColorFamilies)[number],
-): TokenGroup<NamedToken> => ({
-  label: localized(family, family),
-  items: Object.entries(color.primitive[family]).map(([shade, variable]) => ({
-    label: localized(`${family}-${shade}`, `${family}-${shade}`),
-    variable,
+export const primitiveColorGroups = [
+  ...primitiveColorFamilies.map((family) => ({
+    label: localized(family, family),
+    pattern: `--neoverse-color-${family}-*`,
+    items: Object.entries(color.primitive[family]).map(([step, variable]) => ({
+      step,
+      variable,
+    })),
   })),
-});
-
-export const primitiveColorGroups: TokenGroup<NamedToken>[] = [
-  ...primitiveColorFamilies.map(primitiveColorGroup),
   {
-    label: localized('Utility', '实用'),
-    items: (['white', 'black', 'transparent'] as const).map((name) => ({
-      label: localized(name, name),
-      variable: color.primitive[name],
+    label: localizedTerm('Utility', '通用色'),
+    pattern: '--neoverse-color-*',
+    items: (['white', 'black', 'transparent'] as const).map((step) => ({
+      step,
+      variable: color.primitive[step],
     })),
   },
 ];
@@ -296,67 +294,67 @@ const typographyScaleToken = (
 
 export const typographyTokens: TypographyToken[] = [
   typographyScaleToken(
-    localized('Display Large', '展示 大'),
+    localizedTerm('Display Large', '展示标题（大）'),
     'text-display-lg font-display leading-display-lg tracking-display-lg',
     typography.family.display,
     typography.scale.display.lg,
   ),
   typographyScaleToken(
-    localized('Display Medium', '展示 中'),
+    localizedTerm('Display Medium', '展示标题（中）'),
     'text-display-md font-display leading-display-md tracking-display-md',
     typography.family.display,
     typography.scale.display.md,
   ),
   typographyScaleToken(
-    localized('Title Large', '标题 大'),
+    localizedTerm('Title Large', '标题（大）'),
     'text-title-lg font-title leading-title-lg tracking-title-lg',
     typography.family.title,
     typography.scale.title.lg,
   ),
   typographyScaleToken(
-    localized('Title Medium', '标题 中'),
+    localizedTerm('Title Medium', '标题（中）'),
     'text-title-md font-title leading-title-md tracking-title-md',
     typography.family.title,
     typography.scale.title.md,
   ),
   typographyScaleToken(
-    localized('Title Small', '标题 小'),
+    localizedTerm('Title Small', '标题（小）'),
     'text-title-sm font-title leading-title-sm tracking-title-sm',
     typography.family.title,
     typography.scale.title.sm,
   ),
   typographyScaleToken(
-    localized('Body Large', '正文 大'),
+    localizedTerm('Body Large', '正文（大）'),
     'text-body-lg font-body leading-body-lg tracking-body-lg',
     typography.family.body,
     typography.scale.body.lg,
   ),
   typographyScaleToken(
-    localized('Body Medium', '正文 中'),
+    localizedTerm('Body Medium', '正文（中）'),
     'text-body-md font-body leading-body-md tracking-body-md',
     typography.family.body,
     typography.scale.body.md,
   ),
   typographyScaleToken(
-    localized('Body Small', '正文 小'),
+    localizedTerm('Body Small', '正文（小）'),
     'text-body-sm font-body leading-body-sm tracking-body-sm',
     typography.family.body,
     typography.scale.body.sm,
   ),
   typographyScaleToken(
-    localized('Label Large', '标签 大'),
+    localizedTerm('Label Large', '标签（大）'),
     'text-label-lg font-label leading-label-lg tracking-label-lg',
     typography.family.label,
     typography.scale.label.lg,
   ),
   typographyScaleToken(
-    localized('Label Medium', '标签 中'),
+    localizedTerm('Label Medium', '标签（中）'),
     'text-label-md font-label leading-label-md tracking-label-md',
     typography.family.label,
     typography.scale.label.md,
   ),
   typographyScaleToken(
-    localized('Label Small', '标签 小'),
+    localizedTerm('Label Small', '标签（小）'),
     'text-label-sm font-label leading-label-sm tracking-label-sm',
     typography.family.label,
     typography.scale.label.sm,
@@ -373,8 +371,11 @@ export const typographyTokens: TypographyToken[] = [
   },
 ];
 
-export const primitiveSpacingTokens: NamedToken[] = Object.entries(cssVariables.space).map(
-  ([label, variable]) => ({ label: localized(label, label), variable }),
+export const primitiveSpacingTokens = Object.entries(cssVariables.space).map(
+  ([step, variable]) => ({
+    step,
+    variable,
+  }),
 );
 
 export const semanticSpacingTokens = [
@@ -382,18 +383,21 @@ export const semanticSpacingTokens = [
     label: tokenCopy.spacing.inlineGutter,
     className: 'px-gutter-inline',
     variable: cssVariables.layout.gutter.inline,
+    placement: 'inline',
   },
   {
     label: tokenCopy.spacing.blockGutter,
     className: 'py-gutter-block',
     variable: cssVariables.layout.gutter.block,
+    placement: 'block',
   },
   {
     label: tokenCopy.spacing.gridGap,
     className: 'gap-grid',
     variable: cssVariables.layout.gridGap,
+    placement: 'gap',
   },
-];
+] as const;
 
 export const layoutRoleTokens: LayoutRoleToken[] = [
   {

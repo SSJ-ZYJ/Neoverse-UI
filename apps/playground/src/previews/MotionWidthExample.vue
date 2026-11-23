@@ -30,7 +30,7 @@ const widthNavItems = computed(() => [
 </script>
 
 <template>
-  <UiSurface surface="glass-subtle" class="playground-specimen-panel grid gap-3">
+  <UiSurface surface="none" class="playground-specimen-panel grid gap-3">
     <div
       ref="widthStage"
       data-motion-width-stage

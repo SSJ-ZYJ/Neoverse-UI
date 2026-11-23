@@ -5,7 +5,7 @@ import { localize } from './playground-content';
 import type { LayoutPreviewRole } from './playground-types';
 import { resolvedTheme } from './theme-state';
 
-type TokenPreview = 'color' | 'space' | 'layout' | 'radius' | 'border' | 'border-style' | 'shadow';
+type TokenPreview = 'color' | 'layout' | 'radius' | 'border' | 'border-style' | 'shadow';
 
 interface TokenRowProps {
   label: LocalizedText;
@@ -100,11 +100,6 @@ watch(resolvedTheme, () => {
       ref="swatchElement"
       class="size-9 shrink-0 rounded-control border border-default"
       :style="{ backgroundColor: `var(${props.variable})` }"
-    />
-    <span
-      v-else-if="props.preview === 'space'"
-      class="h-3 shrink-0 rounded-pill bg-accent-primary"
-      :style="{ width: `var(${props.variable})` }"
     />
     <span
       v-else-if="props.preview === 'layout'"
