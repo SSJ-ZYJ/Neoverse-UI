@@ -116,6 +116,7 @@ const componentCssVariables = {
     activeBorder: '--neoverse-navigation-item-active-border',
     activeForeground: '--neoverse-navigation-item-active-foreground',
     activeShadow: '--neoverse-navigation-item-active-shadow',
+    filter: '--neoverse-navigation-item-filter',
     gap: '--neoverse-navigation-item-gap',
     compactGap: '--neoverse-navigation-item-compact-gap',
     height: {
@@ -129,6 +130,11 @@ const componentCssVariables = {
       lg: '--neoverse-navigation-item-font-size-lg',
     },
     iconSize: '--neoverse-navigation-item-icon-size',
+    iconSizes: {
+      sm: '--neoverse-navigation-item-icon-size-sm',
+      md: '--neoverse-navigation-item-icon-size-md',
+      lg: '--neoverse-navigation-item-icon-size-lg',
+    },
     paddingBlock: {
       sm: '--neoverse-navigation-item-padding-block-sm',
       md: '--neoverse-navigation-item-padding-block-md',
@@ -162,6 +168,10 @@ const componentCssVariables = {
     focusWidth: '--neoverse-breadcrumb-focus-width',
     focusOffset: '--neoverse-breadcrumb-focus-offset',
     focusRadius: '--neoverse-breadcrumb-focus-radius',
+    linkPlateInset: '--neoverse-breadcrumb-link-plate-inset',
+    linkPlateBackground: '--neoverse-breadcrumb-link-plate-background',
+    linkPlateRestScale: '--neoverse-breadcrumb-link-plate-rest-scale',
+    clipMargin: '--neoverse-breadcrumb-clip-margin',
   },
   dock: {
     navigationTypeFactor: '--neoverse-dock-navigation-type-factor',

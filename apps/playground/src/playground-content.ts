@@ -335,8 +335,8 @@ export const moduleCopy = {
     presence: {
       label: localized('Presence presets', '出场入场预设'),
       description: localized(
-        'One enter/exit contract for the whole library: pick a preset, and elements arrive and leave along the same path. Spinners, tooltips, popovers, and lists all consume it.',
-        '全库唯一的出场入场契约：选择一个预设，元素沿同一路径出现与离开。加载指示、工具提示、弹层与列表都复用同一引擎。',
+        'One enter/exit contract for the whole library: pick a preset, and elements arrive and leave along the same path. Blur, tilt, and spring presets extend the base set, and every preset has a declared fallback you can switch to below.',
+        '全库唯一的出场入场契约：选择一个预设，元素沿同一路径出现与离开。模糊、倾斜与弹簧预设扩展了基础集合，每个预设都有可直接切换的回退档位。',
       ),
       replay: localized('Replay', '重播'),
       visible: localized('Show', '显示'),
@@ -348,6 +348,14 @@ export const moduleCopy = {
       ),
       replayEntries: localized('Replay entrance', '重播入场'),
       shuffle: localized('Shuffle', '重排'),
+      fallbackLabel: localized('Fallback profile', '回退档位'),
+      fallbackFull: localized('Full motion', '完整动效'),
+      fallbackNoFilter: localized('No filter', '无滤镜'),
+      fallbackFadeOnly: localized('Fade only', '仅淡入'),
+      fallbackHint: localized(
+        'Switching the profile replays the entrance. No filter drops the blur pass and keeps the arrival through scale; Fade only reproduces an engine without individual transform properties.',
+        '切换档位会重播入场。无滤镜跳过模糊通道，改由缩放完成入场；仅淡入复现不具备独立变换属性的引擎。',
+      ),
     },
     width: {
       label: localized('Layout width motion', '布局宽度动效'),

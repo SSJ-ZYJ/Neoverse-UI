@@ -5,11 +5,8 @@
   }
 
   .ui-dialog {
-    position: fixed;
-    inset: 0;
     width: min(var(--neoverse-dialog-width), calc(100vw - 2 * var(--neoverse-space-4)));
     max-height: calc(100dvh - 2 * var(--neoverse-space-4));
-    margin: auto;
     padding: var(--neoverse-dialog-padding);
     overflow: auto;
     border: 0;
@@ -81,4 +78,13 @@
       outline: var(--neoverse-border-width-strong) solid CanvasText;
     }
   }
+}
+
+/* The native dialog UA rule is unlayered, so it outranks the same declaration
+   inside a cascade layer. Re-assert viewport anchoring unlayered; otherwise a
+   scrolled playground leaves the modal above the viewport centre. */
+dialog.ui-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
 }

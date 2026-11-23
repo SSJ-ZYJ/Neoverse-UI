@@ -1,7 +1,16 @@
 @layer components {
   .ui-breadcrumb {
     min-width: 0;
-    overflow: hidden;
+    /* The padded link box is the hover surface, and hit testing stops at this
+       container's box even though `overflow-clip-margin` lets the plate paint
+       past it. The container therefore carries the same inset, pulled back by
+       a negative margin so the trail keeps its footprint, and the link's whole
+       padded box stays clickable. The clip margin then only has to cover the
+       focus ring. */
+    padding-block: var(--neoverse-breadcrumb-link-plate-inset);
+    margin-block: calc(var(--neoverse-breadcrumb-link-plate-inset) * -1);
+    overflow: clip;
+    overflow-clip-margin: var(--neoverse-breadcrumb-clip-margin);
     color: var(--neoverse-breadcrumb-link-foreground);
     font-size: var(--neoverse-breadcrumb-font-size);
     font-weight: var(--neoverse-breadcrumb-font-weight);
@@ -37,7 +46,6 @@
     user-select: none;
   }
 
-  .ui-breadcrumb__link,
   .ui-breadcrumb__label,
   .ui-breadcrumb__current {
     min-width: 0;
@@ -46,22 +54,77 @@
     white-space: nowrap;
   }
 
-  .ui-breadcrumb__label {
-    color: var(--neoverse-breadcrumb-link-foreground);
-  }
-
+  /* The link owns the plate's area instead of borrowing it from a drawing
+     overhang: padding grows the hit box and the negative margin of the same
+     size gives the space back, so the label lands exactly where it did and the
+     trail geometry never moves. Hover therefore answers on the padding, not
+     only on the glyph ink. */
   .ui-breadcrumb__link {
+    position: relative;
+    isolation: isolate;
+    min-width: 0;
+    padding: var(--neoverse-breadcrumb-link-plate-inset);
+    margin: calc(var(--neoverse-breadcrumb-link-plate-inset) * -1);
+    overflow: clip;
     border-radius: var(--neoverse-breadcrumb-focus-radius);
-    background-color: var(--neoverse-quiet-control-feedback);
     color: var(--neoverse-breadcrumb-link-foreground);
+    text-overflow: ellipsis;
+    white-space: nowrap;
     text-decoration: none;
-    transition: background-color var(--neoverse-motion-feedback-duration)
-      var(--neoverse-motion-feedback-easing);
+    transition: color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
   }
 
+  /* The plate is painted behind the label, fills the padded box and rises from
+     slightly smaller while it fades in — the same answer plain footer links
+     give. Drawing it on a pseudo-element means the text box still truncates
+     with an ellipsis and the focus ring keeps its geometry. */
+  .ui-breadcrumb__link::after {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    border-radius: var(--neoverse-radius-sm);
+    background-color: var(--neoverse-breadcrumb-link-plate-background);
+    opacity: 0;
+    transform: scale(var(--neoverse-breadcrumb-link-plate-rest-scale));
+    pointer-events: none;
+    content: '';
+    transition:
+      opacity var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      transform var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
+  }
+
+  @media (hover: hover) {
+    .ui-breadcrumb__link:hover {
+      color: var(--neoverse-breadcrumb-link-hover-foreground);
+    }
+
+    .ui-breadcrumb__link:hover::after {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Keyboard focus shows the same plate, so the ring and the wash agree. */
   .ui-breadcrumb__link:focus-visible {
+    color: var(--neoverse-breadcrumb-link-hover-foreground);
     outline: var(--neoverse-breadcrumb-focus-width) solid var(--neoverse-breadcrumb-focus-color);
     outline-offset: var(--neoverse-breadcrumb-focus-offset);
+  }
+
+  .ui-breadcrumb__link:focus-visible::after {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* Pressing deepens the plate instead of fading it: a second layer of the same
+     hover field stacks on the first, and the plate pulls in slightly. */
+  .ui-breadcrumb__link:active::after {
+    opacity: 1;
+    background-image: linear-gradient(
+      var(--neoverse-breadcrumb-link-plate-background),
+      var(--neoverse-breadcrumb-link-plate-background)
+    );
+    transform: scale(var(--neoverse-effect-press-scale));
   }
 
   .ui-breadcrumb__current {
@@ -69,7 +132,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .ui-breadcrumb__link {
+    .ui-breadcrumb__link,
+    .ui-breadcrumb__link::after {
       transition: none;
     }
   }

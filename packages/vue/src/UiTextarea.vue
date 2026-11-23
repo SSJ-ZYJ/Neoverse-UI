@@ -39,13 +39,11 @@ function onBlur(event: FocusEvent) {
 </script>
 
 <template>
-  <span class="ui-textarea-shell">
+  <span class="ui-textarea-shell" :class="attrs.class" :style="attrs.style">
     <textarea
       v-model="value"
       v-bind="forwardedAttrs"
       class="ui-textarea"
-      :class="attrs.class"
-      :style="attrs.style"
       :disabled="props.disabled"
       :readonly="props.readonly"
       :data-validation="props.validation"

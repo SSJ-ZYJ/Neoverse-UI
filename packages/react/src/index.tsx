@@ -699,16 +699,17 @@ export interface UiTextareaProps extends ComponentPropsWithRef<'textarea'> {
 export function UiTextarea({
   validation = 'none',
   className,
+  style,
   onPointerDown,
   onBlur,
   'aria-invalid': ariaInvalid,
   ...props
 }: UiTextareaProps) {
   return (
-    <span className="ui-textarea-shell">
+    <span className={mergeClassNames('ui-textarea-shell', className)} style={style}>
       <textarea
         {...props}
-        className={mergeClassNames('ui-textarea', className)}
+        className="ui-textarea"
         data-validation={validation}
         aria-invalid={resolveAriaInvalid(ariaInvalid, validation)}
         onPointerDown={(event) => {

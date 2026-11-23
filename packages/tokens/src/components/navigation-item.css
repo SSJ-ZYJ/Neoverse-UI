@@ -13,6 +13,10 @@
     );
     --neoverse-navigation-item-active-shadow: var(--neoverse-control-active-highlight);
     --neoverse-navigation-item-indicator-color: var(--neoverse-color-accent-secondary);
+    /* The selected plate samples the page behind it. A flat accent wash over a
+       photographic or optical backdrop left content sharp inside the plate,
+       which read as a highlight rather than a glass selection. */
+    --neoverse-navigation-item-filter: var(--neoverse-material-glass-subtle-filter);
     --neoverse-navigation-item-gap: 0.375rem;
     --neoverse-navigation-item-compact-gap: var(--neoverse-space-1);
     --neoverse-navigation-item-height-sm: var(--neoverse-space-8);
@@ -25,8 +29,12 @@
     --neoverse-navigation-item-font-size-md: var(--neoverse-font-size-sm);
     --neoverse-navigation-item-font-size-lg: var(--neoverse-font-size-md);
     /* Navigation icons stay optically quieter than standalone action icons.
-       The component owns this size so consumers never need to resize SVGs. */
-    --neoverse-navigation-item-icon-size: var(--neoverse-icon-size-md);
+       The component owns each size so a compact or large item scales its glyph
+       with its box instead of leaving the icon at the medium size. */
+    --neoverse-navigation-item-icon-size-sm: var(--neoverse-icon-size-md);
+    --neoverse-navigation-item-icon-size-md: var(--neoverse-icon-size-md);
+    --neoverse-navigation-item-icon-size-lg: var(--neoverse-icon-size-lg);
+    --neoverse-navigation-item-icon-size: var(--neoverse-navigation-item-icon-size-md);
     --neoverse-navigation-item-padding-block-sm: var(--neoverse-space-1);
     --neoverse-navigation-item-padding-block-md: var(--neoverse-space-1);
     --neoverse-navigation-item-padding-block-lg: var(--neoverse-space-1);
@@ -45,6 +53,11 @@
     --neoverse-navigation-item-start-indicator-width: var(
       --neoverse-navigation-item-indicator-height
     );
-    --neoverse-navigation-item-start-indicator-color: var(--neoverse-color-accent-primary);
+    /* Placement changes the bar's orientation, never the navigation identity.
+       Both bars alias one colour so a start rail and a bottom bar cannot drift
+       apart. */
+    --neoverse-navigation-item-start-indicator-color: var(
+      --neoverse-navigation-item-indicator-color
+    );
   }
 }

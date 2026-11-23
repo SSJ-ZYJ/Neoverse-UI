@@ -201,30 +201,37 @@ const copy = {
       :title="localize(copy.table.label, props.locale)"
       :description="localize(copy.table.description, props.locale)"
     >
-      <MaterialBackdrop edge="inset">
-        <UiSurface surface="none" class="playground-data-table-surface rounded-card p-4">
-          <UiTable
-            :caption="localize(copy.table.caption, props.locale)"
-            :aria-label="localize(copy.table.caption, props.locale)"
-            data-data-display-table
-          >
-            <thead>
-              <tr>
-                <th v-for="column in copy.table.columns" :key="localize(column, props.locale)">
-                  {{ localize(column, props.locale) }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="row in copy.table.rows" :key="row[0]">
-                <td>{{ row[0] }}</td>
-                <td>{{ row[1] }}</td>
-                <td>{{ localize(row[2], props.locale) }}</td>
-              </tr>
-            </tbody>
-          </UiTable>
-        </UiSurface>
-      </MaterialBackdrop>
+      <!-- The caption names the table from the section surface. Inside the
+           material backdrop it sat on the optical test field, so the label read
+           as a strip of the table plate instead of a label above it. -->
+      <div class="grid min-w-0 gap-2">
+        <p class="text-caption font-semibold text-secondary">
+          {{ localize(copy.table.caption, props.locale) }}
+        </p>
+        <MaterialBackdrop edge="inset">
+          <UiSurface surface="none" class="playground-data-table-surface rounded-card p-4">
+            <UiTable
+              :aria-label="localize(copy.table.caption, props.locale)"
+              data-data-display-table
+            >
+              <thead>
+                <tr>
+                  <th v-for="column in copy.table.columns" :key="localize(column, props.locale)">
+                    {{ localize(column, props.locale) }}
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="row in copy.table.rows" :key="row[0]">
+                  <td>{{ row[0] }}</td>
+                  <td>{{ row[1] }}</td>
+                  <td>{{ localize(row[2], props.locale) }}</td>
+                </tr>
+              </tbody>
+            </UiTable>
+          </UiSurface>
+        </MaterialBackdrop>
+      </div>
     </LabSpecimenSection>
 
     <LabSpecimenSection

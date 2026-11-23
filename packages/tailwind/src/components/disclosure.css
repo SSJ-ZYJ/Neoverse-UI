@@ -85,10 +85,18 @@
     }
   }
 
+  /* Press deepens the existing inset field and lets the chevron turn on the
+     same spatial curve. No shadow is removed or replaced on activation. */
   :where(.ui-disclosure, .neoverse-prose details):has(
     > :is(.ui-disclosure__summary, summary):active
   ) {
-    box-shadow: var(--neoverse-disclosure-edge-active), var(--neoverse-effect-press-shadow);
+    background-color: var(--neoverse-disclosure-open-hover-fill);
+    box-shadow: var(--neoverse-disclosure-hover-shadow);
+  }
+
+  :where(.ui-disclosure__summary, .neoverse-prose summary):active {
+    color: var(--neoverse-disclosure-active-foreground);
+    background: transparent;
   }
 
   :where(.ui-disclosure__summary, .neoverse-prose summary):focus-visible {

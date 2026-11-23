@@ -3,7 +3,7 @@
 [English](README.md)
 
 <!-- Source: packages/motion/README.md -->
-<!-- Source-SHA256: 8239e0b24464cc395d4a8369b75370b9caf906f105f968c7b71bf46544ec596d -->
+<!-- Source-SHA256: 187415422903408c9f1ee5e66e723f02711908e28a4f058b4177fc367cb7c35a -->
 
 Neoverse-UI 的单一动效规范：变量、Presence 引擎与页面切换动画。组件库中的一切动画都解析到这里发布的值——组件从不硬编码时长、缓动或关键帧。
 
@@ -21,7 +21,7 @@ bun add @neoverse-ui/motion
 
 ## 分层
 
-1. **变量尺度**（`@neoverse-ui/tokens`）：时长（`fast` / `standard` / `expressive`）、缓动（`linear` / `standard` / `emphasized` / `accelerate`）、位移距离、Presence 几何与粒子消散时序。在 `prefers-reduced-motion` 下，整个尺度折叠为瞬时。
+1. **变量尺度**（`@neoverse-ui/tokens`）：时长（`fast` / `standard` / `expressive`）、缓动（`linear` / `standard` / `emphasized` / `accelerate` / `spring`）、位移距离、Presence 几何与粒子消散时序。在 `prefers-reduced-motion` 下，整个尺度折叠为瞬时。
 2. **语义角色**：`feedback`、`state`、`spatial`、`enter` 与 `exit`。组件引用角色而不是原始值，因此修改一个变量即可重新调节整个系统。
 3. **Presence 引擎**（`.nv-*` 类）：为所有框架提供统一的入场/出场行为，由 `data-neoverse-motion` 预设属性驱动。
 4. **布局宽度动效**：`captureLayoutWidths` / `animateLayoutWidths` 让一组盒子在内容尺寸变化时保持同步。
@@ -41,12 +41,23 @@ import { presence } from '@neoverse-ui/vue';
 </Transition>
 ```
 
-预设：`fade`、`rise`、`sink`、`pop`、`veil`、`slide-start`、`slide-end`。`pop` 从原点边缘生长——用 `presence('pop', 'top')` 把原点指向触发边缘，使弹出层从触发器向外生长（边缘到边缘）。
+预设：`fade`、`rise`、`sink`、`pop`、`veil`、`bloom`、`haze`、`sway`、`spring`、`slide-start`、`slide-end`。`pop` 从原点边缘生长——用 `presence('pop', 'top')` 把原点指向触发边缘，使弹出层从触发器向外生长（边缘到边缘）。`veil`、`bloom` 与 `haze` 带模糊通道；`bloom` 还从远缩放生长，`haze` 在 expressive 时长内无位移地落定，`sway` 带轻微倾斜落位，`spring` 用会越过终点一次的曲线做短位移。
 
 - `<TransitionGroup name="nv">` 增加 FLIP 连续性：被重新定位的相邻项会滑行（`nv-move`），而不是瞬移。使用 `@neoverse-ui/vue` 的 `staggerStyle(index)` 错开入场（出场仍立即执行）。
 - `.nv-appear`（或 `presenceAppearClassName`）在首次渲染时零 JavaScript 播放预设——适用于加载指示器、勾选标记与提示的挂载入场。
 - `.nv-vanish` + React 中的 `useUiPresence()` / `<UiPresence show>`：由动画驱动的出场，在 `animationend` 时卸载。
 - `.nv-presence`：通过 `@starting-style` + `allow-discrete` 为顶层 `[popover]` 表面提供零 JS 入场/出场。入场与出场都可中断：CSS 过渡从当前帧重新定向，同一列表中的入场与出场元素并行动画。
+
+### 回退档位
+
+模糊是纵深线索，不是必需品。在任意祖先元素上设置 `data-neoverse-motion-fallback`（`presenceFallbackAttribute`）即可强制声明的回退：
+
+| 档位 | 结果 |
+| --- | --- |
+| `no-filter` | 跳过模糊通道；`veil` 与 `haze` 改为近缩放入场，`bloom` 保留远缩放。`@supports not (filter: blur(1px))` 会自动应用同一档位，也可作为低功耗设备的主动选择。 |
+| `fade-only` | 复现不具备独立 `translate` / `scale` / `rotate` 属性的引擎：所有预设折叠为透明度变化。 |
+
+`presenceFallbacks` 列出这两个值。设计实验室的 Presence 示例会在每个档位下渲染同一批预设，让结果可见而不是只被描述。
 
 ## 布局宽度动效
 

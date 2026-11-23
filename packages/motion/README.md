@@ -21,9 +21,9 @@ Import the shared motion layer with:
 ## Layers
 
 1. **Token scale** (`@neoverse-ui/tokens`): durations (`fast` / `standard` /
-   `expressive`), easings (`linear` / `standard` / `emphasized` / `accelerate`),
-   travel distances, presence geometry, and the particle-dissolve timing. Under
-   `prefers-reduced-motion` the whole scale collapses to instant.
+   `expressive`), easings (`linear` / `standard` / `emphasized` / `accelerate` /
+   `spring`), travel distances, presence geometry, and the particle-dissolve
+   timing. Under `prefers-reduced-motion` the whole scale collapses to instant.
 2. **Semantic roles**: `feedback`, `state`, `spatial`, `enter`, and `exit`.
    Components reference a role, never a raw value, so one token edit retunes
    the system.
@@ -49,9 +49,14 @@ import { presence } from '@neoverse-ui/vue';
 </Transition>
 ```
 
-Presets: `fade`, `rise`, `sink`, `pop`, `veil`, `slide-start`, `slide-end`.
+Presets: `fade`, `rise`, `sink`, `pop`, `veil`, `bloom`, `haze`, `sway`,
+`spring`, `slide-start`, `slide-end`.
 `pop` grows from the origin edge — point the origin at the launching edge with
 `presence('pop', 'top')` so a popover grows out of its trigger (edge to edge).
+`veil`, `bloom`, and `haze` carry the blur pass; `bloom` also grows from the far
+scale, `haze` settles over the expressive duration without travel, `sway` lands
+slightly tilted, and `spring` travels a short distance on a curve that passes
+its endpoint once.
 
 - `<TransitionGroup name="nv">` adds FLIP continuity: repositioned siblings
   glide (`nv-move`) instead of teleporting. Stagger entries with
@@ -65,6 +70,19 @@ Presets: `fade`, `rise`, `sink`, `pop`, `veil`, `slide-start`, `slide-end`.
   `@starting-style` + `allow-discrete`. Enter and exit are both interruptible:
   CSS transitions re-target from the current frame, and entering/exiting
   elements of the same list animate in parallel.
+
+### Fallback profiles
+
+Blur is a depth cue, not a requirement. Set `data-neoverse-motion-fallback`
+(`presenceFallbackAttribute`) on any ancestor to force the declared fallback:
+
+| Profile | Result |
+| --- | --- |
+| `no-filter` | Skips the blur passes; `veil` and `haze` arrive through near scale, `bloom` keeps its far scale. Also applied automatically by `@supports not (filter: blur(1px))` and usable as a low-power opt-out. |
+| `fade-only` | Reproduces an engine without individual `translate` / `scale` / `rotate` properties: every preset collapses to its opacity change. |
+
+`presenceFallbacks` lists both values. The Design Lab's Presence specimen renders
+the same presets under each profile so the result is visible, not described.
 
 ## Layout width motion
 
@@ -149,7 +167,7 @@ Guarantees:
 | Group | Values |
 | --- | --- |
 | Durations | `fast` 140ms · `standard` 240ms · `expressive` 420ms |
-| Easings | `linear` · `standard` · `emphasized` · `accelerate` |
+| Easings | `linear` · `standard` · `emphasized` · `accelerate` · `spring` |
 | Distances | `near` · `mid` · `far` (space-2 / space-4 / space-8) |
 | Particle | `duration` 910ms · `enter-delay` 455ms · `enter-duration` 234ms |
 

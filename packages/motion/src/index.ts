@@ -34,6 +34,10 @@ export { attachSelectionIndicator } from './selection-indicator.js';
  * - `sink`        arrive from above / return upward
  * - `pop`         grow from the origin edge (popovers, spinners, checks)
  * - `veil`        de-blur into focus (glass surfaces materializing)
+ * - `bloom`       grow out of a blurred field (soft materialize)
+ * - `haze`        pull focus out of a heavier fog, slower and without travel
+ * - `sway`        land slightly tilted, then settle upright
+ * - `spring`      short travel on a curve that passes its endpoint once
  * - `slide-start` arrive from the inline start edge
  * - `slide-end`   arrive from the inline end edge
  */
@@ -43,11 +47,32 @@ export const presenceVariants = [
   'sink',
   'pop',
   'veil',
+  'bloom',
+  'haze',
+  'sway',
+  'spring',
   'slide-start',
   'slide-end',
 ] as const;
 
 export type PresenceVariant = (typeof presenceVariants)[number];
+
+/**
+ * Declared fallback profiles, selected with `data-neoverse-motion-fallback`
+ * on any ancestor of the transitioning elements:
+ *
+ * - `no-filter`  skip the blur passes; blur presets keep their arrival through
+ *                scale instead. Applied automatically when the engine cannot
+ *                blur, and available as an opt-out for low-power devices.
+ * - `fade-only`  reproduce an engine without individual transform properties:
+ *                every preset collapses to its opacity change.
+ */
+export const presenceFallbacks = ['no-filter', 'fade-only'] as const;
+
+export type PresenceFallback = (typeof presenceFallbacks)[number];
+
+/** Attribute selecting a fallback profile on an ancestor element. */
+export const presenceFallbackAttribute = 'data-neoverse-motion-fallback';
 
 export type PresenceOrigin = 'top' | 'bottom' | 'start' | 'end';
 

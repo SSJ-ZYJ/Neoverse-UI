@@ -1,8 +1,10 @@
 @layer components {
+  /* Breadcrumb links are not listed here: they answer hover with the shared
+     hover field and their own plate, matching plain links rather than the
+     quieter control tint. */
   :where(
     .ui-button--ghost,
     .ui-button[data-surface='none'],
-    .ui-breadcrumb__link,
     .ui-segmented-control__option,
     .ui-tabs__tab,
     .ui-pagination__button,

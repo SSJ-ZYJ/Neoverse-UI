@@ -22,9 +22,16 @@
 
 .playground-shell__inspector {
   grid-area: inspector;
-  --neoverse-drawer-origin: calc(100vw - var(--neoverse-drawer-size) - var(--neoverse-drawer-inset));
+  --neoverse-drawer-origin: calc(
+    100vw -
+    var(--neoverse-drawer-size) -
+    var(--neoverse-drawer-inset)
+  );
   --neoverse-drawer-side: 1;
-  --neoverse-drawer-width: calc(var(--neoverse-layout-sidebar-drawer-width) + var(--neoverse-space-6));
+  --neoverse-drawer-width: calc(
+    var(--neoverse-layout-sidebar-drawer-width) +
+    var(--neoverse-space-6)
+  );
 }
 
 .playground-shell[data-persistent] .playground-shell__panel {
@@ -44,11 +51,13 @@
     calc(100vw - var(--neoverse-drawer-inset) * 2 - var(--neoverse-space-8))
   );
   --neoverse-drawer-travel: calc(
-    var(--neoverse-drawer-side) * (var(--neoverse-drawer-size) + var(--neoverse-drawer-inset))
+    var(--neoverse-drawer-side) *
+    (var(--neoverse-drawer-size) + var(--neoverse-drawer-inset))
   );
   --neoverse-drawer-shift: var(--neoverse-drawer-travel);
   position: fixed;
-  inset: var(--neoverse-drawer-inset) auto var(--neoverse-drawer-inset) var(--neoverse-drawer-origin);
+  inset: var(--neoverse-drawer-inset) auto var(--neoverse-drawer-inset)
+    var(--neoverse-drawer-origin);
   inline-size: var(--neoverse-drawer-size);
   block-size: auto;
   max-inline-size: none;
@@ -69,13 +78,20 @@
    samples the page, not the scrim. Keep the native top layer for dismissal. */
 .playground-shell:not([data-persistent]) .playground-shell__panel::backdrop {
   --neoverse-drawer-cutout-left: calc(var(--neoverse-drawer-origin) + var(--neoverse-drawer-shift));
-  --neoverse-drawer-cutout-right: calc(var(--neoverse-drawer-cutout-left) + var(--neoverse-drawer-size));
+  --neoverse-drawer-cutout-right: calc(
+    var(--neoverse-drawer-cutout-left) +
+    var(--neoverse-drawer-size)
+  );
   --neoverse-drawer-cutout-bottom: calc(100% - var(--neoverse-drawer-inset));
   background: var(--neoverse-color-overlay-scrim);
   backdrop-filter: blur(4px);
   clip-path: polygon(
     evenodd,
-    0 0, 100% 0, 100% 100%, 0 100%, 0 0,
+    0 0,
+    100% 0,
+    100% 100%,
+    0 100%,
+    0 0,
     var(--neoverse-drawer-cutout-left) var(--neoverse-drawer-inset),
     var(--neoverse-drawer-cutout-right) var(--neoverse-drawer-inset),
     var(--neoverse-drawer-cutout-right) var(--neoverse-drawer-cutout-bottom),
@@ -95,16 +111,25 @@
   .playground-shell:not([data-persistent]) .playground-shell__panel::backdrop {
     --neoverse-drawer-corner: var(--neoverse-radius-panel);
     clip-path: shape(
-      evenodd from 0 0, hline to 100%, vline to 100%, hline to 0, close,
-      move to calc(var(--neoverse-drawer-cutout-left) + var(--neoverse-drawer-corner)) var(--neoverse-drawer-inset),
+      evenodd from 0 0,
+      hline to 100%,
+      vline to 100%,
+      hline to 0,
+      close,
+      move to calc(var(--neoverse-drawer-cutout-left) + var(--neoverse-drawer-corner))
+        var(--neoverse-drawer-inset),
       hline to calc(var(--neoverse-drawer-cutout-right) - var(--neoverse-drawer-corner)),
-      arc by var(--neoverse-drawer-corner) var(--neoverse-drawer-corner) of var(--neoverse-drawer-corner) cw,
+      arc by var(--neoverse-drawer-corner) var(--neoverse-drawer-corner) of
+        var(--neoverse-drawer-corner) cw,
       vline to calc(var(--neoverse-drawer-cutout-bottom) - var(--neoverse-drawer-corner)),
-      arc by calc(-1 * var(--neoverse-drawer-corner)) var(--neoverse-drawer-corner) of var(--neoverse-drawer-corner) cw,
+      arc by calc(-1 * var(--neoverse-drawer-corner)) var(--neoverse-drawer-corner) of
+        var(--neoverse-drawer-corner) cw,
       hline to calc(var(--neoverse-drawer-cutout-left) + var(--neoverse-drawer-corner)),
-      arc by calc(-1 * var(--neoverse-drawer-corner)) calc(-1 * var(--neoverse-drawer-corner)) of var(--neoverse-drawer-corner) cw,
+      arc by calc(-1 * var(--neoverse-drawer-corner)) calc(-1 * var(--neoverse-drawer-corner)) of
+        var(--neoverse-drawer-corner) cw,
       vline to calc(var(--neoverse-drawer-inset) + var(--neoverse-drawer-corner)),
-      arc by var(--neoverse-drawer-corner) calc(-1 * var(--neoverse-drawer-corner)) of var(--neoverse-drawer-corner) cw,
+      arc by var(--neoverse-drawer-corner) calc(-1 * var(--neoverse-drawer-corner)) of
+        var(--neoverse-drawer-corner) cw,
       close
     );
   }

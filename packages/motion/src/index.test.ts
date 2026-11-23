@@ -8,6 +8,8 @@ import {
   prefersReducedMotion,
   presenceClassNames,
   presenceDataAttribute,
+  presenceFallbackAttribute,
+  presenceFallbacks,
   presenceLayerClassName,
   presenceOriginAttribute,
   presenceReplayAttribute,
@@ -29,6 +31,7 @@ test('exposes the canonical Motion durations and easings', () => {
     standard: 'cubic-bezier(0.22, 1, 0.36, 1)',
     emphasized: 'cubic-bezier(0.16, 1, 0.3, 1)',
     accelerate: 'cubic-bezier(0.5, 0, 0.75, 0)',
+    spring: 'cubic-bezier(0.34, 1.56, 0.64, 1)',
   });
 });
 
@@ -64,9 +67,15 @@ test('exposes the shared presence contract', () => {
     'sink',
     'pop',
     'veil',
+    'bloom',
+    'haze',
+    'sway',
+    'spring',
     'slide-start',
     'slide-end',
   ]);
+  expect(presenceFallbacks).toEqual(['no-filter', 'fade-only']);
+  expect(presenceFallbackAttribute).toBe('data-neoverse-motion-fallback');
   expect(presenceTransitionName).toBe('nv');
   expect(presenceDataAttribute).toBe('data-neoverse-motion');
   expect(presenceOriginAttribute).toBe('data-neoverse-motion-origin');

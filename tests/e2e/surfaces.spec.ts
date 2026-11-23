@@ -357,4 +357,38 @@ test.describe('surfaces', () => {
     await expect(statCard).toBeVisible();
     await expect(statCard).not.toBeEmpty();
   });
+
+  test('Disclosure deepens its field on press without swapping to the press shadow', async ({
+    page,
+  }) => {
+    await page.goto('/frame?theme=light&lang=en#data-display-disclosure');
+    const details = page.locator('#data-display-disclosure .ui-disclosure').first();
+    const summary = details.locator('summary');
+    const shadow = () =>
+      summary.evaluate((element) => {
+        const owner = element.closest('.ui-disclosure');
+        if (!(owner instanceof HTMLElement)) throw new Error('The disclosure owner is missing');
+        return getComputedStyle(owner).boxShadow;
+      });
+    const pressShadow = await page.evaluate(() => {
+      const probe = document.createElement('span');
+      probe.style.position = 'fixed';
+      probe.style.opacity = '0';
+      probe.style.boxShadow = 'var(--neoverse-effect-press-shadow)';
+      document.body.append(probe);
+      const value = getComputedStyle(probe).boxShadow;
+      probe.remove();
+      return value;
+    });
+
+    const rest = await shadow();
+    await summary.hover();
+    await page.mouse.down();
+    try {
+      await expect.poll(shadow).not.toBe(rest);
+      expect(await shadow()).not.toBe(pressShadow);
+    } finally {
+      await page.mouse.up();
+    }
+  });
 });

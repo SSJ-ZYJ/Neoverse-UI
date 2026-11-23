@@ -151,7 +151,11 @@
 .playground-explorer__section-toggle {
   display: flex;
   min-block-size: var(--neoverse-space-8);
-  inline-size: auto;
+  /* A button still shrinks to its content as a flex container, so `auto`
+     leaves the count and chevron hugging the label. Fill the heading track
+     and compensate for the negative inline margins to share the module
+     rows' right edge. */
+  inline-size: calc(100% + 2 * var(--neoverse-space-2));
   /* The group heading is two lines; the count and chevron belong to the
      primary line, not to the vertical centre of the whole label. */
   align-items: baseline;
@@ -307,10 +311,25 @@
 
 .playground-explorer__link {
   inline-size: 100%;
+  /* The explorer owns a blue selection, so it must also own the bar that marks
+     it: the library default pairs the mint selection field with the mint
+     indicator, and a surface that retunes one has to retune the other. Both
+     read from the same accent family here, so the plate and the rail can never
+     show different hues. */
+  --neoverse-navigation-item-indicator-color: var(--neoverse-color-accent-primary);
   --neoverse-navigation-item-active-foreground: var(--neoverse-color-text-primary);
   --neoverse-navigation-item-active-background: none;
   --neoverse-navigation-item-active-fill: var(--neoverse-color-accent-soft);
   --neoverse-navigation-item-active-shadow: var(--neoverse-shadow-none);
+}
+
+/* An English label is the only line available, so long names need to wrap
+   instead of being clipped in the persistent rail. The Chinese layout keeps
+   its compact two-line reading aid and its inline English suffix. */
+html[lang='en'] .playground-explorer__link .ui-navigation-item__label {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .playground-explorer__leaf {
@@ -880,16 +899,17 @@
 }
 
 /* Paint observation shapes once, inside the stage rather than behind its headings. */
-[data-playground-view='frame'] .playground-material-backdrop:has(
-  :is(
-      .playground-specimen-preview,
-      .playground-qa-stage,
-      .playground-dock-preview,
-      .playground-motion-stage,
-      .playground-overview-hero__stage,
-      .playground-material-backdrop
-    )
-) {
+[data-playground-view='frame']
+  .playground-material-backdrop:has(
+    :is(
+        .playground-specimen-preview,
+        .playground-qa-stage,
+        .playground-dock-preview,
+        .playground-motion-stage,
+        .playground-overview-hero__stage,
+        .playground-material-backdrop
+      )
+  ) {
   background-image:
     var(--neoverse-playground-stage-color-field), var(--neoverse-playground-stage-underlay);
 }

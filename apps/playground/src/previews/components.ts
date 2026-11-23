@@ -20,6 +20,12 @@ const previewProps = { locale: { type: String as PropType<Locale>, required: tru
 export function breadcrumb(locale: Locale): VNode {
   return h(UiBreadcrumb, {
     ariaLabel: localize(localized('Documentation breadcrumb', '文档路径导航'), locale),
+    // The sample lives inside the Design Lab route, so its links must not
+    // navigate: the trail keeps real anchors for semantics and styling while
+    // the click stays inert like the other specimen previews.
+    onClick: (event: MouseEvent) => {
+      if ((event.target as Element | null)?.closest('a')) event.preventDefault();
+    },
     items: [
       {
         id: 'home',

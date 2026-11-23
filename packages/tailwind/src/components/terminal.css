@@ -333,7 +333,9 @@
     vertical-align: text-top;
     animation: ui-caret-breathe var(--neoverse-motion-caret-duration)
       var(--neoverse-motion-caret-easing) infinite;
-    transition-property: transform, width;
+    /* The bar glides without stretching, so it never covers the line it
+       travels over. */
+    transition-property: transform;
     transition-duration: var(--neoverse-motion-caret-glide-duration);
     transition-timing-function: var(--neoverse-motion-easing-symmetric);
   }

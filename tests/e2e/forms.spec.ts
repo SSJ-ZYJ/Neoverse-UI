@@ -338,4 +338,45 @@ test.describe('forms', () => {
       }
     }
   });
+
+  test('choice controls preview state with a flowing fill instead of a press shadow', async ({
+    page,
+  }) => {
+    await page.goto('/?theme=light&lang=en#forms-checkbox', { waitUntil: 'domcontentloaded' });
+    const input = page.locator('[data-form-checkbox]');
+    const control = page.locator('[data-form-checkbox] + .ui-choice__control');
+    const fillOpacity = () =>
+      control.evaluate((element) => Number(getComputedStyle(element, '::before').opacity));
+    const pressShadow = await page.evaluate(() => {
+      const probe = document.createElement('span');
+      probe.style.position = 'fixed';
+      probe.style.opacity = '0';
+      probe.style.boxShadow = 'var(--neoverse-effect-press-shadow)';
+      document.body.append(probe);
+      const value = getComputedStyle(probe).boxShadow;
+      probe.remove();
+      return value;
+    });
+
+    await expect(input).toBeChecked();
+    await input.click();
+    await expect(input).not.toBeChecked();
+    await expect.poll(fillOpacity).toBe(0);
+
+    await input.hover();
+    await page.mouse.down();
+    try {
+      await expect.poll(fillOpacity).toBeGreaterThan(0.4);
+      const pressed = await control.evaluate((element) => ({
+        shadow: getComputedStyle(element).boxShadow,
+        transform: getComputedStyle(element).transform,
+      }));
+      expect(pressed.shadow).not.toBe(pressShadow);
+      expect(pressed.transform).toBe('none');
+    } finally {
+      await page.mouse.up();
+    }
+    await expect(input).toBeChecked();
+    await expect.poll(fillOpacity).toBe(1);
+  });
 });

@@ -43,6 +43,7 @@
       --neoverse-motion-easing-standard: step-end;
       --neoverse-motion-easing-emphasized: step-end;
       --neoverse-motion-easing-accelerate: step-end;
+      --neoverse-motion-easing-spring: step-end;
       --neoverse-motion-feedback-easing: step-end;
       --neoverse-motion-state-easing: step-end;
       --neoverse-motion-spatial-easing: step-end;
@@ -58,6 +59,9 @@
       --neoverse-motion-scale-near: 1;
       --neoverse-motion-scale-far: 1;
       --neoverse-motion-veil-blur: 0px;
+      --neoverse-motion-bloom-blur: 0px;
+      --neoverse-motion-haze-blur: 0px;
+      --neoverse-motion-sway-angle: 0deg;
       --neoverse-motion-enter-delay: 0ms;
       --neoverse-motion-exit-delay: 0ms;
       --neoverse-motion-particle-duration: 1ms;
@@ -92,6 +96,37 @@
 
   [data-neoverse-motion='veil'] {
     --neoverse-motion-from-filter: blur(var(--neoverse-motion-veil-blur));
+    /* A browser without the filter pass still needs an arrival; the fallback
+       scale stays 1 until a profile lowers it. */
+    --neoverse-motion-from-scale: var(--neoverse-motion-veil-fallback-scale);
+  }
+
+  /* Soft arrival: the element grows out of a blurred field. */
+  [data-neoverse-motion='bloom'] {
+    --neoverse-motion-from-filter: blur(var(--neoverse-motion-bloom-blur));
+    --neoverse-motion-from-scale: var(--neoverse-motion-scale-far);
+  }
+
+  /* Focus pull out of a heavier fog: no travel, and a longer settle so the
+     blur has time to read as depth instead of a flicker. */
+  [data-neoverse-motion='haze'] {
+    --neoverse-motion-enter-duration: var(--neoverse-motion-duration-expressive);
+    --neoverse-motion-from-filter: blur(var(--neoverse-motion-haze-blur));
+    --neoverse-motion-from-scale: var(--neoverse-motion-haze-fallback-scale);
+  }
+
+  /* An organic arrival: the element lands slightly tilted. */
+  [data-neoverse-motion='sway'] {
+    --neoverse-motion-from-rotate: var(--neoverse-motion-sway-angle);
+    --neoverse-motion-from-scale: var(--neoverse-motion-scale-near);
+    --neoverse-motion-from-translate: 0 var(--neoverse-motion-distance-near);
+  }
+
+  /* Short travel on a curve that passes its endpoint once before settling. */
+  [data-neoverse-motion='spring'] {
+    --neoverse-motion-enter-easing: var(--neoverse-motion-easing-spring);
+    --neoverse-motion-from-scale: var(--neoverse-motion-scale-near);
+    --neoverse-motion-from-translate: 0 var(--neoverse-motion-distance-near);
   }
 
   [data-neoverse-motion='slide-start'] {
@@ -121,6 +156,40 @@
     transform-origin: 100% 50%;
   }
 
+  /* --------------------------------------------------------------------
+     Declared fallback profiles. A profile is an opt-in for low-power
+     devices and the exact frame set an engine without the feature uses,
+     so the Design Lab can show a fallback instead of describing it.
+     `no-filter` drops the blur passes; the @supports query below applies
+     the same values automatically when `filter` cannot blur.
+     `fade-only` reproduces engines without individual transform
+     properties: every preset collapses to its opacity change.
+     -------------------------------------------------------------------- */
+  [data-neoverse-motion-fallback='no-filter'] [data-neoverse-motion] {
+    --neoverse-motion-veil-blur: 0px;
+    --neoverse-motion-bloom-blur: 0px;
+    --neoverse-motion-haze-blur: 0px;
+    --neoverse-motion-veil-fallback-scale: var(--neoverse-motion-scale-near);
+    --neoverse-motion-haze-fallback-scale: var(--neoverse-motion-scale-near);
+  }
+
+  [data-neoverse-motion-fallback='fade-only'] :is([data-neoverse-motion], .nv-presence) {
+    --neoverse-motion-from-translate: none;
+    --neoverse-motion-from-scale: 1;
+    --neoverse-motion-from-rotate: 0deg;
+    --neoverse-motion-from-filter: blur(0);
+  }
+
+  @supports not (filter: blur(1px)) {
+    :root {
+      --neoverse-motion-veil-blur: 0px;
+      --neoverse-motion-bloom-blur: 0px;
+      --neoverse-motion-haze-blur: 0px;
+      --neoverse-motion-veil-fallback-scale: var(--neoverse-motion-scale-near);
+      --neoverse-motion-haze-fallback-scale: var(--neoverse-motion-scale-near);
+    }
+  }
+
   .nv-enter-active {
     transition:
       opacity var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
@@ -128,6 +197,8 @@
       translate var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
       var(--neoverse-motion-enter-delay),
       scale var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
+      var(--neoverse-motion-enter-delay),
+      rotate var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
       var(--neoverse-motion-enter-delay),
       filter var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
       var(--neoverse-motion-enter-delay);
@@ -141,6 +212,8 @@
       var(--neoverse-motion-exit-delay),
       scale var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing)
       var(--neoverse-motion-exit-delay),
+      rotate var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing)
+      var(--neoverse-motion-exit-delay),
       filter var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing)
       var(--neoverse-motion-exit-delay);
     pointer-events: none;
@@ -151,6 +224,7 @@
     opacity: 0;
     translate: var(--neoverse-motion-from-translate, 0 0);
     scale: var(--neoverse-motion-from-scale, 1);
+    rotate: var(--neoverse-motion-from-rotate, 0deg);
     filter: var(--neoverse-motion-from-filter, blur(0));
   }
 
@@ -179,6 +253,7 @@
       opacity: 0;
       translate: var(--neoverse-motion-from-translate, 0 0);
       scale: var(--neoverse-motion-from-scale, 1);
+      rotate: var(--neoverse-motion-from-rotate, 0deg);
       filter: var(--neoverse-motion-from-filter, blur(0));
     }
   }
@@ -198,6 +273,7 @@
       opacity: 0;
       translate: var(--neoverse-motion-from-translate, 0 0);
       scale: var(--neoverse-motion-from-scale, 1);
+      rotate: var(--neoverse-motion-from-rotate, 0deg);
       filter: var(--neoverse-motion-from-filter, blur(0));
     }
   }
@@ -215,12 +291,14 @@
       opacity var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
       translate var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
       scale var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
+      rotate var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
       filter var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
       overlay var(--neoverse-motion-exit-duration) allow-discrete,
       display var(--neoverse-motion-exit-duration) allow-discrete;
     opacity: 0;
     translate: var(--neoverse-motion-from-translate, 0 0);
     scale: var(--neoverse-motion-from-scale, 1);
+    rotate: var(--neoverse-motion-from-rotate, 0deg);
     filter: var(--neoverse-motion-from-filter, blur(0));
   }
 
@@ -234,12 +312,14 @@
       opacity var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
       translate var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
       scale var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
+      rotate var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
       filter var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
       overlay var(--neoverse-motion-enter-duration) allow-discrete,
       display var(--neoverse-motion-enter-duration) allow-discrete;
     opacity: 1;
     translate: 0 0;
     scale: 1;
+    rotate: 0deg;
     filter: blur(0);
   }
 
@@ -253,6 +333,7 @@
       opacity: 0;
       translate: var(--neoverse-motion-from-translate, 0 0);
       scale: var(--neoverse-motion-from-scale, 1);
+      rotate: var(--neoverse-motion-from-rotate, 0deg);
       filter: var(--neoverse-motion-from-filter, blur(0));
     }
   }
@@ -266,6 +347,7 @@
     opacity: 0;
     translate: var(--neoverse-motion-from-translate, 0 0);
     scale: var(--neoverse-motion-from-scale, 1);
+    rotate: var(--neoverse-motion-from-rotate, 0deg);
     filter: var(--neoverse-motion-from-filter, blur(0));
   }
 

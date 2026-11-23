@@ -137,10 +137,23 @@ test('exposes consumer-validated action and navigation component tokens', () => 
   expect(cssVariables.components.navigationItem.iconSize).toBe(
     '--neoverse-navigation-item-icon-size',
   );
+  expect(cssVariables.components.navigationItem.iconSizes).toEqual({
+    sm: '--neoverse-navigation-item-icon-size-sm',
+    md: '--neoverse-navigation-item-icon-size-md',
+    lg: '--neoverse-navigation-item-icon-size-lg',
+  });
+  expect(cssVariables.components.navigationItem.filter).toBe('--neoverse-navigation-item-filter');
   expect(cssVariables.components.breadcrumb.currentForeground).toBe(
     '--neoverse-breadcrumb-current-foreground',
   );
   expect(cssVariables.components.breadcrumb.focusRadius).toBe('--neoverse-breadcrumb-focus-radius');
+  // The hover plate is consumer-tunable: size, wash and growth live in tokens.
+  expect(cssVariables.components.breadcrumb).toMatchObject({
+    linkPlateInset: '--neoverse-breadcrumb-link-plate-inset',
+    linkPlateBackground: '--neoverse-breadcrumb-link-plate-background',
+    linkPlateRestScale: '--neoverse-breadcrumb-link-plate-rest-scale',
+    clipMargin: '--neoverse-breadcrumb-clip-margin',
+  });
   expect(cssVariables.components.controlSurface.itemGap).toBe(
     '--neoverse-control-surface-item-gap',
   );

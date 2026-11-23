@@ -154,6 +154,7 @@ export const disclosure = defineSpecimen<Record<never, never>, { open: boolean }
       {
         summary: localize(disclosureCopy.summary, locale),
         open: state.open,
+        class: 'w-full max-w-container-sm',
         'data-data-display-disclosure': state.open ? 'open' : 'closed',
         'onUpdate:open': (value: boolean) => setState('open', value),
       },

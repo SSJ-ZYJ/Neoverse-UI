@@ -1071,14 +1071,16 @@ describe('form controls', () => {
 
   it('keeps textarea attributes and v-model updates native', async () => {
     const wrapper = mount(UiTextarea, {
-      attrs: { name: 'notes', rows: '4', 'aria-label': 'Notes' },
+      attrs: { name: 'notes', rows: '4', 'aria-label': 'Notes', class: 'consumer-notes' },
       props: { modelValue: 'Initial' },
     });
 
     const textarea = wrapper.get('textarea');
     expect(textarea.attributes('rows')).toBe('4');
     expect(textarea.classes()).toContain('ui-textarea');
+    expect(textarea.classes()).not.toContain('consumer-notes');
     expect(wrapper.classes()).toContain('ui-textarea-shell');
+    expect(wrapper.classes()).toContain('consumer-notes');
     await textarea.trigger('pointerdown');
     expect(textarea.attributes('data-neoverse-focus-origin')).toBe('pointer');
     await textarea.trigger('blur');

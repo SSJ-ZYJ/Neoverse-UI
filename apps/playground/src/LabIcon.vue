@@ -54,7 +54,7 @@ const paths: Record<LabIconName, string> = {
 <template>
   <svg
     aria-hidden="true"
-    class="size-4 shrink-0 fill-none stroke-current stroke-2"
+    class="lab-icon shrink-0 fill-none stroke-current stroke-2"
     viewBox="0 0 24 24"
     stroke-linecap="round"
     stroke-linejoin="round"
@@ -62,3 +62,12 @@ const paths: Record<LabIconName, string> = {
     <path :d="paths[props.name]" />
   </svg>
 </template>
+
+<style scoped>
+/* The icon follows the owning action's size token instead of a fixed utility
+   class, so compact/large NavigationItems scale their glyph with the item. */
+.lab-icon {
+  width: var(--ui-action-icon-size, 1rem);
+  height: var(--ui-action-icon-size, 1rem);
+}
+</style>

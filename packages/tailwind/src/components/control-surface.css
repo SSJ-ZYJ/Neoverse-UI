@@ -38,6 +38,19 @@
       var(--neoverse-font-size-md) *
       var(--neoverse-control-surface-scale-lg-type-factor)
     );
+    --neoverse-navigation-item-icon-size-sm: calc(
+      var(--neoverse-icon-size-md) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    --neoverse-navigation-item-icon-size-md: calc(
+      var(--neoverse-icon-size-md) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    --neoverse-navigation-item-icon-size-lg: calc(
+      var(--neoverse-icon-size-lg) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    --neoverse-navigation-item-icon-size: var(--neoverse-navigation-item-icon-size-md);
     --neoverse-control-segmented-option-font-size-sm: calc(
       var(--neoverse-font-size-sm) *
       var(--neoverse-control-surface-scale-lg-type-factor)

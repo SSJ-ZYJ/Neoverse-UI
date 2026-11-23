@@ -97,6 +97,11 @@
     background: var(--neoverse-form-control-readonly-background);
   }
 
+  /* Locked fields keep selection but never paint an insertion caret. */
+  :where(.ui-input, .ui-textarea):is(:disabled, [readonly]) {
+    caret-color: transparent;
+  }
+
   :where(.ui-input, .ui-textarea, .ui-select)[data-validation='error'] {
     --neoverse-form-control-validation-shadow: var(--neoverse-form-control-validation-error-shadow);
   }
@@ -237,7 +242,9 @@
     vertical-align: text-top;
     animation: ui-caret-breathe var(--neoverse-motion-caret-duration)
       var(--neoverse-motion-caret-easing) infinite;
-    transition-property: transform, width;
+    /* The bar keeps its width and only travels. A width transition turned the
+       glide into a solid slab over the text on long jumps. */
+    transition-property: transform;
     transition-duration: var(--neoverse-motion-caret-glide-duration);
     transition-timing-function: var(--neoverse-motion-easing-symmetric);
   }
@@ -649,8 +656,24 @@
     backdrop-filter: var(--neoverse-form-control-filter);
     transition:
       background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
-      box-shadow var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
-      transform var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
+      box-shadow var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  /* State fills flow in from the centre instead of swapping a shadow or
+     compressing the plate. Press previews the same fill at lower opacity, so
+     every choice shares one calm motion vocabulary. */
+  .ui-choice__control::before {
+    position: absolute;
+    z-index: 0;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--neoverse-choice-control-active-background);
+    content: '';
+    opacity: 0;
+    transform: scale(0.72);
+    transition:
+      opacity var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      transform var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
   }
 
   .ui-choice__content {
@@ -674,6 +697,8 @@
   }
 
   .ui-choice__indicator {
+    position: relative;
+    z-index: 1;
     width: var(--neoverse-choice-control-indicator-size);
     height: var(--neoverse-choice-control-indicator-size);
     fill: none;
@@ -681,22 +706,29 @@
     stroke-width: var(--neoverse-border-width-strong);
     stroke-linecap: round;
     stroke-linejoin: round;
+    /* The check draws itself while the fill flows underneath. Opacity and
+       dash offset use the shared state timing; no spring or scale overshoot. */
+    stroke-dasharray: 24;
+    stroke-dashoffset: 24;
     opacity: 0;
-    transform: scale(0.72);
     transition:
       opacity var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
-      transform var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
+      stroke-dashoffset var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  .ui-choice__native:checked + .ui-choice__control::before {
+    opacity: 1;
+    transform: scale(1);
   }
 
   .ui-choice__native:checked + .ui-choice__control {
-    background: var(--neoverse-choice-control-active-background);
     box-shadow:
       var(--neoverse-choice-control-active-shadow), var(--neoverse-choice-validation-shadow);
   }
 
   .ui-choice__native:checked + .ui-choice__control .ui-choice__indicator {
+    stroke-dashoffset: 0;
     opacity: 1;
-    transform: scale(1);
   }
 
   .ui-choice__native:focus-visible + .ui-choice__control {
@@ -707,13 +739,6 @@
   @media (hover: hover) {
     .ui-choice:not([data-disabled='true'], [data-readonly='true']):hover .ui-choice__control {
       background: var(--neoverse-choice-control-hover-background);
-    }
-
-    .ui-choice:not([data-disabled='true'], [data-readonly='true']):has(
-        .ui-choice__native:checked
-      ):hover
-      .ui-choice__control {
-      background: var(--neoverse-choice-control-active-background);
     }
   }
 
@@ -731,14 +756,22 @@
       inset 0 0 0 var(--neoverse-border-width-thin) var(--neoverse-control-silhouette);
   }
 
+  .ui-choice[data-disabled='true'] .ui-choice__control::before {
+    opacity: 0;
+    transform: scale(0.72);
+  }
+
   :where(.ui-choice[data-disabled='true'])
     :where(.ui-choice__content, .ui-choice__indicator, .ui-switch__thumb) {
     opacity: var(--neoverse-choice-control-disabled-opacity);
   }
 
-  .ui-choice:not([data-disabled='true'], [data-readonly='true']):active .ui-choice__control,
-  .ui-select:active:not([aria-disabled='true']):not([aria-readonly='true']) {
-    box-shadow: var(--neoverse-effect-press-shadow);
+  /* Press previews the same flowing fill at lower opacity. No shadow swap,
+     compression or spring overshoot: the state eases in on one continuous arc. */
+  .ui-choice:not([data-disabled='true'], [data-readonly='true']):active
+    .ui-choice__control::before {
+    opacity: var(--neoverse-effect-alpha-intense);
+    transform: scale(0.88);
   }
 
   .ui-choice[data-readonly='true'] {
@@ -794,6 +827,14 @@
     border-radius: var(--neoverse-radius-pill);
     background: currentColor;
     stroke: none;
+    transform: scale(0.6);
+    transition:
+      opacity var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      transform var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  .ui-radio .ui-choice__native:checked + .ui-choice__control .ui-choice__indicator {
+    transform: scale(1);
   }
 
   .ui-switch .ui-choice__control {
@@ -804,6 +845,7 @@
 
   .ui-switch__thumb {
     position: absolute;
+    z-index: 1;
     inset-block-start: var(--neoverse-switch-thumb-inset);
     inset-inline-start: var(--neoverse-switch-thumb-inset);
     width: var(--neoverse-switch-thumb-size);
@@ -886,6 +928,7 @@
     .ui-select__option,
     .ui-input-number__step,
     .ui-choice__control,
+    .ui-choice__control::before,
     .ui-choice__indicator,
     .ui-switch__thumb {
       transition: none;

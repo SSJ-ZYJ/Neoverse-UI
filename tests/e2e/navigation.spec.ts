@@ -1,5 +1,6 @@
 import type { Locator } from '@playwright/test';
 import { expect, test } from '../support/e2e';
+import { chooseOption, showInspector } from '../support/playground';
 
 /** The committed layout box of the indicator, independent of any flight. */
 type IndicatorBox = {
@@ -179,6 +180,106 @@ test.describe('navigation', () => {
     expect(errors).toEqual([]);
   });
 
+  test('breadcrumb hover paints a large readable plate without moving the trail', async ({
+    page,
+  }, testInfo) => {
+    await page.goto('/react-fixture?theme=light&lang=en');
+    const breadcrumb = page.locator('[data-navigation="default"]');
+    const link = breadcrumb.getByRole('link', { name: 'Documentation' });
+    await link.scrollIntoViewIfNeeded();
+
+    const trailBefore = await breadcrumb.boundingBox();
+    const lineHeight = (await breadcrumb.locator('.ui-breadcrumb__current').boundingBox())?.height;
+    const rest = await link.evaluate((node) => {
+      const style = getComputedStyle(node);
+      const plate = getComputedStyle(node, '::after');
+      return {
+        color: style.color,
+        plateOpacity: plate.opacity,
+        plateRadius: plate.borderTopLeftRadius,
+        paddingBlock: Number.parseFloat(style.paddingTop),
+        paddingInline: Number.parseFloat(style.paddingLeft),
+        marginBlock: Number.parseFloat(style.marginTop),
+        marginInline: Number.parseFloat(style.marginLeft),
+        height: node.getBoundingClientRect().height,
+        overflow: style.overflowX,
+      };
+    });
+
+    // The plate covers the padded link box, which is taller than the breadcrumb's
+    // single line, and the negative margin returns the same space to the trail.
+    expect(rest.overflow).toBe('clip');
+    expect(rest.paddingBlock).toBeGreaterThan(0);
+    expect(rest.paddingInline).toBe(rest.paddingBlock);
+    expect(rest.marginBlock).toBeCloseTo(-rest.paddingBlock, 1);
+    expect(rest.marginInline).toBeCloseTo(-rest.paddingInline, 1);
+    expect(rest.plateOpacity).toBe('0');
+    expect(rest.plateRadius).not.toBe('0px');
+    expect(rest.height).toBeGreaterThan((lineHeight ?? 0) + 1);
+
+    if (!testInfo.project.use.hasTouch) {
+      const readPlate = () =>
+        link.evaluate((node) => {
+          const plate = getComputedStyle(node, '::after');
+          return {
+            color: getComputedStyle(node).color,
+            opacity: plate.opacity,
+            background: plate.backgroundColor,
+            image: plate.backgroundImage,
+            transform: plate.transform,
+          };
+        });
+
+      // Hovering the padding — outside the glyphs, clear of the rounded corner —
+      // must still answer, which is the point of growing the hit box instead of
+      // tinting the text line.
+      await link.hover({ position: { x: 2, y: 12 } });
+      // The wash and the label color both animate, so poll instead of
+      // sampling the first frame.
+      await expect.poll(async () => (await readPlate()).opacity).toBe('1');
+      const hovered = await readPlate();
+      expect(hovered.background).not.toBe('rgba(0, 0, 0, 0)');
+      expect(hovered.color).not.toBe(rest.color);
+
+      // Pressing deepens the plate instead of fading it and pulls it in.
+      await page.mouse.down();
+      await expect.poll(async () => (await readPlate()).image).toContain('gradient');
+      await expect.poll(async () => (await readPlate()).transform).not.toBe('none');
+      expect((await readPlate()).background).toBe(hovered.background);
+      await page.mouse.move(0, 0);
+      await page.mouse.up();
+
+      // Hover must not resize the link or shift the trail.
+      const afterBox = await link.boundingBox();
+      expect(afterBox?.height).toBeCloseTo(rest.height, 1);
+      const trailAfter = await breadcrumb.boundingBox();
+      expect(trailAfter?.width).toBeCloseTo(trailBefore?.width ?? 0, 1);
+      expect(trailAfter?.height).toBeCloseTo(trailBefore?.height ?? 0, 1);
+
+      await expect.poll(async () => (await readPlate()).opacity).toBe('0');
+      await expect.poll(async () => (await readPlate()).color).toBe(rest.color);
+    }
+  });
+
+  test('the Design Lab breadcrumb specimen keeps real anchors but stays on its route', async ({
+    page,
+  }) => {
+    await page.goto('/?lang=en#controls-breadcrumb', { waitUntil: 'domcontentloaded' });
+    const breadcrumb = page.locator('#controls-breadcrumb .ui-breadcrumb');
+    const link = breadcrumb.getByRole('link', { name: 'Home' });
+
+    await expect(link).toBeVisible();
+    // Native anchor semantics stay: the specimen demonstrates the real markup.
+    expect(await link.getAttribute('href')).toBe('#top');
+
+    await link.click();
+    await expect(page).toHaveURL(/#controls-breadcrumb$/);
+
+    await link.focus();
+    await link.press('Enter');
+    await expect(page).toHaveURL(/#controls-breadcrumb$/);
+  });
+
   test('dock keeps native links, trailing content and the compact composition', async ({
     page,
   }) => {
@@ -353,6 +454,29 @@ test.describe('navigation', () => {
       await page.mouse.up();
     }
     await expect(current).toHaveCSS('background-image', hover);
+  });
+
+  test('a compact large navigation item scales its icon with the size token', async ({
+    page,
+  }, testInfo) => {
+    await page.goto('/?theme=light&lang=en#controls-navigation-item', {
+      waitUntil: 'domcontentloaded',
+    });
+    const item = page.locator('[data-design-lab-region="specimen"] .ui-navigation-item');
+    const iconWidth = () =>
+      item.evaluate((element) => {
+        const svg = element.querySelector('svg');
+        if (!(svg instanceof SVGElement)) throw new Error('The navigation icon is missing');
+        return svg.getBoundingClientRect().width;
+      });
+    expect(await iconWidth()).toBe(16);
+
+    const inspector = await showInspector(page, testInfo.project.name === 'mobile');
+    await chooseOption(inspector, 'size', 'Large');
+    await expect.poll(iconWidth).toBe(20);
+    await inspector.getByRole('switch', { name: 'Compact' }).press('Space');
+    await expect.poll(iconWidth).toBe(20);
+    expect(await item.evaluate((element) => element.getBoundingClientRect().height)).toBe(40);
   });
 
   test.describe('dock shared indicator', () => {

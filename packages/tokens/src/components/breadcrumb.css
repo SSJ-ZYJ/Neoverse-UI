@@ -14,5 +14,21 @@
     --neoverse-breadcrumb-focus-width: var(--neoverse-focus-ring-width);
     --neoverse-breadcrumb-focus-offset: var(--neoverse-focus-ring-offset);
     --neoverse-breadcrumb-focus-radius: var(--neoverse-radius-control-inner);
+
+    /* The link grows its own box by this inset and pulls the same amount back
+       with a negative margin, so the hit area and the hover plate both reach
+       past the label while the trail keeps its exact geometry. */
+    --neoverse-breadcrumb-link-plate-inset: var(--neoverse-space-1);
+    /* The plate runs in the shared hover field, the same wash plain links use,
+       so breadcrumb feedback matches footer and prose links instead of the
+       quieter control tint. */
+    --neoverse-breadcrumb-link-plate-background: var(--neoverse-effect-hover-field);
+    /* The plate fades in while it grows from slightly smaller to the link box. */
+    --neoverse-breadcrumb-link-plate-rest-scale: 0.92;
+    /* The container must not clip the plate or the focus ring, which reaches
+       one plate inset plus one focus offset and width past the trail box. This
+       stays a plain length because Chromium rejects calc() in
+       overflow-clip-margin. */
+    --neoverse-breadcrumb-clip-margin: 0.625rem;
   }
 }

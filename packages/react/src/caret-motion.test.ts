@@ -10,9 +10,20 @@ function createGlyph(
 ): {
   glyph: HTMLElement;
   state: FakeGlyph;
+  writes: Array<{ property: string; value: string }>;
   reflows: () => number;
 } {
   const style: Record<string, string> = {};
+  const writes: Array<{ property: string; value: string }> = [];
+  const trackedStyle = new Proxy(style, {
+    set(target, property, value) {
+      if (typeof property === 'string') {
+        writes.push({ property, value: String(value) });
+      }
+      Reflect.set(target, property, value);
+      return true;
+    },
+  });
   let reflows = 0;
   const glyph = {
     getBoundingClientRect: () => ({ left, width: bar }),
@@ -20,11 +31,12 @@ function createGlyph(
       reflows += 1;
       return 100;
     },
-    style,
+    style: trackedStyle,
   };
   return {
     glyph: glyph as unknown as HTMLElement,
     state: style,
+    writes,
     reflows: () => reflows,
   };
 }
@@ -75,9 +87,9 @@ test('the first sample records the glyph position without animating', () => {
   expect(state.transitionDuration).toBe('');
 });
 
-test('a travelled caret stretches across the old span and collapses back to the bar', () => {
+test('a travelled caret glides from the previous position without stretching', () => {
   withMotionTokens('200ms', (timers) => {
-    const { glyph, state, reflows } = createGlyph(140);
+    const { glyph, state, writes, reflows } = createGlyph(140);
     slideCaret(glyph, null, 'hello', false);
     expect(slideCaret(glyph, 100, 'hello', false)).toBe(140);
     expect(state.width).toBe('');
@@ -86,6 +98,8 @@ test('a travelled caret stretches across the old span and collapses back to the 
     expect(state.animationName).toBe('none');
     expect(reflows()).toBe(1);
     expect(timers).toHaveLength(1);
+    expect(writes).toContainEqual({ property: 'transform', value: 'translateX(-40px)' });
+    expect(writes.some(({ property, value }) => property === 'width' && value !== '')).toBe(false);
 
     timers[0]?.();
     expect(state.animationName).toBe('');

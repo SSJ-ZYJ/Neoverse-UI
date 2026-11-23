@@ -1,6 +1,53 @@
 import { expect, expectNoPageOverflow, test } from '../support/e2e';
 
 test.describe('motion', () => {
+  test('presence specimens render the library badge instead of a local chip', async ({ page }) => {
+    await page.goto('/frame?theme=light&lang=en#motion');
+    const specimen = page.locator('[data-motion-presence-specimen="veil"]');
+
+    await expect(specimen).toBeVisible();
+    // The specimen must be the real UiBadge, so its status tint, hairline and
+    // glass depth follow the library instead of a hand-written pill.
+    await expect(specimen).toHaveClass(/ui-badge/);
+    await expect(specimen).toHaveClass(/ui-badge--info/);
+    await expect(specimen).toHaveAttribute('data-neoverse-motion', 'veil');
+  });
+
+  test('presence fallback profiles rewrite the frames the engine applies', async ({ page }) => {
+    await page.goto('/frame?theme=light&lang=en#motion');
+    const grid = page.locator('[data-motion-presence-grid]');
+    const control = page.locator('[data-motion-presence-fallback]');
+    const specimen = grid.locator('[data-motion-presence-specimen="veil"]');
+    const frame = (property: string) =>
+      specimen.evaluate(
+        (node, name) => getComputedStyle(node).getPropertyValue(name).trim(),
+        property,
+      );
+    // Chromium serializes a custom-property number without the leading zero.
+    const frameScale = async () => Number.parseFloat(await frame('--neoverse-motion-from-scale'));
+
+    // Full motion keeps the preset's own geometry: veil is a pure blur arrival.
+    await expect(grid).not.toHaveAttribute('data-neoverse-motion-fallback');
+    expect(await frameScale()).toBe(1);
+    expect(await frame('--neoverse-motion-from-filter')).toBe('blur(8px)');
+
+    await control.getByRole('radio', { name: 'No filter' }).click();
+    await expect(grid).toHaveAttribute('data-neoverse-motion-fallback', 'no-filter');
+    // The blur pass is dropped and the arrival moves to a near scale instead.
+    await expect.poll(() => frame('--neoverse-motion-from-filter')).toBe('blur(0px)');
+    await expect.poll(frameScale).toBeCloseTo(0.97, 2);
+
+    await control.getByRole('radio', { name: 'Fade only' }).click();
+    await expect(grid).toHaveAttribute('data-neoverse-motion-fallback', 'fade-only');
+    // An engine without individual transform properties only changes opacity.
+    await expect.poll(() => frame('--neoverse-motion-from-translate')).toBe('none');
+    await expect.poll(frameScale).toBe(1);
+
+    await control.getByRole('radio', { name: 'Full motion' }).click();
+    await expect(grid).not.toHaveAttribute('data-neoverse-motion-fallback');
+    await expect.poll(() => frame('--neoverse-motion-from-filter')).toBe('blur(8px)');
+  });
+
   test('list reorder moves every item to its new position', async ({ page }) => {
     await page.goto('/frame?theme=light&lang=en#motion');
     const group = page.locator('[data-motion-presence-group]');

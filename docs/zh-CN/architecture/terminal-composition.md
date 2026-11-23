@@ -5,7 +5,7 @@ Status: adopted
 [English](../../architecture/terminal-composition.md)
 
 <!-- Source: docs/architecture/terminal-composition.md -->
-<!-- Source-SHA256: 18624fa30e3e673ba473f2c7e1d57ea26d8c6ef3e986eceb4d1caa46ed193694 -->
+<!-- Source-SHA256: 09c623e7e6b04cb8e2a2edf24a0b284c2dc851257b3b0127aaf2f66dc1ada7ab -->
 
 Neoverse-UI 提供的是**终端展示**，不是 Shell 模拟器或命令运行时。提示行是文本行，不是表单字段表面：半透明极光玻璃留在外层 `UiTerminalSurface` 上；编辑器本身没有边框、填充、阴影或圆角盒子。
 
@@ -59,7 +59,7 @@ function submit(event: KeyboardEvent) {
 - `UiTerminalSurface` 把既有极光玻璃表面与无障碍标题和操作插槽组合在一起。
 - `UiTerminalLine` 把字符串渲染为文本，保留复制/选择；`preformatted` 单独处理 ASCII 横幅。
 - `UiTerminalTranscript` 具有原生滚动区域与嵌套实时日志；仅在位于底部时自动跟随，并复用 `scrollbar-immersive`。
-- `UiTerminalPrompt` 拥有一个透明的**原生** `<input>`，外观与行内终端文本难以区分。不要在这里使用 `UiInput`。提示行用 `--neoverse-terminal-cursor` 绘制自己的闪烁光标；选择、IME 组合、密码掩码、`readonly`/`disabled` 与强制颜色模式会把光标交还浏览器。光标横跨已移动的跨度并收缩回竖条，时长随移动距离增长，上限为 glide 变量；在 `prefers-reduced-motion` 下滑动停止，但不透明度闪烁保留。竖条移动时保持实心，落定后重新闪烁。提示行有可组合的 `segments` 数组（host、path、branch、runtime、time）或 `#context` 插槽；`#segment="{ segment }"` 定制每个片段的内容，同时保留共享形状与颜色。text/password/search 类型、禁用、只读、错误与原生属性仍可用。焦点通过 `ref.focus()` 暴露给消费项目。Enter 处理与 IME 组合由消费项目负责。
+- `UiTerminalPrompt` 拥有一个透明的**原生** `<input>`，外观与行内终端文本难以区分。不要在这里使用 `UiInput`。提示行用 `--neoverse-terminal-cursor` 绘制自己的闪烁光标；选择、IME 组合、密码掩码、`readonly`/`disabled` 与强制颜色模式会把光标交还浏览器。光标从上一位置滑向新位置，时长随移动距离增长，上限为 glide 变量；滑行时保持宽度，因此不会覆盖经过的那一行，在 `prefers-reduced-motion` 下滑行停止，但不透明度闪烁保留。竖条移动时保持实心，落定后重新闪烁。提示行有可组合的 `segments` 数组（host、path、branch、runtime、time）或 `#context` 插槽；`#segment="{ segment }"` 定制每个片段的内容，同时保留共享形状与颜色。text/password/search 类型、禁用、只读、错误与原生属性仍可用。焦点通过 `ref.focus()` 暴露给消费项目。Enter 处理与 IME 组合由消费项目负责。
 - `UiTerminalEcho` 把已记录命令渲染为可选择的转义文本，没有输入、标签或 Tab 停靠点。它的 `text`、`segments`、`symbol` 与 `error` 复用实时提示的内部片段渲染器、几何与变量；Vue `#segment` 与 React `renderSegment` 定制同一外观。空 segments 省略上下文行。提交历史时保留 segment 值，而不是把旧条目绑定到当前工作目录。`UiTerminalPrompt readonly` 仍是原生输入，不是 transcript echo。
 - 浅色与深色主题都通过 `cssVariables.components.terminal` 暴露所有片段颜色。分层上下文颜色派生自 `--neoverse-color-accent-primary` 与主题的中性/文本角色；两种主题中光标都跟随主题主强调色，而命令标记在深色中保留更亮的次强调色，在浅色中使用既有 `mint-700` 调色板角色，以在浅色画布上保持足够对比。浅色使用浅色不透明上下文填充，深色使用更深的不透明填充，在不重叠半透明颜色的前提下保留齐平圆角过渡。branch、runtime 与 time 前景各有独立语义角色。改变主题颜色不改变几何或排版。不捆绑第三方字体。
 - 三条全高阴影带汇入齐平、相互重叠的圆帽。上下文与下一行编辑器共享同一等宽字号；在狭窄屏幕上，最后一个圆帽保持在可横向滚动的上下文内。所有形状使用 CSS 几何，不使用 Nerd Font 私有字形。可省略 host、branch 或 runtime 片段，而不改变接合几何。

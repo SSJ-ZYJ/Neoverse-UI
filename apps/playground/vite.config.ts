@@ -35,7 +35,7 @@ export default defineConfig(({ mode }) => ({
     // In watch mode keep the last complete bundle available while Rollup writes
     // the next build. Production builds still start from a clean asset directory.
     emptyOutDir: mode !== 'development',
-    rollupOptions: {
+    rolldownOptions: {
       input: {
         playground: fileURLToPath(new URL('./src/main.ts', import.meta.url)),
         'react-fixture': fileURLToPath(new URL('./src/react-fixture.tsx', import.meta.url)),
@@ -44,6 +44,17 @@ export default defineConfig(({ mode }) => ({
         entryFileNames: '[name].js',
         chunkFileNames: 'chunks/[name]-[hash].js',
         assetFileNames: '[name][extname]',
+        // The shell entry statically imports the whole Design Lab catalogue.
+        // Keep the shared Vue runtime in its own cacheable chunk so no emitted
+        // chunk crosses Vite's 500 kB advisory limit.
+        codeSplitting: {
+          groups: [
+            {
+              name: 'vue-runtime',
+              test: /node_modules[\\/]@vue[\\/]/,
+            },
+          ],
+        },
       },
     },
   },

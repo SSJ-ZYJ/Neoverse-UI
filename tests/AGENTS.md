@@ -13,7 +13,7 @@ tests/
 
 Specs are organised by product module, not by component. The ownership table lives in the [testing registry](../docs/testing/README.md#browser-specs); do not duplicate it here.
 
-`tests/support/e2e.ts` owns the shared adapters, theme iteration, overflow assertions and fixture helpers. A helper used by one spec stays in that spec.
+`tests/support/e2e.ts` owns the shared adapters, theme iteration, overflow assertions and fixture helpers; `tests/support/playground.ts` holds the Inspector and language helpers shared by the playground specs. A helper used by one spec stays in that spec.
 
 ## optics
 

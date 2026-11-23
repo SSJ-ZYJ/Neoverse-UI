@@ -44,7 +44,11 @@ buttons use scale 1; saturation, contrast and brightness remain tier-owned.
 Two independent
 surfaces layered together still composite; grouping owners explicitly use
 `surface="none"` or `glassNesting="inherit"` for borrowed material. Ghost controls
-have no independent plate. Reduced transparency uses an opaque tint and no blur.
+have no independent plate. Navigation's persistent selection plate is a
+component-owned plate rather than transient Ghost feedback, so it samples the
+backdrop even when the item's interaction surface is `none`; hover and press
+still paint only a local wash. Reduced transparency uses an opaque tint and no
+blur.
 
 ## Aurora Glass edge reflection
 
@@ -288,9 +292,22 @@ A selected SegmentedControl slider and a selected navigation item use a local ac
 field. Dock trailing groups retain a local grouping wash. These fields express
 selection or grouping, never create another backdrop filter, and remain consistent
 through hover and press. The surrounding Aurora Glass plate keeps its tier alpha/filter.
-Segmented options, navigation items, tabs, pagination, breadcrumbs, menu items,
-and number steppers share the quiet button wash. Hover adds the wash; press
-uses a deeper shade without moving the control or changing its shadow.
+Segmented options, navigation items, tabs, pagination, menu items, and number
+steppers share the quiet button wash. Hover adds the wash; press uses a deeper
+shade without moving the control or changing its shadow.
+Breadcrumb links answer like plain links instead: the link grows its own box by
+the plate inset and gives the same space back with a negative margin, and the
+container carries the same inset so every padded pixel stays hit-testable while
+the trail keeps its geometry. The plate fills that box in the shared hover field,
+rises from slightly smaller as it fades in, deepens on press, and the label rises
+to the primary text role — accent-on-accent text would drop below 3:1 in Light.
+The container clips with `overflow-clip-margin` rather than hard
+`overflow: hidden`, which would cut the plate and the focus ring.
+A navigation surface owns one accent: a surface that retunes its selection plate
+retunes the start rail and the bottom bar with the same accent, and the placement
+alias resolves on the item rather than at the document root. The library default
+pairs the mint selection field with the mint indicator, so only a surface that
+replaces the plate needs to declare its own accent.
 Current-page, checked, open and selected indicators remain visible, and
 activation rather than press commits selection.
 

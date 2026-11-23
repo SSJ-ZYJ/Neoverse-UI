@@ -5,9 +5,9 @@
 '@neoverse-ui/react': minor
 ---
 
-`UiTerminalPrompt` and `UiInput` now draw their own caret instead of relying on the browser blink. The bar is a rounded pill in the theme accent that breathes on a one second cycle from shared caret tokens, holds solid while text is being edited, and stretches across the span it travels before collapsing back with a distance-scaled glide whose leading edge never wobbles. Only opacity animates for the blink, so it also runs under reduced motion; the glide is real motion and stops when reduced motion is requested.
+`UiTerminalPrompt` and `UiInput` now draw their own caret instead of relying on the browser blink. The bar is a rounded pill in the theme accent that breathes on a one second cycle from shared caret tokens, holds solid while text is being edited, and glides from its previous position to the new one with a duration that grows with the distance travelled up to the glide token. The bar keeps its width for the whole travel, so a Home/End jump moves a thin caret instead of painting a solid slab across the text it passes. Only opacity animates for the blink, so it also runs under reduced motion; the glide is real motion and stops when reduced motion is requested.
 
-The overlay only takes over for a collapsed caret inside an editable control. Selection, IME composition, masked, email and number inputs, readonly or disabled controls and forced colors all keep the native caret, so inputs that do not report a text selection look exactly as they did before.
+The overlay only takes over for a collapsed caret inside an editable control. Selection, IME composition, masked, email and number inputs, and forced colors keep the native caret. Readonly and disabled text controls remain focusable and selectable where the platform allows it, but they no longer paint an insertion caret at all, so a pointer activation cannot leave a blinking bar in a field that cannot be edited.
 
 `UiInput` renders its native input inside a new `ui-input-shell` wrapper so the caret layer can share the control's padding and scroll offset; `class` and `style` still land on the input itself. `UiTextarea` keeps the native caret, because a multi-line caret needs two-axis mirroring.
 

@@ -1,6 +1,12 @@
 /**
- * Stretch a mirrored caret across the travelled span, then contract it back
- * into a thin bar to leave an elastic trail.
+ * Glide the mirrored caret from its previous position to the new one.
+ *
+ * The bar keeps its width; only its transform travels. An earlier version
+ * stretched the bar across the travelled span, which painted an opaque slab
+ * over the text on every long jump and read as a text selection instead of a
+ * caret. A short, distance-scaled glide moves at the same pace without ever
+ * covering glyphs, and edited text or scroll jumps start from the new position
+ * so the caret never trails the content.
  */
 const holdTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>();
 const lastText = new WeakMap<HTMLElement, string>();
@@ -40,7 +46,6 @@ export function slideCaret(
   glyph.style.width = '';
   const box = glyph.getBoundingClientRect();
   const left = box.left;
-  const bar = box.width;
   // Inserting or deleting text must not leave the caret trailing the glyphs.
   const edited = lastText.get(glyph) !== text;
   lastText.set(glyph, text);
@@ -50,18 +55,18 @@ export function slideCaret(
     // A far jump gets more travel time; the token caps how long that may take.
     const limit = glideCap(glyph);
     const duration = Math.round(Math.min(limit, Math.max(shortestGlide, distance * 1.8)));
-    // Start from the union of the old and new spans, then collapse to the bar.
-    glyph.style.width = `${distance + bar}px`;
-    glyph.style.transform = delta < 0 ? `translateX(${delta}px)` : 'none';
+    // Seed the previous position, commit it, then release the bar back to its
+    // resting transform so the browser interpolates the whole travel.
+    glyph.style.transform = `translateX(${delta}px)`;
     void glyph.offsetWidth;
     glyph.style.transition = '';
     glyph.style.transitionDuration = `${duration}ms`;
     holdBlink(glyph, duration);
+    glyph.style.transform = '';
   } else {
     glyph.style.transition = '';
     glyph.style.transitionDuration = '';
+    glyph.style.transform = '';
   }
-  glyph.style.width = '';
-  glyph.style.transform = '';
   return left;
 }
