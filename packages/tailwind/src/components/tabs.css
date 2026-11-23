@@ -43,7 +43,7 @@
     border-radius: var(--neoverse-tabs-tab-radius);
     padding-inline: var(--neoverse-tabs-tab-padding);
     color: var(--neoverse-color-text-secondary);
-    background: transparent;
+    background-color: var(--neoverse-quiet-control-feedback);
     font-size: var(--neoverse-tabs-tab-font-size);
     white-space: nowrap;
     cursor: pointer;
@@ -55,14 +55,19 @@
   .ui-tabs__tab--active {
     color: var(--neoverse-color-text-primary);
     border-color: var(--neoverse-tabs-selected-border);
-    background-image: var(--neoverse-tabs-selected-background-image);
+    background-image:
+      linear-gradient(
+        var(--neoverse-quiet-control-feedback),
+        var(--neoverse-quiet-control-feedback)
+      ),
+      var(--neoverse-tabs-selected-background-image);
     background-color: var(--neoverse-tabs-selected-background-color);
     box-shadow: var(--neoverse-tabs-selected-shadow);
   }
   .ui-tabs__indicator[data-ready='true'] ~ .ui-tabs__tab--active {
     border-color: transparent;
     background-image: none;
-    background-color: transparent;
+    background-color: var(--neoverse-quiet-control-feedback);
     box-shadow: none;
   }
   .ui-tabs__tab:focus-visible {
@@ -72,11 +77,6 @@
   .ui-tabs__tab:disabled {
     opacity: var(--neoverse-effect-disabled-content-opacity);
     cursor: not-allowed;
-  }
-  @media (hover: hover) {
-    .ui-tabs__tab:not(:disabled):not(.ui-tabs__tab--active):hover {
-      background: var(--neoverse-control-hover-background);
-    }
   }
   .ui-tabs__panel {
     min-width: 0;

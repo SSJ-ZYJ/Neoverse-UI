@@ -321,24 +321,11 @@
     border: 0;
     border-radius: var(--neoverse-input-step-radius);
     color: var(--neoverse-input-step-foreground);
-    background: transparent;
+    background-color: var(--neoverse-quiet-control-feedback);
     cursor: pointer;
     touch-action: manipulation;
-    transition:
-      background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
-      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
-  }
-
-  @media (hover: hover) {
-    .ui-input-number__step:not(:disabled):hover {
-      color: var(--neoverse-form-control-foreground);
-      background: var(--neoverse-input-step-hover-background);
-    }
-  }
-
-  .ui-input-number__step:not(:disabled):active {
-    background: var(--neoverse-input-step-active-background);
-    box-shadow: var(--neoverse-effect-press-shadow);
+    transition: background-color var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing);
   }
 
   .ui-input-number__step:focus-visible {
@@ -589,26 +576,13 @@
     cursor: pointer;
     transition:
       color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
-      background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
-      box-shadow var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
-  }
-
-  @media (hover: hover) {
-    .ui-select__option:not(:disabled):hover:not(:active) {
-      color: var(--neoverse-color-text-primary);
-      background: var(--neoverse-select-option-hover-background);
-    }
+      background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
   }
 
   .ui-select__option[aria-selected='true'] {
     color: var(--neoverse-select-option-selected-foreground);
     background: var(--neoverse-select-option-selected-background);
     box-shadow: var(--neoverse-surface-inset-active-highlight);
-  }
-
-  .ui-select__option:active:not(:disabled) {
-    background: var(--neoverse-effect-press-wash);
-    box-shadow: var(--neoverse-effect-press-shadow);
   }
 
   .ui-select__option:focus-visible {

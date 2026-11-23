@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
-import { updateButtonPointerGlow } from './button-pointer-glow';
 import {
   buttonBaseClasses,
   buttonSizeClasses,
@@ -58,7 +57,6 @@ const classes = computed(() => [
     :aria-busy="ariaBusy"
     :data-surface="props.surface"
     :class="[classes, attrs.class]"
-    @pointerdown="updateButtonPointerGlow"
   >
     <span class="ui-button__tone-field" aria-hidden="true" />
     <span class="ui-button__edge-field" aria-hidden="true" />

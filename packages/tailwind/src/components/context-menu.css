@@ -133,19 +133,7 @@
     font-variant-numeric: tabular-nums;
   }
 
-  @media (hover: hover) {
-    .ui-context-menu__item:not(:disabled):not([aria-disabled='true']):hover:not(:active) {
-      color: var(--neoverse-color-text-primary);
-      background: var(--neoverse-overlay-item-hover-background);
-    }
-  }
-
-  .ui-context-menu__item:active:not(:disabled):not([aria-disabled='true']) {
-    background: var(--neoverse-effect-press-wash);
-    box-shadow: var(--neoverse-effect-press-shadow);
-  }
-
-  .ui-context-menu__item:focus-visible:not(:active) {
+  .ui-context-menu__item:focus-visible {
     color: var(--neoverse-color-text-primary);
     background: var(--neoverse-overlay-item-active-background);
     outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);

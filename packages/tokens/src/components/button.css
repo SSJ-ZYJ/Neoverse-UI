@@ -16,27 +16,27 @@
     /* Compatibility aliases use the Light tier; actual owners select their surface preset. */
     --neoverse-control-button-glass-tint: var(--neoverse-material-glass-base-tint);
     --neoverse-control-button-blur-scale: 1;
-    --neoverse-control-button-filled-background: none;
+    --neoverse-control-button-filled-background: var(--neoverse-effect-command-rest-field-light);
     --neoverse-control-button-filled-fill: var(--neoverse-material-glass-subtle-background);
-    --neoverse-control-button-filled-hover-background: none;
+    --neoverse-control-button-filled-hover-background: var(
+      --neoverse-effect-command-hover-field-light
+    );
     --neoverse-control-button-filled-hover-fill: var(--neoverse-control-button-filled-fill);
     --neoverse-control-button-filled-shadow: var(--neoverse-effect-command-rest-shadow);
     --neoverse-control-button-filled-hover-shadow: var(--neoverse-effect-command-hover-shadow);
 
     /* Primary button state surfaces. */
-    --neoverse-control-primary-background: none;
+    --neoverse-control-primary-background: var(--neoverse-effect-primary-rest-field-light);
     --neoverse-control-primary-foreground: var(--neoverse-color-text-primary);
     --neoverse-control-primary-border: var(--neoverse-control-button-border);
     --neoverse-control-primary-shadow: var(--neoverse-effect-primary-rest-shadow);
-    --neoverse-control-primary-hover-background: none;
+    --neoverse-control-primary-hover-background: var(--neoverse-effect-primary-hover-field-light);
     --neoverse-control-primary-hover-shadow: var(--neoverse-effect-primary-hover-shadow);
-    --neoverse-control-primary-active-background: none;
+    --neoverse-control-primary-active-background: var(--neoverse-effect-primary-press-field-light);
 
-    /* The CSS fallback edge and pointer-positioned press field. Filled
-       buttons reuse the neutral control edge beside segmented controls;
-       Ghost reuses that edge without adding a filled plane. */
+    /* The edge field preserves the sampled material independently of button feedback. */
     --neoverse-control-button-edge: var(--neoverse-control-button-filled-shadow);
-    --neoverse-control-button-edge-active: var(--neoverse-control-active-shadow);
+    --neoverse-control-button-edge-active: var(--neoverse-shadow-none);
     --neoverse-control-button-edge-hover: var(--neoverse-control-button-filled-hover-shadow);
     /* Compact sampling composes from the selected shared preset at its owner. */
     --neoverse-control-button-filter: var(--neoverse-material-control-filter);
@@ -47,14 +47,10 @@
        can tune its opacity independently without painting a geometric border. */
     --neoverse-control-button-edge-refraction-opacity: var(--neoverse-effect-command-edge-opacity);
     --neoverse-control-button-hover-background: var(--neoverse-control-active-background);
-    /* Base plates remain stable; shared effect roles supply press feedback. */
-    --neoverse-control-button-active-background: none;
+    --neoverse-control-button-active-background: var(--neoverse-effect-command-press-field-light);
     --neoverse-control-button-ghost-active-background:
       var(--neoverse-control-active-background), transparent;
-    /* Ghost is a transparent control, not a bordered Aurora Glass plate.
-       Theme parity is intentional: neither light nor dark paints a geometric
-       outline at rest, hover, or press. Interaction comes from the wash,
-       foreground shift, and restrained inner light only. */
+    /* Ghost feedback changes only the local wash and foreground. */
     --neoverse-control-ghost-border: transparent;
     --neoverse-control-ghost-hover-border: transparent;
     --neoverse-control-ghost-active-border: transparent;
@@ -62,19 +58,15 @@
     --neoverse-control-ghost-hover-shadow: var(--neoverse-effect-quiet-command-hover-shadow);
     --neoverse-control-ghost-background: transparent;
     --neoverse-control-ghost-hover-background: var(--neoverse-effect-quiet-command-hover-wash);
-    --neoverse-control-ghost-active-background: var(--neoverse-effect-press-wash);
+    --neoverse-control-ghost-active-background: var(--neoverse-effect-quiet-command-press-wash);
 
     /* Button-only foreground and filter states. */
     --neoverse-control-secondary-foreground: var(--neoverse-color-text-secondary);
-    --neoverse-control-secondary-hover-foreground: var(
-      --neoverse-control-segmented-active-foreground
-    );
-    --neoverse-control-secondary-active-foreground: var(
-      --neoverse-control-segmented-active-foreground
-    );
+    --neoverse-control-secondary-hover-foreground: var(--neoverse-color-text-primary);
+    --neoverse-control-secondary-active-foreground: var(--neoverse-color-text-primary);
     --neoverse-control-ghost-foreground: var(--neoverse-color-text-secondary);
-    --neoverse-control-ghost-hover-foreground: var(--neoverse-control-segmented-active-foreground);
-    --neoverse-control-ghost-active-foreground: var(--neoverse-control-segmented-active-foreground);
+    --neoverse-control-ghost-hover-foreground: var(--neoverse-color-text-primary);
+    --neoverse-control-ghost-active-foreground: var(--neoverse-color-text-primary);
     --neoverse-control-button-disabled-opacity: var(--neoverse-effect-disabled-content-opacity);
     --neoverse-control-button-hover-glow-opacity: var(--neoverse-effect-hover-opacity);
   }

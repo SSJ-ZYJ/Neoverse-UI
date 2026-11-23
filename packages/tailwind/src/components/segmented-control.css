@@ -76,7 +76,7 @@
     padding-block: var(--neoverse-control-segmented-option-padding-block-sm);
     padding-inline: var(--neoverse-control-segmented-option-padding-inline-sm);
     background-image: none;
-    background-color: transparent;
+    background-color: var(--neoverse-quiet-control-feedback);
     box-shadow: none;
     color: var(--neoverse-control-segmented-foreground);
     cursor: pointer;
@@ -84,13 +84,8 @@
     font-weight: var(--neoverse-control-segmented-option-font-weight);
     line-height: var(--neoverse-control-compact-line-height);
     white-space: nowrap;
-    transition:
-      background-color var(--neoverse-motion-feedback-duration)
-      var(--neoverse-motion-feedback-easing),
-      border-color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
-      box-shadow var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
-      color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
-      transform var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
+    transition: background-color var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing);
   }
 
   .ui-segmented-control .ui-segmented-control__option--active {
@@ -100,21 +95,6 @@
   .ui-segmented-control .ui-segmented-control__option:focus-visible {
     outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
     outline-offset: var(--neoverse-focus-ring-offset);
-  }
-
-  @media (hover: hover) {
-    /* Hover moves the label to the neutral foreground instead of previewing the
-       selected accent, so the selected option stays the only accented label.
-       Wash and label persist while pressed; press only adds its shadow and scale. */
-    .ui-segmented-control__option:not(.ui-segmented-control__option--active):hover:not(:disabled) {
-      background-color: var(--neoverse-control-hover-background);
-      color: var(--neoverse-control-segmented-hover-foreground);
-    }
-  }
-
-  .ui-segmented-control__option:active:not(:disabled) {
-    transform: scale(var(--neoverse-control-segmented-option-press-scale));
-    box-shadow: var(--neoverse-effect-press-shadow);
   }
 
   .ui-segmented-control__option:disabled {

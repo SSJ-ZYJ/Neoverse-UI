@@ -96,18 +96,6 @@ test('semantic effects share one disabled and loading vocabulary', async () => {
   expect(status).toContain('var(--neoverse-effect-pulse-mid-opacity)');
 });
 
-test('hover and press do not rewrite filled-button optics or dim the whole material', async () => {
-  const css = await Bun.file(
-    new URL('../../tailwind/src/components/button.css', import.meta.url),
-  ).text();
-  expect(css).toContain('@media (hover: hover)');
-  expect(css).toContain(":active:not(:disabled):not([aria-disabled='true'])");
-  expect(css).toContain('var(--neoverse-effect-hover-opacity)');
-  expect(css).toContain('var(--neoverse-effect-press-opacity)');
-  expect(css).toContain('> :not(.ui-button__edge-field)');
-  expect(css).not.toContain('background-color: var(--neoverse-control-button-filled-hover-fill)');
-});
-
 test('opted-in Glass strokes precede highlights without changing button edges', async () => {
   const material = await source('material.css');
   const dark = await source('themes/dark.css');

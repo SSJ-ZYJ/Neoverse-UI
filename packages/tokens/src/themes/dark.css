@@ -152,7 +152,6 @@
     var(--neoverse-material-edge-highlight-subtle), inset 0 -1px 2px rgb(0 0 0 / 18%);
 
   --neoverse-control-button-filled-background: var(--neoverse-effect-command-rest-field-dark);
-  --neoverse-control-button-tone-fill: transparent;
   /* Dark controls shade the sampled scene neutrally; no navy body or white veil. */
   --neoverse-control-button-glass-tint: var(--neoverse-color-black);
   /* Full panel blur erases the fine scene detail beneath a compact control. */
@@ -160,6 +159,7 @@
   --neoverse-control-button-filled-hover-background: var(
     --neoverse-effect-command-hover-field-dark
   );
+  --neoverse-control-button-active-background: var(--neoverse-effect-command-press-field-dark);
   --neoverse-control-primary-background: var(--neoverse-effect-primary-rest-field-dark);
   --neoverse-control-primary-hover-background: var(--neoverse-effect-primary-hover-field-dark);
   --neoverse-control-primary-active-background: var(--neoverse-effect-primary-press-field-dark);
@@ -185,8 +185,7 @@
   --neoverse-control-segmented-active-shadow: var(--neoverse-effect-choice-selected-shadow);
   --neoverse-control-segmented-shell-hover-border: var(--neoverse-control-segmented-border);
   --neoverse-control-segmented-shell-hover-shadow: var(--neoverse-control-segmented-shadow);
-  /* Dark buttons keep the tier-owned translucent plate. Broad white/grey
-     washes make that plate look milky; interaction uses the shared state field. */
+  /* Compact buttons keep the tier-owned sampled plate. */
   --neoverse-control-secondary-shadow: var(--neoverse-effect-compact-rest-shadow);
   --neoverse-control-secondary-hover-shadow: var(--neoverse-effect-compact-hover-shadow);
   /* Command depth remains independent of the segmented/navigation plane. */
@@ -201,21 +200,22 @@
   --neoverse-navigation-item-active-border: var(--neoverse-control-active-border);
   --neoverse-navigation-item-active-foreground: var(--neoverse-color-accent-secondary);
   --neoverse-navigation-item-active-shadow: var(--neoverse-control-active-highlight);
-  /* Primary shares secondary's sampled plane; foreground and stronger depth
-     retain hierarchy while the broad resting tone field stays transparent. */
-  --neoverse-control-primary-foreground: var(--neoverse-color-text-primary);
-  --neoverse-control-primary-border: transparent;
+  --neoverse-control-primary-foreground: #081324;
+  --neoverse-control-primary-border: #869cc8;
+  --neoverse-control-button-border: #566b8b;
   --neoverse-control-primary-shadow: var(--neoverse-effect-primary-rest-shadow);
   --neoverse-control-secondary-active-foreground: var(--neoverse-color-text-primary);
   --neoverse-control-ghost-foreground: var(--neoverse-color-text-muted);
   --neoverse-control-ghost-hover-foreground: var(--neoverse-color-text-primary);
   --neoverse-control-ghost-active-foreground: var(--neoverse-color-text-primary);
   --neoverse-control-ghost-border: transparent;
+  --neoverse-control-ghost-hover-background: rgb(112 141 183 / var(--neoverse-effect-strength-22));
+  --neoverse-control-ghost-active-background: rgb(74 99 140 / var(--neoverse-effect-strength-22));
   /* Dark keeps the validated glass rim as its compact-control silhouette. */
   --neoverse-control-silhouette: var(--neoverse-color-border-subtle);
   --neoverse-switch-thumb-background: var(--neoverse-color-neutral-50);
   --neoverse-control-button-edge: var(--neoverse-control-button-filled-shadow);
-  --neoverse-control-button-edge-active: var(--neoverse-effect-command-hover-shadow);
+  --neoverse-control-button-edge-active: var(--neoverse-shadow-none);
   --neoverse-control-button-edge-hover: var(--neoverse-effect-command-hover-shadow);
   --neoverse-control-button-edge-refraction-opacity: 0.46;
   --neoverse-control-primary-hover-shadow: var(--neoverse-effect-primary-hover-shadow);
@@ -225,8 +225,6 @@
   --neoverse-control-button-refraction-gradient: var(--neoverse-effect-button-edge-field);
   --neoverse-control-button-press-glow: var(--neoverse-effect-command-press-light);
   --neoverse-control-button-hover-background: var(--neoverse-control-hover-background);
-  --neoverse-control-button-active-background: var(--neoverse-control-active-background);
-  --neoverse-control-button-ghost-active-background: var(--neoverse-control-active-background);
 
   /* Material dark mapping. */
   --neoverse-material-edge-highlight-subtle-bottom: inset 0 -1px 2px

@@ -117,24 +117,6 @@ function ButtonMaterialShell() {
   );
 }
 
-const clampPercentage = (value: number): number =>
-  Math.round(Math.min(Math.max(value, 0), 100) * 100) / 100;
-
-function updateButtonPointerGlow(event: Parameters<PointerEventHandler<HTMLElement>>[0]): void {
-  const target = event.currentTarget;
-  const rect = target.getBoundingClientRect();
-  if (rect.width <= 0 || rect.height <= 0) return;
-
-  target.style.setProperty(
-    '--neoverse-button-press-x',
-    `${clampPercentage(((event.clientX - rect.left) / rect.width) * 100)}%`,
-  );
-  target.style.setProperty(
-    '--neoverse-button-press-y',
-    `${clampPercentage(((event.clientY - rect.top) / rect.height) * 100)}%`,
-  );
-}
-
 export interface ActionClassNameOptions {
   variant?: ButtonVariant;
   size?: ActionSize;
@@ -259,7 +241,6 @@ export function UiAction({
       childOnClick?.(event);
     };
     const handleChildPointerDown: PointerEventHandler<HTMLElement> = (event) => {
-      if (!disabled) updateButtonPointerGlow(event);
       onPointerDown?.(event);
       childOnPointerDown?.(event);
     };
@@ -286,10 +267,7 @@ export function UiAction({
         data-surface={surface}
         className={classes}
         onClick={onClick}
-        onPointerDown={(event) => {
-          if (!disabled) updateButtonPointerGlow(event);
-          onPointerDown?.(event);
-        }}
+        onPointerDown={onPointerDown}
       >
         {renderContent(children)}
       </button>
@@ -304,10 +282,7 @@ export function UiAction({
       tabIndex={disabled ? -1 : rest.tabIndex}
       data-surface={surface}
       className={classes}
-      onPointerDown={(event) => {
-        if (!disabled) updateButtonPointerGlow(event);
-        onPointerDown?.(event);
-      }}
+      onPointerDown={onPointerDown}
       onClick={(event) => {
         if (disabled) {
           event.preventDefault();
@@ -1450,7 +1425,6 @@ export function UiButton({
   trailing,
   children,
   className,
-  onPointerDown,
   ...rest
 }: UiButtonProps) {
   return (
@@ -1467,10 +1441,6 @@ export function UiButton({
         surfaceClasses[surface],
         className,
       )}
-      onPointerDown={(event) => {
-        updateButtonPointerGlow(event);
-        onPointerDown?.(event);
-      }}
     >
       <ButtonMaterialShell />
       {leading || loading ? (
@@ -1622,10 +1592,6 @@ export function UiIconButton(props: UiIconButtonProps) {
         tabIndex={isDisabled ? -1 : anchorProps.tabIndex}
         data-surface={surface}
         className={classes}
-        onPointerDown={(event) => {
-          if (!isDisabled) updateButtonPointerGlow(event);
-          anchorProps.onPointerDown?.(event);
-        }}
         onClick={handleClick}
       >
         {content}
@@ -1648,10 +1614,6 @@ export function UiIconButton(props: UiIconButtonProps) {
       aria-busy={ariaBusy}
       data-surface={surface}
       className={classes}
-      onPointerDown={(event) => {
-        if (!isDisabled) updateButtonPointerGlow(event);
-        buttonProps.onPointerDown?.(event);
-      }}
     >
       {content}
     </button>

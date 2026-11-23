@@ -353,7 +353,6 @@ try {
     '--neoverse-control-segmented-embedded-inset',
     '--neoverse-control-segmented-gap',
     '--neoverse-control-segmented-option-radius',
-    '--neoverse-control-segmented-option-press-scale',
     '--neoverse-control-segmented-disabled-opacity',
     '--neoverse-control-segmented-border',
     '--neoverse-control-segmented-shadow',
@@ -498,23 +497,10 @@ try {
     'width: var(--neoverse-button-height-lg);',
     '.ui-icon-button--stretch {',
     '.ui-icon-button__content {',
-    'border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)',
-    'var(--neoverse-control-silhouette);',
-    'background-clip: padding-box;',
-    'overflow: hidden;',
-    '.ui-button > .ui-button__edge-field',
     'position: absolute;',
   ];
   const missingButtonFragments = expectedButtonFragments.filter(
     (fragment) => !buttonCss.includes(fragment),
-  );
-  const ghostActiveCss =
-    buttonCss.match(
-      /\.ui-button--ghost:active:not\(:disabled\):not\(\[aria-disabled='true'\]\) \{([\s\S]*?)\n {2}\}/,
-    )?.[1] ?? '';
-  const expectedGhostActiveFragments = ['background: var(--neoverse-effect-press-wash);'];
-  const missingGhostActiveFragments = expectedGhostActiveFragments.filter(
-    (fragment) => !ghostActiveCss.includes(fragment),
   );
   const forbiddenButtonFragments = [
     'inset: 1px;',
@@ -570,7 +556,6 @@ try {
     emittedForbiddenNestedGlassFragments.length > 0 ||
     emittedForbiddenWebglFragments.length > 0 ||
     missingButtonFragments.length > 0 ||
-    missingGhostActiveFragments.length > 0 ||
     emittedForbiddenButtonFragments.length > 0 ||
     missingProseFragments.length > 0 ||
     missingNavigationMotionFragments.length > 0 ||
@@ -597,9 +582,6 @@ try {
         : '',
       missingButtonFragments.length > 0
         ? `Missing button edge fragments: ${missingButtonFragments.join(', ')}`
-        : '',
-      missingGhostActiveFragments.length > 0
-        ? `Missing Ghost active fragments: ${missingGhostActiveFragments.join(', ')}`
         : '',
       emittedForbiddenButtonFragments.length > 0
         ? `Forbidden button edge fragments: ${emittedForbiddenButtonFragments.join(', ')}`

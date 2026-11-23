@@ -246,10 +246,7 @@
   --neoverse-shadow-xl:
     0 2rem 4.75rem -1.875rem rgb(14 34 44 / 34%), 0 8px 18px -1px rgb(14 34 44 / 14%);
 
-  /* Keep light controls grounded without the heavy dark drop used by the
-       previous shared fallback. The colored edge and press glow carry the
-       visual feedback; this layer only supplies a quiet separation from the
-       atmospheric canvas. */
+  /* Keep compact controls grounded with a quiet contact shadow. */
   --neoverse-shadow-control: 0 1px 4px -1px rgb(14 34 44 / 10%);
   /* Compact elevated controls: a contact layer plus a short ambient falloff. */
   --neoverse-shadow-float: 0 1px 2px rgb(14 34 44 / 8%), 0 6px 16px -6px rgb(14 34 44 / 18%);
@@ -298,19 +295,25 @@
   --neoverse-navigation-item-active-border: transparent;
   --neoverse-navigation-item-active-shadow: var(--neoverse-control-segmented-active-shadow);
 
-  /* Light buttons stay airy and pale instead of inheriting the dark navy
-       CTA plate. Theme ownership is explicit so the same UiButton/UiAction
-       API adapts its material without Consumer overrides. */
-  /* A button samples the scene through a lightly tinted, blurred plate.
-     Keep this button-only so segmented controls retain their own density. */
-  --neoverse-control-button-filled-shadow: var(--neoverse-effect-command-rest-shadow);
-  --neoverse-control-button-tone-fill: color-mix(
-    in srgb,
-    var(--neoverse-color-white) var(--neoverse-effect-strength-12),
-    transparent
+  /* Button tint is independent of the selected Aurora Glass tier. */
+  --neoverse-control-button-filled-background: var(--neoverse-effect-command-rest-field-light);
+  --neoverse-control-button-filled-hover-background: var(
+    --neoverse-effect-command-hover-field-light
   );
+  --neoverse-control-button-active-background: var(--neoverse-effect-command-press-field-light);
+  --neoverse-control-primary-background: var(--neoverse-effect-primary-rest-field-light);
+  --neoverse-control-primary-hover-background: var(--neoverse-effect-primary-hover-field-light);
+  --neoverse-control-primary-active-background: var(--neoverse-effect-primary-press-field-light);
+  --neoverse-control-primary-foreground: #203b6a;
+  --neoverse-control-primary-border: #abc1e4;
+  --neoverse-control-button-border: #a9b9cf;
+  --neoverse-control-secondary-hover-foreground: var(--neoverse-color-text-primary);
+  --neoverse-control-secondary-active-foreground: var(--neoverse-color-text-primary);
+  --neoverse-control-ghost-hover-foreground: var(--neoverse-color-text-primary);
+  --neoverse-control-ghost-active-foreground: var(--neoverse-color-text-primary);
+  --neoverse-control-button-filled-shadow: var(--neoverse-effect-command-rest-shadow);
   --neoverse-control-button-filled-hover-shadow: var(--neoverse-effect-command-hover-shadow);
-  --neoverse-control-button-edge-active: var(--neoverse-effect-command-hover-shadow);
+  --neoverse-control-button-edge-active: var(--neoverse-shadow-none);
   --neoverse-control-primary-shadow: var(--neoverse-effect-primary-rest-shadow);
   --neoverse-control-primary-hover-shadow: var(--neoverse-effect-primary-hover-shadow);
   /* Light glass planes keep their transparent material border, but a compact
@@ -324,9 +327,4 @@
   );
   --neoverse-control-button-edge-refraction-opacity: 0.34;
   --neoverse-control-button-edge-carrier: var(--neoverse-effect-command-edge-carrier);
-
-  /* Light button presses use the same directional accent field as dark
-       controls. A pale interactive border is too close to the surface and
-       makes the press state disappear. */
-  --neoverse-control-button-press-glow: var(--neoverse-effect-command-press-light);
 }

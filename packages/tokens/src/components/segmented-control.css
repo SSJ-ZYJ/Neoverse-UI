@@ -5,9 +5,8 @@
     --neoverse-control-segmented-background-image: none;
     --neoverse-control-segmented-background-color: var(--neoverse-material-glass-subtle-background);
     --neoverse-control-segmented-foreground: var(--neoverse-color-text-secondary);
-    /* Hover stays a neutral affordance: the selected accent belongs to the
-       active option only, and the hover label must survive press unchanged. */
-    --neoverse-control-segmented-hover-foreground: var(--neoverse-color-text-primary);
+    /* The selected accent belongs to the active option only. Hover and press
+       reuse the shared quiet feedback tint, so no hover foreground is needed. */
     --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
     --neoverse-control-segmented-active-background: var(--neoverse-effect-choice-selected-field);
     --neoverse-control-segmented-active-fill: var(--neoverse-effect-choice-selected-fill);
@@ -48,7 +47,6 @@
     --neoverse-control-segmented-option-font-size-sm: var(--neoverse-font-size-sm);
     --neoverse-control-segmented-option-font-weight: var(--neoverse-font-weight-bold);
     --neoverse-control-segmented-option-radius: var(--neoverse-control-compact-radius);
-    --neoverse-control-segmented-option-press-scale: var(--neoverse-effect-press-scale);
     --neoverse-control-segmented-disabled-opacity: var(--neoverse-effect-disabled-content-opacity);
     --neoverse-control-segmented-loading-gap: var(--neoverse-space-1);
     --neoverse-control-segmented-loading-size: var(--neoverse-space-4);

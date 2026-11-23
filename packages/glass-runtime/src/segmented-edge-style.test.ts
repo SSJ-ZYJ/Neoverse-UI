@@ -128,27 +128,28 @@ describe('segmented selection styling', () => {
   });
 
   it.each(['light', 'dark'] as const)(
-    'keeps the unselected label on the neutral hover foreground in %s mode',
+    'keeps the unselected label neutral and reserves the accent for the active option in %s mode',
     (theme) => {
       const { control } = install(theme, 'none');
       const option = document.createElement('button');
       option.className = 'ui-segmented-control__option';
       control.append(option);
-      const hovered = resolveVars(option, 'var(--neoverse-control-segmented-hover-foreground)');
-      expect(hovered).toBe(theme === 'light' ? '#0f172a' : '#f4f8fc');
-      expect(hovered).not.toBe(
-        resolveVars(option, 'var(--neoverse-control-segmented-active-foreground)'),
-      );
+      // Hover and press share the quiet feedback tint, so the label never
+      // changes color and the selected accent stays on the active option.
+      const resting = resolveVars(option, 'var(--neoverse-control-segmented-foreground)');
+      const active = resolveVars(option, 'var(--neoverse-control-segmented-active-foreground)');
+      expect(resting).not.toBe(active);
+      expect(source).not.toContain('color: var(--neoverse-control-segmented-hover-foreground)');
     },
   );
 
   it('reserves the selected accent for the active label and keeps the press wash stable', () => {
     const activeAccentUses = source.match(/--neoverse-control-segmented-active-foreground/g) ?? [];
     expect(activeAccentUses).toHaveLength(1);
-    expect(source).toContain('color: var(--neoverse-control-segmented-hover-foreground);');
-    // Press feedback must not swap the hover wash for a different background.
+    // Temporary feedback comes from the shared quiet tint; press must not swap
+    // in a second background or an extra press shadow.
+    expect(source).toContain('background-color: var(--neoverse-quiet-control-feedback);');
     expect(source).not.toContain('--neoverse-effect-press-wash');
-    const pressRule = source.slice(source.indexOf('.ui-segmented-control__option:active'));
-    expect(pressRule.slice(0, pressRule.indexOf('}'))).not.toContain('background');
+    expect(source).not.toContain('--neoverse-effect-press-shadow');
   });
 });

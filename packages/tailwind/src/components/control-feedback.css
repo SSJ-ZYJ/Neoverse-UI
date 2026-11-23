@@ -1,0 +1,44 @@
+@layer components {
+  :where(
+    .ui-button--ghost,
+    .ui-button[data-surface='none'],
+    .ui-breadcrumb__link,
+    .ui-segmented-control__option,
+    .ui-tabs__tab,
+    .ui-pagination__button,
+    .ui-input-number__step,
+    .ui-select__option,
+    .ui-dropdown-menu__item,
+    .ui-context-menu__item
+  ) {
+    --neoverse-quiet-control-feedback: transparent;
+
+    @media (hover: hover) {
+      &:hover:not(:active, :disabled, [aria-disabled='true']) {
+        --neoverse-quiet-control-feedback: var(--neoverse-control-ghost-hover-background);
+      }
+    }
+
+    &:active:not(:disabled, [aria-disabled='true']) {
+      --neoverse-quiet-control-feedback: var(--neoverse-control-ghost-active-background);
+      transition: none;
+    }
+  }
+
+  /* Menu rows can already own an open, selected or focused background. Keep
+     that layer and put the transient wash below the text, not over it. */
+  :where(.ui-dropdown-menu__item, .ui-context-menu__item, .ui-select__option) {
+    position: relative;
+    isolation: isolate;
+
+    &::after {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      border-radius: inherit;
+      background-color: var(--neoverse-quiet-control-feedback);
+      pointer-events: none;
+      content: '';
+    }
+  }
+}

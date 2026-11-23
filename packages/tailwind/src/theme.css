@@ -741,33 +741,6 @@
     }
   }
 
-  @media (prefers-reduced-transparency: reduce) {
-    .ui-button.ui-button--ghost:is(
-        .material-glass-subtle,
-        .material-glass-elevated,
-        .material-glass-immersive
-      ) {
-      background: transparent;
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
-  }
-
-  .ui-button--ghost:is(
-    .material-glass-subtle,
-    .material-glass-elevated,
-    .material-glass-immersive
-  ) {
-    --neoverse-material-filter: none;
-    --neoverse-material-background: transparent;
-    --neoverse-material-shadow: var(--neoverse-shadow-none);
-    --neoverse-material-edge-refraction-opacity: 0;
-    --neoverse-material-edge-display: none;
-    background-color: transparent;
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-
   /* Independent Aurora Glass surfaces keep their own material even when a parent
      happens to be Aurora Glass (for example, specimen cards inside an Aurora Glass section).
      Only an explicitly inherited nested grouping opts out of its own plane.

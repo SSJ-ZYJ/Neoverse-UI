@@ -257,7 +257,6 @@ const componentCssVariables = {
     optionFontSizeSm: '--neoverse-control-segmented-option-font-size-sm',
     optionFontWeight: '--neoverse-control-segmented-option-font-weight',
     optionRadius: '--neoverse-control-segmented-option-radius',
-    optionPressScale: '--neoverse-control-segmented-option-press-scale',
     disabledOpacity: '--neoverse-control-segmented-disabled-opacity',
     loadingGap: '--neoverse-control-segmented-loading-gap',
     loadingSize: '--neoverse-control-segmented-loading-size',
@@ -275,7 +274,6 @@ const componentCssVariables = {
     edgeRefractionOpacity: '--neoverse-control-segmented-edge-refraction-opacity',
     edgeDisplay: '--neoverse-control-segmented-edge-display',
     optionHoverBackground: '--neoverse-control-hover-background',
-    hoverForeground: '--neoverse-control-segmented-hover-foreground',
   },
   badge: {
     labelOpticalOffset: '--neoverse-badge-label-optical-offset',

@@ -4,13 +4,53 @@
 @layer neoverse.tokens {
   :root {
     --neoverse-effect-strength-17: 17%;
-    /* Dark command bodies expose their Aurora Glass plate without a whitening wash.
-       Reuse the existing state field for hover/press instead of a grey veil. */
-    --neoverse-effect-command-rest-field-dark: none;
-    --neoverse-effect-command-hover-field-dark: var(--neoverse-effect-selection-field);
-    --neoverse-effect-primary-rest-field-dark: none;
-    --neoverse-effect-primary-hover-field-dark: var(--neoverse-effect-selection-field);
-    --neoverse-effect-primary-press-field-dark: var(--neoverse-effect-selection-field);
+    /* Command fields tint the already sampled plate without another filter.
+       Each state carries one translucent color; selection uses separate roles. */
+    --neoverse-effect-command-rest-field-light: rgb(
+      255 255 255 /
+      var(--neoverse-effect-strength-12)
+    );
+    --neoverse-effect-command-hover-field-light: rgb(
+      159 179 209 /
+      var(--neoverse-effect-strength-18)
+    );
+    --neoverse-effect-command-press-field-light: rgb(
+      115 140 180 /
+      var(--neoverse-effect-strength-18)
+    );
+    --neoverse-effect-command-rest-field-dark: rgb(
+      101 125 163 /
+      var(--neoverse-effect-strength-12)
+    );
+    --neoverse-effect-command-hover-field-dark: rgb(
+      101 125 163 /
+      var(--neoverse-effect-strength-24)
+    );
+    --neoverse-effect-command-press-field-dark: rgb(69 93 128 / var(--neoverse-effect-strength-24));
+    --neoverse-effect-primary-rest-field-light: rgb(
+      189 211 244 /
+      var(--neoverse-effect-strength-72)
+    );
+    --neoverse-effect-primary-hover-field-light: rgb(
+      181 203 239 /
+      var(--neoverse-effect-strength-76)
+    );
+    --neoverse-effect-primary-press-field-light: rgb(
+      166 190 228 /
+      var(--neoverse-effect-strength-76)
+    );
+    --neoverse-effect-primary-rest-field-dark: rgb(
+      174 198 255 /
+      var(--neoverse-effect-strength-64)
+    );
+    --neoverse-effect-primary-hover-field-dark: rgb(
+      185 206 255 /
+      var(--neoverse-effect-strength-68)
+    );
+    --neoverse-effect-primary-press-field-dark: rgb(
+      160 184 236 /
+      var(--neoverse-effect-strength-68)
+    );
     --neoverse-effect-strength-3: 3%;
     --neoverse-effect-strength-6: 6%;
     --neoverse-effect-strength-9: 9%;
@@ -63,10 +103,13 @@
         var(--neoverse-color-edge-light) var(--neoverse-effect-alpha-quiet),
         transparent
       );
-    --neoverse-effect-quiet-command-hover-wash: color-mix(
-      in srgb,
-      var(--neoverse-color-text-secondary) var(--neoverse-effect-strength-6),
-      transparent
+    --neoverse-effect-quiet-command-hover-wash: rgb(
+      159 179 209 /
+      var(--neoverse-effect-strength-12)
+    );
+    --neoverse-effect-quiet-command-press-wash: rgb(
+      107 133 174 /
+      var(--neoverse-effect-strength-12)
     );
     /* Local grouping contrast borrows the parent's material; it has no blur. */
     --neoverse-effect-grouped-inset-field-light:

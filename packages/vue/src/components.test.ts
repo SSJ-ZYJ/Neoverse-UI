@@ -218,33 +218,6 @@ describe('UiButton', () => {
     expect(button.classes()).toContain('ui-button--md');
     expect(button.classes().some((className) => className.startsWith('disabled:'))).toBe(false);
   });
-
-  it('anchors the press glow to the pointer location', async () => {
-    const onPointerdown = vi.fn();
-    const wrapper = mount(UiButton, {
-      attrs: { onPointerdown },
-      slots: { default: 'Press' },
-    });
-    const button = wrapper.get('button');
-
-    vi.spyOn(button.element, 'getBoundingClientRect').mockReturnValue({
-      bottom: 60,
-      height: 40,
-      left: 10,
-      right: 110,
-      top: 20,
-      width: 100,
-      x: 10,
-      y: 20,
-      toJSON: () => ({}),
-    });
-
-    await button.trigger('pointerdown', { clientX: 85, clientY: 50 });
-
-    expect(button.element.style.getPropertyValue('--neoverse-button-press-x')).toBe('75%');
-    expect(button.element.style.getPropertyValue('--neoverse-button-press-y')).toBe('75%');
-    expect(onPointerdown).toHaveBeenCalledTimes(1);
-  });
 });
 
 describe('UiAction', () => {
@@ -695,31 +668,6 @@ describe('UiIconButton', () => {
     const loadingIndicator = button.get('[aria-hidden="true"] svg');
     expect(loadingIndicator.classes()).toContain('ui-loading-indicator');
     expect(loadingIndicator.get('circle').attributes('stroke-linecap')).toBe('round');
-  });
-
-  it('anchors its press glow to the pointer location', async () => {
-    const wrapper = mount(UiIconButton, {
-      props: { label: 'Add' },
-      slots: { default: '+' },
-    });
-    const button = wrapper.get('button');
-
-    vi.spyOn(button.element, 'getBoundingClientRect').mockReturnValue({
-      bottom: 50,
-      height: 40,
-      left: 20,
-      right: 60,
-      top: 10,
-      width: 40,
-      x: 20,
-      y: 10,
-      toJSON: () => ({}),
-    });
-
-    await button.trigger('pointerdown', { clientX: 30, clientY: 20 });
-
-    expect(button.element.style.getPropertyValue('--neoverse-button-press-x')).toBe('25%');
-    expect(button.element.style.getPropertyValue('--neoverse-button-press-y')).toBe('25%');
   });
 
   it('fills a fixed-height flex container when stretch is set', () => {

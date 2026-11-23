@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { computed, useAttrs } from 'vue';
-import { updateButtonPointerGlow } from './button-pointer-glow';
 import {
   actionScaleClasses,
   actionSizeClasses,
@@ -63,12 +62,6 @@ function handleDisabledClick(event: MouseEvent): void {
   event.preventDefault();
   event.stopImmediatePropagation();
 }
-
-function handlePointerdown(event: PointerEvent): void {
-  if (!props.disabled) {
-    updateButtonPointerGlow(event);
-  }
-}
 </script>
 
 <template>
@@ -82,7 +75,6 @@ function handlePointerdown(event: PointerEvent): void {
     :class="[classes, attrs.class]"
     :style="attrs.style"
     @click.capture="handleDisabledClick"
-    @pointerdown="handlePointerdown"
   >
     <span class="ui-button__tone-field" aria-hidden="true" />
     <span class="ui-button__edge-field" aria-hidden="true" />
