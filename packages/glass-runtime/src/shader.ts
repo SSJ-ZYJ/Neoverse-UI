@@ -249,23 +249,34 @@ export const glassFragmentShader = `
     }
     alpha *= occlusionMask;
     if (alpha <= 0.0001) discard;
+    float darkCorner = 0.0;
+    bool darkSurface = lightSurface <= 0.5;
+    if (darkSurface) {
+      // Lift the diagonal arcs, with zero slope where they meet the straight edges.
+      float catchMask = 2.0 * max(leftCatch * topCatch, rightCatch * bottomCatch);
+      darkCorner = catchMask * catchMask * (1.0 - roundButton);
+    }
+    float exposure = u_gain * (1.0 + 0.16 * darkCorner);
     if (u_color_dodge > 0.5) {
       // Encode a proportional backdrop lift rather than raising its RGB floor.
       // Partial coverage retains the original backdrop near channel clipping.
       float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
-      float edgeGain = max(2.0 * alpha * luminance - alpha * alpha, 0.0) * u_gain;
+      float edgeGain = max(2.0 * alpha * luminance - alpha * alpha, 0.0) * exposure;
       float lift = min(0.25 * edgeGain, 0.074);
       float coverage = min(4.0 * edgeGain, 0.67);
       if (volumeScale > 0.0) {
         // Lift the stronger catches without a flat cutoff or a hotter
         // straight middle. Keep part of the original color at clipping.
-        float exposure = edgeGain * (0.25 + 0.23 * smoothstep(0.23, 0.50, edgeGain));
-        float shoulder = max(exposure - 0.074, 0.0);
-        float softLift = exposure - shoulder + 0.065 * shoulder / (0.065 + shoulder);
+        float peak = edgeGain * (0.25 + 0.23 * smoothstep(0.23, 0.50, edgeGain));
+        float shoulder = max(peak - 0.074, 0.0);
+        float softLift = peak - shoulder + 0.065 * shoulder / (0.065 + shoulder);
         float remaining = 1.0 - min(edgeGain / 0.34, 1.0);
         lift = mix(lift, softLift, volumeScale);
         coverage = mix(coverage, 0.8 * (1.0 - remaining * remaining), volumeScale);
       }
+      // Dark arcs need extra lift after the base ceiling, which otherwise
+      // flattens their peaks. Leave coverage and straight-edge lift unchanged.
+      if (darkSurface) lift *= 4.0 + 2.0 * darkCorner;
       if (lift <= 0.0) discard;
       // Covered dodge yields lift = coverage * dodge / (1 - dodge) before clipping.
       float dodge = lift / (coverage + lift);
@@ -296,12 +307,6 @@ export const glassFragmentShader = `
       // Removing theme chroma must preserve luminance along the straight rim.
       vec3 neutralHighlight = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)));
       color = mix(color, neutralHighlight, wideMiddle);
-    }
-    float exposure = u_gain;
-    if (lightSurface <= 0.5) {
-      // Lift the diagonal arcs, with zero slope where they meet the straight edges.
-      float catchMask = 2.0 * max(leftCatch * topCatch, rightCatch * bottomCatch);
-      exposure *= 1.0 + 0.16 * catchMask * catchMask * (1.0 - roundButton);
     }
     // Match the former release response at middle gray without adding RGB
     // independently of the backdrop. Gain scales the completed response.

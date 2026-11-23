@@ -3,11 +3,11 @@
 [English](README.md)
 
 <!-- Source: packages/glass-runtime/README.md -->
-<!-- Source-SHA256: 0672343d2ae15d6fda8296126bbfa908c64345fefc0ec76011cb01504a54c4b1 -->
+<!-- Source-SHA256: eedec0e3a301613a81c335eb49f70677d96a30e7e92d011e92ec0a6e72a4650d -->
 
 Neoverse-UI 的共享、可选、方向性极光玻璃（Aurora Glass）边缘增强。极光玻璃是唯一的共享玻璃材质；Light / 轻薄、Standard / 标准与 Immersive / 厚实层级共享同一名称。展示标签从 `@neoverse-ui/tokens` 的 `glassMaterial` 获取；详见[材质标准](../../docs/zh-CN/architecture/material-standards.md)。包与渲染器标识保持稳定。
 
-浅色模式下，WebGL 边缘按比例提亮下方实际颜色，而不是把底色推向白色。边缘不采样或偏移邻近像素；表面色调、模糊与阴影仍由 CSS 负责。详见[材质标准](../../docs/zh-CN/architecture/material-standards.md#光学与主题)。
+浅色与深色模式共用 WebGL 边缘合成，在浏览器支持时按比例提亮下方实际颜色。边缘不采样或偏移邻近像素；表面色调、模糊与阴影仍由 CSS 负责。详见[材质标准](../../docs/zh-CN/architecture/material-standards.md#光学与主题)。
 
 不透明度、裁剪与浮层遮挡仍然生效。Light 对左上与右下做适度聚焦；深色按钮保留其聚焦高光。减少透明度会禁用渲染器。CSS 回退使用仅含 alpha 的渐变遮罩与背景亮度。历史 `native` 后端仍是显式 API 选项，但不得把全表面 SVG 位移设为默认，也不得用它进行[修复守则](../../docs/zh-CN/architecture/material-standards.md#glass-修复守则)所述的 Glass 修复。
 

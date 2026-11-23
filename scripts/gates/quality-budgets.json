@@ -34,8 +34,8 @@
       "reason": "2026-11-22: Glass runtime behavior suite; remove when scenarios are split by lifecycle, rendering and fallback."
     },
     "packages/glass-runtime/src/index.ts": {
-      "ceiling": 2167,
-      "reason": "2026-11-22: Glass runtime public entry with WebGL and CSS fallback paths; remove when the fallback splits into its own module."
+      "ceiling": 2169,
+      "reason": "2026-11-23: Glass runtime public entry with WebGL and CSS fallback paths; remove when the fallback splits into its own module."
     },
     "packages/motion/src/particle-dissolve.ts": {
       "ceiling": 971,

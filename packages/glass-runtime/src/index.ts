@@ -516,7 +516,7 @@ const paintBackdropChroma = (
   viewport: CanvasViewport,
   occluders: readonly Occluder[],
   gain: number,
-  colorDodge: boolean,
+  boostLowerRight: boolean,
 ): void => {
   const opacity = Math.min(style.opacity * 0.7 * gain, 0.55);
   if (opacity <= 0) return;
@@ -577,7 +577,7 @@ const paintBackdropChroma = (
   context.lineWidth = Math.max(style.edgeWidth, 0.75);
   const reach = Math.max(Math.min(width * 0.5, height * 1.25), 16);
   const shortSide = Math.min(style.rect.width, style.rect.height);
-  const size = colorDodge ? Math.min(Math.max((shortSide - 64) / 80, 0), 1) : 0;
+  const size = boostLowerRight ? Math.min(Math.max((shortSide - 64) / 80, 0), 1) : 0;
   const cornerBoost = size * size * (3 - 2 * size) * 1.5;
   const boostEnd = Math.min(shortSide * 0.36, 96) / reach;
   for (let corner = 0; corner < 2; corner += 1) {
@@ -1779,7 +1779,7 @@ class GlassRendererImpl implements GlassRenderer {
       tertiary,
       lightSurface,
       isLight,
-      colorDodge: isLight && view.CSS?.supports('mix-blend-mode', 'color-dodge') === true,
+      colorDodge: view.CSS?.supports('mix-blend-mode', 'color-dodge') === true,
     };
     this.colorSignature = signature;
     this.sceneColors = colors;
@@ -1902,15 +1902,17 @@ class GlassRendererImpl implements GlassRenderer {
     const { gain, edgeLight, primary, secondary, tertiary, lightSurface, isLight, colorDodge } =
       this.resolveSceneColors(rootStyle, view, this.colorProbe);
     gl.uniform1f(locations.gain, gain);
-    if (isLight) this.ensureChromaCanvas();
+    const backdropChroma = isLight || colorDodge;
+    const boostLowerRight = isLight && colorDodge;
+    if (backdropChroma) this.ensureChromaCanvas();
     if (this.chromaCanvas && this.chromaContext) {
       if (!this.chromaCanvas.isConnected && this.canvas.isConnected) {
         this.canvas.before(this.chromaCanvas);
       }
-      const display = isLight ? 'block' : 'none';
+      const display = backdropChroma ? 'block' : 'none';
       if (this.chromaCanvas.style.display !== display) this.chromaCanvas.style.display = display;
       this.syncChromaVisibility();
-      if (isLight) {
+      if (backdropChroma) {
         if (
           this.chromaCanvas.width !== drawingWidth ||
           this.chromaCanvas.height !== drawingHeight
@@ -2016,8 +2018,8 @@ class GlassRendererImpl implements GlassRenderer {
           ),
       );
       uploadOccluders(occluders);
-      if (isLight && this.chromaContext) {
-        paintBackdropChroma(this.chromaContext, style, viewport, occluders, gain, colorDodge);
+      if (backdropChroma && this.chromaContext) {
+        paintBackdropChroma(this.chromaContext, style, viewport, occluders, gain, boostLowerRight);
       }
       for (const strip of getEdgeScissors(
         style,

@@ -384,7 +384,7 @@ describe('Glass renderer', () => {
     const canvas = document.querySelector<HTMLCanvasElement>(
       '[data-neoverse-glass-renderer-canvas]',
     );
-    expect(canvas?.style.mixBlendMode).toBe('overlay');
+    expect(canvas?.style.mixBlendMode).toBe('color-dodge');
     expect(gl.blendFuncSeparate).toHaveBeenLastCalledWith(
       gl.SRC_ALPHA,
       gl.ONE_MINUS_SRC_ALPHA,
@@ -967,7 +967,7 @@ describe('Glass renderer', () => {
     ).toBe(1);
   });
 
-  it('keeps a translucent light contour and the existing dark response on one canvas', () => {
+  it('keeps tier blur and the shared canvas when the palette changes', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const card = document.createElement('article');
@@ -996,7 +996,7 @@ describe('Glass renderer', () => {
     expect(document.querySelector('[data-neoverse-glass-native-defs]')).toBeNull();
   });
 
-  it('repaints the composition when the system color scheme changes', () => {
+  it('keeps the backdrop lift when the system color scheme changes', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const css = window.CSS;
@@ -1047,7 +1047,7 @@ describe('Glass renderer', () => {
     // A media-query change updates computed CSS without mutating the DOM.
     computedScheme = 'dark';
     systemScheme.dispatchEvent(new Event('change'));
-    expect(canvas?.style.mixBlendMode).toBe('overlay');
+    expect(canvas?.style.mixBlendMode).toBe('color-dodge');
     expect(
       gl.uniform1f.mock.calls
         .filter(([location]) => location?.name === 'u_light_surface')
@@ -1486,14 +1486,14 @@ describe('Glass renderer', () => {
     expect(gl.deleteBuffer).toHaveBeenCalledTimes(1);
   });
 
-  it('falls back to CSS on context loss and rebuilds the renderer after context restore', () => {
+  it.each(['light', 'dark'])('restores %s Glass with the overlay fallback', (theme) => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const glass = document.createElement('article');
     glass.className = 'material-glass-subtle';
     setRect(glass, {});
     document.body.append(glass);
-    document.documentElement.style.colorScheme = 'light';
+    document.documentElement.style.colorScheme = theme;
     const css = window.CSS;
     vi.spyOn(css, 'supports').mockReturnValue(false);
     vi.spyOn(window, 'CSS', 'get').mockReturnValue(css);

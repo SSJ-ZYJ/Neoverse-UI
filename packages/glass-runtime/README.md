@@ -4,9 +4,9 @@
 
 Shared optional directional Aurora Glass edges for Neoverse UI. Aurora Glass is the single shared glass material; its Light, Standard, and Immersive tiers share the same name. Obtain display labels from `glassMaterial` in `@neoverse-ui/tokens`; see [material standards](../../docs/architecture/material-standards.md). Package and renderer identifiers remain stable.
 
-In light mode, the WebGL rim brightens the underlying colors proportionally
-instead of washing them toward white. The edge does not sample or displace
-neighboring pixels. CSS still owns the surface tint, blur, and shadows;
+In both themes, the WebGL rim brightens the underlying colors proportionally
+where supported. The edge does not sample or displace neighboring pixels.
+CSS still owns the surface tint, blur, and shadows;
 see [edge reflection](../../docs/architecture/material-standards.md#aurora-glass-edge-reflection).
 
 Opacity, clipping and overlay occlusion still apply. Light has a moderate
