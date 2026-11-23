@@ -39,6 +39,23 @@ test('every Explorer specimen opens a nonempty, independently sized preview', as
   }
 });
 
+test('the Select specimen centers its trigger in the stage', async ({ page }) => {
+  await page.goto('/?theme=light&lang=en#forms-select', { waitUntil: 'domcontentloaded' });
+  const content = page.locator('.playground-stage__specimen-content');
+  const trigger = page.locator('[data-form-select]');
+  await expect(trigger).toBeVisible();
+  const [contentBox, triggerBox] = await Promise.all([
+    content.boundingBox(),
+    trigger.boundingBox(),
+  ]);
+  if (contentBox === null || triggerBox === null) throw new Error('A layout box is missing');
+  // The details shell fills the stage while the trigger carries the width cap;
+  // the specimen must center the capped trigger rather than align it to start.
+  expect(
+    Math.abs(triggerBox.x + triggerBox.width / 2 - (contentBox.x + contentBox.width / 2)),
+  ).toBeLessThanOrEqual(1);
+});
+
 test('the Colors gallery shows every shade and role without sideways scrolling', async ({
   page,
 }) => {
@@ -136,6 +153,9 @@ test('Markdown inline styles stay distinct in rendered combinations', async ({ p
         fontWeight: style.fontWeight === 'normal' ? 400 : Number(style.fontWeight),
         fontStyle: style.fontStyle,
         line: style.textDecorationLine,
+        background: style.backgroundImage,
+        backgroundSize: style.backgroundSize,
+        radius: style.borderRadius,
       };
     });
 
@@ -162,7 +182,9 @@ test('Markdown inline styles stay distinct in rendered combinations', async ({ p
   expect(strike.color).not.toBe(body.color);
 
   const link = await read('link', 'a');
-  expect(link.line).toContain('underline');
+  expect(link.background).toContain('linear-gradient');
+  expect(link.backgroundSize).toContain('2px');
+  expect(link.radius).toBe('1px');
   expect(link.color).not.toBe(body.color);
 
   const linkBold = await read('link-bold', 'a');
@@ -172,7 +194,7 @@ test('Markdown inline styles stay distinct in rendered combinations', async ({ p
 
   const linkStrike = await read('link-strike', 'a');
   const nestedStrike = await read('link-strike', 'a del');
-  expect(linkStrike.line).toContain('underline');
+  expect(linkStrike.background).toContain('linear-gradient');
   expect(nestedStrike.line).toContain('line-through');
   expect(nestedStrike.color).toBe(linkStrike.color);
 
@@ -195,7 +217,17 @@ test('plain, bold, and struck links stay underlined and darken on hover', async 
     const panel = page.locator('[data-markdown-inline]');
     for (const row of ['link', 'link-bold', 'link-strike']) {
       const link = panel.locator(`[data-markdown-inline-row="${row}"]`).getByRole('link');
-      await expect(link).toHaveCSS('text-decoration-line', 'underline');
+      const underline = await link.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          background: style.backgroundImage,
+          size: style.backgroundSize,
+          radius: style.borderRadius,
+        };
+      });
+      expect(underline.background).toContain('linear-gradient');
+      expect(underline.size).toContain('2px');
+      expect(underline.radius).toBe('1px');
       const readUnderline = () =>
         link.evaluate((element, background) => {
           const context = new OffscreenCanvas(1, 1).getContext('2d');
@@ -211,7 +243,11 @@ test('plain, bold, and struck links stay underlined and darken on hover', async 
           context.fillStyle = background;
           context.fillRect(0, 0, 1, 1);
           const base = luminance();
-          context.fillStyle = getComputedStyle(element).textDecorationColor;
+          const decoration = /(color\(srgb[^)]*\)|rgba?\([^)]*\))/.exec(
+            getComputedStyle(element).backgroundImage,
+          )?.[0];
+          if (decoration === undefined) throw new Error('The underline colour is missing');
+          context.fillStyle = decoration;
           context.fillRect(0, 0, 1, 1);
           const stroke = luminance();
           return {

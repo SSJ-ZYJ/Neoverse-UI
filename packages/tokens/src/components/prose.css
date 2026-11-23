@@ -14,6 +14,9 @@
     --neoverse-prose-strong-foreground: var(--neoverse-color-text-primary);
     --neoverse-prose-link-foreground: var(--neoverse-color-text-primary);
     --neoverse-prose-link-hover-foreground: var(--neoverse-color-accent-primary);
+    --neoverse-prose-link-underline-size: var(--neoverse-border-width-strong);
+    --neoverse-prose-link-underline-radius: calc(var(--neoverse-border-width-strong) / 2);
+    --neoverse-prose-link-underline-offset: calc(var(--neoverse-space-1) / 2);
     --neoverse-prose-marker-foreground: var(--neoverse-color-text-muted);
 
     --neoverse-prose-quote-foreground: var(--neoverse-color-text-primary);

@@ -16,6 +16,7 @@ Status: adopted
 | NavigationItem lg | 40px | 16px |
 | SegmentedControl 选项 | 32px | 14px |
 | Input / Select | 最小 40px | 14px |
+| Breadcrumb | 24px（20px 行高 + 2px 链接底板内距） | 16px（Body md，常规字重） |
 | Badge sm / md / lg | 随原有行高和内边距计算 | 13 / 14 / 16px |
 
 徽章三档统一使用 `--neoverse-badge-font-family` 与 `--neoverse-badge-font-weight`，分别映射共享 Label 字体族和字重。字号随尺寸递增，行高与内边距保持原有尺寸；消费项目可通过同一组徽章 Token 调整三档字体和字重。

@@ -108,8 +108,8 @@ The runtime rim cannot add light where the backdrop provides no color signal.
 Surfaces anchored to the window edge can opt into a painted stroke with
 `data-neoverse-glass-edge-stroke`. The stroke comes from
 `--neoverse-material-edge-stroke`, which is `0 0 transparent` by default and
-therefore inert for every other surface; dark themes resolve it to the strong
-border role plus a top catch. The renderer path keeps the stroke ahead of the
+therefore inert for every other surface; dark themes resolve it to one uniform
+strong-border ring. The renderer path keeps the stroke ahead of the
 runtime shadow, and the reduced-transparency fallback keeps it ahead of the
 material highlights. The stroke is geometry, not refraction: it does not track
 backdrop color, which is what keeps a nav bar's silhouette readable while it
@@ -249,7 +249,9 @@ tokens reference those roles; they do not define optical recipes themselves.
 `cssVariables.effects.controls` exposes these roles for customization.
 
 Badge uses a real thin border, a shared 10% semantic field in both themes,
-and the shared subtle edge highlight, inner glow and bloom composition.
+and the shared subtle edge highlight and inner glow. It has no outer bloom:
+combining that shadow with backdrop blur can leave a dark strip at the rounded
+end when Chromium repaints the pill.
 Its background filter aliases the shared Light tier of Aurora Glass (12px blur); labels
 stay sharp. It adds no surface gradient or outline. Every variant uses
 the same border geometry; the existing `sm` / `md` / `lg` size classes and optical
@@ -270,6 +272,16 @@ ink on these fields. Text-only validation, terminal feedback and destructive men
 items use shared `status-*-text` effect roles so pale fields do not turn into
 illegible text. Dark status colors and text-only feedback retain their palette.
 
+TooltipSurface uses a pale blue tint for Neutral and a stronger theme accent
+tint for Accent. The body and pointer stay distinct on a flat canvas without
+changing the Light-tier fill alpha, backdrop filter, or shared refractive
+contour. Reduced transparency keeps the tint on an opaque Light-tier base.
+
+Neutral Notice uses a quiet, theme-aware tint so its rounded silhouette stays
+visible on a flat backdrop. It retains the Light-tier fill alpha, backdrop
+blur, and inset shadows without adding a border. Status variants retain their
+semantic tints.
+
 Disclosure panels use the shared directional inset edge roles in every state,
 together with the shared control shadow. The directional catches separate the
 panel from pale or textured backdrops without a uniform inset ring, and they do
@@ -289,9 +301,10 @@ remain text and future steps retain neutral markers. Container-based horizontal/
 list/date semantics and consumer-owned state remain unchanged.
 
 A selected SegmentedControl slider and a selected navigation item use a local accent
-field. Dock trailing groups retain a local grouping wash. These fields express
-selection or grouping, never create another backdrop filter, and remain consistent
-through hover and press. The surrounding Aurora Glass plate keeps its tier alpha/filter.
+field. Dock trailing groups retain a local grouping wash and match the embedded
+SegmentedControl shape. These fields express selection or grouping, never create
+another backdrop filter, and remain consistent through hover and press. The
+surrounding Aurora Glass plate keeps its tier alpha/filter and shared outer glass edge.
 Segmented options, navigation items, tabs, pagination, menu items, and number
 steppers share the quiet button wash. Hover adds the wash; press uses a deeper
 shade without moving the control or changing its shadow.
@@ -311,11 +324,13 @@ replaces the plate needs to declare its own accent.
 Current-page, checked, open and selected indicators remain visible, and
 activation rather than press commits selection.
 
-Checkbox, RadioGroup and Switch use a pale blue selected field in Light mode,
-with blue-grey checks and compact radio dots. Dark mode uses a translucent blue
-wash and a fine illuminated edge, retaining visible backdrop color through the
-selected controls. White marks remain readable. Reduced transparency restores an
-opaque selected field. Both themes use a porcelain Switch thumb. A quiet top catch adds
+Checkbox, RadioGroup and Switch paint an azure selected field in both themes.
+Light keeps 46% transparency with a deep azure mark; Dark keeps 28% with a white
+mark. The field carries its own colour over any backdrop while the plate still
+shows through, and every mark keeps at least 3:1 non-text contrast on the fill.
+Dark uses a deeper azure and keeps the fine illuminated edge. Reduced
+transparency restores the fully opaque field. Both themes use a porcelain Switch
+thumb. A quiet top catch adds
 depth. The Switch
 keeps the same outer footprint, with a smaller thumb and even inset. Unchecked
 controls retain their neutral Aurora Glass plate with the shared 1px control
@@ -361,9 +376,16 @@ per-frame layout inside the glass plate. The runtime treats selection indicators
 as edge-neutral content and does not reserve edge frames for their motion.
 Reduced motion commits the target geometry directly without a flight.
 
-The light segmented selection plate retains its 0.3.0 pale outline and selected
-gradient. The well keeps its tier-owned blur, and inactive options remain
-transparent. The dark selection keeps its existing edge treatment.
+SegmentedControl renders a translucent Aurora Glass outer shell with its tier-owned
+backdrop blur and shared WebGL/CSS outer glass edge, framing an embedded selection
+slider that retains the library's aurora mint-to-sky selection field in Light and
+luminous selection field in Dark. It defaults to the `pill` shape and also supports
+`rounded` via `shape`, with its geometry and selection tokens decoupled from
+`ControlSurface`, `Tabs`, `Pagination`, and `NavigationItem`. The embedded slider
+and label color glide smoothly on the shared 320ms soft-spring curve (`--neoverse-motion-easing-spring-soft`)
+with subtle tactile press compression on active press, and snap immediately without scaling
+under reduced motion. Inactive options remain transparent and share the
+quiet feedback wash.
 
 Regression contracts check that transient button feedback keeps the sampled
 plate unchanged, and that command states do not replace persistent selection
@@ -372,10 +394,10 @@ or alter shared Aurora Glass Dock depth.
 | Component | Preserved visual role | Shared role / source |
 | --- | --- | --- |
 | Button, Action, IconButton | Translucent primary and secondary tints, quiet Ghost feedback | `command-*`, `primary-*`, `quiet-command-*` in `control-effects.css` |
-| SegmentedControl | Shell depth and theme-specific selected accent field/fill/edge | `choice-rest-shadow`, `choice-selected-*` |
+| SegmentedControl | Translucent Aurora Glass outer shell, shared outer glass edge, embedded aurora selection plate, and `pill` / `rounded` shapes | `choice-rest-shadow`, `choice-selected-*` |
 | Dock, ControlSurface | Selected Aurora Glass tier depth/boundary and local trailing group contrast | Aurora Glass material tokens, `control-surface-*`, `grouped-inset-*` |
 | NavigationItem | Persistent selection under the quiet button wash | `selection-*`, `quiet-command-*` |
-| Skeleton, Badge, Tooltip, Scrollbar | Highlight, edge, accent depth and thumb state effects | `placeholder-*`, `label-edge`, `accent-*`, `rail-*` |
+| Skeleton, Badge, Tooltip, Scrollbar | Skeleton highlight and pulse without an edge, plus badge/tooltip accent depth and scrollbar thumb state | `placeholder-*`, `label-edge`, `accent-*`, `rail-*` |
 | StatusIndicator | Established 42% glow, 88% pulse and separate glow/pulse spread | Status roles in `effects.css` |
 
 ## Audit and verification
@@ -392,7 +414,7 @@ rendering rules; Vue/React adapter sources are scanned separately.
 | Skeleton | Hardcoded 12px and independent pulse alpha | Light tier blur, shared neutral foreground tint for visible placeholders, shared loading/pulse roles | Fallback and inherited blur tests |
 | Input, Textarea, Select, Checkbox, RadioGroup, Switch, Disclosure, Table, Prose | Inset fill became denser on hover/focus/open | Light inset base; shared interaction shadow | Form/disclosure/inset tests |
 | Popover, Select panel, menus, Tooltip | Panel fill/filter tier mismatch; tooltip arrow denser than body | Standard panel; Light tooltip and matching arrow | Overlay/focus/fallback tests |
-| Badge | Borderless flat tint / added outline / fixed white backing | Shared border, Aurora Glass shadows, Light-tier Aurora Glass blur and quiet semantic tint in both themes | Browser theme parity, geometry, backdrop pixels and semantic ink checks |
+| Badge | Borderless flat tint / added outline / fixed white backing / flashing outer bloom | Shared border, inset Aurora Glass highlights, Light-tier Aurora Glass blur and quiet semantic tint in both themes | Browser theme parity, geometry, backdrop pixels and semantic ink checks |
 | Notice | Per-status full-surface gradients | Shared semantic status tint at Light alpha | Status material checks |
 | Scrollbar | Per-component blend weights | Shared effect alpha vocabulary; semantic thumb states | Token and interaction checks |
 | StatusIndicator | Independent pulse/glow opacity | Shared pulse/glow vocabulary | Loading/reduced-motion checks |

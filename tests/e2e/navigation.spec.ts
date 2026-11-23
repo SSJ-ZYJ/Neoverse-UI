@@ -331,7 +331,7 @@ test.describe('navigation', () => {
     await expect(radios.first()).toHaveAttribute('aria-checked', 'true');
   });
 
-  test('segmented control reconciles rejected, loading and disabled updates', async ({ page }) => {
+  test('segmented control reconciles rejected and disabled updates', async ({ page }) => {
     await page.goto('/react-fixture?theme=light&lang=en&contract-fixtures=1');
     const group = page.locator('[data-react-adapter="UiSegmentedControl"]');
     const radios = group.getByRole('radio');
@@ -340,11 +340,6 @@ test.describe('navigation', () => {
     await radios.nth(2).click();
     await expect(radios.first()).toHaveAttribute('aria-checked', 'true');
     await expect(radios.nth(2)).toHaveAttribute('aria-checked', 'false');
-
-    await page.locator('[data-parity-loading]').click();
-    await expect(group).toHaveAttribute('aria-busy', 'true');
-    for (const radio of await radios.all()) await expect(radio).toBeDisabled();
-    await page.locator('[data-parity-loading]').click();
 
     await page.locator('[data-parity-disabled]').click();
     for (const radio of await radios.all()) await expect(radio).toBeDisabled();
@@ -403,6 +398,65 @@ test.describe('navigation', () => {
     await page.keyboard.press('Shift+Tab');
     await expect(radios.nth(2)).toBeFocused();
   });
+
+  for (const theme of ['light', 'dark'] as const) {
+    test(`segmented control renders a translucent Aurora Glass outer shell, pill/rounded shapes and 320ms spring transition in ${theme}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.goto(`/frame?theme=${theme}&lang=en#controls-segmented-control`, {
+        waitUntil: 'domcontentloaded',
+      });
+      const pill = page
+        .locator(
+          '#controls-segmented-control .ui-segmented-control--pill[data-surface="glass-subtle"]',
+        )
+        .first();
+      const rounded = page
+        .locator(
+          '#controls-segmented-control .ui-segmented-control--rounded[data-surface="glass-subtle"]',
+        )
+        .first();
+      await expect(pill).toBeVisible();
+      await expect(rounded).toBeVisible();
+
+      const pillMetrics = await pill.evaluate((element) => {
+        const style = getComputedStyle(element);
+        const slider = element.querySelector<HTMLElement>('.ui-segmented-control__slider');
+        const sliderStyle = slider ? getComputedStyle(slider) : null;
+        return {
+          radius: Number.parseFloat(style.borderTopLeftRadius),
+          bg: style.backgroundColor,
+          backdrop: style.backdropFilter,
+          sliderRadius: sliderStyle ? Number.parseFloat(sliderStyle.borderTopLeftRadius) : 0,
+          sliderDuration: sliderStyle?.transitionDuration ?? '',
+          sliderTiming: sliderStyle?.transitionTimingFunction ?? '',
+          sliderBgImage: sliderStyle?.backgroundImage ?? '',
+        };
+      });
+      expect(pillMetrics.radius).toBeGreaterThanOrEqual(999);
+      expect(pillMetrics.sliderRadius).toBeGreaterThanOrEqual(999);
+      expect(pillMetrics.bg).toContain('/ 0.15');
+      expect(pillMetrics.backdrop).toContain('blur(12px)');
+      expect(pillMetrics.sliderDuration).toContain('0.32s');
+      expect(pillMetrics.sliderTiming).toContain('cubic-bezier(0.32, 1.28, 0.42, 1)');
+      expect(pillMetrics.sliderBgImage).toContain('linear-gradient');
+
+      const roundedMetrics = await rounded.evaluate((element) => {
+        const style = getComputedStyle(element);
+        const slider = element.querySelector<HTMLElement>('.ui-segmented-control__slider');
+        return {
+          radius: Number.parseFloat(style.borderTopLeftRadius),
+          sliderRadius: slider
+            ? Number.parseFloat(getComputedStyle(slider).borderTopLeftRadius)
+            : 0,
+        };
+      });
+      expect(roundedMetrics.radius).toBeCloseTo(12, 0);
+      expect(roundedMetrics.sliderRadius).toBeLessThan(roundedMetrics.radius);
+      expect(roundedMetrics.sliderRadius).toBeGreaterThan(6);
+    });
+  }
 
   test('step flow marks exactly one current stage', async ({ page }) => {
     await page.goto('/frame?theme=light&lang=en#data-display-step-flow');

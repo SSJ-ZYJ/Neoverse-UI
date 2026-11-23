@@ -106,7 +106,7 @@ function skeletonSize(variant: SkeletonVariant | undefined): Record<string, stri
     case 'circle':
       return { width: '4rem' };
     case 'rect':
-      return { width: '12rem', height: '6rem' };
+      return { width: '12rem', height: '6rem', radius: 'var(--neoverse-radius-xl)' };
     default:
       return { width: '16rem' };
   }

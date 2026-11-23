@@ -246,6 +246,8 @@ try {
     '.material-glass-elevated',
     '.material-glass-immersive',
     '.ui-segmented-control',
+    '.ui-segmented-control--pill',
+    '.ui-segmented-control--rounded',
     '.ui-segmented-control__slider',
     '.ui-skeleton',
     '.skeleton-surface',

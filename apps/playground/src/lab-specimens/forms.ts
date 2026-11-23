@@ -113,20 +113,24 @@ export const select = defineSpecimen<
     state: { modelValue: { kind: 'select', label: localized('Value', '值'), options: runtimes } },
   },
   stateDisabled: (props) => props.disabled === true || props.readonly === true,
+  // UiSelect forwards layout classes to the interactive summary, while its
+  // details shell stays full width. Size the shell from a wrapper so the
+  // centered stage centers the specimen; the Input preview uses the same box.
   render: ({ props, state, setState, locale }) =>
-    h(UiSelect, {
-      ...props,
-      id: 'forms-runtime',
-      class: 'w-full max-w-container-sm',
-      modelValue: state.modelValue,
-      'onUpdate:modelValue': (value: FormControlValue) => {
-        const option = runtimes.find((entry) => entry.value === value);
-        if (option !== undefined) setState('modelValue', option.value);
-      },
-      'aria-label': localize(runtimeLabel, locale),
-      options: localizedRuntimes[locale],
-      'data-form-select': '',
-    }),
+    h('div', { class: 'w-full max-w-container-sm' }, [
+      h(UiSelect, {
+        ...props,
+        id: 'forms-runtime',
+        modelValue: state.modelValue,
+        'onUpdate:modelValue': (value: FormControlValue) => {
+          const option = runtimes.find((entry) => entry.value === value);
+          if (option !== undefined) setState('modelValue', option.value);
+        },
+        'aria-label': localize(runtimeLabel, locale),
+        options: localizedRuntimes[locale],
+        'data-form-select': '',
+      }),
+    ]),
 });
 
 const releaseNotifications = localized('Release notifications', '版本发布通知');

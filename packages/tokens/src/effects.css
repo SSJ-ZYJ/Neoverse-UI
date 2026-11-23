@@ -199,7 +199,17 @@
     );
     --neoverse-badge-background: var(--neoverse-effect-label-neutral-background);
     --neoverse-badge-backdrop-filter: var(--neoverse-material-glass-subtle-filter);
-    --neoverse-notice-neutral-background: var(--neoverse-material-glass-subtle-background);
+    /* Separate the whole neutral silhouette from a flat canvas without a stroke. */
+    --neoverse-notice-neutral-background: color-mix(
+      in srgb,
+      color-mix(
+          in srgb,
+          var(--neoverse-color-text-primary) var(--neoverse-effect-strength-38),
+          var(--neoverse-material-glass-base-tint)
+        )
+        var(--neoverse-material-glass-subtle-transparency),
+      var(--neoverse-notice-neutral-base, transparent)
+    );
     --neoverse-choice-control-background: var(--neoverse-material-glass-subtle-background);
     --neoverse-choice-control-hover-background: var(--neoverse-material-glass-subtle-background);
     --neoverse-effect-label-info-background: color-mix(
@@ -248,10 +258,15 @@
     --neoverse-surface-inset-strong-hover-fill: var(--neoverse-surface-inset-fill);
     --neoverse-skeleton-fill: var(--neoverse-effect-highlight-color);
     --neoverse-skeleton-backdrop-filter: var(--neoverse-material-glass-subtle-filter);
+    --neoverse-tooltip-neutral-tint: color-mix(
+      in srgb,
+      var(--neoverse-color-blue-500) var(--neoverse-effect-strength-76),
+      var(--neoverse-material-glass-base-tint)
+    );
     --neoverse-effect-accent-tint: color-mix(
       in srgb,
-      var(--neoverse-material-glass-base-tint) var(--neoverse-effect-strength-72),
-      var(--neoverse-color-accent-primary)
+      var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-76),
+      var(--neoverse-color-blue-800)
     );
     --neoverse-effect-accent-background: color-mix(
       in srgb,
@@ -462,6 +477,7 @@
       --neoverse-material-glass-elevated-background: var(--neoverse-material-glass-base-tint);
       --neoverse-material-glass-subtle-filter: none;
       --neoverse-material-glass-elevated-filter: none;
+      --neoverse-notice-neutral-base: var(--neoverse-material-glass-base-tint);
       --neoverse-notice-info-background: var(--neoverse-material-glass-base-tint);
       --neoverse-notice-success-background: var(--neoverse-material-glass-base-tint);
       --neoverse-notice-warning-background: var(--neoverse-material-glass-base-tint);
@@ -496,6 +512,7 @@
       --neoverse-material-glass-elevated-background: var(--neoverse-material-glass-base-tint);
       --neoverse-material-glass-subtle-filter: none;
       --neoverse-material-glass-elevated-filter: none;
+      --neoverse-notice-neutral-base: var(--neoverse-material-glass-base-tint);
       --neoverse-notice-info-background: var(--neoverse-material-glass-base-tint);
       --neoverse-notice-success-background: var(--neoverse-material-glass-base-tint);
       --neoverse-notice-warning-background: var(--neoverse-material-glass-base-tint);

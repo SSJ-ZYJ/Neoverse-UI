@@ -8,9 +8,7 @@
     --neoverse-navigation-item-active-background: var(--neoverse-control-active-background);
     --neoverse-navigation-item-active-fill: transparent;
     --neoverse-navigation-item-active-border: var(--neoverse-control-active-border);
-    --neoverse-navigation-item-active-foreground: var(
-      --neoverse-control-segmented-active-foreground
-    );
+    --neoverse-navigation-item-active-foreground: var(--neoverse-color-accent-secondary);
     --neoverse-navigation-item-active-shadow: var(--neoverse-control-active-highlight);
     --neoverse-navigation-item-indicator-color: var(--neoverse-color-accent-secondary);
     /* The selected plate samples the page behind it. A flat accent wash over a

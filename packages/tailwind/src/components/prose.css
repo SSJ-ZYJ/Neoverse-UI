@@ -80,14 +80,21 @@
 
   .neoverse-prose a {
     color: var(--neoverse-prose-link-foreground);
-    text-decoration-line: underline;
-    text-decoration-color: var(--neoverse-prose-link-decoration);
-    text-decoration-thickness: var(--neoverse-border-width-thin);
-    text-underline-offset: var(--neoverse-space-1);
-    transition:
-      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
-      text-decoration-color var(--neoverse-motion-state-duration)
-      var(--neoverse-motion-state-easing);
+    /* The background strip paints per inline fragment, so a wrapped link keeps
+       the underline on every line. The bottom clip radius rounds both caps
+       without replacing the text decoration colour token. */
+    background-image: linear-gradient(
+      var(--neoverse-prose-link-decoration),
+      var(--neoverse-prose-link-decoration)
+    );
+    background-position: left bottom;
+    background-repeat: no-repeat;
+    background-size: auto var(--neoverse-prose-link-underline-size);
+    border-radius: var(--neoverse-prose-link-underline-radius);
+    padding-block-end: var(--neoverse-prose-link-underline-offset);
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
+    transition: color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
   }
 
   .neoverse-prose a:focus-visible {
@@ -267,7 +274,10 @@
   @media (hover: hover) {
     .neoverse-prose a:hover {
       color: var(--neoverse-prose-link-hover-foreground);
-      text-decoration-color: var(--neoverse-prose-link-hover-decoration);
+      background-image: linear-gradient(
+        var(--neoverse-prose-link-hover-decoration),
+        var(--neoverse-prose-link-hover-decoration)
+      );
     }
   }
 

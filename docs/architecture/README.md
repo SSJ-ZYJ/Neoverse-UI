@@ -255,8 +255,8 @@ titles such as `.ui-step-flow__title` and `.ui-timeline__title` use `title-sm`.
 The inline syntax rows below the heading scale place each Markdown marker beside
 its rendered semantic element. Bold, italic, bold italic, inline code,
 strikethrough and links share the one `.neoverse-prose` layer; bold and deleted
-text nested in a link keep the link color, and all three forms use a light
-blue underline that deepens on hover in both themes.
+text nested in a link keep the link color, and all three forms use a rounded
+2px light blue underline that deepens on hover in both themes.
 
 The focused Scrollbar specimen demonstrates `scrollbar-immersive` on a local scroll container. The document-bound `UiScrollbar` and its ownership checks stay in the frame; the focused renderer does not bind the shell document to demonstrate a container scrollbar.
 

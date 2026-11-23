@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, useAttrs, watch } from 'vue';
-import { slideCaret } from './caret-motion';
+import { deferPointerFocus, slideCaret, watchCaretSelection } from './caret-motion';
 import { resolveAriaInvalid } from './form-control';
 import type { InputProps } from './types';
 
@@ -28,6 +28,9 @@ const caretHolding = ref(false);
 let holdTimer: ReturnType<typeof setTimeout> | undefined;
 let caretLeft: number | null = null;
 let caretScroll = 0;
+let pointerFocusing = false;
+let cancelPointerFocus: (() => void) | undefined;
+let stopSelectionWatch: (() => void) | undefined;
 const isNumber = computed(() => attrs.type === 'number');
 const forwardedAttrs = computed(() => {
   const {
@@ -57,7 +60,13 @@ const showsCaret = computed(
     caretOffset.value !== null,
 );
 
+function clearPointerFocus() {
+  pointerFocusing = false;
+  cancelPointerFocus?.();
+  cancelPointerFocus = undefined;
+}
 function syncCaret() {
+  clearPointerFocus();
   const editor = inputElement.value;
   if (!editor) {
     caretOffset.value = null;
@@ -85,8 +94,24 @@ function holdCaret() {
     caretHolding.value = false;
   }, 600);
 }
-onBeforeUnmount(() => clearTimeout(holdTimer));
-watch(() => props.modelValue, syncCaret, { flush: 'post' });
+watch(focused, (active) => {
+  stopSelectionWatch?.();
+  stopSelectionWatch = active
+    ? watchCaretSelection(() => inputElement.value, syncCaret)
+    : undefined;
+});
+onBeforeUnmount(() => {
+  clearTimeout(holdTimer);
+  clearPointerFocus();
+  stopSelectionWatch?.();
+});
+watch(
+  () => props.modelValue,
+  () => {
+    if (focused.value) syncCaret();
+  },
+  { flush: 'post' },
+);
 // A new caret position slides from the previous one instead of jumping.
 watch(
   [caretPrefix, scrollOffset, showsCaret, caretText],
@@ -131,11 +156,24 @@ function stepValue(direction: number) {
 
 function onPointerDown(event: PointerEvent) {
   (event.currentTarget as HTMLElement).dataset.neoverseFocusOrigin = 'pointer';
+  if (!focused.value) pointerFocusing = true;
+}
+
+function onFocus() {
+  focused.value = true;
+  if (pointerFocusing) {
+    cancelPointerFocus?.();
+    cancelPointerFocus = deferPointerFocus(syncCaret);
+  } else {
+    syncCaret();
+  }
 }
 
 function onBlur(event: FocusEvent) {
   delete (event.currentTarget as HTMLElement).dataset.neoverseFocusOrigin;
+  clearPointerFocus();
   focused.value = false;
+  caretOffset.value = null;
 }
 </script>
 
@@ -176,17 +214,6 @@ function onBlur(event: FocusEvent) {
     </span>
   </span>
   <span v-else class="ui-input-shell" :data-caret="showsCaret ? 'overlay' : 'native'">
-    <span
-      v-if="showsCaret"
-      class="ui-input-caret"
-      :class="{ 'ui-input-caret--holding': caretHolding }"
-      aria-hidden="true"
-    >
-      <span :style="{ transform: `translateX(${-scrollOffset}px)` }"
-        ><span class="ui-input-caret__prefix">{{ caretPrefix }}</span
-        ><span ref="caretGlyph" class="ui-input-caret__glyph"></span></span
-      >
-    </span>
     <input
       ref="inputElement"
       v-model="value"
@@ -198,10 +225,7 @@ function onBlur(event: FocusEvent) {
       :readonly="props.readonly"
       :data-validation="props.validation"
       :aria-invalid="ariaInvalid"
-      @focus="
-        focused = true;
-        syncCaret();
-      "
+      @focus="onFocus"
       @input="
         syncCaret();
         holdCaret();
@@ -221,5 +245,16 @@ function onBlur(event: FocusEvent) {
       @pointerdown="onPointerDown"
       @blur="onBlur"
     >
+    <span
+      v-if="showsCaret"
+      class="ui-input-caret"
+      :class="{ 'ui-input-caret--holding': caretHolding }"
+      aria-hidden="true"
+    >
+      <span :style="{ transform: `translateX(${-scrollOffset}px)` }"
+        ><span class="ui-input-caret__prefix">{{ caretPrefix }}</span
+        ><span ref="caretGlyph" class="ui-input-caret__glyph"></span></span
+      >
+    </span>
   </span>
 </template>

@@ -7,7 +7,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { slideCaret } from './caret-motion.js';
+import { useCaretMotion } from './caret-motion.js';
 import { type SurfacePreset, UiSurface } from './index.js';
 
 export type TerminalPromptTone = 'host' | 'path' | 'branch' | 'runtime' | 'time';
@@ -88,6 +88,7 @@ export function UiTerminalPrompt({
   className = '',
   style,
   ref,
+  onPointerDown,
   onFocus,
   onBlur,
   onChange,
@@ -113,8 +114,6 @@ export function UiTerminalPrompt({
     scroll: number;
     caret: number | null;
   }>({ atEnd: false, scroll: 0, caret: null });
-  const [caretHolding, setCaretHolding] = useState(false);
-  const holdTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const current = value ?? internal;
   const syncEditor = () => {
     const node = input.current;
@@ -138,7 +137,9 @@ export function UiTerminalPrompt({
   };
   // Selection can move when a controlled value or suggestion changes.
   // biome-ignore lint/correctness/useExhaustiveDependencies: Native selection changes after React commits a new input value.
-  useEffect(syncEditor, [current, suggestion]);
+  useEffect(() => {
+    if (focused) syncEditor();
+  }, [current, suggestion]);
   const suffix =
     focused &&
     editor.atEnd &&
@@ -155,32 +156,21 @@ export function UiTerminalPrompt({
   const caretIndex =
     focused && !composing && !disabled && !readOnly && type !== 'password' ? editor.caret : null;
   const drawsCaret = caretIndex !== null;
-  // Editing keeps the caret solid for one blink cycle before it breathes again.
-  const holdCaret = () => {
-    if (!drawsCaret) return;
-    setCaretHolding(true);
-    if (holdTimer.current !== null) clearTimeout(holdTimer.current);
-    holdTimer.current = setTimeout(() => setCaretHolding(false), 600);
-  };
-  useEffect(
-    () => () => {
-      if (holdTimer.current !== null) clearTimeout(holdTimer.current);
-    },
-    [],
-  );
+  const caretPrefix = current.slice(0, caretIndex ?? 0);
   const caretGlyph = useRef<HTMLSpanElement | null>(null);
-  const caretLeft = useRef<number | null>(null);
-  const caretScroll = useRef(0);
-  // A new caret position slides from the previous one instead of jumping.
-  useEffect(() => {
-    caretLeft.current = slideCaret(
-      caretGlyph.current,
-      caretLeft.current,
-      current,
-      editor.scroll !== caretScroll.current,
-    );
-    caretScroll.current = editor.scroll;
-  });
+  const caretFocus = useCaretMotion(
+    input,
+    caretGlyph,
+    focused,
+    drawsCaret,
+    caretPrefix,
+    editor.scroll,
+    current,
+    syncEditor,
+  );
+  // Editing keeps the caret solid for one blink cycle before it breathes again.
+  const holdCaret = () =>
+    caretFocus.hold(focused && !composing && !disabled && !readOnly && type !== 'password');
   return (
     <div
       className={`ui-terminal-prompt ${className}`}
@@ -203,19 +193,6 @@ export function UiTerminalPrompt({
               </span>
             </span>
           ) : null}
-          {drawsCaret ? (
-            <span
-              className={`ui-terminal-prompt__caret${caretHolding ? ' ui-terminal-prompt__caret--holding' : ''}`}
-              aria-hidden="true"
-            >
-              <span style={{ transform: `translateX(${-editor.scroll}px)` }}>
-                <span className="ui-terminal-prompt__caret-prefix">
-                  {current.slice(0, caretIndex ?? 0)}
-                </span>
-                <span ref={caretGlyph} className="ui-terminal-prompt__caret-glyph" />
-              </span>
-            </span>
-          ) : null}
           <input
             {...rest}
             ref={(node) => {
@@ -234,13 +211,19 @@ export function UiTerminalPrompt({
             autoComplete={autoComplete}
             autoCapitalize={autoCapitalize}
             spellCheck={spellCheck}
+            onPointerDown={(event) => {
+              caretFocus.markPointerFocus();
+              onPointerDown?.(event);
+            }}
             onFocus={(event) => {
               setFocused(true);
-              syncEditor();
+              caretFocus.syncOnFocus();
               onFocus?.(event);
             }}
             onBlur={(event) => {
+              caretFocus.clearPointerFocus();
               setFocused(false);
+              setEditor((prev) => (prev.caret === null ? prev : { ...prev, caret: null }));
               onBlur?.(event);
             }}
             onChange={(event) => {
@@ -277,6 +260,17 @@ export function UiTerminalPrompt({
               onCompositionEnd?.(event);
             }}
           />
+          {drawsCaret ? (
+            <span
+              className={`ui-terminal-prompt__caret${caretFocus.holding ? ' ui-terminal-prompt__caret--holding' : ''}`}
+              aria-hidden="true"
+            >
+              <span style={{ transform: `translateX(${-editor.scroll}px)` }}>
+                <span className="ui-terminal-prompt__caret-prefix">{caretPrefix}</span>
+                <span ref={caretGlyph} className="ui-terminal-prompt__caret-glyph" />
+              </span>
+            </span>
+          ) : null}
         </span>
       </label>
     </div>

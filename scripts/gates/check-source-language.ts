@@ -24,6 +24,10 @@ const abbreviationRules: Array<[RegExp, string]> = [
   [/\bAx\b/g, 'a11y or accessibility'],
 ];
 
+// Banned translations are checked against raw source text, including string
+// literals, because the term can appear in localized zh copy as well as prose.
+const bannedTranslations: Array<[RegExp, string]> = [[/钩子/, 'hook']]; // style-ignore
+
 const cjk = /[\u3040-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff]/;
 
 type ScanState = { inBlock: boolean };
@@ -145,6 +149,13 @@ for (const file of files) {
     if (line.includes('style-ignore')) return;
 
     const lineNumber = index + 1;
+
+    for (const [pattern, replacement] of bannedTranslations) {
+      if (pattern.test(line)) {
+        issues.push(`${file}:${lineNumber}  keep "${replacement}" untranslated`);
+      }
+    }
+
     const comment = commentText(line, commentState);
     const code = codeText(line, codeState);
 

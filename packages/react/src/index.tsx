@@ -25,7 +25,7 @@ import {
   useRef,
   useState,
 } from 'react';
-import { slideCaret } from './caret-motion.js';
+import { useCaretMotion, useTextareaCaret } from './caret-motion.js';
 import {
   type ButtonVariant,
   buttonVariantClasses,
@@ -560,7 +560,8 @@ export function UiInput({
   };
   // Editing keeps the caret solid for one blink cycle before it breathes again.
   const holdCaret = () => {
-    if (!showsCaret) return;
+    if (!focused || composing || props.disabled || props.readOnly || number) return;
+    if (props.type === 'password') return;
     setHolding(true);
     if (holdTimer.current !== null) clearTimeout(holdTimer.current);
     holdTimer.current = setTimeout(() => setHolding(false), 600);
@@ -572,19 +573,16 @@ export function UiInput({
     [],
   );
   const caretGlyph = useRef<HTMLSpanElement | null>(null);
-  const caretLeft = useRef<number | null>(null);
-  const caretScroll = useRef(0);
-  // A new caret position slides from the previous one instead of jumping.
-  useEffect(() => {
-    const scroll = caret?.scroll ?? 0;
-    caretLeft.current = slideCaret(
-      caretGlyph.current,
-      caretLeft.current,
-      caret?.text ?? '',
-      scroll !== caretScroll.current,
-    );
-    caretScroll.current = scroll;
-  });
+  const caretFocus = useCaretMotion(
+    input,
+    caretGlyph,
+    focused,
+    showsCaret,
+    caret?.prefix ?? '',
+    caret?.scroll ?? 0,
+    caret?.text ?? '',
+    syncCaret,
+  );
   const control = (
     <input
       {...props}
@@ -598,20 +596,24 @@ export function UiInput({
       aria-invalid={resolveAriaInvalid(ariaInvalid, validation)}
       onPointerDown={(event) => {
         event.currentTarget.dataset.neoverseFocusOrigin = 'pointer';
+        caretFocus.markPointerFocus();
         onPointerDown?.(event);
       }}
       onFocus={(event) => {
         setFocused(true);
-        syncCaret();
+        caretFocus.syncOnFocus();
         onFocus?.(event);
       }}
       onBlur={(event) => {
         delete event.currentTarget.dataset.neoverseFocusOrigin;
+        caretFocus.clearPointerFocus();
         setFocused(false);
+        setCaret(null);
         onBlur?.(event);
       }}
       onInput={(event) => {
         syncCaret();
+        holdCaret();
         onInput?.(event);
       }}
       onSelect={(event) => {
@@ -676,6 +678,7 @@ export function UiInput({
   }
   return (
     <span className="ui-input-shell" data-caret={showsCaret ? 'overlay' : 'native'}>
+      {control}
       {showsCaret && caret ? (
         <span
           className={`ui-input-caret${holding ? ' ui-input-caret--holding' : ''}`}
@@ -687,7 +690,6 @@ export function UiInput({
           </span>
         </span>
       ) : null}
-      {control}
     </span>
   );
 }
@@ -700,27 +702,50 @@ export function UiTextarea({
   validation = 'none',
   className,
   style,
-  onPointerDown,
-  onBlur,
+  ref: forwardedRef,
   'aria-invalid': ariaInvalid,
   ...props
 }: UiTextareaProps) {
+  const control = useRef<HTMLTextAreaElement | null>(null);
+  const caret = useTextareaCaret(control, props.disabled, props.readOnly, props);
   return (
-    <span className={mergeClassNames('ui-textarea-shell', className)} style={style}>
+    <span
+      className={mergeClassNames('ui-textarea-shell', className)}
+      style={style}
+      data-caret={caret.showsCaret ? 'overlay' : 'native'}
+    >
       <textarea
         {...props}
+        ref={(node) => {
+          control.current = node;
+          if (typeof forwardedRef === 'function') forwardedRef(node);
+          else if (forwardedRef) forwardedRef.current = node;
+        }}
         className="ui-textarea"
         data-validation={validation}
         aria-invalid={resolveAriaInvalid(ariaInvalid, validation)}
-        onPointerDown={(event) => {
-          event.currentTarget.dataset.neoverseFocusOrigin = 'pointer';
-          onPointerDown?.(event);
-        }}
-        onBlur={(event) => {
-          delete event.currentTarget.dataset.neoverseFocusOrigin;
-          onBlur?.(event);
-        }}
+        {...caret.eventProps}
       />
+      {caret.showsCaret && caret.caret ? (
+        <span
+          className={`ui-textarea-caret${caret.holding ? ' ui-textarea-caret--holding' : ''}`}
+          aria-hidden="true"
+        >
+          <span
+            className="ui-textarea-caret__mirror"
+            style={{
+              width: caret.caret.width > 0 ? `${caret.caret.width}px` : undefined,
+              transform: `translate(${-caret.caret.scrollLeft}px, ${-caret.caret.scrollTop}px)`,
+            }}
+          >
+            <span className="ui-textarea-caret__prefix">{caret.caret.prefix}</span>
+            <span className="ui-textarea-caret__anchor">
+              <span ref={caret.glyph} className="ui-textarea-caret__glyph" />
+            </span>
+            <span className="ui-textarea-caret__suffix">{caret.caret.suffix || '\u200b'}</span>
+          </span>
+        </span>
+      ) : null}
     </span>
   );
 }

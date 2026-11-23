@@ -1,39 +1,25 @@
 <script setup lang="ts">
 import type { ComponentPublicInstance } from 'vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, watch } from 'vue';
-import { presence } from './presence';
-import { getSurfaceClass, isGlassSurface } from './surface';
-import type { SegmentedControlProps, SegmentOption } from './types';
-import UiLoadingIndicator from './UiLoadingIndicator.vue';
+import { getSurfaceClass } from './surface';
+import type { SegmentedControlProps, SegmentedControlShape, SegmentOption } from './types';
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(defineProps<SegmentedControlProps>(), {
-  size: 'sm',
-  disabled: false,
-  loading: false,
-  surface: 'glass-subtle',
-});
+const props = withDefaults(
+  defineProps<SegmentedControlProps & { shape?: SegmentedControlShape }>(),
+  {
+    size: 'sm',
+    shape: 'pill',
+    disabled: false,
+    surface: 'glass-subtle',
+  },
+);
 
 const emit = defineEmits<(event: 'update:modelValue', value: string) => void>();
 
 const attrs = useAttrs();
 const ariaLabel = computed(() => props.ariaLabel ?? (attrs['aria-label'] as string | undefined));
-const ariaBusy = computed<'true' | 'false' | undefined>(() => {
-  if (props.loading) {
-    return 'true';
-  }
-
-  const value = attrs['aria-busy'];
-  if (value === true || value === 'true') {
-    return 'true';
-  }
-  if (value === false || value === 'false') {
-    return 'false';
-  }
-
-  return undefined;
-});
 const internalValue = ref<string | undefined>(initialValue(props.options, props.defaultValue));
 const focusedIndex = ref<number | null>(null);
 const optionRefs = ref<Array<HTMLButtonElement | null>>([]);
@@ -95,7 +81,9 @@ onBeforeUnmount(() => {
   optionResizeObserver?.disconnect();
   cancelAnimationFrame(sliderReadyFrame);
 });
-watch([activeIndex, () => props.options], () => void nextTick(measureSlider), { flush: 'post' });
+watch([activeIndex, () => props.options, () => props.shape], () => void nextTick(measureSlider), {
+  flush: 'post',
+});
 const enabledIndexes = computed(() =>
   props.options.flatMap((option, index) => (option.disabled ? [] : [index])),
 );
@@ -111,7 +99,11 @@ const rovingIndex = computed(() => {
   return selectedIndex >= 0 ? selectedIndex : (enabledIndexes.value[0] ?? -1);
 });
 
-const classes = computed(() => ['ui-segmented-control', getSurfaceClass(props.surface)]);
+const classes = computed(() => [
+  'ui-segmented-control',
+  `ui-segmented-control--${props.shape}`,
+  getSurfaceClass(props.surface),
+]);
 const forwardedAttrs = computed(() => {
   const { class: _class, style: _style, 'aria-label': _ariaLabel, ...rest } = attrs;
   return rest;
@@ -183,7 +175,7 @@ function isSelected(option: SegmentOption): boolean {
 }
 
 function selectOption(option: SegmentOption, index: number): void {
-  if (props.disabled || props.loading || option.disabled) {
+  if (props.disabled || option.disabled) {
     return;
   }
 
@@ -203,7 +195,7 @@ function focusOption(index: number): void {
 
 function selectAndFocus(index: number): void {
   const option = props.options[index];
-  if (option === undefined || props.disabled || props.loading || option.disabled) {
+  if (option === undefined || props.disabled || option.disabled) {
     return;
   }
 
@@ -212,7 +204,7 @@ function selectAndFocus(index: number): void {
 }
 
 function handleKeydown(event: KeyboardEvent, index: number): void {
-  if (props.disabled || props.loading) {
+  if (props.disabled) {
     return;
   }
 
@@ -269,15 +261,14 @@ function optionClasses(option: SegmentOption): string[] {
   <div
     v-bind="forwardedAttrs"
     :aria-label="ariaLabel"
+    :data-shape="props.shape"
     :data-surface="props.surface"
-    :data-neoverse-glass-edge-pass="isGlassSurface(props.surface) ? 'css' : undefined"
     data-neoverse-surface-hover="static"
     :class="[classes, attrs.class]"
     :style="[attrs.style, segmentStyle]"
     role="radiogroup"
     aria-orientation="horizontal"
-    :aria-disabled="props.disabled || props.loading || undefined"
-    :aria-busy="ariaBusy"
+    :aria-disabled="props.disabled || undefined"
   >
     <span ref="optionsElement" class="ui-segmented-control__options" @focusout="handleFocusOut">
       <span
@@ -296,7 +287,7 @@ function optionClasses(option: SegmentOption): string[] {
         :aria-checked="isSelected(option)"
         :aria-label="option.ariaLabel"
         :tabindex="index === rovingIndex ? 0 : -1"
-        :disabled="props.disabled || props.loading || option.disabled"
+        :disabled="props.disabled || option.disabled"
         :class="optionClasses(option)"
         @click="selectOption(option, index)"
         @keydown="handleKeydown($event, index)"
@@ -305,15 +296,5 @@ function optionClasses(option: SegmentOption): string[] {
         {{ option.label }}
       </button>
     </span>
-    <Transition name="nv">
-      <span
-        v-if="props.loading"
-        v-bind="presence('pop')"
-        class="ui-segmented-control__loading"
-        aria-hidden="true"
-      >
-        <UiLoadingIndicator />
-      </span>
-    </Transition>
   </div>
 </template>

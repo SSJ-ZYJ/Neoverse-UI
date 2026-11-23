@@ -345,10 +345,10 @@ function ParityFixtures() {
           if (!reject) setSegment(value);
         }}
         disabled={blocked}
-        loading={loading}
       />
       <UiSegmentedControl
         data-parity-uncontrolled
+        shape="rounded"
         ariaLabel={text('Uncontrolled language', '非受控语言')}
         options={
           options

@@ -209,28 +209,30 @@ test.describe('surfaces', () => {
     await expect(state.getByRole('button', { name: 'Create project' })).toBeVisible();
   });
   for (const theme of ['light', 'dark'] as const) {
-    test(`Vue: colored QA target does not intersect the reference card lower rim / ${theme}`, async ({
+    test(`Vue: the card comparison backdrop keeps color below the reference card / ${theme}`, async ({
       page,
     }) => {
       await page.goto(`/frame?theme=${theme}&lang=en#card`);
       const stage = page.locator('[data-card-qa] [data-qa-stage="gradient"]');
       await stage.scrollIntoViewIfNeeded();
-      const gap = await stage.evaluate((element) => {
+      // The isolated frame paints the shared dot-and-aurora field. Its lowest
+      // glow must stay below the card so the Glass edge still samples color.
+      const field = await stage.evaluate((element) => {
         const card = element.querySelector('.ui-card');
         if (!card) throw new Error('Missing reference card');
-        const circle = /circle at 72% ([0-9.]+)%.*? ([0-9.]+)px/.exec(
-          getComputedStyle(element).backgroundImage,
-        );
-        if (!circle) throw new Error('Missing QA colored backdrop target');
+        const glows = [
+          ...getComputedStyle(element).backgroundImage.matchAll(/at\s+([\d.]+)%\s+([\d.]+)%/g),
+        ].map((match) => Number(match[2]));
+        if (glows.length === 0) throw new Error('Missing QA colored backdrop');
         const stageRect = element.getBoundingClientRect();
-        return (
-          stageRect.top +
-          (stageRect.height * Number(circle[1])) / 100 -
-          Number(circle[2]) -
-          card.getBoundingClientRect().bottom
-        );
+        const cardBottom = card.getBoundingClientRect().bottom;
+        return {
+          gap: stageRect.top + (stageRect.height * Math.max(...glows)) / 100 - cardBottom,
+          belowCard: stageRect.bottom - cardBottom,
+        };
       });
-      expect(gap).toBeGreaterThan(0);
+      expect(field.gap).toBeGreaterThan(0);
+      expect(field.gap).toBeLessThan(field.belowCard);
     });
   }
   for (const adapter of ['Vue', 'React'] as const) {
@@ -298,6 +300,43 @@ test.describe('surfaces', () => {
     await expect(statCard).not.toBeEmpty();
     await expect(page.locator('[data-react-adapter="UiStatusIndicator"]').first()).not.toBeEmpty();
   });
+
+  for (const theme of ['light', 'dark'] as const) {
+    test(`skeleton specimens keep a clean large-radius surface and a pulse-only effect / ${theme}`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.goto(`/?theme=${theme}&lang=en#status-feedback-skeleton`, {
+        waitUntil: 'domcontentloaded',
+      });
+      const rectangle = page.locator('[data-design-lab-region="specimen"] .ui-skeleton');
+      await expect(rectangle).toBeVisible();
+
+      const geometry = await rectangle.evaluate((element) => {
+        const style = getComputedStyle(element);
+        return {
+          shadow: style.boxShadow,
+          topLeft: style.borderTopLeftRadius,
+          bottomRight: style.borderBottomRightRadius,
+        };
+      });
+      expect(geometry.shadow).toBe('none');
+      expect(geometry.topLeft).toBe('24px');
+      expect(geometry.bottomRight).toBe('24px');
+
+      await page.goto(`/frame?theme=${theme}&lang=en#status-feedback`, {
+        waitUntil: 'domcontentloaded',
+      });
+      const pulse = page.locator('.ui-skeleton[data-effect="pulse"]').first();
+      await expect(pulse).toBeVisible();
+      const animations = await pulse.evaluate((element) => ({
+        surface: getComputedStyle(element).animationName,
+        sheen: getComputedStyle(element, '::after').animationName,
+      }));
+      expect(animations.surface).toBe('ui-skeleton-pulse');
+      expect(animations.sheen).toBe('none');
+    });
+  }
 
   test('React: scrollbar reveals, seeks, drags, hides and cleans up', async ({ page }) => {
     await page.goto('/react-fixture?theme=light&lang=en&contract-fixtures=1');

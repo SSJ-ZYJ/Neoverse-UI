@@ -26,9 +26,11 @@
   --neoverse-effect-choice-selected-border: var(--neoverse-effect-choice-selected-border-light);
   --neoverse-effect-choice-selected-shadow: var(--neoverse-effect-choice-selected-shadow-light);
   --neoverse-effect-choice-filled-field: var(--neoverse-effect-choice-filled-field-light);
-  --neoverse-effect-choice-filled-field-opaque: var(--neoverse-effect-choice-filled-field-light);
+  --neoverse-effect-choice-filled-field-opaque: var(
+    --neoverse-effect-choice-filled-field-light-opaque
+  );
   --neoverse-effect-choice-filled-shadow: var(--neoverse-effect-choice-filled-shadow-light);
-  --neoverse-effect-choice-filled-foreground: var(--neoverse-effect-choice-filled-accent);
+  --neoverse-effect-choice-filled-foreground: var(--neoverse-color-blue-800);
   --neoverse-effect-command-edge-field: var(--neoverse-effect-command-edge-field-light);
   --neoverse-effect-command-edge-carrier: var(--neoverse-effect-command-edge-carrier-light);
   --neoverse-effect-command-press-light: var(--neoverse-effect-command-press-light-light);
@@ -254,17 +256,16 @@
   --neoverse-control-active-highlight: var(--neoverse-effect-selection-highlight);
   --neoverse-control-active-shadow: var(--neoverse-effect-selection-shadow);
 
-  /* Keep the shell translucent; the selected plate adds a soft accent tint
-       and reuses the ordinary light-button edge shadow. */
-  /* Light segmented controls take their silhouette from the same subtle
-       Aurora Glass refraction field as other Aurora Glass surfaces, not from a painted
-       hairline. Dark keeps its original segmented-control edge recipe. */
+  /* Keep the outer shell clean Aurora Glass while the embedded slider carries
+       the library's translucent aurora mint-to-sky selection plate. */
+  --neoverse-control-segmented-background-image: none;
   --neoverse-control-segmented-border: transparent;
   --neoverse-control-segmented-edge-refraction-opacity: var(
     --neoverse-material-edge-refraction-opacity-subtle
   );
   --neoverse-control-segmented-edge-display: block;
   --neoverse-control-segmented-shadow: var(--neoverse-effect-choice-rest-shadow);
+  --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
   /* Keep the selected field's 0.3.0 accent without changing the global blue. */
   --neoverse-control-segmented-active-background: linear-gradient(
     145deg,
@@ -287,9 +288,9 @@
   --neoverse-control-segmented-shell-hover-border: transparent;
   --neoverse-control-segmented-shell-hover-shadow: var(--neoverse-control-segmented-shadow);
   --neoverse-navigation-item-active-background: var(--neoverse-effect-choice-selected-field);
-  --neoverse-navigation-item-active-fill: var(--neoverse-control-segmented-active-fill);
+  --neoverse-navigation-item-active-fill: var(--neoverse-effect-choice-selected-fill);
   --neoverse-navigation-item-active-border: transparent;
-  --neoverse-navigation-item-active-shadow: var(--neoverse-control-segmented-active-shadow);
+  --neoverse-navigation-item-active-shadow: var(--neoverse-effect-choice-selected-shadow);
 
   /* Button tint is independent of the selected Aurora Glass tier. */
   --neoverse-control-button-filled-background: var(--neoverse-effect-command-rest-field-light);

@@ -4,11 +4,9 @@
     --neoverse-pagination-button-size: var(--neoverse-control-surface-control-height);
     --neoverse-pagination-button-radius: var(--neoverse-control-compact-radius);
     --neoverse-pagination-button-font-size: var(--neoverse-font-size-sm);
-    --neoverse-pagination-current-background-image: var(
-      --neoverse-control-segmented-active-background
-    );
-    --neoverse-pagination-current-background-color: var(--neoverse-control-segmented-active-fill);
-    --neoverse-pagination-current-border: var(--neoverse-control-segmented-active-border);
-    --neoverse-pagination-current-shadow: var(--neoverse-control-segmented-active-shadow);
+    --neoverse-pagination-current-background-image: var(--neoverse-effect-choice-selected-field);
+    --neoverse-pagination-current-background-color: var(--neoverse-effect-choice-selected-fill);
+    --neoverse-pagination-current-border: var(--neoverse-effect-choice-selected-border);
+    --neoverse-pagination-current-shadow: var(--neoverse-effect-choice-selected-shadow);
   }
 }

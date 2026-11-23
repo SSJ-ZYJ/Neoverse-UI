@@ -57,19 +57,16 @@ test('form controls preserve native props and compose canonical classes', () => 
   expect(inputHtml).toContain('name="email"');
   expect(inputHtml).toContain('data-caret="native"');
 
-  const textarea = UiTextarea({
-    name: 'notes',
-    rows: 4,
-    className: 'consumer-notes',
-  }) as TestElement;
-  expect(textarea.type).toBe('span');
-  expect(textarea.props.className).toBe('ui-textarea-shell consumer-notes');
-  const textareaControl = Children.toArray(textarea.props.children)[0] as TestElement;
-  expect(textareaControl.type).toBe('textarea');
-  expect(textareaControl.props.rows).toBe(4);
-  expect(textareaControl.props.className).toBe('ui-textarea');
-  expect(typeof textareaControl.props.onPointerDown).toBe('function');
-  expect(typeof textareaControl.props.onBlur).toBe('function');
+  const textareaHtml = renderToStaticMarkup(
+    createElement(UiTextarea, {
+      name: 'notes',
+      rows: 4,
+      className: 'consumer-notes',
+    }),
+  );
+  expect(textareaHtml).toContain('<span class="ui-textarea-shell consumer-notes"');
+  expect(textareaHtml).toContain('data-caret="native"');
+  expect(textareaHtml).toContain('<textarea name="notes" rows="4" class="ui-textarea"');
 
   const selectHtml = renderToStaticMarkup(
     createElement(UiSelect, {

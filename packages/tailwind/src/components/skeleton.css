@@ -1,6 +1,6 @@
 @layer components {
-  /* Skeleton surfaces use a neutral base, a directional sheen, and a subtle
-     top edge. The component variant classes only control geometry. */
+  /* Skeleton surfaces use a neutral base and a directional sheen. The variant
+     classes only control geometry and effect. */
   .ui-skeleton,
   .skeleton-surface {
     position: relative;
@@ -9,7 +9,6 @@
     min-height: var(--neoverse-skeleton-text-min-height);
     overflow: hidden;
     background: var(--neoverse-skeleton-fill);
-    box-shadow: var(--neoverse-skeleton-edge);
     -webkit-backdrop-filter: var(--neoverse-skeleton-backdrop-filter);
     backdrop-filter: var(--neoverse-skeleton-backdrop-filter);
   }
@@ -47,7 +46,7 @@
   }
 
   .ui-skeleton--shimmer::after,
-  .skeleton-surface::after {
+  .skeleton-surface--shimmer::after {
     position: absolute;
     inset: 0;
     background: linear-gradient(
@@ -69,11 +68,6 @@
       var(--neoverse-motion-easing-standard) infinite;
   }
 
-  .ui-skeleton--static::after,
-  .skeleton-surface--static::after {
-    display: none;
-  }
-
   @keyframes ui-skeleton-shimmer {
     to {
       transform: translateX(100%);
@@ -88,7 +82,7 @@
 
   @media (prefers-reduced-motion: reduce) {
     .ui-skeleton--shimmer::after,
-    .skeleton-surface::after,
+    .skeleton-surface--shimmer::after,
     .ui-skeleton--pulse,
     .skeleton-surface--pulse {
       animation: none;

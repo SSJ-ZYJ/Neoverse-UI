@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, useAttrs, useId, watch } from 'vue';
-import { slideCaret } from './caret-motion';
+import { deferPointerFocus, slideCaret, watchCaretSelection } from './caret-motion';
 import TerminalPromptSegments from './TerminalPromptSegments.vue';
 import type { TerminalPromptProps, TerminalPromptSegment } from './types';
 
@@ -29,6 +29,9 @@ const scrollOffset = ref(0);
 const caretOffset = ref<number | null>(null);
 const caretHolding = ref(false);
 let holdTimer: ReturnType<typeof setTimeout> | undefined;
+let pointerFocusing = false;
+let cancelPointerFocus: (() => void) | undefined;
+let stopSelectionWatch: (() => void) | undefined;
 const resolvedId = computed(
   () => props.id ?? (typeof attrs.id === 'string' ? attrs.id : generatedId),
 );
@@ -76,9 +79,25 @@ function holdCaret() {
     caretHolding.value = false;
   }, 600);
 }
-onBeforeUnmount(() => clearTimeout(holdTimer));
+function clearPointerFocus() {
+  pointerFocusing = false;
+  cancelPointerFocus?.();
+  cancelPointerFocus = undefined;
+}
+watch(focused, (active) => {
+  stopSelectionWatch?.();
+  stopSelectionWatch = active
+    ? watchCaretSelection(() => inputElement.value, syncEditor)
+    : undefined;
+});
+onBeforeUnmount(() => {
+  clearTimeout(holdTimer);
+  clearPointerFocus();
+  stopSelectionWatch?.();
+});
 
 function syncEditor() {
+  clearPointerFocus();
   const editor = inputElement.value;
   atEnd.value =
     !!editor &&
@@ -90,7 +109,30 @@ function syncEditor() {
       ? editor.selectionStart
       : null;
 }
-watch(() => [props.modelValue, props.suggestion], syncEditor, { flush: 'post' });
+function onPointerDown() {
+  if (!focused.value) pointerFocusing = true;
+}
+function onFocus() {
+  focused.value = true;
+  if (pointerFocusing) {
+    cancelPointerFocus?.();
+    cancelPointerFocus = deferPointerFocus(syncEditor);
+  } else {
+    syncEditor();
+  }
+}
+function onBlur() {
+  clearPointerFocus();
+  focused.value = false;
+  caretOffset.value = null;
+}
+watch(
+  () => [props.modelValue, props.suggestion],
+  () => {
+    if (focused.value) syncEditor();
+  },
+  { flush: 'post' },
+);
 const caretGlyph = ref<HTMLElement>();
 let caretLeft: number | null = null;
 let caretScroll = 0;
@@ -142,17 +184,6 @@ defineExpose({ focus });
             ><span class="ui-terminal-prompt__ghost-suffix">{{ suffix }}</span></span
           >
         </span>
-        <span
-          v-if="drawsCaret"
-          class="ui-terminal-prompt__caret"
-          :class="{ 'ui-terminal-prompt__caret--holding': caretHolding }"
-          aria-hidden="true"
-        >
-          <span :style="{ transform: `translateX(${-scrollOffset}px)` }"
-            ><span class="ui-terminal-prompt__caret-prefix">{{ caretPrefix }}</span
-            ><span ref="caretGlyph" class="ui-terminal-prompt__caret-glyph"></span></span
-          >
-        </span>
         <input
           ref="inputElement"
           v-model="value"
@@ -167,11 +198,9 @@ defineExpose({ focus });
           :autocomplete="typeof attrs.autocomplete === 'string' ? attrs.autocomplete : 'off'"
           :autocapitalize="typeof attrs.autocapitalize === 'string' ? attrs.autocapitalize : 'off'"
           :spellcheck="attrs.spellcheck === true || attrs.spellcheck === 'true'"
-          @focus="
-            focused = true;
-            syncEditor();
-          "
-          @blur="focused = false"
+          @pointerdown="onPointerDown"
+          @focus="onFocus"
+          @blur="onBlur"
           @input="
             syncEditor();
             holdCaret();
@@ -189,6 +218,17 @@ defineExpose({ focus });
             syncEditor();
           "
         >
+        <span
+          v-if="drawsCaret"
+          class="ui-terminal-prompt__caret"
+          :class="{ 'ui-terminal-prompt__caret--holding': caretHolding }"
+          aria-hidden="true"
+        >
+          <span :style="{ transform: `translateX(${-scrollOffset}px)` }"
+            ><span class="ui-terminal-prompt__caret-prefix">{{ caretPrefix }}</span
+            ><span ref="caretGlyph" class="ui-terminal-prompt__caret-glyph"></span></span
+          >
+        </span>
       </span>
     </label>
   </div>

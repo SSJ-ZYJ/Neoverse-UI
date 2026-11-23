@@ -77,7 +77,7 @@ export const interactionContracts = [
   {
     specimenId: 'controls-segmented-control',
     apiNames: ['UiSegmentedControl'],
-    states: ['default', 'focus', 'disabled', 'loading'],
+    states: ['default', 'focus', 'disabled'],
     checks: ['keyboard', 'reduced-transparency'],
   },
   {

@@ -243,7 +243,7 @@
       "name": "UiSegmentedControl",
       "vueType": "SegmentedControlProps",
       "reactType": "UiSegmentedControlProps",
-      "props": ["options", "defaultValue", "size", "disabled", "loading", "ariaLabel", "surface"],
+      "props": ["options", "defaultValue", "size", "shape", "disabled", "ariaLabel", "surface"],
       "aliases": {
         "value": ["modelValue", "value"]
       }
@@ -530,6 +530,11 @@
       "name": "SegmentedControlSize",
       "vueType": "SegmentedControlSize",
       "reactType": "SegmentedControlSize"
+    },
+    {
+      "name": "SegmentedControlShape",
+      "vueType": "SegmentedControlShape",
+      "reactType": "SegmentedControlShape"
     }
   ]
 }

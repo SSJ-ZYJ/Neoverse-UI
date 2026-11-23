@@ -663,7 +663,7 @@ export const moduleCopy = {
       ),
     },
     tokens: {
-      label: localized('Semantic hooks', '语义钩子'),
+      label: localized('Semantic hooks', '语义 hooks'),
       description: localized(
         'The utility consumes a theme-aware token family so the treatment follows light and dark surfaces.',
         '该工具类使用主题感知的 token 家族，使样式跟随浅色与深色表面。',

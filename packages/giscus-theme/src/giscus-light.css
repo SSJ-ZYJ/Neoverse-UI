@@ -107,7 +107,7 @@ body {
 }
 
 /* Stable gsc-prefixed hooks restyle Giscus controls without depending on its DOM nesting.
-   使用稳定的 gsc 前缀钩子调整 Giscus 控件，避免依赖其 DOM 嵌套层级。 */
+   使用稳定的 gsc 前缀 hook 调整 Giscus 控件，避免依赖其 DOM 嵌套层级。 */
 body {
   font-family: 'Noto Sans SC', 'Segoe UI', sans-serif;
 }

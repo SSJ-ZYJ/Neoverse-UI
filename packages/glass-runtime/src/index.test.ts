@@ -1356,9 +1356,8 @@ describe('Glass renderer', () => {
     second.mount();
 
     expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
-    // Independent buttons and surface planes share the backdrop compositor.
-    // Segmented controls retain their component-owned local edge fields.
-    expect(gl.drawArrays).toHaveBeenCalledTimes(3);
+    // Independent buttons, segmented shells and surface planes share the backdrop compositor.
+    expect(gl.drawArrays).toHaveBeenCalledTimes(4);
     second.destroy();
     first.destroy();
   });

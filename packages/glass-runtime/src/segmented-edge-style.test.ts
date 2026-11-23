@@ -120,11 +120,13 @@ describe('segmented selection styling', () => {
     },
   );
 
-  it('uses the shared thin solid border without a separate slider edge field', () => {
+  it('uses the shared thin solid border, shape modifiers and no separate slider edge field', () => {
     expect(source).toMatch(
       /border:\s*var\(--neoverse-border-width-thin\)\s+var\(--neoverse-border-style-solid\)\s+var\(--neoverse-control-segmented-active-border\)/,
     );
     expect(source).not.toMatch(/\.ui-segmented-control__slider[^{]*::before/);
+    expect(source).toContain('.ui-segmented-control--pill');
+    expect(source).toContain('.ui-segmented-control--rounded');
   });
 
   it.each(['light', 'dark'] as const)(
@@ -134,8 +136,6 @@ describe('segmented selection styling', () => {
       const option = document.createElement('button');
       option.className = 'ui-segmented-control__option';
       control.append(option);
-      // Hover and press share the quiet feedback tint, so the label never
-      // changes color and the selected accent stays on the active option.
       const resting = resolveVars(option, 'var(--neoverse-control-segmented-foreground)');
       const active = resolveVars(option, 'var(--neoverse-control-segmented-active-foreground)');
       expect(resting).not.toBe(active);
@@ -146,8 +146,6 @@ describe('segmented selection styling', () => {
   it('reserves the selected accent for the active label and keeps the press wash stable', () => {
     const activeAccentUses = source.match(/--neoverse-control-segmented-active-foreground/g) ?? [];
     expect(activeAccentUses).toHaveLength(1);
-    // Temporary feedback comes from the shared quiet tint; press must not swap
-    // in a second background or an extra press shadow.
     expect(source).toContain('background-color: var(--neoverse-quiet-control-feedback);');
     expect(source).not.toContain('--neoverse-effect-press-wash');
     expect(source).not.toContain('--neoverse-effect-press-shadow');

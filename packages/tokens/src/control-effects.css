@@ -290,55 +290,62 @@
     --neoverse-effect-choice-selected-border-dark: var(--neoverse-color-transparent);
     --neoverse-effect-choice-selected-shadow-light: var(--neoverse-effect-command-rest-shadow);
     --neoverse-effect-choice-selected-shadow-dark: var(--neoverse-effect-selection-shadow);
-    /* Filled selection for compact checkboxes, radios and switch tracks. */
+    /* Filled selection for compact checkboxes, radios and switch tracks. A
+       selected control carries its own azure field over any backdrop. Light
+       keeps 46% transparency and a deep azure mark; Dark keeps 28% and a white
+       mark. Reduced transparency swaps in the fully opaque field below. */
     --neoverse-effect-choice-filled-accent: color-mix(
       in srgb,
       var(--neoverse-color-action-primary-active) var(--neoverse-effect-strength-76),
       var(--neoverse-color-accent-primary)
     );
-    --neoverse-effect-choice-filled-tint-light: color-mix(
+    --neoverse-effect-choice-filled-tint: var(--neoverse-color-accent-primary);
+    --neoverse-effect-choice-filled-top: color-mix(
       in srgb,
-      var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-64),
-      var(--neoverse-color-blue-400)
+      var(--neoverse-color-white) var(--neoverse-effect-strength-6),
+      var(--neoverse-effect-choice-filled-tint)
     );
     --neoverse-effect-choice-filled-field-light: linear-gradient(
       160deg,
       color-mix(
         in srgb,
-        var(--neoverse-effect-choice-filled-tint-light) var(--neoverse-effect-strength-14),
-        var(--neoverse-color-surface-raised)
+        var(--neoverse-effect-choice-filled-top) var(--neoverse-effect-strength-54),
+        transparent
       ),
       color-mix(
         in srgb,
-        var(--neoverse-effect-choice-filled-tint-light) var(--neoverse-effect-strength-32),
-        var(--neoverse-color-surface-raised)
+        var(--neoverse-effect-choice-filled-tint) var(--neoverse-effect-strength-54),
+        transparent
       )
     );
     --neoverse-effect-choice-filled-field-dark: linear-gradient(
       160deg,
       color-mix(
         in srgb,
-        var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-14),
+        var(--neoverse-effect-choice-filled-top) var(--neoverse-effect-strength-72),
         transparent
       ),
       color-mix(
         in srgb,
-        var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-6),
+        var(--neoverse-effect-choice-filled-tint) var(--neoverse-effect-strength-72),
         transparent
       )
     );
-    --neoverse-effect-choice-filled-field-dark-opaque: linear-gradient(
-      160deg,
-      color-mix(
-        in srgb,
-        var(--neoverse-color-white) var(--neoverse-effect-strength-14),
-        var(--neoverse-effect-choice-filled-accent)
-      ),
-      var(--neoverse-effect-choice-filled-accent)
+    --neoverse-effect-choice-filled-field-light-opaque: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-54),
+      var(--neoverse-color-white)
+    );
+    --neoverse-effect-choice-filled-field-dark-opaque: color-mix(
+      in srgb,
+      var(--neoverse-color-blue-600) var(--neoverse-effect-strength-50),
+      var(--neoverse-color-blue-700)
     );
     --neoverse-effect-choice-filled-field: var(--neoverse-effect-choice-filled-field-light);
-    --neoverse-effect-choice-filled-field-opaque: var(--neoverse-effect-choice-filled-field-light);
-    --neoverse-effect-choice-filled-foreground: var(--neoverse-effect-choice-filled-accent);
+    --neoverse-effect-choice-filled-field-opaque: var(
+      --neoverse-effect-choice-filled-field-light-opaque
+    );
+    --neoverse-effect-choice-filled-foreground: var(--neoverse-color-blue-800);
     --neoverse-effect-choice-filled-shadow-light:
       var(--neoverse-shadow-control),
       inset 0 var(--neoverse-border-width-thin) 0
@@ -459,9 +466,10 @@
     --neoverse-effect-label-success-foreground: var(--neoverse-color-status-success);
     --neoverse-effect-label-warning-foreground: var(--neoverse-color-status-warning);
     --neoverse-effect-label-danger-foreground: var(--neoverse-color-status-danger);
+    /* An outer bloom paired with backdrop blur can flash a darker cap on
+       compact pills in Chromium. Keep both lighting passes inside the edge. */
     --neoverse-effect-label-edge:
-      var(--neoverse-material-edge-highlight-subtle), var(--neoverse-material-inner-glow-subtle),
-      var(--neoverse-material-bloom-subtle);
+      var(--neoverse-material-edge-highlight-subtle), var(--neoverse-material-inner-glow-subtle);
     --neoverse-effect-accent-foreground: color-mix(
       in srgb,
       var(--neoverse-color-text-primary) var(--neoverse-effect-strength-76),

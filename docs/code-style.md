@@ -131,6 +131,7 @@ new code, comments or documentation.
 | field | the `UiField` wrapper: label, description, validation | form group |
 | consumer | the downstream project that installs a package | user, client, app |
 | adapter | the Vue or React implementation of a shared contract | wrapper, binding |
+| hook | the English term, kept verbatim in zh copy and comments | 钩子 |
 | specimen | a playground preview of one component state | sample, demo |
 | dock | the navigation dock component | toolbar, nav bar |
 | shell | the playground application chrome | layout, frame |
@@ -175,7 +176,9 @@ are rejected in new code and are migrated when a file is touched.
 - CJK characters in comments; localized values inside string literals are ignored,
   so a `zh` label or a CJK fixture value passes,
 - the British spellings listed above, in comments and identifiers,
-- the banned abbreviations `AX` and `Ax`.
+- the banned abbreviations `AX` and `Ax`,
+- banned translations from the Terminology table, in raw text including zh
+  string literals, so `hook` is never written as its Chinese translation.
 
 It runs as part of `bun run lint` and `bun run release:check`. A violation fails
 the build with the file, line and the replacement to use. Historical records in

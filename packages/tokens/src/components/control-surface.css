@@ -15,13 +15,12 @@
     --neoverse-control-surface-padding: var(--neoverse-space-1);
     --neoverse-control-surface-padding-block: var(--neoverse-control-surface-padding);
     --neoverse-control-surface-padding-inline: var(--neoverse-space-2);
-    /* ControlSurface deliberately shares SegmentedControl geometry.
-       Grouped controls should read as one family instead of shrinking their
-       corners again at each nesting level. */
-    --neoverse-control-surface-corner-radius: var(--neoverse-control-segmented-corner-radius);
+    /* ControlSurface owns the standard rounded-control geometry independently
+       of SegmentedControl shape variants. */
+    --neoverse-control-surface-corner-radius: var(--neoverse-control-corner-radius);
     --neoverse-control-surface-boundary-width: var(--neoverse-border-width-thin);
-    --neoverse-control-surface-inner-radius: var(--neoverse-control-segmented-option-radius);
-    --neoverse-control-surface-trailing-radius: var(--neoverse-control-segmented-corner-radius);
+    --neoverse-control-surface-inner-radius: var(--neoverse-control-compact-radius);
+    --neoverse-control-surface-trailing-radius: var(--neoverse-control-corner-radius);
     --neoverse-control-surface-trailing-padding: var(--neoverse-border-width-strong);
     /* Embedded choices have no border of their own. Match the standalone
        segmented shell's visible side clearance, including its boundary. */

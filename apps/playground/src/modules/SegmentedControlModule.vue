@@ -32,6 +32,19 @@ const ariaOptions = computed<readonly SegmentOption[]>(() => [
     ariaLabel: localize(copy.controls.sectionC, props.locale),
   },
 ]);
+const shapeValue = ref('w');
+const shapeOptions = computed<readonly SegmentOption[]>(() => [
+  { value: 'd', label: 'D', ariaLabel: props.locale === 'zh' ? '按天' : 'Day' },
+  { value: 'w', label: 'W', ariaLabel: props.locale === 'zh' ? '按周' : 'Week' },
+  { value: 'm', label: 'M', ariaLabel: props.locale === 'zh' ? '按月' : 'Month' },
+]);
+const shapeCopy = {
+  label: localized('Shapes', '形态'),
+  hint: localized(
+    'Pill is the default recessed capsule; rounded preserves concentric control corners for denser layouts.',
+    '胶囊形态为默认内嵌样式；圆角矩形形态保留同心控件圆角以适配紧凑布局。',
+  ),
+} as const;
 const surfaceCopy = {
   label: localized('Surface ownership', 'Surface 归属'),
   hint: localized(
@@ -71,6 +84,20 @@ const qaCopy = {
       {{ formatLocalized(copy.controls.selected, props.locale, { value: segmentedValue }) }}
     </span>
   </StateRow>
+  <StateRow :label="shapeCopy.label" :hint="shapeCopy.hint" :locale="props.locale">
+    <UiSegmentedControl
+      v-model="shapeValue"
+      shape="pill"
+      :aria-label="localize(copy.aria.view, props.locale)"
+      :options="shapeOptions"
+    />
+    <UiSegmentedControl
+      v-model="shapeValue"
+      shape="rounded"
+      :aria-label="localize(copy.aria.view, props.locale)"
+      :options="shapeOptions"
+    />
+  </StateRow>
   <StateRow :label="copy.states.sizes" :locale="props.locale">
     <UiSegmentedControl
       :aria-label="localize(copy.controls.small, props.locale)"
@@ -93,18 +120,6 @@ const qaCopy = {
     <UiSegmentedControl
       :aria-label="localize(copy.controls.disabled, props.locale)"
       disabled
-      :options="segmentedOptions"
-    />
-  </StateRow>
-  <StateRow
-    :label="copy.states.loading"
-    :hint="copy.hints.loading"
-    :locale="props.locale"
-    contract-state="loading"
-  >
-    <UiSegmentedControl
-      :aria-label="localize(copy.controls.loading, props.locale)"
-      loading
       :options="segmentedOptions"
     />
   </StateRow>

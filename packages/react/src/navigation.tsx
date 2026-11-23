@@ -18,7 +18,6 @@ import {
   type SurfacePreset,
   UiAction,
   type UiActionProps,
-  UiPresence,
 } from './index.js';
 import { surfaceClasses } from './surface.js';
 
@@ -284,14 +283,15 @@ export interface SegmentOption {
   ariaLabel?: string;
 }
 export type SegmentedControlSize = 'sm';
+export type SegmentedControlShape = 'pill' | 'rounded';
 export interface UiSegmentedControlProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue' | 'children'> {
   options: readonly SegmentOption[];
   value?: string;
   defaultValue?: string;
   size?: SegmentedControlSize;
+  shape?: SegmentedControlShape;
   disabled?: boolean;
-  loading?: boolean;
   ariaLabel?: string;
   surface?: 'none' | 'glass-subtle' | 'glass-elevated' | 'glass-immersive';
   onValueChange?: (value: string) => void;
@@ -302,8 +302,8 @@ export function UiSegmentedControl({
   value,
   defaultValue,
   size: _size = 'sm',
+  shape = 'pill',
   disabled = false,
-  loading = false,
   ariaLabel,
   surface = 'glass-subtle',
   onValueChange,
@@ -334,7 +334,7 @@ export function UiSegmentedControl({
     if (!options.some((option) => !option.disabled && option.value === internal))
       setInternal(options.find((option) => !option.disabled)?.value);
   }, [options, value, internal]);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Re-measure replaced options even when the selected index is unchanged.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Re-measure replaced options and shape changes even when the selected index is unchanged.
   useEffect(() => {
     const measure = () => {
       const button = buttons.current[active];
@@ -353,10 +353,10 @@ export function UiSegmentedControl({
       observer?.disconnect();
       cancelAnimationFrame(frame);
     };
-  }, [active, options]);
+  }, [active, options, shape]);
   const select = (index: number, focus = false) => {
     const option = options[index];
-    if (!option || disabled || loading || option.disabled) return;
+    if (!option || disabled || option.disabled) return;
     setFocused(index);
     setInternal(option.value);
     if (option.value !== current) onValueChange?.(option.value);
@@ -368,17 +368,16 @@ export function UiSegmentedControl({
       role="radiogroup"
       aria-orientation="horizontal"
       aria-label={ariaLabel ?? rest['aria-label']}
-      aria-disabled={disabled || loading || undefined}
-      aria-busy={loading || rest['aria-busy']}
+      aria-disabled={disabled || undefined}
       onBlur={(event) => {
         const next = event.relatedTarget;
         if (next instanceof Node && event.currentTarget.contains(next)) return;
         setFocused(null);
       }}
+      data-shape={shape}
       data-surface={surface}
-      data-neoverse-glass-edge-pass={surface.startsWith('glass-') ? 'css' : undefined}
       data-neoverse-surface-hover="static"
-      className={`ui-segmented-control ${surfaceClasses[surface]} ${className}`}
+      className={`ui-segmented-control ui-segmented-control--${shape} ${surfaceClasses[surface]} ${className}`}
       style={
         {
           ...style,
@@ -410,12 +409,12 @@ export function UiSegmentedControl({
             aria-checked={index === active}
             aria-label={option.ariaLabel}
             tabIndex={index === roving ? 0 : -1}
-            disabled={disabled || loading || option.disabled}
+            disabled={disabled || option.disabled}
             className={`ui-segmented-control__option${index === active ? ' ui-segmented-control__option--active' : ''}`}
             onClick={() => select(index)}
             onFocus={() => setFocused(index)}
             onKeyDown={(event) => {
-              if (disabled || loading) return;
+              if (disabled) return;
               let target: number | undefined;
               if (event.key === 'Home') target = enabled[0];
               else if (event.key === 'End') target = enabled[enabled.length - 1];
@@ -436,25 +435,6 @@ export function UiSegmentedControl({
           </button>
         ))}
       </span>
-      <UiPresence
-        as="span"
-        show={loading}
-        variant="pop"
-        className="ui-segmented-control__loading"
-        aria-hidden="true"
-      >
-        <svg className="ui-loading-indicator" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-          <circle
-            cx="8"
-            cy="8"
-            r="6"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeDasharray="28 10"
-          />
-        </svg>
-      </UiPresence>
     </div>
   );
 }

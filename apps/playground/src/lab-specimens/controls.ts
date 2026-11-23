@@ -107,17 +107,22 @@ function segmentOptions(locale: Locale): SegmentedControlProps['options'] {
 }
 
 const localizedSegments = { en: segmentOptions('en'), zh: segmentOptions('zh') };
+const segmentShapeLabel = localized('Shape', '形态');
+const segmentShapeOptions = [
+  { value: 'pill', label: localized('Pill', '胶囊') },
+  { value: 'rounded', label: localized('Rounded', '圆角矩形') },
+] as const;
 /** The editable SegmentedControl specimen */
 export const segmented = defineSpecimen<
-  Pick<SegmentedControlProps, 'disabled' | 'loading' | 'surface'>,
+  Pick<SegmentedControlProps, 'shape' | 'disabled' | 'surface'>,
   { modelValue: SegmentValue }
 >()({
-  initialProps: { disabled: false, loading: false },
+  initialProps: { shape: 'pill', surface: 'glass-subtle', disabled: false },
   initialState: () => ({ modelValue: 'overview' }),
   controls: {
     props: {
+      shape: { kind: 'select', label: segmentShapeLabel, options: segmentShapeOptions },
       disabled,
-      loading,
       surface: { kind: 'select', label: surfaceLabel, options: glassOptions },
     },
     state: { modelValue: { kind: 'select', label: activeOption, options: enabledSegments } },
@@ -126,7 +131,7 @@ export const segmented = defineSpecimen<
     'Size is read-only: the component supports only sm.',
     '尺寸为只读：此组件仅支持 sm。',
   ),
-  stateDisabled: (props) => props.disabled === true || props.loading === true,
+  stateDisabled: (props) => props.disabled === true,
   render: ({ props, state, setState, locale }) =>
     h(UiSegmentedControl, {
       ...props,

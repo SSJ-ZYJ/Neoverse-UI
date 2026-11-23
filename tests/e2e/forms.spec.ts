@@ -346,7 +346,12 @@ test.describe('forms', () => {
     const input = page.locator('[data-form-checkbox]');
     const control = page.locator('[data-form-checkbox] + .ui-choice__control');
     const fillOpacity = () =>
-      control.evaluate((element) => Number(getComputedStyle(element, '::before').opacity));
+      control.evaluate((element) => Number(getComputedStyle(element, '::after').opacity));
+    const fillPaint = () =>
+      control.evaluate((element) => {
+        const style = getComputedStyle(element, '::after');
+        return { display: style.display, background: style.backgroundImage };
+      });
     const pressShadow = await page.evaluate(() => {
       const probe = document.createElement('span');
       probe.style.position = 'fixed';
@@ -359,6 +364,10 @@ test.describe('forms', () => {
     });
 
     await expect(input).toBeChecked();
+    // The Glass edge owns ::before; a fill that targets it is never painted.
+    const paint = await fillPaint();
+    expect(paint.display).toBe('block');
+    expect(paint.background).toContain('linear-gradient');
     await input.click();
     await expect(input).not.toBeChecked();
     await expect.poll(fillOpacity).toBe(0);
@@ -379,4 +388,111 @@ test.describe('forms', () => {
     await expect(input).toBeChecked();
     await expect.poll(fillOpacity).toBe(1);
   });
+
+  for (const adapter of adapters) {
+    test(`${adapter.name}: single-line text caret paints above glass and tracks left/right movement immediately`, async ({
+      page,
+    }) => {
+      await page.goto(adapter.url('light'));
+      const form = page.locator('[data-text-contract-form]');
+      const input = form.getByRole('textbox', { name: 'Contract text', exact: true });
+      const shell = input.locator('xpath=..');
+
+      await input.fill('Neoverse Studio');
+      await input.blur();
+      const box = await input.boundingBox();
+      if (box === null) throw new Error('Input bounding box is missing');
+
+      // Clicking at the end of existing text mounts the caret directly at the clicked slot.
+      await page.mouse.click(box.x + Math.min(box.width - 16, 260), box.y + box.height / 2);
+      await expect(shell).toHaveAttribute('data-caret', 'overlay');
+      const caret = shell.locator('.ui-input-caret');
+      const glyph = caret.locator('.ui-input-caret__glyph');
+      await expect(glyph).toBeVisible();
+
+      const stacking = await shell.evaluate((node) => {
+        const children = Array.from(node.children).map((child) => child.className);
+        const overlay = node.querySelector('.ui-input-caret');
+        const bar = overlay?.querySelector('.ui-input-caret__glyph');
+        return {
+          children,
+          zIndex: overlay ? Number(getComputedStyle(overlay).zIndex) : 0,
+          glyphTransform: bar ? getComputedStyle(bar).transform : '',
+        };
+      });
+      expect(
+        stacking.children.findIndex((name) => name.includes('ui-input-caret')),
+      ).toBeGreaterThan(
+        stacking.children.findIndex((name) => name.split(' ').includes('ui-input')),
+      );
+      expect(stacking.zIndex).toBeGreaterThan(0);
+      expect(stacking.glyphTransform).toBe('none');
+
+      // ArrowLeft must update the caret on keydown (before keyup) and glide smoothly.
+      await page.keyboard.down('ArrowLeft');
+      await expect(caret.locator('.ui-input-caret__prefix')).toHaveText('Neoverse Studi');
+      await page.keyboard.up('ArrowLeft');
+
+      // Long jump to Home starts an active transform glide and settles at the start.
+      const beforeHome = await glyph.evaluate((el) => el.getBoundingClientRect().left);
+      await page.keyboard.press('Home');
+      await expect(caret.locator('.ui-input-caret__prefix')).toHaveText('');
+      await expect
+        .poll(() =>
+          glyph.evaluate((el) => {
+            const anims = el
+              .getAnimations()
+              .filter(
+                (anim) => 'transitionProperty' in anim && anim.transitionProperty === 'transform',
+              );
+            return anims.length;
+          }),
+        )
+        .toBeGreaterThan(0);
+      await expect
+        .poll(() => glyph.evaluate((el) => el.getBoundingClientRect().left))
+        .toBeLessThan(beforeHome - 60);
+
+      // Vertical alignment stays stable between ASCII and CJK characters.
+      await input.fill('Hello 新宇宙');
+      await page.keyboard.press('Home');
+      const startTop = await glyph.evaluate((el) => el.getBoundingClientRect().top);
+      await page.keyboard.press('End');
+      const endTop = await glyph.evaluate((el) => el.getBoundingClientRect().top);
+      expect(Math.abs(endTop - startTop)).toBeLessThanOrEqual(0.5);
+
+      // Multi-line textarea shares the same caret above glass and glides across lines.
+      const notes = form.getByRole('textbox', { name: 'Contract notes', exact: true });
+      const notesShell = notes.locator('xpath=..');
+      await notes.fill('Line one\nLine two');
+      await notes.focus();
+      await page.keyboard.press('End');
+      await expect(notesShell).toHaveAttribute('data-caret', 'overlay');
+      const notesCaret = notesShell.locator('.ui-textarea-caret');
+      const notesGlyph = notesCaret.locator('.ui-textarea-caret__glyph');
+      await expect(notesGlyph).toBeVisible();
+      const notesStack = await notesShell.evaluate((node) => {
+        const children = Array.from(node.children).map((child) => child.className);
+        const overlay = node.querySelector('.ui-textarea-caret');
+        return {
+          children,
+          zIndex: overlay ? Number(getComputedStyle(overlay).zIndex) : 0,
+        };
+      });
+      expect(
+        notesStack.children.findIndex((name) => name.includes('ui-textarea-caret')),
+      ).toBeGreaterThan(
+        notesStack.children.findIndex((name) => name.split(' ').includes('ui-textarea')),
+      );
+      expect(notesStack.zIndex).toBeGreaterThan(1);
+
+      const lineTwoTop = await notesGlyph.evaluate((el) => el.getBoundingClientRect().top);
+      await page.keyboard.down('ArrowUp');
+      await expect(notesCaret.locator('.ui-textarea-caret__prefix')).toHaveText('Line one');
+      await page.keyboard.up('ArrowUp');
+      await expect
+        .poll(() => notesGlyph.evaluate((el) => el.getBoundingClientRect().top))
+        .toBeLessThan(lineTwoTop - 10);
+    });
+  }
 });

@@ -584,4 +584,54 @@ test.describe('overlays', () => {
     await expect(tooltip).toBeVisible();
     await expect(tooltip).not.toBeEmpty();
   });
+
+  for (const theme of ['light', 'dark'] as const) {
+    test(`tooltip variants stay distinct on a solid ${theme} backdrop`, async ({ page }) => {
+      await page.goto(`/frame?theme=${theme}&lang=en#status-feedback-tooltip`);
+
+      for (const context of ['neutral', 'reduced']) {
+        const stage = page.locator(`#status-feedback-tooltip [data-qa-stage="${context}"]`);
+        await expect(stage.getByRole('tooltip').last()).toBeVisible();
+        const surfaces = await stage.evaluate((element) => {
+          const hasShape = CSS.supports('clip-path', 'shape(from 0 0, line to 100% 100%, close)');
+          const canvas = document.createElement('canvas').getContext('2d', {
+            willReadFrequently: true,
+          });
+          if (!canvas) throw new Error('A 2D canvas context is required');
+          const composite = (color: string) => {
+            canvas.fillStyle = color;
+            canvas.fillRect(0, 0, 1, 1);
+            const [red = 0, green = 0, blue = 0] = canvas.getImageData(0, 0, 1, 1).data;
+            return { tone: 0.2126 * red + 0.7152 * green + 0.0722 * blue, blue: blue - red };
+          };
+          return Array.from(element.querySelectorAll('[role="tooltip"]'), (tooltip) => {
+            const plate = getComputedStyle(tooltip, hasShape ? '::before' : null);
+            canvas.clearRect(0, 0, 1, 1);
+            composite(getComputedStyle(document.body).backgroundColor);
+            const background = composite(getComputedStyle(element).backgroundColor);
+            const surface = composite(plate.backgroundColor);
+            return {
+              toneDifference: surface.tone - background.tone,
+              blueShift: surface.blue - background.blue,
+              backdropFilter: plate.backdropFilter,
+            };
+          });
+        });
+        const [neutral, accent] = surfaces;
+        if (!neutral || !accent) throw new Error('Both tooltip variants are required');
+        const direction = theme === 'light' ? -1 : 1;
+        expect(neutral.toneDifference * direction, context).toBeGreaterThanOrEqual(11);
+        expect(neutral.blueShift, context).toBeGreaterThanOrEqual(16);
+        const accentSeparation = (accent.toneDifference - neutral.toneDifference) * direction;
+        expect(accentSeparation, context).toBeGreaterThanOrEqual(3);
+        for (const { backdropFilter } of surfaces) {
+          if (context === 'neutral') {
+            expect(backdropFilter).toContain('blur(12px)');
+          } else {
+            expect(backdropFilter).toBe('none');
+          }
+        }
+      }
+    });
+  }
 });

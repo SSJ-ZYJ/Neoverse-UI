@@ -300,6 +300,7 @@
      exactly like the native caret it replaces. */
   .ui-terminal-prompt__caret {
     position: absolute;
+    z-index: 1;
     inset: 0;
     overflow: hidden;
     pointer-events: none;
@@ -337,7 +338,7 @@
        travels over. */
     transition-property: transform;
     transition-duration: var(--neoverse-motion-caret-glide-duration);
-    transition-timing-function: var(--neoverse-motion-easing-symmetric);
+    transition-timing-function: var(--neoverse-motion-easing-standard);
   }
 
   /* Only the slide is motion; the opacity blink stays on in both preferences. */

@@ -1049,14 +1049,19 @@ describe('form controls', () => {
   });
 
   it('draws the breathing caret inside the shared input shell', async () => {
-    const wrapper = mount(UiInput, { props: { modelValue: 'hello' } });
+    const wrapper = mount(UiInput, { attachTo: document.body, props: { modelValue: 'hello' } });
     const control = wrapper.get('input');
+    control.element.focus();
     control.element.setSelectionRange(2, 2);
     await control.trigger('focus');
     expect(wrapper.attributes('data-caret')).toBe('overlay');
     const caret = wrapper.get('.ui-input-caret');
     expect(caret.attributes('aria-hidden')).toBe('true');
     expect(caret.get('.ui-input-caret__prefix').text()).toBe('he');
+    control.element.setSelectionRange(4, 4);
+    document.dispatchEvent(new Event('selectionchange'));
+    await nextTick();
+    expect(caret.get('.ui-input-caret__prefix').text()).toBe('hell');
     control.element.setSelectionRange(0, 2);
     await control.trigger('select');
     expect(wrapper.attributes('data-caret')).toBe('native');
@@ -1067,6 +1072,7 @@ describe('form controls', () => {
     expect(wrapper.attributes('data-caret')).toBe('native');
     await wrapper.setProps({ readonly: false });
     expect(wrapper.attributes('data-caret')).toBe('overlay');
+    wrapper.unmount();
   });
 
   it('keeps textarea attributes and v-model updates native', async () => {
@@ -1251,13 +1257,24 @@ describe('UiSegmentedControl', () => {
     expect(glass.classes()).toContain('material-glass-subtle');
     expect(glass.attributes('data-surface')).toBe('glass-subtle');
     expect(glass.attributes('data-neoverse-surface-hover')).toBe('static');
-    expect(glass.attributes('data-neoverse-glass-edge-pass')).toBe('css');
+    expect(glass.attributes('data-neoverse-glass-edge-pass')).toBeUndefined();
 
     const bare = mount(UiSegmentedControl, { props: { options, surface: 'none' } });
     expect(bare.attributes('data-neoverse-glass-edge-pass')).toBeUndefined();
     expect(bare.classes()).not.toContain('material-glass-subtle');
     expect(bare.attributes('data-surface')).toBe('none');
     expect(bare.find('.ui-segmented-control__slider').exists()).toBe(true);
+  });
+
+  it('defaults to the pill shape and supports the rounded shape variant', () => {
+    const pill = mount(UiSegmentedControl, { props: { options } });
+    expect(pill.classes()).toContain('ui-segmented-control--pill');
+    expect(pill.attributes('data-shape')).toBe('pill');
+
+    const rounded = mount(UiSegmentedControl, { props: { options, shape: 'rounded' } });
+    expect(rounded.classes()).toContain('ui-segmented-control--rounded');
+    expect(rounded.classes()).not.toContain('ui-segmented-control--pill');
+    expect(rounded.attributes('data-shape')).toBe('rounded');
   });
 
   it('falls back to the compact size for unsupported values', () => {
@@ -1337,23 +1354,6 @@ describe('UiSegmentedControl', () => {
     expect(buttons[2]?.attributes('tabindex')).toBe('0');
     expect(buttons[0]?.attributes('tabindex')).toBe('-1');
     wrapper.unmount();
-  });
-
-  it('marks the group busy and blocks selection while loading', async () => {
-    const wrapper = mount(UiSegmentedControl, {
-      props: { options, defaultValue: 'overview', loading: true },
-    });
-    const buttons = wrapper.findAll('button');
-
-    expect(wrapper.attributes('aria-busy')).toBe('true');
-    expect(buttons.every((button) => button.element.disabled)).toBe(true);
-
-    const loadingIndicator = wrapper.get('[aria-hidden="true"] > svg');
-    expect(loadingIndicator.classes()).toContain('ui-loading-indicator');
-    expect(loadingIndicator.get('circle').attributes('stroke-linecap')).toBe('round');
-
-    await buttons[0]?.trigger('click');
-    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
   });
 
   it('labels the group and individual options through ariaLabel props', () => {

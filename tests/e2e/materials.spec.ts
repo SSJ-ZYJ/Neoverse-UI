@@ -63,6 +63,30 @@ test.describe('materials', () => {
       }
     });
 
+    test(`a neutral notice separates from a solid ${theme} canvas`, async ({ page }) => {
+      await page.goto(`/?theme=${theme}&lang=en#status-feedback-notice`, {
+        waitUntil: 'domcontentloaded',
+      });
+      const notice = page.locator('[data-design-lab-region="specimen"] .ui-notice');
+      await expect(notice).toBeVisible();
+      const difference = await notice.evaluate((element) => {
+        const style = getComputedStyle(element);
+        const context = new OffscreenCanvas(1, 1).getContext('2d');
+        if (!context) throw new Error('A 2D canvas context is required');
+        const compositeTone = (color: string) => {
+          context.fillStyle = color;
+          context.fillRect(0, 0, 1, 1);
+          const [red = 0, green = 0, blue = 0] = context.getImageData(0, 0, 1, 1).data;
+          return 0.2126 * red + 0.7152 * green + 0.0722 * blue;
+        };
+        const canvasTone = compositeTone(style.getPropertyValue('--neoverse-color-surface-canvas'));
+        return compositeTone(style.backgroundColor) - canvasTone;
+      });
+      expect(theme === 'light' ? -difference : difference).toBeGreaterThanOrEqual(8);
+      await expect(notice).toHaveCSS('backdrop-filter', /blur\(12px\)/);
+      await expect(notice).toHaveCSS('border-top-width', '0px');
+    });
+
     test(`Aurora Glass previews survive scrolling in the ${theme} theme`, async ({ page }) => {
       await page.goto(`/frame?theme=${theme}&lang=en#materials`, { waitUntil: 'domcontentloaded' });
       const stage = page.locator('[data-glass-variant]').last();
@@ -75,6 +99,21 @@ test.describe('materials', () => {
   }
 
   for (const theme of themes) {
+    test(`replayed badges keep their blur and inset edge in ${theme}`, async ({ page }) => {
+      await page.goto(`/frame?theme=${theme}&lang=en#motion`, { waitUntil: 'domcontentloaded' });
+      const replay = page.locator('[data-motion-presence-replay]');
+      const badge = page.locator('[data-motion-presence-group-item]').first();
+      await replay.click();
+
+      await expect(badge).toHaveCSS('backdrop-filter', /^blur\(12px\)/);
+      const shadows = await badge.evaluate((element) =>
+        getComputedStyle(element)
+          .boxShadow.replace(/\([^()]*\)/g, '')
+          .split(','),
+      );
+      for (const shadow of shadows) expect(shadow).toMatch(/\binset\b/);
+    });
+
     test(`a glass button deepens its tint without changing depth in ${theme}`, async ({
       page,
     }, testInfo) => {

@@ -117,6 +117,13 @@ test('Project Card presets change the rendered content and keep progress accessi
     'position',
     0.68,
   );
+  // The scene paints both progress ends itself; the native OS bar is square
+  // and dark, so keep the platform appearance disabled.
+  await expect(progress).toHaveCSS('appearance', 'none');
+  await expect(progress).toHaveCSS('border-radius', '9999px');
+  expect(await progress.evaluate((element) => getComputedStyle(element).backgroundColor)).not.toBe(
+    'rgba(0, 0, 0, 0)',
+  );
 
   const inspector = await showInspector(page, mobile);
   const preset = inspector.locator('[data-specimen-control="preset"]').getByRole('combobox');

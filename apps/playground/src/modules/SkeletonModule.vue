@@ -29,7 +29,7 @@ const copy = moduleCopy.skeleton;
         variant="rect"
         width="100%"
         height="var(--neoverse-space-24)"
-        radius="var(--neoverse-radius-md)"
+        radius="var(--neoverse-radius-xl)"
       />
     </UiSurface>
     <UiSurface as="article" surface="none" class="playground-specimen-panel grid gap-3">

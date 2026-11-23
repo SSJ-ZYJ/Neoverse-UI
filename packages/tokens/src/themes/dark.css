@@ -166,19 +166,17 @@
 
   /* Dark control mappings. */
   --neoverse-control-secondary-border: var(--neoverse-color-border-subtle);
+  --neoverse-control-segmented-background-image: none;
   --neoverse-control-segmented-foreground: var(--neoverse-color-text-secondary);
   --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
-  /* The segmented well keeps its refraction-only silhouette; the compact
-     control hairline belongs to buttons and choice controls. */
+  /* The segmented well keeps its clean Aurora Glass silhouette while the
+     embedded slider carries the translucent aurora selection field. */
   --neoverse-control-segmented-border: transparent;
   --neoverse-control-segmented-shadow: var(--neoverse-effect-choice-rest-shadow);
-  /* Dark segmented controls use the same Aurora Glass edge field as system-dark.
-     Lower its opacity instead of disabling it: no hard monochrome outline. */
   --neoverse-control-segmented-edge-refraction-opacity: var(
     --neoverse-material-edge-refraction-opacity-subtle
   );
   --neoverse-control-segmented-edge-display: block;
-  --neoverse-control-segmented-option-radius: var(--neoverse-control-compact-radius);
   --neoverse-control-segmented-active-background: var(--neoverse-effect-choice-selected-field);
   --neoverse-control-segmented-active-fill: var(--neoverse-effect-choice-selected-fill);
   --neoverse-control-segmented-active-border: var(--neoverse-effect-choice-selected-border);
@@ -314,10 +312,10 @@
     transparent
   );
   /* Dark pages leave window-anchored chrome without backdrop light, so its stroke
-     uses the strong border role instead of the 13% edge-light the rim starts from. */
-  --neoverse-material-edge-stroke:
-    inset 0 0 0 var(--neoverse-border-width-thin) var(--neoverse-color-border-strong),
-    inset 0 1px 0 var(--neoverse-color-edge-light);
+     uses the strong border role instead of the 13% edge-light the rim starts from.
+     Keep one uniform ring: a second top catch reads as a thicker top edge. */
+  --neoverse-material-edge-stroke: inset 0 0 0 var(--neoverse-border-width-thin)
+    var(--neoverse-color-border-strong);
   --neoverse-material-glass-subtle-border: var(--neoverse-color-border-subtle);
   --neoverse-material-glass-elevated-border: color-mix(
     in srgb,

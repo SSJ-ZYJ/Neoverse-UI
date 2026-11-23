@@ -1,17 +1,30 @@
 @layer components {
-  /* Compact controls share one refractive outer surface and one moving active
-     layer. Individual options stay transparent so the group reads as a single
-     control, matching the product segmented controls. */
+  /* Compact controls share one recessed Aurora Glass well and one smoothly
+     gliding embedded thumb. Individual options stay transparent so the group
+     reads as a single carved control. */
   .ui-segmented-control {
     position: relative;
     display: inline-flex;
     align-items: center;
     max-width: 100%;
-    gap: var(--neoverse-control-segmented-loading-gap);
     border-radius: var(--neoverse-control-segmented-corner-radius);
     padding: var(--neoverse-control-segmented-inset);
     overflow: hidden;
     touch-action: manipulation;
+  }
+
+  .ui-segmented-control--pill {
+    --neoverse-control-segmented-corner-radius: var(--neoverse-radius-pill);
+    --neoverse-control-segmented-option-radius: var(--neoverse-radius-pill);
+  }
+
+  .ui-segmented-control--rounded {
+    --neoverse-control-segmented-corner-radius: var(
+      --neoverse-control-segmented-rounded-corner-radius
+    );
+    --neoverse-control-segmented-option-radius: var(
+      --neoverse-control-segmented-rounded-option-radius
+    );
   }
 
   .ui-segmented-control[data-surface='none'] {
@@ -38,10 +51,10 @@
   .ui-segmented-control__slider {
     position: absolute;
     z-index: 0;
+    box-sizing: border-box;
     inset-block: 0;
     inset-inline-start: 0;
-    /* Match the selected content-sized track before hydration has measured any buttons.
-       在水合测量按钮前，直接占据选中按钮按内容定宽的网格列。 */
+    /* Match the selected content-sized track before hydration has measured any buttons. */
     grid-column: var(--segment-active-column, calc(var(--segment-index) + 1) / span 1);
     grid-row: 1;
     width: var(--segment-active-width, 100%);
@@ -54,12 +67,14 @@
     pointer-events: none;
     transform: translateX(var(--segment-active-offset, 0));
     transition: none;
-    will-change: transform;
+    will-change: transform, width;
   }
   .ui-segmented-control__slider[data-ready='true'] {
     transition:
-      transform var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
-      width var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
+      transform var(--neoverse-control-segmented-slider-duration)
+      var(--neoverse-control-segmented-slider-easing),
+      width var(--neoverse-control-segmented-slider-duration)
+      var(--neoverse-control-segmented-slider-easing);
   }
 
   .ui-segmented-control .ui-segmented-control__option {
@@ -84,8 +99,35 @@
     font-weight: var(--neoverse-control-segmented-option-font-weight);
     line-height: var(--neoverse-control-compact-line-height);
     white-space: nowrap;
-    transition: background-color var(--neoverse-motion-feedback-duration)
-      var(--neoverse-motion-feedback-easing);
+    transition:
+      background-color var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing),
+      color var(--neoverse-control-segmented-slider-duration)
+      var(--neoverse-control-segmented-slider-easing),
+      transform var(--neoverse-control-segmented-slider-duration)
+      var(--neoverse-control-segmented-slider-easing);
+  }
+
+  .ui-segmented-control
+    .ui-segmented-control__option:active:not(:disabled, [aria-disabled='true']) {
+    transform: scale(var(--neoverse-control-segmented-press-scale));
+    transition:
+      background-color 0s,
+      color var(--neoverse-control-segmented-slider-duration)
+      var(--neoverse-control-segmented-slider-easing),
+      transform var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
+  }
+
+  .ui-segmented-control__options:has(
+      .ui-segmented-control__option--active:active:not(:disabled, [aria-disabled='true'])
+    )
+    .ui-segmented-control__slider {
+    transform: translateX(var(--segment-active-offset, 0))
+      scale(var(--neoverse-control-segmented-press-scale));
+    transition:
+      transform var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
+      width var(--neoverse-control-segmented-slider-duration)
+      var(--neoverse-control-segmented-slider-easing);
   }
 
   .ui-segmented-control .ui-segmented-control__option--active {
@@ -101,8 +143,7 @@
     cursor: not-allowed;
   }
 
-  :where(.ui-segmented-control[aria-disabled='true'])
-    :where(.ui-segmented-control__option, .ui-segmented-control__loading) {
+  .ui-segmented-control[aria-disabled='true'] .ui-segmented-control__option {
     opacity: var(--neoverse-control-segmented-disabled-opacity);
   }
 
@@ -133,36 +174,45 @@
     }
   }
 
-  .ui-segmented-control__loading {
-    position: relative;
-    z-index: 1;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: var(--neoverse-control-segmented-loading-size);
-    height: var(--neoverse-control-segmented-loading-size);
-    flex: 0 0 auto;
-    color: var(--neoverse-color-text-secondary);
-  }
-
   @media (prefers-reduced-motion: reduce) {
-    .ui-segmented-control__slider[data-ready='true'] {
+    .ui-segmented-control__slider[data-ready='true'],
+    .ui-segmented-control .ui-segmented-control__option,
+    .ui-segmented-control
+      .ui-segmented-control__option:active:not(:disabled, [aria-disabled='true']),
+    .ui-segmented-control__options:has(
+        .ui-segmented-control__option--active:active:not(:disabled, [aria-disabled='true'])
+      )
+      .ui-segmented-control__slider {
       transition: none;
+    }
+
+    .ui-segmented-control
+      .ui-segmented-control__option:active:not(:disabled, [aria-disabled='true']) {
+      transform: none;
+    }
+
+    .ui-segmented-control__options:has(
+        .ui-segmented-control__option--active:active:not(:disabled, [aria-disabled='true'])
+      )
+      .ui-segmented-control__slider {
+      transform: translateX(var(--segment-active-offset, 0));
     }
   }
 }
 
 @layer utilities {
-  /* Tier optics describe the well. Its original compact edge and the moving
-     selection field are semantic effects, shared with other controls. */
+  /* Tier optics sample the backdrop, edge refraction and bloom for the well,
+     while the recessed tint and inset cavity shadow carve the track behind
+     the embedded thumb. */
   .ui-segmented-control:is(
     .material-glass-subtle,
     .material-glass-elevated,
     .material-glass-immersive
-  ) {
+  )[data-surface] {
     --neoverse-material-shadow: var(--neoverse-control-segmented-shadow);
     border-color: var(--neoverse-control-segmented-border);
-    box-shadow: var(--neoverse-control-segmented-shadow);
+    background-image: var(--neoverse-control-segmented-background-image);
+    box-shadow: var(--neoverse-material-bloom), var(--neoverse-control-segmented-shadow);
   }
 }
 

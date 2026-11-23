@@ -132,7 +132,19 @@
     flex: 0 0 auto;
   }
 
-  .ui-control-surface__group--trailing:has(.ui-segmented-control) {
+  .ui-dock > .ui-control-surface__group--trailing {
+    border: 0;
+    border-radius: var(--neoverse-control-surface-trailing-radius);
+    padding-block: var(--neoverse-control-surface-trailing-padding);
+    padding-inline: var(--neoverse-control-surface-trailing-padding-inline);
+    background: var(--neoverse-control-surface-trailing-background);
+    box-shadow: var(--neoverse-control-surface-trailing-shadow);
+  }
+
+  /* Keep embedded segmented controls aligned with their shape while borrowing
+     the parent Dock/ControlSurface glass plate and grouping tray. */
+  .ui-control-surface__group--trailing:has(.ui-segmented-control),
+  .ui-dock > .ui-control-surface__group--trailing:has(.ui-segmented-control) {
     --neoverse-control-segmented-option-height-sm: var(--neoverse-control-surface-segmented-height);
     --neoverse-control-segmented-option-min-width: var(
       --neoverse-control-segmented-embedded-option-min-width
@@ -143,11 +155,16 @@
     --neoverse-control-segmented-option-font-size-sm: var(
       --neoverse-control-segmented-embedded-option-font-size-sm
     );
-    border-radius: var(--neoverse-control-surface-trailing-radius);
+    border-radius: var(--neoverse-control-segmented-corner-radius);
     padding-block: var(--neoverse-control-surface-trailing-padding);
-    padding-inline: var(--neoverse-control-surface-trailing-padding-inline);
+    padding-inline: var(--neoverse-control-segmented-inset);
     background: var(--neoverse-control-surface-trailing-background);
     box-shadow: var(--neoverse-control-surface-trailing-shadow);
+  }
+
+  .ui-control-surface__group--trailing:has(.ui-segmented-control--rounded),
+  .ui-dock > .ui-control-surface__group--trailing:has(.ui-segmented-control--rounded) {
+    border-radius: var(--neoverse-control-segmented-rounded-corner-radius);
   }
 
   .ui-control-surface--scale-lg .ui-control-surface__group--trailing:has(.ui-segmented-control) {
@@ -155,15 +172,6 @@
       var(--neoverse-control-segmented-embedded-option-font-size-sm) *
       var(--neoverse-control-segmented-embedded-option-scale-lg-type-factor)
     );
-  }
-
-  .ui-dock > .ui-control-surface__group--trailing {
-    border: 0;
-    border-radius: var(--neoverse-control-surface-trailing-radius);
-    padding-block: var(--neoverse-control-surface-trailing-padding);
-    padding-inline: var(--neoverse-control-surface-trailing-padding-inline);
-    background: var(--neoverse-control-surface-trailing-background);
-    box-shadow: var(--neoverse-control-surface-trailing-shadow);
   }
 
   /* Keep embedded height and option geometry independent of standalone

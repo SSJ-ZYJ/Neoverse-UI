@@ -7,10 +7,10 @@
     --neoverse-tabs-tab-height: var(--neoverse-control-surface-control-height);
     --neoverse-tabs-tab-padding: var(--neoverse-space-3);
     --neoverse-tabs-tab-font-size: var(--neoverse-font-size-sm);
-    --neoverse-tabs-selected-background-image: var(--neoverse-control-segmented-active-background);
-    --neoverse-tabs-selected-background-color: var(--neoverse-control-segmented-active-fill);
-    --neoverse-tabs-selected-border: var(--neoverse-control-segmented-active-border);
-    --neoverse-tabs-selected-shadow: var(--neoverse-control-segmented-active-shadow);
+    --neoverse-tabs-selected-background-image: var(--neoverse-effect-choice-selected-field);
+    --neoverse-tabs-selected-background-color: var(--neoverse-effect-choice-selected-fill);
+    --neoverse-tabs-selected-border: var(--neoverse-effect-choice-selected-border);
+    --neoverse-tabs-selected-shadow: var(--neoverse-effect-choice-selected-shadow);
     --neoverse-tabs-panel-padding-block: var(--neoverse-space-4);
   }
 }

@@ -287,7 +287,7 @@ test('keeps inset component states on shared material roles', async () => {
   expect(proseCss).not.toContain('color-mix(');
 });
 
-test('keeps skeleton motion at a calmer loading pace', async () => {
+test('keeps skeleton motion and effect isolation on shared contracts', async () => {
   const semanticCss = await readTokenCss('components/skeleton.css');
   const duration = semanticCss
     .match(/--neoverse-skeleton-shimmer-duration:\s*([^;]+)/)?.[1]
@@ -306,6 +306,10 @@ test('keeps skeleton motion at a calmer loading pace', async () => {
   );
   expect(skeletonCss).toContain('opacity: var(--neoverse-skeleton-pulse-mid-opacity);');
   expect(skeletonCss).not.toContain('opacity: 0.58;');
+  expect(skeletonCss).not.toContain('box-shadow');
+  expect(skeletonCss).not.toContain('.skeleton-surface::after');
+  expect(skeletonCss).toContain('.ui-skeleton--shimmer::after');
+  expect(skeletonCss).toContain('.skeleton-surface--shimmer::after');
 });
 
 test('keeps skeletons visibly tinted and blurred with an opaque accessibility fallback', async () => {
@@ -549,13 +553,13 @@ test('keeps grouped controls on a compact, shared geometry contract', async () =
     '--neoverse-control-surface-padding-inline: var(--neoverse-space-2);',
   );
   expect(controlSurfaceCss).toContain(
-    '--neoverse-control-surface-corner-radius: var(--neoverse-control-segmented-corner-radius);',
+    '--neoverse-control-surface-corner-radius: var(--neoverse-control-corner-radius);',
   );
   expect(controlSurfaceCss).toContain(
-    '--neoverse-control-surface-inner-radius: var(--neoverse-control-segmented-option-radius);',
+    '--neoverse-control-surface-inner-radius: var(--neoverse-control-compact-radius);',
   );
   expect(controlSurfaceCss).toMatch(
-    /--neoverse-control-surface-trailing-radius:\s*var\(\s*--neoverse-control-segmented-corner-radius\s*\);/,
+    /--neoverse-control-surface-trailing-radius:\s*var\(\s*--neoverse-control-corner-radius\s*\);/,
   );
   expect(controlSurfaceCss).toContain('--neoverse-control-surface-navigation-edge-inset: calc(');
   expect(controlSurfaceCss).toContain('--neoverse-control-surface-divider-height: 1rem;');
@@ -589,32 +593,25 @@ test('keeps grouped controls on a compact, shared geometry contract', async () =
     '--neoverse-navigation-item-indicator-inset: var(--neoverse-space-0);',
   );
 
-  expect(segmentedControlCss).toContain('--neoverse-control-segmented-inset: 0.25rem;');
-  expect(segmentedControlCss).toContain(
+  for (const declaration of [
+    '--neoverse-control-segmented-inset: 0.25rem;',
     '--neoverse-control-segmented-embedded-inset: var(--neoverse-space-0);',
-  );
-  expect(segmentedControlCss).toContain(
     '--neoverse-control-segmented-option-min-width-compact: max-content;',
-  );
-  expect(segmentedControlCss).toContain('--neoverse-control-segmented-option-min-width: 2.5rem;');
-  expect(segmentedControlCss).toContain(
+    '--neoverse-control-segmented-option-min-width: 2.5rem;',
     '--neoverse-control-segmented-embedded-option-min-width: var(--neoverse-space-8);',
-  );
-  expect(segmentedControlCss).toContain(
     '--neoverse-control-segmented-option-height-sm: var(--neoverse-control-surface-control-height);',
-  );
-  expect(segmentedControlCss).toContain(
     '--neoverse-control-segmented-option-padding-block-sm: 0.2rem;',
-  );
-  expect(segmentedControlCss).toContain(
-    '--neoverse-control-segmented-option-padding-inline-sm: var(--neoverse-space-2);',
-  );
-  expect(segmentedControlCss).toContain(
-    '--neoverse-control-segmented-embedded-option-padding-inline-sm: 0.375rem;',
-  );
-  expect(segmentedControlCss).toContain(
-    '--neoverse-control-segmented-option-radius: var(--neoverse-control-compact-radius);',
-  );
+    '--neoverse-control-segmented-option-padding-inline-sm: var(--neoverse-space-3);',
+    '--neoverse-control-segmented-embedded-option-padding-inline-sm: 0.5rem;',
+    '--neoverse-control-segmented-corner-radius: var(--neoverse-radius-pill);',
+    '--neoverse-control-segmented-option-radius: var(--neoverse-radius-pill);',
+    '--neoverse-control-segmented-rounded-corner-radius: var(--neoverse-control-corner-radius);',
+    '--neoverse-control-segmented-rounded-option-radius: var(--neoverse-control-compact-radius);',
+    '--neoverse-control-segmented-slider-duration: 320ms;',
+    '--neoverse-control-segmented-slider-easing: var(--neoverse-motion-easing-spring-soft);',
+  ]) {
+    expect(segmentedControlCss).toContain(declaration);
+  }
 });
 
 test('exposes shared Surface and Glass material contracts', () => {

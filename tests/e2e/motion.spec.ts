@@ -48,6 +48,62 @@ test.describe('motion', () => {
     await expect.poll(() => frame('--neoverse-motion-from-filter')).toBe('blur(8px)');
   });
 
+  test('presence presets are split into helper and component paths', async ({ page }) => {
+    await page.goto('/frame?theme=light&lang=en#motion');
+    const helper = page.locator('[data-motion-presence-path="helper"]');
+    const adapter = page.locator('[data-motion-presence-path="adapter"]');
+
+    await expect(helper).toBeVisible();
+    await expect(adapter).toBeVisible();
+    // The helper path owns every preset; the component path owns only the
+    // UiPresence specimen, so the two mechanisms never share a cell.
+    await expect(helper.locator('[data-motion-presence-specimen]')).toHaveCount(11);
+    await expect(adapter.locator('[data-motion-presence-specimen]')).toHaveCount(0);
+    await expect(adapter.locator('[data-motion-presence-adapter]')).toHaveCount(1);
+  });
+
+  test('every preset enters at once and replays on its own', async ({ page }) => {
+    await page.goto('/frame?theme=light&lang=en#motion');
+    const specimens = page.locator('[data-motion-presence-specimen]');
+
+    // No stagger: every cell carries the same zero enter delay, so all eleven
+    // presets arrive together instead of waiting their turn.
+    const delays = await specimens.evaluateAll((nodes) =>
+      nodes.map((node) =>
+        getComputedStyle(node).getPropertyValue('--neoverse-motion-enter-delay').trim(),
+      ),
+    );
+    expect(new Set(delays)).toEqual(new Set(['0ms']));
+
+    const veil = page.locator('[data-motion-presence-specimen="veil"]');
+    const rise = page.locator('[data-motion-presence-specimen="rise"]');
+    await veil.evaluate((node) => {
+      node.dataset.replayProbe = 'veil';
+    });
+    await rise.evaluate((node) => {
+      node.dataset.replayProbe = 'rise';
+    });
+
+    await page.locator('[data-motion-presence-replay-specimen="veil"]').click();
+
+    // The replayed cell mounts a fresh node; its neighbour is untouched.
+    await expect(veil).not.toHaveAttribute('data-replay-probe', 'veil');
+    await expect(rise).toHaveAttribute('data-replay-probe', 'rise');
+    await expect(page.locator('[data-motion-presence-replay-specimen]')).toHaveCount(12);
+  });
+
+  test('replaying a hidden preset shows it again', async ({ page }) => {
+    await page.goto('/frame?theme=light&lang=en#motion');
+    const toggle = page.locator('[data-motion-presence-toggle]');
+    const specimen = page.locator('[data-motion-presence-specimen="bloom"]');
+
+    await toggle.click();
+    await expect(specimen).toHaveCount(0);
+
+    await page.locator('[data-motion-presence-replay-specimen="bloom"]').click();
+    await expect(specimen).toBeVisible();
+  });
+
   test('list reorder moves every item to its new position', async ({ page }) => {
     await page.goto('/frame?theme=light&lang=en#motion');
     const group = page.locator('[data-motion-presence-group]');

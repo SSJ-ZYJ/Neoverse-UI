@@ -76,6 +76,13 @@ test('segmented selection has one tab stop, skips disabled defaults and respects
   expect(html.match(/aria-checked="true"/g)).toHaveLength(1);
   expect(html).toContain('aria-label="Chinese"');
   expect(html).toContain('role="radiogroup"');
+  expect(html).toContain('ui-segmented-control--pill');
+  expect(html).toContain('data-shape="pill"');
+  const rounded = renderToStaticMarkup(
+    <UiSegmentedControl options={options} shape="rounded" ariaLabel="Language" />,
+  );
+  expect(rounded).toContain('ui-segmented-control--rounded');
+  expect(rounded).toContain('data-shape="rounded"');
   // Before the browser measures every option, the slider keeps the selected
   // content-sized grid column rather than an estimated offset and width.
   expect(html).toContain('--segment-index');
@@ -85,9 +92,6 @@ test('segmented selection has one tab stop, skips disabled defaults and respects
   const invalid = renderToStaticMarkup(<UiSegmentedControl options={options} value="missing" />);
   expect(invalid).not.toContain('aria-checked="true"');
   expect(invalid).not.toContain('ui-segmented-control__slider');
-  expect(renderToStaticMarkup(<UiSegmentedControl options={[]} loading />)).toContain(
-    'aria-busy="true"',
-  );
 });
 
 test('badge and status keep labels accessible while hiding decorative elements', () => {

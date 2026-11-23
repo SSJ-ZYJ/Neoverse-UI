@@ -65,6 +65,7 @@ export type {
   RadioOption,
   ScrollbarProps,
   SegmentedControlProps,
+  SegmentedControlShape,
   SegmentedControlSize,
   SegmentOption,
   SelectOption,

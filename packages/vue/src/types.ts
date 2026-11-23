@@ -262,14 +262,14 @@ export interface SegmentOption {
 }
 
 export type SegmentedControlSize = 'sm';
-
+export type SegmentedControlShape = 'pill' | 'rounded';
 export interface SegmentedControlProps {
   options: readonly SegmentOption[];
   modelValue?: string;
   defaultValue?: string;
   size?: SegmentedControlSize;
+  shape?: SegmentedControlShape;
   disabled?: boolean;
-  loading?: boolean;
   ariaLabel?: string;
   surface?: ControlSurfacePreset;
 }
