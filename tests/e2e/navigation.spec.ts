@@ -328,6 +328,33 @@ test.describe('navigation', () => {
     await expect(active).toBeFocused();
   });
 
+  test('holding the current navigation item tints it without moving it or losing selection', async ({
+    page,
+  }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/frame?theme=light&lang=en#controls-navigation-item');
+    const current = page.locator(
+      '#controls-navigation-item [data-contract-state="default"] a[aria-current="page"]',
+    );
+    await current.scrollIntoViewIfNeeded();
+    const rest = await current.evaluate((node) => getComputedStyle(node).backgroundImage);
+    await current.hover();
+    const hover = await current.evaluate((node) => getComputedStyle(node).backgroundImage);
+    if (!testInfo.project.use.hasTouch) expect(hover).not.toBe(rest);
+    const shadow = await current.evaluate((node) => getComputedStyle(node).boxShadow);
+    const bounds = await current.boundingBox();
+    await page.mouse.down();
+    try {
+      await expect(current).not.toHaveCSS('background-image', hover);
+      await expect(current).toHaveCSS('box-shadow', shadow);
+      expect(await current.boundingBox()).toEqual(bounds);
+      await expect(current).toHaveAttribute('aria-current', 'page');
+    } finally {
+      await page.mouse.up();
+    }
+    await expect(current).toHaveCSS('background-image', hover);
+  });
+
   test.describe('dock shared indicator', () => {
     const indicatorGeometry = (indicator: Element) => {
       const rect = indicator.getBoundingClientRect();

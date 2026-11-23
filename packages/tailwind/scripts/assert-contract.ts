@@ -526,6 +526,10 @@ try {
     ':where(.ui-disclosure__summary, .neoverse-prose summary)::after',
     ':where(.ui-disclosure__summary, .neoverse-prose summary):focus-visible',
     '.neoverse-prose abbr[title]',
+    '.neoverse-prose :where(em, i)',
+    'font-family: var(--neoverse-prose-inline-code-font-family);',
+    '.neoverse-prose :where(del, s)',
+    '.neoverse-prose a :where(strong, b, del, s)',
   ];
   const missingProseFragments = expectedProseFragments.filter(
     (fragment) => !proseCss.includes(fragment),

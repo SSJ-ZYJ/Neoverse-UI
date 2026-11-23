@@ -16,7 +16,7 @@
     --neoverse-typography-display-md-weight: var(--neoverse-font-weight-bold);
     --neoverse-typography-display-md-letter-spacing: var(--neoverse-letter-spacing-tight);
 
-    --neoverse-typography-title-lg-size: clamp(1rem, 1.55vw, 1.25rem);
+    --neoverse-typography-title-lg-size: var(--neoverse-font-size-xl);
     --neoverse-typography-title-lg-line-height: var(--neoverse-line-height-snug);
     --neoverse-typography-title-lg-weight: var(--neoverse-font-weight-semibold);
     --neoverse-typography-title-lg-letter-spacing: var(--neoverse-letter-spacing-normal);
@@ -24,7 +24,7 @@
     --neoverse-typography-title-md-line-height: var(--neoverse-line-height-snug);
     --neoverse-typography-title-md-weight: var(--neoverse-font-weight-semibold);
     --neoverse-typography-title-md-letter-spacing: var(--neoverse-letter-spacing-normal);
-    --neoverse-typography-title-sm-size: 1rem;
+    --neoverse-typography-title-sm-size: var(--neoverse-font-size-md);
     --neoverse-typography-title-sm-line-height: var(--neoverse-line-height-snug);
     --neoverse-typography-title-sm-weight: var(--neoverse-font-weight-semibold);
     --neoverse-typography-title-sm-letter-spacing: var(--neoverse-letter-spacing-normal);

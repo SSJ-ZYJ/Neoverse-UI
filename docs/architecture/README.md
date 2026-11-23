@@ -195,15 +195,23 @@ Controls retain compact painted dimensions on every viewport. Shared Button and 
 
 `apps/playground` uses Bun.serve for the HTML shell, `/frame` theme-isolated documents, built Tailwind CSS, and the Vite browser bundle. The shell and isolated `/frame` use the normal consumer root size (16px). `App.vue` selects the shell or independent frame. `LabWorkspace` owns the active hash, preferences, drawer state, and Preview Stage scroll restoration on reload.
 
-Design Lab 2.0 keeps its toolbar fixed above three independently scrollable areas: Explorer, Preview Stage, and Inspector. The Explorer orders the catalogue into Foundations, Materials & elevation, Components, Compositions, and a separated Lab tools section. A section states design intent, a module is a family that can be read on its own, and QA or theme tooling never mixes with design content. Search matches module or specimen names in either language, API names, and tags without maintaining another inventory. Explorer module rows navigate to the module overview while a separate disclosure expands their specimens; a module with a single browsable specimen renders as one destination, so the tree never repeats the same label at a third level.
+Design Lab 2.0 keeps its toolbar fixed above three independently scrollable areas: Explorer, Preview Stage, and Inspector. The Explorer orders the catalogue into Foundations, Materials & elevation, Components, Compositions, and a separated Lab tools section. A section states design intent, a module is a family that can be read on its own, and QA or theme tooling never mixes with design content. Search matches module or specimen names in either language, API names, and tags without maintaining another inventory. Explorer section labels stack the active language above a smaller muted line for the other language, without parentheses, and their counts and chevrons align to the primary line; navigation items keep the secondary language as a smaller suffix inside the label, sharing the primary text baseline rather than being centred as a separate control child. The muted second line exists only in the Chinese interface: an English interface shows the English name alone, so a Chinese reading aid never becomes extra text for English readers. The suffix is hidden from the accessible name. Explorer module rows navigate to the module overview while a separate disclosure expands their specimens; a module with a single browsable specimen renders as one destination, so the tree never repeats the same label at a third level.
 
-The ordinary Design Lab shell and its Stage use a flat semantic canvas by default. A persisted stage-background control repaints only the centre column with the existing Playground field tokens — solid, tint, gradient or optical — so a component can be judged against a coloured or textured backdrop without opening the isolated frame; every other shell contract keeps the flat default. A specimen route mounts exactly the preview declared by that catalogue entry. The keyed Stage section owns the deep-link anchor and focus target; leaving the route unmounts the instance. A preview may be a single Vue adapter or a deliberately composed scene. It does not select children from a gallery or use CSS to hide sibling specimens.
+The ordinary Design Lab shell and its Stage use a flat semantic canvas by default. A persisted stage-background control repaints only the centre column with the existing Playground field tokens — solid, tint, gradient or optical — so a component can be judged against a coloured or textured backdrop without opening the isolated frame; every other shell contract keeps the flat default. The overview's Preview material choice uses the same preference record, so a reload keeps the selected tier. A specimen route mounts exactly the preview declared by that catalogue entry. The keyed Stage section owns the deep-link anchor and focus target; leaving the route unmounts the instance. A preview may be a single Vue adapter or a deliberately composed scene. It does not select children from a gallery or use CSS to hide sibling specimens.
 
 Focus still moves to the stage for deep links and history, but the shell paints the visible ring only after keyboard input; pointer navigation and the initial load stay ring-free, and the module heading receives the same designed ring as a specimen title. Composition specimens frame their scene at a declared measure — the reading width by default, a narrower measure for sidebar scenes — and start below the heading, while single-component specimens remain centered on the stage.
 
+Compositions sit directly on the selected Stage backdrop. They do not add a
+decorative card or an independent backdrop around the scene; a card or toolbar
+that is itself the specimen retains its configured material. Button, IconButton,
+and Action preview sessions let the Inspector switch corners without adding
+a corner prop to their public API.
+
 A focused specimen exposes a move handle in the stage header: drag it, or use the arrow keys with Shift for a larger step, to place the component anywhere inside the stage; Home or a double-click recenters it. Movement translates the preview directly, so it never joins the specimen's tab order, never wraps the component in a shrink-to-fit container, and never creates a backdrop root around nested Aurora Glass. The isolated `/frame` route paints its comparison stages with the same optical field, so a specimen keeps one backdrop language between the shell and its isolated render.
 
-Every entry in `labSpecimens` declares a `FocusedPreview`: either a localized renderer for a read-only Inspector or a `SpecimenDefinition` that opens one editable `SpecimenSession`. A read-only preview can still support native interactions without exposing a session to the Inspector. Button, SegmentedControl, Input, Select, Checkbox, Tabs, Card, and Dock have editable sessions. To add a specimen, register its explicit renderer on the catalogue entry and retain its stable QA anchor in the owning module. Interactive definitions provide typed initial props, an initial state factory, and editable controls. The session rejects undeclared edits, invalid values, and edits to temporarily disabled fields.
+Every entry in `labSpecimens` declares a `FocusedPreview`: either a localized renderer for a read-only Inspector or a `SpecimenDefinition` that opens one editable `SpecimenSession`. A read-only preview can still support native interactions without exposing a session to the Inspector. Every component specimen whose public API exposes an appearance variant has an editable session: Button, IconButton, Action, SegmentedControl, NavigationItem, ControlSurface, Dock, Badge, StatusIndicator, Skeleton, Notice, Toast, TooltipSurface, Avatar, Table, Disclosure, StatCard, Surface (including the three Aurora Glass tiers), Card, Input, Textarea, Select, Checkbox, RadioGroup, Switch, Field and Tabs. Data-only specimens (Breadcrumb, Pagination, EmptyState, Timeline, StepFlow) and the four overlay specimens stay read-only; overlays own focus, placement and light dismiss, which an Inspector value cannot reproduce. To add a specimen, register its explicit renderer on the catalogue entry and retain its stable QA anchor in the owning module. Interactive definitions live in the `lab-specimens/` family files and are re-exported through `lab-interactive-specimens.ts`; they provide typed initial props, an initial state factory, and editable controls. The session rejects undeclared edits, invalid values, and edits to temporarily disabled fields.
+
+The shell keeps one glass plate per section. `LabSpecimenSection` owns that plate; nested `.playground-specimen-panel` wrappers render with `surface="none"` on the canvas, so a gallery never stacks a second card silhouette. Component specimens that demonstrate glass keep their own material. The isolated `/frame` route keeps its QA backdrops unchanged.
 
 Module URLs and `/frame` render the full QA galleries, including fixed state matrices and optical fixtures. The isolated frame retains the diagnostic comparison backdrops. The Inspector opens that gallery at the specimen anchor, without transferring local edits. `/react-fixture` remains the React contract host. Neither isolated entry mounts the shell.
 
@@ -213,9 +221,39 @@ of the control cluster and project card. The older `#foundation-layout-shape`
 link remains a read-only overview of the three focused geometry groups; the full
 token sets and comparison anchors remain in the layout and shape QA gallery.
 
+The focused Spacing specimen and its QA gallery share the same token-backed
+rulers and layout examples. The rulers compare lengths from a common origin
+and report rendered CSS pixels. The layout examples distinguish responsive
+container padding from the gap between grid items.
+
+The Colors module and focused specimen share a responsive gallery. Primitive
+palettes group shade steps below one CSS variable pattern per family. Semantic
+colors use role lists with the theme swatch, CSS variable, and Tailwind utility
+together. Both layouts wrap instead of scrolling sideways and render without
+per-swatch backdrop filters or Glass edges.
+
+The Typography module's type scale opens with the six Markdown heading levels.
+Each row renders the shipped `.neoverse-prose` heading, its `#` marker, and the
+`--neoverse-prose-heading-h*-size` role that owns its size. The role tokens stay
+separate from the interface title scale, so a page heading never inherits a
+component title size.
+
+The interface title scale is fixed, not fluid: `title-sm` is `--neoverse-font-size-md`
+(16px), `title-md` is `--neoverse-font-size-lg` (18px) and `title-lg` is
+`--neoverse-font-size-xl` (20px), so the three roles stay strictly ordered at
+every viewport width. `.ui-dialog__title` is the `title-md` consumer; component
+titles such as `.ui-step-flow__title` and `.ui-timeline__title` use `title-sm`.
+
+The inline syntax rows below the heading scale place each Markdown marker beside
+its rendered semantic element. Bold, italic, bold italic, inline code,
+strikethrough and links share the one `.neoverse-prose` layer; bold and deleted
+text nested in a link keep the link color, so link decoration and nested states
+remain readable together. The heading rows and the type scale below them keep
+their original layout.
+
 The focused Scrollbar specimen demonstrates `scrollbar-immersive` on a local scroll container. The document-bound `UiScrollbar` and its ownership checks stay in the frame; the focused renderer does not bind the shell document to demonstrate a container scrollbar.
 
-Effective props are the session's overrides over the specimen's explicit initial props. Omitted props are resolved by the component, not the Playground. The Inspector marks changed values and can remove an override to inherit the component default where the specimen leaves the prop unset. Preview events and the editor share one specimen-owned value for controlled inputs and selections. Reset clears overrides and restores the specimen's initial interaction state without remounting its component. Leaving a specimen discards its session; navigation history restores selection, not edits. Locale, theme, and browser hover, focus, and press do not participate in this session.
+Effective props are the session's overrides over the specimen's explicit initial props. Omitted props are resolved by the component, not the Playground. The Inspector marks changed values and can remove an override to inherit the component default where the specimen leaves the prop unset. Preview events and the editor share one specimen-owned value for controlled inputs and selections. Reset clears overrides, restores the specimen's initial interaction state without remounting its component, and clears its saved edits. Edited fields are saved per specimen in the shared preference record and restored when that specimen opens on a fresh page load; a reload therefore keeps the last selection. Leaving a specimen still discards the in-memory session, and navigation history restores selection, not edits. Locale, theme, and browser hover, focus, and press do not participate in this session.
 
 Select and Checkbox suspend their value editors while the specimen is disabled;
 Select does the same while read-only. Neither clears the current value. The
@@ -270,7 +308,9 @@ The Motion module's `foundation-motion-width` specimen demonstrates the shared l
 
 `LabToolbar` uses `useLayoutWidthMotion` for preference controls whose labels change with the locale. Navigation fades the Stage heading with the shared `state` motion role and gives the focused specimen a short `spatial` offset. The specimen tree itself does not fade because opacity would introduce a Glass backdrop root. It renders at its normal consumer size; wide content can use the Stage width or scroll locally. The shell does not snapshot the Stage or start the WebGL particle effect outside its dedicated Motion specimen. Drawer travel uses the shared `spatial` role. Reduced motion removes the Stage and drawer transitions.
 
-Use `?fps=1` to enable the optional FPS diagnostic; the default shell does not sample animation frames for the counter.
+The shell toolbar shows the FPS counter before the theme and language controls.
+The counter pauses while the document is hidden. Use `?fps=0` to disable it
+without sampling frames. The isolated frame does not mount the counter.
 
 `StateRow layout="wide"` reserves a full row for multi-component comparisons;
 nested QA matrices receive the same space automatically. Preview content wraps

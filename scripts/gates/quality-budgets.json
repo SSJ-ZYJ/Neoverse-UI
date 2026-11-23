@@ -50,8 +50,8 @@
       "reason": "2026-11-22: Terminal composition adapter; remove when composition and history behavior are separated."
     },
     "packages/tailwind/scripts/assert-contract.ts": {
-      "ceiling": 639,
-      "reason": "2026-11-22: Tailwind contract assertions; remove when selectors are checked by generated metadata."
+      "ceiling": 650,
+      "reason": "2026-11-23: Tailwind contract assertions including prose inline selectors; remove when selectors are checked by generated metadata."
     },
     "packages/tailwind/src/components/form-control.css": {
       "ceiling": 920,
@@ -66,12 +66,12 @@
       "reason": "2026-11-22: Font face declarations with embedded subsets; remove when font assets move to a generated sheet."
     },
     "packages/tokens/src/index.test.ts": {
-      "ceiling": 1102,
-      "reason": "2026-11-22: Token name-map suite; remove when tests follow the token domain split."
+      "ceiling": 1120,
+      "reason": "2026-11-23: Token name-map suite with code font fallback coverage; remove when tests follow the token domain split."
     },
     "packages/tokens/src/index.ts": {
-      "ceiling": 1406,
-      "reason": "2026-11-22: Token composition entry; remove when token domains become separate public entries."
+      "ceiling": 1420,
+      "reason": "2026-11-23: Token composition entry, now including the six prose heading roles and the inline-code font role; remove when token domains become separate public entries."
     },
     "packages/vue/src/components.test.ts": {
       "ceiling": 1869,
@@ -82,8 +82,8 @@
       "reason": "2026-11-22: Vue shared option and item types; remove when types move beside their owning adapters."
     },
     "tests/e2e/playground.spec.ts": {
-      "ceiling": 1679,
-      "reason": "2026-11-22: Design Lab shell suite; remove when shell scenarios split into focused specs per module."
+      "ceiling": 1990,
+      "reason": "2026-11-23: Design Lab shell suite with Markdown, panel layering, persistence and bilingual label geometry coverage; remove when shell scenarios split into focused specs per module."
     }
   }
 }

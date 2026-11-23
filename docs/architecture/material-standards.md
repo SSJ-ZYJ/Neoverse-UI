@@ -52,20 +52,21 @@ The light shader retains its directional edge profile and 0.34 edge-response
 ceiling. Large light surfaces use edge opacities 0.36 / 0.38 / 0.40 without an
 extra light alpha gain.
 
-In light mode, the shared WebGL canvas encodes a neutral, partially covered
+In both themes, the shared WebGL canvas encodes a neutral, partially covered
 color-dodge signal. The compositor lifts the existing backdrop channels
-proportionally rather than lifting the weaker channels toward white. On large
-surfaces, the stronger catches have a soft exposure shoulder instead of a
-hard cutoff. The lower-right catch limits the dodge signal before channels
-clip, rather than masking the clipped result with lower coverage. The existing
-saturation pass strengthens the live backdrop's hue near that arc and fades
-back to its regular profile on the adjoining edges. Neither pass adds a
-fixed highlight hue.
+proportionally rather than lifting the weaker channels toward white. Dark
+surfaces use a higher exposure scale to keep the fine rim visible on dark
+backdrops. On large light surfaces, the stronger catches have a soft exposure
+shoulder instead of a hard cutoff. The lower-right catch limits the dodge signal
+before channels clip, rather than masking the clipped result with lower coverage.
+The saturation pass strengthens the live backdrop's hue in both themes, with
+additional emphasis near the lower-right arc on large light surfaces. Neither
+pass adds a fixed highlight hue.
 On larger light surfaces, the upper-left catch also rolls off before clipping,
 with a softer peak that fades along the adjoining edges. The rolloff changes
 the dodge signal without changing rim width or coverage.
 
-Dark surfaces and browsers without color dodge keep the overlay transfer.
+Browsers without color dodge keep the overlay transfer in either theme.
 CSS still owns the body tint, blur, and shadows.
 
 The edge reacts to the pixels immediately underneath it, but does not sample
@@ -77,8 +78,9 @@ the upper-left and lower-right catches taper in width independently of the
 lighting direction. The lighting also eases from each straight edge into its
 arc, so the join does not create a second highlight. The lower-right catch
 retains the narrower inward falloff. Dark corners use the same fine contour,
-with a modest exposure lift on the upper-left and lower-right arcs that tapers
-to zero at the straight edges.
+with additional color-dodge lift on the upper-left and lower-right arcs after
+the base exposure ceiling. The lift tapers to zero at the straight edges
+without changing rim geometry or coverage.
 Reduced transparency disables the renderer. The CSS fallback uses alpha-only
 gradient masks and backdrop brightness. The historical `backend: 'native'`
 option remains available for compatibility, but must not be used as the repair
@@ -213,10 +215,10 @@ overriding `backdrop-filter`. `cssVariables.material.glass` exposes the public n
 
 ## Interaction policy
 
-- Hover is available only on hover-capable devices. It uses foreground, local light,
-  and shadow; it does not change the Aurora Glass base alpha or filter.
-- Press takes precedence over hover, uses the shared press light/shadow, and restores
-  hover or rest on release. It does not select an option until native activation.
+- Hover is available only on hover-capable devices. Hover and press do not
+  change the Aurora Glass base alpha or filter.
+- Press takes precedence over hover and restores hover or rest on release.
+  It does not select an option until native activation.
 - Selected, checked, and expanded states persist independently of transient press.
   Native click, Enter, Space, cancellation, and disabled semantics are retained.
 - Disabled/loading controls cannot activate or show hover/press feedback. Their
@@ -279,10 +281,11 @@ A selected SegmentedControl slider and a selected navigation item use a local ac
 field. Dock trailing groups retain a local grouping wash. These fields express
 selection or grouping, never create another backdrop filter, and remain consistent
 through hover and press. The surrounding Aurora Glass plate keeps its tier alpha/filter.
-Unselected segmented options hover and press on the neutral foreground
-(`segmentedControl.hoverForeground`) and keep that hover wash while pressed; only
-the press shadow and scale respond. The secondary accent stays reserved for the
-active option, so pressing never flips the label color or previews selection.
+Segmented options, navigation items, tabs, pagination, breadcrumbs, menu items,
+and number steppers share the quiet button wash. Hover adds the wash; press
+uses a deeper shade without moving the control or changing its shadow.
+Current-page, checked, open and selected indicators remain visible, and
+activation rather than press commits selection.
 
 Checkbox, RadioGroup and Switch use a pale blue selected field in Light mode,
 with blue-grey checks and compact radio dots. Dark mode uses a translucent blue
@@ -302,28 +305,24 @@ Light error and success text feedback uses coral and mint midtones rather than
 the deep foreground colors intended for pastel status fields. Field messages,
 required markers and terminal text feedback share those theme-owned text roles.
 The flat Playground sidebar uses the shared `--neoverse-color-accent-soft` selected
-fill without the raised navigation gradient or shadow. This fill persists through
-hover, press, release and focus; inactive entries keep their resting background.
+fill without the raised navigation gradient or shadow. The quiet feedback
+wash sits over this fill without changing the current destination.
 
-Dark Button/Action/IconButton keep `ui-button__tone-field` transparent at rest:
-neither a white fill nor a pale grey gradient covers the sampled Aurora Glass plate.
-Their Aurora Glass tint uses neutral black through `components.button.glassTint` in dark
-mode, preserving the selected tier's single background alpha with compact blur sampling. The body
-therefore reveals the live blurred backdrop without imposing a navy hue.
-Buttons explicitly disable native appearance and reset the platform background;
-the selected material alone supplies the sampled fill and backdrop filter.
-Primary hierarchy uses the existing foreground and shadow roles. Hover and press
-reuse the shared selection field and retain their distinct shadow/press feedback.
-The decorative field owns no backdrop filter, layout or hit testing;
-disabled/loading retain the resting field while content alone is attenuated.
-Ghost and `surface="none"` hide this field. The Aurora Glass owner continues to use one
-tier background alpha and the compact sampling filter.
+Button, Action, and IconButton share one compact Aurora Glass plate and one
+translucent command tint. Primary is pale blue with deep blue ink in Light and
+muted blue with dark ink in Dark. Secondary uses a neutral tint. Press uses a
+deeper shade of the hover tint without changing the shadow, silhouette, text,
+or blur. Neither state uses the selected field or a pointer-positioned light.
+The tint sits over the sampled plate without adding another filter, layout geometry,
+or hit testing. Disabled and loading controls keep the resting tint and dim only
+their content. Ghost and `surface="none"` do not own a material plate; they
+paint only a local neutral wash on hover or press.
 
-Compact controls own a 1px silhouette through `--neoverse-control-silhouette`:
-Light resolves it to a fine border-role hairline because a 32px button or a
-44px switch track has no sampled backdrop to define it on the pale canvas,
-while Dark resolves it to the validated glass rim. Glass planes, cards and
-segmented wells keep their existing border policy.
+The sampled plate, tint, and glass rim use the button's outer radius, including
+circular icon buttons. The rim replaces the painted stroke; reduced transparency,
+forced colors, and browsers without backdrop filters retain a fallback boundary.
+Keyboard focus keeps its own outline. The border policy for cards, glass planes,
+segmented wells, and other compact controls is unchanged.
 
 Dock's original desktop `lg` scale is 1.3, with a 0.9 optical type factor for
 navigation and embedded segmented labels. Compact Dock remains `md` at 1. These
@@ -342,17 +341,16 @@ The light segmented selection plate retains its 0.3.0 pale outline and selected
 gradient. The well keeps its tier-owned blur, and inactive options remain
 transparent. The dark selection keeps its existing edge treatment.
 
-Regression contracts compare the established light/dark command shadows and shared Aurora Glass Dock depth,
-require the selected accent field at rest, and check that changing selection leaves
-the Aurora Glass base unchanged. This keeps material cleanup from silently redesigning
-controls.
+Regression contracts check that transient button feedback keeps the sampled
+plate unchanged, and that command states do not replace persistent selection
+or alter shared Aurora Glass Dock depth.
 
 | Component | Preserved visual role | Shared role / source |
 | --- | --- | --- |
-| Button, Action, IconButton | Command/primary depth, pointer light and quiet Ghost feedback | `command-*`, `primary-*`, `quiet-command-*` in `control-effects.css` |
+| Button, Action, IconButton | Translucent primary and secondary tints, quiet Ghost feedback | `command-*`, `primary-*`, `quiet-command-*` in `control-effects.css` |
 | SegmentedControl | Shell depth and theme-specific selected accent field/fill/edge | `choice-rest-shadow`, `choice-selected-*` |
 | Dock, ControlSurface | Selected Aurora Glass tier depth/boundary and local trailing group contrast | Aurora Glass material tokens, `control-surface-*`, `grouped-inset-*` |
-| NavigationItem | Persistent selection at rest, hover and press | `selection-*`; distinct shared press feedback |
+| NavigationItem | Persistent selection under the quiet button wash | `selection-*`, `quiet-command-*` |
 | Skeleton, Badge, Tooltip, Scrollbar | Highlight, edge, accent depth and thumb state effects | `placeholder-*`, `label-edge`, `accent-*`, `rail-*` |
 | StatusIndicator | Established 42% glow, 88% pulse and separate glow/pulse spread | Status roles in `effects.css` |
 

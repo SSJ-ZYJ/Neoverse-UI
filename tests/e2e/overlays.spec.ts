@@ -28,6 +28,12 @@ test.describe('modal and transient feedback', () => {
         const dialog = page.locator('dialog.ui-dialog');
         await expect(dialog).toBeVisible();
         await expect(dialog).toHaveAttribute('aria-labelledby', /dialog-title|title/);
+        const title = dialog.locator('.ui-dialog__title');
+        await expect(title).toHaveCSS('font-size', '18px');
+        await title.evaluate((element) =>
+          element.style.setProperty('--neoverse-typography-title-md-size', '26px'),
+        );
+        await expect(title).toHaveCSS('font-size', '26px');
         await page.keyboard.press('Escape');
         await expect(dialog).toBeHidden();
         await expect(trigger).toBeFocused();

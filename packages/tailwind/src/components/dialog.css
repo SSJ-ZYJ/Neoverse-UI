@@ -47,8 +47,11 @@
 
   .ui-dialog__title {
     margin: 0;
-    font-size: var(--neoverse-font-size-lg);
-    font-weight: var(--neoverse-font-weight-semibold);
+    font-family: var(--neoverse-typography-title-font-family);
+    font-size: var(--neoverse-typography-title-md-size);
+    font-weight: var(--neoverse-typography-title-md-weight);
+    line-height: var(--neoverse-typography-title-md-line-height);
+    letter-spacing: var(--neoverse-typography-title-md-letter-spacing);
   }
 
   .ui-dialog__description {

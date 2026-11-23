@@ -29,6 +29,77 @@ test.describe('materials', () => {
     });
   }
 
+  for (const theme of themes) {
+    test(`a glass button deepens its tint without changing depth in ${theme}`, async ({
+      page,
+    }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto(`/frame?theme=${theme}&lang=en#controls-button`, {
+        waitUntil: 'domcontentloaded',
+      });
+      const primary = page
+        .locator('[data-qa-stage="neutral"]')
+        .locator('[data-contract-button="primary"]');
+      await expect(primary).toBeVisible();
+      await primary.scrollIntoViewIfNeeded();
+      const tint = primary.locator('.ui-button__tone-field');
+      const rest = await tint.evaluate((element) => getComputedStyle(element).backgroundColor);
+      const blur = await primary.evaluate((element) => getComputedStyle(element).backdropFilter);
+      const shadow = await primary.evaluate((element) => getComputedStyle(element).boxShadow);
+      expect(blur).toContain('blur(');
+      expect(rest).toMatch(/^rgba\(/);
+
+      if (!testInfo.project.use.hasTouch) await primary.hover();
+      const ready = await tint.evaluate((element) => getComputedStyle(element).backgroundColor);
+      if (!testInfo.project.use.hasTouch) expect(ready).not.toBe(rest);
+      await expect(primary).toHaveCSS('box-shadow', shadow);
+
+      await primary.focus();
+      await page.keyboard.down('Space');
+      try {
+        await expect(tint).not.toHaveCSS('background-color', ready);
+        await expect(primary).toHaveCSS('backdrop-filter', blur);
+        await expect(primary).toHaveCSS('box-shadow', shadow);
+        await expect(primary).toHaveCSS('border-top-color', 'rgba(0, 0, 0, 0)');
+      } finally {
+        await page.keyboard.up('Space');
+      }
+      await expect(tint).toHaveCSS('background-color', ready);
+    });
+
+    test(`quiet buttons reveal a deeper tint while held without acquiring a glass plate in ${theme}`, async ({
+      page,
+    }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto(`/frame?theme=${theme}&lang=en#controls-button`, {
+        waitUntil: 'domcontentloaded',
+      });
+      for (const button of [
+        page.locator('[data-qa-stage="neutral"] [data-contract-button="ghost"]'),
+        page.locator('[data-qa-stage="reduced"] [data-contract-button="ghost"]'),
+        page.locator('[data-contract-button="unplated"]'),
+      ]) {
+        await page.mouse.move(0, 0);
+        await expect(button).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+        if (!testInfo.project.use.hasTouch) {
+          await button.hover();
+          await expect(button).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+        }
+        const ready = await button.evaluate((element) => getComputedStyle(element).backgroundColor);
+        await button.focus();
+        await page.keyboard.down('Space');
+        try {
+          await expect(button).not.toHaveCSS('background-color', ready);
+          await expect(button).toHaveCSS('backdrop-filter', 'none');
+          await expect(button).toHaveCSS('box-shadow', 'none');
+        } finally {
+          await page.keyboard.up('Space');
+        }
+        await expect(button).toHaveCSS('background-color', ready);
+      }
+    });
+  }
+
   test('Aurora Glass tiers wire their own blur, saturation and tint', async ({ page }) => {
     const expected = [
       { surface: 'glass-subtle', blur: 12, saturation: 1.32 },

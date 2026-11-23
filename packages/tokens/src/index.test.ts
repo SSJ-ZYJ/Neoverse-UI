@@ -78,7 +78,16 @@ test('exposes canonical component token namespaces', () => {
   expect(cssVariables.components.disclosure.activeIndicatorForeground).toBe(
     '--neoverse-disclosure-active-indicator-foreground',
   );
+  expect(cssVariables.components.prose.headingWeight).toBe('--neoverse-prose-heading-weight');
+  for (const level of ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'] as const) {
+    expect(cssVariables.components.prose.headingSize[level]).toBe(
+      `--neoverse-prose-heading-${level}-size`,
+    );
+  }
   expect(cssVariables.components.prose.quoteBackground).toBe('--neoverse-prose-quote-background');
+  expect(cssVariables.components.prose.inlineCodeFontFamily).toBe(
+    '--neoverse-prose-inline-code-font-family',
+  );
   expect(cssVariables.components.prose.inlineCodeBackground).toBe(
     '--neoverse-prose-inline-code-background',
   );
@@ -446,6 +455,9 @@ test('keeps semantic typography families overrideable by role', async () => {
   }
   expect(typographyCss).toContain(
     '--neoverse-typography-code-font-family: var(--neoverse-font-family-code);',
+  );
+  expect(await readTokenCss('primitives.css')).toContain(
+    "'Fira Code Variable', 'Fira Code', 'Noto Sans SC Variable', 'Noto Sans SC', 'PingFang SC',",
   );
 });
 

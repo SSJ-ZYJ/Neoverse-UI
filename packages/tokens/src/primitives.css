@@ -120,7 +120,8 @@
       'Inter Variable', Inter, 'Noto Sans SC Variable', 'Noto Sans SC', 'PingFang SC',
       'Microsoft YaHei', ui-sans-serif, system-ui, sans-serif;
     --neoverse-font-family-code-default:
-      'Fira Code Variable', 'Fira Code', ui-monospace, sfmono-regular, menlo, monaco, consolas,
+      'Fira Code Variable', 'Fira Code', 'Noto Sans SC Variable', 'Noto Sans SC', 'PingFang SC',
+      'Microsoft YaHei', ui-monospace, sfmono-regular, menlo, monaco, consolas,
       'Liberation Mono', 'Courier New', monospace;
     --neoverse-font-family-code-maple:
       'Maple Mono NF CN', 'Maple Mono', 'Noto Sans SC Variable', 'Noto Sans SC',

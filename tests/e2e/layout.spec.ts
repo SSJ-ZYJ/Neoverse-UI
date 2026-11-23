@@ -76,6 +76,30 @@ test.describe('layout', () => {
     expect(new Set(typography.map((entry) => entry.family)).size).toBe(1);
   });
 
+  test('interface title roles stay ordered and distinct at every width', async ({ page }) => {
+    for (const width of [390, 1024, 1440, 1920]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto('/?lang=en#foundation-typography', { waitUntil: 'domcontentloaded' });
+      await expect(page.locator('[data-type-scale="Title Small"]')).toBeVisible();
+
+      const sizes = await page
+        .locator('[data-type-scale]')
+        .evaluateAll((rows) =>
+          Object.fromEntries(
+            rows.map((row) => [
+              row.getAttribute('data-type-scale') ?? '',
+              Number.parseFloat(getComputedStyle(row).fontSize),
+            ]),
+          ),
+        );
+      expect(sizes['Title Small'], `${width}px`).toBeCloseTo(16, 1);
+      expect(sizes['Title Medium'], `${width}px`).toBeCloseTo(18, 1);
+      expect(sizes['Title Large'], `${width}px`).toBeCloseTo(20, 1);
+      expect(sizes['Title Large'] ?? 0).toBeGreaterThan(sizes['Title Medium'] ?? 0);
+      expect(sizes['Title Medium'] ?? 0).toBeGreaterThan(sizes['Title Small'] ?? 0);
+    }
+  });
+
   test('interactive controls keep a 24px minimum target', async ({ page }) => {
     await page.goto('/frame?theme=light&lang=en#controls', { waitUntil: 'domcontentloaded' });
     await expect(page.locator('#controls-button')).toBeVisible();

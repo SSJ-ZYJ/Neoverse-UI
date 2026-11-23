@@ -2,6 +2,14 @@
   :root {
     --neoverse-prose-foreground: var(--neoverse-color-text-secondary);
     --neoverse-prose-heading-foreground: var(--neoverse-color-text-primary);
+    --neoverse-prose-heading-weight: var(--neoverse-font-weight-semibold);
+    --neoverse-prose-heading-line-height: var(--neoverse-line-height-snug);
+    --neoverse-prose-heading-h1-size: var(--neoverse-font-size-3xl);
+    --neoverse-prose-heading-h2-size: var(--neoverse-font-size-2xl);
+    --neoverse-prose-heading-h3-size: var(--neoverse-font-size-xl);
+    --neoverse-prose-heading-h4-size: var(--neoverse-font-size-lg);
+    --neoverse-prose-heading-h5-size: var(--neoverse-font-size-md);
+    --neoverse-prose-heading-h6-size: var(--neoverse-font-size-sm);
     --neoverse-prose-muted-foreground: var(--neoverse-color-text-muted);
     --neoverse-prose-strong-foreground: var(--neoverse-color-text-primary);
     --neoverse-prose-link-foreground: var(--neoverse-color-text-primary);
@@ -18,6 +26,7 @@
     --neoverse-prose-quote-filter: var(--neoverse-surface-inset-filter);
 
     --neoverse-prose-inline-code-foreground: var(--neoverse-color-text-primary);
+    --neoverse-prose-inline-code-font-family: var(--neoverse-font-family-code-maple);
     --neoverse-prose-inline-code-background:
       var(--neoverse-surface-inset-sheen), var(--neoverse-surface-inset-alternate-fill);
     --neoverse-prose-inline-code-shadow:

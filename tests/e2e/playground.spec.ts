@@ -59,6 +59,149 @@ test('every Explorer specimen opens a nonempty, independently sized preview', as
   }
 });
 
+test('the Colors gallery shows every shade and role without sideways scrolling', async ({
+  page,
+}) => {
+  const workspace = page.locator('[data-design-lab-workspace]');
+  for (const route of ['colors', 'foundation-colors']) {
+    await page.goto(`/?theme=dark&lang=zh#${route}`, { waitUntil: 'domcontentloaded' });
+    const firstScale = workspace.locator('[data-color-scale]').first();
+    await expect(firstScale).toBeVisible();
+    await expect(firstScale.locator('code').first()).toHaveText('50');
+    await expect(firstScale.locator('code').last()).toHaveText('950');
+    const roles = workspace.locator('[data-color-roles]');
+    await expect(roles.locator('[data-color-swatch-variable]').first()).toHaveText(
+      '--neoverse-color-surface-canvas',
+    );
+    await expect(roles.locator('[data-color-swatch-class]').first()).toHaveText(
+      'bg-surface-canvas',
+    );
+
+    for (const region of [workspace, firstScale, roles]) {
+      expect(
+        await region.evaluate((element) => element.scrollWidth - element.clientWidth),
+      ).toBeLessThanOrEqual(1);
+    }
+    const filtered = await workspace
+      .locator('[data-color-swatch-cell]')
+      .evaluateAll((cells) =>
+        cells.some((cell) => getComputedStyle(cell).backdropFilter !== 'none'),
+      );
+    expect(filtered).toBe(false);
+  }
+});
+
+test('Markdown headings step down through six distinct sizes', async ({ page }) => {
+  await page.goto('/?lang=en#foundation-typography', { waitUntil: 'domcontentloaded' });
+  const rows = page.locator('[data-markdown-heading]');
+  await expect(rows).toHaveCount(6);
+
+  const sizes = await rows.evaluateAll((items) =>
+    items.map((row) => {
+      const heading = row.querySelector('h1, h2, h3, h4, h5, h6');
+      if (heading === null) throw new Error('A heading sample is missing');
+      return Number.parseFloat(getComputedStyle(heading).fontSize);
+    }),
+  );
+  expect(new Set(sizes).size).toBe(6);
+  for (let index = 1; index < sizes.length; index += 1) {
+    expect(sizes[index]).toBeLessThan(sizes[index - 1] ?? 0);
+  }
+
+  for (const region of [
+    page.locator('[data-markdown-headings]'),
+    page.locator('[data-design-lab-workspace]'),
+  ]) {
+    expect(
+      await region.evaluate((element) => element.scrollWidth - element.clientWidth),
+    ).toBeLessThanOrEqual(1);
+  }
+});
+
+test('Markdown inline styles stay distinct in rendered combinations', async ({ page }) => {
+  await page.goto('/?lang=en#foundation-typography', { waitUntil: 'domcontentloaded' });
+  const panel = page.locator('[data-markdown-inline]');
+  await expect(panel).toBeVisible();
+
+  const read = (row: string, selector: string) =>
+    panel.locator(`[data-markdown-inline-row="${row}"] ${selector}`).evaluate((element) => {
+      const style = getComputedStyle(element);
+      return {
+        background: style.backgroundColor,
+        color: style.color,
+        fontFamily: style.fontFamily,
+        fontWeight: style.fontWeight === 'normal' ? 400 : Number(style.fontWeight),
+        fontStyle: style.fontStyle,
+        line: style.textDecorationLine,
+      };
+    });
+
+  const body = await read('bold', 'p');
+  const bold = await read('bold', 'strong');
+  expect(bold.fontWeight).toBeGreaterThan(body.fontWeight);
+
+  const italic = await read('italic', 'em');
+  expect(italic.fontStyle).toBe('italic');
+  expect(italic.fontWeight).toBe(body.fontWeight);
+
+  const boldItalic = await read('bold-italic', 'strong em');
+  expect(boldItalic.fontWeight).toBeGreaterThan(body.fontWeight);
+  expect(boldItalic.fontStyle).toBe('italic');
+
+  const code = await read('code', 'p > code');
+  expect(code.fontFamily).not.toBe(body.fontFamily);
+  expect(code.background).not.toBe('rgba(0, 0, 0, 0)');
+  const codeBold = await read('code-bold', 'strong > code');
+  expect(codeBold.fontFamily).toBe(code.fontFamily);
+  expect(codeBold.fontWeight).toBeGreaterThan(body.fontWeight);
+
+  const strike = await read('strike', 'del');
+  expect(strike.line).toContain('line-through');
+  expect(strike.color).not.toBe(body.color);
+
+  const link = await read('link', 'a');
+  expect(link.line).toContain('underline');
+  expect(link.color).not.toBe(body.color);
+
+  const linkBold = await read('link-bold', 'a');
+  const nestedBold = await read('link-bold', 'a strong');
+  expect(nestedBold.fontWeight).toBeGreaterThan(body.fontWeight);
+  expect(nestedBold.color).toBe(linkBold.color);
+
+  const linkStrike = await read('link-strike', 'a');
+  const nestedStrike = await read('link-strike', 'a del');
+  expect(linkStrike.line).toContain('underline');
+  expect(nestedStrike.line).toContain('line-through');
+  expect(nestedStrike.color).toBe(linkStrike.color);
+
+  expect(
+    await panel.evaluate((element) => element.scrollWidth - element.clientWidth),
+  ).toBeLessThanOrEqual(1);
+});
+
+test('shell specimen panels avoid a second glass card layer', async ({ page }) => {
+  for (const hash of ['typography', 'status-feedback', 'motion']) {
+    await page.goto(`/?lang=en#${hash}`, { waitUntil: 'domcontentloaded' });
+    const panels = page.locator('[data-design-lab-region="module"] .playground-specimen-panel');
+    expect(await panels.count(), `${hash} must render specimen panels`).toBeGreaterThan(0);
+    const treatments = await panels.evaluateAll((elements) =>
+      elements.map((element) => {
+        const style = getComputedStyle(element);
+        return {
+          backdrop: style.backdropFilter,
+          border: style.borderWidth,
+          shadow: style.boxShadow,
+        };
+      }),
+    );
+    for (const treatment of treatments) {
+      expect(treatment.backdrop).toBe('none');
+      expect(treatment.border).toBe('0px');
+      expect(treatment.shadow).toBe('none');
+    }
+  }
+});
+
 test('focused compositions and foundations keep the full galleries in the isolated frame', async ({
   page,
 }) => {
@@ -69,6 +212,15 @@ test('focused compositions and foundations keep the full galleries in the isolat
   await expect(composition.getByRole('heading', { name: 'Aurora Atlas' })).toBeVisible();
   await expect(composition.locator('#composition-reading')).toHaveCount(0);
   await expect(composition.locator('#composition-control-cluster')).toHaveCount(0);
+  const backdrop = page.getByRole('radiogroup', { name: 'Stage background' });
+  await backdrop.getByRole('radio', { name: 'Gradient' }).click();
+  const workspace = page.locator('[data-design-lab-workspace]');
+  await expect(workspace).toHaveAttribute('data-stage-background', 'gradient');
+  await expect(workspace).not.toHaveCSS('background-image', 'none');
+  const surfaces = composition.locator('[data-composition-surface]');
+  await expect(surfaces.first()).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await expect(surfaces.first()).toHaveCSS('backdrop-filter', 'none');
+  await expect(surfaces.last()).not.toHaveCSS('backdrop-filter', 'none');
 
   await page.goto('/?lang=en#foundation-layout-shape', { waitUntil: 'domcontentloaded' });
   const geometry = page.locator('[data-design-lab-region="specimen"]#foundation-layout-shape');
@@ -81,6 +233,9 @@ test('focused compositions and foundations keep the full galleries in the isolat
   await page.goto('/frame?theme=light&lang=en#composition-standard-mode', {
     waitUntil: 'domcontentloaded',
   });
+  await expect(
+    page.locator('#composition-standard-mode .playground-material-backdrop'),
+  ).toHaveCount(0);
   await expect(page.locator('#composition-reading')).toBeVisible();
   await expect(page.locator('#composition-control-cluster')).toBeVisible();
   await expect(page.locator('#composition-floating-toolbar')).toBeVisible();
@@ -555,6 +710,19 @@ test('Composition presets fit the stage across themes and viewport sizes with re
 }, testInfo) => {
   // Four scenes across two presets, themes, and widths: 40 fresh loads.
   test.setTimeout(240_000);
+  await page.addInitScript(() => {
+    const key = 'neoverse-design-lab.preferences';
+    try {
+      const raw = window.localStorage.getItem(key);
+      if (raw === null) return;
+      const stored: unknown = JSON.parse(raw);
+      if (typeof stored !== 'object' || stored === null || Array.isArray(stored)) return;
+      delete (stored as Record<string, unknown>).specimens;
+      window.localStorage.setItem(key, JSON.stringify(stored));
+    } catch {
+      // Malformed storage is already ignored by the application.
+    }
+  });
   await page.emulateMedia({ reducedMotion: 'reduce' });
   for (const width of testInfo.project.name === 'mobile' ? [390] : [768, 1024, 1440, 1920]) {
     await page.setViewportSize({ width, height: 900 });
@@ -941,7 +1109,9 @@ test.describe('playground', () => {
     await expect(page.locator('#controls-segmented-control')).toBeVisible();
   });
 
-  test('the overview showcase switches material presets and opens a module', async ({ page }) => {
+  test('the overview keeps the chosen material after reload and opens a module', async ({
+    page,
+  }) => {
     await page.goto('/?theme=dark&lang=en', { waitUntil: 'domcontentloaded' });
     const sample = page.locator('[data-overview-hero] .playground-overview-hero__sample');
     await expect(sample).toHaveAttribute('data-surface', 'glass-subtle');
@@ -951,6 +1121,9 @@ test.describe('playground', () => {
       .getByRole('radio')
       .nth(1)
       .click();
+    await expect(sample).toHaveAttribute('data-surface', 'glass-elevated');
+
+    await page.reload();
     await expect(sample).toHaveAttribute('data-surface', 'glass-elevated');
 
     await sample.getByRole('button', { name: 'Components' }).click();
@@ -1115,6 +1288,16 @@ test.describe('playground', () => {
     await expect(button).toHaveCSS('height', '48px');
     const sizeField = inspector.locator('[data-specimen-control="size"]');
     await expect(sizeField).toContainText('Modified');
+    const initialRadius = await button.evaluate(
+      (element) => getComputedStyle(element).borderTopLeftRadius,
+    );
+    await chooseOption(inspector, 'corner', 'Square');
+    await expect(button).toHaveCSS('border-top-left-radius', '0px');
+    await chooseOption(inspector, 'corner', 'Pill');
+    await expect(button).not.toHaveCSS('border-top-left-radius', initialRadius);
+    await expect(button).toHaveCSS('height', '48px');
+    await chooseOption(inspector, 'surface', 'None');
+    await expect(button).toHaveCSS('backdrop-filter', 'none');
     const disabled = inspector.getByRole('switch', { name: 'Disabled' });
     await disabled.press('Space');
     await expect(button).toBeDisabled();
@@ -1128,9 +1311,51 @@ test.describe('playground', () => {
     if (mobile) await page.keyboard.press('Escape');
     await expect(button).toBeEnabled();
     await expect(button).toHaveCSS('height', '32px');
+    await expect(button).toHaveCSS('border-top-left-radius', initialRadius);
     await expect(sizeField).not.toContainText('Modified');
     await expect(live.locator('output')).toHaveText('Activations: 0');
     expect(await button.evaluate((node, initialNode) => node === initialNode, instance)).toBe(true);
+  });
+
+  test('the Inspector switches an appearance variant on a presentational component', async ({
+    page,
+  }, testInfo) => {
+    const mobile = testInfo.project.name === 'mobile';
+    await page.goto('/?theme=light&lang=en#status-feedback-badge', {
+      waitUntil: 'domcontentloaded',
+    });
+    const badge = page.locator('[data-design-lab-region="specimen"] .ui-badge');
+    await expect(badge).toHaveText('Neutral');
+    const inspector = await showInspector(page, mobile);
+    await expect(inspector.locator('[data-specimen-control="variant"]')).toBeVisible();
+    await chooseOption(inspector, 'variant', 'Danger');
+    await expect(badge).toHaveText('Danger');
+    await expect(badge).toHaveClass(/ui-badge--danger/);
+    await inspector.getByRole('button', { name: 'Reset specimen' }).click();
+    await expect(badge).toHaveText('Neutral');
+    await expect(badge).toHaveClass(/ui-badge--neutral/);
+  });
+
+  test('an edited specimen keeps its selection after a reload', async ({ page }, testInfo) => {
+    const mobile = testInfo.project.name === 'mobile';
+    await page.goto('/?theme=light&lang=en#status-feedback-badge', {
+      waitUntil: 'domcontentloaded',
+    });
+    const badge = page.locator('[data-design-lab-region="specimen"] .ui-badge');
+    await expect(badge).toHaveText('Neutral');
+    await chooseOption(await showInspector(page, mobile), 'variant', 'Danger');
+    await expect(badge).toHaveText('Danger');
+
+    await page.reload();
+    await expect(badge).toHaveText('Danger');
+    await expect(badge).toHaveClass(/ui-badge--danger/);
+
+    await (await showInspector(page, mobile))
+      .getByRole('button', { name: 'Reset specimen' })
+      .click();
+    await expect(badge).toHaveText('Neutral');
+    await page.reload();
+    await expect(badge).toHaveText('Neutral');
   });
 
   test('the Inspector and SegmentedControl share a selection and honor disabled options', async ({
@@ -1220,7 +1445,8 @@ test.describe('playground', () => {
       await page.keyboard.press('Escape');
       await page.locator('[data-playground-nav-trigger]').click();
     }
-    await explorer.locator('a[href="#forms-textarea"]').click();
+    await explorer.locator('#explorer-module-data-display').click();
+    await explorer.locator('a[href="#data-display-timeline"]').click();
     await expect(live).toBeFocused();
     await showInspector(page, mobile);
     await expect(
@@ -1545,6 +1771,21 @@ test.describe('playground', () => {
   }) => {
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto('/?theme=light&lang=en#controls', { waitUntil: 'domcontentloaded' });
+    const explorer = page.locator('.playground-explorer');
+    const groupLabel = page.locator('.playground-explorer__section-label').first();
+    const moduleLink = page.locator('.playground-explorer__module-link').first();
+
+    // The muted second line is a Chinese reading aid; English shows one language.
+    await expect(groupLabel.locator('.playground-catalogue-label > span').first()).toHaveText(
+      'Foundations',
+    );
+    await expect(page.locator('.playground-catalogue-label__secondary')).toHaveCount(0);
+    await expect(moduleLink).toHaveText('Colors');
+    await expect(explorer).not.toContainText('（');
+    expect(
+      await explorer.evaluate((element) => element.scrollWidth - element.clientWidth),
+    ).toBeLessThanOrEqual(1);
+
     const stage = page.locator('[data-design-lab-workspace]');
     const original = await stage.boundingBox();
     await page
@@ -1557,6 +1798,70 @@ test.describe('playground', () => {
       .getByRole('radio', { name: '中文' })
       .click();
     await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
+
+    const primaryLabel = groupLabel.locator('.playground-catalogue-label > span').first();
+    const secondaryLabel = groupLabel.locator('.playground-catalogue-label__secondary');
+    await expect(primaryLabel).toHaveText('设计基础');
+    await expect(secondaryLabel).toHaveText('Foundations');
+    const primarySize = await primaryLabel.evaluate((element) =>
+      Number.parseFloat(getComputedStyle(element).fontSize),
+    );
+    const secondarySize = await secondaryLabel.evaluate((element) =>
+      Number.parseFloat(getComputedStyle(element).fontSize),
+    );
+    expect(secondarySize).toBeLessThan(primarySize);
+    const primaryBox = await primaryLabel.boundingBox();
+    const secondaryBox = await secondaryLabel.boundingBox();
+    if (primaryBox === null || secondaryBox === null) throw new Error('The label must be laid out');
+    expect(secondaryBox.y).toBeGreaterThanOrEqual(primaryBox.y + primaryBox.height - 1);
+
+    const heading = page.locator('.playground-explorer__section-toggle').first();
+    const headingCenters = await heading.evaluate((toggle) => {
+      const first = toggle.querySelector('.playground-catalogue-label > span:first-child');
+      const count = toggle.querySelector('.playground-explorer__count');
+      if (!(first instanceof HTMLElement) || !(count instanceof HTMLElement)) return null;
+      const firstBox = first.getBoundingClientRect();
+      const countBox = count.getBoundingClientRect();
+      return {
+        first: (firstBox.top + firstBox.bottom) / 2,
+        count: (countBox.top + countBox.bottom) / 2,
+      };
+    });
+    if (headingCenters === null) throw new Error('The heading count must be laid out');
+    expect(Math.abs(headingCenters.count - headingCenters.first)).toBeLessThan(2);
+
+    await expect(moduleLink.locator('.playground-catalogue-label__secondary')).toHaveText('Colors');
+    expect(
+      await page
+        .locator('.playground-explorer__leaf .playground-catalogue-label__secondary')
+        .count(),
+    ).toBeGreaterThan(0);
+    await expect(explorer).not.toContainText('（');
+    const suffixAlignment = await moduleLink.evaluate((link) => {
+      const label = link.querySelector('.ui-navigation-item__label');
+      const suffix = link.querySelector('.playground-catalogue-label__secondary');
+      if (!(label instanceof HTMLElement) || !(suffix instanceof HTMLElement)) return null;
+      const range = document.createRange();
+      range.selectNodeContents(label.firstChild as Node);
+      const primary = range.getBoundingClientRect();
+      const secondary = suffix.getBoundingClientRect();
+      return {
+        primaryFontSize: Number.parseFloat(getComputedStyle(label).fontSize),
+        suffixFontSize: Number.parseFloat(getComputedStyle(suffix).fontSize),
+        primaryBottom: primary.bottom,
+        primaryCenter: (primary.top + primary.bottom) / 2,
+        suffixBottom: secondary.bottom,
+        suffixCenter: (secondary.top + secondary.bottom) / 2,
+      };
+    });
+    if (suffixAlignment === null) throw new Error('The link suffix must be laid out');
+    expect(suffixAlignment.suffixFontSize).toBeLessThan(suffixAlignment.primaryFontSize);
+    expect(Math.abs(suffixAlignment.suffixBottom - suffixAlignment.primaryBottom)).toBeLessThan(2);
+    expect(suffixAlignment.suffixCenter).toBeGreaterThan(suffixAlignment.primaryCenter);
+
+    expect(
+      await explorer.evaluate((element) => element.scrollWidth - element.clientWidth),
+    ).toBeLessThanOrEqual(1);
     await expect(page).toHaveURL(/theme=light&lang=zh#controls$/);
     await expect(page.getByRole('complementary', { name: '检查器' })).toBeVisible();
     expect(await stage.boundingBox()).toEqual(original);
