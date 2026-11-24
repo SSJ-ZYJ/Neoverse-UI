@@ -389,10 +389,8 @@ test.describe('playground', () => {
     const groupLabel = page.locator('.playground-explorer__section-label').first();
     const moduleLink = page.locator('.playground-explorer__module-link').first();
 
-    // The muted second line is a Chinese reading aid; English shows one language.
-    await expect(groupLabel.locator('.playground-catalogue-label > span').first()).toHaveText(
-      'Foundations',
-    );
+    // English shows one language; the Chinese interface adds an English line.
+    await expect(groupLabel).toHaveText('Foundations');
     await expect(page.locator('.playground-catalogue-label__secondary')).toHaveCount(0);
     await expect(moduleLink).toHaveText('Colors');
     await expect(explorer).not.toContainText('（');
@@ -413,50 +411,32 @@ test.describe('playground', () => {
       .click();
     await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
 
-    const primaryLabel = groupLabel.locator('.playground-catalogue-label > span').first();
-    const secondaryLabel = groupLabel.locator('.playground-catalogue-label__secondary');
-    await expect(primaryLabel).toHaveText('设计基础');
-    await expect(secondaryLabel).toHaveText('Foundations');
-    const primarySize = await primaryLabel.evaluate((element) =>
-      Number.parseFloat(getComputedStyle(element).fontSize),
+    await expect(groupLabel).toContainText('设计基础');
+    await expect(groupLabel.locator('.playground-catalogue-label__secondary')).toHaveText(
+      'Foundations',
     );
-    const secondarySize = await secondaryLabel.evaluate((element) =>
-      Number.parseFloat(getComputedStyle(element).fontSize),
-    );
-    expect(secondarySize).toBeLessThan(primarySize);
-    const primaryBox = await primaryLabel.boundingBox();
-    const secondaryBox = await secondaryLabel.boundingBox();
-    if (primaryBox === null || secondaryBox === null) throw new Error('The label must be laid out');
-    expect(secondaryBox.y).toBeGreaterThanOrEqual(primaryBox.y + primaryBox.height - 1);
 
-    const heading = page.locator('.playground-explorer__section-toggle').first();
-    const headingCenters = await heading.evaluate((toggle) => {
-      const first = toggle.querySelector('.playground-catalogue-label > span:first-child');
-      const count = toggle.querySelector('.playground-explorer__count');
-      if (!(first instanceof HTMLElement) || !(count instanceof HTMLElement)) return null;
-      const firstBox = first.getBoundingClientRect();
-      const countBox = count.getBoundingClientRect();
-      return {
-        first: (firstBox.top + firstBox.bottom) / 2,
-        count: (countBox.top + countBox.bottom) / 2,
-      };
-    });
-    if (headingCenters === null) throw new Error('The heading count must be laid out');
-    expect(Math.abs(headingCenters.count - headingCenters.first)).toBeLessThan(2);
-
-    const headingRightEdges = await heading.evaluate((toggle) => {
-      const chevron = toggle.querySelector('.playground-explorer__chevron');
-      const disclosure = document.querySelector('.playground-explorer__disclosure');
-      if (!(chevron instanceof Element) || !(disclosure instanceof Element)) return null;
-      return {
-        chevron: chevron.getBoundingClientRect().right,
-        disclosure: disclosure.getBoundingClientRect().right,
-      };
-    });
-    if (headingRightEdges === null) {
-      throw new Error('The heading chevron and module disclosure must be laid out');
-    }
-    expect(Math.abs(headingRightEdges.chevron - headingRightEdges.disclosure)).toBeLessThan(2);
+    const measureDisclosure = (id: string) =>
+      explorer.locator(`#${id}`).evaluate((toggle) => {
+        const count = toggle.querySelector('.playground-explorer__count');
+        const chevron = toggle.querySelector('svg');
+        if (count === null || chevron === null) throw new Error('Disclosure has no count or icon');
+        const countBox = count.getBoundingClientRect();
+        const iconBox = chevron.getBoundingClientRect();
+        return {
+          countEnd: countBox.right,
+          iconCenter: iconBox.x + iconBox.width / 2,
+          centerOffset: countBox.y + countBox.height / 2 - (iconBox.y + iconBox.height / 2),
+        };
+      });
+    const disclosures = await Promise.all([
+      measureDisclosure('explorer-group-materials'),
+      measureDisclosure('explorer-module-materials'),
+    ]);
+    const [section, module] = disclosures;
+    expect(Math.abs(section.countEnd - module.countEnd)).toBeLessThan(1);
+    expect(Math.abs(section.iconCenter - module.iconCenter)).toBeLessThan(1);
+    for (const { centerOffset } of disclosures) expect(Math.abs(centerOffset)).toBeLessThan(1);
 
     await expect(moduleLink.locator('.playground-catalogue-label__secondary')).toHaveText('Colors');
     expect(
@@ -465,27 +445,40 @@ test.describe('playground', () => {
         .count(),
     ).toBeGreaterThan(0);
     await expect(explorer).not.toContainText('（');
-    const suffixAlignment = await moduleLink.evaluate((link) => {
-      const label = link.querySelector('.ui-navigation-item__label');
-      const suffix = link.querySelector('.playground-catalogue-label__secondary');
-      if (!(label instanceof HTMLElement) || !(suffix instanceof HTMLElement)) return null;
-      const range = document.createRange();
-      range.selectNodeContents(label.firstChild as Node);
-      const primary = range.getBoundingClientRect();
-      const secondary = suffix.getBoundingClientRect();
-      return {
-        primaryFontSize: Number.parseFloat(getComputedStyle(label).fontSize),
-        suffixFontSize: Number.parseFloat(getComputedStyle(suffix).fontSize),
-        primaryBottom: primary.bottom,
-        primaryCenter: (primary.top + primary.bottom) / 2,
-        suffixBottom: secondary.bottom,
-        suffixCenter: (secondary.top + secondary.bottom) / 2,
-      };
-    });
-    if (suffixAlignment === null) throw new Error('The link suffix must be laid out');
-    expect(suffixAlignment.suffixFontSize).toBeLessThan(suffixAlignment.primaryFontSize);
-    expect(Math.abs(suffixAlignment.suffixBottom - suffixAlignment.primaryBottom)).toBeLessThan(2);
-    expect(suffixAlignment.suffixCenter).toBeGreaterThan(suffixAlignment.primaryCenter);
+    const measureLabel = (selector: string) =>
+      explorer.locator(selector).evaluate((element) => {
+        const suffix = element.querySelector('.playground-catalogue-label__secondary');
+        const row = element.closest('a, button')?.getBoundingClientRect();
+        if (suffix === null || row === undefined || element.firstChild === null) {
+          throw new Error('Bilingual label must be laid out in a row');
+        }
+        const range = document.createRange();
+        range.selectNodeContents(element.firstChild);
+        const primary = range.getBoundingClientRect();
+        range.selectNodeContents(suffix);
+        const secondary = range.getBoundingClientRect();
+        return {
+          start: primary.left,
+          secondaryStart: secondary.left,
+          lineGap: secondary.top - primary.bottom,
+          primarySize: Number.parseFloat(getComputedStyle(element).fontSize),
+          suffixSize: Number.parseFloat(getComputedStyle(suffix).fontSize),
+          inlineOverflow: secondary.right - element.getBoundingClientRect().right,
+          blockOverflow: secondary.bottom - row.bottom,
+        };
+      });
+    const labels = await Promise.all([
+      measureLabel('#explorer-group-materials .playground-explorer__section-label'),
+      measureLabel('a[href="#materials"] .ui-navigation-item__label'),
+    ]);
+    for (const label of labels) {
+      expect(label.suffixSize).toBeLessThan(label.primarySize);
+      expect(label.lineGap).toBeGreaterThanOrEqual(-1);
+      expect(Math.abs(label.secondaryStart - label.start)).toBeLessThan(1);
+      expect(label.inlineOverflow).toBeLessThan(1);
+      expect(label.blockOverflow).toBeLessThan(1);
+    }
+    expect(Math.abs(labels[0].start - labels[1].start)).toBeLessThan(1);
 
     expect(
       await explorer.evaluate((element) => element.scrollWidth - element.clientWidth),

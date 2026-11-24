@@ -1,3 +1,4 @@
+import { attachSegmentedControlSlider } from '@neoverse-ui/motion';
 import {
   type CSSProperties,
   cloneElement,
@@ -281,9 +282,12 @@ export interface SegmentOption {
   label: string;
   disabled?: boolean;
   ariaLabel?: string;
+  icon?: ReactNode;
 }
 export type SegmentedControlSize = 'sm';
 export type SegmentedControlShape = 'pill' | 'rounded';
+/** Select the presentation without changing the radio behavior */
+export type SegmentedControlVariant = 'text' | 'icon' | 'language';
 export interface UiSegmentedControlProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange' | 'defaultValue' | 'children'> {
   options: readonly SegmentOption[];
@@ -291,6 +295,7 @@ export interface UiSegmentedControlProps
   defaultValue?: string;
   size?: SegmentedControlSize;
   shape?: SegmentedControlShape;
+  variant?: SegmentedControlVariant;
   disabled?: boolean;
   ariaLabel?: string;
   surface?: 'none' | 'glass-subtle' | 'glass-elevated' | 'glass-immersive';
@@ -303,6 +308,7 @@ export function UiSegmentedControl({
   defaultValue,
   size: _size = 'sm',
   shape = 'pill',
+  variant = 'text',
   disabled = false,
   ariaLabel,
   surface = 'glass-subtle',
@@ -319,8 +325,6 @@ export function UiSegmentedControl({
   const [focused, setFocused] = useState<number | null>(null);
   const buttons = useRef<Array<HTMLButtonElement | null>>([]);
   const group = useRef<HTMLSpanElement>(null);
-  const [bounds, setBounds] = useState<{ offset: number; width: number }>();
-  const [ready, setReady] = useState(false);
   const current = value === undefined ? internal : value;
   const active = options.findIndex((option) => !option.disabled && option.value === current);
   const enabled = options.flatMap((option, index) => (option.disabled ? [] : [index]));
@@ -334,26 +338,9 @@ export function UiSegmentedControl({
     if (!options.some((option) => !option.disabled && option.value === internal))
       setInternal(options.find((option) => !option.disabled)?.value);
   }, [options, value, internal]);
-  // biome-ignore lint/correctness/useExhaustiveDependencies: Re-measure replaced options and shape changes even when the selected index is unchanged.
   useEffect(() => {
-    const measure = () => {
-      const button = buttons.current[active];
-      const next = button ? { offset: button.offsetLeft, width: button.offsetWidth } : undefined;
-      setBounds((previous) =>
-        previous?.offset === next?.offset && previous?.width === next?.width ? previous : next,
-      );
-    };
-    measure();
-    const observer =
-      typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(measure);
-    if (group.current) observer?.observe(group.current);
-    for (const button of buttons.current) if (button) observer?.observe(button);
-    const frame = requestAnimationFrame(() => setReady(true));
-    return () => {
-      observer?.disconnect();
-      cancelAnimationFrame(frame);
-    };
-  }, [active, options, shape]);
+    if (group.current) return attachSegmentedControlSlider(group.current);
+  }, []);
   const select = (index: number, focus = false) => {
     const option = options[index];
     if (!option || disabled || option.disabled) return;
@@ -375,6 +362,7 @@ export function UiSegmentedControl({
         setFocused(null);
       }}
       data-shape={shape}
+      data-variant={variant}
       data-surface={surface}
       data-neoverse-surface-hover="static"
       className={`ui-segmented-control ui-segmented-control--${shape} ${surfaceClasses[surface]} ${className}`}
@@ -383,19 +371,14 @@ export function UiSegmentedControl({
           ...style,
           '--segment-count': Math.max(options.length, 1),
           '--segment-index': Math.max(active, 0),
-          ...(bounds
-            ? {
-                '--segment-active-column': '1 / -1',
-                '--segment-active-offset': `${bounds.offset}px`,
-                '--segment-active-width': `${bounds.width}px`,
-              }
-            : {}),
         } as CSSProperties
       }
     >
       <span ref={group} className="ui-segmented-control__options">
         {active >= 0 ? (
-          <span className="ui-segmented-control__slider" data-ready={ready} aria-hidden="true" />
+          <span className="ui-segmented-control__slider-track" aria-hidden="true">
+            <span className="ui-segmented-control__slider" />
+          </span>
         ) : null}
         {options.map((option, index) => (
           // biome-ignore lint/a11y/useSemanticElements: Custom radio widget uses button keyboard behavior, matching Vue.
@@ -407,7 +390,7 @@ export function UiSegmentedControl({
             type="button"
             role="radio"
             aria-checked={index === active}
-            aria-label={option.ariaLabel}
+            aria-label={option.ariaLabel ?? (variant === 'icon' ? option.label : undefined)}
             tabIndex={index === roving ? 0 : -1}
             disabled={disabled || option.disabled}
             className={`ui-segmented-control__option${index === active ? ' ui-segmented-control__option--active' : ''}`}
@@ -431,7 +414,13 @@ export function UiSegmentedControl({
               if (target !== undefined) select(target, true);
             }}
           >
-            {option.label}
+            {variant === 'icon' && option.icon != null ? (
+              <span className="ui-segmented-control__icon" aria-hidden="true">
+                {option.icon}
+              </span>
+            ) : (
+              option.label
+            )}
           </button>
         ))}
       </span>

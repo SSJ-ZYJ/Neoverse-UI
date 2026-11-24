@@ -195,7 +195,9 @@ Controls retain compact painted dimensions on every viewport. Shared Button and 
 
 `apps/playground` uses Bun.serve for the HTML shell, `/frame` theme-isolated documents, built Tailwind CSS, and the Vite browser bundle. The shell and isolated `/frame` use the normal consumer root size (16px). `App.vue` selects the shell or independent frame. `LabWorkspace` owns the active hash, preferences, drawer state, and Preview Stage scroll restoration on reload.
 
-Design Lab 2.0 keeps its toolbar fixed above three independently scrollable areas: Explorer, Preview Stage, and Inspector. The Explorer orders the catalogue into Foundations, Materials & elevation, Components, Compositions, and a separated Lab tools section. A section states design intent, a module is a family that can be read on its own, and QA or theme tooling never mixes with design content. Search matches module or specimen names in either language, API names, and tags without maintaining another inventory. Explorer section labels stack the active language above a smaller muted line for the other language, without parentheses, and their counts and chevrons align to the primary line; navigation items keep the secondary language as a smaller suffix inside the label, sharing the primary text baseline rather than being centred as a separate control child. The muted second line exists only in the Chinese interface: an English interface shows the English name alone, so a Chinese reading aid never becomes extra text for English readers. The suffix is hidden from the accessible name. Explorer module rows navigate to the module overview while a separate disclosure expands their specimens; a module with a single browsable specimen renders as one destination, so the tree never repeats the same label at a third level.
+Design Lab 2.0 keeps its toolbar fixed above three independently scrollable areas: Explorer, Preview Stage, and Inspector. The Explorer orders the catalogue into Foundations, Materials & elevation, Components, Compositions, and a separated Lab tools section. A section states design intent, a module is a family that can be read on its own, and QA or theme tooling never mixes with design content. Search matches module or specimen names in either language, API names, and tags without maintaining another inventory.
+
+Explorer section and module rows share a leading label inset and align their counts and chevrons in the same trailing columns. In the Chinese interface, section and module names display English below Chinese in smaller, muted text, with wrapping instead of truncation. Specimen names retain a compact inline English suffix. The reading aid is hidden from the accessible name; the English interface shows the English name alone. Module rows navigate to the module overview while a separate disclosure expands their specimens; a module with a single browsable specimen renders as one destination, so the tree never repeats the same label at a third level.
 
 The three shell scroll containers and the isolated frame document use a native
 scroll-position hint. Offscreen rendering containment is confined to passive
@@ -222,6 +224,9 @@ retain their configured materials. Only the isolated `/frame` paints the
 diagnostic comparison backdrops.
 
 Module URLs and `/frame` render the full QA galleries, including fixed state matrices and optical fixtures. The Inspector opens the isolated gallery at the specimen anchor without transferring local edits. `/react-fixture` remains the React contract host. Neither isolated entry mounts the shell.
+
+ControlSurface previews and gallery specimens use automatic Aurora Glass edge
+rendering. Only the edge-mode comparison requests the local CSS edge explicitly.
 
 Focused compositions may reuse individual scenes from QA, but do not mount the
 gallery containing them. Aurora Glass mode shows one Atlas workspace composed

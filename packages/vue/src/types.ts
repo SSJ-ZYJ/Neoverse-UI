@@ -259,16 +259,20 @@ export interface SegmentOption {
   label: string;
   disabled?: boolean;
   ariaLabel?: string;
+  icon?: Component;
 }
 
 export type SegmentedControlSize = 'sm';
 export type SegmentedControlShape = 'pill' | 'rounded';
+/** Select the presentation without changing the radio behavior */
+export type SegmentedControlVariant = 'text' | 'icon' | 'language';
 export interface SegmentedControlProps {
   options: readonly SegmentOption[];
   modelValue?: string;
   defaultValue?: string;
   size?: SegmentedControlSize;
   shape?: SegmentedControlShape;
+  variant?: SegmentedControlVariant;
   disabled?: boolean;
   ariaLabel?: string;
   surface?: ControlSurfacePreset;

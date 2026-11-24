@@ -69,13 +69,16 @@ test.describe('parity', () => {
 
   test('the theme control stores the shared preference without touching the URL', async ({
     page,
-  }) => {
+  }, testInfo) => {
     await page.emulateMedia({ colorScheme: 'light', reducedMotion: 'reduce' });
     await page.goto('/react-fixture?lang=en');
     const control = page.getByRole('radiogroup', { name: 'Playground theme' });
 
     await expect(control.getByRole('radio')).toHaveCount(3);
-    await control.getByRole('radio', { name: 'Dark', exact: true }).check();
+    const dark = control.getByRole('radio', { name: 'Dark', exact: true });
+    await expect(dark.locator('svg')).toBeVisible();
+    await expect(dark).toHaveText('');
+    await dark.click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect.poll(() => storedTheme(page)).toBe('dark');
     expect(new URL(page.url()).searchParams.has('theme')).toBe(false);
@@ -85,14 +88,33 @@ test.describe('parity', () => {
 
     await page.goto('/?lang=en');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    const toolbar = page.getByRole('banner');
+    if (testInfo.project.use.hasTouch) {
+      await expect(
+        toolbar.getByRole('button', { name: /Cycle theme/ }).locator('svg'),
+      ).toBeVisible();
+    } else {
+      const options = toolbar
+        .getByRole('radiogroup', { name: 'Playground theme' })
+        .getByRole('radio');
+      await expect(options).toHaveCount(3);
+      for (const option of await options.all()) {
+        await expect(option.locator('svg')).toBeVisible();
+        await expect(option).toHaveText('');
+      }
+    }
 
     await page.goto('/react-fixture?lang=en');
-    await page
-      .getByRole('radiogroup', { name: 'Playground theme' })
-      .getByRole('radio', { name: 'System', exact: true })
-      .check();
+    const system = control.getByRole('radio', { name: 'System', exact: true });
+    await expect(system.locator('svg')).toBeVisible();
+    await system.click();
+    await expect(system).toBeChecked();
     await expect(page.locator('html')).not.toHaveAttribute('data-theme');
     await expect.poll(() => storedTheme(page)).toBe('system');
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await expect
+      .poll(() => page.evaluate(() => getComputedStyle(document.documentElement).colorScheme))
+      .toBe('dark');
   });
 
   test('Vue and React expose the same control names and roles', async ({ page }) => {

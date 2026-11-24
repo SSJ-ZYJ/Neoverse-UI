@@ -83,11 +83,7 @@ const extraCopy = {
     :hint="copy.states.toolbar.hint"
     :locale="props.locale"
   >
-    <UiControlSurface
-      role="toolbar"
-      edge-mode="local"
-      :aria-label="localize(copy.controls.toolbar, props.locale)"
-    >
+    <UiControlSurface role="toolbar" :aria-label="localize(copy.controls.toolbar, props.locale)">
       <UiIconButton
         variant="ghost"
         size="sm"
@@ -124,7 +120,6 @@ const extraCopy = {
         :key="variant.surface"
         :surface="variant.surface"
         hover-mode="static"
-        edge-mode="local"
       >
         <span class="px-2 text-caption font-label text-primary">{{
           localize(variant.label, props.locale)
@@ -138,11 +133,7 @@ const extraCopy = {
     :hint="copy.states.trailing.hint"
     :locale="props.locale"
   >
-    <UiControlSurface
-      as="nav"
-      edge-mode="local"
-      :aria-label="localize(copy.controls.view, props.locale)"
-    >
+    <UiControlSurface as="nav" :aria-label="localize(copy.controls.view, props.locale)">
       <UiButton variant="ghost" size="sm" surface="none">
         {{ localize(copy.controls.canvas, props.locale) }}
       </UiButton>
@@ -166,7 +157,7 @@ const extraCopy = {
       </div>
       <div class="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
         <code class="min-w-0 text-caption text-muted">surface="glass-subtle"</code>
-        <UiControlSurface surface="glass-subtle" edge-mode="local">
+        <UiControlSurface surface="glass-subtle">
           <UiButton size="sm" variant="ghost" surface="none">{{
             localize(moduleCopy.glass.label, props.locale)
           }}</UiButton>
@@ -177,10 +168,10 @@ const extraCopy = {
 
   <StateRow :label="extraCopy.hover.label" :hint="extraCopy.hover.hint" :locale="props.locale">
     <div class="flex flex-wrap items-center gap-3">
-      <UiControlSurface hover-mode="auto" edge-mode="local">
+      <UiControlSurface hover-mode="auto">
         <UiButton size="sm" variant="ghost" surface="none">hoverMode="auto"</UiButton>
       </UiControlSurface>
-      <UiControlSurface hover-mode="static" edge-mode="local">
+      <UiControlSurface hover-mode="static">
         <UiButton size="sm" variant="ghost" surface="none">hoverMode="static"</UiButton>
       </UiControlSurface>
     </div>
@@ -199,10 +190,10 @@ const extraCopy = {
 
   <StateRow :label="extraCopy.scale.label" :hint="extraCopy.scale.hint" :locale="props.locale">
     <div class="flex flex-wrap items-center gap-3">
-      <UiControlSurface scale="md" edge-mode="local">
+      <UiControlSurface scale="md">
         <UiButton size="sm" variant="ghost" surface="none">scale="md"</UiButton>
       </UiControlSurface>
-      <UiControlSurface scale="lg" edge-mode="local">
+      <UiControlSurface scale="lg">
         <UiButton size="sm" variant="ghost" surface="none">scale="lg"</UiButton>
       </UiControlSurface>
     </div>
@@ -216,7 +207,6 @@ const extraCopy = {
     <UiControlSurface
       as="nav"
       navigation-indicator
-      edge-mode="local"
       :aria-label="localize(extraCopy.indicator.aria, props.locale)"
     >
       <UiNavigationItem
@@ -233,11 +223,7 @@ const extraCopy = {
 
   <StateRow :label="extraCopy.qa.label" :hint="extraCopy.qa.hint" :locale="props.locale">
     <QaPreviewMatrix :locale="props.locale">
-      <UiControlSurface
-        role="toolbar"
-        edge-mode="local"
-        :aria-label="localize(copy.controls.toolbar, props.locale)"
-      >
+      <UiControlSurface role="toolbar" :aria-label="localize(copy.controls.toolbar, props.locale)">
         <UiIconButton
           variant="ghost"
           size="sm"

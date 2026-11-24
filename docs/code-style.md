@@ -131,7 +131,7 @@ new code, comments or documentation.
 | field | the `UiField` wrapper: label, description, validation | form group |
 | consumer | the downstream project that installs a package | user, client, app |
 | adapter | the Vue or React implementation of a shared contract | wrapper, binding |
-| hook | the English term, kept verbatim in zh copy and comments | 钩子 |
+| hook | the English term, kept verbatim in comments and [Chinese copy](zh-CN/terminology.md) | a translated form |
 | specimen | a playground preview of one component state | sample, demo |
 | dock | the navigation dock component | toolbar, nav bar |
 | shell | the playground application chrome | layout, frame |

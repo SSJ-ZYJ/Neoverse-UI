@@ -18,12 +18,16 @@ import { h } from 'vue';
 import LabIcon from '../LabIcon.vue';
 import { defineSpecimen } from '../lab-specimen-config';
 import {
+  appCopy,
   formatLocalized,
   type Locale,
   localize,
   localized,
   moduleCopy,
 } from '../playground-content';
+import { languageCodes, languageNames, languageSegments } from '../preference-segments';
+import { themeModes } from '../theme-runtime';
+import { themeSegments } from '../vue-theme-segments';
 import {
   buttonVariantOptions,
   disabled,
@@ -112,28 +116,74 @@ const segmentShapeOptions = [
   { value: 'pill', label: localized('Pill', '胶囊') },
   { value: 'rounded', label: localized('Rounded', '圆角矩形') },
 ] as const;
+const segmentVariantOptions = [
+  { value: 'text', label: localized('Text', '文字') },
+  { value: 'icon', label: localized('Icons', '图标') },
+  { value: 'language', label: localized('Language', '语言') },
+] as const;
+const segmentThemes = themeModes.map((value) => ({
+  value,
+  label: appCopy.theme.options[value],
+}));
+const segmentLanguages = languageCodes.map((value) => ({ value, label: languageNames[value] }));
+
 /** The editable SegmentedControl specimen */
 export const segmented = defineSpecimen<
-  Pick<SegmentedControlProps, 'shape' | 'disabled' | 'surface'>,
-  { modelValue: SegmentValue }
+  Pick<SegmentedControlProps, 'shape' | 'variant' | 'disabled' | 'surface'>,
+  {
+    modelValue: SegmentValue;
+    theme: (typeof themeModes)[number];
+    language: (typeof languageCodes)[number];
+  }
 >()({
-  initialProps: { shape: 'pill', surface: 'glass-subtle', disabled: false },
-  initialState: () => ({ modelValue: 'overview' }),
+  initialProps: { shape: 'pill', variant: 'text', surface: 'glass-subtle', disabled: false },
+  initialState: () => ({ modelValue: 'overview', theme: 'light', language: 'en' }),
   controls: {
     props: {
       shape: { kind: 'select', label: segmentShapeLabel, options: segmentShapeOptions },
+      variant: { kind: 'select', label: variantLabel, options: segmentVariantOptions },
       disabled,
       surface: { kind: 'select', label: surfaceLabel, options: glassOptions },
     },
-    state: { modelValue: { kind: 'select', label: activeOption, options: enabledSegments } },
+    state: {
+      modelValue: { kind: 'select', label: activeOption, options: enabledSegments },
+      theme: { kind: 'select', label: appCopy.theme.label, options: segmentThemes },
+      language: { kind: 'select', label: appCopy.language.label, options: segmentLanguages },
+    },
   },
   note: localized(
     'Size is read-only: the component supports only sm.',
     '尺寸为只读：此组件仅支持 sm。',
   ),
-  stateDisabled: (props) => props.disabled === true,
-  render: ({ props, state, setState, locale }) =>
-    h(UiSegmentedControl, {
+  stateDisabled: ({ disabled, variant = 'text' }, key) =>
+    disabled === true ||
+    variant !== { modelValue: 'text', theme: 'icon', language: 'language' }[key],
+  render: ({ props, state, setState, locale }) => {
+    if (props.variant === 'icon') {
+      return h(UiSegmentedControl, {
+        ...props,
+        ariaLabel: localize(appCopy.theme.label, locale),
+        options: themeSegments(themeModes, locale),
+        modelValue: state.theme,
+        'onUpdate:modelValue': (value: string) => {
+          const mode = themeModes.find((mode) => mode === value);
+          if (mode !== undefined) setState('theme', mode);
+        },
+      });
+    }
+    if (props.variant === 'language') {
+      return h(UiSegmentedControl, {
+        ...props,
+        ariaLabel: localize(appCopy.language.label, locale),
+        options: languageSegments(locale),
+        modelValue: state.language,
+        'onUpdate:modelValue': (value: string) => {
+          const language = languageCodes.find((code) => code === value);
+          if (language !== undefined) setState('language', language);
+        },
+      });
+    }
+    return h(UiSegmentedControl, {
       ...props,
       ariaLabel: localize(segmentCopy.aria.view, locale),
       options: localizedSegments[locale],
@@ -142,7 +192,8 @@ export const segmented = defineSpecimen<
         const option = enabledSegments.find((entry) => entry.value === value);
         if (option !== undefined) setState('modelValue', option.value);
       },
-    }),
+    });
+  },
 });
 
 const iconButtonCopy = moduleCopy.iconButton;
@@ -303,7 +354,6 @@ export const controlSurface = defineSpecimen<
       {
         ...props,
         as: 'nav',
-        edgeMode: 'local',
         'aria-label': localize(controlSurfaceLabel, locale),
       },
       () =>

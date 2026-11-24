@@ -10,7 +10,7 @@
     border-radius: var(--neoverse-control-segmented-corner-radius);
     padding: var(--neoverse-control-segmented-inset);
     overflow: hidden;
-    touch-action: manipulation;
+    touch-action: pan-y pinch-zoom;
   }
 
   .ui-segmented-control--pill {
@@ -48,15 +48,29 @@
     gap: var(--neoverse-control-segmented-gap);
   }
 
-  .ui-segmented-control__slider {
+  .ui-segmented-control:is([data-variant='icon'], [data-variant='language'])
+    .ui-segmented-control__options {
+    grid-template-columns: repeat(var(--segment-count), 1fr);
+  }
+
+  .ui-segmented-control__slider-track {
     position: absolute;
     z-index: 0;
-    box-sizing: border-box;
-    inset-block: 0;
-    inset-inline-start: 0;
+    inset: 0;
+    /* Keep the paint inside its well while the buttons' touch hit areas stay unclipped. */
+    overflow: hidden;
+    border-radius: var(--neoverse-control-segmented-option-radius);
+    pointer-events: none;
     /* Match the selected content-sized track before hydration has measured any buttons. */
     grid-column: var(--segment-active-column, calc(var(--segment-index) + 1) / span 1);
     grid-row: 1;
+  }
+
+  .ui-segmented-control__slider {
+    position: absolute;
+    box-sizing: border-box;
+    inset-block: 0;
+    left: 0;
     width: var(--segment-active-width, 100%);
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
       var(--neoverse-control-segmented-active-border);
@@ -65,16 +79,53 @@
     background-color: var(--neoverse-control-segmented-active-fill);
     box-shadow: var(--neoverse-control-segmented-active-shadow);
     pointer-events: none;
-    transform: translateX(var(--segment-active-offset, 0));
+    translate: var(--segment-active-offset, 0);
     transition: none;
-    will-change: transform, width;
   }
+
+  .ui-segmented-control__slider::after {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background-color: var(--segment-feedback, transparent);
+    content: '';
+  }
+
+  @media (hover: hover) {
+    .ui-segmented-control__options:has(
+        .ui-segmented-control__option--active:hover:not(:active, :disabled)
+      )
+      .ui-segmented-control__slider:not([data-pressed], [data-dragging]) {
+      --segment-feedback: var(--neoverse-control-ghost-hover-background);
+    }
+  }
+
+  .ui-segmented-control__options:has(.ui-segmented-control__option--active:active:not(:disabled))
+    .ui-segmented-control__slider,
+  .ui-segmented-control__options .ui-segmented-control__slider:is([data-pressed], [data-dragging]) {
+    --segment-feedback: var(--neoverse-control-ghost-active-background);
+  }
+
   .ui-segmented-control__slider[data-ready='true'] {
     transition:
-      transform var(--neoverse-control-segmented-slider-duration)
+      translate var(--neoverse-control-segmented-slider-duration)
       var(--neoverse-control-segmented-slider-easing),
       width var(--neoverse-control-segmented-slider-duration)
-      var(--neoverse-control-segmented-slider-easing);
+      var(--neoverse-control-segmented-slider-easing),
+      scale var(--neoverse-control-segmented-slider-duration)
+      var(--neoverse-motion-easing-spring-soft);
+  }
+
+  .ui-segmented-control__slider[data-pressed] {
+    scale: var(--neoverse-control-segmented-press-scale) 0.84;
+    transition-duration:
+      var(--neoverse-control-segmented-slider-duration),
+      var(--neoverse-control-segmented-slider-duration),
+      var(--neoverse-motion-duration-fast);
+  }
+
+  .ui-segmented-control__slider[data-dragging] {
+    transition-duration: 0s, 0s, var(--neoverse-motion-duration-fast);
   }
 
   .ui-segmented-control .ui-segmented-control__option {
@@ -99,35 +150,44 @@
     font-weight: var(--neoverse-control-segmented-option-font-weight);
     line-height: var(--neoverse-control-compact-line-height);
     white-space: nowrap;
+    user-select: none;
     transition:
       background-color var(--neoverse-motion-feedback-duration)
       var(--neoverse-motion-feedback-easing),
       color var(--neoverse-control-segmented-slider-duration)
-      var(--neoverse-control-segmented-slider-easing),
-      transform var(--neoverse-control-segmented-slider-duration)
       var(--neoverse-control-segmented-slider-easing);
   }
 
-  .ui-segmented-control
-    .ui-segmented-control__option:active:not(:disabled, [aria-disabled='true']) {
-    transform: scale(var(--neoverse-control-segmented-press-scale));
-    transition:
-      background-color 0s,
-      color var(--neoverse-control-segmented-slider-duration)
-      var(--neoverse-control-segmented-slider-easing),
-      transform var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard);
-  }
-
+  /* An active gesture paints one plate, not another full-size wash under the button. */
+  .ui-segmented-control .ui-segmented-control__option--active,
   .ui-segmented-control__options:has(
-      .ui-segmented-control__option--active:active:not(:disabled, [aria-disabled='true'])
+      .ui-segmented-control__option:active:not(:disabled),
+      .ui-segmented-control__slider:is([data-pressed], [data-dragging])
     )
-    .ui-segmented-control__slider {
-    transform: translateX(var(--segment-active-offset, 0))
-      scale(var(--neoverse-control-segmented-press-scale));
-    transition:
-      transform var(--neoverse-motion-duration-fast) var(--neoverse-motion-easing-standard),
-      width var(--neoverse-control-segmented-slider-duration)
-      var(--neoverse-control-segmented-slider-easing);
+    .ui-segmented-control__option {
+    --neoverse-quiet-control-feedback: transparent;
+    transition-property: color;
+  }
+
+  .ui-segmented-control[data-variant='icon'] .ui-segmented-control__option {
+    min-width: var(--neoverse-control-segmented-option-height-sm);
+    padding-inline: var(--neoverse-space-1);
+  }
+
+  .ui-segmented-control__icon {
+    display: inline-flex;
+    width: var(--neoverse-icon-size-md);
+    height: var(--neoverse-icon-size-md);
+  }
+
+  .ui-segmented-control__icon > * {
+    width: 100%;
+    height: 100%;
+  }
+
+  .ui-segmented-control[data-variant='language'] .ui-segmented-control__option {
+    padding-inline: var(--neoverse-space-2);
+    font-size: var(--neoverse-font-size-xs);
   }
 
   .ui-segmented-control .ui-segmented-control__option--active {
@@ -176,26 +236,8 @@
 
   @media (prefers-reduced-motion: reduce) {
     .ui-segmented-control__slider[data-ready='true'],
-    .ui-segmented-control .ui-segmented-control__option,
-    .ui-segmented-control
-      .ui-segmented-control__option:active:not(:disabled, [aria-disabled='true']),
-    .ui-segmented-control__options:has(
-        .ui-segmented-control__option--active:active:not(:disabled, [aria-disabled='true'])
-      )
-      .ui-segmented-control__slider {
+    .ui-segmented-control .ui-segmented-control__option {
       transition: none;
-    }
-
-    .ui-segmented-control
-      .ui-segmented-control__option:active:not(:disabled, [aria-disabled='true']) {
-      transform: none;
-    }
-
-    .ui-segmented-control__options:has(
-        .ui-segmented-control__option--active:active:not(:disabled, [aria-disabled='true'])
-      )
-      .ui-segmented-control__slider {
-      transform: translateX(var(--segment-active-offset, 0));
     }
   }
 }

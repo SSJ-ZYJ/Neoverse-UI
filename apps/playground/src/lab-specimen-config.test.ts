@@ -192,7 +192,8 @@ function openSession(id: string) {
 test('the Select session validates options and preserves its value while blocked', () => {
   const session = openSession('forms-select');
   const selected = session.fields.find(({ key }) => key === 'modelValue');
-  expect(session.render('en').props).toMatchObject({
+  const values = () => Object.fromEntries(session.fields.map(({ key, value }) => [key, value]));
+  expect(values()).toMatchObject({
     modelValue: 'native',
     disabled: false,
     readonly: false,
@@ -208,14 +209,16 @@ test('the Select session validates options and preserves its value while blocked
     expect(session.edit('props', key, true)).toBe(true);
     expect(selected?.disabled).toBe(true);
     expect(session.edit('state', 'modelValue', 'native')).toBe(false);
-    expect(session.render('zh').props).toMatchObject({ modelValue: 'remote', [key]: true });
+    expect(values()).toMatchObject({ modelValue: 'remote', [key]: true });
     expect(session.edit('props', key, false)).toBe(true);
     expect(selected?.disabled).toBe(false);
   }
-  expect(openSession('forms-select').render('en').props?.modelValue).toBe('native');
+  expect(openSession('forms-select').fields.find(({ key }) => key === 'modelValue')?.value).toBe(
+    'native',
+  );
   expect(session.edit('props', 'readonly', true)).toBe(true);
   session.reset();
-  expect(session.render('en').props).toMatchObject({
+  expect(values()).toMatchObject({
     modelValue: 'native',
     disabled: false,
     readonly: false,

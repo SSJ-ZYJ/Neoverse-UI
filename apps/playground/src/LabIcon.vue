@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { themeGlyphPaths } from './preference-segments';
+
 type LabIconName =
   | 'activity'
   | 'arrow-right'
@@ -19,7 +21,8 @@ type LabIconName =
   | 'plus'
   | 'replay'
   | 'spark'
-  | 'target';
+  | 'target'
+  | keyof typeof themeGlyphPaths;
 
 interface LabIconProps {
   name: LabIconName;
@@ -28,6 +31,7 @@ interface LabIconProps {
 const props = defineProps<LabIconProps>();
 
 const paths: Record<LabIconName, string> = {
+  ...themeGlyphPaths,
   activity: 'M4 13h3l2-7 4 12 2-7h5',
   'arrow-right': 'M5 12h14M13 6l6 6-6 6',
   article: 'M6 3h9l3 3v15H6V3Zm3 6h6M9 13h6M9 17h4',

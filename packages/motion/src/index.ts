@@ -23,6 +23,7 @@ export {
   motionEasings,
   motionRoles,
 } from './motion-tokens.js';
+export { attachSegmentedControlSlider } from './segmented-control-slider.js';
 export { attachSelectionIndicator } from './selection-indicator.js';
 
 /**

@@ -399,11 +399,227 @@ test.describe('navigation', () => {
     await expect(radios.nth(2)).toBeFocused();
   });
 
-  for (const theme of ['light', 'dark'] as const) {
-    test(`segmented control renders a translucent Aurora Glass outer shell, pill/rounded shapes and 320ms spring transition in ${theme}`, async ({
+  const visibleBox = async (locator: Locator) => {
+    const box = await locator.boundingBox();
+    if (!box) throw new Error(`No visible box for ${locator}`);
+    return box;
+  };
+
+  for (const framework of ['Vue', 'React'] as const) {
+    const url =
+      framework === 'Vue'
+        ? '/frame?theme=light&lang=en#controls-segmented-control'
+        : '/react-fixture?theme=light&lang=en&contract-fixtures=1';
+    const selector =
+      framework === 'Vue'
+        ? '#controls-segmented-control [data-contract-state="default"] .ui-segmented-control'
+        : '[data-react-adapter="UiSegmentedControl"]';
+
+    test(`segmented control previews a held choice without committing canceled input in ${framework}`, async ({
+      page,
+    }, testInfo) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.goto(url);
+      const group = page.locator(selector);
+      const first = group.getByRole('radio').first();
+      const last = group.getByRole('radio').last();
+      const thumb = group.locator('.ui-segmented-control__slider');
+      const touch = testInfo.project.use.hasTouch ? await page.context().newCDPSession(page) : null;
+      await expect(thumb).toHaveAttribute('data-ready', 'true');
+      await last.scrollIntoViewIfNeeded();
+      const original = await visibleBox(thumb);
+      const destination = await visibleBox(last);
+      const center = destination.x + destination.width / 2;
+      const distanceTo = async (option: Locator) => {
+        const plate = await visibleBox(thumb);
+        const button = await visibleBox(option);
+        return Math.abs(plate.x + plate.width / 2 - button.x - button.width / 2);
+      };
+
+      if (touch) {
+        await touch.send('Input.dispatchTouchEvent', {
+          type: 'touchStart',
+          touchPoints: [{ x: center, y: destination.y + destination.height / 2 }],
+        });
+      } else {
+        await last.hover();
+        await page.mouse.down();
+      }
+      await expect.poll(() => distanceTo(last)).toBeLessThan(2);
+      await expect
+        .poll(async () => (await visibleBox(thumb)).height)
+        .toBeLessThan(original.height * 0.9);
+      await expect(last).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+      await expect
+        .poll(() => thumb.evaluate((node) => getComputedStyle(node, '::after').backgroundColor))
+        .not.toBe('rgba(0, 0, 0, 0)');
+      await expect(first).toBeChecked();
+      await expect(last).not.toBeChecked();
+      if (touch) {
+        await touch.send('Input.dispatchTouchEvent', { type: 'touchCancel', touchPoints: [] });
+        await touch.detach();
+      } else {
+        await page.mouse.move(center, destination.y + destination.height + 18);
+        await page.mouse.up();
+      }
+      await expect.poll(() => distanceTo(first)).toBeLessThan(2);
+      await expect(first).toBeChecked();
+
+      if (testInfo.project.use.hasTouch) await last.tap();
+      else await last.click();
+      await expect(last).toBeChecked();
+      await expect.poll(() => distanceTo(last)).toBeLessThan(2);
+      await expect
+        .poll(async () => Math.abs((await visibleBox(thumb)).width - destination.width))
+        .toBeLessThan(1);
+
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await expect(thumb).toHaveCSS('transition-duration', '0s');
+      await last.press('Home');
+      await expect(first).toBeChecked();
+      await expect.poll(() => distanceTo(first)).toBeLessThan(2);
+    });
+
+    test(`segmented control follows a horizontal drag and commits only on release in ${framework}`, async ({
+      page,
+    }, testInfo) => {
+      await page.goto(url);
+      const group = page.locator(selector);
+      const radios = group.getByRole('radio');
+      const first = radios.first();
+      const disabled = radios.nth(1);
+      const last = radios.last();
+      const thumb = group.locator('.ui-segmented-control__slider');
+      const touch = testInfo.project.use.hasTouch ? await page.context().newCDPSession(page) : null;
+      await expect(thumb).toHaveAttribute('data-ready', 'true');
+      await last.scrollIntoViewIfNeeded();
+
+      const start = await visibleBox(first);
+      const end = await visibleBox(last);
+      const x0 = start.x + start.width / 2;
+      const x1 = end.x + end.width / 2;
+      const y = start.y + start.height / 2;
+      const middle = (x0 + x1) / 2;
+      const nearLast = x0 * 0.2 + x1 * 0.8;
+      const distanceFrom = async (x: number) => {
+        const box = await visibleBox(thumb);
+        return Math.abs(box.x + box.width / 2 - x);
+      };
+      const hold = async (x: number) => {
+        if (touch) {
+          await touch.send('Input.dispatchTouchEvent', {
+            type: 'touchStart',
+            touchPoints: [{ x, y }],
+          });
+        } else {
+          await page.mouse.move(x, y);
+          await page.mouse.down();
+        }
+      };
+      const move = async (x: number) => {
+        if (touch) {
+          await touch.send('Input.dispatchTouchEvent', {
+            type: 'touchMove',
+            touchPoints: [{ x, y }],
+          });
+        } else {
+          await page.mouse.move(x, y);
+        }
+      };
+      const release = async (cancel = false) => {
+        if (touch) {
+          await touch.send('Input.dispatchTouchEvent', {
+            type: cancel ? 'touchCancel' : 'touchEnd',
+            touchPoints: [],
+          });
+        } else {
+          if (cancel) await page.mouse.move(nearLast, end.y + end.height + 18);
+          await page.mouse.up();
+        }
+      };
+
+      await hold(x0);
+      await move(middle);
+      await expect.poll(() => distanceFrom(middle)).toBeLessThan(2);
+      await expect(first).toBeChecked();
+      await expect(disabled).not.toBeChecked();
+      await move(nearLast);
+      await expect.poll(() => distanceFrom(nearLast)).toBeLessThan(2);
+      await move(x1 + 16);
+      await expect.poll(() => distanceFrom(x1)).toBeLessThan(2);
+      await release(true);
+      await expect.poll(() => distanceFrom(x0)).toBeLessThan(2);
+      await expect(first).toBeChecked();
+
+      await hold(x0);
+      await move(nearLast);
+      await expect.poll(() => distanceFrom(nearLast)).toBeLessThan(2);
+      await expect(first).toBeChecked();
+      await release();
+      await expect(last).toBeChecked();
+      const centerOf = async (option: Locator) => {
+        const box = await visibleBox(option);
+        return box.x + box.width / 2;
+      };
+      await expect.poll(async () => distanceFrom(await centerOf(last))).toBeLessThan(2);
+
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      const left = await centerOf(first);
+      await hold(await centerOf(last));
+      await move(left);
+      await expect.poll(() => distanceFrom(left)).toBeLessThan(2);
+      await expect(last).toBeChecked();
+      await release();
+      await expect(first).toBeChecked();
+      await touch?.detach();
+    });
+
+    test(`segmented control presents named theme icons and equal-width language labels in ${framework}`, async ({
       page,
     }) => {
-      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.goto(url);
+      const scope = page.locator(
+        framework === 'Vue' ? '#controls-segmented-control' : '[data-react-parity-fixture]',
+      );
+      const icons =
+        framework === 'Vue'
+          ? scope.locator('[data-segmented-example="icon"]')
+          : page.locator('[data-react-theme-control]');
+      const system = icons.getByRole('radio', { name: 'System' });
+      const light = icons.getByRole('radio', { name: 'Light' });
+      const dark = icons.getByRole('radio', { name: 'Dark' });
+      await expect(system.locator('svg')).toBeVisible();
+      await expect(light.locator('svg')).toBeVisible();
+      await expect(dark.locator('svg')).toBeVisible();
+      await expect(dark).toHaveText('');
+      await light.press('ArrowRight');
+      await expect(dark).toBeFocused();
+      await expect(dark).toBeChecked();
+      await dark.press('ArrowRight');
+      await expect(system).toBeChecked();
+
+      const languages = scope.locator('[data-segmented-example="language"]');
+      for (const well of [icons, languages]) {
+        const thumb = well.locator('.ui-segmented-control__slider');
+        await expect(well).toHaveCSS('border-top-left-radius', '9999px');
+        await expect(thumb).toHaveCSS('border-top-left-radius', '9999px');
+        await expect(thumb.locator('..')).toHaveCSS('overflow-x', 'hidden');
+      }
+      const english = languages.getByRole('radio', { name: 'English' });
+      const chinese = languages.getByRole('radio', { name: '中文' });
+      await expect(english).toHaveText('EN');
+      const englishBox = await visibleBox(english);
+      const chineseBox = await visibleBox(chinese);
+      expect(englishBox.width).toBeCloseTo(chineseBox.width);
+      await chinese.click();
+      await expect(chinese).toBeChecked();
+    });
+  }
+
+  for (const theme of ['light', 'dark'] as const) {
+    test(`segmented control preserves the Aurora Glass well and pill/rounded geometry in ${theme}`, async ({
+      page,
+    }) => {
       await page.goto(`/frame?theme=${theme}&lang=en#controls-segmented-control`, {
         waitUntil: 'domcontentloaded',
       });
@@ -429,8 +645,6 @@ test.describe('navigation', () => {
           bg: style.backgroundColor,
           backdrop: style.backdropFilter,
           sliderRadius: sliderStyle ? Number.parseFloat(sliderStyle.borderTopLeftRadius) : 0,
-          sliderDuration: sliderStyle?.transitionDuration ?? '',
-          sliderTiming: sliderStyle?.transitionTimingFunction ?? '',
           sliderBgImage: sliderStyle?.backgroundImage ?? '',
         };
       });
@@ -438,8 +652,6 @@ test.describe('navigation', () => {
       expect(pillMetrics.sliderRadius).toBeGreaterThanOrEqual(999);
       expect(pillMetrics.bg).toContain('/ 0.15');
       expect(pillMetrics.backdrop).toContain('blur(12px)');
-      expect(pillMetrics.sliderDuration).toContain('0.32s');
-      expect(pillMetrics.sliderTiming).toContain('cubic-bezier(0.32, 1.28, 0.42, 1)');
       expect(pillMetrics.sliderBgImage).toContain('linear-gradient');
 
       const roundedMetrics = await rounded.evaluate((element) => {

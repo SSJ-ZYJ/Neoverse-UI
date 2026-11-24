@@ -20,8 +20,7 @@ export function localize(value: LocalizedText, locale: Locale): string {
   return value[locale];
 }
 
-/* The muted second line is a reading aid for Chinese labels only: an English
-   interface shows the English name alone instead of pairing it with Chinese. */
+/* The English suffix is a reading aid for Chinese labels only. */
 export function catalogueSecondary(label: LocalizedText, locale: Locale): string | undefined {
   if (locale !== 'zh' || label.en === label.zh) return undefined;
   return label.en;

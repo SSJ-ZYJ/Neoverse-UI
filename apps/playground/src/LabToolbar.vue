@@ -11,7 +11,9 @@ import FpsIndicator from './FpsIndicator.vue';
 import LabIcon from './LabIcon.vue';
 import { appCopy, type Locale, localize, localized } from './playground-content';
 import type { ThemeMode } from './playground-types';
+import { languageSegments } from './preference-segments';
 import { defaultThemeMode, themeModes } from './theme-runtime';
+import { themeSegments } from './vue-theme-segments';
 
 const props = defineProps<{
   locale: Locale;
@@ -34,19 +36,8 @@ useLayoutWidthMotion({
   trigger: () => props.locale,
 });
 
-const themeOptions = computed(() =>
-  themeModes.map((value) => ({
-    value,
-    label: localize(appCopy.theme.options[value], props.locale),
-  })),
-);
-const locales = ['en', 'zh'] as const;
-const languageOptions = computed(() =>
-  locales.map((value) => ({
-    value,
-    label: localize(appCopy.language.options[value], props.locale),
-  })),
-);
+const themeOptions = computed(() => themeSegments(themeModes, props.locale));
+const languageOptions = computed(() => languageSegments(props.locale));
 const cycleLabel = localized('Cycle theme', '切换主题');
 const languageLabel = localized('Switch language', '切换语言');
 
@@ -101,7 +92,7 @@ function cycleTheme(): void {
         :label="`${localize(cycleLabel, locale)}: ${localize(appCopy.theme.options[theme], locale)}`"
         @click="cycleTheme"
       >
-        <LabIcon name="spark" />
+        <LabIcon :name="theme" />
       </UiIconButton>
       <UiIconButton
         data-toolbar-width-target
@@ -120,7 +111,7 @@ function cycleTheme(): void {
         :aria-label="localize(appCopy.theme.label, locale)"
         :options="themeOptions"
         :model-value="theme"
-        surface="none"
+        variant="icon"
         @update:model-value="emit('theme', $event)"
       />
       <UiSegmentedControl
@@ -129,7 +120,7 @@ function cycleTheme(): void {
         :aria-label="localize(appCopy.language.label, locale)"
         :options="languageOptions"
         :model-value="locale"
-        surface="none"
+        variant="language"
         @update:model-value="emit('locale', $event)"
       />
       <UiIconButton

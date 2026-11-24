@@ -148,31 +148,33 @@
   padding-block-start: var(--neoverse-space-3);
 }
 
-.playground-explorer__section-toggle {
+.playground-explorer__section-toggle,
+.playground-explorer__disclosure {
   display: flex;
   min-block-size: var(--neoverse-space-8);
-  /* A button still shrinks to its content as a flex container, so `auto`
-     leaves the count and chevron hugging the label. Fill the heading track
-     and compensate for the negative inline margins to share the module
-     rows' right edge. */
-  inline-size: calc(100% + 2 * var(--neoverse-space-2));
-  /* The group heading is two lines; the count and chevron belong to the
-     primary line, not to the vertical centre of the whole label. */
-  align-items: baseline;
-  gap: var(--neoverse-space-2);
-  margin-inline: calc(-1 * var(--neoverse-space-2));
+  align-items: center;
+  gap: var(--neoverse-space-1);
   border: 0;
   border-radius: var(--neoverse-radius-control-inner);
-  padding-block: var(--neoverse-space-1);
-  padding-inline: var(--neoverse-space-2);
+  padding-inline: var(--neoverse-navigation-item-padding-inline-md);
   background: none;
   color: var(--neoverse-color-text-muted);
   font-family: var(--neoverse-font-family-sans);
+  cursor: pointer;
+}
+
+.playground-explorer__section-toggle {
+  inline-size: 100%;
+  padding-block: var(--neoverse-space-1);
   font-size: var(--neoverse-font-size-2xs);
   font-weight: var(--neoverse-font-weight-medium);
-  letter-spacing: var(--neoverse-letter-spacing-wide);
   text-align: start;
-  cursor: pointer;
+}
+
+.playground-explorer__disclosure {
+  min-inline-size: var(--neoverse-space-8);
+  flex: none;
+  justify-content: end;
 }
 
 .playground-explorer__section[data-active] .playground-explorer__section-toggle {
@@ -180,41 +182,28 @@
 }
 
 .playground-explorer__section-label {
-  min-width: 0;
-  flex: 1 1 auto;
+  flex: 1;
+  letter-spacing: var(--neoverse-letter-spacing-wide);
 }
 
-.playground-catalogue-label {
-  display: inline-flex;
-  max-width: 100%;
-  min-width: 0;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--neoverse-space-1);
-}
-
-.playground-catalogue-label > span {
-  max-width: 100%;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.playground-explorer__section-label,
+.playground-explorer__module-link .ui-navigation-item__label {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
 }
 
 .playground-catalogue-label__secondary {
+  display: block;
   color: var(--neoverse-color-text-muted);
   font-size: 0.85em;
   font-weight: var(--neoverse-font-weight-regular);
   letter-spacing: normal;
 }
 
-/* A link suffix shares the label's line box, so the smaller language sits on
-   the primary text baseline instead of being centred as a flex child. */
-.playground-explorer__link .playground-catalogue-label__secondary {
+/* Specimen links retain their compact inline reading aid. */
+.playground-explorer__leaf .playground-catalogue-label__secondary {
   display: inline;
-  max-width: none;
   margin-inline-start: var(--neoverse-space-1);
-  overflow: visible;
-  vertical-align: baseline;
 }
 
 .playground-explorer__heading {
@@ -243,6 +232,7 @@
 }
 
 .playground-explorer__module-link {
+  block-size: auto;
   flex: 1 1 auto;
   color: var(--neoverse-color-text-primary);
   font-weight: var(--neoverse-font-weight-medium);
@@ -250,23 +240,6 @@
 
 .playground-explorer__module[data-active] .playground-explorer__module-link {
   color: var(--neoverse-color-accent-primary);
-}
-
-.playground-explorer__disclosure {
-  display: inline-flex;
-  min-inline-size: var(--neoverse-space-8);
-  block-size: var(--neoverse-space-8);
-  flex: none;
-  align-items: center;
-  justify-content: center;
-  gap: var(--neoverse-space-1);
-  border: 0;
-  border-radius: var(--neoverse-radius-control-inner);
-  padding-inline: var(--neoverse-space-2);
-  background: none;
-  color: var(--neoverse-color-text-muted);
-  font-family: var(--neoverse-font-family-sans);
-  cursor: pointer;
 }
 
 .playground-explorer__count {
@@ -299,11 +272,6 @@
   transition: rotate var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
 }
 
-.playground-explorer__section-toggle .playground-explorer__chevron {
-  inline-size: 0.75rem;
-  block-size: 0.75rem;
-}
-
 .playground-explorer__section-toggle[aria-expanded='true'] .playground-explorer__chevron,
 .playground-explorer__disclosure[aria-expanded='true'] .playground-explorer__chevron {
   rotate: 90deg;
@@ -323,9 +291,8 @@
   --neoverse-navigation-item-active-shadow: var(--neoverse-shadow-none);
 }
 
-/* An English label is the only line available, so long names need to wrap
-   instead of being clipped in the persistent rail. The Chinese layout keeps
-   its compact two-line reading aid and its inline English suffix. */
+/* Let module labels expand for both languages and English specimen names wrap. */
+.playground-explorer__module-link .ui-navigation-item__label,
 html[lang='en'] .playground-explorer__link .ui-navigation-item__label {
   overflow: visible;
   text-overflow: clip;

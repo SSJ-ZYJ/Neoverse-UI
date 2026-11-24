@@ -49,6 +49,7 @@ import { createRoot } from 'react-dom/client';
 import { mountPlaygroundGlass } from './glass-runtime';
 import { appCopy, localize } from './playground-content';
 import type { ThemeMode } from './playground-types';
+import { languageSegments, themeGlyphPaths } from './preference-segments';
 import { TextControlContractFixture } from './TextControlContractFixture';
 import {
   applyThemeMode,
@@ -73,6 +74,19 @@ applyThemeMode(initialThemeMode, false);
 const themeOptions = themeModes.map((mode) => ({
   value: mode,
   label: localize(appCopy.theme.options[mode], locale),
+  icon: (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d={themeGlyphPaths[mode]} />
+    </svg>
+  ),
 }));
 
 const copy =
@@ -359,6 +373,13 @@ function ParityFixtures() {
             : [{ value: 'c', label: 'C' }]
         }
         defaultValue="b"
+      />
+      <UiSegmentedControl
+        data-segmented-example="language"
+        variant="language"
+        ariaLabel={localize(appCopy.language.label, locale)}
+        options={languageSegments(locale)}
+        className="justify-self-start"
       />
       <div className="flex flex-wrap gap-2">
         <UiButton data-parity-disabled onClick={() => setBlocked((value) => !value)}>
@@ -1066,11 +1087,11 @@ function ReactFixture() {
       </UiSurface>
       <UiSurface surface="glass-subtle" className="grid min-w-0 gap-3 rounded-card p-4">
         <UiField label={localize(appCopy.theme.label, locale)} className="w-fit">
-          <UiRadioGroup
-            name="theme"
+          <UiSegmentedControl
+            variant="icon"
             value={themeMode}
             options={themeOptions}
-            aria-label={localize(appCopy.theme.label, locale)}
+            ariaLabel={localize(appCopy.theme.label, locale)}
             onValueChange={selectedThemeMode}
             data-react-theme-control
           />

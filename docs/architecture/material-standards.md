@@ -381,11 +381,28 @@ backdrop blur and shared WebGL/CSS outer glass edge, framing an embedded selecti
 slider that retains the library's aurora mint-to-sky selection field in Light and
 luminous selection field in Dark. It defaults to the `pill` shape and also supports
 `rounded` via `shape`, with its geometry and selection tokens decoupled from
-`ControlSurface`, `Tabs`, `Pagination`, and `NavigationItem`. The embedded slider
-and label color glide smoothly on the shared 320ms soft-spring curve (`--neoverse-motion-easing-spring-soft`)
-with subtle tactile press compression on active press, and snap immediately without scaling
-under reduced motion. Inactive options remain transparent and share the
-quiet feedback wash.
+`ControlSurface`, `Tabs`, `Pagination`, and `NavigationItem`.
+The plate shares the well's shape and clips inside the inner track, independently
+of the options' expanded touch hit areas.
+
+On pointer down, the selection plate glides toward the pressed option, briefly
+stretches in transit, and compresses while held. During a horizontal drag, the
+plate follows the pointer; releasing it selects the nearest enabled option.
+A canceled drag or rejected activation returns the plate to the committed
+selection. Touch input still permits vertical scrolling. Keyboard and
+programmatic changes glide directly to the new selection. Reduced motion
+preserves direct dragging but skips animated previews and settling. Hover on
+the selected option and feedback during a press or drag tint the plate itself,
+so the feedback moves and scales with it. Idle, unselected options retain the
+shared quiet hover feedback.
+
+Both adapters support `variant="text"` (the default content-sized labels),
+`variant="icon"` (equal-width segments with decorative `options[].icon`), and
+`variant="language"` (equal-width segments with compact text for short names or
+language codes). For icons, pass a Vue component or a React node; `label` names
+the option for assistive technology and is also the visible fallback without
+an icon. Set `ariaLabel` to give a short label a fuller accessible name.
+Presentation does not change selection or keyboard behavior.
 
 Regression contracts check that transient button feedback keeps the sampled
 plate unchanged, and that command states do not replace persistent selection

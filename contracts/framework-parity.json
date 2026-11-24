@@ -243,7 +243,16 @@
       "name": "UiSegmentedControl",
       "vueType": "SegmentedControlProps",
       "reactType": "UiSegmentedControlProps",
-      "props": ["options", "defaultValue", "size", "shape", "disabled", "ariaLabel", "surface"],
+      "props": [
+        "options",
+        "defaultValue",
+        "size",
+        "shape",
+        "variant",
+        "disabled",
+        "ariaLabel",
+        "surface"
+      ],
       "aliases": {
         "value": ["modelValue", "value"]
       }
@@ -406,7 +415,7 @@
       "name": "SegmentOption",
       "vueType": "SegmentOption",
       "reactType": "SegmentOption",
-      "props": ["value", "label", "disabled", "ariaLabel"]
+      "props": ["value", "label", "disabled", "ariaLabel", "icon"]
     },
     {
       "name": "TerminalPromptSegment",
@@ -535,6 +544,11 @@
       "name": "SegmentedControlShape",
       "vueType": "SegmentedControlShape",
       "reactType": "SegmentedControlShape"
+    },
+    {
+      "name": "SegmentedControlVariant",
+      "vueType": "SegmentedControlVariant",
+      "reactType": "SegmentedControlVariant"
     }
   ]
 }

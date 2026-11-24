@@ -67,6 +67,7 @@ export type {
   SegmentedControlProps,
   SegmentedControlShape,
   SegmentedControlSize,
+  SegmentedControlVariant,
   SegmentOption,
   SelectOption,
   SelectProps,

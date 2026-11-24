@@ -456,7 +456,7 @@ try {
     'transition-timing-function:var(--tw-ease)',
     '@keyframes ui-skeleton-shimmer',
     'grid-column:var(--segment-active-column,calc(var(--segment-index) + 1) / span 1)',
-    'transform:translateX(var(--segment-active-offset,0))',
+    'translate:var(--segment-active-offset,0)',
     'box-shadow:var(--neoverse-control-segmented-active-shadow)',
     'background-image:var(--neoverse-control-segmented-background-image)',
     'background-color:var(--neoverse-control-segmented-background-color)',

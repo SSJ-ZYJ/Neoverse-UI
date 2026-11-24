@@ -2,9 +2,12 @@
 import type { SegmentOption } from '@neoverse-ui/vue';
 import { UiSegmentedControl } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
-import { formatLocalized, localize, localized, moduleCopy } from '../playground-content';
+import { appCopy, formatLocalized, localize, localized, moduleCopy } from '../playground-content';
+import { languageSegments } from '../preference-segments';
 import QaPreviewMatrix from '../QaPreviewMatrix.vue';
 import StateRow from '../StateRow.vue';
+import { themeModes } from '../theme-runtime';
+import { themeSegments } from '../vue-theme-segments';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
@@ -15,6 +18,8 @@ const segmentedOptions = computed<readonly SegmentOption[]>(() => [
   { value: 'details', label: localize(copy.options.details, props.locale), disabled: true },
   { value: 'activity', label: localize(copy.options.activity, props.locale) },
 ]);
+const themeOptions = computed(() => themeSegments(themeModes, props.locale));
+const languageOptions = computed(() => languageSegments(props.locale));
 const ariaOptions = computed<readonly SegmentOption[]>(() => [
   {
     value: 'a',
@@ -96,6 +101,23 @@ const qaCopy = {
       shape="rounded"
       :aria-label="localize(copy.aria.view, props.locale)"
       :options="shapeOptions"
+    />
+  </StateRow>
+  <StateRow :label="appCopy.theme.label" :locale="props.locale">
+    <UiSegmentedControl
+      data-segmented-example="icon"
+      variant="icon"
+      default-value="light"
+      :aria-label="localize(appCopy.theme.label, props.locale)"
+      :options="themeOptions"
+    />
+  </StateRow>
+  <StateRow :label="appCopy.language.label" :locale="props.locale">
+    <UiSegmentedControl
+      data-segmented-example="language"
+      variant="language"
+      :aria-label="localize(appCopy.language.label, props.locale)"
+      :options="languageOptions"
     />
   </StateRow>
   <StateRow :label="copy.states.sizes" :locale="props.locale">

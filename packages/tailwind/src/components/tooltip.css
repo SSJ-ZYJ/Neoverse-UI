@@ -37,22 +37,14 @@
     --neoverse-material-border: transparent;
     --neoverse-material-border-width: var(--neoverse-border-width-none);
     --neoverse-material-hover-border: transparent;
-    --neoverse-material-background-fallback: color-mix(
-      in srgb,
-      var(--neoverse-material-tint) var(--neoverse-material-transparency),
-      var(--neoverse-material-glass-subtle-background-fallback)
-    );
+    --neoverse-material-background-fallback: var(--neoverse-tooltip-background-fallback);
   }
 
   .ui-tooltip-surface--neutral.material-glass-subtle[data-neoverse-tooltip-surface] {
     /* On a flat canvas the sampled rim has little contrast to borrow.
        Shift the tint, not the Light tier's fill alpha or backdrop filter. */
     --neoverse-material-tint: var(--neoverse-tooltip-neutral-tint);
-    --neoverse-material-background: color-mix(
-      in srgb,
-      var(--neoverse-material-tint) var(--neoverse-material-transparency),
-      transparent
-    );
+    --neoverse-material-background: var(--neoverse-tooltip-neutral-background);
   }
 
   .ui-tooltip-surface--accent.material-glass-subtle[data-neoverse-tooltip-surface] {

@@ -195,9 +195,11 @@ function toggleModule(id: string): void {
           :aria-expanded="!collapsed.has(group.id)"
           @click="toggle(group.id)"
         >
-          <span class="playground-explorer__section-label">
-            <CatalogueLabel :label="group.label" :locale="locale" />
-          </span>
+          <CatalogueLabel
+            :label="group.label"
+            :locale="locale"
+            class="playground-explorer__section-label"
+          />
           <span v-if="groupCount(group) > 0" class="playground-explorer__count" aria-hidden="true">
             {{ groupCount(group) }}
           </span>

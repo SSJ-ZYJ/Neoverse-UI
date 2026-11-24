@@ -518,12 +518,13 @@ test('derives compact-control inner corners from the shared outer radius and ins
 });
 
 test('keeps grouped controls on a compact, shared geometry contract', async () => {
-  const [sharedControlCss, controlSurfaceCss, navigationItemCss, segmentedControlCss] =
+  const [sharedControlCss, controlSurfaceCss, navigationItemCss, segmentedControlCss, motionCss] =
     await Promise.all([
       readTokenCss('components/shared-control.css'),
       readTokenCss('components/control-surface.css'),
       readTokenCss('components/navigation-item.css'),
       readTokenCss('components/segmented-control.css'),
+      readTokenCss('motion.css'),
     ]);
 
   expect(sharedControlCss).toContain('--neoverse-control-compact-height: var(--neoverse-space-8);');
@@ -608,10 +609,13 @@ test('keeps grouped controls on a compact, shared geometry contract', async () =
     '--neoverse-control-segmented-rounded-corner-radius: var(--neoverse-control-corner-radius);',
     '--neoverse-control-segmented-rounded-option-radius: var(--neoverse-control-compact-radius);',
     '--neoverse-control-segmented-slider-duration: 320ms;',
-    '--neoverse-control-segmented-slider-easing: var(--neoverse-motion-easing-spring-soft);',
+    '--neoverse-control-segmented-slider-easing: var(--neoverse-motion-easing-emphasized);',
   ]) {
     expect(segmentedControlCss).toContain(declaration);
   }
+  expect(motionCss).toContain(
+    '--neoverse-motion-easing-spring-soft: cubic-bezier(0.3, 1.16, 0.48, 1);',
+  );
 });
 
 test('exposes shared Surface and Glass material contracts', () => {

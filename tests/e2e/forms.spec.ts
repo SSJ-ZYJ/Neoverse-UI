@@ -200,28 +200,53 @@ test.describe('forms', () => {
     test(`${adapter.name}: readonly choices keep submission and return on reset`, async ({
       page,
     }) => {
-      await page.goto(adapter.url('light'));
+      await page.goto(adapter.url('dark'));
       const form = page.locator('[data-contract-form]');
       const notifications = form.locator('[data-contract-checkbox]');
+      const channel = form.locator('[data-contract-radio]');
       const sync = form.locator('[data-contract-switch]');
       const lockedCheckbox = form.locator('[data-contract-readonly-checkbox]');
+      const lockedChannel = form.locator('[data-contract-readonly-radio]');
+      const lockedSwitch = form.locator('[data-contract-readonly-switch]');
 
-      await expect(lockedCheckbox).toHaveAttribute('aria-disabled', 'true');
-      await lockedCheckbox.click({ force: true });
-      await lockedCheckbox.focus();
-      await page.keyboard.press('Space');
-      await expect(lockedCheckbox).toBeChecked();
-      // A pointer that misses the readonly row by one row would flip this
-      // controlled switch instead; the submitted record would still look valid.
-      await expect(sync).toBeChecked();
-      expect(await formValues(form)).toMatchObject({ locked: 'yes', 'locked-channel': '2' });
+      // Scroll and wait for a stable box before forcing the pointer action.
+      // Playwright otherwise bypasses stability checks along with aria-disabled.
+      for (const control of [
+        lockedCheckbox,
+        lockedChannel.locator('input[value="1"]'),
+        lockedSwitch,
+      ]) {
+        await expect(control).toHaveAttribute('aria-disabled', 'true');
+        await control.scrollIntoViewIfNeeded();
+        await control.click({ force: true });
+      }
+      await lockedCheckbox.press('Space');
+      await lockedChannel.locator('input[value="2"]').press('ArrowRight');
+      await lockedSwitch.press('Space');
+      const submitted = {
+        notifications: 'yes',
+        channel: '2',
+        sync: 'yes',
+        locked: 'yes',
+        'locked-channel': '2',
+        'locked-sync': 'yes',
+      };
+      expect(await formValues(form)).toEqual(submitted);
 
       await notifications.uncheck();
+      await channel.locator('input[value="1"]').check();
+      await sync.uncheck();
+      await expect(form.locator('[data-contract-form-state]')).toContainText(
+        'false / 1 / false / number',
+      );
       await form.locator('[data-contract-reset]').click();
       await expect(notifications).toBeChecked();
+      await expect(channel.locator('input[value="2"]')).toBeChecked();
+      await expect(sync).toBeChecked();
       await expect(form.locator('[data-contract-form-state]')).toContainText(
         'true / 2 / true / number',
       );
+      expect(await formValues(form)).toEqual(submitted);
     });
 
     test(`${adapter.name}: controls expose their accessibility roles and names`, async ({

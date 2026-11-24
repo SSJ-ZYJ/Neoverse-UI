@@ -11,8 +11,8 @@ const secondary = computed(() => catalogueSecondary(props.label, props.locale));
 </script>
 
 <template>
-  <span class="playground-catalogue-label">
-    <span>{{ props.label[props.locale] }}</span>
+  <span>
+    {{ props.label[props.locale] }}
     <span
       v-if="secondary"
       class="playground-catalogue-label__secondary"

@@ -1,16 +1,19 @@
 <script setup lang="ts">
+import { attachSegmentedControlSlider } from '@neoverse-ui/motion';
 import type { ComponentPublicInstance } from 'vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, watch } from 'vue';
 import { getSurfaceClass } from './surface';
-import type { SegmentedControlProps, SegmentedControlShape, SegmentOption } from './types';
+import type { SegmentedControlProps, SegmentedControlVariant, SegmentOption } from './types';
 
 defineOptions({ inheritAttrs: false });
 
+// Declare the runtime discriminator in the SFC so a warm Vite watch can recompile it.
 const props = withDefaults(
-  defineProps<SegmentedControlProps & { shape?: SegmentedControlShape }>(),
+  defineProps<SegmentedControlProps & { variant?: SegmentedControlVariant }>(),
   {
     size: 'sm',
     shape: 'pill',
+    variant: 'text',
     disabled: false,
     surface: 'glass-subtle',
   },
@@ -24,10 +27,7 @@ const internalValue = ref<string | undefined>(initialValue(props.options, props.
 const focusedIndex = ref<number | null>(null);
 const optionRefs = ref<Array<HTMLButtonElement | null>>([]);
 const optionsElement = ref<HTMLElement | null>(null);
-const sliderBounds = ref<{ offset: number; width: number } | null>(null);
-const sliderReady = ref(false);
-let sliderReadyFrame = 0;
-let optionResizeObserver: ResizeObserver | undefined;
+let detachSlider: (() => void) | undefined;
 
 const selectedOptionClasses = 'ui-segmented-control__option--active';
 const unselectedOptionClasses = '';
@@ -40,50 +40,13 @@ const activeIndex = computed(() =>
 const segmentStyle = computed(() => ({
   '--segment-count': Math.max(props.options.length, 1),
   '--segment-index': Math.max(activeIndex.value, 0),
-  ...(sliderBounds.value === null
-    ? {}
-    : {
-        '--segment-active-column': '1 / -1',
-        '--segment-active-offset': `${sliderBounds.value.offset}px`,
-        '--segment-active-width': `${sliderBounds.value.width}px`,
-      }),
 }));
 
-function measureSlider(): void {
-  const selected = optionRefs.value[activeIndex.value];
-  if (!selected) {
-    sliderBounds.value = null;
-    return;
-  }
-
-  // Offset geometry is in CSS layout pixels, so it stays correct under
-  // parent zoom and responsive font-size changes.
-  const next = { offset: selected.offsetLeft, width: selected.offsetWidth };
-  if (sliderBounds.value?.offset !== next.offset || sliderBounds.value.width !== next.width) {
-    sliderBounds.value = next;
-  }
-}
-
 onMounted(() => {
-  if (optionsElement.value) {
-    optionResizeObserver = new ResizeObserver(measureSlider);
-    optionResizeObserver.observe(optionsElement.value);
-  }
-  measureSlider();
-  void nextTick(() => {
-    sliderReadyFrame = requestAnimationFrame(() => {
-      sliderReady.value = true;
-    });
-  });
+  if (optionsElement.value) detachSlider = attachSegmentedControlSlider(optionsElement.value);
 });
+onBeforeUnmount(() => detachSlider?.());
 
-onBeforeUnmount(() => {
-  optionResizeObserver?.disconnect();
-  cancelAnimationFrame(sliderReadyFrame);
-});
-watch([activeIndex, () => props.options, () => props.shape], () => void nextTick(measureSlider), {
-  flush: 'post',
-});
 const enabledIndexes = computed(() =>
   props.options.flatMap((option, index) => (option.disabled ? [] : [index])),
 );
@@ -262,6 +225,7 @@ function optionClasses(option: SegmentOption): string[] {
     v-bind="forwardedAttrs"
     :aria-label="ariaLabel"
     :data-shape="props.shape"
+    :data-variant="props.variant"
     :data-surface="props.surface"
     data-neoverse-surface-hover="static"
     :class="[classes, attrs.class]"
@@ -271,12 +235,9 @@ function optionClasses(option: SegmentOption): string[] {
     :aria-disabled="props.disabled || undefined"
   >
     <span ref="optionsElement" class="ui-segmented-control__options" @focusout="handleFocusOut">
-      <span
-        v-if="activeIndex >= 0"
-        class="ui-segmented-control__slider"
-        :data-ready="sliderReady"
-        aria-hidden="true"
-      />
+      <span v-if="activeIndex >= 0" class="ui-segmented-control__slider-track" aria-hidden="true">
+        <span class="ui-segmented-control__slider" />
+      </span>
       <!-- biome-ignore lint/a11y/useSemanticElements: Custom radio widget needs button keyboard behavior. -->
       <button
         v-for="(option, index) in props.options"
@@ -285,7 +246,7 @@ function optionClasses(option: SegmentOption): string[] {
         type="button"
         role="radio"
         :aria-checked="isSelected(option)"
-        :aria-label="option.ariaLabel"
+        :aria-label="option.ariaLabel ?? (props.variant === 'icon' ? option.label : undefined)"
         :tabindex="index === rovingIndex ? 0 : -1"
         :disabled="props.disabled || option.disabled"
         :class="optionClasses(option)"
@@ -293,7 +254,14 @@ function optionClasses(option: SegmentOption): string[] {
         @keydown="handleKeydown($event, index)"
         @focus="focusedIndex = index"
       >
-        {{ option.label }}
+        <span
+          v-if="props.variant === 'icon' && option.icon"
+          class="ui-segmented-control__icon"
+          aria-hidden="true"
+        >
+          <component :is="option.icon" />
+        </span>
+        <template v-else>{{ option.label }}</template>
       </button>
     </span>
   </div>
