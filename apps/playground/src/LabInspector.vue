@@ -134,7 +134,7 @@ const frameHref = computed(() => {
           surface="none"
           class="playground-inspector__frame-link"
         >
-          {{ localize(copy.frame, locale) }}
+          <span class="truncate">{{ localize(copy.frame, locale) }}</span>
           <template #trailing><LabIcon name="arrow-right" /></template>
         </UiAction>
       </template>

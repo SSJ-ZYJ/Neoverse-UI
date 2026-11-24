@@ -11,6 +11,13 @@ import { createParticleDissolve, type ParticleDissolveHandle } from './particle-
 import { prefersReducedMotion } from './reduced-motion.js';
 
 export type {
+  AppearanceTransitionKind,
+  AppearanceTransitionOptions,
+} from './appearance-transition.js';
+export { animateAppearanceChange, stopAppearanceTransition } from './appearance-transition.js';
+export type { LayoutSizeMotionOptions } from './layout-size.js';
+export { attachLayoutSizeMotion } from './layout-size.js';
+export type {
   LayoutWidthAnimation,
   LayoutWidthOptions,
   LayoutWidthSample,

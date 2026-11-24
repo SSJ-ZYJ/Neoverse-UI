@@ -3,7 +3,7 @@
 [English](README.md)
 
 <!-- Source: packages/motion/README.md -->
-<!-- Source-SHA256: 187415422903408c9f1ee5e66e723f02711908e28a4f058b4177fc367cb7c35a -->
+<!-- Source-SHA256: 0ac4e4d54c61fe14e8ea5c83edc58c6d492e37bfc2097e5eacb5db428baf7e14 -->
 
 Neoverse-UI 的单一动效规范：变量、Presence 引擎与页面切换动画。组件库中的一切动画都解析到这里发布的值——组件从不硬编码时长、缓动或关键帧。
 
@@ -82,6 +82,43 @@ animateLayoutWidths(samples);
 - 终点从渲染布局测量，因此消费项目必须在测量前等待字体加载完成（`document.fonts.ready`）——更新期间的字体切换会在动画开始后改变自然宽度。
 
 `captureLayoutWidths` 与 `animateLayoutWidths` 与框架无关；Vue 适配为 `@neoverse-ui/vue` 的 `useLayoutWidthMotion`。Design Lab 的 `foundation-motion-width` 样例展示了语言切换下的结果。
+
+## 外观与控件尺寸动效
+
+`animateAppearanceChange` 不管理应用的主题或语言状态。把真实的 DOM 更新放在回调中，保持控件实例不变：
+
+```ts
+import { animateAppearanceChange, attachLayoutSizeMotion } from '@neoverse-ui/motion';
+
+await animateAppearanceChange(
+  () => { document.documentElement.dataset.theme = 'dark'; },
+  {
+    kind: 'theme-reveal',
+    origin: themeControl,
+    theme: { current: readAppliedPalette, next: 'dark' },
+  },
+);
+
+await animateAppearanceChange(() => renderLocale('en'), { kind: 'locale' });
+
+// Mark the descendants to animate with `data-neoverse-size-motion`.
+const detach = attachLayoutSizeMotion(controlGroup);
+// Call detach() when the group unmounts.
+```
+
+- `theme-reveal` 从触发控件中心开始羽化扩散，键盘触发也使用相同中心。`theme-fade` 保留原来的淡入淡出；缺少有效起点或无法播放遮罩动效时，也回退到淡入淡出。扩散时长与羽化宽度分别由 `--neoverse-motion-theme-reveal-duration`、`--neoverse-motion-theme-reveal-feather` 控制。
+- 外观动效只播放旧界面的快照，下方实时界面仍可点击。新的切换请求会打断当前动效，不排队，也不会丢失之前的 DOM 更新。
+  每次切换传入 `theme.current` 和 `theme.next`，使用解析后的配色标识。切回被快照覆盖的配色时，动画从当前进度原地反向，不重拍快照。控件可立即显示最新选择；反向收尾时，等快照重新盖住实时页面，再由回调应用目标配色。回调只负责应用配色。
+  主题配色由快照统一过渡。回调新触发的颜色和阴影过渡会在实时页面露出前到达终点；已在运行的效果和布局动效不受影响。
+- `locale` 让旧界面淡出，露出更新后的界面。在同一渲染批次更新文案和 `document.documentElement.lang`；Vue 回调返回 `nextTick()`，React 在回调内通过 `flushSync` 提交状态。减少动效时直接更新；不支持 View Transition 时，主题回退到令牌颜色过渡，语言直接更新。
+- `attachLayoutSizeMotion` 对同一个元素的实际宽度和高度做动画。默认只观察带 `data-neoverse-size-motion` 的后代，可用 `targets` 指定范围，或用 `attributes` 指定触发尺寸变化的属性。默认观察 `class`、`style`、`hidden` 和内容更新。卸载时解除观察；初次挂载、视口变化和原生拖拽缩放不播放动画。显式 `zoom` 档位可按 `spatial` 角色过渡。
+  紧凑标签可标记 `data-neoverse-size-motion-label`，也可用 `singleLineLabels` 指定选择器。控件尺寸或语言变化时，标签保持单行，只暂时裁切尚未容纳的文字；动画结束后按正常字号完整显示，不为其他译文占位。描述等本应换行的内容不要标记。
+
+### 避免双语控件换行
+
+带尾部图标的紧凑操作控件用当前译文决定宽度，文字保持单行，图标不收缩，两者之间沿用组件间距。容器极窄时只截断可见文字，无障碍名称仍使用完整的当前译文。不要按最长译文固定标签宽度，否则较短的译文会在图标前留下空白。如果外部布局必须等宽，把预留空间放在文字和图标组合之外。需要播放宽度动画时，使用 `attachLayoutSizeMotion` 或布局宽度原语的临时不换行行为。
+
+「切换动效」（`foundation-motion-playground`）提供三种动效的操作示例；检查器的独立预览链接按当前译文排布。
 
 ## 页面切换动画
 

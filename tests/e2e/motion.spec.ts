@@ -180,6 +180,238 @@ test.describe('motion', () => {
   });
 });
 
+for (const path of ['/', '/frame'] as const) {
+  test(`the Motion showcase on ${path} switches theme and language without resetting size`, async ({
+    page,
+  }) => {
+    await page.goto(`${path}?theme=light&lang=en&fps=0#foundation-motion-playground`);
+    const demo = page.locator('#foundation-motion-playground');
+    const root = page.locator('html');
+    const sample = demo.locator('[data-motion-size-sample="icon"]');
+    await expect(sample).toHaveCSS('width', '32px');
+    await demo.locator('[data-motion-size-control]').getByRole('radio', { name: 'Large' }).click();
+    await expect(sample).toHaveCSS('width', '48px');
+
+    await demo.locator('[data-motion-theme-reveal]').click();
+    await expect(root).toHaveAttribute('data-theme', 'dark');
+    await demo.locator('[data-motion-theme-fade]').click();
+    await expect(root).toHaveAttribute('data-theme', 'light');
+    await demo.locator('[data-motion-locale]').click();
+    await expect(root).toHaveAttribute('lang', 'zh-CN');
+    await expect(demo.locator('[data-motion-size-sample="text"]')).toHaveText('示例操作');
+    await expect(sample).toHaveCSS('width', '48px');
+  });
+}
+
+test('translated actions resize and move without wrapping their labels', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/?theme=light&lang=zh&fps=0#foundation-motion-playground');
+  test.skip(
+    !(await page.evaluate(() => typeof document.startViewTransition === 'function')),
+    'The engine has no view-transition snapshots',
+  );
+  const specimen = page.locator('#foundation-motion-playground');
+  await expect(specimen.getByRole('heading', { name: '切换动效', exact: true })).toBeVisible();
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  const sample = specimen.locator('[data-motion-size-sample="text"]');
+  const icon = specimen.locator('[data-motion-size-sample="icon"]');
+  const before = await sample.boundingBox();
+  const iconBefore = await icon.boundingBox();
+  if (!before || !iconBefore) throw new Error('Size samples are not laid out');
+
+  const [frame] = await Promise.all([
+    page.waitForFunction(() => {
+      const root = document.documentElement;
+      const snapshot = getComputedStyle(root, '::view-transition-old(root)');
+      if (root.lang !== 'en' || snapshot.animationName === 'none') return;
+      const selector = `#foundation-motion-playground :is(
+        [data-motion-theme-reveal], [data-motion-theme-fade], [data-motion-locale],
+        [data-motion-size-sample='text']
+      ) .ui-button__content`;
+      const range = document.createRange();
+      const lines = Array.from(document.querySelectorAll(selector), (label) => {
+        range.selectNodeContents(label);
+        return range.getClientRects().length;
+      });
+      const text = document.querySelector('[data-motion-size-sample="text"]');
+      const icon = document.querySelector('[data-motion-size-sample="icon"]');
+      return {
+        lines,
+        width: text?.getBoundingClientRect().width,
+        iconX: icon?.getBoundingClientRect().x,
+      };
+    }),
+    specimen.locator('[data-motion-locale]').press('Enter'),
+  ]);
+
+  const during = await frame.jsonValue();
+  await expect.poll(() => sample.evaluate((element) => element.getAnimations().length)).toBe(0);
+  const after = await sample.boundingBox();
+  const iconAfter = await icon.boundingBox();
+  if (!after || !iconAfter) throw new Error('Translated size samples are not laid out');
+  expect(during.lines).toEqual([1, 1, 1, 1]);
+  expect(during.width).toBeGreaterThanOrEqual(before.width - 1);
+  expect(during.width).toBeLessThan(after.width - 1);
+  expect(during.iconX).toBeLessThan(iconAfter.x - 1);
+  expect(iconAfter.x).toBeGreaterThan(iconBefore.x);
+  await expect(specimen.getByRole('heading', { name: 'Transitions', exact: true })).toBeVisible();
+  await expectNoPageOverflow(page);
+});
+
+test('a larger text button keeps its label on one line throughout resize', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/?theme=light&lang=en&fps=0#foundation-motion-playground');
+  const sample = page.locator('[data-motion-size-sample="text"]');
+  const large = page.locator('[data-motion-size-control]').getByRole('radio', { name: 'Large' });
+  await expect(sample).toHaveCSS('height', '32px');
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
+  const [frame] = await Promise.all([
+    page.waitForFunction(
+      () => {
+        const button = document.querySelector('[data-motion-size-sample="text"]');
+        const label = button?.querySelector('.ui-button__content');
+        if (!button || !label) return;
+        const animation = button
+          .getAnimations()
+          .find(
+            (entry) =>
+              entry.effect instanceof KeyframeEffect &&
+              entry.effect.getKeyframes().some((keyframe) => 'height' in keyframe),
+          );
+        if (!animation) return;
+        animation.pause();
+        animation.currentTime = 24;
+        const height = button.getBoundingClientRect().height;
+        const range = document.createRange();
+        range.selectNodeContents(label);
+        const lines = range.getClientRects().length;
+        animation.finish();
+        return { height, lines };
+      },
+      undefined,
+      { timeout: 5000 },
+    ),
+    large.press('Enter'),
+  ]);
+
+  const during = await frame.jsonValue();
+  expect(during.height).toBeGreaterThan(32);
+  expect(during.height).toBeLessThan(48);
+  expect(during.lines).toBe(1);
+  await expect(sample).toHaveCSS('height', '48px');
+});
+
+test('theme reveal stays clickable and reverses from its current edge', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/?theme=light&lang=en&fps=0#foundation-motion-playground');
+  test.skip(
+    !(await page.evaluate(
+      () =>
+        typeof document.startViewTransition === 'function' &&
+        typeof CSS.registerProperty === 'function',
+    )),
+    'The engine has no animated snapshot mask',
+  );
+  const reveal = page.locator('[data-motion-theme-reveal]');
+  const large = page.locator('[data-motion-size-control]').getByRole('radio', { name: 'Large' });
+  await reveal.click();
+  await page.waitForFunction(() => {
+    const animation = document
+      .getAnimations()
+      .find((entry) => entry instanceof CSSAnimation && entry.animationName === 'nv-theme-reveal');
+    if (!animation) return false;
+    animation.pause();
+    animation.currentTime = 320;
+    return true;
+  });
+  const sizeBox = await large.boundingBox();
+  const revealBox = await reveal.boundingBox();
+  if (!sizeBox || !revealBox) throw new Error('Demo controls are not laid out');
+
+  await page.mouse.click(sizeBox.x + sizeBox.width / 2, sizeBox.y + sizeBox.height / 2);
+  await expect(large).toBeChecked();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  const first = await page.evaluateHandle(() =>
+    document
+      .getAnimations()
+      .find((entry) => entry instanceof CSSAnimation && entry.animationName === 'nv-theme-reveal'),
+  );
+  const clickReveal = () =>
+    page.mouse.click(revealBox.x + revealBox.width / 2, revealBox.y + revealBox.height / 2);
+  const playback = () =>
+    first.evaluate(async (animation) => {
+      if (!animation) throw new Error('First reveal was not captured');
+      const before = Number(animation.currentTime);
+      const { promise, resolve } = Promise.withResolvers<number>();
+      requestAnimationFrame(() => requestAnimationFrame(resolve));
+      await promise;
+      return {
+        active: document.getAnimations().includes(animation),
+        before,
+        time: Number(animation.currentTime),
+      };
+    });
+  await clickReveal();
+  const reversing = await playback();
+  expect(reversing.active).toBe(true);
+  expect(reversing.time).toBeLessThan(reversing.before);
+  expect(reversing.time).toBeGreaterThan(100);
+  expect(reversing.time).toBeLessThanOrEqual(320);
+  await clickReveal();
+  const advancing = await playback();
+  expect(advancing.active).toBe(true);
+  expect(advancing.time).toBeGreaterThan(advancing.before);
+  await clickReveal();
+  const returning = await playback();
+  expect(returning.active).toBe(true);
+  expect(returning.time).toBeLessThan(returning.before);
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-appearance-live');
+  await expect(page.locator('[data-motion-size-sample="icon"]')).toHaveCSS('width', '48px');
+});
+
+test('reversing from the toolbar does not replay Glass colors outside the reveal', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.setViewportSize({ width: 1474, height: 916 });
+  await page.goto('/?theme=light&lang=zh&fps=0#foundation-motion-playground');
+  test.skip(
+    !(await page.evaluate(
+      () =>
+        typeof document.startViewTransition === 'function' &&
+        typeof CSS.registerProperty === 'function',
+    )),
+    'The engine has no animated snapshot mask',
+  );
+  await page.getByRole('radio', { name: '光学', exact: true }).click();
+  const theme = page.locator('[data-playground-theme-control="segments"]');
+  const panel = page.locator('#design-lab-inspector');
+  const settled = await panel.evaluate((element) => getComputedStyle(element).backgroundColor);
+
+  await theme.getByRole('radio', { name: '深色', exact: true }).click();
+  await page.waitForFunction(() => {
+    const reveal = document
+      .getAnimations()
+      .find((entry) => entry instanceof CSSAnimation && entry.animationName === 'nv-theme-reveal');
+    if (!reveal) return false;
+    reveal.pause();
+    reveal.currentTime = 160;
+    return true;
+  });
+
+  const [firstLightFrame] = await Promise.all([
+    page.waitForFunction(() => {
+      const panel = document.getElementById('design-lab-inspector');
+      if (!panel || document.documentElement.dataset.theme !== 'light') return false;
+      return getComputedStyle(panel).backgroundColor;
+    }),
+    theme.getByRole('radio', { name: '浅色', exact: true }).click(),
+  ]);
+  expect(await firstLightFrame.jsonValue()).toBe(settled);
+  await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-appearance-live');
+});
+
 test('page dissolve swaps the specimen and clears the particle layer', async ({ page }) => {
   await page.goto('/frame?theme=light&lang=en#foundation-motion-page');
   const trigger = page.locator('[data-motion-page-dissolve]');

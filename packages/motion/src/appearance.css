@@ -1,0 +1,72 @@
+/* biome-ignore-all lint/complexity/noImportantStyles: snapshot capture excludes fixed Glass overlays regardless of their consumer styles. */
+@property --neoverse-appearance-reveal-edge {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
+}
+
+@layer neoverse.motion {
+  :root {
+    --neoverse-motion-theme-reveal-duration: 640ms;
+    --neoverse-motion-theme-reveal-feather: clamp(2rem, 5vmin, 4rem);
+  }
+}
+
+/* Keep viewport-sized edge overlays out of the snapshots; the tier-owned blur
+   and CSS material are unchanged. */
+:root[data-neoverse-theme-view-transitioning] [data-neoverse-glass-renderer-canvas],
+:root[data-neoverse-theme-view-transitioning] [data-neoverse-glass-chroma-canvas] {
+  display: none !important;
+}
+
+/* Keep named descendants in the outgoing root snapshot rather than capturing
+   them independently. The new UI stays live below that one snapshot. */
+:root[data-neoverse-appearance-motion] *,
+:root[data-neoverse-appearance-live] {
+  view-transition-name: none !important;
+}
+
+:root[data-neoverse-appearance-motion='theme-fade']::view-transition-old(root) {
+  animation: nv-appearance-fade var(--neoverse-motion-theme-duration)
+    var(--neoverse-motion-theme-easing) both;
+}
+
+:root[data-neoverse-appearance-motion='theme-reveal']::view-transition-group(root) {
+  animation-duration: var(--neoverse-motion-theme-reveal-duration);
+}
+
+:root[data-neoverse-appearance-motion='theme-reveal']::view-transition-old(root) {
+  mix-blend-mode: normal;
+  animation: nv-theme-reveal var(--neoverse-motion-theme-reveal-duration)
+    var(--neoverse-motion-easing-symmetric) both;
+  mask-image: radial-gradient(
+    circle at var(--neoverse-appearance-reveal-center),
+    transparent
+      max(0px, var(--neoverse-appearance-reveal-edge) - var(--neoverse-motion-theme-reveal-feather)),
+    black var(--neoverse-appearance-reveal-edge)
+  );
+}
+
+@keyframes nv-theme-reveal {
+  from {
+    --neoverse-appearance-reveal-edge: 0px;
+  }
+
+  to {
+    --neoverse-appearance-reveal-edge: calc(
+      var(--neoverse-appearance-reveal-radius) +
+      var(--neoverse-motion-theme-reveal-feather)
+    );
+  }
+}
+
+:root[data-neoverse-appearance-motion='locale']::view-transition-old(root) {
+  animation: nv-appearance-fade var(--neoverse-motion-state-duration)
+    var(--neoverse-motion-state-easing) both;
+}
+
+@keyframes nv-appearance-fade {
+  to {
+    opacity: 0;
+  }
+}

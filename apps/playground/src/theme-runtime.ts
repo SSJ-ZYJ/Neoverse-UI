@@ -1,3 +1,4 @@
+import { animateAppearanceChange, stopAppearanceTransition } from '@neoverse-ui/motion';
 import { readPreferences, writePreferences } from './playground-preferences';
 import type { FrameTheme, ThemeMode } from './playground-types';
 
@@ -14,14 +15,11 @@ const themeQueryParameter = 'theme';
 const systemThemeQuery = '(prefers-color-scheme: dark)';
 const reducedMotionQuery = '(prefers-reduced-motion: reduce)';
 const themeTransitionAttribute = 'data-neoverse-theme-transitioning';
-const themeViewTransitionAttribute = 'data-neoverse-theme-view-transitioning';
 const fallbackThemeTransitionDuration = 420;
 const themeTransitionCleanupBuffer = 32;
 
-let themeTransitionFrame: number | undefined;
 let themeTransitionTimeout: number | undefined;
-let activeThemeViewTransition: ViewTransition | undefined;
-let themeTransitionRequest = 0;
+let pendingTheme: { mode: ThemeMode } | undefined;
 
 const themeChangeListeners = new Set<() => void>();
 
@@ -69,6 +67,12 @@ export function resolveDocumentTheme(): FrameTheme {
   return mode === 'system' ? readSystemTheme() : mode;
 }
 
+/** Resolve the most recently selected palette, including one still reversing. */
+export function resolveRequestedTheme(): FrameTheme {
+  const mode = pendingTheme?.mode ?? readDocumentThemeMode();
+  return mode === 'system' ? readSystemTheme() : mode;
+}
+
 export function readThemeModeFromSearch(search: string): ThemeMode | undefined {
   const value = new URLSearchParams(search).get(themeQueryParameter);
   return isThemeMode(value) ? value : undefined;
@@ -112,15 +116,6 @@ export function persistThemeMode(value: ThemeMode): void {
 }
 
 function clearScheduledThemeTransition(root: HTMLElement): void {
-  activeThemeViewTransition?.skipTransition();
-  activeThemeViewTransition = undefined;
-  root.removeAttribute(themeViewTransitionAttribute);
-
-  if (themeTransitionFrame !== undefined) {
-    window.cancelAnimationFrame(themeTransitionFrame);
-    themeTransitionFrame = undefined;
-  }
-
   if (themeTransitionTimeout !== undefined) {
     window.clearTimeout(themeTransitionTimeout);
     themeTransitionTimeout = undefined;
@@ -172,44 +167,29 @@ function applyDocumentThemeMode(root: HTMLElement, value: ThemeMode): void {
   notifyThemeChange();
 }
 
-export function applyThemeMode(value: ThemeMode, animate = true): void {
+export function applyThemeMode(value: ThemeMode, animate = true, origin?: Element): void {
   const root = document.documentElement;
-  const request = ++themeTransitionRequest;
   clearScheduledThemeTransition(root);
 
-  if (!animate || shouldReduceMotion()) {
-    applyDocumentThemeMode(root, value);
+  const apply = () => applyDocumentThemeMode(root, value);
+  if (!animate) {
+    stopAppearanceTransition(document);
+    pendingTheme = undefined;
+    apply();
     return;
   }
 
-  if (typeof document.startViewTransition === 'function') {
-    root.setAttribute(themeViewTransitionAttribute, '');
-    const transition = document.startViewTransition(() => {
-      if (request !== themeTransitionRequest) {
-        return;
-      }
-      applyDocumentThemeMode(root, value);
-    });
-    activeThemeViewTransition = transition;
-    const finish = (): void => {
-      if (activeThemeViewTransition === transition) {
-        activeThemeViewTransition = undefined;
-        root.removeAttribute(themeViewTransitionAttribute);
-      }
-    };
-    void transition.finished.then(finish, finish);
-    return;
-  }
-
-  root.setAttribute(themeTransitionAttribute, '');
-  themeTransitionFrame = window.requestAnimationFrame(() => {
-    // Let the transition properties reach a painted frame before changing the
-    // inherited text colors and theme tokens.
-    themeTransitionFrame = window.requestAnimationFrame(() => {
-      themeTransitionFrame = undefined;
-      applyDocumentThemeMode(root, value);
-      scheduleThemeTransitionCleanup(root);
-    });
+  const request = { mode: value };
+  pendingTheme = request;
+  void animateAppearanceChange(apply, {
+    kind: origin ? 'theme-reveal' : 'theme-fade',
+    origin,
+    theme: {
+      current: resolveDocumentTheme,
+      next: value === 'system' ? readSystemTheme() : value,
+    },
+  }).finally(() => {
+    if (pendingTheme === request) pendingTheme = undefined;
   });
 }
 
@@ -221,9 +201,12 @@ export function observeSystemTheme(): () => void {
   const query = window.matchMedia(systemThemeQuery);
   const handleChange = (): void => {
     const root = document.documentElement;
+    if (pendingTheme?.mode === 'system') stopAppearanceTransition(document);
     if (root.hasAttribute('data-theme')) {
       return;
     }
+
+    stopAppearanceTransition(document);
 
     clearScheduledThemeTransition(root);
     if (!shouldReduceMotion()) {

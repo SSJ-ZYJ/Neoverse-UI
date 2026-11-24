@@ -37,18 +37,23 @@ onBeforeUnmount(pause);
 
 <template>
   <Teleport v-if="mounted" to="body">
-    <UiPresence :show="open" variant="rise" class="ui-toast-container">
-      <div
-        class="ui-toast material-glass-immersive"
+    <div class="ui-toast-container">
+      <UiPresence
+        :show="open"
+        variant="rise"
+        class="ui-toast material-glass-elevated"
         :class="`ui-toast--${variant}`"
-        data-surface="glass-immersive"
+        data-surface="glass-elevated"
         data-neoverse-glass-occluder="topmost"
+        data-neoverse-surface-overflow="visible"
+        data-neoverse-surface-hover="static"
         :role="variant === 'danger' ? 'alert' : 'status'"
         @pointerenter="pause"
         @pointerleave="resume"
         @focusin="pause"
         @focusout="resume"
       >
+        <span class="ui-toast__indicator" aria-hidden="true" />
         <div class="ui-toast__message"><slot>{{ message }}</slot></div>
         <slot name="action" />
         <button
@@ -59,7 +64,7 @@ onBeforeUnmount(pause);
         >
           <span aria-hidden="true">×</span>
         </button>
-      </div>
-    </UiPresence>
+      </UiPresence>
+    </div>
   </Teleport>
 </template>

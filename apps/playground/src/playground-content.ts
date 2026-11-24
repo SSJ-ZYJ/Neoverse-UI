@@ -86,7 +86,6 @@ export const appCopy = {
   },
   stageBackground: {
     label: localized('Stage background', '舞台背景'),
-    shortLabel: localized('Background', '背景'),
     options: {
       canvas: localized('Solid', '纯色'),
       tint: localized('Tint', '淡色'),

@@ -1,9 +1,11 @@
 <script setup lang="ts">
-import { nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, provide, ref } from 'vue';
 import { applyFrameContextFromDocument, frameLocale } from './frame-state';
 import LabSection from './LabSection.vue';
 import { labModules, type ModuleId, resolveLabHash, type SpecimenId } from './lab-modules';
+import { appearanceControls, applyPlaygroundLocale } from './playground-appearance';
 import { localize } from './playground-content';
+import { applyThemeMode } from './theme-runtime';
 
 const defaultModule: ModuleId = labModules[0].id;
 const locale = frameLocale;
@@ -15,6 +17,15 @@ const activeModule = ref(labModules.find((module) => module.id === activeModuleI
 let attributeObserver: MutationObserver | undefined;
 
 document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en';
+
+provide(appearanceControls, {
+  setTheme(value, origin) {
+    applyThemeMode(value, true, origin);
+  },
+  setLocale(value) {
+    applyPlaygroundLocale(locale, value);
+  },
+});
 
 function routeFromHash() {
   let value = '';

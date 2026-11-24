@@ -20,15 +20,11 @@
     --neoverse-notice-success-shadow: var(--neoverse-effect-status-success-shadow);
     --neoverse-notice-warning-shadow: var(--neoverse-effect-status-warning-shadow);
     --neoverse-notice-danger-shadow: var(--neoverse-effect-status-danger-shadow);
-    --neoverse-toast-width: var(--neoverse-layout-container-sm);
+    --neoverse-toast-width: 22rem;
     --neoverse-toast-bottom: var(--neoverse-space-6);
-    --neoverse-toast-padding: var(--neoverse-space-3);
+    --neoverse-toast-padding: var(--neoverse-space-1);
     --neoverse-toast-accent: var(--neoverse-color-text-muted);
-    /* A transient notification floats above content without a scrim, so its
-       plane reads from the overlay surface role instead of the 30% tier fill
-       that disappears against an empty dark canvas. The shared Immersive edge,
-       shadow and blur remain the material. */
-    --neoverse-toast-background: var(--neoverse-color-surface-overlay);
+    --neoverse-toast-background: var(--neoverse-material-glass-elevated-background);
     --neoverse-toast-foreground: var(--neoverse-color-text-primary);
   }
 }

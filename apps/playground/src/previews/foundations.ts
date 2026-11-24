@@ -11,6 +11,7 @@ import { type Locale, localize, moduleCopy } from '../playground-content';
 import TokenRow from '../TokenRow.vue';
 import ColorPalettesExample from './ColorPalettesExample.vue';
 import MotionPageExample from './MotionPageExample.vue';
+import MotionPlaygroundExample from './MotionPlaygroundExample.vue';
 import MotionPresenceExample from './MotionPresenceExample.vue';
 import MotionPrimitivesExample from './MotionPrimitivesExample.vue';
 import MotionStaggerExample from './MotionStaggerExample.vue';
@@ -113,6 +114,10 @@ export function motionPresence(locale: Locale): VNode {
 
 export function motionWidth(locale: Locale): VNode {
   return h(MotionWidthExample, { locale, class: previewWidth });
+}
+
+export function motionPlayground(locale: Locale): VNode {
+  return h(MotionPlaygroundExample, { locale, class: previewWidth });
 }
 
 export function motionPage(locale: Locale): VNode {

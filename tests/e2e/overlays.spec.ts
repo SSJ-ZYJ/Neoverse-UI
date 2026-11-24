@@ -39,7 +39,7 @@ test.describe('modal and transient feedback', () => {
         await expect(trigger).toBeFocused();
       });
 
-      test(`${adapter.name}: feedback is announced and can be dismissed / ${theme}`, async ({
+      test(`${adapter.name}: compact glass feedback is announced and can be dismissed / ${theme}`, async ({
         page,
       }) => {
         await page.goto(adapter.url(theme, 'status-feedback'));
@@ -50,19 +50,22 @@ test.describe('modal and transient feedback', () => {
         await trigger.click();
         const toast = page.locator('.ui-toast[role="status"]');
         await expect(toast).toBeVisible();
-        const background = await toast.evaluate((element) => {
-          const value = getComputedStyle(element).backgroundColor;
-          const srgb = value.match(/\/\s*([\d.]+)\s*\)/)?.[1];
-          if (srgb !== undefined) return Number.parseFloat(srgb);
-          const rgba = value.match(/rgba?\([^)]*,\s*([\d.]+)\s*\)/)?.[1];
-          return rgba === undefined ? 1 : Number.parseFloat(rgba);
+        await expect(toast).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+        const { alpha, width, height } = await toast.evaluate((element) => {
+          const { backgroundColor } = getComputedStyle(element);
+          const alpha =
+            backgroundColor.match(/\/\s*([\d.]+)\s*\)/)?.[1] ??
+            backgroundColor.match(/^rgba\(.*,\s*([\d.]+)\s*\)/)?.[1];
+          const { width, height } = element.getBoundingClientRect();
+          return {
+            alpha: alpha === undefined ? 1 : Number(alpha),
+            width,
+            height,
+          };
         });
-        // A transient notification floats over content without a scrim; its
-        // overlay plane must stay readable instead of inheriting the 30% tier tint.
-        expect(background).toBeGreaterThanOrEqual(0.9);
-        expect(await toast.evaluate((element) => getComputedStyle(element).backdropFilter)).toBe(
-          'none',
-        );
+        expect(alpha).toBeCloseTo(0.2);
+        expect(width).toBeLessThan(300);
+        expect(height).toBeLessThanOrEqual(42);
         await toast.getByRole('button').click();
         await expect(toast).toBeHidden();
       });

@@ -380,6 +380,61 @@ test.describe('playground', () => {
     await expect(page.locator('[data-design-lab-workspace]')).toHaveCount(0);
   });
 
+  test('the isolated preview link keeps its label and arrow on one line when switching to English', async ({
+    page,
+  }, testInfo) => {
+    const mobile = testInfo.project.name === 'mobile';
+    await page.goto('/?theme=light&lang=zh&fps=0#controls-button', {
+      waitUntil: 'domcontentloaded',
+    });
+    const inspector = await showInspector(page, mobile);
+    const link = inspector.locator('a[href^="/frame"]');
+    await expect(link).toHaveAccessibleName('打开独立预览');
+    await page.evaluate(() => document.fonts.ready.then(() => undefined));
+    const measure = () =>
+      link.evaluate((element) => {
+        const label = element.querySelector('.truncate');
+        const arrow = element.querySelector('svg');
+        if (!label || !arrow) throw new Error('Preview link must have a label and arrow');
+        const text = document.createRange();
+        text.selectNodeContents(label);
+        const box = text.getBoundingClientRect();
+        return {
+          width: element.getBoundingClientRect().width,
+          lines: new Set(Array.from(text.getClientRects(), ({ top }) => top)).size,
+          extraGap:
+            arrow.getBoundingClientRect().left -
+            box.right -
+            Number.parseFloat(getComputedStyle(element).columnGap),
+          clipped: label.scrollWidth > label.clientWidth,
+        };
+      });
+    const before = await measure();
+    expect(before.lines).toBe(1);
+    expect(before.clipped).toBe(false);
+    expect(before.extraGap).toBeCloseTo(0, 0);
+
+    if (mobile) {
+      await page.keyboard.press('Escape');
+      await page.getByRole('button', { name: /切换语言/ }).click();
+      await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+      await showInspector(page, mobile);
+    } else {
+      await page
+        .getByRole('radiogroup', { name: '语言' })
+        .getByRole('radio', { name: '英文' })
+        .click();
+    }
+    await expect(link).toHaveAccessibleName('Open isolated preview');
+    expect((await measure()).lines).toBe(1);
+    await expect.poll(async () => (await measure()).clipped).toBe(false);
+    const after = await measure();
+    expect(after.lines).toBe(1);
+    expect(after.clipped).toBe(false);
+    expect(after.extraGap).toBeCloseTo(0, 0);
+    expect(after.width).toBeGreaterThan(before.width);
+  });
+
   test('the desktop toolbar switches theme and language without resizing the stage', async ({
     page,
   }) => {
@@ -399,13 +454,14 @@ test.describe('playground', () => {
     ).toBeLessThanOrEqual(1);
 
     const stage = page.locator('[data-design-lab-workspace]');
+    const toolbar = page.locator('.playground-shell__toolbar');
     const original = await stage.boundingBox();
-    await page
+    await toolbar
       .getByRole('radiogroup', { name: 'Playground theme' })
       .getByRole('radio', { name: 'Dark' })
       .click();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-    await page
+    await toolbar
       .getByRole('radiogroup', { name: 'Language' })
       .getByRole('radio', { name: '中文' })
       .click();

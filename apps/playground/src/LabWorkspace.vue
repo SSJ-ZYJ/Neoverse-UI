@@ -1,11 +1,21 @@
 <script setup lang="ts">
 import { layoutBreakpoints } from '@neoverse-ui/tokens';
-import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue';
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  provide,
+  ref,
+  shallowRef,
+  watch,
+} from 'vue';
 import LabExplorer from './LabExplorer.vue';
 import LabInspector from './LabInspector.vue';
 import LabStage from './LabStage.vue';
 import LabToolbar from './LabToolbar.vue';
 import { labModules, moduleGroupFor, resolveLabHash, specimenById } from './lab-modules';
+import { appearanceControls, applyPlaygroundLocale } from './playground-appearance';
 import { isLocale, type Locale } from './playground-content';
 import { readPreferences, writePreferences } from './playground-preferences';
 import { restoreScrollPosition, saveScrollPosition } from './scroll-restoration';
@@ -95,6 +105,7 @@ const preferences = readPreferences();
 const parameters = new URLSearchParams(window.location.search);
 const queryLocale = parameters.get('lang');
 const showFps = parameters.get('fps') !== '0';
+const fadeTheme = parameters.get('theme-motion') === 'fade';
 const locale = ref<Locale>(
   isLocale(queryLocale)
     ? queryLocale
@@ -104,6 +115,8 @@ const locale = ref<Locale>(
         ? 'zh'
         : 'en',
 );
+// Selection follows the user immediately; translated copy waits for the snapshot.
+const requestedLocale = ref(locale.value);
 const theme = ref(resolveInitialThemeMode());
 applyThemeMode(theme.value, false);
 const stageBackground = ref<StageBackground>(
@@ -118,10 +131,10 @@ const showcaseSurface = ref<ShowcaseSurface>(
 );
 document.documentElement.lang = locale.value === 'zh' ? 'zh-CN' : 'en';
 
-function setTheme(value: string): void {
+function setTheme(value: string, origin?: Element): void {
   if (!isThemeMode(value)) return;
   theme.value = value;
-  applyThemeMode(value);
+  applyThemeMode(value, true, origin);
   persistThemeMode(value);
 }
 
@@ -138,14 +151,16 @@ function setShowcaseSurface(value: string): void {
 }
 
 function setLocale(value: string): void {
-  if (!isLocale(value)) return;
-  locale.value = value;
-  document.documentElement.lang = value === 'zh' ? 'zh-CN' : 'en';
+  if (!isLocale(value) || value === requestedLocale.value) return;
+  requestedLocale.value = value;
   writePreferences({ locale: value });
   const url = new URL(window.location.href);
   url.searchParams.set('lang', value);
   window.history.replaceState(null, '', url);
+  applyPlaygroundLocale(locale, value);
 }
+
+provide(appearanceControls, { setTheme, setLocale });
 
 type Panel = 'explorer' | 'inspector';
 const desktopQuery = window.matchMedia(`(min-width: ${layoutBreakpoints.xl}px)`);
@@ -303,11 +318,12 @@ onBeforeUnmount(() => {
   >
     <LabToolbar
       :locale="locale"
+      :requested-locale="requestedLocale"
       :theme="theme"
       :persistent="persistent"
       :open-panel="openPanel"
       :show-fps="showFps"
-      @theme="setTheme"
+      @theme="(value, origin) => setTheme(value, fadeTheme ? undefined : origin)"
       @locale="setLocale"
       @panel="showPanel"
     />

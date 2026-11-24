@@ -3,46 +3,43 @@
     position: fixed;
     z-index: var(--neoverse-layout-layer-toast);
     bottom: var(--neoverse-toast-bottom);
-    left: 50%;
-    width: min(var(--neoverse-toast-width), calc(100vw - 2 * var(--neoverse-space-4)));
-    transform: translateX(-50%);
+    inset-inline: 0;
+    width: max-content;
+    max-width: min(var(--neoverse-toast-width), calc(100% - 2 * var(--neoverse-space-4)));
+    margin-inline: auto;
     pointer-events: none;
   }
 
   .ui-toast {
     display: flex;
     align-items: center;
-    gap: var(--neoverse-space-3);
-    padding: var(--neoverse-toast-padding);
+    gap: var(--neoverse-space-2);
+    padding: var(--neoverse-toast-padding)
+      calc(var(--neoverse-toast-padding) + var(--neoverse-space-2));
     border-radius: var(--neoverse-radius-card);
     color: var(--neoverse-toast-foreground);
-    background: var(--neoverse-toast-background);
-    box-shadow: var(--neoverse-material-glass-immersive-shadow);
-    -webkit-backdrop-filter: var(--neoverse-material-glass-immersive-filter);
-    backdrop-filter: var(--neoverse-material-glass-immersive-filter);
     pointer-events: auto;
   }
 
-  .ui-toast::before {
-    content: '';
+  .ui-toast__indicator {
     flex: none;
-    width: var(--neoverse-space-1);
-    align-self: stretch;
+    width: var(--neoverse-space-2);
+    height: var(--neoverse-space-2);
     border-radius: var(--neoverse-radius-pill);
     background: var(--neoverse-toast-accent);
   }
 
   .ui-toast--info {
-    --neoverse-toast-accent: var(--neoverse-color-status-info);
+    --neoverse-toast-accent: var(--neoverse-effect-status-info-text);
   }
   .ui-toast--success {
-    --neoverse-toast-accent: var(--neoverse-color-status-success);
+    --neoverse-toast-accent: var(--neoverse-effect-status-success-text);
   }
   .ui-toast--warning {
-    --neoverse-toast-accent: var(--neoverse-color-status-warning);
+    --neoverse-toast-accent: var(--neoverse-effect-status-warning-text);
   }
   .ui-toast--danger {
-    --neoverse-toast-accent: var(--neoverse-color-status-danger);
+    --neoverse-toast-accent: var(--neoverse-effect-status-danger-text);
   }
 
   .ui-toast__message {
@@ -53,21 +50,34 @@
   }
 
   .ui-toast__dismiss {
+    position: relative;
     display: inline-grid;
-    width: var(--neoverse-space-8);
-    height: var(--neoverse-space-8);
+    width: var(--neoverse-space-7);
+    height: var(--neoverse-space-7);
     flex: none;
     place-items: center;
     border: 0;
-    border-radius: var(--neoverse-radius-control);
+    border-radius: var(--neoverse-radius-control-inner);
     color: inherit;
     background: transparent;
     font: inherit;
     cursor: pointer;
   }
 
-  .ui-toast__dismiss:hover {
-    background: var(--neoverse-control-hover-background);
+  @media (hover: hover) {
+    .ui-toast__dismiss:hover {
+      background: var(--neoverse-control-hover-background);
+    }
+  }
+
+  @media (pointer: coarse) {
+    .ui-toast__dismiss::after {
+      /* Expand away from the optional action so the two targets do not overlap. */
+      position: absolute;
+      inset-block: calc(-1 * var(--neoverse-control-touch-hit-area));
+      inset-inline: 0 calc(-2 * var(--neoverse-control-touch-hit-area));
+      content: '';
+    }
   }
 
   .ui-toast__dismiss:focus-visible {
@@ -75,11 +85,21 @@
     outline-offset: var(--neoverse-focus-ring-offset);
   }
 
-  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+  @media (forced-colors: active) {
     .ui-toast {
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-      background: var(--neoverse-color-surface-overlay);
+      --neoverse-material-glass-elevated-filter: none;
+      --neoverse-material-edge-display: none;
     }
+
+    .ui-toast__indicator {
+      forced-color-adjust: none;
+      background: CanvasText;
+    }
+  }
+}
+
+@layer utilities {
+  .ui-toast.material-glass-elevated {
+    --neoverse-material-background: var(--neoverse-toast-background);
   }
 }

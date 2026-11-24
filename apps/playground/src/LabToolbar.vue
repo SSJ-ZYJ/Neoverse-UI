@@ -1,10 +1,5 @@
 <script setup lang="ts">
-import {
-  UiIconButton,
-  UiSegmentedControl,
-  UiSurface,
-  useLayoutWidthMotion,
-} from '@neoverse-ui/vue';
+import { UiIconButton, UiSegmentedControl, UiSurface } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
 import brandWordmarkUrl from './assets/neoverse-wordmark.svg';
 import FpsIndicator from './FpsIndicator.vue';
@@ -17,35 +12,35 @@ import { themeSegments } from './vue-theme-segments';
 
 const props = defineProps<{
   locale: Locale;
+  requestedLocale: Locale;
   theme: ThemeMode;
   persistent: boolean;
   openPanel: 'explorer' | 'inspector' | null;
   showFps: boolean;
 }>();
 const emit = defineEmits<{
-  theme: [value: string];
+  theme: [value: string, origin: Element | undefined];
   locale: [value: string];
   panel: [panel: 'explorer' | 'inspector', event: MouseEvent];
 }>();
 
 const actions = ref<HTMLElement | null>(null);
-// biome-ignore lint/correctness/useHookAtTopLevel: Vue composables belong at <script setup> top level; this is not a React hook.
-useLayoutWidthMotion({
-  root: actions,
-  targets: '[data-toolbar-width-target]',
-  trigger: () => props.locale,
-});
-
 const themeOptions = computed(() => themeSegments(themeModes, props.locale));
 const languageOptions = computed(() => languageSegments(props.locale));
 const cycleLabel = localized('Cycle theme', '切换主题');
 const languageLabel = localized('Switch language', '切换语言');
 
-function cycleTheme(): void {
+function cycleTheme(event: MouseEvent): void {
   emit(
     'theme',
     themeModes[(themeModes.indexOf(props.theme) + 1) % themeModes.length] ?? defaultThemeMode,
+    event.currentTarget instanceof Element ? event.currentTarget : undefined,
   );
+}
+
+function selectTheme(value: string): void {
+  const origin = actions.value?.querySelector('[data-playground-theme-control="segments"]');
+  emit('theme', value, origin ?? undefined);
 }
 </script>
 
@@ -84,7 +79,7 @@ function cycleTheme(): void {
     <div ref="actions" class="playground-shell__toolbar-actions">
       <FpsIndicator v-if="showFps" />
       <UiIconButton
-        data-toolbar-width-target
+        data-playground-theme-control="cycle"
         class="sm:hidden"
         size="sm"
         variant="ghost"
@@ -95,31 +90,29 @@ function cycleTheme(): void {
         <LabIcon :name="theme" />
       </UiIconButton>
       <UiIconButton
-        data-toolbar-width-target
         class="sm:hidden"
         size="sm"
         variant="ghost"
         surface="none"
-        :label="`${localize(languageLabel, locale)}: ${localize(appCopy.language.options[locale], locale)}`"
-        @click="emit('locale', locale === 'zh' ? 'en' : 'zh')"
+        :label="`${localize(languageLabel, locale)}: ${localize(appCopy.language.options[requestedLocale], locale)}`"
+        @click="emit('locale', requestedLocale === 'zh' ? 'en' : 'zh')"
       >
         <LabIcon name="globe" />
       </UiIconButton>
       <UiSegmentedControl
-        data-toolbar-width-target
+        data-playground-theme-control="segments"
         class="hidden sm:inline-flex"
         :aria-label="localize(appCopy.theme.label, locale)"
         :options="themeOptions"
         :model-value="theme"
         variant="icon"
-        @update:model-value="emit('theme', $event)"
+        @update:model-value="selectTheme"
       />
       <UiSegmentedControl
-        data-toolbar-width-target
         class="hidden sm:inline-flex"
         :aria-label="localize(appCopy.language.label, locale)"
         :options="languageOptions"
-        :model-value="locale"
+        :model-value="requestedLocale"
         variant="language"
         @update:model-value="emit('locale', $event)"
       />

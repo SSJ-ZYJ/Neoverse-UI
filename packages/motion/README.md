@@ -126,6 +126,87 @@ The two phases are required: the natural width only exists after the update.
 adapter is `useLayoutWidthMotion` from `@neoverse-ui/vue`. The Design Lab's
 `foundation-motion-width` specimen shows the result on a language switch.
 
+## Appearance and control size transitions
+
+`animateAppearanceChange` takes the update rather than owning the application's
+theme or language state. Keep the control and surrounding UI mounted, and
+update the live DOM inside the callback:
+
+```ts
+import { animateAppearanceChange, attachLayoutSizeMotion } from '@neoverse-ui/motion';
+
+await animateAppearanceChange(
+  () => { document.documentElement.dataset.theme = 'dark'; },
+  {
+    kind: 'theme-reveal',
+    origin: themeControl,
+    theme: { current: readAppliedPalette, next: 'dark' },
+  },
+);
+
+await animateAppearanceChange(
+  () => renderLocale('en'), // Update the UI and documentElement.lang together.
+  { kind: 'locale' },
+);
+
+// Mark the descendants that should resize with `data-neoverse-size-motion`.
+const detach = attachLayoutSizeMotion(controlGroup);
+// Call detach() when the group unmounts.
+```
+
+- `theme-reveal` uses the trigger's center (even on keyboard activation) and a
+  feathered circle. `theme-fade` preserves a uniform crossfade; it also runs
+  when a usable origin or animated mask is unavailable. The reveal duration and
+  feather width are `--neoverse-motion-theme-reveal-duration` and
+  `--neoverse-motion-theme-reveal-feather`.
+- Appearance motion animates only an outgoing snapshot; the live incoming DOM
+  stays clickable beneath it. A new appearance request interrupts the current
+  effect rather than queuing, without dropping the earlier DOM update.
+  Pass `theme.current` and `theme.next` as resolved palette keys on each theme
+  request. A request for the currently covered palette reverses the visible
+  effect in place, without discarding the snapshot or repainting the viewport
+  from a fresh start. Read the applied palette in `current`; the control can
+  show the latest requested selection immediately. On reversal the update
+  callback commits the requested palette once the old snapshot covers the
+  live page again. Keep that callback scoped to applying the palette.
+  The snapshot owns the palette interpolation. Color and shadow transitions
+  started by the callback commit to their end values before the live page is
+  revealed; existing effects and layout motion keep running.
+- `locale` fades the outgoing view over the updated UI. Set the new content and
+  `document.documentElement.lang` in the same render batch. In Vue, return
+  `nextTick()` after the state update. In React, commit the update with
+  `flushSync` inside the callback. With reduced motion, updates apply immediately;
+  without View Transitions, the theme falls back to a token color transition
+  and the language updates directly.
+- `attachLayoutSizeMotion` animates the actual `width` and `height` of the same
+  elements. Pass `targets` to select a scoped group, and `attributes` when
+  data attributes drive its sizes. The default watches `class`, `style`, and
+  `hidden`, plus content changes. Keep the group small, use stable DOM nodes,
+  and detach on unmount. New elements, viewport resizes, and native resize
+  gestures do not animate. Explicit CSS `zoom` changes can use a `zoom`
+  transition on the spatial role.
+  Mark a compact label inside a target with `data-neoverse-size-motion-label`,
+  or pass its selector as `singleLineLabels`. During a size change, including
+  a language change, the label stays on one line and clips only the text that
+  does not yet fit. The label uses its normal typography and full text at rest
+  without reserving space for other translations. Do not mark content intended
+  to wrap, such as a description.
+
+### Keep translated actions on one line
+
+For compact actions with a trailing icon, let the current label set the natural
+width and keep it on one line. Keep the icon in a non-shrinking slot, use the
+component's gap, and let the text alone truncate in a very narrow container.
+Do not set the label track to the longest translation unless the surrounding
+layout needs a fixed-width control; otherwise short labels leave a large gap
+before the icon. For fixed-width controls, reserve space outside the label
+and icon pair, and render only the current translation as the accessible label.
+For intentional width animation, use the temporary no-wrap behavior in
+`attachLayoutSizeMotion` or the dedicated layout width primitive.
+
+The Transitions specimen (`foundation-motion-playground`) demonstrates all
+three effects. The Inspector's isolated preview link follows its visible label.
+
 ## Page-change choreography
 
 ```ts

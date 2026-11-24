@@ -1,8 +1,75 @@
 import { expect, test } from '@playwright/test';
 import { expectNoPageOverflow } from '../support/e2e';
-import { chooseOption, showInspector } from '../support/playground';
+import { chooseOption, showInspector, switchToChinese } from '../support/playground';
 
 test.describe('playground', () => {
+  test('theme expands from its control and language fades without resetting the specimen', async ({
+    page,
+  }, testInfo) => {
+    const mobile = testInfo.project.name === 'mobile';
+    await page.goto('/?theme=light&lang=en&fps=0#controls-button');
+    const specimen = page.locator('#controls-button');
+    const specimenButton = specimen.getByRole('button');
+    await specimenButton.click();
+    await expect(specimen.locator('output')).toHaveText('Activations: 1');
+
+    const theme = page.locator(
+      `[data-playground-theme-control="${mobile ? 'cycle' : 'segments'}"]`,
+    );
+    const trigger = mobile ? theme : theme.getByRole('radio', { name: 'Dark' });
+    const box = await theme.boundingBox();
+    if (!box) throw new Error('Theme control has no bounding box');
+    const [mask] = await Promise.all([
+      page.waitForFunction(() => {
+        const snapshot = getComputedStyle(document.documentElement, '::view-transition-old(root)');
+        const stops = [...snapshot.maskImage.matchAll(/\)\s+([\d.]+)px/g)];
+        const feather = Number(stops[1]?.[1]) - Number(stops[0]?.[1]);
+        return feather >= 24 && Number(stops[0]?.[1]) > 0 ? snapshot.maskImage : undefined;
+      }),
+      trigger.press(mobile ? 'Enter' : 'End'),
+    ]);
+    const center = (await mask.jsonValue()).match(/at ([\d.]+)px ([\d.]+)px/);
+    expect(center).not.toBeNull();
+    expect(Number(center?.[1])).toBeCloseTo(box.x + box.width / 2, 1);
+    expect(Number(center?.[2])).toBeCloseTo(box.y + box.height / 2, 1);
+    const root = page.locator('html');
+    await expect(root).toHaveAttribute('data-theme', 'dark');
+    await expect(trigger).toBeFocused();
+
+    const [fading] = await Promise.all([
+      page.waitForFunction(() => {
+        if (document.documentElement.lang !== 'zh-CN') return false;
+        const old = getComputedStyle(document.documentElement, '::view-transition-old(root)');
+        return Number(old.opacity) > 0 && Number(old.opacity) < 1;
+      }),
+      switchToChinese(page, mobile),
+    ]);
+    expect(await fading.jsonValue()).toBe(true);
+    await expect(root).toHaveAttribute('data-theme', 'dark');
+    await expect(page).toHaveURL(/lang=zh.*#controls-button$/);
+    await expect(specimen.locator('output')).toHaveText('触发次数：1');
+  });
+
+  test('reduced motion changes preferences without a viewport animation', async ({
+    page,
+  }, testInfo) => {
+    const mobile = testInfo.project.name === 'mobile';
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/?theme=light&lang=en&fps=0');
+    const theme = page.locator(
+      `[data-playground-theme-control="${mobile ? 'cycle' : 'segments'}"]`,
+    );
+    await (mobile ? theme : theme.getByRole('radio', { name: 'Dark' })).click();
+    await switchToChinese(page, mobile);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    expect(
+      await page.evaluate(
+        () =>
+          getComputedStyle(document.documentElement, '::view-transition-old(root)').animationName,
+      ),
+    ).toBe('none');
+  });
+
   test('the explorer opens a module overview before disclosing its specimens', async ({
     page,
   }, testInfo) => {
@@ -470,7 +537,15 @@ test.describe('playground', () => {
     const large = inspector.getByRole('option', { name: 'Large' });
     await page.keyboard.press('End');
     await expect(large).toBeFocused();
-    await page.keyboard.press('Enter');
+    await Promise.all([
+      page.waitForFunction(() => {
+        const target = document.querySelector('#controls-button .ui-button');
+        if (!target) return false;
+        const height = Number.parseFloat(getComputedStyle(target).height);
+        return height > 32 && height < 48;
+      }),
+      page.keyboard.press('Enter'),
+    ]);
     await expect(size).toBeFocused();
     await expect(size.locator('..')).toContainText('Large');
     await expect(button).toHaveCSS('height', '48px');

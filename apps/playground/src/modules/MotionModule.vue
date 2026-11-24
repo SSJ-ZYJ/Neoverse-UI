@@ -2,10 +2,12 @@
 import LabSpecimenSection from '../LabSpecimenSection.vue';
 import { localize, moduleCopy } from '../playground-content';
 import MotionPageExample from '../previews/MotionPageExample.vue';
+import MotionPlaygroundExample from '../previews/MotionPlaygroundExample.vue';
 import MotionPresenceExample from '../previews/MotionPresenceExample.vue';
 import MotionPrimitivesExample from '../previews/MotionPrimitivesExample.vue';
 import MotionStaggerExample from '../previews/MotionStaggerExample.vue';
 import MotionWidthExample from '../previews/MotionWidthExample.vue';
+import { motionPlaygroundCopy } from '../previews/motion-playground-copy';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
@@ -46,6 +48,14 @@ const pageCopy = moduleCopy.motion.page;
       :description="localize(widthCopy.description, props.locale)"
     >
       <MotionWidthExample :locale="props.locale" />
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="foundation-motion-playground"
+      :title="localize(motionPlaygroundCopy.label, props.locale)"
+      :description="localize(motionPlaygroundCopy.description, props.locale)"
+    >
+      <MotionPlaygroundExample :locale="props.locale" />
     </LabSpecimenSection>
 
     <MotionPageExample

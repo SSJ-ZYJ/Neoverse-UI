@@ -46,7 +46,7 @@ import {
 } from '@neoverse-ui/react';
 import { Fragment, useCallback, useEffect, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { mountPlaygroundGlass } from './glass-runtime';
+import { mountPlaygroundEffects } from './playground-effects';
 import { appCopy, localize } from './playground-content';
 import type { ThemeMode } from './playground-types';
 import { languageSegments, themeGlyphPaths } from './preference-segments';
@@ -1275,4 +1275,4 @@ if (root === null) {
 }
 
 createRoot(root).render(<ReactFixture />);
-mountPlaygroundGlass();
+mountPlaygroundEffects(root);

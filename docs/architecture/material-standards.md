@@ -282,6 +282,11 @@ visible on a flat backdrop. It retains the Light-tier fill alpha, backdrop
 blur, and inset shadows without adding a border. Status variants retain their
 semantic tints.
 
+Toast uses the Standard tier for its floating notification surface. Short
+messages size the surface to their content; long messages wrap within the
+width limit and viewport margins. Tone is carried by a compact status dot
+rather than a painted stripe on the glass edge.
+
 Disclosure panels use the shared directional inset edge roles in every state,
 together with the shared control shadow. The directional catches separate the
 panel from pale or textured backdrops without a uniform inset ring, and they do

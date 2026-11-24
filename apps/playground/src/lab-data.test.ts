@@ -206,6 +206,7 @@ test('keeps the foundation modules represented in the specimen catalogue', () =>
     ['foundation-motion', 'motion'],
     ['foundation-motion-presence', 'motion'],
     ['foundation-motion-width', 'motion'],
+    ['foundation-motion-playground', 'motion'],
     ['foundation-motion-page', 'motion'],
     ['materials-glass', 'materials'],
   ]);

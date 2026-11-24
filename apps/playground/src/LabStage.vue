@@ -209,18 +209,13 @@ const showcaseOptions = computed(() =>
           <LabIcon name="move" />
         </button>
       </div>
-      <UiSurface surface="elevated" class="playground-stage__background">
-        <span class="hidden text-label-sm font-label text-secondary sm:inline" aria-hidden="true">
-          {{ localize(appCopy.stageBackground.shortLabel, locale) }}
-        </span>
-        <UiSegmentedControl
-          :aria-label="localize(appCopy.stageBackground.label, locale)"
-          :model-value="props.background"
-          :options="backgroundOptions"
-          surface="none"
-          @update:model-value="emit('background', $event)"
-        />
-      </UiSurface>
+      <UiSegmentedControl
+        :aria-label="localize(appCopy.stageBackground.label, locale)"
+        :model-value="props.background"
+        :options="backgroundOptions"
+        surface="glass-elevated"
+        @update:model-value="emit('background', $event)"
+      />
     </div>
 
     <section

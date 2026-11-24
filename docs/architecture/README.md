@@ -205,6 +205,10 @@ gallery content; interactive previews retain visible focus and overlay overflow.
 
 The ordinary Design Lab shell and its Stage use a flat semantic canvas by default. A persisted stage-background control repaints only the centre column with the existing Playground field tokens — solid, tint, gradient or optical — so a component can be judged against a coloured or textured backdrop without opening the isolated frame; every other shell contract keeps the flat default. The overview's Preview material choice uses the same preference record, so a reload keeps the selected tier. A specimen route mounts exactly the preview declared by that catalogue entry. The keyed Stage section owns the deep-link anchor and focus target; leaving the route unmounts the instance. A preview may be a single Vue adapter or a deliberately composed scene. It does not select children from a gallery or use CSS to hide sibling specimens.
 
+The Stage background picker uses the shared SegmentedControl with
+`surface="glass-elevated"`. The Playground defines the backdrop presets, not
+the selector's casing, selection plate, or interaction styles.
+
 Focus still moves to the stage for deep links and history, but the shell paints the visible ring only after keyboard input; pointer navigation and the initial load stay ring-free, and the module heading receives the same designed ring as a specimen title. Composition specimens frame their scene at a declared measure — the reading width by default, a narrower measure for sidebar scenes — and start below the heading, while single-component specimens remain centered on the stage.
 
 Compositions sit directly on the selected Stage backdrop. They do not add a
@@ -322,7 +326,39 @@ Playground-only composition helpers keep specimen structure consistent without b
 
 The Motion module's `foundation-motion-width` specimen demonstrates the shared layout width motion with real content: the Design Lab language control is the trigger, and `useLayoutWidthMotion` keeps the brand, navigation, and preference boxes on one `spatial` curve without scaling text. The stage stacks its boxes below the `md` breakpoint so a width change cannot switch the flex-wrap row count mid-animation. It is registered in the specimen catalogue, so deep links cover it.
 
-`LabToolbar` uses `useLayoutWidthMotion` for preference controls whose labels change with the locale. Navigation fades the Stage heading with the shared `state` motion role and gives the focused specimen a short `spatial` offset. The specimen tree itself does not fade because opacity would introduce a Glass backdrop root. It renders at its normal consumer size; wide content can use the Stage width or scroll locally. The shell does not snapshot the Stage or start the WebGL particle effect outside its dedicated Motion specimen. Drawer travel uses the shared `spatial` role. Reduced motion removes the Stage and drawer transitions.
+Changing the shell language fades the outgoing snapshot over the live UI with
+the `state` role. The live UI keeps its DOM, focus, route, and specimen session.
+The outgoing capture excludes the viewport Glass canvases, as the theme
+transition does.
+Without the View Transition API or with reduced motion, the copy changes
+immediately.
+
+The shell, isolated frame, and React Runtime Fixture animate the width and
+height of existing controls when DOM updates change their natural size. This
+covers Inspector sizes and resets, density and scale changes, and content
+changes in persistent controls. The animation runs on the `spatial` role
+without scaling text or replacing elements. Initial and newly mounted sizes,
+native resize gestures, and viewport resizing are not animated. The dedicated
+layout width specimen retains its own animation.
+Language changes use the same size motion beneath the outgoing snapshot.
+Compact labels stay on one line and reveal their full text as space becomes
+available; intentional multiline Explorer labels are not constrained.
+
+`@neoverse-ui/motion` exposes the appearance transition and size observer
+independently of the Playground. The [Motion package guide](../../packages/motion/README.md#appearance-and-control-size-transitions)
+describes consumer setup and the single-line translated-label strategy used by
+the Inspector's isolated preview link.
+
+The Motion module's Transitions specimen (`foundation-motion-playground`) exposes the live
+theme reveal and crossfade side by side, the language crossfade, and a shared
+size control for a text button and an icon button. It runs in the shell and
+isolated frame. Appearance changes in the isolated frame do not overwrite
+shell preferences.
+
+Navigation fades the Stage heading with the `state` role and gives the focused
+specimen a short `spatial` offset. Route changes do not snapshot the Stage
+outside the dedicated Motion specimen. Drawer travel uses the `spatial` role.
+Reduced motion disables the spatial animations.
 
 The shell toolbar shows the FPS counter before the theme and language controls.
 The counter pauses while the document is hidden. Use `?fps=0` to disable it
@@ -347,7 +383,29 @@ Test layers, spec ownership and commands are maintained in the [testing registry
 
 Consumers set `data-theme="light"`, `data-theme="dark"`, or `data-theme="system"` on the root. Light values are mapped from `themes/light.css`; one canonical dark declaration body is emitted for explicit dark and system-dark selectors. `data-theme` is the only supported theme-selection contract.
 
-The Playground resolves and applies that contract through one framework-neutral engine, `apps/playground/src/theme-runtime.ts`. Mode precedence is `?theme=` → the shared `neoverse-design-lab.preferences` record → the system default; the engine owns the `data-theme` write, the Motion transition attributes, and the `prefers-color-scheme` observer, and it reports resolved changes to subscribers. `theme-state.ts` is only the Vue binding that mirrors the resolved value into a ref, and the React Runtime Fixture imports the same engine, so `/`, `/frame`, and `/react-fixture` cannot drift in mode resolution, persistence, URL synchronization, or transition behavior. Theme vocabulary (`themeModes`, `defaultThemeMode`) and every color come from that module and the token layer; surfaces never hardcode a theme literal or a palette value.
+The Playground resolves and applies that contract through one framework-neutral
+engine, `apps/playground/src/theme-runtime.ts`. On a fresh navigation, the
+order is `?theme=` → the shared `neoverse-design-lab.preferences` record →
+the system default; on reload the stored choice takes priority. The engine
+owns `data-theme` and the `prefers-color-scheme` observer and reports resolved
+changes to subscribers, including the Vue `theme-state.ts` binding.
+
+The shell reveals the new palette from the center of the desktop theme
+control or the compact toggle to the farthest viewport corner. A feathered
+circular mask follows a 640ms symmetric curve. Pointer and keyboard activation
+use the same origin. `?theme-motion=fade` selects the original toolbar
+crossfade, also used for changes without a control origin. If view
+transitions are unavailable, the theme uses the existing token color
+transition. Reduced motion applies the palette immediately. The outgoing
+snapshot does not block pointer input. A new appearance request interrupts the
+previous effect without dropping its pending preference update.
+When switching back between the two palettes during a reveal or fade, the
+same snapshot reverses from its current progress. The toolbar shows the latest
+choice immediately; the live palette commits once the reversed snapshot covers
+it, avoiding a full-viewport color jump.
+Palette updates settle their new color and shadow transitions while the
+snapshot still covers them. Glass controls do not replay the previous tint
+after the reveal, and control layout and selection motion run independently.
 
 ## Verification
 

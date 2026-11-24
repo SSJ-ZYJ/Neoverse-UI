@@ -1,5 +1,7 @@
 import {
+  type FocusEvent,
   type HTMLAttributes,
+  type PointerEvent,
   type ReactNode,
   useCallback,
   useEffect,
@@ -30,11 +32,14 @@ export function UiToast({
   onOpenChange,
   className,
   children,
+  onPointerEnter,
+  onPointerLeave,
+  onFocus,
+  onBlur,
   ...rest
 }: UiToastProps) {
   const [mounted, setMounted] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const element = useRef<HTMLDivElement | null>(null);
   const callback = useRef(onOpenChange);
   callback.current = onOpenChange;
   const pause = useCallback(() => {
@@ -54,34 +59,39 @@ export function UiToast({
     return pause;
   }, [resume, pause]);
 
-  useEffect(() => {
-    const node = element.current;
-    if (!mounted || !node) return;
-    node.addEventListener('pointerenter', pause);
-    node.addEventListener('pointerleave', resume);
-    node.addEventListener('focusin', pause);
-    node.addEventListener('focusout', resume);
-    return () => {
-      node.removeEventListener('pointerenter', pause);
-      node.removeEventListener('pointerleave', resume);
-      node.removeEventListener('focusin', pause);
-      node.removeEventListener('focusout', resume);
-    };
-  }, [mounted, pause, resume]);
-
   if (!mounted) return null;
   return createPortal(
-    <UiPresence show={open} variant="rise" className="ui-toast-container">
-      <div
+    <div className="ui-toast-container">
+      <UiPresence
         {...rest}
-        ref={element}
-        className={['ui-toast material-glass-immersive', `ui-toast--${variant}`, className]
+        show={open}
+        variant="rise"
+        className={['ui-toast material-glass-elevated', `ui-toast--${variant}`, className]
           .filter(Boolean)
           .join(' ')}
-        data-surface="glass-immersive"
+        data-surface="glass-elevated"
         data-neoverse-glass-occluder="topmost"
+        data-neoverse-surface-overflow="visible"
+        data-neoverse-surface-hover="static"
         role={variant === 'danger' ? 'alert' : 'status'}
+        onPointerEnter={(event: PointerEvent<HTMLDivElement>) => {
+          pause();
+          onPointerEnter?.(event);
+        }}
+        onPointerLeave={(event: PointerEvent<HTMLDivElement>) => {
+          resume();
+          onPointerLeave?.(event);
+        }}
+        onFocus={(event: FocusEvent<HTMLDivElement>) => {
+          pause();
+          onFocus?.(event);
+        }}
+        onBlur={(event: FocusEvent<HTMLDivElement>) => {
+          resume();
+          onBlur?.(event);
+        }}
       >
+        <span className="ui-toast__indicator" aria-hidden="true" />
         <div className="ui-toast__message">{children ?? message}</div>
         {action}
         <button
@@ -92,8 +102,8 @@ export function UiToast({
         >
           <span aria-hidden="true">×</span>
         </button>
-      </div>
-    </UiPresence>,
+      </UiPresence>
+    </div>,
     document.body,
   );
 }

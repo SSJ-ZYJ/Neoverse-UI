@@ -343,6 +343,14 @@ html[lang='en'] .playground-explorer__link .ui-navigation-item__label {
 
 .playground-inspector__frame-link {
   justify-self: start;
+  max-inline-size: 100%;
+}
+
+/* The ControlSurface and Dock scale props intentionally change layout zoom. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-playground-view] .ui-control-surface {
+    transition: zoom var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
+  }
 }
 
 .playground-shell__workspace {
@@ -393,25 +401,6 @@ html[lang='en'] .playground-explorer__link .ui-navigation-item__label {
   display: flex;
   align-items: center;
   gap: var(--neoverse-space-2);
-}
-
-/* The background switch must stay legible on every backdrop it selects, so it
-   owns a raised plate instead of borrowing the stage surface. */
-.playground-stage__background {
-  display: flex;
-  min-inline-size: 0;
-  align-items: center;
-  gap: var(--neoverse-space-3);
-  border-radius: var(--neoverse-radius-control);
-  padding: var(--neoverse-space-1) var(--neoverse-space-2);
-}
-
-/* The visible group label is dropped below the small breakpoint; the leading
-   padding follows it so the control stays optically centred in its plate. */
-@media (min-width: 40rem) {
-  .playground-stage__background {
-    padding-inline-start: var(--neoverse-space-3);
-  }
 }
 
 .playground-stage__label > span {

@@ -2,7 +2,7 @@ import { createApp } from 'vue';
 import App from './App.vue';
 import siteIconUrl from './assets/neoverse-site-icon.png';
 import { frameView } from './frame-state';
-import { mountPlaygroundGlass } from './glass-runtime';
+import { mountPlaygroundEffects } from './playground-effects';
 import './styles/drawers.css';
 import './styles/playground-tokens.css';
 import './styles/scroll-ports.css';
@@ -19,5 +19,7 @@ if (!favicon.isConnected) {
   document.head.append(favicon);
 }
 
-createApp(App).mount('#app');
-mountPlaygroundGlass();
+const root = document.getElementById('app');
+if (root === null) throw new Error('Playground root is missing.');
+createApp(App).mount(root);
+mountPlaygroundEffects(root);
