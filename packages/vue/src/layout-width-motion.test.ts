@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { defineComponent, h, nextTick, onBeforeUpdate, ref } from 'vue';
-import { useLayoutWidthMotion } from './layout-width-motion';
+import { useLayoutWidthMotion } from './components/motion/layout-width-motion';
 
 interface RecordedAnimation {
   keyframes: Keyframe[];

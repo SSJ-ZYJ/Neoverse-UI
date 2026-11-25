@@ -1,8 +1,8 @@
 import { expect, test } from 'bun:test';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { UiAvatar } from './avatar';
-import { UiPagination } from './pagination';
-import { UiTabs } from './tabs';
+import { UiAvatar } from './components/display/avatar';
+import { UiPagination } from './components/navigation/pagination';
+import { UiTabs } from './components/navigation/tabs';
 
 test('React tabs expose labels, tab selection and labelled panels on the server', () => {
   const html = renderToStaticMarkup(

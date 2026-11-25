@@ -57,7 +57,11 @@ packages/tokens/src/
     light.css            dark.css
 ```
 
-`cssVariables.components` follows that ownership. The build emits the public `@neoverse-ui/tokens/css` entry after primitives, semantic roles, foundation layers, light mapping, component defaults, and the canonical dark mapping.
+The TypeScript `cssVariables` map composes foundation domains from
+`src/foundation/` and one token map per component from the category directories
+under `src/components/`. The CSS build emits `@neoverse-ui/tokens/css` in order:
+primitives, semantic roles, foundation layers, light mapping, component defaults,
+then the canonical dark mapping.
 
 ## Tailwind Foundation
 
@@ -135,6 +139,18 @@ The current source of `@neoverse-ui/react` provides the same 43 components liste
 React adapters share the same Tailwind component selectors, Surface presets, native interaction semantics, and accessibility expectations as Vue. Canonical Shared and Consumer Driven remain distinct maturity tracks even where both adapters now exist. `UiAction` supports `asChild` routing composition, `UiBreadcrumb` exposes a custom item renderer seam, and `UiDock` shares ControlSurface's navigation indicator while leaving navigation content and active state to the consumer. Native controls preserve refs and platform attributes. Form controls share the state and accessibility rules documented in [`form-control-contract.md`](./form-control-contract.md). Top-layer controls share the positioning and dismiss rules documented in [`overlay-contract.md`](./overlay-contract.md).
 
 Framework parity is declared in `contracts/framework-parity.json` and validated by `scripts/gates/check-framework-parity.ts`. The current contract covers all 43 components, shared option/item structures, and shared literal unions, including Consumer Driven adapters. Framework-native binding names are normalized explicitly—for example Vue `modelValue` maps to React `value`/`checked`, while Vue `readonly` maps to React `readOnly`. This parity does not promote maturity or replace real consumer evidence. The React Runtime Fixture is checked against `component-matrix.json` rather than a handwritten component list, so a newly runtime-validated adapter cannot silently miss browser coverage.
+
+## Adapter source layout
+
+Vue and React use matching `src/components/<category>/` directories:
+`actions`, `display`, `forms`, `motion`, `navigation`, `overlays`, `surfaces`,
+and `terminal`. Give each public or private component its own file. Keep
+category-specific helpers next to the components that use them. The package
+entry re-exports the public API; internal modules import from the owning
+source files, not the package entry. Category paths are not public imports.
+
+`bun run check:component-layout` enforces categorized adapter files,
+one component per React file, and re-export-only TypeScript package entries.
 
 ## Overlay runtime
 

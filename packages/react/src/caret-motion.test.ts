@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { slideCaret, slideCaret2d } from './caret-motion.js';
+import { slideCaret, slideCaret2d } from './components/motion/caret-motion.js';
 
 type FakeGlyph = Record<string, string>;
 

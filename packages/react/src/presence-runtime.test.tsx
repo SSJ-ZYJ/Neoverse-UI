@@ -3,7 +3,7 @@ import { presenceVanishClassName } from '@neoverse-ui/motion';
 import { Window } from 'happy-dom';
 import { act } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
-import { UiPresence } from './presence.js';
+import { UiPresence } from './components/motion/presence.js';
 
 function installBrowser() {
   const browser = new Window();

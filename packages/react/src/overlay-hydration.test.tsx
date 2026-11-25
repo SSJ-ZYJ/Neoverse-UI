@@ -3,7 +3,9 @@ import { Window } from 'happy-dom';
 import { act } from 'react';
 import { hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
-import { UiContextMenu, UiDropdownMenu, UiPopover } from './overlays';
+import { UiContextMenu } from './components/overlays/context-menu';
+import { UiDropdownMenu } from './components/overlays/dropdown-menu';
+import { UiPopover } from './components/overlays/popover';
 
 test('overlay panel associations remain unique and unchanged through SSR hydration and interaction', async () => {
   const browser = new Window();

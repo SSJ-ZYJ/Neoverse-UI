@@ -12,6 +12,7 @@ const checks = [
   { name: 'Tailwind usage', args: ['lint:tailwind'] },
   { name: 'Material standards', args: ['check:materials'] },
   { name: 'Component contracts', args: ['scripts/gates/check-component-contracts.ts'] },
+  { name: 'Component layout', args: ['check:component-layout'] },
   { name: 'Framework parity', args: ['scripts/gates/check-framework-parity.ts'] },
   { name: 'Component requests', args: ['check:requests'] },
   { name: 'Test registry', args: ['check:test-registry'] },

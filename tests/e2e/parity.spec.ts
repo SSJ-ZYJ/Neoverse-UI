@@ -42,6 +42,14 @@ test.describe('parity', () => {
       await expect(
         page.locator('[data-react-adapter="UiStepFlow"] [aria-current="step"]'),
       ).toHaveCount(1);
+      const navigation = page.getByRole('button', { name: '首页', exact: true }).filter({
+        has: page.locator('[data-contract-navigation-suffix]'),
+      });
+      await expect(navigation.locator('[data-contract-navigation-suffix]')).toHaveText('· 01');
+      await expect(navigation.locator('[data-contract-navigation-decoration]')).toBeVisible();
+      const notice = page.locator('[data-react-adapter="UiNotice"]');
+      await expect(notice).toHaveJSProperty('tagName', 'ARTICLE');
+      await expect(notice.getByRole('button')).toBeVisible();
       expect(errors).toEqual([]);
     });
   }

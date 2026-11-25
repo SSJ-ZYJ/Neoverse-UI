@@ -1,10 +1,10 @@
 /** API checks shared by local tarballs and registry releases from 0.3.1 onward. */
 export function releaseApiSmoke(versions: ReadonlyMap<string, string>, published: boolean): string {
-  const includesReleaseApi = (name: string): boolean => {
+  const includesReleaseApi = (name: string, range = '>=0.3.1'): boolean => {
     if (!published) return true;
     const version = versions.get(name);
     if (!version) throw new Error(`Missing release version for ${name}`);
-    return Bun.semver.satisfies(version, '>=0.3.1');
+    return Bun.semver.satisfies(version, range);
   };
   const checks: string[] = [];
 
@@ -19,6 +19,16 @@ export function releaseApiSmoke(versions: ReadonlyMap<string, string>, published
         `const reactHeader: ReactAdapters.UiTerminalSurfaceProps = { title: 'Smoke terminal', header: 'Custom header' };\n` +
         `void [reactSegments, reactPrompt, reactEcho, reactMetric, reactHeader];\n`,
     );
+    if (includesReleaseApi('@neoverse-ui/react', '>=0.5.0')) {
+      checks.push(
+        `const reactNavigation: ReactAdapters.UiNavigationItemProps = { label: 'Docs', suffix: 'Beta', decoration: 'New' };\n` +
+          `const reactBreadcrumb: ReactAdapters.UiBreadcrumbProps = { items: [{ label: 'Docs' }], renderSeparator: ({ index }) => String(index) };\n` +
+          `const reactDock: ReactAdapters.UiDockProps = { as: () => 'Quick actions' };\n` +
+          `const reactPresence: ReactAdapters.UiPresenceProps = { as: 'article', show: true, children: 'Visible' };\n` +
+          `const reactNotice: ReactAdapters.UiNoticeProps = { as: 'article', children: 'Notice' };\n` +
+          `void [reactNavigation, reactBreadcrumb, reactDock, reactPresence, reactNotice];\n`,
+      );
+    }
   }
 
   if (includesReleaseApi('@neoverse-ui/vue')) {

@@ -102,6 +102,7 @@ export default function SurfaceAndOverlaySection({
       </output>
 
       <UiNotice
+        as="article"
         variant="info"
         data-react-adapter="UiNotice"
         action={

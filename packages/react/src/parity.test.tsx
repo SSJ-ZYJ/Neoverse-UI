@@ -2,6 +2,7 @@ import { expect, test } from 'bun:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 import {
   UiBadge,
+  UiBreadcrumb,
   UiControlSurface,
   UiNavigationItem,
   UiScrollbar,
@@ -34,13 +35,36 @@ test('navigation retains native link semantics, accessible compact labels and a 
   expect(disabled).toContain('aria-disabled="true"');
   expect(disabled).toContain('tabindex="-1"');
   const routed = renderToStaticMarkup(
-    <UiNavigationItem asChild label="Routed docs" active>
+    <UiNavigationItem
+      asChild
+      label="Routed docs"
+      active
+      suffix={<small>Beta</small>}
+      decoration={<span aria-hidden="true">New</span>}
+    >
       <a href="/routed">Router content</a>
     </UiNavigationItem>,
   );
   expect(routed).toContain('href="/routed"');
-  expect(routed).toContain('Routed docs');
+  expect(routed).toContain('Routed docs<small>Beta</small></span>');
+  expect(routed).toContain(
+    '<span aria-hidden="true">New</span><span class="ui-navigation-item__indicator"',
+  );
+  expect(routed).not.toContain(' suffix=');
   expect(routed).not.toContain('Router content');
+});
+
+test('a breadcrumb customizes each separator and can omit its content', () => {
+  const html = renderToStaticMarkup(
+    <UiBreadcrumb
+      items={[{ label: 'Home' }, { label: 'Docs' }, { label: 'Page' }]}
+      separator="Fallback divider"
+      renderSeparator={({ index }) => (index === 1 ? 'First divider' : null)}
+    />,
+  );
+  expect(html).toContain('aria-hidden="true">First divider</span>');
+  expect(html).toContain('aria-hidden="true"></span>');
+  expect(html).not.toContain('Fallback divider');
 });
 
 test('control surface forwards semantics and renders trailing content only when supplied', () => {

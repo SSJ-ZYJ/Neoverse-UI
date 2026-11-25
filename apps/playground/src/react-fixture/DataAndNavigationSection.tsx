@@ -104,6 +104,7 @@ export default function DataAndNavigationSection({
           </UiButton>
 
           <UiPresence
+            as="article"
             show={presenceVisible}
             variant="pop"
             origin="start"
@@ -132,7 +133,7 @@ export default function DataAndNavigationSection({
         <UiBreadcrumb
           items={breadcrumbItems}
           ariaLabel={copy.breadcrumb}
-          separator={<span>/</span>}
+          renderSeparator={({ index }) => (index === 1 ? '/' : '›')}
           data-navigation="custom"
           renderItem={({ item, index, current }) => (
             <a
@@ -167,7 +168,7 @@ export default function DataAndNavigationSection({
               {copy.docs}
             </UiAction>
           </UiDock>
-          <UiDock as="div" scale="md" surface="none" data-dock-div>
+          <UiDock as="section" scale="md" surface="none" data-dock-section>
             <UiAction href="#react-navigation-home" size="sm" surface="none" variant="ghost">
               {copy.home}
             </UiAction>

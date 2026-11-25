@@ -3,18 +3,22 @@ import { fileURLToPath } from 'node:url';
 const ADAPTER_CLASS_LITERAL =
   /['"]((?:ui-|material-glass-)[a-z0-9_-]+(?:\s+(?:ui-|material-glass-)[a-z0-9_-]+)*)['"]/g;
 
+// These shared DOM hooks mark structure; they have no independent style rules.
+const unstyledAdapterHooks: Record<string, true> = {
+  'ui-dialog__body': true,
+  'ui-status-indicator__label': true,
+};
+
 export async function collectMissingAdapterSelectors(
   flattenedComponentsCss: string,
   contractCss: string,
   baseUrl: URL,
 ): Promise<string[]> {
-  const vueClassesSource = new URL('../../vue/src/classes.ts', baseUrl);
-  const vueSurfaceSource = new URL('../../vue/src/surface.ts', baseUrl);
+  const vueClassesSource = new URL('../../vue/src/components/actions/classes.ts', baseUrl);
+  const vueSurfaceSource = new URL('../../vue/src/components/surfaces/surface.ts', baseUrl);
   const reactSourceDirectory = fileURLToPath(new URL('../../react/src/', baseUrl));
   const reactFiles = [
-    ...new Bun.Glob('index.tsx').scanSync({ cwd: reactSourceDirectory }),
-    ...new Bun.Glob('adapters/*.{ts,tsx}').scanSync({ cwd: reactSourceDirectory }),
-    ...new Bun.Glob('overlays/*.{ts,tsx}').scanSync({ cwd: reactSourceDirectory }),
+    ...new Bun.Glob('components/**/*.{ts,tsx}').scanSync({ cwd: reactSourceDirectory }),
   ]
     .filter((file) => !file.includes('.test.'))
     .sort();
@@ -40,7 +44,12 @@ export async function collectMissingAdapterSelectors(
     ),
   );
 
-  return [...adapterClassNames].filter((className) => !adapterCssClassNames.has(className)).sort();
+  return [...adapterClassNames]
+    .filter(
+      (className) =>
+        !Object.hasOwn(unstyledAdapterHooks, className) && !adapterCssClassNames.has(className),
+    )
+    .sort();
 }
 
 export async function collectComponentCssIssues(componentSourceDirectory: string) {

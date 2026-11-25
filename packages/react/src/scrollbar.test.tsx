@@ -3,7 +3,7 @@ import { Window } from 'happy-dom';
 import { act } from 'react';
 import { hydrateRoot, type Root } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
-import { UiScrollbar } from './scrollbar';
+import { UiScrollbar } from './components/surfaces/scrollbar';
 
 test('document scrollbar stays visible while hovered or dragged and hides afterwards', async () => {
   const browser = new Window();

@@ -72,7 +72,7 @@ test('dependent recipes compose at local material owners for consumer overrides'
 test('all control adapters accept the three presets without losing none', async () => {
   const vue = await Bun.file(new URL('../../vue/src/types/controls.ts', import.meta.url)).text();
   const react = await Bun.file(
-    new URL('../../react/src/adapters/shared.tsx', import.meta.url),
+    new URL('../../react/src/components/surfaces/control-surface.tsx', import.meta.url),
   ).text();
   for (const adapter of [vue, react]) {
     expect(adapter).toMatch(

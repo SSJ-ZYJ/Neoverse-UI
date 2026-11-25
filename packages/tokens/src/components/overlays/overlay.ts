@@ -1,0 +1,16 @@
+export const overlayCssVariables = {
+  gap: '--neoverse-overlay-gap',
+  radius: '--neoverse-overlay-radius',
+  padding: '--neoverse-overlay-padding',
+  minInlineSize: '--neoverse-overlay-min-inline-size',
+  maxInlineSize: '--neoverse-overlay-max-inline-size',
+  maxBlockSize: '--neoverse-overlay-max-block-size',
+  background: '--neoverse-overlay-background',
+  shadow: '--neoverse-overlay-shadow',
+  filter: '--neoverse-overlay-filter',
+  foreground: '--neoverse-overlay-foreground',
+  layer: '--neoverse-overlay-layer',
+  itemRadius: '--neoverse-overlay-item-radius',
+  itemHoverBackground: '--neoverse-overlay-item-hover-background',
+  itemDangerForeground: '--neoverse-overlay-item-danger-foreground',
+} as const;

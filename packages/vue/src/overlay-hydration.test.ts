@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from 'vitest';
 import { createSSRApp, h, nextTick } from 'vue';
 import { renderToString } from 'vue/server-renderer';
-import UiDropdownMenu from './UiDropdownMenu.vue';
-import UiPopover from './UiPopover.vue';
+import UiDropdownMenu from './components/overlays/UiDropdownMenu.vue';
+import UiPopover from './components/overlays/UiPopover.vue';
 
 describe('overlay SSR hydration', () => {
   it('preserves unique panel associations through hydration and interaction', async () => {

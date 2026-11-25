@@ -1,13 +1,13 @@
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { h, nextTick } from 'vue';
-import UiCheckbox from './UiCheckbox.vue';
-import UiField from './UiField.vue';
-import UiInput from './UiInput.vue';
-import UiRadioGroup from './UiRadioGroup.vue';
-import UiSelect from './UiSelect.vue';
-import UiSwitch from './UiSwitch.vue';
-import UiTextarea from './UiTextarea.vue';
+import UiCheckbox from './components/forms/UiCheckbox.vue';
+import UiField from './components/forms/UiField.vue';
+import UiInput from './components/forms/UiInput.vue';
+import UiRadioGroup from './components/forms/UiRadioGroup.vue';
+import UiSelect from './components/forms/UiSelect.vue';
+import UiSwitch from './components/forms/UiSwitch.vue';
+import UiTextarea from './components/forms/UiTextarea.vue';
 
 afterEach(() => {
   vi.restoreAllMocks();

@@ -512,6 +512,7 @@
       "consumer": "pending",
       "runtime": "validated",
       "evidence": [
+        "packages/react/src/parity.test.tsx",
         "tests/e2e/navigation.spec.ts",
         ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
@@ -669,7 +670,8 @@
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": ["tests/e2e/parity.spec.ts"]
     },
     {
       "name": "UiToast",

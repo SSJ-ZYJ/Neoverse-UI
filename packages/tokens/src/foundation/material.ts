@@ -1,0 +1,248 @@
+export const materialCssVariables = {
+  scale: {
+    backdropBrightness: '--neoverse-material-backdrop-brightness',
+    backdropContrast: '--neoverse-material-backdrop-contrast',
+    refractionStrength: '--neoverse-material-refraction-strength',
+    transparency: {
+      opaque: '--neoverse-material-transparency-opaque',
+      subtle: '--neoverse-material-transparency-subtle',
+      elevated: '--neoverse-material-transparency-elevated',
+      immersive: '--neoverse-material-transparency-immersive',
+    },
+    blur: {
+      none: '--neoverse-material-blur-none',
+      sm: '--neoverse-material-blur-sm',
+      md: '--neoverse-material-blur-md',
+      lg: '--neoverse-material-blur-lg',
+    },
+    saturation: {
+      normal: '--neoverse-material-saturation-normal',
+      subtle: '--neoverse-material-saturation-subtle',
+      elevated: '--neoverse-material-saturation-elevated',
+      immersive: '--neoverse-material-saturation-immersive',
+    },
+    filter: {
+      subtle: '--neoverse-material-filter-subtle',
+      elevated: '--neoverse-material-filter-elevated',
+      immersive: '--neoverse-material-filter-immersive',
+    },
+    edgeFilter: {
+      subtle: '--neoverse-material-edge-filter-subtle',
+      elevated: '--neoverse-material-edge-filter-elevated',
+      immersive: '--neoverse-material-edge-filter-immersive',
+    },
+    tint: {
+      subtle: '--neoverse-material-tint-subtle',
+      elevated: '--neoverse-material-tint-elevated',
+      immersive: '--neoverse-material-tint-immersive',
+    },
+    edgeHighlight: {
+      none: '--neoverse-material-edge-highlight-none',
+      subtle: '--neoverse-material-edge-highlight-subtle',
+      subtleBottom: '--neoverse-material-edge-highlight-subtle-bottom',
+      elevated: '--neoverse-material-edge-highlight-elevated',
+      immersive: '--neoverse-material-edge-highlight-immersive',
+    },
+    innerGlow: {
+      subtle: '--neoverse-material-inner-glow-subtle',
+      elevated: '--neoverse-material-inner-glow-elevated',
+      immersive: '--neoverse-material-inner-glow-immersive',
+    },
+    seamGlow: {
+      subtle: '--neoverse-material-seam-glow-subtle',
+      elevated: '--neoverse-material-seam-glow-elevated',
+      immersive: '--neoverse-material-seam-glow-immersive',
+    },
+    bloom: {
+      subtle: '--neoverse-material-bloom-subtle',
+      elevated: '--neoverse-material-bloom-elevated',
+      immersive: '--neoverse-material-bloom-immersive',
+    },
+    edgeRefractionOpacity: {
+      subtle: '--neoverse-material-edge-refraction-opacity-subtle',
+      elevated: '--neoverse-material-edge-refraction-opacity-elevated',
+      immersive: '--neoverse-material-edge-refraction-opacity-immersive',
+    },
+    edgeRefractionWidth: {
+      subtle: '--neoverse-material-edge-refraction-width-subtle',
+      elevated: '--neoverse-material-edge-refraction-width-elevated',
+      immersive: '--neoverse-material-edge-refraction-width-immersive',
+    },
+    edgeRefractionSoftness: {
+      subtle: '--neoverse-material-edge-refraction-softness-subtle',
+      elevated: '--neoverse-material-edge-refraction-softness-elevated',
+      immersive: '--neoverse-material-edge-refraction-softness-immersive',
+    },
+    edgeRefractionCarrier: {
+      subtle: '--neoverse-material-edge-refraction-carrier-subtle',
+      elevated: '--neoverse-material-edge-refraction-carrier-elevated',
+      immersive: '--neoverse-material-edge-refraction-carrier-immersive',
+    },
+    refractionGradient: {
+      none: '--neoverse-material-refraction-gradient-none',
+      subtle: '--neoverse-material-refraction-gradient-subtle',
+      elevated: '--neoverse-material-refraction-gradient-elevated',
+      immersive: '--neoverse-material-refraction-gradient-immersive',
+    },
+  },
+  surface: {
+    inset: {
+      highlight: '--neoverse-surface-inset-highlight',
+      refraction: '--neoverse-surface-inset-refraction',
+      denseFill: '--neoverse-surface-inset-dense-fill',
+      fill: '--neoverse-surface-inset-fill',
+      sheen: '--neoverse-surface-inset-sheen',
+      restBackground: '--neoverse-surface-inset-rest-background',
+      hoverFill: '--neoverse-surface-inset-hover-fill',
+      hoverBackground: '--neoverse-surface-inset-hover-background',
+      strongFill: '--neoverse-surface-inset-strong-fill',
+      strongBackground: '--neoverse-surface-inset-strong-background',
+      planeBackground: '--neoverse-surface-inset-plane-background',
+      alternateFill: '--neoverse-surface-inset-alternate-fill',
+      disabledFill: '--neoverse-surface-inset-disabled-fill',
+      disabledBackground: '--neoverse-surface-inset-disabled-background',
+      activeHighlight: '--neoverse-surface-inset-active-highlight',
+      outlineRest: '--neoverse-surface-inset-outline-rest',
+      outlineActive: '--neoverse-surface-inset-outline-active',
+      dangerHighlight: '--neoverse-surface-inset-danger-highlight',
+      warningHighlight: '--neoverse-surface-inset-warning-highlight',
+      successHighlight: '--neoverse-surface-inset-success-highlight',
+      filter: '--neoverse-surface-inset-filter',
+      interactiveActiveScale: '--neoverse-surface-interactive-active-scale',
+    },
+    solid: {
+      background: '--neoverse-material-surface-solid-background',
+      backgroundFallback: '--neoverse-material-surface-solid-background-fallback',
+      transparency: '--neoverse-material-surface-solid-transparency',
+      blur: '--neoverse-material-surface-solid-blur',
+      saturation: '--neoverse-material-surface-solid-saturation',
+      border: '--neoverse-material-surface-solid-border',
+      borderWidth: '--neoverse-material-surface-solid-border-width',
+      edgeHighlight: '--neoverse-material-surface-solid-edge-highlight',
+      shadow: '--neoverse-material-surface-solid-shadow',
+      refractionGradient: '--neoverse-material-surface-solid-refraction-gradient',
+    },
+    subtle: {
+      background: '--neoverse-material-surface-subtle-background',
+      backgroundFallback: '--neoverse-material-surface-subtle-background-fallback',
+      transparency: '--neoverse-material-surface-subtle-transparency',
+      blur: '--neoverse-material-surface-subtle-blur',
+      saturation: '--neoverse-material-surface-subtle-saturation',
+      border: '--neoverse-material-surface-subtle-border',
+      borderWidth: '--neoverse-material-surface-subtle-border-width',
+      edgeHighlight: '--neoverse-material-surface-subtle-edge-highlight',
+      shadow: '--neoverse-material-surface-subtle-shadow',
+      refractionGradient: '--neoverse-material-surface-subtle-refraction-gradient',
+    },
+    elevated: {
+      background: '--neoverse-material-surface-elevated-background',
+      backgroundFallback: '--neoverse-material-surface-elevated-background-fallback',
+      transparency: '--neoverse-material-surface-elevated-transparency',
+      blur: '--neoverse-material-surface-elevated-blur',
+      saturation: '--neoverse-material-surface-elevated-saturation',
+      border: '--neoverse-material-surface-elevated-border',
+      borderWidth: '--neoverse-material-surface-elevated-border-width',
+      edgeHighlight: '--neoverse-material-surface-elevated-edge-highlight',
+      shadow: '--neoverse-material-surface-elevated-shadow',
+      refractionGradient: '--neoverse-material-surface-elevated-refraction-gradient',
+    },
+  },
+  glass: {
+    subtle: {
+      background: '--neoverse-material-glass-subtle-background',
+      backgroundFallback: '--neoverse-material-glass-subtle-background-fallback',
+      tint: '--neoverse-material-glass-subtle-tint',
+      transparency: '--neoverse-material-glass-subtle-transparency',
+      blur: '--neoverse-material-glass-subtle-blur',
+      saturation: '--neoverse-material-glass-subtle-saturation',
+      filter: '--neoverse-material-glass-subtle-filter',
+      edgeFilter: '--neoverse-material-glass-subtle-edge-filter',
+      border: '--neoverse-material-glass-subtle-border',
+      borderWidth: '--neoverse-material-glass-subtle-border-width',
+      edgeRefractionOpacity: '--neoverse-material-glass-subtle-edge-refraction-opacity',
+      edgeRefractionWidth: '--neoverse-material-glass-subtle-edge-refraction-width',
+      edgeRefractionSoftness: '--neoverse-material-glass-subtle-edge-refraction-softness',
+      edgeRefractionCarrier: '--neoverse-material-glass-subtle-edge-refraction-carrier',
+      edgeHighlight: '--neoverse-material-glass-subtle-edge-highlight',
+      innerGlow: '--neoverse-material-glass-subtle-inner-glow',
+      seamGlow: '--neoverse-material-glass-subtle-seam-glow',
+      bloom: '--neoverse-material-glass-subtle-bloom',
+      shadow: '--neoverse-material-glass-subtle-shadow',
+      hoverTransparency: '--neoverse-material-glass-subtle-hover-transparency',
+      hoverBorder: '--neoverse-material-glass-subtle-hover-border',
+      hoverShadow: '--neoverse-material-glass-subtle-hover-shadow',
+      refractionGradient: '--neoverse-material-glass-subtle-refraction-gradient',
+    },
+    elevated: {
+      background: '--neoverse-material-glass-elevated-background',
+      backgroundFallback: '--neoverse-material-glass-elevated-background-fallback',
+      tint: '--neoverse-material-glass-elevated-tint',
+      transparency: '--neoverse-material-glass-elevated-transparency',
+      blur: '--neoverse-material-glass-elevated-blur',
+      saturation: '--neoverse-material-glass-elevated-saturation',
+      filter: '--neoverse-material-glass-elevated-filter',
+      edgeFilter: '--neoverse-material-glass-elevated-edge-filter',
+      border: '--neoverse-material-glass-elevated-border',
+      borderWidth: '--neoverse-material-glass-elevated-border-width',
+      edgeRefractionOpacity: '--neoverse-material-glass-elevated-edge-refraction-opacity',
+      edgeRefractionWidth: '--neoverse-material-glass-elevated-edge-refraction-width',
+      edgeRefractionSoftness: '--neoverse-material-glass-elevated-edge-refraction-softness',
+      edgeRefractionCarrier: '--neoverse-material-glass-elevated-edge-refraction-carrier',
+      edgeHighlight: '--neoverse-material-glass-elevated-edge-highlight',
+      innerGlow: '--neoverse-material-glass-elevated-inner-glow',
+      seamGlow: '--neoverse-material-glass-elevated-seam-glow',
+      bloom: '--neoverse-material-glass-elevated-bloom',
+      shadow: '--neoverse-material-glass-elevated-shadow',
+      hoverTransparency: '--neoverse-material-glass-elevated-hover-transparency',
+      hoverBorder: '--neoverse-material-glass-elevated-hover-border',
+      hoverShadow: '--neoverse-material-glass-elevated-hover-shadow',
+      refractionGradient: '--neoverse-material-glass-elevated-refraction-gradient',
+    },
+    immersive: {
+      background: '--neoverse-material-glass-immersive-background',
+      backgroundFallback: '--neoverse-material-glass-immersive-background-fallback',
+      tint: '--neoverse-material-glass-immersive-tint',
+      transparency: '--neoverse-material-glass-immersive-transparency',
+      blur: '--neoverse-material-glass-immersive-blur',
+      saturation: '--neoverse-material-glass-immersive-saturation',
+      filter: '--neoverse-material-glass-immersive-filter',
+      edgeFilter: '--neoverse-material-glass-immersive-edge-filter',
+      border: '--neoverse-material-glass-immersive-border',
+      borderWidth: '--neoverse-material-glass-immersive-border-width',
+      edgeRefractionOpacity: '--neoverse-material-glass-immersive-edge-refraction-opacity',
+      edgeRefractionWidth: '--neoverse-material-glass-immersive-edge-refraction-width',
+      edgeRefractionSoftness: '--neoverse-material-glass-immersive-edge-refraction-softness',
+      edgeRefractionCarrier: '--neoverse-material-glass-immersive-edge-refraction-carrier',
+      edgeHighlight: '--neoverse-material-glass-immersive-edge-highlight',
+      innerGlow: '--neoverse-material-glass-immersive-inner-glow',
+      seamGlow: '--neoverse-material-glass-immersive-seam-glow',
+      bloom: '--neoverse-material-glass-immersive-bloom',
+      shadow: '--neoverse-material-glass-immersive-shadow',
+      hoverTransparency: '--neoverse-material-glass-immersive-hover-transparency',
+      hoverBorder: '--neoverse-material-glass-immersive-hover-border',
+      hoverShadow: '--neoverse-material-glass-immersive-hover-shadow',
+      refractionGradient: '--neoverse-material-glass-immersive-refraction-gradient',
+    },
+  },
+} as const;
+
+export type MaterialTransparencyToken = keyof typeof materialCssVariables.scale.transparency;
+export type MaterialBlurToken = keyof typeof materialCssVariables.scale.blur;
+export type MaterialSaturationToken = keyof typeof materialCssVariables.scale.saturation;
+export type MaterialFilterToken = keyof typeof materialCssVariables.scale.filter;
+export type MaterialEdgeFilterToken = keyof typeof materialCssVariables.scale.edgeFilter;
+export type MaterialTintToken = keyof typeof materialCssVariables.scale.tint;
+export type MaterialEdgeHighlightToken = keyof typeof materialCssVariables.scale.edgeHighlight;
+export type MaterialInnerGlowToken = keyof typeof materialCssVariables.scale.innerGlow;
+export type MaterialSeamGlowToken = keyof typeof materialCssVariables.scale.seamGlow;
+export type MaterialBloomToken = keyof typeof materialCssVariables.scale.bloom;
+export type MaterialEdgeRefractionOpacityToken =
+  keyof typeof materialCssVariables.scale.edgeRefractionOpacity;
+export type MaterialEdgeRefractionWidthToken =
+  keyof typeof materialCssVariables.scale.edgeRefractionWidth;
+export type MaterialEdgeRefractionSoftnessToken =
+  keyof typeof materialCssVariables.scale.edgeRefractionSoftness;
+export type MaterialRefractionGradientToken =
+  keyof typeof materialCssVariables.scale.refractionGradient;
+export type MaterialSurfaceToken = keyof typeof materialCssVariables.surface;
+export type MaterialGlassToken = keyof typeof materialCssVariables.glass;

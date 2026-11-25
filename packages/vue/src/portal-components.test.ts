@@ -1,8 +1,8 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
-import UiAvatar from './UiAvatar.vue';
-import UiPagination from './UiPagination.vue';
-import UiTabs from './UiTabs.vue';
+import UiAvatar from './components/display/UiAvatar.vue';
+import UiPagination from './components/navigation/UiPagination.vue';
+import UiTabs from './components/navigation/UiTabs.vue';
 
 describe('portal components', () => {
   it('Tabs uses tab semantics, skips disabled options and changes on arrow keys', async () => {

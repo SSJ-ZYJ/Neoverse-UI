@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from 'bun:test';
 import { Window } from 'happy-dom';
-import { attachSegmentedControlSlider } from './segmented-control-slider.js';
+import { attachSegmentedControlSlider } from './layout/segmented-control-slider.js';
 
 const originalMutationObserver = globalThis.MutationObserver;
 const windows: Window[] = [];

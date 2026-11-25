@@ -21,6 +21,12 @@ Vue 与 React 现提供相同的 43 个公开组件。两套适配复用 Tokens�
 
 React 的原生事件名称、`className`、`htmlFor` 和 ref 遵循 React 约定。框架适配不要求把这些名称改写为一致的拼写。
 
+## 命名内容和根元素
+
+- `UiNavigationItem`：Vue 的 `#suffix`、`#decoration` 对应 React 的 `suffix`、`decoration`。后缀位于标签内部，装饰内容位于内置指示器之前；`trailing` 仍是独立位置。
+- `UiBreadcrumb`：Vue 的 `#separator="{ index }"` 对应 React 的 `renderSeparator({ index })`。索引是分隔符后方条目的从零开始的索引。未提供渲染函数时使用 `separator`；函数返回 `null` 时保留位置，不渲染分隔符内容。
+- `UiPresence` 和 `UiNotice` 的 `as` 接受标签名。`UiDock` 和 `UiControlSurface` 也可使用自定义组件；组件须把收到的属性和内容转交给根元素。
+
 ## 本次补齐
 
 - 导航：`UiControlSurface`、`UiNavigationItem`、`UiSegmentedControl`；`UiDock` 复用 ControlSurface 并支持默认启用的 `navigationIndicator`。
@@ -34,7 +40,7 @@ TerminalPrompt 的 `suggestion` 在两端都只显示匹配的候选后缀；接
 
 ## 验证与边界
 
-- `contracts/framework-parity.json`：43 个组件、10 个数据结构与 23 组字面量类型；已覆盖 consumer-driven 组件，不仅检查 Canonical Shared。
+- `contracts/framework-parity.json`：校验 43 个组件、10 个数据结构、29 组字面量类型和登记的命名插槽对应关系，覆盖两条成熟度轨道。
 - `packages/react/src/parity.test.tsx`：SSR、原生语义、可访问标签、默认状态与定制内容。
 - `/react-fixture?contract-fixtures`：Design Lab 中的实际 React DOM 与状态示例。
 - `tests/e2e/parity.spec.ts`：桌面和移动端、深浅主题下每个 React 适配器的语义 DOM、主题解析与共享控件名称；键盘选择、受控拒绝、终端补全、输出跟随、滚动条拖拽等交互分别由 `navigation`、`terminal`、`surfaces` 模块覆盖。

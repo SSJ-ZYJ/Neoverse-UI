@@ -3,18 +3,18 @@ import { Window } from 'happy-dom';
 import { act } from 'react';
 import { createRoot, hydrateRoot } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
+import { UiTerminalEcho } from './components/terminal/terminal-echo.js';
 import {
   detectTerminalEnvironment,
   matchTerminalSegmentIcon,
   resolveTerminalSegmentIcon,
   resolveTerminalTitlebar,
   type TerminalWindowAction,
-  terminalSegmentGlyphs,
   terminalSegmentIconNames,
-  UiTerminalEcho,
-  UiTerminalPrompt,
-  UiTerminalSurface,
-} from './terminal.js';
+} from './components/terminal/terminal-environment.js';
+import { terminalSegmentGlyphs } from './components/terminal/terminal-icons.js';
+import { UiTerminalPrompt } from './components/terminal/terminal-prompt.js';
+import { UiTerminalSurface } from './components/terminal/terminal-surface.js';
 
 function withBrowserDom<T>(
   options: {

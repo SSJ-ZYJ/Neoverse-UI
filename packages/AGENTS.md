@@ -37,6 +37,7 @@ No package imports from `apps/playground` or `tests/`. Vue and React do not impo
 ## Rules
 
 - Public exports are additive unless an approved breaking release says otherwise. Remove obsolete exports, aliases and shims in the same cutover instead of keeping both paths.
+- Keep each package's TypeScript `src/index` re-export-only. Add one component per file under the owning Vue or React `src/components/<category>/` directory; follow the [adapter source layout](../docs/architecture/README.md#adapter-source-layout).
 - A new public component changes Tokens, Tailwind, both adapters, `contracts/framework-parity.json`, `contracts/component-matrix.json`, unit and browser tests, the Design Lab and the owning document together.
 - Component CSS belongs to `packages/tailwind/src/components/*.css`; adapters compose selectors and never hard-code material values. Material values belong to `packages/tokens`.
 - A package README describes current consumer behavior and links to the owning document instead of restating the contract.

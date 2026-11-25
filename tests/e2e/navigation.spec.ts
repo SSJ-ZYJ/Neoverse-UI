@@ -177,6 +177,10 @@ test.describe('navigation', () => {
     await expect(page.locator('[data-navigation="custom"] [aria-current="page"]')).toHaveText(
       'Home',
     );
+    await expect(page.locator('[data-navigation="custom"] .ui-breadcrumb__separator')).toHaveText([
+      '/',
+      '›',
+    ]);
     expect(errors).toEqual([]);
   });
 
@@ -289,7 +293,7 @@ test.describe('navigation', () => {
 
     const dock = page.locator('[data-react-adapter="UiDock"]');
     await expect(dock).toHaveAttribute('aria-label', '快捷导航');
-    await expect(page.locator('[data-dock-div]')).toHaveJSProperty('tagName', 'DIV');
+    await expect(page.locator('[data-dock-section]')).toHaveJSProperty('tagName', 'SECTION');
 
     const home = dock.getByRole('link', { name: '首页' });
     await home.focus();

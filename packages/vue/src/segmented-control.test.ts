@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSSRApp, h, nextTick } from 'vue';
 import { renderToString } from 'vue/server-renderer';
-import UiSegmentedControl from './UiSegmentedControl.vue';
+import UiSegmentedControl from './components/navigation/UiSegmentedControl.vue';
 
 const options = [
   { value: 'overview', label: 'Overview' },

@@ -1,11 +1,11 @@
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { nextTick } from 'vue';
-import { presence } from './presence';
-import UiAction from './UiAction.vue';
-import UiButton from './UiButton.vue';
-import UiIconButton from './UiIconButton.vue';
-import UiPresence from './UiPresence.vue';
+import UiAction from './components/actions/UiAction.vue';
+import UiButton from './components/actions/UiButton.vue';
+import UiIconButton from './components/actions/UiIconButton.vue';
+import { presence } from './components/motion/presence';
+import UiPresence from './components/motion/UiPresence.vue';
 
 afterEach(() => {
   vi.restoreAllMocks();

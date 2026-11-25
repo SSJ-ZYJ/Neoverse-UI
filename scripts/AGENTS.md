@@ -23,6 +23,7 @@ Only the `check.ts` entry stays at the root. Every other script belongs to the d
 | `quality-budgets.json` | Single owner of limit values and exception records |
 | `check-docs.ts` | Docs structure registry, status lines, links, translation pairs and hashes, English-only prose and contract evidence paths |
 | `check-component-contracts.ts` | Matrix schema, public exports, React runtime coverage, evidence and docs rows |
+| `check-component-layout.ts` | Category directories, one React component per file and re-export-only package entries |
 | `check-framework-parity.ts` | Vue/React components, structures, literal unions and normalized binding names |
 | `check-material-standards.ts` | Shared component selectors must reference token-owned material variables |
 | `check-source-language.ts` | English comments and identifiers; Chinese only in localized values |

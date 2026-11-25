@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import { nextTick } from 'vue';
-import UiTextarea from './UiTextarea.vue';
+import UiTextarea from './components/forms/UiTextarea.vue';
 
 describe('Textarea mirrored caret', () => {
   it('draws the two-axis breathing caret and falls back on selection, IME and locked states', async () => {

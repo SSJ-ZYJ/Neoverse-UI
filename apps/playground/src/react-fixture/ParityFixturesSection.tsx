@@ -117,6 +117,16 @@ export default function ParityFixturesSection({
           as="button"
           label={copy.home}
           active={active === 0}
+          suffix={
+            <small aria-hidden="true" data-contract-navigation-suffix>
+              {' · 01'}
+            </small>
+          }
+          decoration={
+            <span aria-hidden="true" data-contract-navigation-decoration>
+              •
+            </span>
+          }
           onClick={() => setActive(0)}
         />
         <UiNavigationItem

@@ -601,4 +601,5 @@ test('React presence removes the exited region and returns it on show', async ({
   await expect(presence).toHaveCount(0);
   await toggle.click();
   await expect(presence).toBeVisible();
+  await expect(presence).toHaveJSProperty('tagName', 'ARTICLE');
 });

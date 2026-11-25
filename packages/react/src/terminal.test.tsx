@@ -3,8 +3,9 @@ import { Window } from 'happy-dom';
 import { act, useState } from 'react';
 import { hydrateRoot, type Root } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
-import { UiButton } from './index';
-import { UiTerminalPrompt, UiTerminalSurface } from './terminal';
+import { UiButton } from './components/actions/button';
+import { UiTerminalPrompt } from './components/terminal/terminal-prompt';
+import { UiTerminalSurface } from './components/terminal/terminal-surface';
 
 function Fixture() {
   const [closed, setClosed] = useState(false);

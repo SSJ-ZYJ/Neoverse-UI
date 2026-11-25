@@ -1,10 +1,10 @@
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { h, nextTick } from 'vue';
-import UiBreadcrumb from './UiBreadcrumb.vue';
-import UiControlSurface from './UiControlSurface.vue';
-import UiDock from './UiDock.vue';
-import UiNavigationItem from './UiNavigationItem.vue';
+import UiBreadcrumb from './components/navigation/UiBreadcrumb.vue';
+import UiDock from './components/navigation/UiDock.vue';
+import UiNavigationItem from './components/navigation/UiNavigationItem.vue';
+import UiControlSurface from './components/surfaces/UiControlSurface.vue';
 
 afterEach(() => {
   vi.restoreAllMocks();

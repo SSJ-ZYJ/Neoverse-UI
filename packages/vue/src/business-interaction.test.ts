@@ -2,8 +2,8 @@ import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSSRApp, h, nextTick, ref } from 'vue';
 import { renderToString } from 'vue/server-renderer';
-import UiDialog from './UiDialog.vue';
-import UiToast from './UiToast.vue';
+import UiDialog from './components/overlays/UiDialog.vue';
+import UiToast from './components/overlays/UiToast.vue';
 
 afterEach(() => {
   vi.restoreAllMocks();

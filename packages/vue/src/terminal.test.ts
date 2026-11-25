@@ -1,12 +1,12 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it, vi } from 'vitest';
 import { h, nextTick, ref } from 'vue';
-import UiButton from './UiButton.vue';
-import UiTerminalEcho from './UiTerminalEcho.vue';
-import UiTerminalLine from './UiTerminalLine.vue';
-import UiTerminalPrompt from './UiTerminalPrompt.vue';
-import UiTerminalSurface from './UiTerminalSurface.vue';
-import UiTerminalTranscript from './UiTerminalTranscript.vue';
+import UiButton from './components/actions/UiButton.vue';
+import UiTerminalEcho from './components/terminal/UiTerminalEcho.vue';
+import UiTerminalLine from './components/terminal/UiTerminalLine.vue';
+import UiTerminalPrompt from './components/terminal/UiTerminalPrompt.vue';
+import UiTerminalSurface from './components/terminal/UiTerminalSurface.vue';
+import UiTerminalTranscript from './components/terminal/UiTerminalTranscript.vue';
 
 describe('Terminal composition', () => {
   it('reuses UiSurface Glass and exposes accessible header/action slots', () => {

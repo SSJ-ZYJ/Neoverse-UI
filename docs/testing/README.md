@@ -85,4 +85,4 @@ bypasses Playwright's usual stability and hit-target checks.
 
 `bun run check` executes `scripts/check.ts`. The runner runs every stage sequentially without stopping at the first failure, then prints a PASS/FAIL summary with durations and totals. Full stdout and stderr go to per-stage files in the printed temporary log directory; failed stages include exit codes and standalone rerun commands. Any failed stage produces a nonzero overall exit code. Individual check scripts and `release:check` remain independently callable.
 
-The stages cover Biome auto-fix, text integrity, source language, documentation standards, Stylelint, Tailwind usage, material standards, component contracts, framework parity, component requests, test registry, changeset targets, typecheck with builds, and all unit and contract tests.
+The stages cover Biome auto-fix, text integrity, source language, documentation standards, Stylelint, Tailwind usage, material standards, component contracts, component layout, framework parity, component requests, test registry, changeset targets, typecheck with builds, and all unit and contract tests.

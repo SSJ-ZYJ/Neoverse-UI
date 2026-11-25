@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { UiEmptyState } from './empty-state';
+import { UiEmptyState } from './components/display/empty-state';
 
 test('empty state keeps accessible headings and consumer-owned actions', () => {
   const html = renderToStaticMarkup(

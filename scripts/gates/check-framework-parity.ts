@@ -7,6 +7,7 @@ interface PropContract {
   reactType: string;
   props: readonly string[];
   aliases?: Record<string, readonly [string, string]>;
+  slots?: Record<string, string>;
 }
 
 interface UnionContract {
@@ -41,10 +42,19 @@ const matrix = (await Bun.file(
 
 const vueTypesPath = resolve(root, 'packages/vue/src/types.ts');
 const reactIndexPath = resolve(root, 'packages/react/src/index.tsx');
-const reactPresencePath = resolve(root, 'packages/react/src/presence.tsx');
+const vueSourceDirectory = resolve(root, 'packages/vue/src');
+const vueIndex = await Bun.file(resolve(vueSourceDirectory, 'index.ts')).text();
+const vueComponentModules = new Map(
+  Array.from(
+    vueIndex.matchAll(
+      /export\s+\{\s*default\s+as\s+(Ui[A-Za-z0-9]+)\s*\}\s+from\s+['"](\.\/[^'"]+\.vue)['"]/g,
+    ),
+    ([, name, module]) => [name, module] as const,
+  ),
+);
 
 const program = ts.createProgram({
-  rootNames: [vueTypesPath, reactIndexPath, reactPresencePath],
+  rootNames: [vueTypesPath, reactIndexPath],
   options: {
     target: ts.ScriptTarget.ES2022,
     module: ts.ModuleKind.ESNext,
@@ -178,6 +188,26 @@ function validateProps(contract: PropContract): void {
   }
 }
 
+async function validateSlots(contract: PropContract): Promise<void> {
+  if (!contract.slots) return;
+  const module = vueComponentModules.get(contract.name);
+  if (!module) {
+    errors.push(`${contract.name}: cannot resolve the Vue component for named slot checks`);
+    return;
+  }
+  const vueSource = await Bun.file(resolve(vueSourceDirectory, module)).text();
+  const vueSlots = new Set(
+    Array.from(vueSource.matchAll(/<slot\b[^>]*\sname=['"]([\w-]+)['"]/g), ([, name]) => name),
+  );
+  const reactProps = propertyNames(getType('react', contract.reactType));
+  for (const [slot, prop] of Object.entries(contract.slots)) {
+    if (!vueSlots.has(slot)) errors.push(`${contract.name}: Vue is missing named slot ${slot}`);
+    if (!reactProps.has(prop)) {
+      errors.push(`${contract.name}: React ${contract.reactType} is missing ${prop} for #${slot}`);
+    }
+  }
+}
+
 function literalValues(type: ts.Type | undefined): string[] {
   if (type === undefined) return [];
   const members = type.isUnion() ? type.types : [type];
@@ -243,7 +273,10 @@ if (unexpectedParity.length > 0) {
   errors.push(`Parity contracts exist for unregistered components: ${unexpectedParity.join(', ')}`);
 }
 
-for (const contract of parity.components) validateProps(contract);
+for (const contract of parity.components) {
+  validateProps(contract);
+  await validateSlots(contract);
+}
 for (const contract of parity.dataContracts) validateProps(contract);
 for (const contract of parity.literalUnions) validateLiteralUnion(contract);
 

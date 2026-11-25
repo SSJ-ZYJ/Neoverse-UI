@@ -1,9 +1,9 @@
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { nextTick } from 'vue';
-import UiContextMenu from './UiContextMenu.vue';
-import UiDropdownMenu from './UiDropdownMenu.vue';
-import UiPopover from './UiPopover.vue';
+import UiContextMenu from './components/overlays/UiContextMenu.vue';
+import UiDropdownMenu from './components/overlays/UiDropdownMenu.vue';
+import UiPopover from './components/overlays/UiPopover.vue';
 
 afterEach(() => {
   vi.restoreAllMocks();

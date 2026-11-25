@@ -1,18 +1,18 @@
 import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { h, nextTick } from 'vue';
-import UiBadge from './UiBadge.vue';
-import UiCard from './UiCard.vue';
-import UiDisclosure from './UiDisclosure.vue';
-import UiNotice from './UiNotice.vue';
-import UiSkeleton from './UiSkeleton.vue';
-import UiStatCard from './UiStatCard.vue';
-import UiStatusIndicator from './UiStatusIndicator.vue';
-import UiStepFlow from './UiStepFlow.vue';
-import UiSurface from './UiSurface.vue';
-import UiTable from './UiTable.vue';
-import UiTimeline from './UiTimeline.vue';
-import UiTooltipSurface from './UiTooltipSurface.vue';
+import UiBadge from './components/display/UiBadge.vue';
+import UiDisclosure from './components/display/UiDisclosure.vue';
+import UiNotice from './components/display/UiNotice.vue';
+import UiSkeleton from './components/display/UiSkeleton.vue';
+import UiStatCard from './components/display/UiStatCard.vue';
+import UiStatusIndicator from './components/display/UiStatusIndicator.vue';
+import UiTable from './components/display/UiTable.vue';
+import UiTimeline from './components/display/UiTimeline.vue';
+import UiStepFlow from './components/navigation/UiStepFlow.vue';
+import UiTooltipSurface from './components/overlays/UiTooltipSurface.vue';
+import UiCard from './components/surfaces/UiCard.vue';
+import UiSurface from './components/surfaces/UiSurface.vue';
 
 afterEach(() => {
   vi.restoreAllMocks();

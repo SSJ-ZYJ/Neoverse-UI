@@ -1,9 +1,10 @@
 import { expect, test } from 'bun:test';
 import { type HTMLElement as HappyHTMLElement, Window } from 'happy-dom';
-import { act } from 'react';
+import { act, type ComponentPropsWithoutRef } from 'react';
 import { hydrateRoot, type Root } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
-import { UiControlSurface } from './navigation';
+import { UiControlSurface } from './components/surfaces/control-surface';
+import { UiDock } from './index';
 
 const fixture = (
   <UiControlSurface navigationIndicator aria-label="Navigation">
@@ -17,6 +18,25 @@ const fixture = (
     </a>
   </UiControlSurface>
 );
+
+function QuickActionsRegion(props: ComponentPropsWithoutRef<'section'>) {
+  return <section {...props} />;
+}
+
+test('a custom Dock host retains named navigation and its trailing action', () => {
+  const html = renderToString(
+    <UiDock
+      as={QuickActionsRegion}
+      aria-label="Quick actions"
+      trailing={<button type="button">Save</button>}
+    >
+      <a href="/overview">Overview</a>
+    </UiDock>,
+  );
+  expect(html).toStartWith('<section aria-label="Quick actions"');
+  expect(html).toContain('<a href="/overview">Overview</a>');
+  expect(html).toContain('<button type="button">Save</button>');
+});
 
 const indicatorRect = (left: number) => ({
   bottom: 32,

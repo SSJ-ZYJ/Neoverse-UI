@@ -1,4 +1,4 @@
-import type { GlassRenderer } from './index.js';
+import type { GlassRenderer } from './types.js';
 
 const svgNamespace = 'http://www.w3.org/2000/svg';
 const selector = '.material-glass-subtle, .material-glass-elevated, .material-glass-immersive';

@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createSSRApp, h, nextTick } from 'vue';
 import { renderToString } from 'vue/server-renderer';
-import UiScrollbar from './UiScrollbar.vue';
+import UiScrollbar from './components/surfaces/UiScrollbar.vue';
 
 afterEach(() => {
   vi.restoreAllMocks();

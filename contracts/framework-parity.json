@@ -208,7 +208,8 @@
       "name": "UiBreadcrumb",
       "vueType": "BreadcrumbProps",
       "reactType": "UiBreadcrumbProps",
-      "props": ["items", "ariaLabel", "separator"]
+      "props": ["items", "ariaLabel", "separator"],
+      "slots": { "separator": "renderSeparator" }
     },
     {
       "name": "UiControlSurface",
@@ -237,7 +238,8 @@
         "stretch",
         "surface",
         "indicatorPlacement"
-      ]
+      ],
+      "slots": { "suffix": "suffix", "decoration": "decoration" }
     },
     {
       "name": "UiSegmentedControl",

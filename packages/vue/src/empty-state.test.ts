@@ -1,7 +1,7 @@
 import { mount } from '@vue/test-utils';
 import { describe, expect, it } from 'vitest';
 import { h } from 'vue';
-import UiEmptyState from './UiEmptyState.vue';
+import UiEmptyState from './components/display/UiEmptyState.vue';
 
 describe('UiEmptyState', () => {
   it('labels the region with its title and description', () => {

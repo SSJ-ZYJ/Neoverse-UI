@@ -1,7 +1,7 @@
 import { expect, test } from 'bun:test';
 import { renderToStaticMarkup } from 'react-dom/server';
 
-import { UiPresence } from './presence.js';
+import { UiPresence } from './components/motion/presence.js';
 
 test('UiPresence renders the shared Motion attributes and entrance class', () => {
   const markup = renderToStaticMarkup(

@@ -7,7 +7,7 @@ import {
   prewarmParticleDissolve,
   supportsParticleCapture,
   supportsParticleDissolve,
-} from './particle-dissolve.js';
+} from './particles/particle-dissolve.js';
 
 const uniforms = [
   'uContent',
