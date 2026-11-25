@@ -365,6 +365,9 @@ test('theme reveal stays clickable and reverses from its current edge', async ({
     animation.currentTime = 320;
     return true;
   });
+  // The stage scrolls on small viewports; measure the controls only after
+  // bringing them into view so the pointer coordinates hit the real targets.
+  await large.scrollIntoViewIfNeeded();
   const sizeBox = await large.boundingBox();
   const revealBox = await reveal.boundingBox();
   if (!sizeBox || !revealBox) throw new Error('Demo controls are not laid out');

@@ -314,7 +314,7 @@ test('specimens sit on the stage without a painted card around them', async ({ p
     ['materials', '[data-surface-preset="glass-immersive"]'],
     ['forms', '[data-form-input]'],
     ['controls', '[data-qa-stage="gradient"] button'],
-    ['motion', '[data-neoverse-dissolve]'],
+    ['foundation-motion-page', '[data-neoverse-dissolve]'],
     ['colors', '.color-gallery__role-list'],
   ] as const) {
     await page.goto(`/?lang=en#${hash}`, { waitUntil: 'domcontentloaded' });

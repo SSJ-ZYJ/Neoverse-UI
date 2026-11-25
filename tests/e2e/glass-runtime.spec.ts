@@ -344,6 +344,21 @@ test('WAAPI layout size motion keeps WebGL edges aligned with resizing and shift
   await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
   await page.evaluate(() => document.fonts.ready);
 
+  // Bring the size controls into view before sampling. A click that scrolls
+  // mid-trace would compare DOM geometry against a frame painted before the
+  // scroll, so wait for the scroll-driven repaint to land first.
+  const largeControl = page
+    .locator('[data-motion-size-control]')
+    .getByRole('radio', { name: 'Large' });
+  await largeControl.scrollIntoViewIfNeeded();
+  await expect
+    .poll(() =>
+      page.evaluate<number>(
+        () => (window as Window & { __glassFrames?: unknown[] }).__glassFrames?.length ?? 0,
+      ),
+    )
+    .toBeGreaterThan(0);
+
   const tracePromise = page.evaluate(() => {
     const scope = window as Window & { __glassFrames?: Array<{ rects: number[][] }> };
     scope.__glassFrames = [];
@@ -393,7 +408,7 @@ test('WAAPI layout size motion keeps WebGL edges aligned with resizing and shift
     });
   });
 
-  await page.locator('[data-motion-size-control]').getByRole('radio', { name: 'Large' }).click();
+  await largeControl.click();
   const samples = await tracePromise;
   expect(samples.length).toBeGreaterThan(4);
   const maxError = Math.max(...samples.map((entry) => entry.maxErr));
