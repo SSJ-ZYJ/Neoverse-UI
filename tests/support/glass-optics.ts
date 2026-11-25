@@ -45,6 +45,7 @@ export type OpticsMetrics = {
   bodyFilter: string;
   sides: Record<'top' | 'right' | 'bottom' | 'left', EdgeMetrics>;
   corners: Record<'upperLeft' | 'upperRight' | 'lowerLeft' | 'lowerRight', number>;
+  cornerLift: Record<'upperLeft' | 'lowerRight', number>;
   blueRetention: Record<'upperLeft' | 'lowerRight', number>;
   interior: { mean: number; p95: number };
 };
@@ -289,14 +290,23 @@ export async function measureOptics(
         };
       }
 
-      const cornerSignal = (xOrigin: number, yOrigin: number) => {
-        const values: number[] = [];
-        for (let y = 0; y < position.radius + 8; y += 1) {
-          for (let x = 0; x < position.radius + 8; x += 1) {
-            values.push(delta(xOrigin + x, yOrigin + y));
+      const cornerSignal = (xOrigin: number, yOrigin: number, sample = delta) => {
+        const size = position.radius + 8;
+        let sum = 0;
+        for (let y = 0; y < size; y += 1) {
+          for (let x = 0; x < size; x += 1) {
+            sum += sample(xOrigin + x, yOrigin + y);
           }
         }
-        return average(values);
+        return sum / (size * size);
+      };
+      const luminanceLift = (x: number, y: number) => {
+        const offset = (y * screenshotWidth + x) * 3;
+        return (
+          0.2126 * (signed[offset] ?? 0) +
+          0.7152 * (signed[offset + 1] ?? 0) +
+          0.0722 * (signed[offset + 2] ?? 0)
+        );
       };
       const cornerBlueRetention = (xOrigin: number, yOrigin: number) => {
         const endX = xOrigin + position.radius + 8;
@@ -339,6 +349,10 @@ export async function measureOptics(
       return {
         sides,
         corners,
+        cornerLift: {
+          upperLeft: cornerSignal(left, top, luminanceLift),
+          lowerRight: cornerSignal(right, bottom, luminanceLift),
+        },
         blueRetention: {
           upperLeft: cornerBlueRetention(left, top),
           lowerRight: cornerBlueRetention(right, bottom),

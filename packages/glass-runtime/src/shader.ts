@@ -118,10 +118,10 @@ export const glassFragmentShader = `
     // into a second, visibly painted border.
     float edgeFalloff = clamp(u_softness * 0.05, 0.2, 0.42);
 
-    vec2 topLeftDirection = normalize(vec2(-0.58, -0.82));
-    vec2 bottomRightDirection = normalize(vec2(0.68, 0.74));
-    float topLeftLight = max(dot(normal, topLeftDirection), 0.0);
-    float bottomRightScatter = max(dot(normal, bottomRightDirection), 0.0);
+    vec2 keyDirection = normalize(vec2(0.63, 0.78));
+    float lighting = dot(normal, keyDirection);
+    float topLeftLight = max(-lighting, 0.0);
+    float bottomRightScatter = max(lighting, 0.0);
     float leftCatch = max(-normal.x, 0.0);
     float rightCatch = max(normal.x, 0.0);
     float topCatch = max(-normal.y, 0.0);
@@ -137,6 +137,7 @@ export const glassFragmentShader = `
       max(normal.x, 0.0) * max(-normal.y, 0.0),
       max(-normal.x, 0.0) * max(normal.y, 0.0)
     );
+    float diagonalArc = 2.0 * (cornerCatch - opposingCornerCatch);
 
     // Edge width controls light gain while the perimeter stays narrow.
     float thicknessScale = clamp(0.82 + (u_edge_width * 0.55), 0.9, 1.65);
@@ -190,12 +191,9 @@ export const glassFragmentShader = `
     }
     // There is deliberately no uniform base alpha: these directional catches
     // must break up instead of closing into a white outline around the card.
-    float directionalAlpha = smoothstep(0.16, 0.82, topLeftLight) * 0.42
-      + smoothstep(0.16, 0.82, bottomRightScatter) * 0.46
-      + (leftCatch * 0.04)
-      + (rightCatch * 0.06)
-      + (topCatch * 0.018)
-      + (bottomCatch * 0.05)
+    float directionalAlpha = smoothstep(0.16, 0.82, abs(lighting)) * 0.44
+      + (abs(normal.x) * 0.05)
+      + (abs(normal.y) * 0.034)
       + (cornerCatch * 0.16)
       + (opposingCornerCatch * 0.28);
     // Broader opposing catches extend along the adjacent edges. Round buttons
@@ -210,22 +208,22 @@ export const glassFragmentShader = `
     bottomRightFocus *= 1.0 - smoothstep(0.65, 1.0, max(1.0 - v_local.x, 1.0 - v_local.y));
     topLeftFocus = mix(topLeftFocus, 1.0, roundButton);
     bottomRightFocus = mix(bottomRightFocus, 1.0, roundButton);
-    float cornerAlpha = pow(topLeftLight, 2.0) * topLeftFocus * 0.72
-      + pow(bottomRightScatter, 2.0) * bottomRightFocus * 0.78;
+    float cornerAlpha = 0.75 * (pow(topLeftLight, 2.0) * topLeftFocus
+      + pow(bottomRightScatter, 2.0) * bottomRightFocus);
     // Preserve a quiet straight side between the two bright catches. Spatial
     // corner focus must not erase the middle of a button's vertical contour.
-    cornerAlpha += leftCatch * 0.1 + rightCatch * 0.12;
+    cornerAlpha += abs(normal.x) * 0.11;
     directionalAlpha = mix(directionalAlpha, cornerAlpha, u_corner_focus);
-    float bottomRightVolume = 0.0;
+    float diagonalVolume = 0.0;
+    float diagonalFocus = max(topLeftFocus, bottomRightFocus);
     if (volumeScale > 0.0) {
-      // Taper width by position, independently of the turning light normal.
+      // Matching envelopes keep the catches equally fine as edge opacity rises.
       float volumeReach = min(shortSide * 0.36, 96.0);
-      float topLeftVolume = volumeScale *
-        (1.0 - smoothstep(volumeReach * 0.25, volumeReach, topLeftDistance));
-      bottomRightVolume = volumeScale *
-        (1.0 - smoothstep(volumeReach * 0.25, volumeReach, bottomRightDistance));
-      edgeFalloff += 0.78 * topLeftVolume + 0.44 * bottomRightVolume;
-      directionalAlpha += 0.24 * (topLeftLight * topLeftVolume + bottomRightScatter * bottomRightVolume);
+      float diagonalDistance = min(topLeftDistance, bottomRightDistance);
+      diagonalVolume = volumeScale *
+        (1.0 - smoothstep(volumeReach * 0.25, volumeReach, diagonalDistance));
+      edgeFalloff += 0.61 * diagonalVolume;
+      directionalAlpha += 0.24 * abs(lighting) * diagonalVolume;
     }
     float edge = 1.0 - smoothstep(0.0, u_edge_width + edgeFalloff, -distance);
     float alpha = inside * edge * u_opacity * directionalAlpha * thicknessScale;
@@ -256,14 +254,18 @@ export const glassFragmentShader = `
     bool darkSurface = lightSurface <= 0.5;
     if (darkSurface) {
       // Lift the diagonal arcs, with zero slope where they meet the straight edges.
-      float catchMask = 2.0 * max(leftCatch * topCatch, rightCatch * bottomCatch);
-      darkCorner = catchMask * catchMask * (1.0 - roundButton);
+      darkCorner = diagonalArc * diagonalArc * (1.0 - roundButton);
     }
     float exposure = u_gain * (1.0 + 0.16 * darkCorner);
     if (u_color_dodge > 0.5) {
       // Encode a proportional backdrop lift rather than raising its RGB floor.
       // Partial coverage retains the original backdrop near channel clipping.
       float luminance = dot(color, vec3(0.2126, 0.7152, 0.0722));
+      // The diagonal peaks share neutral exposure; the chroma pass still
+      // responds to the local backdrop independently at each corner.
+      float cornerLuminance = dot((u_primary + u_secondary) * 0.5, vec3(0.2126, 0.7152, 0.0722));
+      cornerLuminance = mix(cornerLuminance, edgeLightLuminance, lightSurface * 0.7);
+      luminance = mix(luminance, cornerLuminance, diagonalArc);
       float edgeGain = max(2.0 * alpha * luminance - alpha * alpha, 0.0) * exposure;
       float lift = min(0.25 * edgeGain, 0.074);
       float coverage = min(4.0 * edgeGain, 0.67);
@@ -283,17 +285,15 @@ export const glassFragmentShader = `
       if (lift <= 0.0) discard;
       // Covered dodge yields lift = coverage * dodge / (1 - dodge) before clipping.
       float dodge = lift / (coverage + lift);
-      // Roll off the dodge source at the lower-right catch before the
-      // compositor clips it. The chroma pass supplies the stronger color.
-      float excess = max(dodge - 0.036, 0.0);
-      dodge -= bottomRightVolume * excess * excess / (0.011 + excess);
-      if (shortSide > 192.0 && volumeScale > 0.0 && topLeftFocus > 0.0) {
-        // The stronger catch on large light surfaces can wash out pale
-        // backdrops. Follow its lighting envelope so the lift does not peak
-        // again just outside the rounded corner.
-        float topLeftRolloff = smoothstep(192.0, 384.0, shortSide) * volumeScale * topLeftFocus;
-        float topLeftExcess = max(dodge - 0.03, 0.0);
-        dodge -= topLeftRolloff * topLeftExcess * topLeftExcess / (0.006 + topLeftExcess);
+      if (volumeScale > 0.0) {
+        // Both catches roll off before pale backdrop channels clip. Keep the
+        // softer, wider shoulder on large surfaces without applying it twice.
+        float excess = max(dodge - 0.036, 0.0);
+        float localRolloff = diagonalVolume * excess * excess / (0.011 + excess);
+        float paleExcess = max(dodge - 0.03, 0.0);
+        float largeRolloff = smoothstep(192.0, 384.0, shortSide) * volumeScale * diagonalFocus;
+        largeRolloff *= paleExcess * paleExcess / (0.006 + paleExcess);
+        dodge -= max(localRolloff, largeRolloff);
       }
       gl_FragColor = vec4(vec3(dodge), coverage);
       return;

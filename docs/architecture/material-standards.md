@@ -60,15 +60,13 @@ In both themes, the shared WebGL canvas encodes a neutral, partially covered
 color-dodge signal. The compositor lifts the existing backdrop channels
 proportionally rather than lifting the weaker channels toward white. Dark
 surfaces use a higher exposure scale to keep the fine rim visible on dark
-backdrops. On large light surfaces, the stronger catches have a soft exposure
-shoulder instead of a hard cutoff. The lower-right catch limits the dodge signal
-before channels clip, rather than masking the clipped result with lower coverage.
-The saturation pass strengthens the live backdrop's hue in both themes, with
-additional emphasis near the lower-right arc on large light surfaces. Neither
-pass adds a fixed highlight hue.
-On larger light surfaces, the upper-left catch also rolls off before clipping,
-with a softer peak that fades along the adjoining edges. The rolloff changes
-the dodge signal without changing rim width or coverage.
+backdrops. The upper-left and lower-right catches share one lighting profile.
+On large light surfaces, both catches roll off before the backdrop channels
+clip, with a softer shoulder on the largest surfaces. The saturation pass
+strengthens the live backdrop's hue in both themes, with additional emphasis
+near the lower-right arc on large light surfaces. Neither pass adds a fixed
+highlight hue. Equal lighting does not require equal output on different
+underlying colors.
 
 Browsers without color dodge keep the overlay transfer in either theme.
 CSS still owns the body tint, blur, and shadows.
@@ -78,13 +76,12 @@ neighboring pixels or bend their position. This is backdrop-dependent
 compositing, not spatial refraction.
 
 Opacity, clipping, and overlay occlusion still apply. On large light surfaces,
-the upper-left and lower-right catches taper in width independently of the
-lighting direction. The lighting also eases from each straight edge into its
-arc, so the join does not create a second highlight. The lower-right catch
-retains the narrower inward falloff. Dark corners use the same fine contour,
-with additional color-dodge lift on the upper-left and lower-right arcs after
-the base exposure ceiling. The lift tapers to zero at the straight edges
-without changing rim geometry or coverage.
+the upper-left and lower-right catches use the same inward falloff. The
+lighting eases from each straight edge into its arc, so the join does not
+create a second highlight. Dark corners use the same fine contour, with
+additional color-dodge lift on the upper-left and lower-right arcs after the
+base exposure ceiling. The lift tapers to zero at the straight edges without
+changing rim geometry or coverage.
 Reduced transparency disables the renderer. The CSS fallback uses alpha-only
 gradient masks and backdrop brightness. The historical `backend: 'native'`
 option remains available for compatibility, but must not be used as the repair
