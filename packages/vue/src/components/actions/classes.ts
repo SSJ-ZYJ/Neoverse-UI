@@ -10,6 +10,10 @@ export const buttonVariantClasses = {
   primary: 'ui-button--primary',
   secondary: 'ui-button--secondary',
   ghost: 'ui-button--ghost',
+  danger: 'ui-button--danger',
+  success: 'ui-button--success',
+  warning: 'ui-button--warning',
+  accent: 'ui-button--accent',
 } as const;
 
 export const buttonSizeClasses = {

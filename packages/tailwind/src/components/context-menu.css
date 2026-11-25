@@ -35,17 +35,15 @@
     gap: var(--neoverse-context-menu-item-gap);
     border: 0;
     border-radius: var(--neoverse-overlay-item-radius);
-    padding: var(--neoverse-space-2) var(--neoverse-space-3);
+    padding: var(--neoverse-overlay-item-padding-block) var(--neoverse-overlay-item-padding-inline);
     color: var(--neoverse-context-menu-item-foreground);
     background: transparent;
     font: inherit;
     font-size: var(--neoverse-context-menu-font-size);
-    line-height: var(--neoverse-line-height-snug);
+    line-height: var(--neoverse-overlay-item-line-height);
     text-align: left;
     cursor: pointer;
-    transition:
-      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
-      background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+    transition: color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
   }
 
   /* Only checkable rows reserve a check column; a plain action starts at the padding.
@@ -74,30 +72,15 @@
      inside element for dismissal. */
   /* 二级菜单是顶层里独立的 manual 浮层，像原生二级菜单那样贴着面板边缘。它直接采用共享浮层配方，
      而不是嵌套玻璃工具类（材质契约禁止嵌套），面板把它登记为内部元素以处理关闭。 */
-  /* The adapter overlaps the column onto the panel edge by one edge width. The
-     shared Glass canvas paints above the top layer, so the column must cover the
-     panel's rim and be picked up by the renderer's occlusion hit test; otherwise
-     the panel edge paints across the column as soon as it opens. */
-  .ui-context-menu__submenu {
-    position: fixed;
-    inset: auto;
-    top: var(--neoverse-overlay-top);
-    left: var(--neoverse-overlay-left);
-    display: none;
+  /* The adapter overlaps the column onto the panel so the submenu covers the parent's rim. */
+  :where(.ui-context-menu, .ui-context-menu__submenu) {
     min-width: var(--neoverse-context-menu-min-inline-size);
-    max-width: min(var(--neoverse-overlay-max-inline-size), calc(100vw - var(--neoverse-space-4)));
-    max-height: var(--neoverse-overlay-max-block-size);
-    margin: 0;
-    padding: var(--neoverse-space-1);
     gap: 0;
-    overflow: auto;
-    border: 0;
-    border-radius: var(--neoverse-overlay-radius);
-    color: var(--neoverse-context-menu-item-foreground);
-    background: var(--neoverse-overlay-background);
-    box-shadow: var(--neoverse-overlay-shadow);
-    -webkit-backdrop-filter: var(--neoverse-overlay-filter);
-    backdrop-filter: var(--neoverse-overlay-filter);
+  }
+
+  /* Submenus inherit .ui-overlay-panel, .material-glass-elevated and .nv-presence,
+     adding only submenu stacking and its fallback-open display class. */
+  .ui-context-menu__submenu {
     z-index: calc(var(--neoverse-overlay-layer) + 1);
   }
 
@@ -112,11 +95,9 @@
     min-width: var(--neoverse-context-menu-min-inline-size);
   }
 
-  /* The row that opened the submenu keeps its open state while the column is visible. */
-  /* 打开二级菜单的行在列可见期间保持展开状态。 */
+  /* Keep the same wash as hover when the pointer crosses into the submenu. */
   .ui-context-menu__item[data-open='true'] {
-    color: var(--neoverse-color-text-primary);
-    background: var(--neoverse-overlay-item-active-background);
+    --neoverse-quiet-control-rest-feedback: var(--neoverse-control-ghost-hover-background);
   }
 
   .ui-context-menu__chevron {
@@ -133,7 +114,7 @@
     font-variant-numeric: tabular-nums;
   }
 
-  .ui-context-menu__item:focus-visible {
+  .ui-context-menu__item:focus-visible:not([data-neoverse-focus-origin='pointer']) {
     color: var(--neoverse-color-text-primary);
     background: var(--neoverse-overlay-item-active-background);
     outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
@@ -160,7 +141,7 @@
       background: CanvasText;
     }
 
-    .ui-context-menu__item:focus-visible {
+    .ui-context-menu__item:focus-visible:not([data-neoverse-focus-origin='pointer']) {
       outline-color: Highlight;
     }
   }

@@ -14,6 +14,7 @@ export const breadcrumbCssVariables = {
   focusOffset: '--neoverse-breadcrumb-focus-offset',
   focusRadius: '--neoverse-breadcrumb-focus-radius',
   linkPlateInset: '--neoverse-breadcrumb-link-plate-inset',
+  linkPlateInsetInline: '--neoverse-breadcrumb-link-plate-inset-inline',
   linkPlateBackground: '--neoverse-breadcrumb-link-plate-background',
   linkPlateRestScale: '--neoverse-breadcrumb-link-plate-rest-scale',
   clipMargin: '--neoverse-breadcrumb-clip-margin',

@@ -1,3 +1,4 @@
+import type { Locator } from '@playwright/test';
 import {
   adapters,
   describedTexts,
@@ -6,6 +7,53 @@ import {
   formValues,
   test,
 } from '../support/e2e';
+
+async function sampleCaretFlight(glyph: Locator, progress: number, finish = false) {
+  return glyph.evaluate(
+    async (node, { progress, finish }) => {
+      const frame = node.closest('[aria-hidden="true"]');
+      const flight = frame?.getAnimations({ subtree: true }).find((animation) => {
+        const effect = animation.effect;
+        return (
+          effect instanceof KeyframeEffect && effect.getKeyframes().some(({ clipPath }) => clipPath)
+        );
+      });
+      const effect = flight?.effect;
+      if (!flight || !(effect instanceof KeyframeEffect) || !effect.target) return null;
+
+      flight.pause();
+      await flight.ready;
+      flight.currentTime = Number(effect.getTiming().duration) * progress;
+      const points = Array.from(
+        getComputedStyle(effect.target).clipPath.matchAll(/(-?[\d.]+)px (-?[\d.]+)px/g),
+        ([, x, y]) => [Number(x), Number(y)] as const,
+      );
+      const xs = points.map(([x]) => x);
+      const ys = points.map(([, y]) => y);
+      const left = Math.min(...xs);
+      const top = Math.min(...ys);
+      if (finish) flight.finish();
+      return { left, top, width: Math.max(...xs) - left, height: Math.max(...ys) - top };
+    },
+    { progress, finish },
+  );
+}
+
+function measureCaret(glyph: Locator) {
+  return glyph.evaluate((node) => {
+    const control = node.closest('[data-caret]')?.querySelector('input, textarea');
+    if (!control) throw new Error('Text control is missing');
+    const { x, y, width, height } = node.getBoundingClientRect();
+    const box = control.getBoundingClientRect();
+    return {
+      x: x - box.x,
+      y: y - box.y,
+      width,
+      height,
+      lineHeight: Number.parseFloat(getComputedStyle(control).lineHeight),
+    };
+  });
+}
 
 test.describe('forms', () => {
   for (const adapter of adapters) {
@@ -400,8 +448,7 @@ test.describe('forms', () => {
     test(`${adapter.name}: single-line text caret paints above glass and tracks left/right movement immediately`, async ({
       page,
     }) => {
-      // The glide below is a CSS transition, which the cross-browser config
-      // removes under reduced motion unless a test explicitly opts back in.
+      // Cross-browser tests default to reduced motion.
       await page.emulateMedia({ reducedMotion: 'no-preference' });
       await page.goto(adapter.url('light'));
       const form = page.locator('[data-text-contract-form]');
@@ -445,9 +492,7 @@ test.describe('forms', () => {
       await expect(caret.locator('.ui-input-caret__prefix')).toHaveText('Neoverse Studi');
       await page.keyboard.up('ArrowLeft');
 
-      // Long jump to Home settles at the start. Whether the engine exposes the
-      // glide as a running transform transition differs (WebKit reports none),
-      // so the landing position is the contract that is asserted.
+      // Long jump to Home settles at the start.
       const beforeHome = await glyph.evaluate((el) => el.getBoundingClientRect().left);
       await page.keyboard.press('Home');
       await expect(caret.locator('.ui-input-caret__prefix')).toHaveText('');
@@ -495,6 +540,75 @@ test.describe('forms', () => {
       await expect
         .poll(() => notesGlyph.evaluate((el) => el.getBoundingClientRect().top))
         .toBeLessThan(lineTwoTop - 10);
+    });
+
+    test(`${adapter.name}: caret stretches toward clicks on the same row and across rows`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.goto(adapter.url('light'));
+
+      for (const layout of ['input', 'newline', 'wrap']) {
+        const multiline = layout !== 'input';
+        const control = page.locator(multiline ? '#contract-notes' : '#contract-text');
+        const glyph = control
+          .locator('xpath=..')
+          .locator(multiline ? '.ui-textarea-caret__glyph' : '.ui-input-caret__glyph');
+        const line = 'a'.repeat(30);
+        let text = multiline ? `aaaa\n${line}` : line;
+        if (layout === 'wrap') {
+          // Fill one visual row and part of the next without inserting a newline.
+          const columns = await control.evaluate((node) => {
+            const style = getComputedStyle(node);
+            const canvas = document.createElement('canvas').getContext('2d');
+            if (!canvas) throw new Error('Text measurement is unavailable');
+            canvas.font = `${style.fontSize} ${style.fontFamily}`;
+            const width =
+              node.clientWidth -
+              Number.parseFloat(style.paddingLeft) -
+              Number.parseFloat(style.paddingRight);
+            return Math.floor(width / canvas.measureText('a').width);
+          });
+          text = 'a'.repeat(columns + line.length);
+        }
+        await control.fill(text);
+        await expect(glyph).toBeVisible();
+        const resting = await measureCaret(glyph);
+        const rowCenter = resting.y + resting.height / 2;
+
+        await control.click({
+          position: {
+            x: 30,
+            y: rowCenter - (multiline ? resting.lineHeight : 0),
+          },
+        });
+        const stretch = await sampleCaretFlight(glyph, 0.27);
+        if (!stretch) throw new Error('Caret did not animate');
+        expect(stretch.width).toBeGreaterThan(resting.width + 10);
+        if (multiline) expect(stretch.height).toBeGreaterThan(resting.height + 2);
+        else expect(stretch.height).toBeCloseTo(resting.height, 0);
+
+        // Reverse before the tail catches up; both ends should stay where they were painted.
+        await control.click({ position: { x: resting.x, y: rowCenter } });
+        const reversal = await sampleCaretFlight(glyph, 0, true);
+        if (!reversal) throw new Error('Caret did not reverse');
+        expect(reversal.left).toBeCloseTo(stretch.left, 0);
+        expect(reversal.top).toBeCloseTo(stretch.top, 0);
+        expect(reversal.width).toBeCloseTo(stretch.width, 0);
+        expect(reversal.height).toBeCloseTo(stretch.height, 0);
+
+        await expect(glyph).toBeVisible();
+        const landed = await measureCaret(glyph);
+        expect(landed.width).toBe(resting.width);
+        expect(landed.x).toBeCloseTo(resting.x, 0);
+        expect(landed.y).toBeCloseTo(resting.y, 0);
+
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await control.click({ position: { x: 30, y: rowCenter } });
+        expect(await sampleCaretFlight(glyph, 0)).toBeNull();
+        await expect(glyph).toBeVisible();
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
+      }
     });
   }
 });

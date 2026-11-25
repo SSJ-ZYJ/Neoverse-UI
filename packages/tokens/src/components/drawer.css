@@ -1,0 +1,6 @@
+@layer neoverse.tokens {
+  :root {
+    --neoverse-drawer-width: var(--neoverse-layout-sidebar-drawer-width);
+    --neoverse-drawer-inset: var(--neoverse-space-2);
+  }
+}

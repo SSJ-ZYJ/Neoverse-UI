@@ -1,15 +1,6 @@
-/**
- * Glide the mirrored caret from its previous position to the new one.
- *
- * The bar keeps its width; only its transform travels. Sampling the painted
- * position before clearing the active transform lets rapid arrow repeats and
- * mid-flight reversals continue from the live pixel instead of teleporting,
- * while edited text or scroll jumps start directly at the new slot so the
- * caret never trails the content.
- */
-export interface CaretPoint {
-  left: number;
-  top: number;
+// The terminal keeps a narrow, fixed-width bar while it glides.
+function caretOrigin(glyph: HTMLElement): number {
+  return glyph.closest?.('.ui-terminal-prompt__caret')?.getBoundingClientRect().left ?? 0;
 }
 
 const holdTimers = new WeakMap<HTMLElement, ReturnType<typeof setTimeout>>();
@@ -38,25 +29,12 @@ function glideCap(glyph: HTMLElement): number {
   return raw.endsWith('ms') ? parsed : parsed * 1000;
 }
 
-function caretOrigin(glyph: HTMLElement): CaretPoint {
-  const frame =
-    typeof glyph.closest === 'function'
-      ? glyph.closest('.ui-input-caret, .ui-textarea-caret, .ui-terminal-prompt__caret')
-      : null;
-  if (!frame) return { left: 0, top: 0 };
-  const rect = frame.getBoundingClientRect();
-  return { left: rect.left, top: rect.top };
-}
-
-function applyGlide(glyph: HTMLElement, dx: number, dy: number): void {
-  const distance = Math.hypot(dx, dy);
+function applyGlide(glyph: HTMLElement, dx: number): void {
+  const distance = Math.abs(dx);
   if (distance > 0.5) {
-    // A far jump gets more travel time; the token caps how long that may take.
     const limit = glideCap(glyph);
     const duration = Math.round(Math.min(limit, Math.max(shortestGlide, distance * 1.8)));
-    // Seed the previous position, commit it, then release the bar back to its
-    // resting transform so the browser interpolates the whole travel.
-    glyph.style.transform = dy === 0 ? `translateX(${dx}px)` : `translate(${dx}px, ${dy}px)`;
+    glyph.style.transform = `translateX(${dx}px)`;
     void glyph.offsetWidth;
     glyph.style.transition = '';
     glyph.style.transitionDuration = `${duration}ms`;
@@ -77,45 +55,19 @@ export function slideCaret(
 ): number | null {
   if (!glyph) return null;
   const origin = caretOrigin(glyph);
-  const renderedLeft = glyph.getBoundingClientRect().left - origin.left;
+  const renderedLeft = glyph.getBoundingClientRect().left - origin;
   glyph.style.transition = 'none';
   glyph.style.transform = 'none';
   glyph.style.width = '';
-  const left = glyph.getBoundingClientRect().left - origin.left;
+  const left = glyph.getBoundingClientRect().left - origin;
   // Inserting or deleting text must not leave the caret trailing the glyphs.
   const edited = lastText.get(glyph) !== text;
   lastText.set(glyph, text);
   const activeOffset = renderedLeft - left;
   const visualPrevious = previousLeft === null ? null : previousLeft + activeOffset;
   const dx = visualPrevious === null || scrolled || edited ? 0 : visualPrevious - left;
-  applyGlide(glyph, dx, 0);
+  applyGlide(glyph, dx);
   return left;
-}
-
-export function slideCaret2d(
-  glyph: HTMLElement | null | undefined,
-  previous: CaretPoint | null,
-  text: string,
-  scrolled: boolean,
-): CaretPoint | null {
-  if (!glyph) return null;
-  const origin = caretOrigin(glyph);
-  const rendered = glyph.getBoundingClientRect();
-  const renderedLeft = rendered.left - origin.left;
-  const renderedTop = rendered.top - origin.top;
-  glyph.style.transition = 'none';
-  glyph.style.transform = 'none';
-  glyph.style.width = '';
-  const box = glyph.getBoundingClientRect();
-  const left = box.left - origin.left;
-  const top = box.top - origin.top;
-  const edited = lastText.get(glyph) !== text;
-  lastText.set(glyph, text);
-  const dx =
-    previous === null || scrolled || edited ? 0 : previous.left + (renderedLeft - left) - left;
-  const dy = previous === null || scrolled || edited ? 0 : previous.top + (renderedTop - top) - top;
-  applyGlide(glyph, dx, dy);
-  return { left, top };
 }
 
 /**

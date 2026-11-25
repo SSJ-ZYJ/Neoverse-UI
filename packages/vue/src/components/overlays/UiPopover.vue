@@ -2,13 +2,15 @@
 import {
   type AnchoredOverlayOptions,
   hideAnchoredOverlay,
+  installFocusModality,
   isOverlayOpen,
+  markPointerModality,
   showAnchoredOverlay,
   stopOverlayTracking,
 } from '@neoverse-ui/overlay-runtime';
-import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue';
-import type { ButtonVariant, PopoverProps } from '../../types';
-import { buttonVariantClasses } from '../actions/classes';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
+import type { ButtonSize, ButtonVariant, PopoverProps } from '../../types';
+import { buttonSizeClasses, buttonVariantClasses } from '../actions/classes';
 import { presence } from '../motion/presence';
 import { getSurfaceClass } from '../surfaces/surface';
 
@@ -19,6 +21,7 @@ const props = withDefaults(defineProps<PopoverProps>(), {
   placement: 'auto',
   matchTriggerWidth: false,
   triggerVariant: 'secondary',
+  triggerSize: 'md',
 });
 const emit = defineEmits<{ 'update:open': [value: boolean] }>();
 
@@ -27,7 +30,7 @@ const triggerClasses = computed(() => [
   'ui-button',
   getSurfaceClass('glass-subtle'),
   buttonVariantClasses[props.triggerVariant as ButtonVariant] ?? buttonVariantClasses.secondary,
-  'ui-button--md',
+  buttonSizeClasses[props.triggerSize as ButtonSize] ?? buttonSizeClasses.md,
 ]);
 
 const triggerRef = ref<HTMLButtonElement | null>(null);
@@ -86,6 +89,16 @@ function toggleOpen() {
   setOpen(!resolvedOpen.value);
 }
 
+function onTriggerPointerDown(event: PointerEvent) {
+  const trigger = event.currentTarget as HTMLElement;
+  trigger.dataset.neoverseFocusOrigin = 'pointer';
+  markPointerModality(trigger.ownerDocument);
+}
+
+function onTriggerBlur(event: FocusEvent) {
+  delete (event.currentTarget as HTMLElement).dataset.neoverseFocusOrigin;
+}
+
 function onPanelToggle(event: Event) {
   const panel = event.currentTarget as HTMLElement;
   const newState = (event as Event & { newState?: 'open' | 'closed' }).newState;
@@ -111,6 +124,10 @@ watch(
   { immediate: true },
 );
 
+onMounted(() => {
+  if (typeof document !== 'undefined') installFocusModality(document);
+});
+
 onBeforeUnmount(() => {
   const options = overlayOptions();
   if (options !== undefined) hideAnchoredOverlay(options);
@@ -126,6 +143,8 @@ onBeforeUnmount(() => {
       :disabled="props.disabled"
       :aria-expanded="expandedOpen"
       :aria-controls="panelId"
+      @pointerdown="onTriggerPointerDown"
+      @blur="onTriggerBlur"
       @click="toggleOpen"
     >
       <slot name="trigger" />

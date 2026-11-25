@@ -307,6 +307,8 @@
 
   .nv-presence:is(
     :popover-open,
+    :modal,
+    :where(.ui-dialog[open]),
     .ui-overlay-panel--fallback-open,
     .ui-select__popover--fallback-open,
     .ui-context-menu__submenu--open
@@ -326,9 +328,29 @@
     filter: blur(0);
   }
 
+  .nv-presence:where([data-neoverse-overlay-motion]) {
+    --neoverse-motion-from-translate: var(--neoverse-overlay-motion-translate, 0 0);
+    --neoverse-motion-from-scale: var(--neoverse-overlay-motion-scale, 1);
+    transform-origin: top left;
+  }
+
+  .nv-presence:where([data-neoverse-overlay-motion]):not(
+    :is(
+      :popover-open,
+      :where(.ui-dialog[open]),
+      .ui-overlay-panel--fallback-open,
+      .ui-select__popover--fallback-open,
+      .ui-context-menu__submenu--open
+    )
+  ) {
+    pointer-events: none;
+  }
+
   @starting-style {
     .nv-presence:is(
         :popover-open,
+        :modal,
+        :where(.ui-dialog[open]),
         .ui-overlay-panel--fallback-open,
         .ui-select__popover--fallback-open,
         .ui-context-menu__submenu--open
@@ -345,7 +367,8 @@
      that swaps content inside an already-open top layer surface pins this
      attribute for one frame, then releases it so the same enter transition
      replays. Declared after the resting rules so the pinned frame wins. */
-  .nv-presence[data-neoverse-motion-replay='from'] {
+  .nv-presence[data-neoverse-motion-replay='from'],
+  .nv-presence[data-neoverse-overlay-motion='prepare'] {
     transition: none;
     opacity: 0;
     translate: var(--neoverse-motion-from-translate, 0 0);
@@ -355,12 +378,19 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .nv-presence:where([data-neoverse-overlay-motion]) {
+      --neoverse-motion-from-translate: none;
+      --neoverse-motion-from-scale: 1;
+    }
+
     .nv-enter-active,
     .nv-leave-active,
     .nv-move,
     .nv-presence,
     .nv-presence:is(
         :popover-open,
+        :modal,
+        :where(.ui-dialog[open]),
         .ui-overlay-panel--fallback-open,
         .ui-select__popover--fallback-open,
         .ui-context-menu__submenu--open

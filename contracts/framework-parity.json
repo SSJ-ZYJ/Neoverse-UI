@@ -150,7 +150,8 @@
       "name": "UiEmptyState",
       "vueType": "EmptyStateProps",
       "reactType": "UiEmptyStateProps",
-      "props": ["title", "description"]
+      "props": ["title", "description", "variant"],
+      "slots": { "icon": "icon", "action": "action" }
     },
     {
       "name": "UiDisclosure",
@@ -175,14 +176,30 @@
         "placement",
         "matchTriggerWidth",
         "ariaLabel",
-        "triggerVariant"
+        "triggerVariant",
+        "triggerSize"
       ]
     },
     {
       "name": "UiDialog",
       "vueType": "DialogProps",
       "reactType": "UiDialogProps",
-      "props": ["open", "title", "description", "closeOnEscape", "closeOnBackdrop"]
+      "props": [
+        "open",
+        "title",
+        "description",
+        "size",
+        "role",
+        "closeOnEscape",
+        "closeOnBackdrop",
+        "motionSource"
+      ]
+    },
+    {
+      "name": "UiDrawer",
+      "vueType": "DrawerProps",
+      "reactType": "UiDrawerProps",
+      "props": ["open", "modal", "side", "width", "closeOnOutside"]
     },
     {
       "name": "UiDropdownMenu",
@@ -195,7 +212,8 @@
         "disabled",
         "placement",
         "ariaLabel",
-        "triggerVariant"
+        "triggerVariant",
+        "triggerSize"
       ]
     },
     {
@@ -388,7 +406,7 @@
       "name": "DropdownMenuItem",
       "vueType": "DropdownMenuItem",
       "reactType": "UiDropdownMenuItem",
-      "props": ["id", "label", "disabled", "tone"]
+      "props": ["id", "label", "disabled", "tone", "checked", "shortcut"]
     },
     {
       "name": "ContextMenuItem",
@@ -582,6 +600,21 @@
       "name": "SegmentedControlVariant",
       "vueType": "SegmentedControlVariant",
       "reactType": "SegmentedControlVariant"
+    },
+    {
+      "name": "DialogSize",
+      "vueType": "DialogSize",
+      "reactType": "DialogSize"
+    },
+    {
+      "name": "DrawerSide",
+      "vueType": "DrawerSide",
+      "reactType": "DrawerSide"
+    },
+    {
+      "name": "DialogRole",
+      "vueType": "DialogRole",
+      "reactType": "DialogRole"
     }
   ]
 }

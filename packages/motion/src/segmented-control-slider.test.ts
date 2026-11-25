@@ -95,4 +95,34 @@ describe('attachSegmentedControlSlider', () => {
     expect(slider.dataset.circular).toBe('false');
     detach();
   });
+
+  test('commits the destination immediately while an appearance snapshot is active', async () => {
+    const { win, track, slider, buttons } = createTrack([
+      { width: 32, left: 0, height: 32 },
+      { width: 32, left: 35, height: 32 },
+    ]);
+    const nextFrame = () =>
+      new Promise<void>((resolve) => {
+        win.requestAnimationFrame(() => resolve());
+      });
+
+    const detach = attachSegmentedControlSlider(track);
+    expect(slider.hasAttribute('data-instant')).toBe(false);
+
+    win.document.documentElement.setAttribute('data-neoverse-appearance-motion', 'theme-reveal');
+    buttons[0]?.setAttribute('aria-checked', 'false');
+    buttons[1]?.setAttribute('aria-checked', 'true');
+    await nextFrame();
+    await nextFrame();
+
+    expect(slider.hasAttribute('data-instant')).toBe(true);
+    expect(slider.style.getPropertyValue('--segment-active-offset')).toBe('35px');
+
+    win.document.documentElement.removeAttribute('data-neoverse-appearance-motion');
+    await nextFrame();
+    await nextFrame();
+
+    expect(slider.hasAttribute('data-instant')).toBe(false);
+    detach();
+  });
 });

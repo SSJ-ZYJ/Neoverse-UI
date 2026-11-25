@@ -1,4 +1,10 @@
-import { isOverlayOpen, type OverlayPlacement } from '@neoverse-ui/overlay-runtime';
+import {
+  focusElement,
+  installFocusModality,
+  isOverlayOpen,
+  markPointerModality,
+  type OverlayPlacement,
+} from '@neoverse-ui/overlay-runtime';
 import {
   type ComponentPropsWithRef,
   type KeyboardEvent,
@@ -7,7 +13,12 @@ import {
   useEffect,
 } from 'react';
 import { mergeClassNames } from '../../internal.js';
-import { type ButtonVariant, buttonVariantClasses } from '../actions/button-variants.js';
+import type { ActionSize } from '../actions/action-size.js';
+import {
+  type ButtonVariant,
+  buttonSizeClasses,
+  buttonVariantClasses,
+} from '../actions/button-variants.js';
 import { useAnchoredOverlayController } from './anchored-overlay.js';
 
 export type UiDropdownMenuItemTone = 'default' | 'danger';
@@ -17,6 +28,8 @@ export interface UiDropdownMenuItem {
   label: ReactNode;
   disabled?: boolean;
   tone?: UiDropdownMenuItemTone;
+  checked?: boolean;
+  shortcut?: string;
 }
 
 export interface UiDropdownMenuProps
@@ -30,6 +43,7 @@ export interface UiDropdownMenuProps
   placement?: OverlayPlacement;
   /** Button variant of the rendered trigger; ghost reuses the shared washes for chrome. */
   triggerVariant?: ButtonVariant;
+  triggerSize?: ActionSize;
   onOpenChange?: (open: boolean) => void;
   onSelect?: (item: UiDropdownMenuItem) => void;
   renderItem?: (item: UiDropdownMenuItem) => ReactNode;
@@ -44,6 +58,7 @@ export function UiDropdownMenu({
   disabled = false,
   placement = 'auto',
   triggerVariant = 'secondary',
+  triggerSize = 'md',
   onOpenChange,
   onSelect,
   renderItem,
@@ -57,6 +72,10 @@ export function UiDropdownMenu({
     placement,
     ...(onOpenChange === undefined ? {} : { onOpenChange }),
   });
+
+  useEffect(() => {
+    installFocusModality(document);
+  }, []);
 
   const enabledItems = useCallback(
     () =>
@@ -77,7 +96,7 @@ export function UiDropdownMenu({
         !controller.triggerRef.current?.disabled &&
         isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')
       ) {
-        enabledItems()[0]?.focus();
+        focusElement(enabledItems()[0], { preventScroll: true });
       }
     });
     return () => cancelAnimationFrame(frame);
@@ -87,10 +106,22 @@ export function UiDropdownMenu({
     if (item.disabled) return;
     onSelect?.(item);
     controller.setOpen(false);
-    requestAnimationFrame(() => controller.triggerRef.current?.focus());
+    requestAnimationFrame(() =>
+      focusElement(controller.triggerRef.current, { preventScroll: true }),
+    );
   };
 
   const onMenuKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === 'Tab') {
+      const closeImmediately = event.shiftKey;
+      queueMicrotask(() => {
+        if (closeImmediately || !controller.panelRef.current?.contains(document.activeElement)) {
+          controller.setOpen(false);
+        }
+      });
+      return;
+    }
+
     const current = event.target;
     if (!(current instanceof HTMLButtonElement)) return;
     const menuItems = enabledItems();
@@ -99,13 +130,17 @@ export function UiDropdownMenu({
       event.preventDefault();
       const index = menuItems.indexOf(current);
       const direction = event.key === 'ArrowDown' ? 1 : -1;
-      menuItems[(index + direction + menuItems.length) % menuItems.length]?.focus();
+      focusElement(menuItems[(index + direction + menuItems.length) % menuItems.length], {
+        modality: 'keyboard',
+      });
       return;
     }
 
     if (event.key === 'Home' || event.key === 'End') {
       event.preventDefault();
-      (event.key === 'Home' ? menuItems[0] : menuItems.at(-1))?.focus();
+      focusElement(event.key === 'Home' ? menuItems[0] : menuItems.at(-1), {
+        modality: 'keyboard',
+      });
     }
   };
 
@@ -113,12 +148,29 @@ export function UiDropdownMenu({
     <span {...props} className={mergeClassNames('ui-dropdown-menu', className)}>
       <button
         ref={controller.triggerRef}
-        className={`ui-dropdown-menu__trigger ui-button material-glass-subtle ${buttonVariantClasses[triggerVariant]} ui-button--md`}
+        className={`ui-dropdown-menu__trigger ui-button material-glass-subtle ${buttonVariantClasses[triggerVariant]} ${buttonSizeClasses[triggerSize]}`}
         type="button"
         aria-haspopup="menu"
         aria-expanded={controller.expandedOpen}
         aria-controls={controller.panelId}
         disabled={disabled}
+        onPointerDown={(event) => {
+          event.currentTarget.dataset.neoverseFocusOrigin = 'pointer';
+          markPointerModality(event.currentTarget.ownerDocument);
+        }}
+        onBlur={(event) => {
+          delete event.currentTarget.dataset.neoverseFocusOrigin;
+        }}
+        onKeyDown={(event) => {
+          if (!controller.expandedOpen || (event.key !== 'ArrowDown' && event.key !== 'ArrowUp')) {
+            return;
+          }
+          event.preventDefault();
+          const menuItems = enabledItems();
+          focusElement(event.key === 'ArrowDown' ? menuItems[0] : menuItems.at(-1), {
+            modality: 'keyboard',
+          });
+        }}
         onClick={controller.toggle}
       >
         {trigger}
@@ -135,19 +187,43 @@ export function UiDropdownMenu({
         onToggle={controller.onPanelToggle}
         onKeyDown={onMenuKeyDown}
       >
-        {items.map((item) => (
-          <button
-            key={item.id}
-            className="ui-dropdown-menu__item"
-            type="button"
-            role="menuitem"
-            disabled={item.disabled}
-            data-tone={item.tone ?? 'default'}
-            onClick={() => selectItem(item)}
-          >
-            {renderItem?.(item) ?? item.label}
-          </button>
-        ))}
+        {items.map((item) => {
+          const itemSemantics =
+            item.checked === undefined
+              ? ({ role: 'menuitem' } as const)
+              : ({
+                  role: 'menuitemcheckbox',
+                  'aria-checked': item.checked ? 'true' : 'false',
+                } as const);
+          return (
+            <button
+              key={item.id}
+              className="ui-dropdown-menu__item"
+              type="button"
+              tabIndex={-1}
+              {...itemSemantics}
+              disabled={item.disabled}
+              data-tone={item.tone ?? 'default'}
+              onClick={() => selectItem(item)}
+            >
+              {renderItem ? (
+                renderItem(item)
+              ) : (
+                <>
+                  {item.checked === undefined ? null : (
+                    <span className="ui-dropdown-menu__check" aria-hidden="true">
+                      {item.checked ? '✓' : ''}
+                    </span>
+                  )}
+                  <span className="ui-dropdown-menu__label">{item.label}</span>
+                  {item.shortcut ? (
+                    <span className="ui-dropdown-menu__shortcut">{item.shortcut}</span>
+                  ) : null}
+                </>
+              )}
+            </button>
+          );
+        })}
       </div>
     </span>
   );

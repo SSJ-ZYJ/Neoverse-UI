@@ -101,8 +101,10 @@ export const expectedProseFragments = [
 ];
 
 export const expectedNavigationMotionFragments = [
-  'opacity var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing)',
-  'transform var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing)',
+  'opacity var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing)',
+  'top var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing)',
+  'left var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing)',
+  'transform var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing)',
 ];
 
 export const expectedTooltipFragments = [

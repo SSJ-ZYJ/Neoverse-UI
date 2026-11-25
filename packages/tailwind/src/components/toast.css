@@ -140,7 +140,7 @@
   }
 
   @media (hover: hover) {
-    :where(.ui-toast__action > :is(a, button)):hover {
+    :where(.ui-toast__action > :is(a, button):not(.ui-button)):hover {
       text-decoration: underline;
     }
   }

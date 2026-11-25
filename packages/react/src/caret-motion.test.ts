@@ -1,6 +1,6 @@
 import { expect, test } from 'bun:test';
 
-import { slideCaret, slideCaret2d } from './components/motion/caret-motion.js';
+import { slideCaret } from './components/motion/caret-motion.js';
 
 type FakeGlyph = Record<string, string>;
 
@@ -201,61 +201,4 @@ test('the token caps long travel and falls back when the duration is invalid', (
 test('a missing glyph is a no-op', () => {
   expect(slideCaret(null, 100, 'text', false)).toBeNull();
   expect(slideCaret(undefined, 100, 'text', false)).toBeNull();
-  expect(slideCaret2d(null, { left: 100, top: 20 }, 'text', false)).toBeNull();
-});
-
-test('two-axis caret glide handles line hops and mid-flight 2D reversals', () => {
-  withMotionTokens('200ms', () => {
-    let layoutLeft = 40;
-    let layoutTop = 10;
-    let activeX = 0;
-    let activeY = 0;
-    const style: Record<string, string> = {};
-    const writes: Array<{ property: string; value: string }> = [];
-    const glyph = {
-      getBoundingClientRect: () => ({
-        left: 100 + layoutLeft + activeX,
-        top: 50 + layoutTop + activeY,
-        width: 2,
-      }),
-      closest: () => ({ getBoundingClientRect: () => ({ left: 100, top: 50 }) }),
-      get offsetWidth() {
-        return 100;
-      },
-      style: new Proxy(style, {
-        set(target, property, value) {
-          if (typeof property === 'string') {
-            writes.push({ property, value: String(value) });
-            if (property === 'transform' && String(value) === 'none') {
-              activeX = 0;
-              activeY = 0;
-            }
-          }
-          Reflect.set(target, property, value);
-          return true;
-        },
-      }),
-    } as unknown as HTMLElement;
-
-    let point = slideCaret2d(glyph, null, 'line1\nline2', false);
-    expect(point).toEqual({ left: 40, top: 10 });
-
-    // Move diagonally to line 2 (dx = -20, dy = -22).
-    layoutLeft = 60;
-    layoutTop = 32;
-    writes.length = 0;
-    point = slideCaret2d(glyph, point, 'line1\nline2', false);
-    expect(point).toEqual({ left: 60, top: 32 });
-    expect(writes).toContainEqual({ property: 'transform', value: 'translate(-20px, -22px)' });
-
-    // Mid-flight reversal back to line 1 while halfway (activeX = -8, activeY = -10).
-    layoutLeft = 40;
-    layoutTop = 10;
-    activeX = -8;
-    activeY = -10;
-    writes.length = 0;
-    point = slideCaret2d(glyph, point, 'line1\nline2', false);
-    expect(point).toEqual({ left: 40, top: 10 });
-    expect(writes).toContainEqual({ property: 'transform', value: 'translate(12px, 12px)' });
-  });
 });

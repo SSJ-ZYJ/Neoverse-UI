@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { attachSelectionIndicator } from '@neoverse-ui/motion';
+import { attachLayoutReflow, attachSelectionIndicator } from '@neoverse-ui/motion';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import type { PaginationProps } from '../../types';
 
 const props = defineProps<PaginationProps>();
 const emit = defineEmits<{ 'update:page': [value: number] }>();
+const navigation = ref<HTMLElement | null>(null);
 const track = ref<HTMLElement | null>(null);
 const indicator = ref<HTMLElement | null>(null);
 let disposeIndicator: (() => void) | undefined;
+let disposeLayout: (() => void) | undefined;
 onMounted(() => {
   if (track.value && indicator.value) {
     disposeIndicator = attachSelectionIndicator(
@@ -16,15 +18,25 @@ onMounted(() => {
       '[aria-current="page"]',
     );
   }
+  if (navigation.value && track.value) {
+    disposeLayout = attachLayoutReflow(
+      navigation.value,
+      track.value,
+      'button, .ui-pagination__ellipsis',
+    );
+  }
 });
-onBeforeUnmount(() => disposeIndicator?.());
+onBeforeUnmount(() => {
+  disposeIndicator?.();
+  disposeLayout?.();
+});
 const count = computed(() =>
   Number.isFinite(props.totalPages) ? Math.max(0, Math.floor(props.totalPages)) : 0,
 );
 const current = computed(() =>
   count.value === 0 ? 0 : Math.min(Math.max(1, Math.floor(props.page)), count.value),
 );
-const pages = computed((): Array<number | 'ellipsis'> => {
+const pages = computed((): Array<number | 'leading-gap' | 'trailing-gap'> => {
   if (count.value === 0) return [];
   const picked = new Set([1, count.value]);
   const start =
@@ -35,11 +47,13 @@ const pages = computed((): Array<number | 'ellipsis'> => {
     picked.add(index);
   }
   const sorted = [...picked].sort((a, b) => a - b);
-  const result: Array<number | 'ellipsis'> = [];
+  const result: Array<number | 'leading-gap' | 'trailing-gap'> = [];
   for (const number of sorted) {
     const previous = result[result.length - 1];
     if (typeof previous === 'number' && number - previous === 2) result.push(previous + 1);
-    else if (typeof previous === 'number' && number - previous > 2) result.push('ellipsis');
+    else if (typeof previous === 'number' && number - previous > 2) {
+      result.push(previous === 1 ? 'leading-gap' : 'trailing-gap');
+    }
     result.push(number);
   }
   return result;
@@ -51,7 +65,7 @@ function change(page: number): void {
 </script>
 
 <template>
-  <nav class="ui-pagination" :aria-label="ariaLabel">
+  <nav ref="navigation" class="ui-pagination" :aria-label="ariaLabel">
     <button
       type="button"
       class="ui-pagination__button"
@@ -68,8 +82,12 @@ function change(page: number): void {
         aria-hidden="true"
         data-ready="false"
       />
-      <template v-for="(entry, index) in pages" :key="index">
-        <span v-if="entry === 'ellipsis'" class="ui-pagination__ellipsis" aria-hidden="true"
+      <template v-for="entry in pages" :key="entry">
+        <span
+          v-if="typeof entry === 'string'"
+          class="ui-pagination__ellipsis nv-appear"
+          data-neoverse-motion="fade"
+          aria-hidden="true"
           >…</span
         >
         <button

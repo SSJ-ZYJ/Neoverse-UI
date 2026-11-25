@@ -1,8 +1,25 @@
 @layer components {
   .ui-table-region {
+    position: relative;
     max-width: 100%;
     overflow-x: auto;
+    /* The port repeats the plate's radius because a table cannot round its own
+       silhouette: border-radius on the table never clips descendant cell fills,
+       so a square port leaves the first and last cells, plus the elevation they
+       sit on, with right angles at all four corners. Clipping at the plate
+       radius removes that footprint; the inset rim and the renderer edge stay
+       inside the plate. */
     border-radius: var(--neoverse-table-radius);
+  }
+
+  /* A caption occupies the port's top band, so the port keeps square top
+     corners there: a rounded top-left would shave the label's first glyph. The
+     plate's own top corners sit below that band, where the clip edge is still
+     far enough above them to leave the header cells' radius untouched. The
+     shorthand is deliberate; a logical longhand here loses to the shorthand
+     above because both describe the same physical corners. */
+  .ui-table-region:has(> .ui-table > caption.ui-table__caption) {
+    border-radius: 0 0 var(--neoverse-table-radius) var(--neoverse-table-radius);
   }
 
   :where(.ui-table, .neoverse-prose table) {
@@ -153,6 +170,29 @@
     font-weight: var(--neoverse-font-weight-semibold);
     line-height: var(--neoverse-typography-caption-line-height);
     text-align: start;
+  }
+
+  /* The caption stays the table's native accessible name, but the table
+     element also owns the glass plate, its backdrop sampling and its rounded
+     corners. Taking the caption out of that box keeps the plate, rim and
+     corners on the header/body grid: the title reads as a label above the
+     surface instead of a tinted strip whose corners cut into the text. */
+  .ui-table-region:has(> .ui-table > caption.ui-table__caption) {
+    padding-block-start: calc(
+      var(--neoverse-typography-caption-size) *
+      var(--neoverse-typography-caption-line-height) +
+      var(--neoverse-table-caption-gap)
+    );
+  }
+
+  .ui-table-region > .ui-table > caption.ui-table__caption {
+    position: absolute;
+    inset-inline: 0;
+    bottom: 100%;
+    margin-block: 0 var(--neoverse-table-caption-gap);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   @media (hover: hover) {

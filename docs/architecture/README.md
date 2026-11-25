@@ -104,6 +104,7 @@ UiTextarea
 UiSelect
 UiPopover
 UiDialog
+UiDrawer
 UiToast
 UiDropdownMenu
 UiContextMenu
@@ -134,11 +135,11 @@ They compose shared Tailwind classes, expose semantic props and slots, and prese
 
 ## React components
 
-The current source of `@neoverse-ui/react` provides the same 43 components listed above, including consumer-driven navigation, feedback, terminal, presentation and scrollbar adapters. This is a source inventory, not an assertion that all adapters exist in npm React 0.3.0 or have real React product acceptance; see [framework parity](framework-parity.md) and the [published baseline](../releases/release-0.3.1.md).
+The current source of `@neoverse-ui/react` provides the same components listed above, including consumer-driven navigation, feedback, terminal, presentation and scrollbar adapters. This is a source inventory, not an assertion that all adapters exist in npm React 0.3.0 or have real React product acceptance; see [framework parity](framework-parity.md) and the [published baseline](../releases/release-0.3.1.md).
 
 React adapters share the same Tailwind component selectors, Surface presets, native interaction semantics, and accessibility expectations as Vue. Canonical Shared and Consumer Driven remain distinct maturity tracks even where both adapters now exist. `UiAction` supports `asChild` routing composition, `UiBreadcrumb` exposes a custom item renderer seam, and `UiDock` shares ControlSurface's navigation indicator while leaving navigation content and active state to the consumer. Native controls preserve refs and platform attributes. Form controls share the state and accessibility rules documented in [`form-control-contract.md`](./form-control-contract.md). Top-layer controls share the positioning and dismiss rules documented in [`overlay-contract.md`](./overlay-contract.md).
 
-Framework parity is declared in `contracts/framework-parity.json` and validated by `scripts/gates/check-framework-parity.ts`. The current contract covers all 43 components, shared option/item structures, and shared literal unions, including Consumer Driven adapters. Framework-native binding names are normalized explicitly—for example Vue `modelValue` maps to React `value`/`checked`, while Vue `readonly` maps to React `readOnly`. This parity does not promote maturity or replace real consumer evidence. The React Runtime Fixture is checked against `component-matrix.json` rather than a handwritten component list, so a newly runtime-validated adapter cannot silently miss browser coverage.
+Framework parity is declared in `contracts/framework-parity.json` and validated by `scripts/gates/check-framework-parity.ts`. The contract covers public components, shared option/item structures, and shared literal unions, including Consumer Driven adapters. Framework-native binding names are normalized explicitly—for example Vue `modelValue` maps to React `value`/`checked`, while Vue `readonly` maps to React `readOnly`. This parity does not promote maturity or replace real consumer evidence. The React Runtime Fixture is checked against `component-matrix.json` rather than a handwritten component list, so a newly runtime-validated adapter cannot silently miss browser coverage.
 
 ## Adapter source layout
 
@@ -207,6 +208,9 @@ real-device performance remain subject to manual acceptance.
 
 Mounted disclosure regions use the reusable `animateDisclosure()` primitive. It animates one region between zero and its natural height on the `state` role, applies `hidden`/`inert`/`aria-hidden` while closed, continues from the visible frame when reversed, and restores the consumer's inline `height` and `overflow` when it settles. The Explorer's specimen leaf lists use it, and the Motion module's Disclosure motion specimen demonstrates it; the animation is not owned by the shell.
 
+In the Motion specimen, spacing that leaves with the list is inside the animated
+region, so applying `hidden` at the end of the exit does not shift the hint.
+
 ## Density and touch strategy
 
 Controls retain compact painted dimensions on every viewport. Shared Button and SegmentedControl CSS uses `@media (pointer: coarse)` to add an invisible 8px hit-area expansion with pseudo-elements. Disabled pseudo hit areas do not intercept input. No `mobile-button`, `docs-button`, or other application-specific component is introduced. The same core components serve desktop and touch; `focus-visible`, keyboard navigation, and disabled behavior remain explicit component contracts.
@@ -214,6 +218,10 @@ Controls retain compact painted dimensions on every viewport. Shared Button and 
 ## Design Lab
 
 `apps/playground` uses Bun.serve for the HTML shell, `/frame` theme-isolated documents, built Tailwind CSS, and the Vite browser bundle. The shell and isolated `/frame` use the normal consumer root size (16px). `App.vue` selects the shell or independent frame. `LabWorkspace` owns the active hash, preferences, drawer state, and Preview Stage scroll restoration on reload.
+
+The Vite development server serves shared styles from a separate build cache. The CSS watcher serializes rebuilds and atomically replaces the served stylesheet only after compilation succeeds; package builds do not clear the development cache.
+
+Before the browser entry runs, the shell uses the workspace grid and chrome styles with noninteractive placeholders. A pre-paint script applies the same theme and language precedence as the mounted workspace, including the stored theme and stage background on reload. The toolbar, Explorer and Inspector mount independently of the initial preview. Scroll restoration waits for the preview to render so the stage has its full scroll height.
 
 Design Lab 2.0 keeps its toolbar fixed above three independently scrollable areas: Explorer, Preview Stage, and Inspector. The Explorer orders the catalogue into Foundations, Materials & elevation, Components, Compositions, and a separated Lab tools section. A section states design intent, a module is a family that can be read on its own, and QA or theme tooling never mixes with design content. Search matches module or specimen names in either language, API names, and tags without maintaining another inventory.
 
@@ -255,7 +263,7 @@ sideways. Zoom does not change Inspector settings. Opening another specimen
 restores 100%. Fallback overlay panels inside a scaled preview convert the
 rendered scale when they position, so a Select still opens against its trigger.
 
-Every entry in `labSpecimens` declares a `FocusedPreview`: either a localized renderer for a read-only Inspector or a `SpecimenDefinition` that opens one editable `SpecimenSession`. A read-only preview can still support native interactions without exposing a session to the Inspector. Every component specimen whose public API exposes an appearance variant has an editable session: Button, IconButton, Action, SegmentedControl, NavigationItem, ControlSurface, Dock, Badge, StatusIndicator, Skeleton, Notice, Toast, TooltipSurface, Avatar, Table, Disclosure, StatCard, Surface (including the three Aurora Glass tiers), Card, Input, Textarea, Select, Checkbox, RadioGroup, Switch, Field and Tabs. Data-only specimens (Breadcrumb, Pagination, EmptyState, Timeline, StepFlow) and the four overlay specimens stay read-only; overlays own focus, placement and light dismiss, which an Inspector value cannot reproduce. To add a specimen, register its explicit renderer on the catalogue entry and retain its stable QA anchor in the owning module. Interactive definitions live in the `lab-specimens/` family files and are re-exported through `lab-interactive-specimens.ts`; they provide typed initial props, an initial state factory, and editable controls. The session rejects undeclared edits, invalid values, and edits to temporarily disabled fields.
+Every entry in `labSpecimens` declares a `FocusedPreview`: either a localized renderer for a read-only Inspector or a `SpecimenDefinition` that opens one editable `SpecimenSession`. A read-only preview can still support native interactions without exposing a session to the Inspector. Every component specimen whose public API exposes an appearance variant has an editable session: Button, IconButton, Action, SegmentedControl, NavigationItem, ControlSurface, Dock, Badge, StatusIndicator, Skeleton, Notice, Toast, TooltipSurface, Avatar, Table, Disclosure, EmptyState, StatCard, Surface (including the three Aurora Glass tiers), Card, Input, Textarea, Select, Checkbox, RadioGroup, Switch, Field and Tabs. Data-only specimens (Breadcrumb, Pagination, Timeline, StepFlow) and the four overlay specimens stay read-only; overlays own focus, placement and light dismiss, which an Inspector value cannot reproduce. To add a specimen, register its explicit renderer on the catalogue entry and retain its stable QA anchor in the owning module. Interactive definitions live in the `lab-specimens/` family files and are re-exported through `lab-interactive-specimens.ts`; they provide typed initial props, an initial state factory, and editable controls. The session rejects undeclared edits, invalid values, and edits to temporarily disabled fields.
 
 The Stage paints the shared backdrop for both module galleries and focused
 specimens. Section outlines, state rows, and preview wrappers organize the
@@ -264,6 +272,22 @@ retain their configured materials. Only the isolated `/frame` paints the
 diagnostic comparison backdrops.
 
 Module URLs and `/frame` render the full QA galleries, including fixed state matrices and optical fixtures. The Inspector opens the isolated gallery at the specimen anchor without transferring local edits. `/react-fixture` remains the React contract host. Neither isolated entry mounts the shell.
+
+`UiEmptyState` shares four `variant` values across Vue and React: `default`
+uses the centered layout and the standard Aurora Glass card preset (`glass-elevated`).
+`outlined` frames the centered content with a
+strong dashed border, `compact` aligns content in a dense row and wraps actions
+when space runs out, and `subtle` uses the shared subtle Surface with actions
+below its text.
+Variants do not require an icon or action, and do not change the accessible name
+or description.
+The two centered variants use a thin neutral outline to distinguish their
+optional icon tile from the surrounding surface.
+
+The Empty State specimen and Data Display gallery compare onboarding, no
+results, passive activity, and restricted access. The Inspector's Content
+group selects a scenario; its Appearance group uses that scenario's default
+variant or overrides it independently.
 
 The Card module has one editable Card specimen. Its Inspector changes the
 `surface` prop without replacing the card or its contents. The gallery compares
@@ -357,9 +381,10 @@ not poll focus or observe the document; the policy runs once per hide.
 
 At the shared `xl` / 1280px breakpoint, the Explorer and Inspector become persistent columns. Below it, the same panels open as native modal dialogs with the background inert, keyboard focus inside the dialog, and focus returned to the opening control on dismissal. Selecting an item closes the drawer and moves focus to the module heading or specimen without creating a history entry for the drawer itself.
 
-The native backdrop dims and blurs the page outside the drawer, with a cutout
-that follows the panel as it moves. The panel keeps its own Glass blur and does
-not sample the scrim. Reduced transparency removes the backdrop blur.
+The native backdrop dims the page outside the drawer without filtering it.
+Its cutout moves with the panel so the drawer's Light-tier Glass blurs the
+page rather than the scrim. The drawer uses a local CSS edge throughout its
+top-layer transition; inline controls borrow the panel's backdrop.
 
 Explorer and Inspector links explicitly join the tab order so the same navigation is available in WebKit when it skips links with implicit tab stops.
 
@@ -381,12 +406,19 @@ native resize gestures, and viewport resizing are not animated.
 Language changes use the same size motion beneath the outgoing snapshot.
 Compact labels, including StatusIndicator labels during Inspector status changes,
 stay on one line and reveal their full text as space becomes available.
-Intentional multiline Explorer labels are not constrained.
+Intentional multiline Explorer labels are not constrained. The overview hero's
+glass sample is also a size-motion target: translation changes its copy length,
+so its height animates on the `spatial` role instead of jumping between layouts.
+Its multiline copy is never locked to one line.
 
 `@neoverse-ui/motion` exposes the appearance transition and size observer
 independently of the Playground. The [Motion package guide](../../packages/motion/README.md#appearance-and-control-size-transitions)
 describes consumer setup and the single-line translated-label strategy used by
 the Inspector's isolated preview link.
+
+ControlSurface and Dock also transition their `scale` through shared CSS in
+consumer applications. The zoom transition is disabled when reduced motion
+is requested.
 
 The Motion module's Transitions specimen (`foundation-motion-playground`) exposes the live
 theme reveal and crossfade side by side, the language crossfade with the layout
@@ -415,7 +447,7 @@ than stretching their preview to match the tallest neighbouring card.
 
 Specimen and QA stages render components without additional CSS zoom. Standard and compact Dock specimens, including the consumer-parity composition, explicitly use `scale="md"`; larger scales belong only in labeled scale-comparison examples. This prevents stage enlargement from stacking with component scaling and the shell's presentation root size.
 
-Default component geometry is consumer-owned by the shared tokens: Button and Action sizes are 32 / 40 / 48px at a normal 16px root, navigation and segmented options start at 32px with 14px labels, and grouped controls use a 36px track. Consumers should select public sizes instead of overriding internal selectors. Explicit composition scaling remains opt-in. Local `file:` consumers use `scripts/sync/sync-consumer.ts` to build and verify every installed copy before serving CSS; see [consumer sizing](consumer-sizing.md).
+Shared tokens own default component geometry; use public sizes instead of overriding internal selectors. Explicit composition scaling remains opt-in. Local `file:` consumers use `scripts/sync/sync-consumer.ts` to build and verify every installed copy before serving CSS; see [consumer sizing](consumer-sizing.md).
 
 The validation area also acts as the Playground Contract Lab. `apps/playground/src/contract-lab.ts` derives component maturity, release-visual status, runtime validation, and framework parity from the repository contracts instead of maintaining a second component inventory. Interaction-heavy specimens declare stable state ids and browser checks; `StateRow` exposes non-localized `data-contract-state` markers so automation does not depend on English copy. The Contract Lab table mirrors the component matrix and exposes explicit Vue and React runtime-validation entry points. These `data-contract-*` attributes are development/test instrumentation only and are not part of the public package API.
 

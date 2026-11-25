@@ -1,39 +1,92 @@
 @layer components {
-  /* Native modal interaction keeps the background inert; block document scrolling too. */
-  html:has(.ui-dialog:modal) {
+  /* Modal interaction keeps the background inert visually/by backdrop; block document scrolling too. */
+  html:has(.ui-dialog[open]) {
     overflow: hidden;
   }
 
+  .ui-dialog__backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--neoverse-layout-layer-modal);
+    display: none;
+    pointer-events: none;
+    background: transparent;
+    opacity: 0;
+    transition:
+      opacity var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
+      background-color var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
+      display var(--neoverse-motion-exit-duration) allow-discrete;
+  }
+
+  .ui-dialog__backdrop[data-open='true'] {
+    display: block;
+    pointer-events: auto;
+    background: var(--neoverse-dialog-scrim);
+    opacity: 1;
+    transition:
+      opacity var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
+      background-color var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
+      display var(--neoverse-motion-enter-duration) allow-discrete;
+  }
+
+  @starting-style {
+    .ui-dialog__backdrop[data-open='true'] {
+      background: transparent;
+      opacity: 0;
+    }
+  }
+
   .ui-dialog {
-    width: min(var(--neoverse-dialog-width), calc(100vw - 2 * var(--neoverse-space-4)));
+    --neoverse-dialog-inline-size: var(--neoverse-dialog-width);
+    /* Inputs seated directly on the modal plane use an inset bevel without an outer float drop shadow. */
+    --neoverse-form-control-shadow: var(--neoverse-shadow-inset);
+    --neoverse-form-control-hover-shadow:
+      var(--neoverse-shadow-inset), var(--neoverse-surface-inset-active-highlight);
+    --neoverse-form-control-focus-depth-shadow:
+      var(--neoverse-shadow-inset), var(--neoverse-surface-inset-active-highlight);
+    --neoverse-form-control-focus-shadow:
+      var(--neoverse-shadow-inset), var(--neoverse-surface-inset-active-highlight);
+    flex-direction: column;
+    width: min(var(--neoverse-dialog-inline-size), calc(100vw - 2 * var(--neoverse-space-4)));
+    max-width: min(var(--neoverse-dialog-inline-size), calc(100vw - 2 * var(--neoverse-space-4)));
     max-height: calc(100dvh - 2 * var(--neoverse-space-4));
     padding: var(--neoverse-dialog-padding);
-    overflow: auto;
-    border: 0;
+    overflow: hidden;
     border-radius: var(--neoverse-dialog-radius);
-    color: var(--neoverse-color-text-primary);
-    background: var(--neoverse-material-glass-elevated-background);
-    box-shadow: var(--neoverse-material-glass-elevated-shadow);
-    -webkit-backdrop-filter: var(--neoverse-material-glass-elevated-filter);
-    backdrop-filter: var(--neoverse-material-glass-elevated-filter);
+    z-index: var(--neoverse-layout-layer-modal);
+  }
+
+  .ui-dialog:focus {
+    outline: none;
+  }
+
+  .ui-dialog[data-size='sm'] {
+    --neoverse-dialog-inline-size: var(--neoverse-dialog-width-sm);
+  }
+
+  .ui-dialog[data-size='md'] {
+    --neoverse-dialog-inline-size: var(--neoverse-dialog-width);
+  }
+
+  .ui-dialog[data-size='lg'] {
+    --neoverse-dialog-inline-size: var(--neoverse-dialog-width-lg);
   }
 
   .ui-dialog:not([open]) {
     display: none;
+    pointer-events: none;
   }
 
   .ui-dialog[open] {
-    animation: nv-appear var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
-      both;
+    display: flex;
   }
 
-  .ui-dialog::backdrop {
-    background: var(--neoverse-dialog-scrim);
-  }
-
-  .ui-dialog[open]::backdrop {
-    animation: nv-appear var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing)
-      both;
+  .ui-dialog__body {
+    flex: 1 1 auto;
+    min-height: 0;
+    margin: calc(-1 * var(--neoverse-space-3));
+    padding: var(--neoverse-space-3);
+    overflow: auto;
   }
 
   .ui-dialog__header {
@@ -65,11 +118,10 @@
     margin-top: var(--neoverse-space-4);
   }
 
-  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
-    .ui-dialog {
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-      background: var(--neoverse-color-surface-overlay);
+  @media (prefers-reduced-motion: reduce) {
+    .ui-dialog__backdrop,
+    .ui-dialog__backdrop[data-open='true'] {
+      transition-duration: 1ms;
     }
   }
 
@@ -81,10 +133,11 @@
 }
 
 /* The native dialog UA rule is unlayered, so it outranks the same declaration
-   inside a cascade layer. Re-assert viewport anchoring unlayered; otherwise a
-   scrolled playground leaves the modal above the viewport centre. */
+   inside a cascade layer. Re-assert viewport anchoring and modal z-index unlayered;
+   staying in the document modal layer lets browser extensions sit above it. */
 dialog.ui-dialog {
   position: fixed;
   inset: 0;
   margin: auto;
+  z-index: var(--neoverse-layout-layer-modal);
 }

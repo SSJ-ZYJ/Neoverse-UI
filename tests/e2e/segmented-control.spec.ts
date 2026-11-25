@@ -478,4 +478,45 @@ test.describe('segmented control', () => {
       }
     });
   }
+
+  test('theme icons commit the thumb before the appearance reveal uncovers it', async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.use.hasTouch === true, 'The compact toolbar has no theme thumb');
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/?theme=light&lang=en&fps=0');
+    test.skip(
+      !(await page.evaluate(() => typeof document.startViewTransition === 'function')),
+      'The engine has no view-transition snapshots',
+    );
+    const theme = page.locator('[data-playground-theme-control="segments"]');
+    const thumb = theme.locator('.ui-segmented-control__slider');
+    const dark = theme.getByRole('radio', { name: 'Dark', exact: true });
+    const light = theme.getByRole('radio', { name: 'Light', exact: true });
+    const distanceToSelection = () =>
+      thumb.evaluate((element) => {
+        const selected = element
+          .closest('.ui-segmented-control')
+          ?.querySelector('button[role="radio"][aria-checked="true"]');
+        if (!selected) return Number.POSITIVE_INFINITY;
+        const plate = element.getBoundingClientRect();
+        const option = selected.getBoundingClientRect();
+        return Math.abs(plate.x + plate.width / 2 - option.x - option.width / 2);
+      });
+    await expect(thumb).toHaveAttribute('data-ready', 'true');
+
+    // A theme snapshot freezes the page, so the thumb has to reach the newly
+    // committed icon before the incoming frame is captured.
+    await dark.click();
+    await expect(thumb).toHaveAttribute('data-instant', '');
+    await expect(thumb).toHaveCSS('transition-duration', /^0s, 0s, 0s, /);
+    await expect.poll(distanceToSelection).toBeLessThan(1);
+
+    // Reversing immediately must not uncover the previous position and slide back.
+    await light.click();
+    await expect(light).toBeChecked();
+    await expect.poll(distanceToSelection).toBeLessThan(1);
+    await expect(thumb).not.toHaveAttribute('data-instant', '');
+    await expect(thumb).toHaveCSS('transition-duration', /^0.24s, 0.24s, 0.24s, /);
+  });
 });

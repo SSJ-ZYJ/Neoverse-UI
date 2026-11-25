@@ -18,6 +18,7 @@ import { segmentedControlCssVariables } from './navigation/segmented-control.js'
 import { tabsCssVariables } from './navigation/tabs.js';
 import { contextMenuCssVariables } from './overlays/context-menu.js';
 import { dialogCssVariables } from './overlays/dialog.js';
+import { drawerCssVariables } from './overlays/drawer.js';
 import { overlayCssVariables } from './overlays/overlay.js';
 import { toastCssVariables } from './overlays/toast.js';
 import { tooltipCssVariables } from './overlays/tooltip.js';
@@ -44,6 +45,7 @@ export const componentCssVariables = {
   pagination: paginationCssVariables,
   emptyState: emptyStateCssVariables,
   dialog: dialogCssVariables,
+  drawer: drawerCssVariables,
   toast: toastCssVariables,
   contextMenu: contextMenuCssVariables,
   skeleton: skeletonCssVariables,

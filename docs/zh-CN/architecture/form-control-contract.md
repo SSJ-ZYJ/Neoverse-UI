@@ -5,7 +5,7 @@ Status: adopted
 [English](../../architecture/form-control-contract.md)
 
 <!-- Source: docs/architecture/form-control-contract.md -->
-<!-- Source-SHA256: d62dfcba938ab6fc2a264259ca60a0be2c96a06e57bf19e809f23d2bb4716096 -->
+<!-- Source-SHA256: 35a863936c50f84528ca4a753b1dd426eb905c23995053b27c5c8110e42abbbe -->
 
 Neoverse-UI 表单控件在 Vue 与 React 之间共享同一套状态、无障碍与样式规则。原生 HTML 控件仍是交互语义的来源；组件层增加 Neoverse 材质、几何、状态语言与框架绑定。
 
@@ -28,9 +28,11 @@ Neoverse-UI 表单控件在 Vue 与 React 之间共享同一套状态、无障�
 
 规范控件集合：
 
-- `UiInput`、`UiTextarea` 与 `UiSelect` 用于文本和选择输入。`UiInput` 与 `UiTextarea` 均在极光玻璃输入层之上同步绘制共享的呼吸滑行光标（`ui-input-shell` 为单轴，`ui-textarea-shell` 为双轴）；选择、IME 组合、掩码、email、number 等没有文本选择的类型，以及强制颜色模式，继续使用浏览器光标。光标保持固定宽度，从实时视觉位置滑向新位置，时长随移动距离增长，上限为 glide 变量；在 `prefers-reduced-motion` 下滑行停止，但不透明度闪烁保留。竖条移动时保持实心，落定后重新闪烁。只读与禁用的文本框在平台允许时仍可聚焦与选择文本，但不再绘制插入光标。消费项目提供的 `class` 与 `style` 落在多行文本外壳上，因此宽度约束会让缩放手柄、边缘处理与阴影始终跟随可见输入区域。
+- `UiInput`、`UiTextarea` 与 `UiSelect` 用于文本和选择输入。`UiInput` 与 `UiTextarea` 在极光玻璃输入层之上同步绘制光标；选择、IME 组合、掩码、email、number 等没有文本选择的类型，以及强制颜色模式，继续使用浏览器光标。只读与禁用的文本框不绘制插入光标。消费项目提供的 `class` 与 `style` 落在多行文本外壳上，因此宽度约束会让缩放手柄、边缘处理与阴影始终跟随可见输入区域。
 - `UiCheckbox`、`UiRadioGroup` 与 `UiSwitch` 用于选择输入。
 - `UiField` 用于标签、描述、必填标记、控件放置与校验消息组合。
+
+文本未改动时，光标在同一行水平拉伸，在多行文本框中则沿两行之间的直线路径拉伸。前缘先到，尾缘随后收拢，光标恢复原有形状与闪烁。连续移动从当前绘制的形状继续。滑行时长受 glide 变量限制；编辑文本、滚动控件或启用减少动态效果偏好时，光标直接落在插入位置。
 
 选择控件保留原生 `input` 元素。Checkbox 与 Switch 使用原生 checkbox 状态；RadioGroup 使用按 `name` 分组的原生 radio 输入。视觉控件是相邻的展示层，不替代浏览器语义。
 

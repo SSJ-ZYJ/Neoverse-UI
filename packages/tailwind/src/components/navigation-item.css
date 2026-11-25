@@ -78,48 +78,69 @@
   .ui-navigation-item__indicator {
     position: absolute;
     z-index: 2;
-    bottom: var(--neoverse-navigation-item-indicator-inset);
+    /* Place the bar by its centre from the outset. A placement change then
+       moves and rotates the same bar instead of re-laying it out. */
+    top: calc(
+      100% -
+      var(--neoverse-navigation-item-indicator-height) /
+      2 -
+      var(--neoverse-navigation-item-indicator-inset)
+    );
     left: 50%;
     width: var(--neoverse-navigation-item-indicator-width);
     height: var(--neoverse-navigation-item-indicator-height);
     border-radius: var(--neoverse-radius-pill);
     background: var(--neoverse-navigation-item-indicator-color);
     opacity: 0;
-    transform: translateX(-50%) scaleX(0.55);
-    /* Dock/navigation selection should move at the same perceptual rate
-       as the SegmentedControl slider. Using the shorter feedback timing for
-       opacity made the bottom indicator appear to snap before its scale
-       transition had finished. */
+    transform: translate(-50%, -50%) rotate(0deg) scale(0.55, 1);
+    /* The geometry travels with the transform so an Inspector change to
+       placement or size moves the same bar along its path. State timing keeps
+       the slide readable without a long decelerating tail. */
     transition:
-      opacity var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
-      transform var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
+      opacity var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      top var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      left var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      transform var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
   }
 
   .ui-navigation-item--compact .ui-navigation-item__indicator {
-    bottom: var(--neoverse-navigation-item-compact-indicator-inset);
-    width: var(--neoverse-navigation-item-compact-indicator-width);
+    transform: translate(-50%, -50%) rotate(0deg)
+      scale(calc(var(--neoverse-navigation-item-compact-indicator-length-factor) * 0.55), 1);
   }
 
   .ui-navigation-item--active .ui-navigation-item__indicator {
     opacity: 1;
-    transform: translateX(-50%) scaleX(1);
+    transform: translate(-50%, -50%) rotate(0deg) scale(1, 1);
   }
 
   .ui-navigation-item--indicator-start .ui-navigation-item__indicator {
-    top: var(--neoverse-navigation-item-start-indicator-inset);
-    bottom: var(--neoverse-navigation-item-start-indicator-inset);
-    left: 0;
-    width: var(--neoverse-navigation-item-start-indicator-width);
-    height: auto;
+    top: 50%;
+    left: calc(var(--neoverse-navigation-item-start-indicator-width) / 2);
     /* The start token defaults to the shared indicator colour; keeping the
        reference lets consumers retheme one placement without splitting the
        navigation identity. */
     background: var(--neoverse-navigation-item-start-indicator-color);
-    transform: scaleY(0.55);
+    transform: translate(-50%, -50%) rotate(90deg) scale(0.55, 1);
+  }
+
+  .ui-navigation-item--compact.ui-navigation-item--active .ui-navigation-item__indicator {
+    transform: translate(-50%, -50%) rotate(0deg)
+      scale(var(--neoverse-navigation-item-compact-indicator-length-factor), 1);
+  }
+
+  .ui-navigation-item--compact.ui-navigation-item--indicator-start .ui-navigation-item__indicator {
+    transform: translate(-50%, -50%) rotate(90deg)
+      scale(calc(var(--neoverse-navigation-item-compact-indicator-length-factor) * 0.55), 1);
   }
 
   .ui-navigation-item--indicator-start.ui-navigation-item--active .ui-navigation-item__indicator {
-    transform: scaleY(1);
+    transform: translate(-50%, -50%) rotate(90deg) scale(1, 1);
+  }
+
+  .ui-navigation-item--compact.ui-navigation-item--indicator-start.ui-navigation-item--active
+    .ui-navigation-item__indicator {
+    transform: translate(-50%, -50%) rotate(90deg)
+      scale(var(--neoverse-navigation-item-compact-indicator-length-factor), 1);
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -130,8 +151,7 @@
 }
 
 @layer utilities {
-  /* The persistent selection field mirrors Primary selection hover and press
-     feedback directly instead of dimming the azure plate with a neutral wash. */
+  /* Persistent selection gets its own hover and press states without a second wash. */
   .ui-navigation-item.ui-navigation-item--active.ui-button--ghost {
     --neoverse-quiet-control-feedback: transparent;
     color: var(--neoverse-navigation-item-active-foreground);
@@ -171,7 +191,7 @@
 
   @media (prefers-reduced-transparency: reduce) {
     .ui-navigation-item.ui-navigation-item--active.ui-button--ghost {
-      background-color: var(--neoverse-effect-choice-selected-fill-opaque);
+      background-color: var(--neoverse-navigation-item-active-fill-opaque);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
@@ -182,7 +202,7 @@
           :disabled,
           [aria-disabled='true']
         ) {
-        background-color: var(--neoverse-effect-choice-selected-hover-fill-opaque);
+        background-color: var(--neoverse-navigation-item-active-hover-fill-opaque);
       }
     }
 
@@ -190,7 +210,7 @@
         :disabled,
         [aria-disabled='true']
       ) {
-      background-color: var(--neoverse-effect-choice-selected-press-fill-opaque);
+      background-color: var(--neoverse-navigation-item-active-press-fill-opaque);
     }
   }
 }

@@ -23,7 +23,10 @@
       "visual": "release",
       "consumer": "validated",
       "runtime": "validated",
-      "evidence": [".agents/notes/archives/consumer-migration-2026-10-29.md"]
+      "evidence": [
+        ".agents/notes/archives/consumer-migration-2026-10-29.md",
+        "tests/e2e/overlays.spec.ts"
+      ]
     },
     {
       "name": "UiIconButton",
@@ -346,7 +349,8 @@
       "evidence": [
         "packages/vue/src/empty-state.test.ts",
         "packages/react/src/empty-state.test.tsx",
-        "tests/e2e/surfaces.spec.ts"
+        "tests/e2e/surfaces.spec.ts",
+        "tests/e2e/playground-inspector.spec.ts"
       ],
       "reactValidation": {
         "runtime": "validated",
@@ -443,7 +447,32 @@
       "evidence": [
         "packages/vue/src/business-interaction.test.ts",
         "packages/react/src/business-interaction.test.tsx",
+        "docs/architecture/overlay-contract.md",
         "tests/e2e/overlays.spec.ts"
+      ],
+      "reactValidation": {
+        "runtime": "validated",
+        "visual": "pending",
+        "consumer": "pending"
+      }
+    },
+    {
+      "name": "UiDrawer",
+      "track": "canonical-shared",
+      "maturity": "consumer-validation",
+      "tokens": "stable",
+      "css": "stable",
+      "vue": "stable",
+      "react": "stable",
+      "unit": "stable",
+      "visual": "playground",
+      "consumer": "pending",
+      "runtime": "validated",
+      "evidence": [
+        "packages/vue/src/drawer.test.ts",
+        "packages/react/src/drawer.test.tsx",
+        "docs/architecture/overlay-contract.md",
+        "tests/e2e/overlay-layering.spec.ts"
       ],
       "reactValidation": {
         "runtime": "validated",

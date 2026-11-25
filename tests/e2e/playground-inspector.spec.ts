@@ -3,6 +3,35 @@ import { expectNoPageOverflow } from '../support/e2e';
 import { chooseOption, showInspector, switchToChinese } from '../support/playground';
 
 test.describe('playground', () => {
+  test('empty-state Inspector filters scenarios and applies an independent appearance', async ({
+    page,
+  }, testInfo) => {
+    await page.goto('/?theme=light&lang=en#data-display-empty-state');
+    const stage = page.locator('#data-display-empty-state');
+    const cases = stage.locator('[data-empty-state-case]');
+    await expect(cases).toHaveCount(4);
+    const mobile = testInfo.project.name === 'mobile';
+    const inspector = await showInspector(page, mobile);
+    const content = inspector.getByRole('group', { name: 'Content' });
+    const appearance = inspector.getByRole('group', { name: 'Appearance' });
+    await chooseOption(content, 'category', 'No results');
+    await expect(cases).toHaveCount(1);
+    const search = stage.locator('[data-empty-state-case="search"]');
+    const state = search.getByRole('region');
+    await expect(state).toHaveCSS('border-top-style', 'dashed');
+    await chooseOption(appearance, 'variant', 'Compact row');
+    await expect(state).toHaveCSS('border-top-width', '0px');
+    await expect(state).toHaveCSS('min-height', '0px');
+    await inspector.getByRole('button', { name: 'Reset specimen' }).click();
+    await expect(cases).toHaveCount(4);
+    await expect(state).toHaveCSS('border-top-style', 'dashed');
+    if (mobile) await page.keyboard.press('Escape');
+    await search.getByRole('button', { name: 'Clear filter' }).click();
+    await expect(search.getByText('Project brief')).toBeVisible();
+    await search.getByRole('button', { name: 'Restore filter' }).click();
+    await expect(state).toBeVisible();
+  });
+
   test('preview and Inspector edits are discarded when Explorer history changes specimen', async ({
     page,
   }, testInfo) => {
@@ -381,7 +410,7 @@ test.describe('playground', () => {
     const inspector = page.locator('#design-lab-inspector');
     await expect(live).toBeFocused();
     await expect(page.locator('[data-design-lab-region="module"]')).toHaveCount(0);
-    await expect(button).toHaveCSS('height', '32px');
+    await expect(button).toHaveCSS('height', '36px');
     await page.keyboard.press('Tab');
     await expect(button).toBeFocused();
     await page.keyboard.press('Enter');
@@ -399,13 +428,13 @@ test.describe('playground', () => {
         const target = document.querySelector('#controls-button .ui-button');
         if (!target) return false;
         const height = Number.parseFloat(getComputedStyle(target).height);
-        return height > 32 && height < 48;
+        return height > 36 && height < 44;
       }),
       page.keyboard.press('Enter'),
     ]);
     await expect(size).toBeFocused();
     await expect(size.locator('..')).toContainText('Large');
-    await expect(button).toHaveCSS('height', '48px');
+    await expect(button).toHaveCSS('height', '44px');
     const sizeField = inspector.locator('[data-specimen-control="size"]');
     await expect(sizeField).toContainText('Modified');
     const initialRadius = await button.evaluate(
@@ -415,7 +444,7 @@ test.describe('playground', () => {
     await expect(button).toHaveCSS('border-top-left-radius', '0px');
     await chooseOption(inspector, 'corner', 'Pill');
     await expect(button).not.toHaveCSS('border-top-left-radius', initialRadius);
-    await expect(button).toHaveCSS('height', '48px');
+    await expect(button).toHaveCSS('height', '44px');
     await chooseOption(inspector, 'surface', 'None');
     await expect(button).toHaveCSS('backdrop-filter', 'none');
     const disabled = inspector.getByRole('switch', { name: 'Disabled' });
@@ -430,7 +459,7 @@ test.describe('playground', () => {
     await inspector.getByRole('button', { name: 'Reset specimen' }).press('Enter');
     if (mobile) await page.keyboard.press('Escape');
     await expect(button).toBeEnabled();
-    await expect(button).toHaveCSS('height', '32px');
+    await expect(button).toHaveCSS('height', '36px');
     await expect(button).toHaveCSS('border-top-left-radius', initialRadius);
     await expect(sizeField).not.toContainText('Modified');
     await expect(live.locator('output')).toHaveText('Activations: 0');

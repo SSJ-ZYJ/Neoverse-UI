@@ -91,7 +91,7 @@ test('UiContextMenu renders menu rows, separators, headings and checkable state'
   );
 
   expect(html).toContain(
-    'class="ui-overlay-panel ui-context-menu material-glass-immersive nv-presence"',
+    'class="ui-overlay-panel ui-context-menu material-glass-elevated nv-presence"',
   );
   // A context menu owns a nested submenu popover, so the runtime owns outside dismissal.
   expect(html).toContain('popover="manual"');
@@ -104,4 +104,27 @@ test('UiContextMenu renders menu rows, separators, headings and checkable state'
   expect(html).toContain('data-tone="danger"');
   expect(html).toContain('disabled=""');
   expect(html).toContain('class="ui-context-menu__shortcut"');
+});
+
+test('DropdownMenu supports compact triggers, checkable rows and shortcuts', () => {
+  const html = renderToStaticMarkup(
+    <UiDropdownMenu
+      trigger="Commands"
+      ariaLabel="Commands"
+      triggerSize="sm"
+      triggerVariant="ghost"
+      placement="bottom-end"
+      items={[
+        { id: 'grid', label: 'Show grid', checked: true, shortcut: '⌘G' },
+        { id: 'dup', label: 'Duplicate', shortcut: '⌘D' },
+      ]}
+    />,
+  );
+
+  expect(html).toContain('ui-button--sm');
+  expect(html).toContain('ui-button--ghost');
+  expect(html).toContain('role="menuitemcheckbox"');
+  expect(html).toContain('aria-checked="true"');
+  expect(html).toContain('class="ui-dropdown-menu__check"');
+  expect(html).toContain('class="ui-dropdown-menu__shortcut"');
 });

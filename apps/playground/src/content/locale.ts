@@ -4,6 +4,18 @@ export function isLocale(value: unknown): value is Locale {
   return value === 'en' || value === 'zh';
 }
 
+/** Resolve the shell language before paint and when the workspace mounts. */
+export function resolveWorkspaceLocale(
+  query: unknown,
+  stored: unknown,
+  browserLanguage: string,
+  valid = isLocale,
+): Locale {
+  if (valid(query)) return query;
+  if (valid(stored)) return stored;
+  return browserLanguage.toLowerCase().startsWith('zh') ? 'zh' : 'en';
+}
+
 export interface LocalizedText {
   readonly en: string;
   readonly zh: string;

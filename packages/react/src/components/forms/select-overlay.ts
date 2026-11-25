@@ -1,5 +1,6 @@
 import {
   type AnchoredOverlayOptions,
+  focusElement,
   hideAnchoredOverlay,
   showAnchoredOverlay,
 } from '@neoverse-ui/overlay-runtime';
@@ -15,7 +16,7 @@ export function focusSelectKeyboardTarget(details: HTMLDetailsElement, key: stri
   );
   const target = selectedOption ?? (key === 'ArrowDown' ? enabled[0] : enabled[enabled.length - 1]);
   if (target === undefined) return;
-  target.focus();
+  focusElement(target, { modality: 'keyboard' });
   if (document.activeElement === target || !details.open || attempt >= 6) return;
   requestAnimationFrame(() => {
     if (details.open) focusSelectKeyboardTarget(details, key, attempt + 1);

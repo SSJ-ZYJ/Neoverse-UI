@@ -91,13 +91,12 @@
     --neoverse-textarea-resize-handle-inset: var(--neoverse-space-2);
     --neoverse-textarea-resize-handle-color: var(--neoverse-color-text-muted);
     --neoverse-textarea-resize-handle-focus-color: var(--neoverse-color-text-secondary);
-    --neoverse-select-popover-gap: var(--neoverse-space-2);
-    --neoverse-select-popover-padding: var(--neoverse-space-1);
-    --neoverse-select-popover-radius: var(--neoverse-radius-control);
-    --neoverse-select-popover-background: var(--neoverse-material-glass-elevated-background);
-    --neoverse-select-popover-shadow:
-      var(--neoverse-material-glass-elevated-shadow), var(--neoverse-shadow-inset);
-    --neoverse-select-popover-filter: var(--neoverse-material-glass-elevated-filter);
+    --neoverse-select-popover-gap: var(--neoverse-overlay-gap);
+    --neoverse-select-popover-padding: var(--neoverse-overlay-menu-padding);
+    --neoverse-select-popover-radius: var(--neoverse-overlay-radius);
+    --neoverse-select-popover-background: var(--neoverse-overlay-background);
+    --neoverse-select-popover-shadow: var(--neoverse-overlay-shadow);
+    --neoverse-select-popover-filter: var(--neoverse-overlay-filter);
     --neoverse-select-option-radius: var(--neoverse-radius-control-inner);
     --neoverse-select-option-padding-block: var(--neoverse-space-2);
     --neoverse-select-option-padding-inline: var(--neoverse-space-3);
@@ -108,6 +107,6 @@
     --neoverse-select-check-size: var(--neoverse-icon-size-sm);
     --neoverse-select-check-stroke-width: var(--neoverse-border-width-strong);
     --neoverse-select-check-color: var(--neoverse-color-text-muted);
-    --neoverse-select-popover-layer: 20;
+    --neoverse-select-popover-layer: var(--neoverse-overlay-layer);
   }
 }

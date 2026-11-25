@@ -1,11 +1,10 @@
-import type { Page } from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import {
   adapters,
   disablePopoverApi,
   expect,
   expectPanelClosed,
   expectPanelOpen,
-  openContextMenuAtZone,
   test,
 } from '../support/e2e';
 
@@ -50,14 +49,14 @@ test.describe('modal and transient feedback', () => {
         await expect(toast).toHaveCSS('backdrop-filter', /blur\(18px\)/);
         const { alpha, width, height } = await toast.evaluate((element) => {
           const { backgroundColor } = getComputedStyle(element);
-          const alpha =
-            backgroundColor.match(/\/\s*([\d.]+)\s*\)/)?.[1] ??
-            backgroundColor.match(/^rgba\(.*,\s*([\d.]+)\s*\)/)?.[1];
-          const { width, height } = element.getBoundingClientRect();
+          const match =
+            backgroundColor.match(/\/\s*([\d.]+)\s*\)/) ??
+            backgroundColor.match(/^rgba\(.*,\s*([\d.]+)\s*\)/);
+          const rect = element.getBoundingClientRect();
           return {
-            alpha: alpha === undefined ? 1 : Number(alpha),
-            width,
-            height,
+            alpha: match?.[1] === undefined ? 1 : Number(match[1]),
+            width: rect.width,
+            height: rect.height,
           };
         });
         expect(alpha).toBeCloseTo(0.2);
@@ -74,13 +73,12 @@ test.describe('modal and transient feedback', () => {
 
         await fixture.locator('[data-toast-open="notification"]').click();
         await expect(toast.getByRole('button')).toBeVisible();
-        const notification = await toast.evaluate((element) => {
-          const { left, right, height } = element.getBoundingClientRect();
-          return { left, right, height, viewport: document.documentElement.clientWidth };
+        const notification = await toast.evaluate((el) => {
+          const { left, right, height: h } = el.getBoundingClientRect();
+          return { left, right, height: h, viewport: document.documentElement.clientWidth };
         });
         expect(notification.height).toBeGreaterThan(height);
-        expect(notification.left).toBeGreaterThan(0);
-        expect(notification.right).toBeLessThan(notification.viewport);
+        expect(notification.left > 0 && notification.right < notification.viewport).toBe(true);
         await toast.getByRole('button').click();
         await expect(toast).toBeHidden();
       });
@@ -106,62 +104,11 @@ async function menuParts(page: Page, adapterName: string) {
   return { shell, trigger, panel: shell.locator('.ui-dropdown-menu__panel') };
 }
 
-type SubmenuMotionLog = { count: number };
-
-function motionLog(page: Page): Promise<SubmenuMotionLog | undefined> {
-  return page.evaluate(
-    () => (window as Window & { __submenuMotions?: SubmenuMotionLog }).__submenuMotions,
-  );
-}
-
-async function recordSubmenuMotion(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    const log: SubmenuMotionLog = { count: 0 };
-    (window as Window & { __submenuMotions?: SubmenuMotionLog }).__submenuMotions = log;
-    document.addEventListener(
-      'transitionstart',
-      (event) => {
-        if (
-          event.target instanceof Element &&
-          event.target.matches('.ui-context-menu__submenu') &&
-          (event as TransitionEvent).propertyName === 'opacity'
-        ) {
-          log.count += 1;
-        }
-      },
-      true,
-    );
+async function readPanelFillAlpha(panel: Locator): Promise<number> {
+  return panel.evaluate((element) => {
+    const color = getComputedStyle(element).backgroundColor;
+    return Number(color.match(/(?:\/\s*|rgba\([^)]*,\s*)([\d.]+)\)$/)?.[1] ?? 1);
   });
-}
-
-async function resetSubmenuMotion(page: Page): Promise<void> {
-  await page.evaluate(() => {
-    const log = (window as Window & { __submenuMotions?: SubmenuMotionLog }).__submenuMotions;
-    if (log !== undefined) log.count = 0;
-  });
-}
-
-async function submenuMotionCount(page: Page): Promise<number> {
-  return (await motionLog(page))?.count ?? 0;
-}
-
-async function expectSubmenuAtRest(page: Page): Promise<void> {
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const parent = document.querySelector('.ui-context-menu');
-        const column = document.querySelector('.ui-context-menu__submenu');
-        if (parent === null || column === null) return false;
-        return [parent, column].every(
-          (element) =>
-            element.getAttribute('data-neoverse-motion-replay') !== 'from' &&
-            element
-              .getAnimations({ subtree: false })
-              .every((animation) => animation.playState !== 'running'),
-        );
-      }),
-    )
-    .toBe(true);
 }
 
 test.describe('overlays', () => {
@@ -192,16 +139,19 @@ test.describe('overlays', () => {
 
         await trigger.click();
         await expectPanelOpen(panel);
-        await expect(panel.getByRole('menuitem', { name: 'Open' })).toBeFocused();
+        const openItem = panel.getByRole('menuitem', { name: 'Open' });
+        await expect(openItem).toBeFocused();
+        await expect(openItem).toHaveAttribute('data-neoverse-focus-origin', 'pointer');
         await page.keyboard.press('ArrowDown');
-        await expect(panel.getByRole('menuitem', { name: 'Archive' })).toBeFocused();
+        const archiveItem = panel.getByRole('menuitem', { name: 'Archive' });
+        await expect(archiveItem).toBeFocused();
+        await expect(archiveItem).not.toHaveAttribute('data-neoverse-focus-origin');
         await page.keyboard.press('ArrowDown');
         await expect(panel.getByRole('menuitem', { name: 'Remove' })).toBeFocused();
         await page.keyboard.press('ArrowDown');
         await expect(panel.getByRole('menuitem', { name: 'Open' })).toBeFocused();
         await page.keyboard.press('End');
         await expect(panel.getByRole('menuitem', { name: 'Remove' })).toBeFocused();
-
         await page.keyboard.press('Escape');
         await expectPanelClosed(panel, trigger);
         await expect(trigger).toBeFocused();
@@ -234,8 +184,7 @@ test.describe('overlays', () => {
 
         await trigger.click();
         await expectPanelOpen(panel);
-        const count = await panel.getByRole('menuitem').count();
-        for (let index = 0; index < count + 2; index += 1) await page.keyboard.press('Tab');
+        await page.keyboard.press('Tab');
         await expectPanelClosed(panel, trigger);
       });
     }
@@ -314,12 +263,10 @@ test.describe('overlays', () => {
       await expectPanelOpen(panel);
 
       const offset = () =>
-        panel.evaluate((element) => {
-          const anchor = element.parentElement?.querySelector('.ui-popover__trigger');
+        panel.evaluate((el) => {
+          const anchor = el.parentElement?.querySelector('.ui-popover__trigger');
           if (!anchor) throw new Error('The overlay trigger is missing');
-          return Math.abs(
-            element.getBoundingClientRect().left - anchor.getBoundingClientRect().left,
-          );
+          return Math.abs(el.getBoundingClientRect().left - anchor.getBoundingClientRect().left);
         });
       await expect.poll(offset).toBeLessThan(2);
 
@@ -332,269 +279,6 @@ test.describe('overlays', () => {
       await expect.poll(offset).toBeLessThan(2);
     });
   }
-
-  test('context menu opens at the pointer and supports keyboard entry', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#overlays');
-    const panel = await openContextMenuAtZone(page);
-    const items = panel.locator('.ui-context-menu__item');
-
-    await expect(panel).toHaveAttribute('role', 'menu');
-    await expect(items.first()).not.toBeFocused();
-    await page.keyboard.press('ArrowDown');
-    await expect(items.first()).toBeFocused();
-    await items.first().press('ArrowDown');
-    await expect(items.nth(1)).toBeFocused();
-    await items.nth(1).press('End');
-    await expect(items.last()).toBeFocused();
-    await page.keyboard.press('Home');
-    await expect(items.first()).toBeFocused();
-
-    await page.keyboard.press('Escape');
-    await expect(panel).toBeHidden();
-    expect(await panel.evaluate((element) => element.contains(document.activeElement))).toBe(false);
-  });
-
-  test('context menu selection reports the item and closes the panel', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#overlays');
-    const panel = await openContextMenuAtZone(page);
-
-    await panel.getByRole('menuitem').first().click();
-    await expect(panel).toBeHidden();
-    await expect(page.locator('#overlays-context-menu [data-overlay-selection]')).toContainText(
-      'copy',
-    );
-  });
-
-  test('context menu exposes checkable rows, a submenu and a disabled row', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#overlays');
-    const panel = await openContextMenuAtZone(page);
-
-    await expect(panel.getByRole('menuitemcheckbox', { name: 'Show details' })).toHaveAttribute(
-      'aria-checked',
-      'true',
-    );
-    await expect(panel.getByRole('menuitem', { name: 'Disabled action' })).toBeDisabled();
-
-    const themeRow = panel.getByRole('menuitem', { name: 'Theme' });
-    await expect(themeRow).toHaveAttribute('aria-haspopup', 'menu');
-    await themeRow.click();
-
-    const submenu = page.locator('.ui-context-menu__submenu');
-    await expect(submenu).toBeVisible();
-    await expect(submenu.getByRole('menuitemradio')).toHaveCount(3);
-    await expect(submenu.getByRole('menuitemradio', { name: 'system' })).toHaveAttribute(
-      'aria-checked',
-      'true',
-    );
-    await expect(themeRow).toHaveAttribute('aria-expanded', 'true');
-
-    await submenu.getByRole('menuitemradio', { name: 'dark' }).click();
-    await expect(panel).toBeHidden();
-    await expect(page.locator('[data-context-menu-zone]')).toContainText('Theme: dark');
-  });
-
-  for (const adapter of adapters) {
-    test(`${adapter.name}: a cursor submenu keeps the parent rim behind it and animates on open and switch`, async ({
-      page,
-    }) => {
-      await page.goto(adapter.url('light', 'overlays'));
-      const panel = await openContextMenuAtZone(page);
-      await recordSubmenuMotion(page);
-      const submenu = page.locator('.ui-context-menu__submenu');
-
-      await panel.getByRole('menuitem', { name: 'Theme' }).hover();
-      await expect(submenu).toBeVisible();
-      await expect(submenu).toHaveAttribute('aria-label', 'Theme');
-      // Both menu levels animate their geometry. Waiting only for the column's
-      // translate to reach zero still samples the parent's or column's scale
-      // transition, giving transient gaps or an overlap above the real 4px.
-      await expectSubmenuAtRest(page);
-
-      const seam = await page.evaluate(() => {
-        const parent = document.querySelector('.ui-context-menu');
-        const column = document.querySelector('.ui-context-menu__submenu');
-        if (parent === null || column === null)
-          throw new Error('Both menu levels must be laid out');
-        const parentRect = parent.getBoundingClientRect();
-        const columnRect = column.getBoundingClientRect();
-        const onStart = columnRect.left < parentRect.left;
-        const seamX = onStart ? parentRect.left + 2 : parentRect.right - 2;
-        const stack = document.elementsFromPoint(seamX, (parentRect.top + parentRect.bottom) / 2);
-        return {
-          overlap: onStart
-            ? columnRect.right - parentRect.left
-            : parentRect.right - columnRect.left,
-          topmost: stack[0]?.className ?? '',
-        };
-      });
-      // One edge width of overlap covers the rim and lands in the Glass occluder sample.
-      expect(seam.overlap).toBeGreaterThanOrEqual(3);
-      expect(seam.overlap).toBeLessThanOrEqual(6);
-      expect(seam.topmost).toContain('ui-context-menu__submenu');
-      await expect.poll(() => submenuMotionCount(page)).toBeGreaterThan(0);
-
-      await resetSubmenuMotion(page);
-      await panel.getByRole('menuitem', { name: 'Language' }).hover();
-      await expect(submenu).toHaveAttribute('aria-label', 'Language');
-      await expect.poll(() => submenuMotionCount(page)).toBeGreaterThan(0);
-
-      // A touch fires pointerenter before click; the running entrance must not restart.
-      await resetSubmenuMotion(page);
-      await panel.getByRole('menuitem', { name: 'Language' }).click();
-      await page.waitForTimeout(150);
-      expect(await submenuMotionCount(page)).toBe(0);
-    });
-  }
-
-  for (const adapter of adapters) {
-    test(`${adapter.name}: an open submenu follows a parent positioning correction`, async ({
-      page,
-    }) => {
-      await page.goto(adapter.url('light', 'overlays'));
-      const panel = await openContextMenuAtZone(page);
-      await panel.getByRole('menuitem', { name: 'Theme' }).hover();
-      const submenu = page.locator('.ui-context-menu__submenu');
-      await expect(submenu).toBeVisible();
-      await expectSubmenuAtRest(page);
-
-      const initialLeft = await panel.evaluate((element) =>
-        Number.parseFloat(getComputedStyle(element).left),
-      );
-      // The overlay runtime can correct the parent's CSS position after the
-      // column opened. Its painted rim must remain behind the column.
-      await panel.evaluate((element, left) => {
-        element.style.setProperty('--neoverse-overlay-left', `${left + 14}px`);
-      }, initialLeft);
-      await expect
-        .poll(() => panel.evaluate((element) => element.getBoundingClientRect().left))
-        .toBeGreaterThan(initialLeft + 10);
-      await expect
-        .poll(() =>
-          page.evaluate(() => {
-            const parent = document.querySelector('.ui-context-menu');
-            const column = document.querySelector('.ui-context-menu__submenu');
-            if (parent === null || column === null) return false;
-            const parentRect = parent.getBoundingClientRect();
-            const columnRect = column.getBoundingClientRect();
-            const opensLeft = columnRect.left < parentRect.left;
-            const overlap = opensLeft
-              ? columnRect.right - parentRect.left
-              : parentRect.right - columnRect.left;
-            return overlap >= 3 && overlap <= 6;
-          }),
-        )
-        .toBe(true);
-    });
-  }
-
-  test('a touch opens a cursor submenu with an entrance', async ({ page, hasTouch }) => {
-    test.skip(!hasTouch, 'Touch input is required');
-    await page.goto('/frame?theme=light&lang=en#overlays');
-    const zone = page.locator('[data-context-menu-zone]');
-    await zone.scrollIntoViewIfNeeded();
-    const box = await zone.boundingBox();
-    if (box === null) throw new Error('The context menu zone must be laid out');
-    await zone.evaluate(
-      (element, point) => {
-        element.dispatchEvent(
-          new MouseEvent('contextmenu', {
-            bubbles: true,
-            cancelable: true,
-            clientX: point.x,
-            clientY: point.y,
-          }),
-        );
-      },
-      { x: box.x + 24, y: box.y + 16 },
-    );
-    const panel = page.locator('.ui-context-menu');
-    await expect(panel).toBeVisible();
-    await recordSubmenuMotion(page);
-    await panel.getByRole('menuitem', { name: 'Theme' }).tap();
-    await expect(page.locator('.ui-context-menu__submenu')).toBeVisible();
-    await expect.poll(() => submenuMotionCount(page)).toBeGreaterThan(0);
-  });
-
-  for (const adapter of adapters) {
-    test(`${adapter.name}: a cursor submenu stays visible and animated without the Popover API`, async ({
-      page,
-      hasTouch,
-    }) => {
-      await disablePopoverApi(page);
-      await page.goto(adapter.url('light', 'overlays'));
-      const panel = await openContextMenuAtZone(page);
-      await recordSubmenuMotion(page);
-      const themeRow = panel.getByRole('menuitem', { name: 'Theme' });
-      if (hasTouch) await themeRow.tap();
-      else await themeRow.click();
-      const submenu = page.locator('.ui-context-menu__submenu');
-      await expect(submenu).toBeVisible();
-      await expectSubmenuAtRest(page);
-      // The body-level submenu must not cover the parent row when the fallback
-      // panel's CSS position is relative to a transformed containing block.
-      const hitCheck = await themeRow.evaluate((row) => {
-        const rect = row.getBoundingClientRect();
-        const hit = document.elementFromPoint(
-          rect.left + rect.width / 2,
-          rect.top + rect.height / 2,
-        );
-        return {
-          clickable: row === hit || row.contains(hit),
-          obstruction: hit?.className,
-        };
-      });
-      expect(hitCheck.clickable, `Theme row is obscured by ${hitCheck.obstruction}`).toBe(true);
-      await expect
-        .poll(() => submenu.evaluate((element) => Number(getComputedStyle(element).opacity)))
-        .toBeGreaterThan(0.9);
-      await expect.poll(() => submenuMotionCount(page)).toBeGreaterThan(0);
-    });
-  }
-
-  test('context menu stays inside the viewport at the bottom-right corner', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#overlays');
-    const zone = page.locator('[data-context-menu-zone]');
-    await zone.scrollIntoViewIfNeeded();
-    const viewport = page.viewportSize();
-    if (viewport === null) throw new Error('A viewport is required');
-
-    await zone.evaluate(
-      (element, point) => {
-        element.dispatchEvent(
-          new MouseEvent('contextmenu', {
-            bubbles: true,
-            cancelable: true,
-            clientX: point.x,
-            clientY: point.y,
-          }),
-        );
-      },
-      { x: viewport.width - 2, y: viewport.height - 2 },
-    );
-
-    const panel = page.locator('.ui-context-menu');
-    await expect(panel).toBeVisible();
-    const bounds = await panel.boundingBox();
-    if (bounds === null) throw new Error('The context menu must be laid out');
-    expect(bounds.x).toBeGreaterThanOrEqual(0);
-    expect(bounds.y).toBeGreaterThanOrEqual(0);
-    expect(bounds.x + bounds.width).toBeLessThanOrEqual(viewport.width);
-    expect(bounds.y + bounds.height).toBeLessThanOrEqual(viewport.height);
-  });
-
-  test('the page keeps its native menu outside a registered zone', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#overlays');
-    const prevented = await page.evaluate(() => {
-      const target = document.querySelector('#overlays-context-menu [data-overlay-selection]');
-      if (target === null) throw new Error('The selection output is required');
-      const event = new MouseEvent('contextmenu', { bubbles: true, cancelable: true });
-      target.dispatchEvent(event);
-      return event.defaultPrevented;
-    });
-
-    expect(prevented).toBe(false);
-    await expect(page.locator('.ui-context-menu')).toBeHidden();
-  });
 
   test('the tooltip surface renders its message', async ({ page }) => {
     await page.goto('/frame?theme=light&lang=en#status-feedback-tooltip');
@@ -650,6 +334,104 @@ test.describe('overlays', () => {
           }
         }
       }
+    });
+  }
+
+  for (const adapter of adapters) {
+    test(`${adapter.name}: destructive confirmation is red while ordinary confirmation stays blue`, async ({
+      page,
+    }) => {
+      for (const theme of ['light', 'dark'] as const) {
+        await page.goto(adapter.url(theme, 'overlays'));
+        const dialog = page.locator('dialog.ui-dialog');
+        const confirm = dialog.locator('[data-dialog-confirm]');
+        const redMinusBlue = () =>
+          confirm.evaluate((button) => {
+            const paint = getComputedStyle(button).backgroundImage;
+            const channels = paint.match(
+              /(?:color\(srgb |rgba?\()([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/,
+            );
+            if (channels === null) throw new Error(`Expected a colored fill, received ${paint}`);
+            return Number(channels[1]) - Number(channels[3]);
+          });
+
+        await page.locator('[data-dialog-open-form]').click();
+        await expect(confirm).toBeVisible();
+        expect(await redMinusBlue()).toBeLessThan(0);
+        await page.keyboard.press('Escape');
+        await expect(dialog).toBeHidden();
+
+        await page.locator('[data-dialog-open-destructive]').click();
+        await expect(confirm).toBeVisible();
+        expect(await redMinusBlue()).toBeGreaterThan(0);
+      }
+    });
+
+    test(`${adapter.name}: unified overlay typography, elevated rim, dimmed scrim and scenarios`, async ({
+      page,
+    }) => {
+      await page.goto(adapter.url('light', 'overlays'));
+      await page.locator('[data-overlay-rich-dropdown] .ui-dropdown-menu__trigger').click();
+      const richPanel = page.locator('[data-overlay-rich-dropdown] .ui-dropdown-menu__panel');
+      await expectPanelOpen(richPanel);
+      const richItem = richPanel.locator('.ui-dropdown-menu__item').first();
+      await expect(richItem).toHaveCSS('font-size', '14px');
+      await expect(richPanel.locator('.ui-dropdown-menu__shortcut').first()).toBeVisible();
+      const overlayFillAlpha = await readPanelFillAlpha(richPanel);
+      await page.keyboard.press('Escape');
+
+      await page.locator('[data-context-menu-keyboard]').click();
+      const ctxPanel = page.locator('.ui-context-menu');
+      await expect(ctxPanel).toBeVisible();
+      const ctxItem = ctxPanel.locator('.ui-context-menu__item').first();
+      await expect(ctxItem).toHaveCSS('font-size', '14px');
+      await ctxPanel.locator('.ui-context-menu__item').filter({ hasText: 'Theme' }).hover();
+      const submenu = page.locator('.ui-context-menu__submenu');
+      await expect(submenu).toBeVisible();
+      const isSameShadow =
+        (await submenu.evaluate((e) => getComputedStyle(e).boxShadow)) ===
+        (await ctxPanel.evaluate((e) => getComputedStyle(e).boxShadow));
+      expect(isSameShadow).toBe(true);
+      await page.keyboard.press('Tab');
+      await expect(ctxPanel).toBeHidden();
+      await expect(submenu).toBeHidden();
+
+      await page.locator('[data-dialog-open-form]').click();
+      const dialog = page.locator('dialog.ui-dialog');
+      await expect(dialog).toBeVisible();
+      const dialogFillAlpha = await readPanelFillAlpha(dialog);
+      expect(dialogFillAlpha).toBeGreaterThan(overlayFillAlpha);
+      expect(dialogFillAlpha).toBeLessThan(1);
+      await expect(dialog).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+      expect(await dialog.evaluate((e) => e.matches(':modal'))).toBe(false);
+      await expect(dialog.locator('input')).not.toBeFocused();
+      expect(
+        await dialog.evaluate((el) => {
+          const probe = document.createElement('div');
+          Object.assign(probe.style, { position: 'fixed', inset: '0', zIndex: '2147483647' });
+          document.body.append(probe);
+          const r = el.getBoundingClientRect();
+          const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+          probe.remove();
+          return hit === probe;
+        }),
+      ).toBe(true);
+      await page.keyboard.press('Tab');
+      await expect(dialog.locator('input')).toBeFocused();
+      await page.keyboard.press('Escape');
+      await expect(dialog).toBeHidden();
+
+      await page.locator('[data-dialog-open-destructive]').click();
+      await expect(dialog).toBeVisible();
+      await expect(dialog).toHaveAttribute('role', 'alertdialog');
+      await expect(dialog).toHaveAttribute('data-size', 'sm');
+      const scrim = page.locator('.ui-dialog__backdrop');
+      await expect(scrim).toHaveCSS('opacity', '1');
+      await expect.poll(() => readPanelFillAlpha(scrim)).toBeCloseTo(0.32);
+      await page.mouse.click(10, 10);
+      await expect(dialog).toBeVisible();
+      await page.keyboard.press('Escape');
+      await expect(dialog).toBeHidden();
     });
   }
 });

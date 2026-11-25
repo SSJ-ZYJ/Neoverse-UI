@@ -350,10 +350,10 @@ A navigation surface owns one accent: a surface that retunes its indicator
 retunes the start rail and the bottom bar together, and the placement alias
 resolves on the item rather than at the document root. Light pairs the frosted
 ice-azure selection plate with `--neoverse-color-accent-primary`, while Dark
-pairs the primary sky-blue selection fill with rich cobalt azure
-(`--neoverse-color-blue-700`) on `--neoverse-navigation-item-indicator-color`
-so the active bar stays vivid and legible against both the sky-blue fill and the
-dark canvas.
+pairs the deep navy selection plate (`--neoverse-navigation-item-active-fill`)
+with light azure (`--neoverse-color-blue-300`) on
+`--neoverse-navigation-item-indicator-color` so the active bar keeps its
+separation from both the plate and the dark canvas.
 Current-page, checked, open and selected indicators remain visible, and
 activation rather than press commits selection.
 

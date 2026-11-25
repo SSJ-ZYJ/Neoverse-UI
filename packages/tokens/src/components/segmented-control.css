@@ -75,8 +75,8 @@
     --neoverse-control-segmented-embedded-option-scale-lg-type-factor: 0.9;
     --neoverse-control-segmented-option-font-size-sm: var(--neoverse-font-size-sm);
     --neoverse-control-segmented-option-font-weight: var(--neoverse-font-weight-semibold);
-    --neoverse-control-segmented-slider-duration: 320ms;
-    --neoverse-control-segmented-slider-easing: var(--neoverse-motion-easing-emphasized);
+    --neoverse-control-segmented-slider-duration: var(--neoverse-motion-state-duration);
+    --neoverse-control-segmented-slider-easing: var(--neoverse-motion-state-easing);
     --neoverse-control-segmented-press-scale: var(--neoverse-effect-press-scale);
     --neoverse-control-segmented-circular-press-scale: 0.88;
     --neoverse-control-segmented-pill-press-scale-y: 0.84;

@@ -1,12 +1,17 @@
 import {
+  type DialogRole,
+  type DialogSize,
   UiAction,
   UiAvatar,
   UiButton,
   UiCard,
   UiDialog,
+  UiDrawer,
   UiDropdownMenu,
   UiEmptyState,
+  UiField,
   UiIconButton,
+  UiInput,
   UiNotice,
   UiPagination,
   UiPopover,
@@ -33,6 +38,18 @@ export default function SurfaceAndOverlaySection({
   onIncrement: () => void;
 }) {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<'confirm' | 'form' | 'destructive' | 'scrollable'>(
+    'confirm',
+  );
+  const [motionSource, setMotionSource] = useState<HTMLElement | null>(null);
+  const launchDialog = (mode: typeof dialogMode, source: HTMLElement) => {
+    setDialogMode(mode);
+    setMotionSource(source);
+    setDialogOpen(true);
+  };
+  const [workspaceName, setWorkspaceName] = useState('Aurora Glass');
+  const [showGrid, setShowGrid] = useState(true);
   const [selectedTab, setSelectedTab] = useState('overview');
   const [currentPage, setCurrentPage] = useState(4);
   const [toastOpen, setToastOpen] = useState(false);
@@ -62,6 +79,16 @@ export default function SurfaceAndOverlaySection({
         <UiButton variant="primary" onClick={onIncrement} data-react-adapter="UiButton">
           {copy.button} · {copy.count} {count}
         </UiButton>
+        {(['success', 'warning', 'accent'] as const).map((variant) => (
+          <UiButton
+            key={variant}
+            variant={variant}
+            onClick={onIncrement}
+            data-button-palette={variant}
+          >
+            {variant}
+          </UiButton>
+        ))}
         <UiIconButton
           label={copy.icon}
           variant="ghost"
@@ -101,6 +128,35 @@ export default function SurfaceAndOverlaySection({
         {menuSelection}
       </output>
 
+      <div className="flex flex-wrap items-center gap-2" data-overlay-scenarios>
+        <UiPopover
+          placement="top-start"
+          triggerSize="sm"
+          trigger="Top inspector"
+          ariaLabel="Top inspector"
+          data-overlay-popover-top
+        >
+          <p className="m-0 max-w-container-xs p-2 text-secondary">{copy.popoverBody}</p>
+        </UiPopover>
+        <UiDropdownMenu
+          trigger="Rich menu"
+          ariaLabel="Rich menu"
+          placement="bottom-end"
+          triggerVariant="ghost"
+          triggerSize="sm"
+          data-overlay-rich-dropdown
+          items={[
+            { id: 'grid', label: 'Show layout grid', checked: showGrid, shortcut: '⌘G' },
+            { id: 'dup', label: 'Duplicate view', shortcut: '⌘D' },
+            { id: 'remove', label: copy.menuRemove, tone: 'danger' },
+          ]}
+          onSelect={(item) => {
+            if (item.id === 'grid') setShowGrid((value) => !value);
+            setMenuSelection(item.id);
+          }}
+        />
+      </div>
+
       <UiNotice
         as="article"
         variant="info"
@@ -115,17 +171,123 @@ export default function SurfaceAndOverlaySection({
       </UiNotice>
 
       <div data-react-adapter="UiDialog">
-        <UiButton data-dialog-open onClick={() => setDialogOpen(true)}>
-          Open dialog
-        </UiButton>
+        <div className="flex flex-wrap items-center gap-2">
+          <UiButton
+            data-dialog-open
+            onClick={(event) => launchDialog('confirm', event.currentTarget)}
+          >
+            Open dialog
+          </UiButton>
+          <UiButton
+            variant="secondary"
+            size="sm"
+            data-dialog-open-form
+            onClick={(event) => launchDialog('form', event.currentTarget)}
+          >
+            Form modal (md)
+          </UiButton>
+          <UiButton
+            variant="secondary"
+            size="sm"
+            data-dialog-open-destructive
+            onClick={(event) => launchDialog('destructive', event.currentTarget)}
+          >
+            Destructive alert (sm)
+          </UiButton>
+          <UiButton
+            variant="ghost"
+            size="sm"
+            data-dialog-open-scrollable
+            onClick={(event) => launchDialog('scrollable', event.currentTarget)}
+          >
+            Long notes modal (lg)
+          </UiButton>
+        </div>
         <UiDialog
           open={dialogOpen}
-          title="Confirm changes"
+          motionSource={motionSource}
+          title={
+            dialogMode === 'form'
+              ? 'Rename workspace'
+              : dialogMode === 'destructive'
+                ? 'Delete release snapshot?'
+                : dialogMode === 'scrollable'
+                  ? 'Release checklist'
+                  : 'Confirm changes'
+          }
+          {...(dialogMode === 'destructive'
+            ? { description: 'Backdrop clicks stay locked for high-impact confirmation.' }
+            : dialogMode === 'scrollable'
+              ? { description: 'Header and action footer stay pinned while body scrolls.' }
+              : {})}
+          size={
+            (dialogMode === 'destructive'
+              ? 'sm'
+              : dialogMode === 'scrollable'
+                ? 'lg'
+                : 'md') as DialogSize
+          }
+          role={(dialogMode === 'destructive' ? 'alertdialog' : 'dialog') as DialogRole}
+          closeOnBackdrop={dialogMode === 'form' || dialogMode === 'scrollable'}
           onOpenChange={setDialogOpen}
-          footer={<UiButton onClick={() => setDialogOpen(false)}>Continue</UiButton>}
+          footer={
+            <div className="flex gap-2">
+              <UiButton variant="ghost" onClick={() => setDialogOpen(false)}>
+                Cancel
+              </UiButton>
+              <UiButton
+                variant={dialogMode === 'destructive' ? 'danger' : 'primary'}
+                data-dialog-confirm
+                onClick={() => setDialogOpen(false)}
+              >
+                {dialogMode === 'destructive' ? 'Delete' : 'Continue'}
+              </UiButton>
+            </div>
+          }
         >
-          Review this action before continuing.
+          {dialogMode === 'form' ? (
+            <UiField label="Workspace name">
+              <UiInput
+                value={workspaceName}
+                onChange={(event) => setWorkspaceName(event.target.value)}
+              />
+            </UiField>
+          ) : dialogMode === 'scrollable' ? (
+            <div className="grid gap-3">
+              {['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'].map((row) => (
+                <p key={row} className="m-0 text-secondary">
+                  {row}. Review this action before continuing. — {workspaceName}
+                </p>
+              ))}
+            </div>
+          ) : (
+            'Review this action before continuing.'
+          )}
         </UiDialog>
+      </div>
+      <div data-react-adapter="UiDrawer">
+        <UiButton
+          aria-controls="react-overlay-example-drawer"
+          aria-expanded={drawerOpen}
+          data-drawer-open
+          onClick={() => setDrawerOpen(true)}
+        >
+          Open drawer
+        </UiButton>
+        <UiDrawer
+          id="react-overlay-example-drawer"
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          side="right"
+          aria-label="Tools drawer"
+          className="gap-3 p-4"
+          data-drawer-panel
+        >
+          <h3 className="text-subtitle font-heading">Tools drawer</h3>
+          <UiButton data-drawer-close onClick={() => setDrawerOpen(false)}>
+            Close drawer
+          </UiButton>
+        </UiDrawer>
       </div>
       <div data-react-adapter="UiToast">
         <div className="flex flex-wrap gap-2">
@@ -161,8 +323,9 @@ export default function SurfaceAndOverlaySection({
           onOpenChange={setToastOpen}
           action={
             toastPresentation === 'action' ? (
-              <button
-                type="button"
+              <UiButton
+                size="sm"
+                variant="ghost"
                 data-toast-action
                 onClick={() => {
                   setToastDetails(true);
@@ -170,7 +333,7 @@ export default function SurfaceAndOverlaySection({
                 }}
               >
                 View details
-              </button>
+              </UiButton>
             ) : undefined
           }
         />
@@ -221,10 +384,22 @@ export default function SurfaceAndOverlaySection({
       />
       <UiEmptyState
         data-react-adapter="UiEmptyState"
+        data-empty-state-sample="onboarding"
         title="No projects yet"
         description="Create a project to get started."
         icon={<span aria-hidden="true">□</span>}
         action={<UiButton size="sm">Create project</UiButton>}
+      />
+      <UiEmptyState title="No matching files" variant="outlined" data-empty-state-sample="search" />
+      <UiEmptyState
+        title="No recent activity"
+        variant="compact"
+        data-empty-state-sample="activity"
+      />
+      <UiEmptyState
+        title="Shared files are restricted"
+        variant="subtle"
+        data-empty-state-sample="access"
       />
       <UiCard as="article" surface="elevated" className="grid gap-2" data-react-adapter="UiCard">
         <h3 className="text-subtitle font-heading tracking-heading text-primary">{copy.card}</h3>

@@ -23,6 +23,15 @@
   box-shadow: var(--neoverse-shadow-sm);
 }
 
+/* Each frame section is a glass stacking context. Lift the section, not its
+   descendants, so an inline panel stays above the next specimen without hover or focus. */
+[data-playground-view='frame']
+  .playground-specimen-section:has(
+    :is(.ui-overlay-panel--fallback-open, .ui-select__popover--fallback-open)
+  ) {
+  z-index: var(--neoverse-layout-layer-overlay);
+}
+
 .playground-specimen-section > .grid {
   grid-template-columns: repeat(
       auto-fit,
@@ -188,7 +197,6 @@
 
 [data-playground-view='frame'] .playground-material-backdrop--inset {
   position: relative;
-  isolation: isolate;
   box-shadow: var(--neoverse-material-glass-subtle-shadow);
 }
 
@@ -208,27 +216,14 @@
   backdrop-filter: var(--neoverse-material-glass-subtle-edge-filter);
 }
 
+/* Paint the rim behind the content without trapping inline fallback panels. */
 [data-playground-view='frame'] .playground-material-backdrop--inset > * {
   position: relative;
-  z-index: 1;
 }
 
-/* A fallback overlay has no top layer. Its wrapper shares z-index 1 with the
-   legend and later specimens, so raise only the wrapper that owns an open
-   fallback panel; otherwise a later sibling intercepts its pointer events. */
-.playground-material-backdrop--inset
-  > :has(.ui-overlay-panel--fallback-open, .ui-select__popover--fallback-open),
-[data-playground-view='frame']
-  section
-  > div:has(.ui-overlay-panel--fallback-open, .ui-select__popover--fallback-open) {
-  position: relative;
-  z-index: 30;
-}
-
-.playground-data-table-surface .ui-table-region {
-  border-radius: 0;
-}
-
+/* The reading composition sits inside prose, which owns vertical margins for
+   block content. The table plate keeps its own rhythm in every playground
+   scene instead of inheriting a prose margin. */
 .playground-data-table-surface .ui-table {
   margin-block: 0;
 }

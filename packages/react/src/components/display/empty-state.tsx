@@ -1,8 +1,10 @@
 import { type HTMLAttributes, type ReactNode, useId } from 'react';
+import { UiSurface } from '../surfaces/surface.js';
 
 export interface UiEmptyStateProps extends Omit<HTMLAttributes<HTMLElement>, 'title' | 'children'> {
   title: string;
   description?: string;
+  variant?: 'default' | 'outlined' | 'compact' | 'subtle';
   icon?: ReactNode;
   action?: ReactNode;
 }
@@ -10,6 +12,7 @@ export interface UiEmptyStateProps extends Omit<HTMLAttributes<HTMLElement>, 'ti
 export function UiEmptyState({
   title,
   description,
+  variant = 'default',
   icon,
   action,
   className,
@@ -17,9 +20,12 @@ export function UiEmptyState({
 }: UiEmptyStateProps) {
   const id = useId();
   return (
-    <section
+    <UiSurface
       {...rest}
+      as="section"
       className={['ui-empty-state', className].filter(Boolean).join(' ')}
+      surface={variant === 'default' ? 'glass-elevated' : variant === 'subtle' ? 'subtle' : 'none'}
+      data-empty-state-variant={variant}
       aria-labelledby={`${id}-title`}
       aria-describedby={description ? `${id}-description` : undefined}
     >
@@ -39,6 +45,6 @@ export function UiEmptyState({
         )}
       </div>
       {action != null && <div className="ui-empty-state__action">{action}</div>}
-    </section>
+    </UiSurface>
   );
 }

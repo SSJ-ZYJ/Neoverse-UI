@@ -1,15 +1,26 @@
 <script setup lang="ts">
-import { useId } from 'vue';
-import type { EmptyStateProps } from '../../types';
+import { type PropType, useId } from 'vue';
+import type { EmptyStateProps } from '../../types/display';
+import UiSurface from '../surfaces/UiSurface.vue';
 
-defineProps<EmptyStateProps>();
+defineProps({
+  title: { type: String, required: true },
+  description: String,
+  variant: {
+    type: String as PropType<NonNullable<EmptyStateProps['variant']>>,
+    default: 'default',
+  },
+});
 const titleId = `${useId()}-empty-state-title`;
 const descriptionId = `${useId()}-empty-state-description`;
 </script>
 
 <template>
-  <section
+  <UiSurface
+    as="section"
     class="ui-empty-state"
+    :surface="variant === 'default' ? 'glass-elevated' : variant === 'subtle' ? 'subtle' : 'none'"
+    :data-empty-state-variant="variant"
     :aria-labelledby="titleId"
     :aria-describedby="description ? descriptionId : undefined"
   >
@@ -25,5 +36,5 @@ const descriptionId = `${useId()}-empty-state-description`;
     <div v-if="$slots.action" class="ui-empty-state__action">
       <slot name="action" />
     </div>
-  </section>
+  </UiSurface>
 </template>

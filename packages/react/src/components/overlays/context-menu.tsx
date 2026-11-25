@@ -1,3 +1,4 @@
+import { isKeyboardModality } from '@neoverse-ui/overlay-runtime';
 import { createPortal } from 'react-dom';
 import { mergeClassNames } from '../../internal.js';
 import {
@@ -27,8 +28,9 @@ export function UiContextMenu({
     panelId,
     submenuId,
     openSubmenu,
+    submenuContent,
     enterSubmenu,
-    onItemPointerEnter,
+    onItemPointerMove,
     onPanelToggle,
     selectItem,
     onMenuKeyDown,
@@ -48,7 +50,7 @@ export function UiContextMenu({
       ref={panelRef}
       id={panelId}
       className={mergeClassNames(
-        'ui-overlay-panel ui-context-menu material-glass-immersive nv-presence',
+        'ui-overlay-panel ui-context-menu material-glass-elevated nv-presence',
         className,
       )}
       popover="manual"
@@ -78,6 +80,7 @@ export function UiContextMenu({
               key={key}
               className="ui-context-menu__item"
               type="button"
+              tabIndex={-1}
               role={contextMenuItemRole(entry)}
               disabled={entry.disabled}
               data-tone={entry.tone ?? 'default'}
@@ -93,10 +96,17 @@ export function UiContextMenu({
               }
               aria-controls={entry.children?.length ? submenuId : undefined}
               {...checkableState(entry)}
-              onPointerEnter={(event) => onItemPointerEnter(entry, event.currentTarget)}
+              onPointerMove={(event) => {
+                // A moving column can change hit targets under a stationary pointer.
+                if (event.pointerType !== 'touch') onItemPointerMove(entry, event.currentTarget);
+              }}
               onClick={(event) =>
                 entry.children?.length
-                  ? enterSubmenu(entry, event.currentTarget)
+                  ? enterSubmenu(
+                      entry,
+                      event.currentTarget,
+                      isKeyboardModality(event.currentTarget.ownerDocument),
+                    )
                   : selectItem(entry)
               }
             >
@@ -117,43 +127,53 @@ export function UiContextMenu({
           );
         })}
       </div>
-
-      {openSubmenu === null
-        ? null
-        : createPortal(
-            <div
-              id={submenuId}
-              ref={submenuRef}
-              className="ui-context-menu__submenu nv-presence"
-              popover="manual"
-              role="menu"
-              aria-label={typeof openSubmenu.label === 'string' ? openSubmenu.label : undefined}
-              data-neoverse-motion="slide-end"
-              data-neoverse-motion-origin="start"
-            >
-              {(openSubmenu.children ?? []).map((child) => (
-                <button
-                  key={child.id}
-                  className="ui-context-menu__item"
-                  type="button"
-                  role={contextMenuItemRole(child)}
-                  disabled={child.disabled}
-                  data-entry-id={child.id}
-                  {...checkableState(child)}
-                  onClick={() => selectItem(child)}
-                >
-                  {child.selection === undefined ? null : (
-                    <span className="ui-context-menu__check" aria-hidden="true">
-                      {child.checked ? '✓' : ''}
-                    </span>
-                  )}
-                  <span className="ui-context-menu__label">{child.label}</span>
-                </button>
-              ))}
-            </div>,
-            document.body,
-          )}
     </div>
   );
-  return portalHost === null ? panel : createPortal(panel, portalHost);
+
+  const submenu =
+    submenuContent === undefined || portalHost === null
+      ? null
+      : createPortal(
+          <div
+            id={submenuId}
+            ref={submenuRef}
+            className="ui-overlay-panel ui-context-menu__submenu material-glass-elevated nv-presence"
+            popover="manual"
+            role="menu"
+            aria-label={typeof submenuContent.label === 'string' ? submenuContent.label : undefined}
+            inert={openSubmenu === null}
+            data-neoverse-motion="slide-end"
+            data-neoverse-motion-origin="start"
+            onKeyDown={onMenuKeyDown}
+          >
+            {(submenuContent.children ?? []).map((child) => (
+              <button
+                key={child.id}
+                className="ui-context-menu__item"
+                type="button"
+                tabIndex={-1}
+                role={contextMenuItemRole(child)}
+                disabled={child.disabled}
+                data-entry-id={child.id}
+                {...checkableState(child)}
+                onClick={() => selectItem(child)}
+              >
+                {child.selection === undefined ? null : (
+                  <span className="ui-context-menu__check" aria-hidden="true">
+                    {child.checked ? '✓' : ''}
+                  </span>
+                )}
+                <span className="ui-context-menu__label">{child.label}</span>
+              </button>
+            ))}
+          </div>,
+          document.body,
+        );
+
+  return (
+    <>
+      {portalHost === null ? panel : createPortal(panel, portalHost)}
+      {submenu}
+    </>
+  );
 }

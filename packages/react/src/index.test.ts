@@ -378,13 +378,10 @@ test('icon button preserves its native attributes and requires an accessible lab
   expect(button.props.className).toContain('ui-icon-button--sm');
   expect(button.props.className).toContain('ui-icon-button');
   expect(button.props.className).toContain('ui-button--ghost');
+  // The button renders one decorative content wrapper as its only child, the
+  // same DOM the Vue adapter produces; nothing else may sit beside it.
   const buttonContent = (button.props as unknown as { children: ReactElement }).children;
-  const children = (buttonContent.props as unknown as { children: ReactElement[] }).children;
-  expect(
-    children.find(
-      (child) => (child.props as { className?: string }).className === 'ui-icon-button__content',
-    )?.props,
-  ).toEqual({
+  expect(buttonContent.props).toEqual({
     className: 'ui-icon-button__content',
     'aria-hidden': 'true',
     children: 'gear',

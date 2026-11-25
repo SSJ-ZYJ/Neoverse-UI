@@ -160,7 +160,7 @@ describe('Glass surface geometry and top-layer exclusion', () => {
     expect(sharpOpacity).toBeCloseTo(0.5, 4);
   });
 
-  it('excludes native top-layer elements and descendants while keeping them as occluders', () => {
+  it('draws the card rim without duplicating native and fallback overlay rims', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const card = document.createElement('article');
@@ -192,8 +192,10 @@ describe('Glass surface geometry and top-layer exclusion', () => {
     try {
       createTestRenderer({ maxDevicePixelRatio: 1 }).mount();
 
-      // Only the document-layer card and non-top-layer fallback popover are drawn (2 draws).
-      expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+      const rectangles = gl.uniform4f.mock.calls
+        .filter(([location]) => location?.name === 'u_rect')
+        .map(([, x, y, width, height]) => [x, y, width, height]);
+      expect(rectangles).toEqual([[40, 40, 300, 200]]);
       // The top-layer modal still occludes the underlying card.
       expect(gl.uniform1f).toHaveBeenCalledWith(
         expect.objectContaining({ name: 'u_occluder_count' }),

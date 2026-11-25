@@ -182,6 +182,13 @@
       );
 
     --neoverse-material-refraction-gradient-none: none;
+    /* Perimeter mask for local CSS edge passes; alpha only, with two directional catches. */
+    --neoverse-material-edge-rim-coverage: linear-gradient(
+      135deg,
+      black,
+      rgb(0 0 0 / 42%) 28% 72%,
+      black
+    );
     /* Match the 0.2.0 directional catches when the optional renderer is absent. */
     --neoverse-material-refraction-gradient-subtle:
       radial-gradient(

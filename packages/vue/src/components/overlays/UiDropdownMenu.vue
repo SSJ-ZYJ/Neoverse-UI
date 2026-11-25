@@ -1,14 +1,17 @@
 <script setup lang="ts">
 import {
   type AnchoredOverlayOptions,
+  focusElement,
   hideAnchoredOverlay,
+  installFocusModality,
   isOverlayOpen,
+  markPointerModality,
   showAnchoredOverlay,
   stopOverlayTracking,
 } from '@neoverse-ui/overlay-runtime';
-import { computed, nextTick, onBeforeUnmount, ref, useId, watch } from 'vue';
-import type { ButtonVariant, DropdownMenuItem, DropdownMenuProps } from '../../types';
-import { buttonVariantClasses } from '../actions/classes';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
+import type { ButtonSize, ButtonVariant, DropdownMenuItem, DropdownMenuProps } from '../../types';
+import { buttonSizeClasses, buttonVariantClasses } from '../actions/classes';
 import { presence } from '../motion/presence';
 import { getSurfaceClass } from '../surfaces/surface';
 
@@ -18,6 +21,7 @@ const props = withDefaults(defineProps<DropdownMenuProps>(), {
   disabled: false,
   placement: 'auto',
   triggerVariant: 'secondary',
+  triggerSize: 'md',
 });
 const emit = defineEmits<{
   'update:open': [value: boolean];
@@ -29,7 +33,7 @@ const triggerClasses = computed(() => [
   'ui-button',
   getSurfaceClass('glass-subtle'),
   buttonVariantClasses[props.triggerVariant as ButtonVariant] ?? buttonVariantClasses.secondary,
-  'ui-button--md',
+  buttonSizeClasses[props.triggerSize as ButtonSize] ?? buttonSizeClasses.md,
 ]);
 
 const triggerRef = ref<HTMLButtonElement | null>(null);
@@ -73,7 +77,7 @@ function focusFirstItem() {
   requestAnimationFrame(() => {
     const panel = panelRef.value;
     if (expandedOpen.value && panel && isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')) {
-      menuItems()[0]?.focus();
+      focusElement(menuItems()[0], { preventScroll: true });
     }
   });
 }
@@ -104,9 +108,26 @@ function toggleOpen() {
   setOpen(!resolvedOpen.value);
 }
 
+function onTriggerPointerDown(event: PointerEvent) {
+  const trigger = event.currentTarget as HTMLElement;
+  trigger.dataset.neoverseFocusOrigin = 'pointer';
+  markPointerModality(trigger.ownerDocument);
+}
+
+function onTriggerBlur(event: FocusEvent) {
+  delete (event.currentTarget as HTMLElement).dataset.neoverseFocusOrigin;
+}
+
+function onTriggerKeydown(event: KeyboardEvent) {
+  if (!expandedOpen.value || (event.key !== 'ArrowDown' && event.key !== 'ArrowUp')) return;
+  event.preventDefault();
+  const items = menuItems();
+  focusElement(event.key === 'ArrowDown' ? items[0] : items.at(-1), { modality: 'keyboard' });
+}
+
 function closeAndRestoreFocus() {
   setOpen(false);
-  void nextTick(() => triggerRef.value?.focus());
+  void nextTick(() => focusElement(triggerRef.value, { preventScroll: true }));
 }
 
 function onPanelToggle(event: Event) {
@@ -137,10 +158,20 @@ function focusRelative(current: HTMLButtonElement, direction: 1 | -1) {
   if (items.length === 0) return;
   const index = items.indexOf(current);
   const next = items[(index + direction + items.length) % items.length];
-  next?.focus();
+  focusElement(next, { modality: 'keyboard' });
 }
 
 function onMenuKeydown(event: KeyboardEvent) {
+  if (event.key === 'Tab') {
+    const closeImmediately = event.shiftKey;
+    queueMicrotask(() => {
+      if (closeImmediately || !panelRef.value?.contains(document.activeElement)) {
+        void requestDismiss();
+      }
+    });
+    return;
+  }
+
   const current = event.target;
   if (!(current instanceof HTMLButtonElement)) return;
 
@@ -153,7 +184,7 @@ function onMenuKeydown(event: KeyboardEvent) {
   if (event.key === 'Home' || event.key === 'End') {
     event.preventDefault();
     const items = menuItems();
-    (event.key === 'Home' ? items[0] : items.at(-1))?.focus();
+    focusElement(event.key === 'Home' ? items[0] : items.at(-1), { modality: 'keyboard' });
   }
 }
 
@@ -164,6 +195,10 @@ watch(
   },
   { immediate: true },
 );
+
+onMounted(() => {
+  if (typeof document !== 'undefined') installFocusModality(document);
+});
 
 onBeforeUnmount(() => {
   const options = overlayOptions();
@@ -181,6 +216,9 @@ onBeforeUnmount(() => {
       :aria-expanded="expandedOpen"
       :aria-controls="panelId"
       :disabled="props.disabled"
+      @pointerdown="onTriggerPointerDown"
+      @blur="onTriggerBlur"
+      @keydown="onTriggerKeydown"
       @click="toggleOpen"
     >
       <slot name="trigger" />
@@ -202,12 +240,25 @@ onBeforeUnmount(() => {
         :key="item.id"
         class="ui-dropdown-menu__item"
         type="button"
-        role="menuitem"
+        tabindex="-1"
+        :role="item.checked === undefined ? 'menuitem' : 'menuitemcheckbox'"
+        :aria-checked="item.checked === undefined ? undefined : Boolean(item.checked)"
         :disabled="item.disabled"
         :data-tone="item.tone ?? 'default'"
         @click="selectItem(item)"
       >
-        <slot name="item" :item="item">{{ item.label }}</slot>
+        <slot name="item" :item="item">
+          <span
+            v-if="item.checked !== undefined"
+            class="ui-dropdown-menu__check"
+            aria-hidden="true"
+            >{{
+              item.checked ? '✓' : ''
+            }}</span
+          >
+          <span class="ui-dropdown-menu__label">{{ item.label }}</span>
+          <span v-if="item.shortcut" class="ui-dropdown-menu__shortcut">{{ item.shortcut }}</span>
+        </slot>
       </button>
     </div>
   </span>

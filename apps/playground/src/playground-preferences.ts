@@ -6,22 +6,20 @@ export const playgroundPreferencesKey = 'neoverse-design-lab.preferences';
 
 export type PreferenceRecord = Record<string, unknown>;
 
-const isRecord = (value: unknown): value is PreferenceRecord =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
-export function readPreferences(): PreferenceRecord {
+export function readPreferences(key = playgroundPreferencesKey): PreferenceRecord {
   if (typeof window === 'undefined') {
     return {};
   }
 
   try {
-    const raw = window.localStorage.getItem(playgroundPreferencesKey);
+    const raw = window.localStorage.getItem(key);
     if (raw === null) {
       return {};
     }
 
     const parsed: unknown = JSON.parse(raw);
-    return isRecord(parsed) ? parsed : {};
+    if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) return {};
+    return parsed as PreferenceRecord;
   } catch {
     return {};
   }

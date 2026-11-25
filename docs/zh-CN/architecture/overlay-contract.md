@@ -5,7 +5,7 @@ Status: adopted
 [English](../../architecture/overlay-contract.md)
 
 <!-- Source: docs/architecture/overlay-contract.md -->
-<!-- Source-SHA256: 6c7b095947ade1e6557bd6da28c0834f8d9d0769e93a69e73a297433ed91e042 -->
+<!-- Source-SHA256: 2b418efd9a7a9680adb32bb633660c387322e145d6562a5bdfa08001c901bdcd -->
 
 Neoverse-UI 对锚定的顶层界面使用同一套浮层行为规则。Popover、DropdownMenu 与 Select 共享同一个与框架无关的定位运行时和同一套极光玻璃深度语言。
 
@@ -14,7 +14,7 @@ Neoverse-UI 对锚定的顶层界面使用同一套浮层行为规则。Popover�
 `@neoverse-ui/overlay-runtime` 负责：
 
 - 相对触发器的视口定位，
-- `auto`、`bottom-start` 与 `bottom-end` 放置方式，
+- `auto`、`bottom-start`、`bottom`、`bottom-end`、`top-start`、`top`、`top-end`、`left-start`、`left-end`、`right-start` 与 `right-end` 放置方式，
 - 当下方视口无法容纳 `auto` 放置的面板时自动向上翻转，
 - 视口限制，
 - CSS 缩放补偿，
@@ -32,7 +32,11 @@ Neoverse-UI 对锚定的顶层界面使用同一套浮层行为规则。Popover�
 
 首选浏览器路径使用 `popover="auto"`。它提供原生顶层堆叠与轻触关闭。回退路径保持相同的运行时计算 `position: fixed`、`top` 与 `left` 规则，仅通过回退类改变可见性。
 
+固定定位回退不是浏览器顶层。层级变量只能在所在的层叠上下文内排序，无法把面板抬到较低祖先上下文的兄弟元素之上。此规则适用于所有锚定面板，包括 Select 和 ContextMenu 子菜单。应避免让浮层祖先落入较低的层叠上下文；组合明确隔离层级时，应避免裁剪浮层宿主，并把宿主放在它要覆盖的兄弟元素之上。单独调高面板层级无法解决祖先层级冲突。
+
 通用极光玻璃材质辅助类不得用 `position: relative` 替换顶层定位。因此浮层面板与 Select 弹出层直接拥有自己的定位上下文。
+
+原生与回退浮层都在面板本地绘制玻璃细边。圆角透明度遮罩将材质的背景提亮限制在轮廓上，左上与右下的覆盖率更高。面板本体仍使用独立的模糊；共享 WebGL 画布不重复绘制这些边缘。
 
 ## 关闭与焦点
 
@@ -43,6 +47,26 @@ Neoverse-UI 对锚定的顶层界面使用同一套浮层行为规则。Popover�
 - 受控与非受控框架状态必须表现一致；在 Vue 中，省略布尔 `open` prop 时必须保持 `undefined`，避免意外变成受控的 `false`。
 
 关闭请求是改变受控 `open` 的请求。父级更新后，适配器让实际面板与最终生效的 prop 保持一致。如果父级保持 `open=true`，面板保持打开，而不是留下已展开触发器与隐藏面板。原生 toggle 事件按同一策略处理。跟踪与关闭清理会捕获已挂载面板，因此卸载不依赖已被清空的 ref。
+
+## 共享元素动画
+
+Popover、DropdownMenu 与 Select 从触发器的视口矩形展开，关闭时收回触发器。ContextMenu 以唤出位置为起点，子菜单以父菜单行为起点。切换菜单行会从新行播放展开动画，再次激活同一行不会重播。
+
+Dialog 默认以打开前聚焦的元素为起点。Vue 和 React 都可通过 `motionSource` 指定另一元素，例如指针事件的 `event.currentTarget`；传 `null` 则保留默认出入场动画。此属性不改变焦点归还目标。打开时选定来源，关闭时重新测量；如果触发器移动，面板会收回其当前位置。来源隐藏、离开文档或不存在时，回退到默认出入场动画。
+
+动画直接移动和缩放面板，不克隆 DOM，不捕获背景。CSS 复用现有出入场时序，并在浏览器支持时保留顶层退出过渡。启用减少动态效果偏好时跳过共享元素的位移和缩放。
+
+Dialog 在遮罩上使用专用的半透明底色 `--neoverse-dialog-background`，而不是覆盖率较低的普通浮层底色。`--neoverse-dialog-scrim` 独立控制周围页面的压暗程度。面板保留抬升层级玻璃的模糊与边缘效果。
+
+删除等破坏性操作的确认按钮使用 `UiButton variant="danger"`。普通确认保留 `primary`；对话框的 `alertdialog` 角色不会自动改变按钮颜色。
+
+## Drawer
+
+`UiDrawer` 使用 `open` 控制边缘面板，默认关闭。Vue 绑定 `v-model:open`，React 绑定 `open` 与 `onOpenChange`。通过 `aria-label` 或 `aria-labelledby` 提供无障碍名称，内容放在默认插槽或 `children` 中。`side` 支持 `left`（默认）与 `right`。
+
+`modal` 默认为 `true`。模态抽屉挂载于文档根部，与 Dialog 共用 `--neoverse-layout-layer-modal` 层级。它位于普通页面浮层之上，但不会盖住层级更高的控件，例如浏览器扩展工具栏。最上方的文档模态面板约束 Tab，关闭时把焦点归还给先前聚焦的元素。Escape 和激活遮罩会请求关闭；`closeOnOutside` 设为 `false` 可禁用遮罩关闭。调用方更新 `open` 前，抽屉保持打开。
+
+将 `modal` 设为 `false` 可作为宽屏常驻导航等行内面板使用。行内面板参与布局，打开时不捕获或移动焦点。模态位置使用 `--neoverse-drawer-width` 与 `--neoverse-drawer-inset` 变量，可用 `width` 传入 CSS 长度来覆盖默认宽度。抽屉遵循减少动态效果与降低透明度偏好。
 
 ## Popover
 
@@ -63,7 +87,8 @@ Neoverse-UI 对锚定的顶层界面使用同一套浮层行为规则。Popover�
 - ArrowUp / ArrowDown 循环，
 - Home / End 导航，
 - 跳过禁用项，
-- 打开时聚焦第一个启用项，
+- 打开时聚焦第一个启用项（指针打开时抑制视觉焦点环，直至开始键盘导航），
+- 按一次 Tab 即可退出菜单（菜单项与列表项使用 `tabindex="-1"`），
 - 选择后关闭并恢复触发器焦点。
 
 ## Select 复用
@@ -92,13 +117,15 @@ Neoverse-UI 对锚定的顶层界面使用同一套浮层行为规则。Popover�
 
 `UiContextMenu` 是这条路径的适配器。它渲染 `role="menu"`，包含 `menuitem`、`menuitemradio` 与 `menuitemcheckbox` 行、分隔线与标题，并复用 DropdownMenu 键盘行为：ArrowUp/ArrowDown 循环、Home/End、跳过禁用项、打开时聚焦第一个启用项、Escape 与选择关闭面板，以及焦点恢复。关闭原因仍为 `escape` 与 `outside`；光标菜单没有触发器，因此只应用文档监听器。
 
-`data-neoverse-overlay-side` 记录面板在锚点上方还是下方打开，适配器把 `data-neoverse-motion-origin` 指向相反边缘，使入场动效始终从静止边缘生长。
+更新 `point` 时，已打开的上下文菜单从当前画面位置平滑移到新位置，不会关闭或重播入场动画。滑动途中再次更新位置会改向新目标。定位规则仍生效；启用减少动态效果时直接移位。若外部位置的右键事件没有被上下文菜单处理器通过 `preventDefault()` 接管，则关闭菜单。
+
+`data-neoverse-overlay-side` 记录面板在锚点哪一侧（`top`、`bottom`、`left` 或 `right`）打开。光标菜单没有可用的共享元素几何数据时，以相反边缘作为出入场起点。所有浮层面板（`UiPopover`、`UiDropdownMenu`、`UiContextMenu`、`.ui-context-menu__submenu`、`UiSelect` 下拉框与 `UiDialog`）统一复用 `.ui-overlay-panel` 的 `body-sm` 字体排版、`material-glass-elevated` 材质与无遮挡方向性极光玻璃边缘高光，并通过 `control-feedback` 统一行内点击项的悬停反馈；模态对话框保留在 `--neoverse-layout-layer-modal`（`show()` + `.ui-dialog__backdrop` 遮罩过渡与范围化 Tab 循环）以使浏览器插件等更高层级浮层保持不被遮挡，同时支持 `size`（`sm`、`md`、`lg`）与 `role`（`dialog`、`alertdialog`）配置。
 
 带 `children` 的行会在点击、悬停或 ArrowRight 时打开子菜单，ArrowLeft 把焦点返回父行。子菜单是面板旁顶层中的第二个 `popover="manual"`，因此父行保持可见，面板保持自身宽度。适配器用 `containedElements` 注册该列，使列内指针按压不会关闭父级。两个表面一起关闭。
 
-该列与面板边缘重叠一个极光玻璃边缘宽度，而不是仅仅接触。共享 Glass 边缘画布绘制在顶层之上，其遮挡命中测试会在表面边界内采样：重叠让该列位于面板边缘之上，并使渲染器把该列视为遮挡物，因此面板边缘不会跨列绘制。面板边缘未覆盖的部分保持连续。
+鼠标从展开的父菜单行移入二级菜单时，父行保留与普通悬停相同的一层高亮，不再叠加展开态底色。
 
-打开一列、用指针在列之间切换、触控或键盘打开都会重放共享 Presence 入场。切换复用同一 popover 节点，因此 `@starting-style` 无法再次播种入场：适配器通过 `replayPresence()` 把 `data-neoverse-motion-replay="from"` 固定一帧，再释放到同一个入场过渡中。重新进入已经打开的行不会重启动画。
+二级菜单与父面板略微重叠，而不是仅仅接触。它在接缝处覆盖父面板玻璃边缘，未覆盖的轮廓仍然可见。
 
 `autoFocus` 默认是 true。指针打开传 `false`，使区域保持焦点，编辑器保留选择高亮；方向键随后从第一行或最后一行进入面板。键盘打开则立即把焦点移入面板。
 

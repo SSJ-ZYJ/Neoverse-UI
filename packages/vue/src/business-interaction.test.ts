@@ -25,13 +25,14 @@ describe('business interaction adapters', () => {
     expect(html).not.toContain('ui-toast');
   });
 
-  it('delegates cancel requests without closing a controlled modal', async () => {
+  it('delegates Escape and close requests without keeping a controlled modal in the top layer', async () => {
     const open = ref(true);
-    const show = vi.spyOn(HTMLDialogElement.prototype, 'showModal').mockImplementation(function (
+    const show = vi.spyOn(HTMLDialogElement.prototype, 'show').mockImplementation(function (
       this: HTMLDialogElement,
     ) {
       this.setAttribute('open', '');
     });
+    const showModal = vi.spyOn(HTMLDialogElement.prototype, 'showModal');
     const close = vi.spyOn(HTMLDialogElement.prototype, 'close').mockImplementation(function (
       this: HTMLDialogElement,
     ) {
@@ -55,10 +56,17 @@ describe('business interaction adapters', () => {
     await nextTick();
     const dialog = document.querySelector<HTMLDialogElement>('.ui-dialog');
     expect(dialog).not.toBeNull();
+    expect(dialog?.getAttribute('aria-modal')).toBe('true');
     expect(show).toHaveBeenCalledOnce();
-    const cancel = new Event('cancel', { cancelable: true });
-    dialog?.dispatchEvent(cancel);
-    expect(cancel.defaultPrevented).toBe(true);
+    expect(showModal).not.toHaveBeenCalled();
+
+    const escapeEvent = new KeyboardEvent('keydown', {
+      key: 'Escape',
+      cancelable: true,
+      bubbles: true,
+    });
+    document.dispatchEvent(escapeEvent);
+    expect(escapeEvent.defaultPrevented).toBe(true);
     await nextTick();
     await nextTick();
     expect(open.value).toBe(false);

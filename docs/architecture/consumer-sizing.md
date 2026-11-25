@@ -8,10 +8,10 @@ Status: adopted
 
 | 组件 | 高度 | 字号 |
 | --- | --- | --- |
-| Button / Action sm | 32px | 14px |
-| Button / Action md | 40px | 14px |
-| Button / Action lg | 48px | 16px |
-| IconButton sm / md / lg | 32 / 40 / 48px | 图标 16 / 16 / 20px |
+| Button sm / md / lg | 28 / 36 / 44px | 14 / 14 / 16px |
+| IconButton sm / md / lg | 28 / 36 / 44px | 图标 16 / 16 / 20px |
+| Action sm / md / lg | 32 / 40 / 48px | 14 / 14 / 16px |
+| Button 左右留白 sm / md / lg | 各 8 / 12 / 16px | — |
 | NavigationItem sm / md | 32px | 14px |
 | NavigationItem lg | 40px | 16px |
 | SegmentedControl 选项 | 32px | 14px |
@@ -78,7 +78,7 @@ Doc 的官方 `react@0.1.0`、`giscus-theme@0.1.0` 返回 404；官方 `tailwind
 - `scripts/sync/sync-consumer.test.ts` 覆盖旧 CSS、嵌套副本、硬链接和根 overrides。
 - Neoverse-Slides 的 `bun run test:ui-size` 检查真实 `/slides` 页面在桌面/手机、深浅主题下的导航、按钮、输入框、选择框尺寸和横向溢出。
 
-尺寸几何由 `tests/e2e/layout.spec.ts` 在真实浏览器中断言：32 / 40 / 48px 按钮与圆形控件、40px 输入框、13 / 14 / 16px 徽标字号、24px 最小点击区，以及各模块不被隐式放大。几何规则同时由 Token 单测、消费 CSS 测试和真实消费项目检查承担；`tests/e2e/playground.spec.ts` 覆盖响应式横向溢出。
+尺寸几何由 `tests/e2e/layout.spec.ts` 在真实浏览器中断言：28 / 36 / 44px 按钮与圆形控件、40px 输入框、13 / 14 / 16px 徽标字号、24px 最小点击区，以及各模块不被隐式放大。几何规则同时由 Token 单测、消费 CSS 测试和真实消费项目检查承担；`tests/e2e/playground.spec.ts` 覆盖响应式横向溢出。
 
 ### 2026-10-16 Dock 尺寸验证
 

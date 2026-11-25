@@ -52,7 +52,7 @@ onBeforeUnmount(() => animation?.cancel());
 </script>
 
 <template>
-  <UiSurface surface="none" class="playground-specimen-panel grid w-full max-w-reading-wide gap-3">
+  <UiSurface surface="none" class="playground-specimen-panel grid w-full max-w-reading-wide">
     <div class="flex flex-wrap items-center justify-between gap-2">
       <UiButton
         data-motion-disclosure-toggle
@@ -73,7 +73,7 @@ onBeforeUnmount(() => animation?.cancel());
       data-motion-disclosure-list
       class="playground-explorer__specimens grid gap-1"
     >
-      <li v-for="(item, index) in items" :key="item.id">
+      <li v-for="(item, index) in items" :key="item.id" class="first:pt-3">
         <UiNavigationItem
           as="span"
           size="sm"
@@ -86,6 +86,6 @@ onBeforeUnmount(() => animation?.cancel());
       </li>
     </ul>
 
-    <p class="text-caption text-secondary">{{ localize(copy.hint, props.locale) }}</p>
+    <p class="mt-3 text-caption text-secondary">{{ localize(copy.hint, props.locale) }}</p>
   </UiSurface>
 </template>

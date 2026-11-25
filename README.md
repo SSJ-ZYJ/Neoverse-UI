@@ -165,6 +165,8 @@ bun install
 bun run dev
 ```
 
+The Design Lab uses Vite hot updates for Vue, React and CSS. Ordinary component and style edits keep the page open and preserve unrelated state. Shared entry-point changes outside a hot-update boundary can still reload the page.
+
 `bun run check` runs the quality gates. Architecture, testing and release rules live in [AGENTS.md](AGENTS.md) and [docs](docs/AGENTS.md).
 
 ## License

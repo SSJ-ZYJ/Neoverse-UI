@@ -262,6 +262,64 @@ test('keeps explicit bottom placement below even when auto placement would flip'
   ).toEqual({ left: 240, top: 572, opensAbove: false });
 });
 
+test('supports centered, top, left and right anchored placements with viewport clamping', () => {
+  const trigger = { top: 300, right: 500, bottom: 340, left: 400, width: 100, height: 40 };
+  expect(
+    resolveAnchoredPosition({
+      trigger,
+      overlayWidth: 200,
+      overlayHeight: 120,
+      viewport,
+      gap: 8,
+      placement: 'top-start',
+    }),
+  ).toEqual({ left: 400, top: 172, opensAbove: true });
+
+  expect(
+    resolveAnchoredPosition({
+      trigger,
+      overlayWidth: 200,
+      overlayHeight: 120,
+      viewport,
+      gap: 8,
+      placement: 'top',
+    }),
+  ).toEqual({ left: 350, top: 172, opensAbove: true });
+
+  expect(
+    resolveAnchoredPosition({
+      trigger,
+      overlayWidth: 200,
+      overlayHeight: 120,
+      viewport,
+      gap: 8,
+      placement: 'bottom',
+    }),
+  ).toEqual({ left: 350, top: 348, opensAbove: false });
+
+  expect(
+    resolveAnchoredPosition({
+      trigger,
+      overlayWidth: 200,
+      overlayHeight: 120,
+      viewport,
+      gap: 8,
+      placement: 'right-start',
+    }),
+  ).toEqual({ left: 508, top: 300, opensAbove: false });
+
+  expect(
+    resolveAnchoredPosition({
+      trigger,
+      overlayWidth: 200,
+      overlayHeight: 120,
+      viewport,
+      gap: 8,
+      placement: 'left-end',
+    }),
+  ).toEqual({ left: 192, top: 220, opensAbove: false });
+});
+
 test('positions a point-anchored overlay from the cursor and flips above when needed', () => {
   const saved = ['window', 'document', 'getComputedStyle'].map(
     (name) => [name, Object.getOwnPropertyDescriptor(globalThis, name)] as const,
@@ -497,4 +555,100 @@ test('a light-dismissed overlay leaves focus to the engine', () => {
     topVariable: '--top',
     fallbackOpenClass: 'is-open',
   });
+});
+
+test('native top-layer popovers ignore ancestor CSS scale while preserving CSS zoom', () => {
+  const saved = ['window', 'document', 'getComputedStyle'].map(
+    (name) => [name, Object.getOwnPropertyDescriptor(globalThis, name)] as const,
+  );
+  const values = new Map<string, string>();
+  const stageAncestor = { parentElement: null };
+  const styleByElement = new Map<unknown, Record<string, unknown>>();
+  const trigger = {
+    parentElement: stageAncestor,
+    getBoundingClientRect: () => ({
+      top: 320,
+      bottom: 352,
+      left: 585.5,
+      right: 633.5,
+      width: 48,
+      height: 32,
+    }),
+  } as unknown as HTMLElement;
+  const overlay = {
+    parentElement: stageAncestor,
+    showPopover: () => undefined,
+    hidePopover: () => undefined,
+    matches: (selector: string) => selector === ':popover-open',
+    classList: { contains: () => false },
+    offsetWidth: 160,
+    offsetHeight: 120,
+    dataset: {},
+    style: { setProperty: (name: string, value: string) => values.set(name, value) },
+    getBoundingClientRect: () => ({ left: 585.5, top: 360, width: 160, height: 120 }),
+  } as unknown as HTMLElement;
+  const stageStyle = { zoom: '1', scale: '0.38' };
+  const overlayStyle = {
+    zoom: '1',
+    fontSize: '16px',
+    scale: 'none',
+    translate: 'none',
+    transformOrigin: '0px 0px',
+    getPropertyValue: () => '8px',
+  };
+  styleByElement.set(stageAncestor, stageStyle);
+  styleByElement.set(overlay, overlayStyle);
+
+  try {
+    Object.defineProperty(globalThis, 'window', {
+      configurable: true,
+      value: { innerWidth: 1200, innerHeight: 800 },
+    });
+    Object.defineProperty(globalThis, 'document', {
+      configurable: true,
+      value: { documentElement: { clientWidth: 1200, clientHeight: 800 } },
+    });
+    Object.defineProperty(globalThis, 'getComputedStyle', {
+      configurable: true,
+      value: (element: unknown) => styleByElement.get(element) ?? overlayStyle,
+    });
+
+    positionAnchoredOverlay({
+      trigger,
+      overlay,
+      gapVariable: '--gap',
+      leftVariable: '--left',
+      topVariable: '--top',
+      inlineSizeVariable: '--inline',
+      matchTriggerWidth: true,
+      fallbackOpenClass: 'open',
+    });
+
+    expect(Number.parseFloat(values.get('--left') ?? '')).toBeCloseTo(585.5);
+    expect(Number.parseFloat(values.get('--top') ?? '')).toBeCloseTo(360);
+    expect(Number.parseFloat(values.get('--inline') ?? '')).toBeCloseTo(48);
+
+    // When an ancestor sets CSS zoom, top-layer popovers still inherit that zoom.
+    values.clear();
+    stageStyle.zoom = '2';
+    positionAnchoredOverlay({
+      trigger,
+      overlay,
+      gapVariable: '--gap',
+      leftVariable: '--left',
+      topVariable: '--top',
+      inlineSizeVariable: '--inline',
+      matchTriggerWidth: true,
+      fallbackOpenClass: 'open',
+    });
+
+    expect(Number.parseFloat(values.get('--left') ?? '')).toBeCloseTo(292.75);
+    expect(Number.parseFloat(values.get('--top') ?? '')).toBeCloseTo(184);
+    expect(Number.parseFloat(values.get('--inline') ?? '')).toBeCloseTo(24);
+  } finally {
+    for (const [name, descriptor] of saved) {
+      if (descriptor) Object.defineProperty(globalThis, name, descriptor);
+      else Reflect.deleteProperty(globalThis, name);
+    }
+  }
 });

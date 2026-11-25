@@ -34,6 +34,7 @@
   }
 
   .ui-button--sm {
+    --ui-action-icon-size: var(--neoverse-action-icon-size-sm);
     height: var(--neoverse-button-height-sm);
     min-height: var(--neoverse-button-height-sm);
     padding-inline: var(--neoverse-button-padding-inline-sm);
@@ -42,6 +43,7 @@
   }
 
   .ui-button--md {
+    --ui-action-icon-size: var(--neoverse-action-icon-size-md);
     height: var(--neoverse-button-height-md);
     min-height: var(--neoverse-button-height-md);
     font-size: var(--neoverse-button-font-size-md);
@@ -49,6 +51,7 @@
   }
 
   .ui-button--lg {
+    --ui-action-icon-size: var(--neoverse-action-icon-size-lg);
     height: var(--neoverse-button-height-lg);
     min-height: var(--neoverse-button-height-lg);
     padding-inline: var(--neoverse-button-padding-inline-lg);
@@ -64,6 +67,10 @@
 
   .ui-icon-button {
     --neoverse-icon-button-icon-size: var(--neoverse-icon-button-icon-size-md);
+    /* Consumer icons read the shared action size token; alias it to the
+       icon-button's own per-size value so a slotted SVG is not left at the
+       1rem fallback when the control grows. */
+    --ui-action-icon-size: var(--neoverse-icon-button-icon-size);
     padding-inline: 0;
   }
 
@@ -94,7 +101,7 @@
     align-self: stretch;
   }
 
-  .ui-button:focus-visible {
+  .ui-button:focus-visible:not([data-neoverse-focus-origin='pointer']) {
     outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
     outline-offset: var(--neoverse-focus-ring-offset);
   }
@@ -119,6 +126,14 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
+  }
+
+  /* The library owns slot geometry: icons follow the button's size token
+     instead of keeping an unrelated fixed size. Consumer SVGs that read
+     --ui-action-icon-size agree with this rule. */
+  :is(.ui-button__leading, .ui-button__trailing) > svg {
+    width: var(--ui-action-icon-size, var(--neoverse-icon-size-md));
+    height: var(--ui-action-icon-size, var(--neoverse-icon-size-md));
   }
 
   .ui-button__leading-placeholder {
@@ -195,6 +210,34 @@
       --neoverse-button-press-tone: var(--neoverse-control-primary-active-background);
     }
 
+    &.ui-button--danger {
+      --neoverse-button-tone-color: var(--neoverse-control-danger-background);
+      --neoverse-button-hover-tone: var(--neoverse-control-danger-hover-background);
+      --neoverse-button-press-tone: var(--neoverse-control-danger-active-background);
+      color: var(--neoverse-control-danger-foreground);
+    }
+
+    &.ui-button--success {
+      --neoverse-button-tone-color: var(--neoverse-control-button-success-rest-tone);
+      --neoverse-button-hover-tone: var(--neoverse-control-button-success-hover-tone);
+      --neoverse-button-press-tone: var(--neoverse-control-button-success-press-tone);
+      color: var(--neoverse-color-status-success-foreground);
+    }
+
+    &.ui-button--warning {
+      --neoverse-button-tone-color: var(--neoverse-control-button-warning-rest-tone);
+      --neoverse-button-hover-tone: var(--neoverse-control-button-warning-hover-tone);
+      --neoverse-button-press-tone: var(--neoverse-control-button-warning-press-tone);
+      color: var(--neoverse-color-status-warning-foreground);
+    }
+
+    &.ui-button--accent {
+      --neoverse-button-tone-color: var(--neoverse-control-button-accent-rest-tone);
+      --neoverse-button-hover-tone: var(--neoverse-control-button-accent-hover-tone);
+      --neoverse-button-press-tone: var(--neoverse-control-button-accent-press-tone);
+      color: var(--neoverse-color-neutral-950);
+    }
+
     @media (hover: hover) {
       &:hover:not(:active, :disabled, [aria-disabled='true']) {
         --neoverse-button-tone-color: var(--neoverse-button-hover-tone);
@@ -255,6 +298,9 @@
   .ui-button--primary {
     color: var(--neoverse-control-primary-foreground);
   }
+  .ui-button--danger {
+    color: var(--neoverse-color-text-primary);
+  }
   .ui-button--secondary {
     color: var(--neoverse-control-secondary-foreground);
   }
@@ -290,7 +336,7 @@
   }
 
   @media (forced-colors: active) {
-    .ui-button:focus-visible {
+    .ui-button:focus-visible:not([data-neoverse-focus-origin='pointer']) {
       outline-color: Highlight;
     }
   }

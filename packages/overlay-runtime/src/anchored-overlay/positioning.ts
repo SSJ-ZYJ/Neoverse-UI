@@ -15,20 +15,42 @@ export function resolveAnchoredPosition({
 }: ResolveAnchoredPositionOptions): AnchoredPosition {
   const normalizedGap = Math.max(0, gap);
   const maxLeft = Math.max(normalizedGap, viewport.width - overlayWidth - normalizedGap);
-  const preferredLeft = placement === 'bottom-end' ? trigger.right - overlayWidth : trigger.left;
-  const left = Math.min(Math.max(preferredLeft, normalizedGap), maxLeft);
+  const maxTop = Math.max(normalizedGap, viewport.height - overlayHeight - normalizedGap);
+  const clampLeft = (value: number) => Math.min(Math.max(value, normalizedGap), maxLeft);
+  const clampTop = (value: number) => Math.min(Math.max(value, normalizedGap), maxTop);
+
+  if (placement === 'left-start' || placement === 'left-end') {
+    const left = clampLeft(trigger.left - overlayWidth - normalizedGap);
+    const preferredTop = placement === 'left-end' ? trigger.bottom - overlayHeight : trigger.top;
+    return { left, top: clampTop(preferredTop), opensAbove: false };
+  }
+
+  if (placement === 'right-start' || placement === 'right-end') {
+    const left = clampLeft(trigger.right + normalizedGap);
+    const preferredTop = placement === 'right-end' ? trigger.bottom - overlayHeight : trigger.top;
+    return { left, top: clampTop(preferredTop), opensAbove: false };
+  }
+
+  const preferredLeft =
+    placement === 'bottom-end' || placement === 'top-end'
+      ? trigger.right - overlayWidth
+      : placement === 'bottom' || placement === 'top'
+        ? trigger.left + (trigger.width - overlayWidth) / 2
+        : trigger.left;
+  const left = clampLeft(preferredLeft);
 
   const spaceBelow = viewport.height - trigger.bottom - normalizedGap;
   const spaceAbove = trigger.top - normalizedGap;
   const opensAbove =
-    placement === 'auto' && overlayHeight > spaceBelow && spaceAbove >= overlayHeight;
+    placement === 'top-start' ||
+    placement === 'top' ||
+    placement === 'top-end' ||
+    (placement === 'auto' && overlayHeight > spaceBelow && spaceAbove >= overlayHeight);
   const unclampedTop = opensAbove
     ? trigger.top - overlayHeight - normalizedGap
     : trigger.bottom + normalizedGap;
-  const maxTop = Math.max(normalizedGap, viewport.height - overlayHeight - normalizedGap);
-  const top = Math.min(Math.max(unclampedTop, normalizedGap), maxTop);
 
-  return { left, top, opensAbove };
+  return { left, top: clampTop(unclampedTop), opensAbove };
 }
 
 function resolveCssLength(element: HTMLElement, value: string): number {
@@ -46,13 +68,15 @@ function resolveCssLength(element: HTMLElement, value: string): number {
 }
 
 /**
- * Rendered scale from CSS `zoom` and ancestor `scale` transforms. A visual zoom
- * on a preview keeps layout at 100%, so only the painted size changes; a
- * fallback panel positioned in that subtree must convert the same way. The
- * element's own `scale` is its entrance motion and stays out of the conversion:
- * its left/top are resolved before that transform applies.
+ * Rendered scale from CSS `zoom` and, for fallback overlays still laid out in
+ * the ancestor subtree, ancestor `scale` transforms. Native top-layer popovers
+ * escape ancestor transforms so they inherit CSS `zoom` only; dividing top-layer
+ * coordinates by an ancestor `scale` pushes panels away from zoomed stages.
  */
-function resolveEffectiveScale(element: HTMLElement): number {
+export function resolveEffectiveScale(
+  element: HTMLElement,
+  includeAncestorScale = !supportsPopover(element),
+): number {
   let scale = 1;
   const ownZoom = Number.parseFloat(getComputedStyle(element).zoom);
   if (Number.isFinite(ownZoom) && ownZoom > 0) scale *= ownZoom;
@@ -61,9 +85,11 @@ function resolveEffectiveScale(element: HTMLElement): number {
     const style = getComputedStyle(node);
     const zoom = Number.parseFloat(style.zoom);
     if (Number.isFinite(zoom) && zoom > 0) scale *= zoom;
-    // `scale` takes one or two values; the uniform factor is the first.
-    const factor = Number.parseFloat((style.scale || '1').split(/\s+/)[0] ?? '1');
-    if (Number.isFinite(factor) && factor > 0) scale *= factor;
+    if (includeAncestorScale) {
+      // `scale` takes one or two values; the uniform factor is the first.
+      const factor = Number.parseFloat((style.scale || '1').split(/\s+/)[0] ?? '1');
+      if (Number.isFinite(factor) && factor > 0) scale *= factor;
+    }
     node = node.parentElement;
   }
   return scale;
@@ -204,5 +230,11 @@ export function positionAnchoredOverlay({
       }
     }
   }
-  overlay.dataset.neoverseOverlaySide = position.opensAbove ? 'top' : 'bottom';
+  overlay.dataset.neoverseOverlaySide = placement.startsWith('left')
+    ? 'left'
+    : placement.startsWith('right')
+      ? 'right'
+      : position.opensAbove
+        ? 'top'
+        : 'bottom';
 }

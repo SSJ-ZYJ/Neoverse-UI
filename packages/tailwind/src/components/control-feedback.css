@@ -1,7 +1,6 @@
 @layer components {
-  /* Breadcrumb links are not listed here: they answer hover with the shared
-     hover field and their own plate, matching plain links rather than the
-     quieter control tint. */
+  /* Breadcrumb links are not listed here: they draw their own animated plate,
+     but read the same quiet-control hover wash through their component token. */
   :where(
     .ui-button--ghost,
     .ui-button[data-surface='none'],
@@ -14,7 +13,7 @@
     .ui-dropdown-menu__item,
     .ui-context-menu__item
   ) {
-    --neoverse-quiet-control-feedback: transparent;
+    --neoverse-quiet-control-feedback: var(--neoverse-quiet-control-rest-feedback, transparent);
 
     @media (hover: hover) {
       &:hover:not(:active, :disabled, [aria-disabled='true']) {

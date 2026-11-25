@@ -33,6 +33,7 @@ const sourceFiles = [
   'components/terminal.css',
   'components/form-control.css',
   'components/overlay.css',
+  'components/drawer.css',
   'components/context-menu.css',
   'effects.css',
   'surface-effects.css',

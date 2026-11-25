@@ -1,4 +1,15 @@
-export type OverlayPlacement = 'auto' | 'bottom-start' | 'bottom-end';
+export type OverlayPlacement =
+  | 'auto'
+  | 'bottom-start'
+  | 'bottom'
+  | 'bottom-end'
+  | 'top-start'
+  | 'top'
+  | 'top-end'
+  | 'left-start'
+  | 'left-end'
+  | 'right-start'
+  | 'right-end';
 
 export type OverlayDismissReason = 'escape' | 'outside' | 'scroll';
 

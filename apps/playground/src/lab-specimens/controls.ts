@@ -66,7 +66,13 @@ function cornerStyle(corner: PreviewCorners['corner']) {
 
 /** The editable Button specimen */
 export const button = defineSpecimen<ButtonProps & PreviewCorners, { clicks: number }>()({
-  initialProps: { variant: 'secondary', size: 'sm', disabled: false, loading: false },
+  initialProps: {
+    variant: 'primary',
+    size: 'md',
+    surface: 'glass-subtle',
+    disabled: false,
+    loading: false,
+  },
   initialState: () => ({ clicks: 0 }),
   controls: {
     props: {
@@ -243,6 +249,10 @@ const actionLabels = {
   primary: actionCopy.controls.primary,
   secondary: actionCopy.controls.secondary,
   ghost: actionCopy.controls.ghost,
+  danger: localized('Danger', '危险'),
+  success: localized('Success', '成功'),
+  warning: localized('Warning', '警告'),
+  accent: localized('Accent', '强调'),
 } as const;
 /** The editable Action specimen */
 export const action = defineSpecimen<ActionProps & PreviewCorners>()({

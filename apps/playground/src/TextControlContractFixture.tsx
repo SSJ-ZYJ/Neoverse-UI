@@ -76,7 +76,9 @@ export function TextControlContractFixture() {
           </button>
         </div>
         <output data-text-value>{text}</output>
-        <output data-notes-value>{notes}</output>
+        <output data-notes-value className="break-all">
+          {notes}
+        </output>
         <output data-select-requests>{requests}</output>
       </form>
       <form data-text-uncontrolled-form className="grid gap-3">

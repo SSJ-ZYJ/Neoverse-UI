@@ -30,6 +30,9 @@
     overflow: auto;
     border: 0;
     border-radius: var(--neoverse-overlay-radius);
+    font-family: var(--neoverse-overlay-font-family);
+    font-size: var(--neoverse-overlay-font-size);
+    line-height: var(--neoverse-overlay-line-height);
     color: var(--neoverse-overlay-foreground);
     background: var(--neoverse-overlay-background);
     box-shadow: var(--neoverse-overlay-shadow);
@@ -44,6 +47,15 @@
 
   .ui-overlay-panel--fallback-open {
     display: block;
+  }
+
+  .ui-overlay-panel:is(
+    .ui-dropdown-menu__panel,
+    .ui-context-menu,
+    .ui-context-menu__submenu,
+    .ui-select__popover
+  ) {
+    padding: var(--neoverse-overlay-menu-padding);
   }
 
   .ui-popover__content {
@@ -65,6 +77,23 @@
     display: grid;
   }
 
+  .ui-dropdown-menu__heading {
+    margin: 0;
+    padding: var(--neoverse-space-1) var(--neoverse-space-3) var(--neoverse-space-1);
+    color: var(--neoverse-context-menu-heading-foreground);
+    font-size: var(--neoverse-context-menu-heading-font-size);
+    line-height: var(--neoverse-line-height-tight);
+    letter-spacing: var(--neoverse-typography-label-sm-letter-spacing);
+    text-transform: uppercase;
+  }
+
+  .ui-dropdown-menu__separator {
+    height: 0;
+    margin: var(--neoverse-space-1) 0;
+    border: 0;
+    border-top: var(--neoverse-border-width-thin) solid var(--neoverse-context-menu-separator-color);
+  }
+
   .ui-dropdown-menu__item {
     display: flex;
     width: 100%;
@@ -76,14 +105,36 @@
     color: var(--neoverse-overlay-item-foreground);
     background: transparent;
     font: inherit;
+    font-size: var(--neoverse-overlay-item-font-size);
+    line-height: var(--neoverse-overlay-item-line-height);
     text-align: left;
     cursor: pointer;
-    transition:
-      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
-      background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+    transition: color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
   }
 
-  .ui-dropdown-menu__item:focus-visible {
+  .ui-dropdown-menu__check {
+    display: inline-grid;
+    place-items: center;
+    width: var(--neoverse-context-menu-check-inline-size);
+    color: var(--neoverse-context-menu-check-foreground);
+    font-size: var(--neoverse-context-menu-heading-font-size);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .ui-dropdown-menu__label {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .ui-dropdown-menu__shortcut {
+    color: var(--neoverse-context-menu-shortcut-foreground);
+    font-size: var(--neoverse-context-menu-heading-font-size);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .ui-dropdown-menu__item:focus-visible:not([data-neoverse-focus-origin='pointer']) {
     color: var(--neoverse-color-text-primary);
     background: var(--neoverse-overlay-item-active-background);
     outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
@@ -103,5 +154,80 @@
     .ui-dropdown-menu__item {
       transition: none;
     }
+  }
+}
+
+@layer utilities {
+  /* Panel edges travel with the panel in both the native and fallback layers. */
+  .ui-overlay-panel:is(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive
+  ) {
+    --neoverse-material-shadow: var(--neoverse-shadow-overlay);
+  }
+
+  .ui-dialog.ui-overlay-panel {
+    --neoverse-material-background: var(--neoverse-dialog-background);
+    --neoverse-material-shadow: var(--neoverse-shadow-modal);
+  }
+
+  @supports (mask-composite: subtract) and
+    ((backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1))) {
+    .ui-overlay-panel:is(
+        .material-glass-subtle,
+        .material-glass-elevated,
+        .material-glass-immersive
+      ):not(.ui-button)::before {
+      display: block;
+      box-sizing: border-box;
+      padding: var(--neoverse-material-edge-refraction-width);
+      /* Subtract the inner rounded box from directional alpha coverage.
+         The mask does not paint color; the existing edge filter supplies it. */
+      mask-image: var(--neoverse-material-edge-rim-coverage), linear-gradient(black, black);
+      mask-clip: border-box, content-box;
+      mask-composite: subtract;
+      filter: none;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .ui-overlay-panel:is(
+        .material-glass-subtle,
+        .material-glass-elevated,
+        .material-glass-immersive
+      ):not(.ui-button)::before {
+      display: none;
+    }
+  }
+
+  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+      .ui-button
+    ).ui-overlay-panel:is(
+      :popover-open,
+      :modal,
+      :where(.ui-dialog[open]),
+      .ui-overlay-panel--fallback-open,
+      .ui-select__popover--fallback-open,
+      .ui-context-menu__submenu--open
+    ),
+  .ui-overlay-panel:is(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive
+  ):is(
+    :popover-open,
+    :modal,
+    :where(.ui-dialog[open]),
+    .ui-overlay-panel--fallback-open,
+    .ui-select__popover--fallback-open,
+    .ui-context-menu__submenu--open
+  ) {
+    border-width: 0;
+    border-color: transparent;
+    box-shadow:
+      var(--neoverse-material-edge-highlight), var(--neoverse-material-bloom),
+      var(--neoverse-material-shadow);
   }
 }

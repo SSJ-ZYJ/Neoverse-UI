@@ -1,4 +1,10 @@
-import { isOverlayOpen, stopOverlayTracking } from '@neoverse-ui/overlay-runtime';
+import {
+  focusElement,
+  installFocusModality,
+  isOverlayOpen,
+  markPointerModality,
+  stopOverlayTracking,
+} from '@neoverse-ui/overlay-runtime';
 import {
   type ComponentPropsWithRef,
   type ReactNode,
@@ -77,9 +83,10 @@ export function UiSelect({
   // WebKit dismisses the native popover between pointerdown and click, so the
   // press itself commits an option. The click belonging to that gesture is
   // ignored, while a click dispatched without a pointer pair still selects.
-  const pointerCommitAt = useRef(0);
-  useEffect(
-    () => () => {
+  const pointerCommitAt = useRef(Number.NEGATIVE_INFINITY);
+  useEffect(() => {
+    installFocusModality(document);
+    return () => {
       const overlay = overlayRef.current;
       if (overlay === null) return;
       stopOverlayTracking(overlay);
@@ -87,9 +94,8 @@ export function UiSelect({
         overlay.hidePopover();
       }
       overlay.classList.remove('ui-select__popover--fallback-open');
-    },
-    [],
-  );
+    };
+  }, []);
   const selected = options.find((option) => String(option.value) === String(value ?? ''));
 
   const focusRelativeOption = (current: HTMLButtonElement, direction: 1 | -1) => {
@@ -100,10 +106,30 @@ export function UiSelect({
     );
     if (optionElements.length === 0) return;
     const index = optionElements.indexOf(current);
-    optionElements[(index + direction + optionElements.length) % optionElements.length]?.focus();
+    focusElement(
+      optionElements[(index + direction + optionElements.length) % optionElements.length],
+      {
+        modality: 'keyboard',
+      },
+    );
   };
 
   const onOptionKeyDown = (event: React.KeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'Tab') {
+      const closeOnShift = event.shiftKey;
+      const details = event.currentTarget.closest('details');
+      queueMicrotask(() => {
+        if (closeOnShift || !overlayRef.current?.contains(document.activeElement)) {
+          if (details !== null) {
+            details.open = false;
+            closeSelectPopover(details);
+          }
+          setOpen(false);
+        }
+      });
+      return;
+    }
+
     if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
       event.preventDefault();
       focusRelativeOption(event.currentTarget, event.key === 'ArrowDown' ? 1 : -1);
@@ -117,7 +143,9 @@ export function UiSelect({
           .closest('.ui-select__popover')
           ?.querySelectorAll<HTMLButtonElement>('.ui-select__option:not(:disabled)') ?? [],
       );
-      (event.key === 'Home' ? optionElements[0] : optionElements.at(-1))?.focus();
+      focusElement(event.key === 'Home' ? optionElements[0] : optionElements.at(-1), {
+        modality: 'keyboard',
+      });
       return;
     }
 
@@ -127,7 +155,7 @@ export function UiSelect({
       if (details !== null) {
         details.open = false;
         closeSelectPopover(details);
-        details.querySelector<HTMLElement>('.ui-select')?.focus();
+        focusElement(details.querySelector<HTMLElement>('.ui-select'), { modality: 'keyboard' });
       }
       setOpen(false);
     }
@@ -142,7 +170,7 @@ export function UiSelect({
       closeSelectPopover(details);
     }
     setOpen(false);
-    details?.querySelector<HTMLElement>('.ui-select')?.focus();
+    focusElement(details?.querySelector<HTMLElement>('.ui-select'), { preventScroll: true });
   };
 
   return (
@@ -197,6 +225,7 @@ export function UiSelect({
         }}
         onPointerDown={(event) => {
           event.currentTarget.dataset.neoverseFocusOrigin = 'pointer';
+          markPointerModality(event.currentTarget.ownerDocument);
           onPointerDown?.(event);
         }}
         onBlur={(event) => {
@@ -224,7 +253,7 @@ export function UiSelect({
           // effect cleanup, and the runtime cleanup needs the element identity.
           if (element !== null) overlayRef.current = element;
         }}
-        className="ui-select__popover nv-presence"
+        className="ui-overlay-panel ui-select__popover material-glass-elevated nv-presence"
         role="listbox"
         popover="auto"
         data-neoverse-motion="pop"
@@ -245,6 +274,7 @@ export function UiSelect({
               key={String(option.value)}
               className="ui-select__option"
               type="button"
+              tabIndex={-1}
               role="option"
               disabled={option.disabled}
               aria-selected={selectedOption}
@@ -253,6 +283,7 @@ export function UiSelect({
                   .closest('details')
                   ?.querySelector<HTMLElement>('.ui-select');
                 if (trigger) trigger.dataset.neoverseFocusOrigin = 'pointer';
+                markPointerModality(event.currentTarget.ownerDocument);
                 if (!event.isPrimary || event.button !== 0) return;
                 pointerCommitAt.current = performance.now();
                 commitOption(option, event.currentTarget);

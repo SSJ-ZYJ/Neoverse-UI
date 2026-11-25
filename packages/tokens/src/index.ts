@@ -14,6 +14,7 @@ export type { PaginationToken } from './components/navigation/pagination.js';
 export type { SegmentedControlToken } from './components/navigation/segmented-control.js';
 export type { TabsToken } from './components/navigation/tabs.js';
 export type { DialogToken } from './components/overlays/dialog.js';
+export type { DrawerToken } from './components/overlays/drawer.js';
 export type { ToastToken } from './components/overlays/toast.js';
 export type { TooltipToken } from './components/overlays/tooltip.js';
 export type { ControlSurfaceToken } from './components/surfaces/control-surface.js';

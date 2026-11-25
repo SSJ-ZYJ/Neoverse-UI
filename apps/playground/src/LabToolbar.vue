@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { UiIconButton, UiSegmentedControl, UiSurface } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
-import brandWordmarkUrl from './assets/neoverse-wordmark.svg';
 import FpsIndicator from './FpsIndicator.vue';
 import LabIcon from './LabIcon.vue';
 import { appCopy, type Locale, localize, localized } from './playground-content';
@@ -70,7 +69,6 @@ function selectTheme(value: string): void {
         role="img"
         :aria-label="localize(appCopy.brand, locale)"
         class="playground-shell__brand-wordmark text-primary"
-        :style="{ maskImage: `url('${brandWordmarkUrl}')` }"
       />
       <h1 class="playground-shell__name text-label-lg font-label text-secondary">
         {{ localize(appCopy.designLab, locale) }}

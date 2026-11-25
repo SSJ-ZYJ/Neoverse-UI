@@ -7,7 +7,8 @@ const controls = `:is(
   button, input:not([type='hidden']), select, textarea, [role='tab'], [role='switch'],
   .ui-action, .ui-segmented-control, .ui-navigation-item, .ui-control-surface, .ui-dock,
   .ui-input, .ui-textarea, .ui-select, .ui-field, .ui-checkbox, .ui-radio-group,
-  .ui-tabs, .ui-disclosure, .ui-avatar, .ui-badge, .ui-status-indicator
+  .ui-tabs, .ui-disclosure, .ui-avatar, .ui-badge, .ui-status-indicator,
+  .playground-overview-hero__sample
 ):not([data-motion-width-stage] *, .playground-explorer__link, .playground-explorer__section-toggle)`;
 
 export function mountPlaygroundEffects(root: HTMLElement): void {

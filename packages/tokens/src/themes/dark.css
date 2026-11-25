@@ -154,6 +154,9 @@
   --neoverse-color-accent-primary-foreground: var(--neoverse-color-neutral-950);
   --neoverse-color-accent-secondary: var(--neoverse-color-mint-400);
   --neoverse-color-accent-tertiary: #8c9bff;
+  /* Filled controls need a lighter violet than the ambient accent to stay
+     legible on the dark glass plate. */
+  --neoverse-color-accent-tertiary-filled: #b7a6ff;
   --neoverse-color-accent-tertiary-foreground: var(--neoverse-color-neutral-950);
   --neoverse-color-accent-soft: rgb(56 189 248 / 12%);
   --neoverse-color-action-primary-hover: var(--neoverse-color-blue-300);
@@ -174,7 +177,13 @@
   /* Default controls keep the primary azure ring in both themes. Mint
      selection controls override this locally instead of retuning the theme. */
   --neoverse-color-focus-ring: var(--neoverse-color-accent-primary);
-  --neoverse-color-overlay-scrim: rgb(0 0 0 / 64%);
+  --neoverse-color-overlay-scrim: rgb(4 10 16 / 52%);
+  --neoverse-dialog-scrim: rgb(4 10 16 / 64%);
+  --neoverse-dialog-background: color-mix(
+    in srgb,
+    var(--neoverse-material-glass-base-tint) 76%,
+    transparent
+  );
   --neoverse-color-ambient-ice: rgb(56 189 248 / 13%);
   --neoverse-color-ambient-mint: rgb(61 214 166 / 8%);
   --neoverse-color-ambient-violet: rgb(140 155 255 / 7%);
@@ -228,7 +237,28 @@
   --neoverse-control-active-highlight: var(--neoverse-effect-selection-highlight);
   --neoverse-control-active-shadow: var(--neoverse-effect-selection-shadow);
   --neoverse-control-primary-foreground: #081324;
-  --neoverse-navigation-item-indicator-color: var(--neoverse-color-blue-700);
+  --neoverse-navigation-item-active-background: var(--neoverse-effect-selection-field-dark);
+  --neoverse-navigation-item-active-fill: color-mix(
+    in srgb,
+    var(--neoverse-color-blue-950) var(--neoverse-effect-strength-64),
+    transparent
+  );
+  --neoverse-navigation-item-active-hover-fill: color-mix(
+    in srgb,
+    var(--neoverse-color-blue-900) var(--neoverse-effect-strength-68),
+    transparent
+  );
+  --neoverse-navigation-item-active-press-fill: color-mix(
+    in srgb,
+    var(--neoverse-color-blue-950) var(--neoverse-effect-strength-82),
+    transparent
+  );
+  --neoverse-navigation-item-active-fill-opaque: var(--neoverse-color-blue-950);
+  --neoverse-navigation-item-active-hover-fill-opaque: var(--neoverse-color-blue-900);
+  --neoverse-navigation-item-active-press-fill-opaque: var(--neoverse-color-blue-950);
+  --neoverse-navigation-item-active-foreground: var(--neoverse-color-text-primary);
+  --neoverse-navigation-item-active-shadow: var(--neoverse-shadow-float);
+  --neoverse-navigation-item-indicator-color: var(--neoverse-color-blue-300);
   --neoverse-control-primary-border: #869cc8;
   --neoverse-control-button-border: #566b8b;
   --neoverse-control-primary-shadow: var(--neoverse-effect-primary-rest-shadow);

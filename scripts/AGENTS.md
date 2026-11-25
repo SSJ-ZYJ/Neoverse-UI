@@ -60,8 +60,10 @@ Only the `check.ts` entry stays at the root. Every other script belongs to the d
 
 | File | Responsibility |
 | --- | --- |
-| `dev.ts` | Build once, then run the Playground, Vite watch and CSS watch |
+| `dev.ts` | Build once, then run the Vite dev server and CSS watcher |
 | `dev-watch.ts` | Rebuild Tokens, Motion and Tailwind CSS on source edits |
+| `playground-css.ts` | Atomically publish the separate development stylesheet |
+| `integration/playground-css.test.ts` | Covers stylesheet visibility during failed and incomplete builds |
 | `tailwind-cli.ts` | Locate the installed `@tailwindcss/cli` executable |
 | `tailwind-cli.test.ts` | Covers platform-specific CLI lookup |
 

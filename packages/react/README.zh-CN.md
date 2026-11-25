@@ -3,11 +3,11 @@
 [English](README.md)
 
 <!-- Source: packages/react/README.md -->
-<!-- Source-SHA256: ad95aef32c445bf96d2b733df35e18797aeff4d4d0c6e0757dd0047d2d4a73d1 -->
+<!-- Source-SHA256: d474de3a479becd211c98507b79eb199a9d2b7c4c0a7d0ece2b6816fa380186f -->
 
 Neoverse-UI 的 React 适配器，以极光玻璃作为共享玻璃材质。Light、Standard 与 Immersive 是它的层级，不是独立样式。展示标签使用 [Tokens 的 `glassMaterial` 元数据](../tokens/README.md#极光玻璃)；`glass-*` surface 标识保持稳定。详见[材质标准](../../docs/zh-CN/architecture/material-standards.md)。
 
-此包提供与 Vue 包相同的 43 个公开组件，包括导航、表单、反馈、数据展示、终端组合与文档滚动条。两套适配器复用共享的 Tokens、Tailwind、Material、Motion 与 Overlay Runtime。状态绑定与验证范围见[框架对应](../../docs/architecture/framework-parity.md)。
+此包提供与 Vue 包相同的公开组件，包括导航、表单、浮层、反馈、数据展示、终端组合与文档滚动条。两套适配器复用共享的 Tokens、Tailwind、Material、Motion 与 Overlay Runtime。状态绑定与验证范围见[框架对应](../../docs/architecture/framework-parity.md)。
 
 ## 表单与浮层
 

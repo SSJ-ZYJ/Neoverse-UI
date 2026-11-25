@@ -464,11 +464,12 @@
       var(--neoverse-material-shadow);
     isolation: isolate;
     overflow: hidden;
-    transition:
+    --neoverse-material-transition:
       background-color var(--neoverse-motion-duration-standard)
       var(--neoverse-motion-easing-emphasized),
       border-color var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-emphasized),
       box-shadow var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-emphasized);
+    transition: var(--neoverse-material-transition);
   }
 
   /* Opted-in surfaces paint the stroke ahead of the material highlights, so an
@@ -490,6 +491,15 @@
     .ui-button
   )[data-neoverse-surface-overflow='visible'] {
     overflow: visible;
+  }
+
+  /* Floating overlay panels scroll their menu items instead of clipping at the frame edge. */
+  .ui-overlay-panel:not(.ui-dialog):is(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive
+  ) {
+    overflow: auto;
   }
 
   @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) and
@@ -573,7 +583,7 @@
     );
   }
 
-  :is(.ui-card, .ui-surface).material-glass-elevated {
+  :is(.ui-card, .ui-surface, .ui-overlay-panel).material-glass-elevated {
     --neoverse-material-edge-refraction-opacity: var(
       --neoverse-surface-glass-elevated-edge-opacity,
       var(--neoverse-material-glass-elevated-edge-refraction-opacity)
@@ -599,7 +609,8 @@
      Hide duplicate decorative edge fields while either backend is active. */
   :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-      .ui-button
+      .ui-button,
+      .ui-overlay-panel
     )::before {
     display: none;
   }
@@ -613,8 +624,7 @@
     display: block;
   }
 
-  /* A sibling cannot paint in the owner's native top layer. Keep a local
-     edge on the popover/dialog itself; surfaces inside it can still sample. */
+  /* The shared canvas cannot paint inside a native top layer. */
   [data-neoverse-glass-renderer='webgl']
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
       .ui-button

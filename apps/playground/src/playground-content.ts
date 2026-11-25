@@ -20,6 +20,8 @@ export const appCopy = {
   framePageTitle: localized('{title} — {theme}', '{title} — {theme}'),
   brand: localized('Neoverse UI', 'Neoverse UI'),
   designLab: localized('Design Lab', '设计实验室'),
+  previewStage: localized('Preview Stage', '预览区'),
+  loadingPreview: localized('Loading preview…', '正在加载预览…'),
   navigation: {
     label: localized('Explorer', '资源浏览'),
     modulesLabel: localized('Design Lab modules', '设计实验室模块'),

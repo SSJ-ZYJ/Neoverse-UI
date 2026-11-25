@@ -78,12 +78,8 @@ export function readThemeModeFromSearch(search: string): ThemeMode | undefined {
   return isThemeMode(value) ? value : undefined;
 }
 
-function readStoredThemeMode(): ThemeMode | undefined {
-  const value = readPreferences().theme;
-  return isThemeMode(value) ? value : undefined;
-}
-
-function isReloadNavigation(): boolean {
+/** Whether the current document replaces itself through a browser reload. */
+export function isReloadNavigation(): boolean {
   if (typeof performance === 'undefined' || typeof performance.getEntriesByType !== 'function') {
     return false;
   }
@@ -94,21 +90,29 @@ function isReloadNavigation(): boolean {
   return navigation?.type === 'reload';
 }
 
+/** Match the pre-paint theme selection to the mounted application's policy. */
+export function selectInitialThemeMode(
+  query: ThemeMode | undefined,
+  stored: unknown,
+  reloading: boolean,
+  modes = themeModes,
+  fallback = defaultThemeMode,
+): ThemeMode {
+  const preference = modes.find((mode) => mode === stored);
+  // A fresh link is a fixed preview; a reload keeps the last interactive choice.
+  return reloading ? (preference ?? query ?? fallback) : (query ?? preference ?? fallback);
+}
+
 export function resolveInitialThemeMode(): ThemeMode {
   if (typeof window === 'undefined') {
     return defaultThemeMode;
   }
 
-  const queryMode = readThemeModeFromSearch(window.location.search);
-  const storedMode = readStoredThemeMode();
-  // A `?theme=` URL is a shareable fixed preview and wins on a fresh navigation.
-  // Theme switches deliberately do not write history: replaceState triggers a
-  // same-document navigation that DevTools reconstructs while the view transition
-  // is capturing, which stalls the compositor. On reload the last interactive
-  // choice wins instead, and the query remains a fallback until a choice exists.
-  return isReloadNavigation()
-    ? (storedMode ?? queryMode ?? defaultThemeMode)
-    : (queryMode ?? storedMode ?? defaultThemeMode);
+  return selectInitialThemeMode(
+    readThemeModeFromSearch(window.location.search),
+    readPreferences().theme,
+    isReloadNavigation(),
+  );
 }
 
 export function persistThemeMode(value: ThemeMode): void {

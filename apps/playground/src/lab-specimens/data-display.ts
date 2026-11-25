@@ -12,6 +12,7 @@ import {
 import { h } from 'vue';
 import { defineSpecimen } from '../lab-specimen-config';
 import { type Locale, localize, localized } from '../playground-content';
+import EmptyStatePreview from '../previews/EmptyStatePreview.vue';
 import { shapeLabel, sizeLabel, sizeOptions, surfaceLabel, surfaceOptions } from './shared';
 
 const tabsLabel = localized('Member sections', '成员页面分区');
@@ -169,6 +170,57 @@ export const disclosure = defineSpecimen<Record<never, never>, { open: boolean }
       },
       () => h('p', { class: 'text-body-sm text-secondary' }, localize(disclosureCopy.body, locale)),
     ),
+});
+
+type EmptyStatePreviewProps = Pick<
+  InstanceType<typeof EmptyStatePreview>['$props'],
+  'category' | 'variant'
+>;
+
+/** The editable Empty State specimen */
+export const emptyState = defineSpecimen<
+  EmptyStatePreviewProps,
+  { projectCreated: boolean; filterActive: boolean }
+>()({
+  initialProps: { category: 'all', variant: 'scenario' },
+  initialState: () => ({ projectCreated: false, filterActive: true }),
+  controls: {
+    props: {
+      category: {
+        kind: 'select',
+        group: 'content',
+        label: localized('Scenario category', '场景分类'),
+        options: [
+          { value: 'all', label: localized('All scenarios', '全部场景') },
+          { value: 'onboarding', label: localized('Onboarding', '首次使用') },
+          { value: 'search', label: localized('No results', '无匹配结果') },
+          { value: 'activity', label: localized('No activity', '暂无活动') },
+          { value: 'access', label: localized('Restricted access', '权限受限') },
+        ],
+      },
+      variant: {
+        kind: 'select',
+        group: 'appearance',
+        label: localized('Variant', '样式'),
+        options: [
+          { value: 'scenario', label: localized('Match scenario', '随场景') },
+          { value: 'default', label: localized('Centered', '居中引导') },
+          { value: 'outlined', label: localized('Outlined panel', '虚线面板') },
+          { value: 'compact', label: localized('Compact row', '紧凑列表行') },
+          { value: 'subtle', label: localized('Subtle surface', '柔和表面') },
+        ],
+      },
+    },
+  },
+  render: ({ locale, props, state, setState }) =>
+    h(EmptyStatePreview, {
+      ...props,
+      locale,
+      projectCreated: state.projectCreated,
+      filterActive: state.filterActive,
+      'onUpdate:projectCreated': (value: boolean) => setState('projectCreated', value),
+      'onUpdate:filterActive': (value: boolean) => setState('filterActive', value),
+    }),
 });
 
 /** The editable StatCard specimen */

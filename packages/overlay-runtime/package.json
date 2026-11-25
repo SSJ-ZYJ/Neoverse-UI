@@ -25,7 +25,7 @@
   "scripts": {
     "build": "rm -rf dist tsconfig.build.tsbuildinfo && tsc --project tsconfig.build.json",
     "typecheck": "tsc --project tsconfig.json --noEmit",
-    "test": "bun test src/index.test.ts"
+    "test": "bun test"
   },
   "publishConfig": {
     "access": "public",

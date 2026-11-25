@@ -137,7 +137,7 @@ describe('segmented selection styling', () => {
   );
 
   it.each(['webgl', 'none'] as const)(
-    'matches the primary sky-blue fill, transparent border, dark primary ink and primary indicator in dark mode with renderer %s',
+    'matches the primary sky-blue fill, transparent border, dark primary ink and light azure indicator in dark mode with renderer %s',
     (renderer) => {
       const { slider } = install('dark', renderer);
       const normalize = (value: string) =>
@@ -167,7 +167,7 @@ describe('segmented selection styling', () => {
         resolveVars(slider, 'var(--neoverse-control-primary-foreground)'),
       );
       expect(resolveVars(slider, 'var(--neoverse-navigation-item-indicator-color)')).toBe(
-        '#0369a1',
+        '#7dd3fc',
       );
     },
   );

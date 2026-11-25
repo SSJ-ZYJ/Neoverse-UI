@@ -16,16 +16,14 @@
 }
 
 .playground-overview-hero__intro h2 {
+  max-inline-size: 100%;
   font-size: var(--neoverse-typography-display-md-size);
   line-height: var(--neoverse-typography-display-md-line-height);
   letter-spacing: var(--neoverse-typography-display-md-letter-spacing);
-  white-space: nowrap;
-}
-
-@media (max-width: 480px) {
-  .playground-overview-hero__intro h2 {
-    white-space: normal;
-  }
+  /* The English headline is wider than the reading measure when the hero has
+     two columns. Wrap inside the column instead of painting over the live
+     glass specimen; balance keeps both languages on an even number of lines. */
+  text-wrap: balance;
 }
 
 .playground-overview-hero__stage {

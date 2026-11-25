@@ -136,7 +136,7 @@ describe('Overlay primitives', () => {
     expect(panel.attributes('role')).toBe('menu');
     expect(panel.attributes('aria-label')).toBe('Page actions');
     expect(panel.classes()).toContain('ui-overlay-panel');
-    expect(panel.classes()).toContain('material-glass-immersive');
+    expect(panel.classes()).toContain('material-glass-elevated');
 
     expect(wrapper.get('.ui-context-menu__heading').text()).toBe('Edit');
     // A native hr carries the separator role without an explicit attribute.
@@ -201,6 +201,8 @@ describe('Overlay primitives', () => {
     expect(opener?.attributes('aria-controls')).toBe(submenu?.id);
 
     const childRows = submenu?.querySelectorAll<HTMLElement>('.ui-context-menu__item') ?? [];
+    expect(submenu?.classList.contains('ui-overlay-panel')).toBe(true);
+    expect(submenu?.classList.contains('material-glass-elevated')).toBe(true);
     expect(childRows).toHaveLength(2);
     expect(childRows[0]?.getAttribute('aria-checked')).toBe('true');
     expect(childRows[1]?.getAttribute('role')).toBe('menuitemradio');
@@ -283,5 +285,31 @@ describe('Overlay primitives', () => {
     expect(items[0]?.attributes('role')).toBe('menuitem');
     expect(items[1]?.attributes('disabled')).toBeDefined();
     expect(items[2]?.attributes('data-tone')).toBe('danger');
+  });
+
+  it('supports compact triggers, checkmarks and shortcuts on rich dropdown menus', () => {
+    const wrapper = mount(UiDropdownMenu, {
+      props: {
+        ariaLabel: 'Command menu',
+        triggerSize: 'sm',
+        triggerVariant: 'ghost',
+        placement: 'bottom-end',
+        items: [
+          { id: 'grid', label: 'Show grid', checked: true, shortcut: '⌘G' },
+          { id: 'dup', label: 'Duplicate', shortcut: '⌘D' },
+        ],
+      },
+      slots: { trigger: 'Commands' },
+    });
+
+    const trigger = wrapper.get('.ui-dropdown-menu__trigger');
+    expect(trigger.classes()).toContain('ui-button--sm');
+    expect(trigger.classes()).toContain('ui-button--ghost');
+    const items = wrapper.findAll('.ui-dropdown-menu__item');
+    expect(items[0]?.attributes('role')).toBe('menuitemcheckbox');
+    expect(items[0]?.attributes('aria-checked')).toBe('true');
+    expect(items[0]?.get('.ui-dropdown-menu__check').text()).toBe('✓');
+    expect(items[0]?.get('.ui-dropdown-menu__shortcut').text()).toBe('⌘G');
+    expect(items[1]?.attributes('role')).toBe('menuitem');
   });
 });

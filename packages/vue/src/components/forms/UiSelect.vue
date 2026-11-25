@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import {
   type AnchoredOverlayOptions,
+  focusElement,
   hideAnchoredOverlay,
+  installFocusModality,
   isOverlayOpen,
+  markPointerModality,
   showAnchoredOverlay,
   stopOverlayTracking,
 } from '@neoverse-ui/overlay-runtime';
-import { computed, nextTick, onBeforeUnmount, ref, useAttrs, useId, watch } from 'vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, useId, watch } from 'vue';
 import type { FormControlValue, SelectOption, SelectProps } from '../../types';
 import { presence } from '../motion/presence';
 import { resolveAriaInvalid } from './form-control';
@@ -45,9 +48,12 @@ const forwardedAttrs = computed(() => {
   return rest;
 });
 
-function focusTrigger() {
+function focusTrigger(modality: 'auto' | 'keyboard' | 'pointer' = 'auto') {
   void nextTick(() => {
-    detailsRef.value?.querySelector<HTMLElement>('.ui-select')?.focus();
+    focusElement(detailsRef.value?.querySelector<HTMLElement>('.ui-select'), {
+      preventScroll: true,
+      modality,
+    });
   });
 }
 
@@ -131,17 +137,20 @@ async function onTriggerKeydown(event: KeyboardEvent) {
     '.ui-select__option[aria-selected="true"]:not(:disabled)',
   );
   if (selected) {
-    selected.focus();
+    focusElement(selected, { modality: 'keyboard' });
     return;
   }
   const options = panel.querySelectorAll<HTMLButtonElement>('.ui-select__option:not(:disabled)');
-  (event.key === 'ArrowDown' ? options[0] : options[options.length - 1])?.focus();
+  focusElement(event.key === 'ArrowDown' ? options[0] : options[options.length - 1], {
+    modality: 'keyboard',
+  });
 }
 
 function markTriggerPointerFocus() {
   const trigger = detailsRef.value?.querySelector<HTMLElement>('.ui-select');
   if (trigger !== null && trigger !== undefined) {
     trigger.dataset.neoverseFocusOrigin = 'pointer';
+    markPointerModality(trigger.ownerDocument);
   }
 }
 
@@ -162,7 +171,7 @@ function selectOption(option: SelectOption) {
 // press itself must commit the option. The click that belongs to the same
 // gesture is then ignored, while a click dispatched without a pointer pair
 // (assistive technology) still selects.
-let pointerCommitAt = 0;
+let pointerCommitAt = Number.NEGATIVE_INFINITY;
 function onOptionPointerDown(option: SelectOption, event: PointerEvent) {
   markTriggerPointerFocus();
   if (!event.isPrimary || event.button !== 0) return;
@@ -192,10 +201,21 @@ function focusOption(direction: 1 | -1, event: KeyboardEvent) {
   );
   const index = options.indexOf(current);
   const next = options[(index + direction + options.length) % options.length];
-  next?.focus();
+  focusElement(next, { modality: 'keyboard' });
 }
 
 function onOptionKeydown(event: KeyboardEvent) {
+  if (event.key === 'Tab') {
+    const closeOnShift = event.shiftKey;
+    queueMicrotask(() => {
+      if (closeOnShift || !popoverRef.value?.contains(document.activeElement)) {
+        if (detailsRef.value) detailsRef.value.open = false;
+        open.value = false;
+        closePopover();
+      }
+    });
+    return;
+  }
   if (event.key === 'ArrowDown') {
     event.preventDefault();
     focusOption(1, event);
@@ -214,7 +234,7 @@ function onOptionKeydown(event: KeyboardEvent) {
         .closest('.ui-select__popover')
         ?.querySelectorAll<HTMLButtonElement>('.ui-select__option:not(:disabled)') ?? [],
     );
-    (event.key === 'Home' ? options[0] : options.at(-1))?.focus();
+    focusElement(event.key === 'Home' ? options[0] : options.at(-1), { modality: 'keyboard' });
     return;
   }
   if (event.key === 'Escape') {
@@ -222,9 +242,13 @@ function onOptionKeydown(event: KeyboardEvent) {
     if (detailsRef.value) detailsRef.value.open = false;
     open.value = false;
     closePopover();
-    focusTrigger();
+    focusTrigger('keyboard');
   }
 }
+
+onMounted(() => {
+  if (typeof document !== 'undefined') installFocusModality(document);
+});
 
 onBeforeUnmount(() => {
   closePopover();
@@ -269,7 +293,7 @@ onBeforeUnmount(() => {
     <div
       ref="popoverRef"
       :id="listboxId"
-      class="ui-select__popover nv-presence"
+      class="ui-overlay-panel ui-select__popover material-glass-elevated nv-presence"
       role="listbox"
       popover="auto"
       v-bind="presence('pop', 'top')"
@@ -280,6 +304,7 @@ onBeforeUnmount(() => {
         :key="String(option.value)"
         class="ui-select__option"
         type="button"
+        tabindex="-1"
         role="option"
         :disabled="option.disabled"
         :aria-selected="String(option.value) === String(props.modelValue ?? '')"

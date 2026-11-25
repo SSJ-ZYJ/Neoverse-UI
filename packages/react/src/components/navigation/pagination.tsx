@@ -1,4 +1,4 @@
-import { attachSelectionIndicator } from '@neoverse-ui/motion';
+import { attachLayoutReflow, attachSelectionIndicator } from '@neoverse-ui/motion';
 import { type HTMLAttributes, useEffect, useRef } from 'react';
 
 export interface UiPaginationProps extends Omit<HTMLAttributes<HTMLElement>, 'onChange'> {
@@ -22,13 +22,20 @@ export function UiPagination({
   className,
   ...rest
 }: UiPaginationProps) {
+  const navigationRef = useRef<HTMLElement | null>(null);
   const trackRef = useRef<HTMLDivElement | null>(null);
   const indicatorRef = useRef<HTMLSpanElement | null>(null);
   useEffect(() => {
+    const navigation = navigationRef.current;
     const track = trackRef.current;
     const indicator = indicatorRef.current;
-    if (!track || !indicator) return;
-    return attachSelectionIndicator(track, indicator, '[aria-current="page"]');
+    if (!navigation || !track || !indicator) return;
+    const disposeIndicator = attachSelectionIndicator(track, indicator, '[aria-current="page"]');
+    const disposeLayout = attachLayoutReflow(navigation, track, 'button, .ui-pagination__ellipsis');
+    return () => {
+      disposeLayout();
+      disposeIndicator();
+    };
   }, []);
   const count = Number.isFinite(totalPages) ? Math.max(0, Math.floor(totalPages)) : 0;
   const current = count === 0 ? 0 : Math.min(Math.max(1, Math.floor(page)), count);
@@ -39,11 +46,13 @@ export function UiPagination({
     picked.add(index);
   }
   const sorted = [...picked].filter((value) => value > 0).sort((a, b) => a - b);
-  const pages: Array<number | { after: number }> = [];
+  const pages: Array<number | 'leading-gap' | 'trailing-gap'> = [];
   let previous = 0;
   for (const number of sorted) {
     if (previous > 0 && number - previous === 2) pages.push(previous + 1);
-    else if (previous > 0 && number - previous > 2) pages.push({ after: previous });
+    else if (previous > 0 && number - previous > 2) {
+      pages.push(previous === 1 ? 'leading-gap' : 'trailing-gap');
+    }
     pages.push(number);
     previous = number;
   }
@@ -53,6 +62,7 @@ export function UiPagination({
   return (
     <nav
       {...rest}
+      ref={navigationRef}
       className={['ui-pagination', className].filter(Boolean).join(' ')}
       aria-label={ariaLabel}
     >
@@ -73,10 +83,11 @@ export function UiPagination({
           data-ready="false"
         />
         {pages.map((entry) =>
-          typeof entry === 'object' ? (
+          typeof entry === 'string' ? (
             <span
-              key={`gap-after-${entry.after}`}
-              className="ui-pagination__ellipsis"
+              key={entry}
+              className="ui-pagination__ellipsis nv-appear"
+              data-neoverse-motion="fade"
               aria-hidden="true"
             >
               …

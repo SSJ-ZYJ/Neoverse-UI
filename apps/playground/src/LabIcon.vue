@@ -14,6 +14,7 @@ type LabIconName =
   | 'globe'
   | 'home'
   | 'inspector'
+  | 'lock'
   | 'mail'
   | 'menu'
   | 'message'
@@ -21,6 +22,7 @@ type LabIconName =
   | 'move'
   | 'plus'
   | 'replay'
+  | 'search'
   | 'spark'
   | 'target'
   | keyof typeof themeGlyphPaths;
@@ -47,6 +49,7 @@ const paths: Record<LabIconName, string> = {
     'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-18c2.2 2.5 3.3 5.5 3.3 9S14.2 18.5 12 21c-2.2-2.5-3.3-5.5-3.3-9S9.8 5.5 12 3ZM3 12h18',
   home: 'm4 10 8-7 8 7v10h-5v-6H9v6H4V10Z',
   inspector: 'M3 5h18v14H3V5Zm12 0v14',
+  lock: 'M6 10h12v10H6V10Zm3 0V7a3 3 0 0 1 6 0v3m-3 4v2',
   mail: 'M3 6h18v12H3V6Zm1 1 8 6 8-6',
   menu: 'M4 7h16M4 12h16M4 17h16',
   message: 'M4 5h16v11H8l-4 4V5Z',
@@ -54,6 +57,7 @@ const paths: Record<LabIconName, string> = {
   move: 'M12 3v18M3 12h18M9 6l3-3 3 3M9 18l3 3 3-3M6 9l-3 3 3 3M18 9l3 3-3 3',
   plus: 'M12 5v14M5 12h14',
   replay: 'M4 10a8 8 0 1 1 2.3 6.2M4 4v6h6',
+  search: 'M16 10a6 6 0 1 0-12 0 6 6 0 0 0 12 0Zm-1.8 4.2L20 20',
   spark: 'm12 3 1.6 6.4L20 11l-6.4 1.6L12 19l-1.6-6.4L4 11l6.4-1.6L12 3Z',
   target: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-5a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0-4h.01',
 };

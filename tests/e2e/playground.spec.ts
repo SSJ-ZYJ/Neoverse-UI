@@ -301,6 +301,7 @@ test.describe('playground', () => {
     await expect(page.locator('[data-overlay-popover]')).toBeVisible();
     await expect(page.locator('[data-overlay-dropdown]')).toBeVisible();
   });
+
   test('module and isolated QA routes still expose the original complete gallery', async ({
     page,
   }) => {
@@ -339,6 +340,73 @@ test.describe('playground', () => {
     await expect(page.locator('iframe')).toHaveCount(0);
   });
 
+  test('the overview glass sample resizes smoothly when the language changes', async ({
+    page,
+  }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/?theme=light&lang=en', { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => document.fonts.ready);
+    const sample = page.locator('[data-overview-hero] .playground-overview-hero__sample');
+    const before = await sample.boundingBox();
+    if (!before) throw new Error('The overview glass sample has no box');
+
+    await page.evaluate(() => {
+      const root = document.getElementById('app');
+      if (!root) throw new Error('Playground root is missing');
+      const scope = window as Window & { __overviewSizeMotion?: number };
+      scope.__overviewSizeMotion = 0;
+      root.addEventListener('neoverse-motion-start', () => {
+        const element = document.querySelector(
+          '[data-overview-hero] .playground-overview-hero__sample',
+        );
+        if (element?.getAnimations().length)
+          scope.__overviewSizeMotion = (scope.__overviewSizeMotion ?? 0) + 1;
+      });
+    });
+    await switchToChinese(page, testInfo.project.name === 'mobile');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
+    const after = await sample.boundingBox();
+    if (!after) throw new Error('The overview glass sample lost its box');
+    // English copy is taller than Chinese copy on the sample, so the resize is
+    // observable and must be animated instead of jumping between the heights.
+    expect(after.height).toBeLessThan(before.height);
+    expect(
+      await page.evaluate(
+        () => (window as Window & { __overviewSizeMotion?: number }).__overviewSizeMotion ?? 0,
+      ),
+    ).toBeGreaterThan(0);
+  });
+
+  test('the overview glass sample skips size motion under reduced motion', async ({
+    page,
+  }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/?theme=light&lang=en', { waitUntil: 'domcontentloaded' });
+    await page.evaluate(() => document.fonts.ready);
+    const sample = page.locator('[data-overview-hero] .playground-overview-hero__sample');
+    await page.evaluate(() => {
+      const root = document.getElementById('app');
+      if (!root) throw new Error('Playground root is missing');
+      const scope = window as Window & { __overviewSizeMotion?: number };
+      scope.__overviewSizeMotion = 0;
+      root.addEventListener('neoverse-motion-start', () => {
+        const element = document.querySelector(
+          '[data-overview-hero] .playground-overview-hero__sample',
+        );
+        if (element?.getAnimations().length)
+          scope.__overviewSizeMotion = (scope.__overviewSizeMotion ?? 0) + 1;
+      });
+    });
+    await switchToChinese(page, testInfo.project.name === 'mobile');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'zh-CN');
+    expect(
+      await page.evaluate(
+        () => (window as Window & { __overviewSizeMotion?: number }).__overviewSizeMotion ?? 0,
+      ),
+    ).toBe(0);
+    expect(await sample.evaluate((element) => element.getAnimations().length)).toBe(0);
+  });
+
   test('expanding an Explorer module and selecting a specimen resets stage scroll', async ({
     page,
   }) => {
@@ -355,6 +423,76 @@ test.describe('playground', () => {
     await expect(page.locator('[data-design-lab-region="specimen"]')).toBeVisible();
     await expect.poll(() => workspace.evaluate((element) => element.scrollTop)).toBe(0);
   });
+
+  for (const theme of ['light', 'dark'] as const) {
+    test(`a reload matches the ${theme} workspace while the preview loads`, async ({
+      page,
+    }, testInfo) => {
+      const mobile = testInfo.project.name === 'mobile';
+      const queryTheme = theme === 'light' ? 'dark' : 'light';
+      await page.emulateMedia({ reducedMotion: 'reduce', colorScheme: queryTheme });
+      await page.goto(`/?theme=${queryTheme}&lang=en&fps=0#overlays`);
+      await expect(page.locator('#overlays-popover')).toBeAttached();
+      if (mobile) {
+        const cycle = page.locator('[data-playground-theme-control="cycle"]');
+        await cycle.click();
+        if (theme === 'light') await cycle.click();
+      } else {
+        await page
+          .locator('[data-playground-theme-control="segments"]')
+          .getByRole('radio', { name: theme === 'light' ? 'Light' : 'Dark' })
+          .click();
+      }
+      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+      await page.getByRole('radio', { name: 'Optical' }).click();
+
+      const layout = async () => {
+        const banner = page.getByRole('banner');
+        const stage = page.getByRole('main');
+        const panels = page.getByRole('complementary');
+        return {
+          banner: await banner.boundingBox(),
+          stage: await stage.boundingBox(),
+          panels: await Promise.all((await panels.all()).map((panel) => panel.boundingBox())),
+          canvas: await page.locator('body').evaluate((el) => getComputedStyle(el).backgroundColor),
+          toolbarTint: await banner.evaluate((el) =>
+            getComputedStyle(el).getPropertyValue('--neoverse-material-background'),
+          ),
+          field: await stage.evaluate((el) => getComputedStyle(el).backgroundImage),
+        };
+      };
+      const mountedLayout = await layout();
+      expect(mountedLayout.panels).toHaveLength(mobile ? 0 : 2);
+      expect(mountedLayout.field).not.toBe('none');
+
+      const entry = Promise.withResolvers<void>();
+      const preview = Promise.withResolvers<void>();
+      await page.route(/\/(?:assets\/playground\.js|src\/main\.ts)(?:\?|$)/, async (route) => {
+        await entry.promise;
+        await route.continue();
+      });
+      await page.route(/\/OverlaysModule(?:\.vue|-[^/]+\.js)(?:\?|$)/, async (route) => {
+        await preview.promise;
+        await route.continue();
+      });
+
+      try {
+        await page.reload({ waitUntil: 'commit' });
+        await expect(page.getByRole('banner')).toBeVisible();
+        await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+        await expect.poll(layout).toEqual(mountedLayout);
+        entry.resolve();
+        await expect(page.locator('[data-design-lab-workspace]')).toBeVisible();
+        await expect(page.locator('#overlays-popover')).toHaveCount(0);
+        await expect.poll(layout).toEqual(mountedLayout);
+        preview.resolve();
+        await expect(page.locator('#overlays-popover')).toBeVisible();
+      } finally {
+        entry.resolve();
+        preview.resolve();
+      }
+    });
+  }
 
   test('a reload restores the reading position', async ({ page }) => {
     await page.goto('/?lang=en#controls', { waitUntil: 'domcontentloaded' });
@@ -423,13 +561,31 @@ test.describe('playground', () => {
 
       await trigger.click();
       await expect(drawer).toBeVisible();
-      const scrim = await drawer.evaluate((el) => {
-        const { backgroundColor, backdropFilter, clipPath } = getComputedStyle(el, '::backdrop');
-        return { backgroundColor, backdropFilter, clipPath };
+      await expect
+        .poll(() =>
+          drawer.evaluate((el) => {
+            const backdrop = el.parentElement?.querySelector('.ui-drawer__backdrop');
+            return backdrop && getComputedStyle(backdrop, '::before').backgroundColor;
+          }),
+        )
+        .not.toBe('rgba(0, 0, 0, 0)');
+      const material = await drawer.evaluate((el) => {
+        const backdrop = el.parentElement?.querySelector('.ui-drawer__backdrop');
+        if (!backdrop) throw new Error('Drawer backdrop is missing');
+        const scrim = getComputedStyle(backdrop, '::before');
+        return {
+          scrimTint: scrim.backgroundColor,
+          scrimFilter: scrim.backdropFilter,
+          scrimCutout: scrim.clipPath,
+          drawerFilter: getComputedStyle(el).backdropFilter,
+          drawerEdge: getComputedStyle(el, '::before').display,
+        };
       });
-      expect(scrim.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
-      expect(scrim.backdropFilter).toMatch(/^blur\(/);
-      expect(scrim.clipPath).toContain('evenodd');
+      expect(material.scrimTint).not.toBe('rgba(0, 0, 0, 0)');
+      expect(material.scrimFilter).toBe('none');
+      expect(material.scrimCutout).toContain('evenodd');
+      expect(material.drawerFilter).toContain('blur(12px)');
+      expect(material.drawerEdge).not.toBe('none');
       const outsideX = name === 'Explorer' ? 380 : 10;
       await page.mouse.click(outsideX, 400);
       await expect(drawer).toBeHidden();

@@ -38,7 +38,7 @@ const badgeSizeOptions = [
 
 /** The editable Badge specimen */
 export const badge = defineSpecimen<BadgeProps>()({
-  initialProps: { variant: 'neutral', size: 'sm' },
+  initialProps: { variant: 'neutral', size: 'md' },
   initialState: () => ({}),
   controls: {
     props: {
@@ -65,7 +65,7 @@ const indicatorSizeOptions = [
 
 /** The editable StatusIndicator specimen */
 export const indicator = defineSpecimen<StatusIndicatorProps>()({
-  initialProps: { status: 'neutral', size: 'sm', pulse: false, loading: false },
+  initialProps: { status: 'neutral', size: 'md', pulse: false, loading: false },
   initialState: () => ({}),
   controls: {
     props: {

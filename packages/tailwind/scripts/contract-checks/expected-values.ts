@@ -116,6 +116,8 @@ export const expectedValues = [
   '--neoverse-tooltip-radius',
   '--neoverse-tooltip-arrow-background',
   '--neoverse-tooltip-accent-tint',
+  '--neoverse-drawer-width',
+  '--neoverse-drawer-inset',
   '--neoverse-scrollbar-immersive-size',
   '--neoverse-scrollbar-overlay-thumb-width',
   '--neoverse-scrollbar-immersive-thumb-hover-border-width',

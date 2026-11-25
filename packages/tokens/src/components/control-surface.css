@@ -54,9 +54,10 @@
     --neoverse-control-surface-scale-lg-type-factor: 1;
     --neoverse-control-surface-divider-color: var(--neoverse-color-border-default);
     /* The shared Dock indicator is the navigation counterpart of the
-       SegmentedControl slider. Both move between peer selections, so they
-       deliberately share the same spatial timing contract. */
-    --neoverse-control-surface-indicator-duration: var(--neoverse-motion-spatial-duration);
-    --neoverse-control-surface-indicator-easing: var(--neoverse-motion-spatial-easing);
+       SegmentedControl slider. Both move between peer selections on the same
+       state timing: long enough to read as one continuous slide, short enough
+       to settle without a dragging tail. */
+    --neoverse-control-surface-indicator-duration: var(--neoverse-motion-state-duration);
+    --neoverse-control-surface-indicator-easing: var(--neoverse-motion-state-easing);
   }
 }

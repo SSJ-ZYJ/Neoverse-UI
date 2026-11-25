@@ -15,6 +15,15 @@
     --neoverse-navigation-item-active-border: var(--neoverse-effect-choice-selected-border);
     --neoverse-navigation-item-active-foreground: var(--neoverse-effect-choice-selected-foreground);
     --neoverse-navigation-item-active-shadow: var(--neoverse-effect-choice-selected-shadow);
+    --neoverse-navigation-item-active-fill-opaque: var(
+      --neoverse-effect-choice-selected-fill-opaque
+    );
+    --neoverse-navigation-item-active-hover-fill-opaque: var(
+      --neoverse-effect-choice-selected-hover-fill-opaque
+    );
+    --neoverse-navigation-item-active-press-fill-opaque: var(
+      --neoverse-effect-choice-selected-press-fill-opaque
+    );
     --neoverse-navigation-item-indicator-color: var(--neoverse-color-accent-primary);
     /* The selected plate samples the page behind it. A flat fill over a
        photographic or optical backdrop left content sharp inside the plate,
@@ -48,16 +57,20 @@
     --neoverse-navigation-item-indicator-width: var(--neoverse-space-5);
     --neoverse-navigation-item-indicator-height: 0.125rem;
     --neoverse-navigation-item-compact-indicator-width: var(--neoverse-space-3);
+    /* Compact keeps the same bar and shortens it through scale, so a placement
+       change can interpolate one transform instead of swapping geometry. */
+    --neoverse-navigation-item-compact-indicator-length-factor: 0.6;
     /* Keep the bottom indicator visually detached from centered icon/label
        content instead of letting it creep upward as the control scales. */
     --neoverse-navigation-item-indicator-inset: var(--neoverse-space-0);
     --neoverse-navigation-item-compact-indicator-inset: var(--neoverse-space-0);
-    --neoverse-navigation-item-start-indicator-inset: var(--neoverse-space-2);
+    /* A placement only rotates the indicator: the start rail takes its thickness
+       from the bottom bar's height and its length from the bottom bar's width,
+       so the two placements keep one silhouette. */
     --neoverse-navigation-item-start-indicator-width: var(
       --neoverse-navigation-item-indicator-height
     );
-    /* Placement changes the bar's orientation, never the navigation identity.
-       Both bars alias one colour so a start rail and a bottom bar cannot drift
+    /* Both bars alias one colour so a start rail and a bottom bar cannot drift
        apart. */
     --neoverse-navigation-item-start-indicator-color: var(
       --neoverse-navigation-item-indicator-color

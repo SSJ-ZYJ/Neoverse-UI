@@ -6,13 +6,6 @@ import { frameView } from './frame-state';
 import { preloadLabRoute } from './lab-modules';
 import { preloadComponent } from './lazy-component';
 import { mountPlaygroundEffects } from './playground-effects';
-import './styles/drawers.css';
-import './styles/motion-page.css';
-import './styles/playground-tokens.css';
-import './styles/scroll-ports.css';
-import './styles/shell.css';
-
-document.documentElement.dataset.playgroundView = frameView ? 'frame' : 'shell';
 
 const favicon =
   document.querySelector<HTMLLinkElement>('link[rel~="icon"]') ?? document.createElement('link');
@@ -25,9 +18,15 @@ if (!favicon.isConnected) {
 
 const root = document.getElementById('app');
 if (root === null) throw new Error('Playground root is missing.');
-await Promise.all([
-  preloadComponent(frameView ? LabBoard : LabWorkspace),
-  preloadLabRoute(window.location.hash, { frame: frameView }),
-]);
+if (frameView) {
+  await Promise.all([
+    preloadComponent(LabBoard),
+    preloadLabRoute(window.location.hash, { frame: true }),
+  ]);
+} else {
+  await preloadComponent(LabWorkspace);
+}
 createApp(App).mount(root);
+delete document.documentElement.dataset.startupPersistent;
+delete document.documentElement.dataset.startupBackground;
 mountPlaygroundEffects(root);

@@ -281,21 +281,38 @@ test('the React fixture wires the same three Glass tiers', async ({ page }) => {
   }
 });
 
-test('reduced transparency removes the renderer and the tier blur', async ({ page }) => {
+test('the browser transparency preference removes blur but preserves only opted-in edge strokes', async ({
+  page,
+}) => {
+  await page.goto('/frame?theme=dark&lang=en#materials', { waitUntil: 'domcontentloaded' });
+  const surface = page.locator('[data-surface="glass-elevated"]').first();
+  await expect(surface).toBeVisible();
+  expect(
+    await surface.evaluate(
+      (element) => element.closest('.playground-reduced-transparency-preview') === null,
+    ),
+  ).toBe(true);
+  await expect(surface).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+  const sampledBackground = await surface.evaluate(
+    (element) => getComputedStyle(element).backgroundColor,
+  );
+
   const client = await page.context().newCDPSession(page);
   await client.send('Emulation.setEmulatedMedia', {
     features: [{ name: 'prefers-reduced-transparency', value: 'reduce' }],
   });
-  await page.goto('/frame?theme=dark&lang=en#materials', { waitUntil: 'domcontentloaded' });
+  await expect
+    .poll(() => page.evaluate(() => matchMedia('(prefers-reduced-transparency: reduce)').matches))
+    .toBe(true);
   await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCount(0);
+  await expect(surface).toHaveCSS('backdrop-filter', 'none');
+  await expect(surface).not.toHaveCSS('background-color', sampledBackground);
 
-  const surface = page.locator('[data-surface="glass-elevated"]').first();
-  await expect(surface).toBeVisible();
-  const fallback = await surface.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return { filter: style.backdropFilter, background: style.backgroundColor };
-  });
-  expect(fallback.filter).toBe('none');
-  expect(fallback.background).not.toContain('rgba(0, 0, 0, 0)');
+  // A continuous 1px inset stroke differs from the directional fallback highlights.
+  const paintedStroke = /\b0px 0px 0px 1px inset\b/;
+  await expect(surface).not.toHaveCSS('box-shadow', paintedStroke);
+  await surface.evaluate((element) => element.setAttribute('data-neoverse-glass-edge-stroke', ''));
+  await expect(surface).toHaveCSS('box-shadow', paintedStroke);
+  await expect(surface).toHaveCSS('backdrop-filter', 'none');
   await expectNoPageOverflow(page);
 });

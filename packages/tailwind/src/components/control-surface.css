@@ -10,6 +10,15 @@
     padding-inline: var(--neoverse-control-surface-padding-inline);
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    .ui-control-surface {
+      /* Scale changes affect layout, not just the painted surface. */
+      --neoverse-control-surface-scale-transition: zoom var(--neoverse-motion-spatial-duration)
+        var(--neoverse-motion-spatial-easing);
+      transition: var(--neoverse-control-surface-scale-transition);
+    }
+  }
+
   .ui-control-surface[data-surface='none'] {
     --neoverse-control-surface-boundary-width: var(--neoverse-border-width-none);
   }
@@ -87,7 +96,6 @@
   .ui-control-surface--shared-indicator[data-neoverse-navigation-indicator-ready='true']
     .ui-navigation-item__indicator {
     visibility: hidden;
-    transform: translateX(-50%);
     transition: none;
   }
 
@@ -201,6 +209,20 @@
   @media (prefers-reduced-transparency: reduce) {
     .ui-control-surface:not([data-surface='none']) {
       background-color: var(--neoverse-material-glass-base-tint);
+    }
+  }
+}
+
+@layer utilities {
+  @media (prefers-reduced-motion: no-preference) {
+    /* Compose scale with the transition in the shared Glass utility layer. */
+    .ui-control-surface:is(
+        .material-glass-subtle,
+        .material-glass-elevated,
+        .material-glass-immersive
+      ):not(.ui-button) {
+      transition:
+        var(--neoverse-material-transition), var(--neoverse-control-surface-scale-transition);
     }
   }
 }

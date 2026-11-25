@@ -13,6 +13,10 @@ export const buttonVariantOptions = [
   { value: 'primary', label: localized('Primary', '主要') },
   { value: 'secondary', label: localized('Secondary', '次要') },
   { value: 'ghost', label: localized('Ghost', '无填充') },
+  { value: 'danger', label: localized('Danger', '危险') },
+  { value: 'success', label: localized('Success', '成功') },
+  { value: 'warning', label: localized('Warning', '警告') },
+  { value: 'accent', label: localized('Accent', '强调') },
 ] as const;
 
 export const sizeOptions = [

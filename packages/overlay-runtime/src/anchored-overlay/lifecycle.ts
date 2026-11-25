@@ -1,17 +1,25 @@
+import { focusElement, installFocusModality } from './focus-modality.js';
 import { installDismiss } from './light-dismiss.js';
-import { supportsPopover } from './popover-state.js';
+import { isOverlayOpen, supportsPopover } from './popover-state.js';
 import { positionAnchoredOverlay } from './positioning.js';
+import { moveOverlayToPoint, openOverlayWithMotion, refreshOverlayExit } from './shared-motion.js';
 import { addOverlayCleanup, startOverlayTracking, stopOverlayTracking } from './tracking.js';
 import type { AnchoredOverlayOptions } from './types.js';
 
 export function showAnchoredOverlay(options: AnchoredOverlayOptions): void {
-  if (supportsPopover(options.overlay)) {
-    if (!options.overlay.matches(':popover-open')) options.overlay.showPopover();
+  installFocusModality(options.overlay.ownerDocument);
+  const { overlay, fallbackOpenClass } = options;
+  if (isOverlayOpen(overlay, fallbackOpenClass)) {
+    if (options.point !== undefined && options.trigger === undefined) {
+      moveOverlayToPoint(overlay, options.point, () => positionAnchoredOverlay(options));
+    } else positionAnchoredOverlay(options);
   } else {
-    options.overlay.classList.add(options.fallbackOpenClass);
+    openOverlayWithMotion(overlay, options.trigger ?? options.point, () => {
+      if (supportsPopover(overlay)) overlay.showPopover();
+      else overlay.classList.add(fallbackOpenClass);
+      positionAnchoredOverlay(options);
+    });
   }
-
-  positionAnchoredOverlay(options);
   startOverlayTracking(options);
 
   const stopDismiss = installDismiss(options, hideAnchoredOverlay);
@@ -37,7 +45,7 @@ function releaseOverlayFocus(options: AnchoredOverlayOptions): void {
   if (!inside(options.overlay) && !(options.containedElements?.() ?? []).some(inside)) return;
   const target = options.focusReturn ?? options.trigger ?? options.previousFocus?.();
   if (target?.isConnected === true && !options.overlay.contains(target)) {
-    target.focus({ preventScroll: true });
+    focusElement(target, { preventScroll: true });
     if (!options.overlay.contains(options.overlay.ownerDocument.activeElement)) return;
   }
   focused.blur();
@@ -47,6 +55,7 @@ export function hideAnchoredOverlay(options: AnchoredOverlayOptions): void {
   if (supportsPopover(options.overlay)) {
     if (options.overlay.matches(':popover-open')) options.overlay.hidePopover();
   } else {
+    refreshOverlayExit(options.overlay);
     options.overlay.classList.remove(options.fallbackOpenClass);
   }
   stopOverlayTracking(options.overlay);

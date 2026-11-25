@@ -1,9 +1,12 @@
-import { replayPresence } from '@neoverse-ui/motion';
 import {
   type AnchoredOverlayOptions,
+  focusElement,
   hideAnchoredOverlay,
+  installFocusModality,
   isOverlayOpen,
   type OverlayPoint,
+  openOverlayWithMotion,
+  refreshOverlayExit,
   resolveOverlayViewportLayoutBounds,
   showAnchoredOverlay,
   stopOverlayTracking,
@@ -24,9 +27,7 @@ import {
   type UiContextMenuItem,
 } from './context-menu-types.js';
 
-// The column overlaps the panel rim by one Glass edge width. Covering the rim is
-// not enough on its own: the shared Glass edge canvas paints above the top layer,
-// and only an occluder inside the panel's 2px hit-test sample suppresses that rim.
+// Overlap enough for the submenu surface to cover the parent's CSS rim.
 const SUBMENU_EDGE_OVERLAP = 4;
 
 interface UseContextMenuOptions {
@@ -57,11 +58,15 @@ export function useContextMenu({
   useEffect(() => setPortalHost(document.body), []);
   const restoreTarget = useRef<HTMLElement | null>(null);
   const ignoreNativeClose = useRef(false);
+  const lastPoint = useRef<OverlayPoint | undefined>(undefined);
   const panelId = useId();
   const submenuId = useId();
-  const [openSubmenu, setOpenSubmenu] = useState<UiContextMenuItem | null>(null);
-  // Synchronous counterpart of the state: pointerenter and click arrive in one
-  // interaction, before React commits the next render.
+  const [submenuState, setSubmenuState] = useState<{
+    item: UiContextMenuItem;
+    open: boolean;
+  } | null>(null);
+  const openSubmenu = submenuState?.open ? submenuState.item : null;
+  // Pointer movement and click can arrive before React commits the next render.
   const submenuEntryId = useRef<string | null>(null);
   const pendingSubmenu = useRef<{ opener: HTMLElement; moveFocus: boolean } | null>(null);
 
@@ -96,11 +101,16 @@ export function useContextMenu({
   const enabledItems = useCallback(() => rowsOf(panelRef.current), [rowsOf]);
 
   const closeSubmenuPopover = useCallback(() => {
+    if (submenuEntryId.current === null) return;
+    submenuEntryId.current = null;
+    pendingSubmenu.current = null;
+    setSubmenuState((state) => (state === null ? null : { item: state.item, open: false }));
     const submenu = submenuRef.current;
     if (!submenu) return;
     if (supportsPopover(submenu)) {
       if (submenu.matches(':popover-open')) submenu.hidePopover();
     } else {
+      refreshOverlayExit(submenu);
       submenu.classList.remove('ui-context-menu__submenu--open');
     }
   }, []);
@@ -109,15 +119,19 @@ export function useContextMenu({
     (item: UiContextMenuItem, opener: HTMLElement, moveFocus = true) => {
       if (item.disabled || !item.children?.length) return;
       if (submenuEntryId.current === item.id) {
-        if (moveFocus) rowsOf(submenuRef.current)[0]?.focus();
+        if (moveFocus) focusElement(rowsOf(submenuRef.current)[0], { preventScroll: true });
         return;
       }
       submenuEntryId.current = item.id;
       pendingSubmenu.current = { opener, moveFocus };
-      setOpenSubmenu(item);
+      setSubmenuState({ item, open: true });
     },
     [rowsOf],
   );
+
+  useEffect(() => {
+    installFocusModality(document);
+  }, []);
 
   useEffect(() => {
     if (openSubmenu === null) return;
@@ -126,12 +140,6 @@ export function useContextMenu({
     const submenu = submenuRef.current;
     if (pending === null || panel === null || submenu === null) return;
     pendingSubmenu.current = null;
-
-    if (supportsPopover(submenu)) {
-      if (!submenu.matches(':popover-open')) submenu.showPopover();
-    } else {
-      submenu.classList.add('ui-context-menu__submenu--open');
-    }
 
     const placeSubmenu = () => {
       if (!panel.isConnected || !submenu.isConnected || !pending.opener.isConnected) return;
@@ -154,9 +162,20 @@ export function useContextMenu({
         )}px`,
       );
     };
-    placeSubmenu();
-    replayPresence(submenu);
-    if (pending.moveFocus) rowsOf(submenu)[0]?.focus();
+    openOverlayWithMotion(
+      submenu,
+      pending.opener,
+      () => {
+        if (supportsPopover(submenu)) {
+          if (!submenu.matches(':popover-open')) submenu.showPopover();
+        } else {
+          submenu.classList.add('ui-context-menu__submenu--open');
+        }
+        placeSubmenu();
+      },
+      true,
+    );
+    if (pending.moveFocus) focusElement(rowsOf(submenu)[0], { preventScroll: true });
     const positionObserver = new MutationObserver(placeSubmenu);
     positionObserver.observe(panel, { attributes: true, attributeFilter: ['style'] });
     const resizeObserver = new ResizeObserver(placeSubmenu);
@@ -171,7 +190,7 @@ export function useContextMenu({
     };
   }, [openSubmenu, rowsOf]);
 
-  const onItemPointerEnter = (item: UiContextMenuItem, target: HTMLButtonElement) => {
+  const onItemPointerMove = (item: UiContextMenuItem, target: HTMLButtonElement) => {
     if (item.disabled) return;
     if (item.children?.length) {
       if (submenuEntryId.current === item.id) return;
@@ -179,32 +198,39 @@ export function useContextMenu({
       return;
     }
     closeSubmenuPopover();
-    submenuEntryId.current = null;
-    setOpenSubmenu(null);
   };
 
   const leaveSubmenu = useCallback(() => {
+    const openerId = openSubmenu?.id;
     closeSubmenuPopover();
-    submenuEntryId.current = null;
-    setOpenSubmenu(null);
-    requestAnimationFrame(() => enabledItems()[0]?.focus());
-  }, [closeSubmenuPopover, enabledItems]);
+    requestAnimationFrame(() => {
+      const row = enabledItems().find((element) => element.dataset.entryId === openerId);
+      focusElement(row ?? enabledItems()[0], { modality: 'keyboard' });
+    });
+  }, [closeSubmenuPopover, enabledItems, openSubmenu]);
 
   useEffect(() => {
     const options = portalHost === null ? undefined : resolveOptions();
     if (options === undefined) return;
     if (open) {
-      restoreTarget.current = focusReturn ?? (document.activeElement as HTMLElement | null);
+      const opening = !isOverlayOpen(options.overlay, options.fallbackOpenClass);
+      const previous = lastPoint.current;
+      lastPoint.current = options.point;
+      if (opening) {
+        restoreTarget.current = focusReturn ?? (document.activeElement as HTMLElement | null);
+      } else if (previous?.x !== options.point?.x || previous?.y !== options.point?.y) {
+        closeSubmenuPopover();
+      }
       showAnchoredOverlay(options);
       const side = options.overlay.dataset.neoverseOverlaySide;
       options.overlay.setAttribute(
         'data-neoverse-motion-origin',
         side === 'top' ? 'bottom' : 'top',
       );
-      if (!autoFocus) return;
+      if (!opening || !autoFocus) return;
       const frame = requestAnimationFrame(() => {
         if (isOverlayOpen(options.overlay, 'ui-overlay-panel--fallback-open')) {
-          enabledItems()[0]?.focus();
+          focusElement(enabledItems()[0], { preventScroll: true });
         }
       });
       return () => cancelAnimationFrame(frame);
@@ -213,8 +239,6 @@ export function useContextMenu({
       ignoreNativeClose.current = true;
     }
     closeSubmenuPopover();
-    submenuEntryId.current = null;
-    setOpenSubmenu(null);
     hideAnchoredOverlay(options);
     return () => stopOverlayTracking(options.overlay);
   }, [autoFocus, closeSubmenuPopover, enabledItems, focusReturn, open, portalHost, resolveOptions]);
@@ -235,20 +259,45 @@ export function useContextMenu({
     if (open) onOpenChange?.(false);
   };
 
+  const closeAndRestoreFocus = useCallback(
+    (modality: 'auto' | 'keyboard' | 'pointer' = 'auto') => {
+      onOpenChange?.(false);
+      const target = focusReturn ?? restoreTarget.current;
+      requestAnimationFrame(() => {
+        if (target?.isConnected) focusElement(target, { preventScroll: true, modality });
+        restoreTarget.current = null;
+      });
+    },
+    [focusReturn, onOpenChange],
+  );
+
   const selectItem = (item: UiContextMenuItem) => {
     if (item.disabled) return;
     onSelect?.(item);
-    onOpenChange?.(false);
-    const target = focusReturn ?? restoreTarget.current;
-    requestAnimationFrame(() => {
-      if (target?.isConnected) target.focus();
-      restoreTarget.current = null;
-    });
+    closeAndRestoreFocus();
   };
 
   useEffect(() => {
     if (!open) return;
     const onDocumentKeyDown = (event: globalThis.KeyboardEvent) => {
+      if (event.key === 'Tab') {
+        const panel = panelRef.current;
+        const submenu = submenuRef.current;
+        const target = event.target;
+        const active = document.activeElement;
+        const insideMenu =
+          (target instanceof Node && (panel?.contains(target) || submenu?.contains(target))) ||
+          panel?.contains(active) ||
+          submenu?.contains(active);
+        if (insideMenu) {
+          event.preventDefault();
+          closeAndRestoreFocus('keyboard');
+        } else {
+          onOpenChange?.(false);
+        }
+        return;
+      }
+
       if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
       const panel = panelRef.current;
       if (panel === null) return;
@@ -257,11 +306,11 @@ export function useContextMenu({
       const rows = openSubmenu === null ? enabledItems() : rowsOf(submenuRef.current);
       if (rows.length === 0) return;
       event.preventDefault();
-      (event.key === 'ArrowDown' ? rows[0] : rows.at(-1))?.focus();
+      focusElement(event.key === 'ArrowDown' ? rows[0] : rows.at(-1), { modality: 'keyboard' });
     };
     document.addEventListener('keydown', onDocumentKeyDown);
     return () => document.removeEventListener('keydown', onDocumentKeyDown);
-  }, [enabledItems, open, openSubmenu, rowsOf]);
+  }, [closeAndRestoreFocus, enabledItems, onOpenChange, open, openSubmenu, rowsOf]);
 
   const onMenuKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     const inSubmenu = openSubmenu !== null;
@@ -270,7 +319,9 @@ export function useContextMenu({
       if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
       if (menuItems.length === 0) return;
       event.preventDefault();
-      (event.key === 'ArrowDown' ? menuItems[0] : menuItems.at(-1))?.focus();
+      focusElement(event.key === 'ArrowDown' ? menuItems[0] : menuItems.at(-1), {
+        modality: 'keyboard',
+      });
       return;
     }
     const current = event.target;
@@ -297,13 +348,17 @@ export function useContextMenu({
       event.preventDefault();
       const index = menuItems.indexOf(current);
       const direction = event.key === 'ArrowDown' ? 1 : -1;
-      menuItems[(index + direction + menuItems.length) % menuItems.length]?.focus();
+      focusElement(menuItems[(index + direction + menuItems.length) % menuItems.length], {
+        modality: 'keyboard',
+      });
       return;
     }
 
     if (event.key === 'Home' || event.key === 'End') {
       event.preventDefault();
-      (event.key === 'Home' ? menuItems[0] : menuItems.at(-1))?.focus();
+      focusElement(event.key === 'Home' ? menuItems[0] : menuItems.at(-1), {
+        modality: 'keyboard',
+      });
     }
   };
 
@@ -314,8 +369,9 @@ export function useContextMenu({
     panelId,
     submenuId,
     openSubmenu,
+    submenuContent: submenuState?.item,
     enterSubmenu,
-    onItemPointerEnter,
+    onItemPointerMove,
     onPanelToggle,
     selectItem,
     onMenuKeyDown,

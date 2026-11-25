@@ -11,7 +11,7 @@ afterEach(() => {
   document.body.innerHTML = '';
 });
 
-function mountIndicatorSurface() {
+function mountIndicatorSurface(secondWidth = 20) {
   const surface = mount(UiControlSurface, {
     props: { navigationIndicator: true },
     slots: {
@@ -29,20 +29,20 @@ function mountIndicatorSurface() {
   if (!firstMarker || !secondMarker || !firstItem || !secondItem) {
     throw new Error('Indicator fixture elements are missing');
   }
-  const rect = (left: number) => ({
+  const rect = (left: number, width = 20) => ({
     bottom: 32,
     height: 2,
     left,
-    right: left + 20,
+    right: left + width,
     top: 30,
-    width: 20,
+    width,
     x: left,
     y: 30,
     toJSON: () => ({}),
   });
   vi.spyOn(group.element, 'getBoundingClientRect').mockReturnValue(rect(0));
   vi.spyOn(firstMarker.element, 'getBoundingClientRect').mockReturnValue(rect(10));
-  vi.spyOn(secondMarker.element, 'getBoundingClientRect').mockReturnValue(rect(60));
+  vi.spyOn(secondMarker.element, 'getBoundingClientRect').mockReturnValue(rect(60, secondWidth));
   return { indicator, firstItem, secondItem };
 }
 
@@ -265,7 +265,7 @@ describe('UiControlSurface', () => {
     // happy-dom delivers MutationObserver records on the microtask queue.
     await nextTick();
 
-    expect(indicator.element.style.transform).toBe('translate(50px, 0px) scale(1, 1)');
+    expect(indicator.element.style.transform).toBe('translate(50px, 0px)');
     expect(indicator.element.style.left).toBe('10px');
 
     await indicator.trigger('transitionend', { propertyName: 'transform' });
@@ -276,9 +276,30 @@ describe('UiControlSurface', () => {
     secondItem.element.classList.remove('ui-navigation-item--active');
     firstItem.element.classList.add('ui-navigation-item--active');
     await nextTick();
-    expect(indicator.element.style.transform).toBe('translate(-50px, 0px) scale(1, 1)');
+    expect(indicator.element.style.transform).toBe('translate(-50px, 0px)');
     await indicator.trigger('transitionend', { propertyName: 'transform' });
     expect(indicator.element.style.left).toBe('10px');
+    expect(indicator.element.style.transform).toBe('');
+  });
+
+  it('takes the destination size before translating the same bar', async () => {
+    const { indicator, firstItem, secondItem } = mountIndicatorSurface(12);
+
+    firstItem.element.setAttribute('aria-current', 'page');
+    await nextTick();
+    expect(indicator.element.style.width).toBe('20px');
+
+    firstItem.element.classList.remove('ui-navigation-item--active');
+    secondItem.element.classList.add('ui-navigation-item--active');
+    await nextTick();
+
+    expect(indicator.element.style.transform).toBe('translate(50px, 0px)');
+    expect(indicator.element.style.width).toBe('12px');
+    expect(indicator.element.style.left).toBe('10px');
+
+    await indicator.trigger('transitionend', { propertyName: 'transform' });
+    expect(indicator.element.style.left).toBe('60px');
+    expect(indicator.element.style.width).toBe('12px');
     expect(indicator.element.style.transform).toBe('');
   });
 

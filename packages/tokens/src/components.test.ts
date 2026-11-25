@@ -117,6 +117,10 @@ test('exposes canonical component token namespaces', () => {
   }
   expect(cssVariables.components.notice.info.background).toBe('--neoverse-notice-info-background');
   expect(cssVariables.components.tooltip.accentTint).toBe('--neoverse-tooltip-accent-tint');
+  expect(cssVariables.components.drawer).toEqual({
+    width: '--neoverse-drawer-width',
+    inset: '--neoverse-drawer-inset',
+  });
   expect(cssVariables.components.table.background).toBe('--neoverse-table-background');
   expect(cssVariables.components.table.radius).toBe('--neoverse-table-radius');
   expect(cssVariables.components.table.gridLine).toBe('--neoverse-table-grid-line');
@@ -201,6 +205,7 @@ test('exposes consumer-validated action and navigation component tokens', () => 
   // The hover plate is consumer-tunable: size, wash and growth live in tokens.
   expect(cssVariables.components.breadcrumb).toMatchObject({
     linkPlateInset: '--neoverse-breadcrumb-link-plate-inset',
+    linkPlateInsetInline: '--neoverse-breadcrumb-link-plate-inset-inline',
     linkPlateBackground: '--neoverse-breadcrumb-link-plate-background',
     linkPlateRestScale: '--neoverse-breadcrumb-link-plate-rest-scale',
     clipMargin: '--neoverse-breadcrumb-clip-margin',
@@ -246,6 +251,8 @@ test('keeps component token declarations in their owner recipes', async () => {
     ['components/badge.css', '--neoverse-badge-background'],
     ['components/notice.css', '--neoverse-notice-neutral-background'],
     ['components/tooltip.css', '--neoverse-tooltip-radius'],
+    ['components/drawer.css', '--neoverse-drawer-width'],
+    ['components/drawer.css', '--neoverse-drawer-inset'],
     ['components/skeleton.css', '--neoverse-skeleton-fill'],
     ['components/scrollbar.css', '--neoverse-scrollbar-immersive-size'],
     ['components/form-control.css', '--neoverse-form-control-background'],

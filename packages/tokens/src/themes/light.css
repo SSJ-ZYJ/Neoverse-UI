@@ -157,6 +157,8 @@
   --neoverse-color-accent-primary-foreground: var(--neoverse-color-neutral-900);
   --neoverse-color-accent-secondary: var(--neoverse-color-mint-500);
   --neoverse-color-accent-tertiary: #7c6ee6;
+  /* Filled controls keep the accent base in Light; Dark lifts it separately. */
+  --neoverse-color-accent-tertiary-filled: var(--neoverse-color-accent-tertiary);
   --neoverse-color-accent-tertiary-foreground: var(--neoverse-color-white);
   --neoverse-color-accent-soft: color-mix(
     in srgb,
@@ -196,7 +198,13 @@
     var(--neoverse-color-accent-primary) 56%,
     transparent
   );
-  --neoverse-color-overlay-scrim: rgb(20 33 43 / 28%);
+  --neoverse-color-overlay-scrim: rgb(15 27 38 / 20%);
+  --neoverse-dialog-scrim: rgb(15 27 38 / 32%);
+  --neoverse-dialog-background: color-mix(
+    in srgb,
+    var(--neoverse-material-glass-base-tint) 68%,
+    transparent
+  );
   --neoverse-color-ambient-ice: rgb(56 189 248 / 18%);
   --neoverse-color-ambient-mint: rgb(52 211 153 / 10%);
   --neoverse-color-ambient-violet: rgb(124 110 230 / 9%);

@@ -5,9 +5,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "dev": "bun run src/index.ts",
-    "dev:client": "vite build --watch --mode development",
-    "build:client": "vite build --mode production",
+    "dev": "vite --configLoader runner",
+    "build:client": "vite build --mode production --configLoader runner",
     "build": "bun run build:client && bun build ./src/index.ts --outdir ./dist --target bun --sourcemap",
     "typecheck": "vue-tsc --noEmit",
     "test": "bun run --filter @neoverse-ui/tokens build && bun run --filter @neoverse-ui/motion build && bun test src/lab-data.test.ts src/lab-specimen-config.test.ts src/scene-focus.test.ts src/asset-state.test.ts src/theme-runtime.test.ts"
@@ -27,6 +26,7 @@
   "devDependencies": {
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
     "@vitejs/plugin-vue": "^6.0.10",
     "vite": "^8.3.7",
     "vue-tsc": "^3.3.14"

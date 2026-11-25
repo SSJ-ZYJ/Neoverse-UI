@@ -193,7 +193,11 @@ const languageOptions = computed(
           </UiAction>
         </UiSurface>
 
-        <UiSurface surface="none" class="rounded-card p-3" data-contract-matrix>
+        <UiSurface
+          surface="none"
+          class="playground-data-table-surface rounded-card p-3"
+          data-contract-matrix
+        >
           <UiTable :caption="localize(contractCopy.tableCaption, props.locale)" striped hoverable>
             <thead>
               <tr>

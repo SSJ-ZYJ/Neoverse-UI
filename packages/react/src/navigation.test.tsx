@@ -38,22 +38,22 @@ test('a custom Dock host retains named navigation and its trailing action', () =
   expect(html).toContain('<button type="button">Save</button>');
 });
 
-const indicatorRect = (left: number) => ({
+const indicatorRect = (left: number, width = 20) => ({
   bottom: 32,
   height: 2,
   left,
-  right: left + 20,
+  right: left + width,
   top: 30,
-  width: 20,
+  width,
   x: left,
   y: 30,
   toJSON: () => ({}),
 });
 
-const mockRect = (element: object, left: number): void => {
+const mockRect = (element: object, left: number, width = 20): void => {
   Object.defineProperty(element, 'getBoundingClientRect', {
     configurable: true,
-    value: () => indicatorRect(left),
+    value: () => indicatorRect(left, width),
   });
 };
 
@@ -155,7 +155,7 @@ test('shared indicator flies on transform and commits the settled geometry', asy
       secondItem.classList.add('ui-navigation-item--active');
       await flushObserver();
     });
-    expect(indicator.style.transform).toBe('translate(50px, 0px) scale(1, 1)');
+    expect(indicator.style.transform).toBe('translate(50px, 0px)');
     expect(indicator.style.left).toBe('10px');
 
     const end = new browser.Event('transitionend', { bubbles: true });
@@ -172,11 +172,53 @@ test('shared indicator flies on transform and commits the settled geometry', asy
       firstItem.classList.add('ui-navigation-item--active');
       await flushObserver();
     });
-    expect(indicator.style.transform).toBe('translate(-50px, 0px) scale(1, 1)');
+    expect(indicator.style.transform).toBe('translate(-50px, 0px)');
     await act(async () => {
       indicator.dispatchEvent(end);
     });
     expect(indicator.style.left).toBe('10px');
+    expect(indicator.style.transform).toBe('');
+  } finally {
+    await restore(root);
+  }
+});
+
+test('shared indicator takes the destination size before translating one bar', async () => {
+  const { browser, container, restore } = installBrowser();
+  let root: Root | undefined;
+  try {
+    container.innerHTML = renderToString(fixture);
+    await act(async () => {
+      root = hydrateRoot(container as unknown as Element, fixture);
+    });
+    const { group, indicator, firstMarker, secondMarker, firstItem, secondItem } =
+      queryFixture(container);
+    mockRect(group, 0);
+    mockRect(firstMarker, 10);
+    mockRect(secondMarker, 60, 12);
+
+    await act(async () => {
+      firstItem.setAttribute('aria-current', 'page');
+      await flushObserver();
+    });
+    expect(indicator.style.width).toBe('20px');
+
+    await act(async () => {
+      firstItem.classList.remove('ui-navigation-item--active');
+      secondItem.classList.add('ui-navigation-item--active');
+      await flushObserver();
+    });
+    expect(indicator.style.transform).toBe('translate(50px, 0px)');
+    expect(indicator.style.width).toBe('12px');
+    expect(indicator.style.left).toBe('10px');
+
+    const end = new browser.Event('transitionend', { bubbles: true });
+    Object.defineProperty(end, 'propertyName', { value: 'transform' });
+    await act(async () => {
+      indicator.dispatchEvent(end);
+    });
+    expect(indicator.style.left).toBe('60px');
+    expect(indicator.style.width).toBe('12px');
     expect(indicator.style.transform).toBe('');
   } finally {
     await restore(root);

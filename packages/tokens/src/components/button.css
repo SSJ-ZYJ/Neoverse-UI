@@ -1,12 +1,12 @@
 @layer neoverse.tokens {
   :root {
     /* Consumer defaults are readable at a normal 16px root without page zoom. */
-    --neoverse-button-height-sm: var(--neoverse-space-8);
-    --neoverse-button-height-md: var(--neoverse-space-10);
-    --neoverse-button-height-lg: var(--neoverse-space-12);
-    --neoverse-button-padding-inline-sm: var(--neoverse-space-3);
-    --neoverse-button-padding-inline-md: var(--neoverse-space-4);
-    --neoverse-button-padding-inline-lg: var(--neoverse-space-5);
+    --neoverse-button-height-sm: var(--neoverse-space-7);
+    --neoverse-button-height-md: var(--neoverse-space-9);
+    --neoverse-button-height-lg: var(--neoverse-space-11);
+    --neoverse-button-padding-inline-sm: var(--neoverse-space-2);
+    --neoverse-button-padding-inline-md: var(--neoverse-space-3);
+    --neoverse-button-padding-inline-lg: var(--neoverse-space-4);
     --neoverse-button-font-size-sm: var(--neoverse-typography-label-md-size);
     --neoverse-button-font-size-md: var(--neoverse-typography-label-md-size);
     --neoverse-button-font-size-lg: var(--neoverse-typography-label-lg-size);
@@ -33,6 +33,24 @@
     --neoverse-control-primary-hover-background: var(--neoverse-effect-primary-hover-field-light);
     --neoverse-control-primary-hover-shadow: var(--neoverse-effect-primary-hover-shadow);
     --neoverse-control-primary-active-background: var(--neoverse-effect-primary-press-field-light);
+
+    --neoverse-control-danger-background: var(--neoverse-effect-danger-rest-field);
+    --neoverse-control-danger-foreground: var(--neoverse-color-status-danger-foreground);
+    --neoverse-control-danger-hover-background: var(--neoverse-effect-danger-hover-field);
+    --neoverse-control-danger-active-background: var(--neoverse-color-status-danger);
+    --neoverse-control-button-accent-tone: var(--neoverse-color-accent-tertiary-filled);
+    /* Status and accent variants paint one translucent tone over the sampled
+       material. The shared effect sheet owns each mix, so these tokens only
+       alias roles and the recipe never derives its own colour. */
+    --neoverse-control-button-success-rest-tone: var(--neoverse-effect-success-rest-field);
+    --neoverse-control-button-success-hover-tone: var(--neoverse-effect-success-hover-field);
+    --neoverse-control-button-success-press-tone: var(--neoverse-color-status-success);
+    --neoverse-control-button-warning-rest-tone: var(--neoverse-effect-warning-rest-field);
+    --neoverse-control-button-warning-hover-tone: var(--neoverse-effect-warning-hover-field);
+    --neoverse-control-button-warning-press-tone: var(--neoverse-color-status-warning);
+    --neoverse-control-button-accent-rest-tone: var(--neoverse-effect-accent-rest-field);
+    --neoverse-control-button-accent-hover-tone: var(--neoverse-effect-accent-hover-field);
+    --neoverse-control-button-accent-press-tone: var(--neoverse-control-button-accent-tone);
 
     /* The edge field preserves the sampled material independently of button feedback. */
     --neoverse-control-button-edge: var(--neoverse-control-button-filled-shadow);

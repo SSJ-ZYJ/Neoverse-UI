@@ -1,7 +1,16 @@
-import type { OverlayPlacement } from '@neoverse-ui/overlay-runtime';
-import type { ComponentPropsWithRef, ReactNode } from 'react';
+import {
+  installFocusModality,
+  markPointerModality,
+  type OverlayPlacement,
+} from '@neoverse-ui/overlay-runtime';
+import { type ComponentPropsWithRef, type ReactNode, useEffect } from 'react';
 import { mergeClassNames } from '../../internal.js';
-import { type ButtonVariant, buttonVariantClasses } from '../actions/button-variants.js';
+import type { ActionSize } from '../actions/action-size.js';
+import {
+  type ButtonVariant,
+  buttonSizeClasses,
+  buttonVariantClasses,
+} from '../actions/button-variants.js';
 import { useAnchoredOverlayController } from './anchored-overlay.js';
 
 export interface UiPopoverProps extends Omit<ComponentPropsWithRef<'span'>, 'children' | 'ref'> {
@@ -15,6 +24,7 @@ export interface UiPopoverProps extends Omit<ComponentPropsWithRef<'span'>, 'chi
   ariaLabel?: string;
   /** Button variant of the rendered trigger; ghost reuses the shared washes for chrome. */
   triggerVariant?: ButtonVariant;
+  triggerSize?: ActionSize;
   onOpenChange?: (open: boolean) => void;
 }
 
@@ -28,6 +38,7 @@ export function UiPopover({
   matchTriggerWidth = false,
   ariaLabel,
   triggerVariant = 'secondary',
+  triggerSize = 'md',
   onOpenChange,
   className,
   ...props
@@ -41,15 +52,26 @@ export function UiPopover({
     ...(onOpenChange === undefined ? {} : { onOpenChange }),
   });
 
+  useEffect(() => {
+    installFocusModality(document);
+  }, []);
+
   return (
     <span {...props} className={mergeClassNames('ui-popover', className)}>
       <button
         ref={controller.triggerRef}
-        className={`ui-popover__trigger ui-button material-glass-subtle ${buttonVariantClasses[triggerVariant]} ui-button--md`}
+        className={`ui-popover__trigger ui-button material-glass-subtle ${buttonVariantClasses[triggerVariant]} ${buttonSizeClasses[triggerSize]}`}
         type="button"
         disabled={disabled}
         aria-expanded={controller.expandedOpen}
         aria-controls={controller.panelId}
+        onPointerDown={(event) => {
+          event.currentTarget.dataset.neoverseFocusOrigin = 'pointer';
+          markPointerModality(event.currentTarget.ownerDocument);
+        }}
+        onBlur={(event) => {
+          delete event.currentTarget.dataset.neoverseFocusOrigin;
+        }}
         onClick={controller.toggle}
       >
         {trigger}

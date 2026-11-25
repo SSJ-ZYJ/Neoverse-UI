@@ -30,7 +30,7 @@
     "check:requests": "bun run requests check",
     "requests": "bun run scripts/requests/component-requests.ts",
     "test:requests": "bun test scripts/requests/component-requests.test.ts scripts/requests/component-request-intake.test.ts",
-    "test:contracts": "bun test scripts/gates/react-runtime-fixture.test.ts scripts/gates/check-component-layout.test.ts scripts/gates/check-test-registry.test.ts scripts/gates/check-budgets.test.ts scripts/dev/tailwind-cli.test.ts",
+    "test:contracts": "bun test scripts/gates/react-runtime-fixture.test.ts scripts/gates/check-component-layout.test.ts scripts/gates/check-test-registry.test.ts scripts/gates/check-budgets.test.ts scripts/dev/tailwind-cli.test.ts scripts/dev/integration/playground-css.test.ts",
     "test:consumer-sync": "bun run --filter @neoverse-ui/tokens build && bun run --filter @neoverse-ui/giscus-theme build && bun test scripts/sync/sync-consumer.test.ts",
     "test:release-tools": "bun test scripts/release/check-changeset-targets.test.ts scripts/release/verify-published.test.ts scripts/release/release-api-smoke.test.ts",
     "typecheck": "bun run build:types && bun run typecheck:only",

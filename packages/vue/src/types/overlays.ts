@@ -1,5 +1,5 @@
 import type { OverlayPlacement, OverlayPoint } from '@neoverse-ui/overlay-runtime';
-import type { ButtonVariant } from './controls';
+import type { ButtonSize, ButtonVariant } from './controls';
 
 export interface PopoverProps {
   open?: boolean | undefined;
@@ -10,6 +10,19 @@ export interface PopoverProps {
   ariaLabel?: string;
   /** Button variant of the rendered trigger; ghost reuses the shared washes for chrome. */
   triggerVariant?: ButtonVariant;
+  triggerSize?: ButtonSize;
+}
+
+/** Select the physical edge of the Drawer */
+export type DrawerSide = 'left' | 'right';
+
+/** Configure a controlled Drawer in modal or inline mode */
+export interface DrawerProps {
+  open?: boolean;
+  modal?: boolean;
+  side?: DrawerSide;
+  closeOnOutside?: boolean;
+  width?: string;
 }
 
 export type DropdownMenuItemTone = 'default' | 'danger';
@@ -19,6 +32,8 @@ export interface DropdownMenuItem {
   label: string;
   disabled?: boolean;
   tone?: DropdownMenuItemTone;
+  checked?: boolean;
+  shortcut?: string;
 }
 
 export interface DropdownMenuProps {
@@ -30,6 +45,7 @@ export interface DropdownMenuProps {
   ariaLabel: string;
   /** Button variant of the rendered trigger; ghost reuses the shared washes for chrome. */
   triggerVariant?: ButtonVariant;
+  triggerSize?: ButtonSize;
 }
 
 export type ContextMenuItemTone = 'default' | 'danger';

@@ -20,6 +20,8 @@ export {
   motionRoles,
 } from './foundation/motion-tokens.js';
 export { prefersReducedMotion } from './foundation/reduced-motion.js';
+export { syncCaretFlight } from './layout/caret-flight.js';
+export { attachLayoutReflow } from './layout/layout-reflow.js';
 export type { LayoutSizeMotionOptions } from './layout/layout-size.js';
 export { attachLayoutSizeMotion } from './layout/layout-size.js';
 export type {

@@ -1,7 +1,3 @@
-export type AssetStatSource = {
-  stat: () => Promise<{ mtimeMs: number } | null>;
-};
-
 export type AssetExistenceSource = {
   exists: () => Promise<boolean>;
 };
@@ -9,22 +5,6 @@ export type AssetExistenceSource = {
 export type AssetAvailabilityOptions = {
   attempts?: number;
   delay?: () => Promise<void>;
-};
-
-const isMissingAssetError = (error: unknown): boolean =>
-  typeof error === 'object' && error !== null && 'code' in error && error.code === 'ENOENT';
-
-export const readAssetMtime = async (asset: AssetStatSource): Promise<number | null> => {
-  try {
-    const stat = await asset.stat();
-    return stat?.mtimeMs ?? null;
-  } catch (error: unknown) {
-    if (isMissingAssetError(error)) {
-      return null;
-    }
-
-    throw error;
-  }
 };
 
 export const waitForAssets = async (

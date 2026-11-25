@@ -131,12 +131,27 @@ test.describe('motion', () => {
     const animations = () => list.evaluate((element) => element.getAnimations().length);
     await expect(list).not.toHaveAttribute('hidden', '');
 
-    await toggle.click();
+    const finalShift = await toggle.evaluate(async (element) => {
+      if (!(element instanceof HTMLElement))
+        throw new Error('The disclosure toggle must be an element');
+      const list = document.getElementById(element.getAttribute('aria-controls') ?? '');
+      const hint = list?.parentElement?.querySelector('p');
+      element.click();
+      await Promise.resolve();
+      const animation = list?.getAnimations()[0];
+      if (!animation?.effect || !hint) throw new Error('Missing disclosure exit or hint');
+      const { endTime } = animation.effect.getComputedTiming();
+      if (typeof endTime !== 'number') throw new Error('The disclosure exit must have a timed end');
+      animation.pause();
+      animation.currentTime = endTime - 0.01;
+      const before = hint.getBoundingClientRect().top - element.getBoundingClientRect().top;
+      animation.finish();
+      await animation.finished;
+      const after = hint.getBoundingClientRect().top - element.getBoundingClientRect().top;
+      return Math.abs(after - before);
+    });
     await expect(list).toHaveAttribute('inert', '');
-    // Each direction is asserted by the state it lands in. Counting a running
-    // animation raced the exit and return on the slowest engine and only
-    // re-stated what the hidden/inert contract already proves.
-    await expect.poll(animations).toBe(0);
+    expect(finalShift).toBeLessThan(0.5);
     await expect(list).toHaveAttribute('hidden', '');
     await expect(list).toHaveAttribute('aria-hidden', 'true');
 
@@ -466,7 +481,7 @@ test('reversing from the toolbar does not replay Glass colors outside the reveal
 test('the theme thumb blends into its pressed tint when reversing a reveal', async ({
   page,
 }, testInfo) => {
-  test.skip(testInfo.project.use.hasTouch, 'The compact toolbar has no theme thumb');
+  test.skip(testInfo.project.use.hasTouch === true, 'The compact toolbar has no theme thumb');
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto('/?theme=light&lang=en&fps=0');
   test.skip(
@@ -500,7 +515,8 @@ test('the theme thumb blends into its pressed tint when reversing a reveal', asy
           entry instanceof CSSTransition && entry.transitionProperty === 'background-color',
       );
     if (!transition?.effect) return { start: fill(), middle: fill(), end: fill() };
-    const endTime = transition.effect.getComputedTiming().endTime;
+    const { endTime } = transition.effect.getComputedTiming();
+    if (typeof endTime !== 'number') throw new Error('The pressed tint must have a timed end');
     transition.pause();
     transition.currentTime = 0;
     const start = fill();

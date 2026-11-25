@@ -33,6 +33,12 @@ export const buttonCssVariables = {
     hoverShadow: '--neoverse-control-primary-hover-shadow',
     activeBackground: '--neoverse-control-primary-active-background',
   },
+  danger: {
+    background: '--neoverse-control-danger-background',
+    foreground: '--neoverse-control-danger-foreground',
+    hoverBackground: '--neoverse-control-danger-hover-background',
+    activeBackground: '--neoverse-control-danger-active-background',
+  },
   secondary: {
     background: '--neoverse-control-secondary-background',
     border: '--neoverse-control-secondary-border',

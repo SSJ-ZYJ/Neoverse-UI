@@ -1,4 +1,4 @@
-import { UiContextMenu } from '@neoverse-ui/react';
+import { UiButton, UiContextMenu } from '@neoverse-ui/react';
 import { useState } from 'react';
 import type { FixtureCopy } from './fixture-copy';
 
@@ -12,6 +12,7 @@ export function ContextMenuFixture({
   const [open, setOpen] = useState(false);
   const [point, setPoint] = useState({ x: 0, y: 0 });
   const [autoFocus, setAutoFocus] = useState(false);
+  const [focusReturn, setFocusReturn] = useState<HTMLElement | null>(null);
   const [contextTheme, setContextTheme] = useState('system');
   const [showDetails, setShowDetails] = useState(true);
 
@@ -24,6 +25,7 @@ export function ContextMenuFixture({
         onContextMenu={(event) => {
           event.preventDefault();
           setPoint({ x: event.clientX, y: event.clientY });
+          setFocusReturn(null);
           setAutoFocus(false);
           setOpen(true);
         }}
@@ -33,20 +35,22 @@ export function ContextMenuFixture({
           {copy.contextMenuTheme}: {contextTheme} · {copy.contextMenuDetails}:{' '}
           {showDetails ? 'on' : 'off'}
         </p>
-        <button
-          className="mt-2 rounded-control border border-default px-2 py-1 text-caption"
-          type="button"
+        <UiButton
+          className="mt-3"
+          size="sm"
+          variant="secondary"
           data-context-menu-keyboard
-          onClick={() => {
-            const zone = document.querySelector<HTMLElement>('[data-context-menu-zone]');
-            const rect = zone?.getBoundingClientRect();
-            setPoint({ x: (rect?.left ?? 0) + 24, y: (rect?.top ?? 0) + 24 });
+          onClick={(event) => {
+            const trigger = event.currentTarget;
+            const rect = trigger.getBoundingClientRect();
+            setPoint({ x: rect.left, y: rect.bottom });
+            setFocusReturn(trigger);
             setAutoFocus(true);
             setOpen(true);
           }}
         >
           {copy.contextMenuKeyboard}
-        </button>
+        </UiButton>
       </section>
 
       <UiContextMenu
@@ -54,6 +58,7 @@ export function ContextMenuFixture({
         ariaLabel={copy.contextMenu}
         point={point}
         autoFocus={autoFocus}
+        focusReturn={focusReturn}
         entries={[
           { type: 'heading', id: 'edit', label: copy.contextMenuEdit },
           { id: 'copy', label: copy.contextMenuCopy, shortcut: 'Ctrl+C' },

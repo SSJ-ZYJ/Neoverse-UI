@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test';
-import { expectNoPageOverflow } from '../support/e2e';
+import { disablePopoverApi, expectNoPageOverflow } from '../support/e2e';
 
 const glassPage = '/frame?theme=light&lang=en#materials';
 const canvasSelector = '[data-neoverse-glass-renderer-canvas]';
@@ -501,7 +501,7 @@ test('rotated glass surfaces upload tilted basis vectors matching their local di
   expect(rotated?.basis[1]).toBeCloseTo(Math.sin(rad), 2);
 });
 
-test('open native top-layer popovers keep local CSS edges without duplicate WebGL draws', async ({
+test('native and fallback popovers keep a narrow local rim without duplicate canvas draws', async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -527,31 +527,41 @@ test('open native top-layer popovers keep local CSS edges without duplicate WebG
     };
   });
 
-  await page.goto('/frame?theme=light&lang=en#overlays', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
+  const popover = page.locator('.ui-popover__content').first();
 
-  const popover = page.locator('.ui-overlay-panel[popover]').first();
-  test.skip((await popover.count()) === 0, 'No native popover fixture on overlays frame');
+  const readRim = () =>
+    popover.evaluate((panel) => {
+      (
+        window as Window & { __neoverseGlassRenderer?: { refresh(force?: boolean): void } }
+      ).__neoverseGlassRenderer?.refresh(true);
+      const rect = panel.getBoundingClientRect();
+      const edge = getComputedStyle(panel, '::before');
+      const beforeDisplay = edge.display;
+      const maskComposite = edge.maskComposite;
+      const edgeWidth = edge.paddingTop;
+      const bodyFilter = getComputedStyle(panel).backdropFilter;
+      const glRects = (window as Window & { __latestGlRects?: number[][] }).__latestGlRects ?? [];
+      const matchedGl = glRects.some(
+        (entry) =>
+          Math.abs((entry[0] ?? 0) - rect.left) < 1 &&
+          Math.abs((entry[1] ?? 0) - rect.top) < 1 &&
+          Math.abs((entry[2] ?? 0) - rect.width) < 1 &&
+          Math.abs((entry[3] ?? 0) - rect.height) < 1,
+      );
+      return { beforeDisplay, maskComposite, edgeWidth, bodyFilter, matchedGl };
+    });
 
-  const result = await popover.evaluate((panel) => {
-    (panel as HTMLElement).showPopover();
-    (
-      window as Window & { __neoverseGlassRenderer?: { refresh(force?: boolean): void } }
-    ).__neoverseGlassRenderer?.refresh(true);
-    const rect = panel.getBoundingClientRect();
-    const beforeDisplay = getComputedStyle(panel, '::before').display;
-    const glRects = (window as Window & { __latestGlRects?: number[][] }).__latestGlRects ?? [];
-    const matchedGl = glRects.some(
-      (entry) =>
-        Math.abs((entry[0] ?? 0) - rect.left) < 1 &&
-        Math.abs((entry[1] ?? 0) - rect.top) < 1 &&
-        Math.abs((entry[2] ?? 0) - rect.width) < 1 &&
-        Math.abs((entry[3] ?? 0) - rect.height) < 1,
-    );
-    (panel as HTMLElement).hidePopover();
-    return { beforeDisplay, matchedGl };
-  });
-
-  expect(result.beforeDisplay).toBe('block');
-  expect(result.matchedGl).toBe(false);
+  for (const fallback of [false, true]) {
+    if (fallback) await disablePopoverApi(page);
+    await page.goto('/frame?theme=light&lang=en#overlays');
+    await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
+    await page.locator('.ui-popover__trigger').first().click();
+    await expect(popover).toHaveCSS('opacity', '1');
+    const result = await readRim();
+    expect(result.beforeDisplay).toBe('block');
+    expect(result.maskComposite).toMatch(/^subtract\b/);
+    expect(result.edgeWidth).toBe('1.25px');
+    expect(result.bodyFilter).toContain('blur(18px)');
+    expect(result.matchedGl).toBe(false);
+  }
 });

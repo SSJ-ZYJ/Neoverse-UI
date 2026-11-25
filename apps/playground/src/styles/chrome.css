@@ -12,7 +12,8 @@
   background: var(--neoverse-color-surface-canvas);
 }
 
-.playground-shell[data-persistent] {
+.playground-shell[data-persistent],
+html[data-startup-persistent] [data-playground-startup] {
   grid-template:
     'toolbar toolbar toolbar' auto
     'explorer stage inspector' minmax(0, 1fr)
@@ -68,6 +69,7 @@
   inline-size: clamp(4.75rem, 20vw, 6rem);
   block-size: 2rem;
   flex: none;
+  mask-image: url('../assets/neoverse-wordmark.svg');
   background-color: currentColor;
   mask-position: center;
   mask-repeat: no-repeat;
@@ -307,6 +309,7 @@
   );
   --neoverse-navigation-item-active-press-fill: var(--neoverse-color-accent-soft);
   --neoverse-navigation-item-active-shadow: var(--neoverse-shadow-none);
+  --neoverse-navigation-item-filter: none;
 }
 
 /* Let module labels expand for both languages and English specimen names wrap. */
@@ -362,11 +365,4 @@ html[lang='en'] .playground-explorer__link .ui-navigation-item__label {
 .playground-inspector__frame-link {
   justify-self: start;
   max-inline-size: 100%;
-}
-
-/* The ControlSurface and Dock scale props intentionally change layout zoom. */
-@media (prefers-reduced-motion: no-preference) {
-  [data-playground-view] .ui-control-surface {
-    transition: zoom var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
-  }
 }

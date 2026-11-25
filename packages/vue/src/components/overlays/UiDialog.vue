@@ -1,39 +1,107 @@
 <script setup lang="ts">
+import {
+  focusElement,
+  installFocusModality,
+  openOverlayWithMotion,
+  ownsDocumentModalKeyboard,
+  trapModalTabKey,
+} from '@neoverse-ui/overlay-runtime';
 import { nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
-import type { DialogProps } from '../../types';
+import type { DialogProps, DialogRole, DialogSize } from '../../types';
 
-const props = withDefaults(defineProps<DialogProps>(), {
-  open: false,
-  closeOnEscape: true,
-  closeOnBackdrop: false,
-});
+const props = withDefaults(
+  defineProps<
+    DialogProps & {
+      size?: DialogSize;
+      role?: DialogRole;
+    }
+  >(),
+  {
+    open: false,
+    size: 'md',
+    role: 'dialog',
+    closeOnEscape: true,
+    closeOnBackdrop: false,
+  },
+);
 const emit = defineEmits<{ 'update:open': [value: boolean] }>();
 const element = ref<HTMLDialogElement | null>(null);
 const mounted = ref(false);
 const titleId = `${useId()}-dialog-title`;
 const descriptionId = `${useId()}-dialog-description`;
 let focusReturn: HTMLElement | null = null;
+let keydownListening = false;
 
 function restoreFocus() {
   const target = focusReturn;
   focusReturn = null;
-  if (target?.isConnected) target.focus({ preventScroll: true });
+  if (target?.isConnected) focusElement(target, { preventScroll: true });
+}
+
+function requestClose() {
+  emit('update:open', false);
+}
+
+function onDocumentKeydown(event: KeyboardEvent) {
+  const dialog = element.value;
+  if (!dialog?.open || !props.open || event.defaultPrevented) return;
+  if (!ownsDocumentModalKeyboard(dialog)) return;
+
+  if (event.key === 'Escape') {
+    event.preventDefault();
+    if (props.closeOnEscape) requestClose();
+    return;
+  }
+
+  if (event.key === 'Tab') {
+    trapModalTabKey(event, dialog);
+  }
+}
+
+function setDocumentListeners(active: boolean) {
+  if (typeof document === 'undefined') return;
+  if (active && !keydownListening) {
+    document.addEventListener('keydown', onDocumentKeydown);
+    keydownListening = true;
+  } else if (!active && keydownListening) {
+    document.removeEventListener('keydown', onDocumentKeydown);
+    keydownListening = false;
+  }
+}
+
+function showDialogNode(dialog: HTMLDialogElement) {
+  if (typeof dialog.show === 'function') dialog.show();
+  else dialog.setAttribute('open', '');
+}
+
+function closeDialogNode(dialog: HTMLDialogElement) {
+  if (typeof dialog.close === 'function') dialog.close();
+  else if (dialog.hasAttribute('open')) {
+    dialog.removeAttribute('open');
+    dialog.dispatchEvent(new Event('close'));
+  }
 }
 
 async function syncOpen() {
   await nextTick();
   const dialog = element.value;
   if (!dialog) return;
+  installFocusModality(dialog.ownerDocument);
   if (props.open && !dialog.open) {
     focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    dialog.showModal();
+    openOverlayWithMotion(
+      dialog,
+      props.motionSource === undefined ? focusReturn : props.motionSource,
+      () => showDialogNode(dialog),
+    );
+    setDocumentListeners(true);
+    focusElement(dialog, { preventScroll: true });
   } else if (!props.open && dialog.open) {
-    dialog.close();
+    setDocumentListeners(false);
+    closeDialogNode(dialog);
+  } else {
+    setDocumentListeners(props.open && dialog.open);
   }
-}
-
-function requestClose() {
-  emit('update:open', false);
 }
 
 function onCancel(event: Event) {
@@ -41,16 +109,13 @@ function onCancel(event: Event) {
   if (props.closeOnEscape) requestClose();
 }
 
-function onBackdropClick(event: MouseEvent) {
-  if (props.closeOnBackdrop && event.target === element.value) requestClose();
-}
-
-function onDialogKeydown(event: KeyboardEvent) {
-  // Escape remains a native cancel action unless the consumer explicitly locks it.
-  if (event.key === 'Escape' && !props.closeOnEscape) event.preventDefault();
+function onBackdropClick() {
+  if (props.closeOnBackdrop) requestClose();
 }
 
 function onNativeClose() {
+  if (element.value?.open) return;
+  setDocumentListeners(false);
   if (props.open) requestClose();
   restoreFocus();
 }
@@ -62,28 +127,39 @@ watch(
 );
 onMounted(() => {
   mounted.value = true;
+  if (typeof document !== 'undefined') installFocusModality(document);
   void syncOpen();
 });
 onBeforeUnmount(() => {
-  if (element.value?.open) element.value.close();
+  setDocumentListeners(false);
+  if (element.value?.open) closeDialogNode(element.value);
   restoreFocus();
 });
 </script>
 
 <template>
   <Teleport v-if="mounted" to="body">
+    <div
+      class="ui-dialog__backdrop"
+      :data-open="props.open ? 'true' : undefined"
+      aria-hidden="true"
+      @click="onBackdropClick"
+    />
     <dialog
       ref="element"
-      class="ui-dialog material-glass-elevated"
+      tabindex="-1"
+      class="ui-overlay-panel ui-dialog material-glass-elevated nv-presence"
+      :role="props.role"
+      :data-size="props.size"
       data-neoverse-motion="pop"
       data-surface="glass-elevated"
       data-neoverse-glass-occluder="topmost"
+      data-neoverse-glass-edge-pass="css"
+      aria-modal="true"
       :aria-labelledby="titleId"
       :aria-describedby="description ? descriptionId : undefined"
       @cancel="onCancel"
       @close="onNativeClose"
-      @click="onBackdropClick"
-      @keydown="onDialogKeydown"
     >
       <header class="ui-dialog__header">
         <h2 :id="titleId" class="ui-dialog__title">{{ title }}</h2>

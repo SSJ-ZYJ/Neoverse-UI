@@ -25,6 +25,49 @@
     --neoverse-effect-status-success-text: var(--neoverse-color-status-success);
     --neoverse-effect-status-warning-text: var(--neoverse-color-status-warning);
     --neoverse-effect-status-danger-text: var(--neoverse-color-status-danger);
+    /* Tone fields carry one translucent status or accent color over the
+       sampled material. Component tokens alias them instead of deriving their
+       own mix, so Button, Notice and future surfaces share one recipe. */
+    --neoverse-effect-success-rest-field: color-mix(
+      in srgb,
+      var(--neoverse-color-status-success) var(--neoverse-effect-strength-86),
+      transparent
+    );
+    --neoverse-effect-success-hover-field: color-mix(
+      in srgb,
+      var(--neoverse-color-status-success) var(--neoverse-effect-strength-88),
+      transparent
+    );
+    --neoverse-effect-warning-rest-field: color-mix(
+      in srgb,
+      var(--neoverse-color-status-warning) var(--neoverse-effect-strength-86),
+      transparent
+    );
+    --neoverse-effect-warning-hover-field: color-mix(
+      in srgb,
+      var(--neoverse-color-status-warning) var(--neoverse-effect-strength-88),
+      transparent
+    );
+    --neoverse-effect-danger-rest-field: color-mix(
+      in srgb,
+      var(--neoverse-color-status-danger) var(--neoverse-effect-strength-86),
+      transparent
+    );
+    --neoverse-effect-danger-hover-field: color-mix(
+      in srgb,
+      var(--neoverse-color-status-danger) var(--neoverse-effect-strength-88),
+      transparent
+    );
+    --neoverse-effect-accent-rest-field: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-tertiary-filled) var(--neoverse-effect-strength-86),
+      transparent
+    );
+    --neoverse-effect-accent-hover-field: color-mix(
+      in srgb,
+      var(--neoverse-color-accent-tertiary-filled) var(--neoverse-effect-strength-88),
+      transparent
+    );
     --neoverse-effect-disabled-content-opacity: 0.6;
     --neoverse-effect-disabled-foreground: color-mix(
       in srgb,

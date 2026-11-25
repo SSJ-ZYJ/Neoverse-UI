@@ -5,6 +5,7 @@ Read this file before changing the Design Lab. Global constraints are in [AGENTS
 ```text
 apps/playground/
   src/index.ts              Bun.serve shell, /frame document, health endpoint, port selection
+  src/playground-document.ts  HTML shell shared by the static and Vite dev servers
   src/main.ts               Vite browser entry: Vue app, shell styles, Glass mount
   src/App.vue               selects the shell or the isolated frame
   src/LabWorkspace.vue      shell route, preferences, drawer and scroll coordination
@@ -21,7 +22,7 @@ apps/playground/
   src/*.vue                 shell, specimen and fixture components
   src/styles/               shell CSS and Playground-only token overrides
   src/assets/               wordmark and site icon
-  vite.config.ts            browser bundles for the shell and React fixture
+  vite.config.ts            development routes, hot updates and production browser bundles
 ```
 
 ## Responsibilities
@@ -35,7 +36,7 @@ apps/playground/
 
 ## Rules
 
-- Commands come from `apps/playground/package.json`. The root `bun run dev` sequences build, server and watchers; do not start a second server on an occupied port.
+- Commands come from `apps/playground/package.json`. The root `bun run dev` builds and starts the Vite dev server and CSS watcher; do not start a second server on an occupied port.
 - The shell uses `PORT` (default 3000) and selects the next available port. Playwright starts its own server on `NEOVERSE_UI_PLAYWRIGHT_PORT` (default 3200) or reuses an existing one.
 - Register each focused renderer on its existing `labSpecimens` entry in `lab-modules.ts`. Keep complete galleries and stable fixture anchors in `modules/`; the Stage does not mount a module to render a specimen.
 - Shell CSS belongs in `src/styles/`; shared component styling belongs in `packages/tailwind`. Do not fix a shared component from the shell.

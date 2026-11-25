@@ -1,0 +1,223 @@
+@layer components {
+  html:has(.ui-drawer__host[data-open='true']) {
+    overflow: hidden;
+  }
+
+  .ui-drawer {
+    position: relative;
+    inset: auto;
+    box-sizing: border-box;
+    width: auto;
+    height: auto;
+    min-inline-size: 0;
+    min-block-size: 0;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    flex-direction: column;
+    overflow: auto;
+    overscroll-behavior: contain;
+    border: 0;
+    border-radius: var(--neoverse-radius-panel);
+    padding: 0;
+    color: var(--neoverse-color-text-primary);
+  }
+
+  .ui-drawer:not([open]) {
+    display: none;
+    pointer-events: none;
+  }
+
+  .ui-drawer[open] {
+    display: flex;
+  }
+
+  .ui-drawer__host {
+    /* Bound the inset on tiny viewports and reserve room to dismiss from the opposite side. */
+    --neoverse-drawer-fit-inset: clamp(
+      var(--neoverse-space-0),
+      var(--neoverse-drawer-inset),
+      min(25vw, 25dvh)
+    );
+    --neoverse-drawer-fit-width: clamp(
+      var(--neoverse-space-0),
+      var(--neoverse-drawer-width),
+      calc(100vw - 2 * var(--neoverse-drawer-fit-inset) - min(25vw, var(--neoverse-space-8)))
+    );
+    --neoverse-drawer-fit-radius: min(
+      var(--neoverse-radius-panel),
+      calc(var(--neoverse-drawer-fit-width) / 2),
+      calc(50dvh - var(--neoverse-drawer-fit-inset))
+    );
+    --neoverse-drawer-origin: var(--neoverse-drawer-fit-inset);
+    --neoverse-drawer-direction: -1;
+    --neoverse-drawer-travel: calc(
+      var(--neoverse-drawer-direction) *
+      (var(--neoverse-drawer-fit-width) + var(--neoverse-drawer-fit-inset))
+    );
+    --neoverse-drawer-shift: var(--neoverse-drawer-travel);
+    position: fixed;
+    inset: 0;
+    z-index: var(--neoverse-layout-layer-modal);
+    display: none;
+    pointer-events: none;
+    transition: display var(--neoverse-motion-spatial-duration) allow-discrete;
+  }
+
+  .ui-drawer__host[data-side='right'] {
+    /* Both siblings resolve viewport percentages against the fixed host. */
+    --neoverse-drawer-origin: calc(
+      100% -
+      var(--neoverse-drawer-fit-width) -
+      var(--neoverse-drawer-fit-inset)
+    );
+    --neoverse-drawer-direction: 1;
+  }
+
+  .ui-drawer__host[data-open='true'] {
+    --neoverse-drawer-shift: var(--neoverse-space-0);
+    display: block;
+  }
+
+  /* The host keeps painting during exit even after dialog.open is cleared. */
+  .ui-drawer__host > .ui-drawer {
+    display: flex;
+    inset: var(--neoverse-drawer-fit-inset) auto var(--neoverse-drawer-fit-inset)
+      var(--neoverse-drawer-origin);
+    width: var(--neoverse-drawer-fit-width);
+    border-radius: var(--neoverse-drawer-fit-radius);
+    translate: var(--neoverse-drawer-shift);
+  }
+
+  .ui-drawer__host[data-open='true'] > :is(.ui-drawer, .ui-drawer__backdrop) {
+    pointer-events: auto;
+  }
+
+  .ui-drawer__backdrop {
+    position: absolute;
+    inset: 0;
+  }
+
+  /* Only paint is clipped: the backdrop still catches outside presses in the
+     polygon fallback's square cutout corners and while the drawer moves. */
+  .ui-drawer__backdrop::before {
+    --neoverse-drawer-cutout-left: calc(
+      var(--neoverse-drawer-origin) +
+      var(--neoverse-drawer-shift)
+    );
+    --neoverse-drawer-cutout-right: calc(
+      var(--neoverse-drawer-cutout-left) +
+      var(--neoverse-drawer-fit-width)
+    );
+    --neoverse-drawer-cutout-bottom: calc(100% - var(--neoverse-drawer-fit-inset));
+    position: absolute;
+    inset: 0;
+    content: '';
+    pointer-events: none;
+    background-color: transparent;
+    clip-path: polygon(
+      evenodd,
+      0 0,
+      100% 0,
+      100% 100%,
+      0 100%,
+      0 0,
+      var(--neoverse-drawer-cutout-left) var(--neoverse-drawer-fit-inset),
+      var(--neoverse-drawer-cutout-right) var(--neoverse-drawer-fit-inset),
+      var(--neoverse-drawer-cutout-right) var(--neoverse-drawer-cutout-bottom),
+      var(--neoverse-drawer-cutout-left) var(--neoverse-drawer-cutout-bottom),
+      var(--neoverse-drawer-cutout-left) var(--neoverse-drawer-fit-inset),
+      0 0
+    );
+    transition:
+      clip-path var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
+      background-color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  @supports (clip-path: shape(evenodd from 0 0, arc to 100% 100% of 50% cw, close)) {
+    .ui-drawer__backdrop::before {
+      clip-path: shape(
+        evenodd from 0 0,
+        hline to 100%,
+        vline to 100%,
+        hline to 0,
+        close,
+        move to calc(var(--neoverse-drawer-cutout-left) + var(--neoverse-drawer-fit-radius))
+          var(--neoverse-drawer-fit-inset),
+        hline to calc(var(--neoverse-drawer-cutout-right) - var(--neoverse-drawer-fit-radius)),
+        arc by var(--neoverse-drawer-fit-radius) var(--neoverse-drawer-fit-radius) of
+          var(--neoverse-drawer-fit-radius) cw,
+        vline to calc(var(--neoverse-drawer-cutout-bottom) - var(--neoverse-drawer-fit-radius)),
+        arc by calc(-1 * var(--neoverse-drawer-fit-radius)) var(--neoverse-drawer-fit-radius) of
+          var(--neoverse-drawer-fit-radius) cw,
+        hline to calc(var(--neoverse-drawer-cutout-left) + var(--neoverse-drawer-fit-radius)),
+        arc by calc(-1 * var(--neoverse-drawer-fit-radius))
+          calc(-1 * var(--neoverse-drawer-fit-radius)) of var(--neoverse-drawer-fit-radius) cw,
+        vline to calc(var(--neoverse-drawer-fit-inset) + var(--neoverse-drawer-fit-radius)),
+        arc by var(--neoverse-drawer-fit-radius) calc(-1 * var(--neoverse-drawer-fit-radius)) of
+          var(--neoverse-drawer-fit-radius) cw,
+        close
+      );
+    }
+  }
+
+  .ui-drawer__host[data-open='true'] > .ui-drawer__backdrop::before {
+    background-color: var(--neoverse-color-overlay-scrim);
+  }
+
+  @starting-style {
+    .ui-drawer__host[data-open='true'] > .ui-drawer,
+    .ui-drawer__host[data-open='true'] > .ui-drawer__backdrop::before {
+      --neoverse-drawer-shift: var(--neoverse-drawer-travel);
+    }
+
+    .ui-drawer__host[data-open='true'] > .ui-drawer__backdrop::before {
+      background-color: transparent;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-drawer__host,
+    .ui-drawer__backdrop::before {
+      transition: none;
+    }
+  }
+}
+
+@layer utilities {
+  dialog.ui-drawer.material-glass-subtle {
+    overflow: auto;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ui-drawer__host > dialog.ui-drawer {
+      transition: translate var(--neoverse-motion-spatial-duration)
+        var(--neoverse-motion-spatial-easing);
+    }
+  }
+}
+
+/* The shared Glass utility establishes relative positioning for its edge.
+   A modal panel instead stays anchored to its viewport-sized host. */
+.ui-drawer__host > dialog.ui-drawer {
+  position: absolute;
+}
+
+/* Override the Glass utility even while its renderer state is still active. */
+@media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+  .ui-drawer.material-glass-subtle {
+    background-color: var(--neoverse-material-glass-subtle-background-fallback);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  .ui-drawer.material-glass-subtle::before {
+    display: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .ui-drawer {
+    outline: var(--neoverse-border-width-thin) solid CanvasText;
+  }
+}

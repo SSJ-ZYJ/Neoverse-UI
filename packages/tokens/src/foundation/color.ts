@@ -128,6 +128,7 @@ export const colorCssVariables = {
     secondary: '--neoverse-color-accent-secondary',
     secondaryForeground: '--neoverse-color-accent-secondary-foreground',
     tertiary: '--neoverse-color-accent-tertiary',
+    tertiaryFilled: '--neoverse-color-accent-tertiary-filled',
     tertiaryForeground: '--neoverse-color-accent-tertiary-foreground',
     soft: '--neoverse-color-accent-soft',
   },

@@ -1,7 +1,7 @@
 @layer neoverse.tokens {
   :root {
     /* Terminal titlebar and window-control geometry derive from the shared scales. */
-    --neoverse-terminal-header-min-height: var(--neoverse-button-height-sm);
+    --neoverse-terminal-header-min-height: var(--neoverse-space-8);
     --neoverse-terminal-header-padding-block: var(--neoverse-space-2);
     --neoverse-terminal-header-padding-inline: var(--neoverse-space-4);
     --neoverse-terminal-header-border: var(--neoverse-color-border-subtle);

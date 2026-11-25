@@ -124,6 +124,7 @@ export function UiTerminalPrompt({
     editor.scroll,
     current,
     syncEditor,
+    'terminal',
   );
   // Editing keeps the caret solid for one blink cycle before it breathes again.
   const holdCaret = () =>

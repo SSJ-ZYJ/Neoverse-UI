@@ -69,7 +69,7 @@ Use Bun 1.4 and the existing `bun.lock`; do not introduce another package manage
 | Command | Purpose |
 | --- | --- |
 | `bun install` | Install the workspace |
-| `bun run dev` | Build once, then run the Playground, Vite watch and CSS watch together |
+| `bun run dev` | Build once, then run Vite hot updates and the CSS watcher |
 | `bun run build` | Build every package and the Playground in dependency order |
 | `bun run check` | Run all quality gates sequentially and print a pass/fail summary |
 | `bun run test` | Workspace unit tests plus repository tooling tests |
@@ -91,7 +91,7 @@ The Playground uses `PORT` (default 3000) and moves to the next available port. 
 
 - **Toolchain:** Bun workspace, ESM-only packages, strict TypeScript, Biome formatting and lint, Tailwind CSS 4, Vue 3.5+, React 19. Published packages emit declarations and source maps; CSS packages publish generated `dist` files.
 - **Package boundaries:** `tokens` feeds `tailwind` and `motion`; `overlay-runtime` feeds `vue` and `react`; `tailwind` + `motion` + `overlay-runtime` feed both adapters; `playground` consumes all. `glass-runtime` is optional enhancement. Public package dependencies use explicit SemVer ranges; local Bun links must not leak into published manifests.
-- **Shared contract:** Vue and React expose the same 43 public components and shared option, item and literal structures. Parity lives in `contracts/framework-parity.json`, maturity in `contracts/component-matrix.json`, and both are checked by `scripts/gates/check-framework-parity.ts` and `scripts/gates/check-component-contracts.ts`. A Playground specimen is evidence but never promotes maturity by itself.
+- **Shared contract:** Vue and React expose the same public components and shared option, item and literal structures. Parity lives in `contracts/framework-parity.json`, maturity in `contracts/component-matrix.json`, and both are checked by `scripts/gates/check-framework-parity.ts` and `scripts/gates/check-component-contracts.ts`. A Playground specimen is evidence but never promotes maturity by itself.
 - **Material:** Aurora Glass is one material with `subtle`, `elevated` and `immersive` tiers. Material values belong to Tokens; consumers select public presets and sizes. Do not introduce application-specific components, duplicate glass CSS or a second token layer in consumers.
 - **Glass repairs:** Follow the [Glass repair guardrails](docs/architecture/material-standards.md#glass-repair-guardrails). Do not switch the default renderer to full-surface SVG backdrop displacement, add backdrop capture/reconstruction layers, or replace the tier-owned body blur to repair edge appearance. These approaches have repeatedly caused severe stutter, lost blur, or missing edges. Keep the entire edge visible and fine; emphasize the upper-left and lower-right without removing the other sides or corners. Verify backdrop-dependent color, actual blur, edge continuity and performance together, and do not describe a theme-colored overlay as true spatial refraction.
 - **Accessibility and density:** Keep native semantics, visible focus, labels, contrast and keyboard paths. Shared controls keep compact painted dimensions on every viewport and expand touch hit areas through `@media (pointer: coarse)`; do not add mobile-only button variants. Reduced motion, reduced transparency and forced colors must remain usable.

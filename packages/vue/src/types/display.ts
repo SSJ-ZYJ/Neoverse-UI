@@ -1,12 +1,19 @@
 import type { PresenceOrigin, PresenceVariant } from '@neoverse-ui/motion';
 import type { SurfacePreset } from './controls';
 
+export type DialogSize = 'sm' | 'md' | 'lg';
+export type DialogRole = 'dialog' | 'alertdialog';
+
 export interface DialogProps {
   open?: boolean;
   title: string;
   description?: string;
+  size?: DialogSize;
+  role?: DialogRole;
   closeOnEscape?: boolean;
   closeOnBackdrop?: boolean;
+  /** Visual source at open time; omitted uses the focused element, null disables the morph. */
+  motionSource?: HTMLElement | null;
 }
 
 export interface TabOption {
@@ -47,6 +54,7 @@ export interface PaginationProps {
 export interface EmptyStateProps {
   title: string;
   description?: string;
+  variant?: 'default' | 'outlined' | 'compact' | 'subtle';
 }
 
 export interface ToastProps {

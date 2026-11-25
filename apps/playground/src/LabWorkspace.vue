@@ -1,22 +1,20 @@
 <script setup lang="ts">
 import { layoutBreakpoints } from '@neoverse-ui/tokens';
-import {
-  computed,
-  nextTick,
-  onBeforeUnmount,
-  onMounted,
-  provide,
-  ref,
-  shallowRef,
-  watch,
-} from 'vue';
+import { UiDrawer } from '@neoverse-ui/vue';
+import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef } from 'vue';
+import { isLocale, resolveWorkspaceLocale } from './content/locale';
 import LabExplorer from './LabExplorer.vue';
 import LabInspector from './LabInspector.vue';
 import LabStage from './LabStage.vue';
 import LabToolbar from './LabToolbar.vue';
-import { labModules, moduleGroupFor, resolveLabHash, specimenById } from './lab-modules';
+import {
+  labModules,
+  moduleGroupFor,
+  preloadLabRoute,
+  resolveLabHash,
+  specimenById,
+} from './lab-modules';
 import { appearanceControls, applyPlaygroundLocale } from './playground-appearance';
-import { isLocale, type Locale } from './playground-content';
 import { readPreferences, writePreferences } from './playground-preferences';
 import { restoreScrollPosition, saveScrollPosition } from './scroll-restoration';
 import {
@@ -51,7 +49,10 @@ function hrefFor(hash: string | null): string {
 }
 
 const initialHash = readHash();
-const route = shallowRef(resolveLabHash(initialHash));
+const initialRoute = resolveLabHash(initialHash);
+const route = shallowRef(initialRoute);
+const previewPending = ref(initialRoute !== null);
+const initialPreview = initialRoute === null ? undefined : preloadLabRoute(window.location.hash);
 if (window.location.hash !== '' && route.value?.canonicalHash !== initialHash) {
   window.history.replaceState(null, '', hrefFor(route.value?.canonicalHash ?? null));
 }
@@ -76,15 +77,7 @@ const parameters = new URLSearchParams(window.location.search);
 const queryLocale = parameters.get('lang');
 const showFps = parameters.get('fps') !== '0';
 const fadeTheme = parameters.get('theme-motion') === 'fade';
-const locale = ref<Locale>(
-  isLocale(queryLocale)
-    ? queryLocale
-    : isLocale(preferences.locale)
-      ? preferences.locale
-      : navigator.language.toLowerCase().startsWith('zh')
-        ? 'zh'
-        : 'en',
-);
+const locale = ref(resolveWorkspaceLocale(queryLocale, preferences.locale, navigator.language));
 // Selection follows the user immediately; translated copy waits for the snapshot.
 const requestedLocale = ref(locale.value);
 const theme = ref(resolveInitialThemeMode());
@@ -136,8 +129,6 @@ type Panel = 'explorer' | 'inspector';
 const desktopQuery = window.matchMedia(`(min-width: ${layoutBreakpoints.xl}px)`);
 const persistent = ref(desktopQuery.matches);
 const openPanel = ref<Panel | null>(null);
-const explorer = ref<HTMLDialogElement | null>(null);
-const inspector = ref<HTMLDialogElement | null>(null);
 const workspace = ref<HTMLElement | null>(null);
 // Focus moves to the stage for deep links and history too. Only keyboard
 // navigation should paint the focus ring, so the shell tracks the modality
@@ -145,30 +136,6 @@ const workspace = ref<HTMLElement | null>(null);
 const focusReveal = ref(false);
 let returnFocus: HTMLElement | null = null;
 let focusFrame = 0;
-
-function syncPanels(): void {
-  for (const [panel, element] of [
-    ['explorer', explorer.value],
-    ['inspector', inspector.value],
-  ] as const) {
-    if (!element) continue;
-    const modal = element.matches(':modal');
-    if (modal && (persistent.value || openPanel.value !== panel)) element.close();
-    if (persistent.value) {
-      // Setting the non-modal open state keeps the desktop column from stealing focus.
-      element.open = true;
-    } else if (openPanel.value === panel) {
-      if (!modal) {
-        element.open = false;
-        element.showModal();
-      }
-    } else {
-      element.open = false;
-    }
-  }
-}
-
-watch([persistent, openPanel], syncPanels, { flush: 'post' });
 
 function revealFocus(): void {
   focusReveal.value = true;
@@ -215,6 +182,7 @@ function focusRoute(): void {
 }
 
 function applyRoute(next: ReturnType<typeof resolveLabHash>): void {
+  previewPending.value = false;
   route.value = next;
   if (next !== null) writePreferences({ module: next.moduleId });
   closePanel(false);
@@ -251,12 +219,11 @@ function syncLocation(): void {
 }
 
 function saveWorkspace(): void {
-  saveScrollPosition(workspace.value);
+  if (!previewPending.value) saveScrollPosition(workspace.value);
 }
 
 let stopThemeObservation: (() => void) | undefined;
-onMounted(() => {
-  syncPanels();
+onMounted(async () => {
   stopThemeObservation = observeSystemTheme();
   desktopQuery.addEventListener('change', syncLayout);
   window.addEventListener('pointerdown', concealFocus, true);
@@ -264,8 +231,20 @@ onMounted(() => {
   window.addEventListener('popstate', syncLocation);
   window.addEventListener('hashchange', syncLocation);
   window.addEventListener('pagehide', saveWorkspace);
-  if (!restoreScrollPosition(workspace.value) && route.value?.specimenId !== undefined)
-    focusRoute();
+  if (initialPreview !== undefined) {
+    try {
+      await initialPreview;
+    } finally {
+      previewPending.value = false;
+      await nextTick();
+    }
+  }
+  // Restore only after the initial preview gives the stage its scroll height.
+  if (route.value === initialRoute && workspace.value !== null) {
+    if (!restoreScrollPosition(workspace.value) && initialRoute?.specimenId !== undefined) {
+      focusRoute();
+    }
+  }
 });
 
 onBeforeUnmount(() => {
@@ -297,18 +276,16 @@ onBeforeUnmount(() => {
       @locale="setLocale"
       @panel="showPanel"
     />
-    <dialog
-      ref="explorer"
+    <UiDrawer
       id="design-lab-navigation"
       data-playground-navigation
-      class="playground-shell__panel playground-shell__explorer material-glass-subtle"
-      data-neoverse-glass-edge-stroke
-      data-neoverse-surface-hover="static"
+      :open="persistent || openPanel === 'explorer'"
+      :modal="!persistent"
+      side="left"
+      class="playground-shell__panel playground-shell__explorer"
       aria-labelledby="explorer-title"
       :role="persistent ? 'complementary' : undefined"
-      :inert="!persistent && openPanel !== 'explorer'"
-      @cancel.prevent="closePanel()"
-      :closedby="persistent ? 'none' : 'any'"
+      @update:open="(open) => !open && openPanel === 'explorer' && closePanel()"
     >
       <LabExplorer
         :locale="locale"
@@ -318,7 +295,7 @@ onBeforeUnmount(() => {
         @close="closePanel()"
         @navigate="navigateLink"
       />
-    </dialog>
+    </UiDrawer>
     <main
       ref="workspace"
       data-design-lab-workspace
@@ -332,6 +309,7 @@ onBeforeUnmount(() => {
         :category="category?.label"
         :specimen="specimen"
         :session="session"
+        :preview-pending="previewPending"
         :background="stageBackground"
         :surface="showcaseSurface"
         @navigate="navigate"
@@ -339,17 +317,16 @@ onBeforeUnmount(() => {
         @surface="setShowcaseSurface"
       />
     </main>
-    <dialog
-      ref="inspector"
+    <UiDrawer
       id="design-lab-inspector"
-      class="playground-shell__panel playground-shell__inspector material-glass-subtle"
-      data-neoverse-glass-edge-stroke
-      data-neoverse-surface-hover="static"
+      class="playground-shell__panel playground-shell__inspector"
+      :open="persistent || openPanel === 'inspector'"
+      :modal="!persistent"
+      side="right"
+      width="calc(var(--neoverse-layout-sidebar-drawer-width) + var(--neoverse-space-6))"
       aria-labelledby="inspector-title"
       :role="persistent ? 'complementary' : undefined"
-      :inert="!persistent && openPanel !== 'inspector'"
-      @cancel.prevent="closePanel()"
-      :closedby="persistent ? 'none' : 'any'"
+      @update:open="(open) => !open && openPanel === 'inspector' && closePanel()"
     >
       <LabInspector
         :locale="locale"
@@ -360,6 +337,6 @@ onBeforeUnmount(() => {
         :session="session"
         @close="closePanel()"
       />
-    </dialog>
+    </UiDrawer>
   </div>
 </template>

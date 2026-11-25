@@ -37,6 +37,7 @@ const props = defineProps<{
   category: LocalizedText | undefined;
   specimen: LabSpecimen | undefined;
   session: SpecimenSession | undefined;
+  previewPending: boolean;
   background: StageBackground;
   surface: ShowcaseSurface;
 }>();
@@ -53,7 +54,6 @@ const FocusedSpecimen = () => {
 };
 
 const copy = {
-  label: localized('Preview Stage', '预览区'),
   summary: localized(
     '{modules} modules · {specimens} specimens',
     '{modules} 个模块 · {specimens} 个示例',
@@ -121,7 +121,7 @@ const overviewSummary = computed(() =>
       <div class="playground-stage__identity">
         <p class="playground-stage__label text-label-sm font-label text-secondary">
           <span aria-hidden="true" />
-          {{ localize(copy.label, locale) }}
+          {{ localize(appCopy.previewStage, locale) }}
         </p>
         <button
           v-if="specimen"
@@ -235,6 +235,7 @@ const overviewSummary = computed(() =>
       <div
         class="playground-stage__specimen-content"
         :style="contentStyle"
+        :aria-busy="previewPending || undefined"
         :data-dragging="dragging || undefined"
         @wheel.ctrl="zoomWithWheel"
         @pointerdown="startStageDrag"
@@ -243,7 +244,10 @@ const overviewSummary = computed(() =>
         @pointercancel="endDrag"
         @lostpointercapture="endDrag"
       >
-        <FocusedSpecimen />
+        <p v-if="previewPending" role="status" class="text-body text-secondary">
+          {{ localize(appCopy.loadingPreview, locale) }}
+        </p>
+        <FocusedSpecimen v-else />
       </div>
     </section>
 
@@ -272,8 +276,15 @@ const overviewSummary = computed(() =>
           {{ localize(module.description, locale) }}
         </p>
       </header>
-      <div data-design-lab-region="module" class="grid min-w-0 gap-grid">
-        <component :is="module.component" :key="module.id" :locale="locale" />
+      <div
+        data-design-lab-region="module"
+        class="grid min-w-0 gap-grid"
+        :aria-busy="previewPending || undefined"
+      >
+        <p v-if="previewPending" role="status" class="text-body text-secondary">
+          {{ localize(appCopy.loadingPreview, locale) }}
+        </p>
+        <component v-else :is="module.component" :key="module.id" :locale="locale" />
       </div>
     </section>
 

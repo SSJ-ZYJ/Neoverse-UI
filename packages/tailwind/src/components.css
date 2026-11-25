@@ -23,6 +23,7 @@
 @import './components/form-control.css';
 @import './components/overlay.css';
 @import './components/dialog.css';
+@import './components/drawer.css';
 @import './components/toast.css';
 @import './components/context-menu.css';
 @import './components/prose.css';

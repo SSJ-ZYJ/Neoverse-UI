@@ -45,6 +45,7 @@ export { default as UiStepFlow } from './components/navigation/UiStepFlow.vue';
 export { default as UiTabs } from './components/navigation/UiTabs.vue';
 export { default as UiContextMenu } from './components/overlays/UiContextMenu.vue';
 export { default as UiDialog } from './components/overlays/UiDialog.vue';
+export { default as UiDrawer } from './components/overlays/UiDrawer.vue';
 export { default as UiDropdownMenu } from './components/overlays/UiDropdownMenu.vue';
 export { default as UiPopover } from './components/overlays/UiPopover.vue';
 export { default as UiToast } from './components/overlays/UiToast.vue';
@@ -101,8 +102,12 @@ export type {
   ControlSurfaceProps,
   ControlSurfaceScale,
   DialogProps,
+  DialogRole,
+  DialogSize,
   DisclosureProps,
   DockProps,
+  DrawerProps,
+  DrawerSide,
   DropdownMenuItem,
   DropdownMenuItemTone,
   DropdownMenuProps,

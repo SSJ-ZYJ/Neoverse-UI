@@ -1,19 +1,11 @@
 import { resolve } from 'node:path';
+import { seedPlaygroundCss } from './playground-css';
 
 const rootDirectory = resolve(import.meta.dir, '../..');
 
-// Live dev loop:
-// 1. playground server (with browser auto-reload enabled)
-// 2. vite --watch, rebuilding the client bundle on source edits
-// 3. dev-watch orchestrator, rebuilding tokens/motion/tailwind CSS on edits
-const commands: Array<{ args: string[]; cwd: string; env?: Record<string, string> }> = [
+const commands = [
   {
-    args: ['bun', 'run', 'src/index.ts'],
-    cwd: resolve(import.meta.dir, '../../apps/playground'),
-    env: { LIVE_RELOAD: '1' },
-  },
-  {
-    args: ['bun', 'run', 'dev:client'],
+    args: ['bun', 'run', 'dev'],
     cwd: resolve(import.meta.dir, '../../apps/playground'),
   },
   {
@@ -33,11 +25,11 @@ const main = async (): Promise<void> => {
   if (buildExitCode !== 0) {
     process.exit(buildExitCode);
   }
+  await seedPlaygroundCss();
 
-  const children = commands.map(({ args, cwd, env }) =>
+  const children = commands.map(({ args, cwd }) =>
     Bun.spawn(args, {
       cwd,
-      env: { ...process.env, ...env },
       stdin: 'inherit',
       stderr: 'inherit',
       stdout: 'inherit',

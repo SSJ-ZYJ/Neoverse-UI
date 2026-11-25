@@ -102,6 +102,15 @@ export const controlOverlaySpecimens = [
     kind: 'component',
   },
   {
+    id: 'overlays-drawer',
+    preview: overlays.drawer,
+    moduleId: 'overlays',
+    label: localized('Drawer', '抽屉'),
+    apiNames: ['UiDrawer'],
+    tags: ['overlay', 'drawer', 'modal', 'focus'],
+    kind: 'component',
+  },
+  {
     id: 'controls-navigation-item',
     preview: interactive.navigationItem,
     moduleId: 'controls',

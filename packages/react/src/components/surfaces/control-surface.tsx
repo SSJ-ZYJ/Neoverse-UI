@@ -76,8 +76,9 @@ export function UiControlSurface({
   const primary = useRef<HTMLDivElement>(null);
   const indicator = useRef<HTMLSpanElement>(null);
   // Committed geometry lives in left/top/width/height; the flight between
-  // selections is a compositor translate + scale away from that base, so the
-  // indicator never runs per-frame layout inside a glass surface.
+  // selections is a compositor translate away from that base, so the indicator
+  // never runs per-frame layout inside a glass surface. The destination size is
+  // committed before the flight, keeping one bar of constant painted length.
   const indicatorBase = useRef<IndicatorRect | undefined>(undefined);
   const indicatorTarget = useRef<IndicatorRect | undefined>(undefined);
   const [ready, setReady] = useState(false);
@@ -146,9 +147,17 @@ export function UiControlSurface({
       }
       const translateX = target.left - base.left;
       const translateY = target.top - base.top;
-      const scaleX = target.width / base.width;
-      const scaleY = target.height / base.height;
-      element.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scaleX}, ${scaleY})`;
+      // Take the destination size before the flight, then move only the
+      // position. Scaling between markers would stretch the same bar
+      // mid-flight and read as a drag instead of one bar travelling its path.
+      if (
+        Math.abs(target.width - base.width) > 0.5 ||
+        Math.abs(target.height - base.height) > 0.5
+      ) {
+        element.style.width = `${target.width}px`;
+        element.style.height = `${target.height}px`;
+      }
+      element.style.transform = `translate(${translateX}px, ${translateY}px)`;
     };
     const resize = typeof ResizeObserver === 'undefined' ? undefined : new ResizeObserver(measure);
     const observe = () => {

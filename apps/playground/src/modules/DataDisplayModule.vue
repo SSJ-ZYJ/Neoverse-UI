@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import {
   UiAvatar,
-  UiButton,
   UiDisclosure,
-  UiEmptyState,
   UiPagination,
   UiStatCard,
   UiStepFlow,
@@ -13,11 +11,11 @@ import {
   UiTimeline,
 } from '@neoverse-ui/vue';
 import { ref } from 'vue';
-import LabIcon from '../LabIcon.vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
 import { lazyComponent } from '../lazy-component';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, localized } from '../playground-content';
+import EmptyStatePreview from '../previews/EmptyStatePreview.vue';
 import type { LabModuleProps } from './types';
 
 const DataDisplayVisualFixture = lazyComponent(() => import('./DataDisplayVisualFixture.vue'));
@@ -181,8 +179,8 @@ const copy = {
       :description="
         localize(
           localized(
-            'Controlled page navigation with compact visible ranges.',
-            '受控页码导航，按需折叠过长页码列表。',
+            'Go from page 5 to 6 to see the compact range reflow.',
+            '从第 5 页翻到第 6 页，观察折叠页码平滑重排。',
           ),
           props.locale,
         )
@@ -244,32 +242,14 @@ const copy = {
       :description="
         localize(
           localized(
-            'A lightweight placeholder with consumer-owned actions and imagery.',
-            '轻量的空状态占位，操作与插图由消费端提供。',
+            'Compare onboarding, filtered results, passive activity, and restricted access.',
+            '对照首次使用、筛选无结果、暂无活动与权限受限四种场景。',
           ),
           props.locale,
         )
       "
     >
-      <MaterialBackdrop edge="inset">
-        <UiEmptyState
-          :title="localize(localized('No projects yet', '暂无项目'), props.locale)"
-          :description="
-            localize(
-              localized('Create a project to get started.', '创建项目后即可在这里查看。'),
-              props.locale,
-            )
-          "
-          data-empty-state-sample
-        >
-          <template #icon><LabIcon name="folder" /></template>
-          <template #action>
-            <UiButton size="sm">
-              {{ localize(localized('Create project', '创建项目'), props.locale) }}
-            </UiButton>
-          </template>
-        </UiEmptyState>
-      </MaterialBackdrop>
+      <EmptyStatePreview :locale="props.locale" />
     </LabSpecimenSection>
 
     <LabSpecimenSection

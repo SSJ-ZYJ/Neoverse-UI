@@ -24,8 +24,11 @@ const contexts = [
   },
   {
     id: 'reduced',
-    label: localized('Reduced transparency', '降低透明度'),
-    hint: localized('Checks the accessible opaque fallback.', '检查无障碍不透明回退表现。'),
+    label: localized('Reduced transparency simulation', '降低透明度模拟'),
+    hint: localized(
+      'Local CSS preview without backdrop blur. It does not change the browser preference or test the painted edge stroke.',
+      '仅以局部 CSS 预览无背景模糊的效果，不会更改浏览器偏好，也不验证描边。',
+    ),
   },
 ] as const;
 </script>

@@ -2,7 +2,7 @@
 
 Status: adopted
 
-Vue 与 React 现提供相同的 43 个公开组件。两套适配复用 Tokens、Tailwind 组件样式、Motion 与 Overlay Runtime，业务数据和路由仍由使用方管理。
+Vue 与 React 提供相同的公开组件。两套适配复用 Tokens、Tailwind 组件样式、Motion 与 Overlay Runtime，业务数据和路由仍由使用方管理。
 
 ## 状态与事件
 
@@ -20,6 +20,8 @@ Vue 与 React 现提供相同的 43 个公开组件。两套适配复用 Tokens�
 | Prompt 聚焦 | 组件 ref 的 `focus()` | input ref 的 `focus()` |
 
 React 的原生事件名称、`className`、`htmlFor` 和 ref 遵循 React 约定。框架适配不要求把这些名称改写为一致的拼写。
+
+`ButtonVariant` 在两端共享：`primary` 为主要蓝色，`secondary` 为次要样式，`ghost` 无填充；`success` 为成功绿，`warning` 为警告琥珀色，`danger` 为危险红，`accent` 为强调紫。
 
 ## 命名内容和根元素
 
@@ -40,7 +42,7 @@ TerminalPrompt 的 `suggestion` 在两端都只显示匹配的候选后缀；接
 
 ## 验证与边界
 
-- `contracts/framework-parity.json`：校验 43 个组件、10 个数据结构、29 组字面量类型和登记的命名插槽对应关系，覆盖两条成熟度轨道。
+- `contracts/framework-parity.json`：校验组件、数据结构、字面量类型和登记的命名插槽对应关系，覆盖两条成熟度轨道。
 - `packages/react/src/parity.test.tsx`：SSR、原生语义、可访问标签、默认状态与定制内容。
 - `/react-fixture?contract-fixtures`：Design Lab 中的实际 React DOM 与状态示例。
 - `tests/e2e/parity.spec.ts`：桌面和移动端、深浅主题下每个 React 适配器的语义 DOM、主题解析与共享控件名称；键盘选择、受控拒绝、终端补全、输出跟随、滚动条拖拽等交互分别由 `navigation`、`terminal`、`surfaces` 模块覆盖。

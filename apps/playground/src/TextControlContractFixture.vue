@@ -61,7 +61,7 @@ const options = [
       <button type="button" data-text-editable @click="locked = 'none'">Editable</button>
     </div>
     <output data-text-value>{{ text }}</output>
-    <output data-notes-value>{{ notes }}</output>
+    <output data-notes-value class="break-all">{{ notes }}</output>
     <output data-select-requests>{{ requests }}</output>
   </form>
 </template>

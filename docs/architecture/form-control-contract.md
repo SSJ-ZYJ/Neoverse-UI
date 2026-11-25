@@ -25,9 +25,11 @@ An explicit consumer-provided `aria-invalid` always wins over the validation-der
 
 The canonical control set is:
 
-- `UiInput`, `UiTextarea`, and `UiSelect` for text and selection input. `UiInput` and `UiTextarea` both mirror the shared breathing and gliding caret above their Glass field (`ui-input-shell` in one axis, `ui-textarea-shell` in two axes); selection, IME composition, masked, email, number and other types without a text selection, and forced colors keep the browser caret. The bar keeps its width and glides from its live visual position to the new slot, with a duration that grows with the distance travelled up to the glide token; the glide stops under `prefers-reduced-motion` while the opacity blink stays. The bar stays solid while it travels and blinks again once it settles. Readonly and disabled text fields remain focusable and selectable where the platform allows it, but they never paint an insertion caret. The host `class` and `style` land on the textarea shell, so a width constraint keeps the resize handle, edge treatment and shadow attached to the visible field.
+- `UiInput`, `UiTextarea`, and `UiSelect` for text and selection input. `UiInput` and `UiTextarea` mirror the caret above their Glass fields; selection, IME composition, masked, email, number and other types without a text selection, and forced colors keep the browser caret. Readonly and disabled controls do not paint an insertion caret. The host `class` and `style` land on the textarea shell, so a width constraint keeps the resize handle, edge treatment and shadow attached to the visible field.
 - `UiCheckbox`, `UiRadioGroup`, and `UiSwitch` for choice input.
 - `UiField` for label, description, required marker, control placement, and validation message composition.
+
+When the insertion point moves without a text edit, the mirrored caret stretches toward it horizontally on the same row and along the direct path between rows in a textarea. The leading edge arrives first; the trailing edge catches up, restoring the normal bar and its blink. Retargeting starts from the currently painted shape. The glide token caps the duration, and text changes, control scrolling, and reduced motion place the caret directly at the insertion point.
 
 Choice controls preserve native `input` elements. Checkbox and Switch use native checkbox state; RadioGroup uses native radio inputs grouped by `name`. The visual control is a sibling presentation layer and does not replace browser semantics.
 

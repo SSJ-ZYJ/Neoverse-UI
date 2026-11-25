@@ -3,12 +3,14 @@
     min-width: 0;
     /* The padded link box is the hover surface, and hit testing stops at this
        container's box even though `overflow-clip-margin` lets the plate paint
-       past it. The container therefore carries the same inset, pulled back by
-       a negative margin so the trail keeps its footprint, and the link's whole
-       padded box stays clickable. The clip margin then only has to cover the
-       focus ring. */
+       past it. The container therefore carries the same insets on both axes,
+       pulled back by negative margins so the trail keeps its footprint, and
+       the link's whole padded box stays clickable. The clip margin then only
+       has to cover the focus ring. */
     padding-block: var(--neoverse-breadcrumb-link-plate-inset);
+    padding-inline: var(--neoverse-breadcrumb-link-plate-inset-inline);
     margin-block: calc(var(--neoverse-breadcrumb-link-plate-inset) * -1);
+    margin-inline: calc(var(--neoverse-breadcrumb-link-plate-inset-inline) * -1);
     overflow: clip;
     overflow-clip-margin: var(--neoverse-breadcrumb-clip-margin);
     color: var(--neoverse-breadcrumb-link-foreground);
@@ -55,16 +57,19 @@
   }
 
   /* The link owns the plate's area instead of borrowing it from a drawing
-     overhang: padding grows the hit box and the negative margin of the same
-     size gives the space back, so the label lands exactly where it did and the
-     trail geometry never moves. Hover therefore answers on the padding, not
-     only on the glyph ink. */
+     overhang: padding grows the hit box and the negative margins of the same
+     size give the space back, so the label lands exactly where it did and the
+     trail geometry never moves. Horizontal clearance is wider than the block
+     inset so the plate does not hug the glyphs, but stays well below button
+     padding. Hover therefore answers on the padding, not only on the glyph ink. */
   .ui-breadcrumb__link {
     position: relative;
     isolation: isolate;
     min-width: 0;
-    padding: var(--neoverse-breadcrumb-link-plate-inset);
-    margin: calc(var(--neoverse-breadcrumb-link-plate-inset) * -1);
+    padding: var(--neoverse-breadcrumb-link-plate-inset)
+      var(--neoverse-breadcrumb-link-plate-inset-inline);
+    margin: calc(var(--neoverse-breadcrumb-link-plate-inset) * -1)
+      calc(var(--neoverse-breadcrumb-link-plate-inset-inline) * -1);
     overflow: clip;
     border-radius: var(--neoverse-breadcrumb-focus-radius);
     color: var(--neoverse-breadcrumb-link-foreground);
@@ -75,9 +80,10 @@
   }
 
   /* The plate is painted behind the label, fills the padded box and rises from
-     slightly smaller while it fades in — the same answer plain footer links
-     give. Drawing it on a pseudo-element means the text box still truncates
-     with an ellipsis and the focus ring keeps its geometry. */
+     slightly smaller while it fades in. Its wash is the global quiet-control
+     hover token, so the trail answers like buttons and navigation items.
+     Drawing it on a pseudo-element means the text box still truncates with an
+     ellipsis and the focus ring keeps its geometry. */
   .ui-breadcrumb__link::after {
     position: absolute;
     z-index: -1;

@@ -49,7 +49,7 @@ import {
 export const glassRendererAttribute = 'data-neoverse-glass-renderer';
 
 const tableGlassSelector = 'table.ui-table, .neoverse-prose table';
-const cssEdgePassSelector = '[data-neoverse-glass-edge-pass="css"]';
+const cssEdgePassSelector = '.ui-overlay-panel, [data-neoverse-glass-edge-pass="css"]';
 const reducedTransparencyQuery = '(prefers-reduced-transparency: reduce)';
 const systemDarkQuery = '(prefers-color-scheme: dark)';
 // Cap passive scroll and viewport-resize bursts at roughly 60 fps while keeping
@@ -829,8 +829,7 @@ class GlassRendererImpl implements GlassRenderer {
       glassSelector,
       occluderSelector,
       getStyle,
-      isStrictTopLayerDescendant: (element) =>
-        topLayer.isStrictTopLayerDescendant(element, getStyle, topLayerCache),
+      isInTopLayer: (element) => topLayer.isInTopLayer(element, getStyle, topLayerCache),
     };
   }
 

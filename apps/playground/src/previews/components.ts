@@ -1,13 +1,5 @@
-import {
-  UiBreadcrumb,
-  UiButton,
-  UiEmptyState,
-  UiPagination,
-  UiStepFlow,
-  UiTimeline,
-} from '@neoverse-ui/vue';
+import { UiBreadcrumb, UiPagination, UiStepFlow, UiTimeline } from '@neoverse-ui/vue';
 import { defineComponent, h, type PropType, ref, type VNode } from 'vue';
-import LabIcon from '../LabIcon.vue';
 import {
   checkbox,
   radioGroup as radioGroupSpecimen,
@@ -97,68 +89,6 @@ const PaginationPreview = defineComponent({
 
 export function pagination(locale: Locale): VNode {
   return h(PaginationPreview, { locale });
-}
-
-const emptyStateCopy = {
-  title: localized('No projects yet', '暂无项目'),
-  description: localized('Create a project to get started.', '创建项目后即可在这里查看。'),
-  action: localized('Create project', '创建项目'),
-  project: localized('Untitled project', '未命名项目'),
-  remove: localized('Remove project', '移除项目'),
-};
-const EmptyStatePreview = defineComponent({
-  props: previewProps,
-  setup(props) {
-    const projectCreated = ref(false);
-    return () => {
-      if (projectCreated.value) {
-        return h('div', { class: 'grid justify-items-center gap-3' }, [
-          h(
-            'p',
-            { class: 'text-body-sm text-primary', role: 'status' },
-            localize(emptyStateCopy.project, props.locale),
-          ),
-          h(
-            UiButton,
-            {
-              size: 'sm',
-              onClick: () => {
-                projectCreated.value = false;
-              },
-            },
-            () => localize(emptyStateCopy.remove, props.locale),
-          ),
-        ]);
-      }
-
-      return h(
-        UiEmptyState,
-        {
-          title: localize(emptyStateCopy.title, props.locale),
-          description: localize(emptyStateCopy.description, props.locale),
-          'data-empty-state-sample': '',
-        },
-        {
-          icon: () => h(LabIcon, { name: 'folder' }),
-          action: () =>
-            h(
-              UiButton,
-              {
-                size: 'sm',
-                onClick: () => {
-                  projectCreated.value = true;
-                },
-              },
-              () => localize(emptyStateCopy.action, props.locale),
-            ),
-        },
-      );
-    };
-  },
-});
-
-export function emptyState(locale: Locale): VNode {
-  return h(EmptyStatePreview, { locale });
 }
 
 const milestones = [

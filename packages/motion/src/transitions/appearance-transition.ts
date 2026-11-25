@@ -71,7 +71,12 @@ const active = new WeakMap<Document, AppearanceRun>();
 const ignoreCancellation = () => undefined;
 const outgoingPseudo = '::view-transition-old(root)';
 const snapshotAttribute = 'data-neoverse-theme-view-transitioning';
-const appearanceAttribute = 'data-neoverse-appearance-motion';
+/**
+ * Attribute set on `<html>` while a View Transition owns the page appearance.
+ * Live motion inside the page is invisible until the reveal, so unrelated
+ * components can commit geometry instead of animating it.
+ */
+export const appearanceMotionAttribute = 'data-neoverse-appearance-motion';
 const liveAttribute = 'data-neoverse-appearance-live';
 const tokenFadeAttribute = 'data-neoverse-theme-transitioning';
 const revealCenter = '--neoverse-appearance-reveal-center';
@@ -148,7 +153,7 @@ export async function animateAppearanceChange(
     }
   }
 
-  root.setAttribute(appearanceAttribute, kind);
+  root.setAttribute(appearanceMotionAttribute, kind);
   root.setAttribute(snapshotAttribute, '');
   let captureCommit: Promise<void> | undefined;
   let playback: Animation | undefined;
@@ -234,7 +239,7 @@ export async function animateAppearanceChange(
     if (active.get(document) !== run) return;
     view.cancelAnimationFrame(frame);
     active.delete(document);
-    root.removeAttribute(appearanceAttribute);
+    root.removeAttribute(appearanceMotionAttribute);
     root.removeAttribute(liveAttribute);
     root.removeAttribute(snapshotAttribute);
     if (kind === 'theme-reveal') {

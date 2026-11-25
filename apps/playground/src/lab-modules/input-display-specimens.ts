@@ -34,11 +34,11 @@ export const dataDisplayTopSpecimens = [
   },
   {
     id: 'data-display-empty-state',
-    preview: components.emptyState,
+    preview: interactive.emptyState,
     moduleId: 'data-display',
     label: localized('Empty state', '空状态'),
     apiNames: ['UiEmptyState'],
-    tags: ['empty', 'placeholder', 'action'],
+    tags: ['empty', 'placeholder', 'onboarding', 'search', 'activity', 'access'],
     kind: 'component',
   },
   {

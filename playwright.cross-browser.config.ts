@@ -14,6 +14,7 @@ export default defineConfig({
   testMatch: [
     '**/forms.spec.ts',
     '**/overlays.spec.ts',
+    '**/context-menu.spec.ts',
     '**/navigation.spec.ts',
     '**/segmented-control.spec.ts',
     '**/surfaces.spec.ts',

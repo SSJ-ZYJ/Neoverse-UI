@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { syncCaretFlight } from '@neoverse-ui/motion';
 import { computed, onBeforeUnmount, ref, useAttrs, watch } from 'vue';
 import type { InputProps } from '../../types';
-import { deferPointerFocus, slideCaret, watchCaretSelection } from '../motion/caret-motion';
+import { deferPointerFocus, watchCaretSelection } from '../motion/caret-motion';
 import { resolveAriaInvalid } from './form-control';
 
 defineOptions({ inheritAttrs: false });
@@ -26,7 +27,6 @@ const caretText = ref('');
 const scrollOffset = ref(0);
 const caretHolding = ref(false);
 let holdTimer: ReturnType<typeof setTimeout> | undefined;
-let caretLeft: number | null = null;
 let caretScroll = 0;
 let pointerFocusing = false;
 let cancelPointerFocus: (() => void) | undefined;
@@ -116,12 +116,7 @@ watch(
 watch(
   [caretPrefix, scrollOffset, showsCaret, caretText],
   () => {
-    caretLeft = slideCaret(
-      caretGlyph.value,
-      caretLeft,
-      caretText.value,
-      scrollOffset.value !== caretScroll,
-    );
+    syncCaretFlight(caretGlyph.value, caretText.value, scrollOffset.value !== caretScroll);
     caretScroll = scrollOffset.value;
   },
   { flush: 'post' },

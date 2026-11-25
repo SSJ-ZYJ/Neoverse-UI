@@ -1,7 +1,8 @@
-import { UiButton, UiDialog, UiDropdownMenu, UiPopover } from '@neoverse-ui/vue';
+import { UiButton, UiDrawer, UiDropdownMenu, UiPopover } from '@neoverse-ui/vue';
 import { defineComponent, h, ref } from 'vue';
 import { lazyComponent, withPreload } from '../lazy-component';
 import { type Locale, localize, localized } from '../playground-content';
+import { DialogPreview, OverlayScenarios } from './OverlayScenarios';
 
 const ContextMenuPreview = lazyComponent(() => import('./ContextMenuPreview.vue'));
 
@@ -18,12 +19,9 @@ const copy = {
   archive: localized('Archive', '归档'),
   remove: localized('Remove', '移除'),
   selected: localized('Selected action', '已选择操作'),
-  openDialog: localized('Open dialog', '打开对话框'),
-  dialogTitle: localized('Confirm changes', '确认修改'),
-  dialogBody: localized('Review this action before continuing.', '继续前请确认本次操作。'),
-  cancel: localized('Cancel', '取消'),
-  confirm: localized('Continue', '继续'),
 };
+
+export { DialogPreview, OverlayScenarios };
 
 /** The standard Popover instance shared with the full overlay fixture */
 export const PopoverPreview = ({ locale }: { locale: Locale }) =>
@@ -81,51 +79,6 @@ export const DropdownPreview = defineComponent(
   { props: ['locale', 'id', 'contractMode', 'disabled'] },
 );
 
-/** A modal trigger and its dialog share the owning preview's lifetime */
-export const DialogPreview = defineComponent(
-  (props: { locale: Locale }) => {
-    const open = ref(false);
-    const close = () => {
-      open.value = false;
-    };
-    return () => {
-      const locale = props.locale;
-      return [
-        h(
-          UiButton,
-          {
-            'data-dialog-open': '',
-            onClick: () => {
-              open.value = true;
-            },
-          },
-          () => localize(copy.openDialog, locale),
-        ),
-        h(
-          UiDialog,
-          {
-            open: open.value,
-            title: localize(copy.dialogTitle, locale),
-            'onUpdate:open': (value: boolean) => {
-              open.value = value;
-            },
-          },
-          {
-            default: () => h('p', localize(copy.dialogBody, locale)),
-            footer: () => [
-              h(UiButton, { variant: 'ghost', onClick: close }, () =>
-                localize(copy.cancel, locale),
-              ),
-              h(UiButton, { onClick: close }, () => localize(copy.confirm, locale)),
-            ],
-          },
-        ),
-      ];
-    };
-  },
-  { props: ['locale'] },
-);
-
 /** Mount only the standard Popover */
 export const popover = (locale: Locale) => h(PopoverPreview, { locale });
 /** Mount only the standard DropdownMenu */
@@ -138,3 +91,51 @@ export const contextMenu = withPreload(
 );
 /** Mount the modal dialog example */
 export const dialog = (locale: Locale) => h(DialogPreview, { locale });
+
+export const DrawerPreview = defineComponent(
+  (props: { locale: Locale }) => {
+    const open = ref(false);
+    return () => {
+      const label = localize(localized('Tools drawer', '工具抽屉'), props.locale);
+      const close = () => {
+        open.value = false;
+      };
+      return [
+        h(
+          UiButton,
+          {
+            'aria-controls': 'overlay-example-drawer',
+            'aria-expanded': open.value,
+            'data-drawer-open': '',
+            onClick: () => {
+              open.value = true;
+            },
+          },
+          () => localize(localized('Open drawer', '打开抽屉'), props.locale),
+        ),
+        h(
+          UiDrawer,
+          {
+            id: 'overlay-example-drawer',
+            open: open.value,
+            'onUpdate:open': (value: boolean) => {
+              open.value = value;
+            },
+            'aria-label': label,
+            class: 'gap-3 p-4',
+            'data-drawer-panel': '',
+          },
+          () => [
+            h('h3', { class: 'text-subtitle font-heading' }, label),
+            h(UiButton, { 'data-drawer-close': '', onClick: close }, () =>
+              localize(localized('Close drawer', '关闭抽屉'), props.locale),
+            ),
+          ],
+        ),
+      ];
+    };
+  },
+  { props: ['locale'] },
+);
+
+export const drawer = (locale: Locale) => h(DrawerPreview, { locale });

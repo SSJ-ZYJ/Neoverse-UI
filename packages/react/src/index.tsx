@@ -101,7 +101,13 @@ export {
   type UiContextMenuProps,
   type UiContextMenuSeparator,
 } from './components/overlays/context-menu-types.js';
-export { UiDialog, type UiDialogProps } from './components/overlays/dialog.js';
+export {
+  type DialogRole,
+  type DialogSize,
+  UiDialog,
+  type UiDialogProps,
+} from './components/overlays/dialog.js';
+export { type DrawerSide, UiDrawer, type UiDrawerProps } from './components/overlays/drawer.js';
 export {
   UiDropdownMenu,
   type UiDropdownMenuItem,

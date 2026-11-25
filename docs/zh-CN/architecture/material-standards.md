@@ -5,7 +5,7 @@ Status: adopted
 [English](../../architecture/material-standards.md)
 
 <!-- Source: docs/architecture/material-standards.md -->
-<!-- Source-SHA256: 3e5b9cce607b0c43ec1c6ee3648c386cdc2a8bdfc08e3437b2ad3393b6c0a69a -->
+<!-- Source-SHA256: 67d122ec71f6b8ad06474b4f788c57d7c77d81fa5e1fef1a68106b3a9be4dfa1 -->
 
 本文是[英文材质标准](../../architecture/material-standards.md)的中文摘要，覆盖消费项目最常用的材质、层级、嵌套与修复边界。具体光学数值、逐组件审计与历史验收记录以英文原文为准。
 
@@ -46,7 +46,7 @@ Status: adopted
 - 中性 Notice 用随主题变化的浅淡底色与纯色背景分隔，保留轻薄层级的填充透明度、背景模糊和内阴影，不加描边。其他状态样式的语义色不变。
 - Toast 的三种布局共用标准层级的极光玻璃：`compact` 是图标加短文案的胶囊，`action` 是带行内操作的圆角条，`notification` 支持多行、把操作放在文案下方，并保留关闭按钮。未指定布局但提供操作时使用 `action`。前两种默认四秒关闭，多行通知默认保持打开；任一布局设置 `duration` 为零都可保持打开并显示关闭按钮。
 - Skeleton 占位面保留共享高光与 pulse，不再叠加顶部深色边缘；pulse 示例只播放 pulse，不生成 shimmer 扫光。
-- 导航表面只拥有一个强调色：改了指示条的表面，必须用同一强调色同时改左侧竖条与底部横条；朝向别名在条目上解析，而不是在文档根上解析。浅色把冰蓝透明选中底板与主色蔚蓝指示条（`--neoverse-color-accent-primary`）配成一对，深色在明亮的天空蓝选中底板上改用饱和高对比钴蓝（`--neoverse-color-blue-700`），避免深黑缺口感并保持与深色背景的层次。
+- 导航表面只拥有一个强调色：改了指示条的表面，必须用同一强调色同时改左侧竖条与底部横条；朝向别名在条目上解析，而不是在文档根上解析。浅色把冰蓝透明选中底板与主色蔚蓝指示条（`--neoverse-color-accent-primary`）配成一对；深色把深海军蓝选中底板（`--neoverse-navigation-item-active-fill`）与浅天蓝指示条（`--neoverse-color-blue-300`）配成一对，使指示条在底板与深色背景上都保持分离度。
 - 面包屑链接改用普通链接的反馈：链接用底板内距扩大自身盒子，再用等量负外边距把空间还给轨迹；容器也带上同一内距，使内距范围内都可命中，同时路径几何不变。底板填满该盒子，使用共享 hover 场，淡入时由略小放大，按下再叠加加深，文字同时提升到主文本层级——强调色文字落在强调色底板上，在浅色模式下会低于 3:1。容器使用 `overflow-clip-margin` 裁切，不再使用会切掉底板与焦点轮廓的 `overflow: hidden`。
 
 ## 嵌套

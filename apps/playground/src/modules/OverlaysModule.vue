@@ -4,7 +4,7 @@ import LabSpecimenSection from '../LabSpecimenSection.vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, localized, moduleCopy } from '../playground-content';
 import ContextMenuPreview from '../previews/ContextMenuPreview.vue';
-import { DialogPreview } from '../previews/overlays';
+import { DialogPreview, DrawerPreview, OverlayScenarios } from '../previews/overlays';
 import OverlayModule from './OverlayModule.vue';
 import type { LabModuleProps } from './types';
 
@@ -31,10 +31,18 @@ const dialogCopy = {
     '原生模态焦点约束、共享玻璃材质与关闭后的焦点恢复。',
   ),
 } as const;
+const drawerCopy = {
+  label: localized('Drawer', '抽屉'),
+  description: localized(
+    'A viewport-edge panel that shares the modal layer with Dialog.',
+    '从视口边缘打开的面板，与对话框共用模态层级。',
+  ),
+} as const;
 const sections = [
   { id: 'overlays-popover', label: popoverCopy.label },
   { id: 'overlays-context-menu', label: contextMenuCopy.label },
   { id: 'overlays-dialog', label: dialogCopy.label },
+  { id: 'overlays-drawer', label: drawerCopy.label },
 ] as const;
 </script>
 
@@ -62,7 +70,10 @@ const sections = [
       :title="localize(popoverCopy.label, props.locale)"
       :description="localize(popoverCopy.description, props.locale)"
     >
-      <OverlayModule :locale="props.locale" />
+      <div class="grid gap-4">
+        <OverlayModule :locale="props.locale" />
+        <OverlayScenarios :locale="props.locale" />
+      </div>
     </LabSpecimenSection>
 
     <LabSpecimenSection
@@ -81,6 +92,14 @@ const sections = [
       :description="localize(dialogCopy.description, props.locale)"
     >
       <DialogPreview :locale="props.locale" />
+    </LabSpecimenSection>
+
+    <LabSpecimenSection
+      id="overlays-drawer"
+      :title="localize(drawerCopy.label, props.locale)"
+      :description="localize(drawerCopy.description, props.locale)"
+    >
+      <DrawerPreview :locale="props.locale" />
     </LabSpecimenSection>
   </div>
 </template>

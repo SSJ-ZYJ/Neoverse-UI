@@ -8,6 +8,7 @@
     margin-inline: auto;
     gap: var(--neoverse-pagination-gap);
     flex-wrap: wrap;
+    align-content: start;
   }
   .ui-pagination__pages {
     position: relative;

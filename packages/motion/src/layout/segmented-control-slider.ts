@@ -1,3 +1,5 @@
+import { appearanceMotionAttribute } from '../transitions/appearance-transition.js';
+
 const stretchKeyframes: Keyframe[] = [
   { transform: 'scaleX(1)', easing: 'ease-out' },
   { transform: 'scaleX(1.12)', offset: 0.24, easing: 'ease-out' },
@@ -52,6 +54,7 @@ export function attachSegmentedControlSlider(track: HTMLElement): () => void {
   const view = track.ownerDocument.defaultView;
   if (!view) return () => undefined;
 
+  const root = track.ownerDocument.documentElement;
   const reducedMotion = view.matchMedia('(prefers-reduced-motion: reduce)');
   let slider: HTMLElement | null = null;
   let target: HTMLButtonElement | null = null;
@@ -76,6 +79,12 @@ export function attachSegmentedControlSlider(track: HTMLElement): () => void {
     }
     if (!slider) return;
 
+    // A View Transition paints frozen snapshots of the page, so geometry has to
+    // land before the incoming snapshot is captured. Sliding underneath the
+    // snapshot only replays the stale frame after the reveal.
+    const instant = root.hasAttribute(appearanceMotionAttribute);
+    slider.toggleAttribute('data-instant', instant);
+
     const preview = !reducedMotion.matches && pressed?.parentElement === track && !pressed.disabled;
     const next = preview
       ? pressed
@@ -91,6 +100,7 @@ export function attachSegmentedControlSlider(track: HTMLElement): () => void {
     if (offset !== slider.style.getPropertyValue('--segment-active-offset')) {
       slider.style.setProperty('--segment-active-offset', offset);
       if (
+        !instant &&
         !drag &&
         !wasDragging &&
         target &&
@@ -250,6 +260,10 @@ export function attachSegmentedControlSlider(track: HTMLElement): () => void {
     attributes: true,
     attributeFilter: ['aria-checked', 'disabled'],
   });
+  // Release the instant commit as soon as the appearance snapshot is gone so
+  // later selections animate normally again.
+  const appearance = new MutationObserver(schedule);
+  appearance.observe(root, { attributes: true, attributeFilter: [appearanceMotionAttribute] });
   track.addEventListener('pointerdown', onPointerDown);
   track.addEventListener('lostpointercapture', onLostPointerCapture);
   track.addEventListener('pointerout', onPointerOut);
@@ -265,12 +279,14 @@ export function attachSegmentedControlSlider(track: HTMLElement): () => void {
     track.removeEventListener('click', onClick, true);
     reducedMotion.removeEventListener('change', onMotionChange);
     changes.disconnect();
+    appearance.disconnect();
     resize?.disconnect();
     stretch?.cancel();
     stopTracking();
     slider?.removeAttribute('data-ready');
     slider?.removeAttribute('data-pressed');
     slider?.removeAttribute('data-dragging');
+    slider?.removeAttribute('data-instant');
     slider?.removeAttribute('data-circular');
     view.cancelAnimationFrame(frame);
     view.cancelAnimationFrame(readyFrame);

@@ -25,7 +25,7 @@
 </div>
 
 <!-- Source: README.md -->
-<!-- Source-SHA256: c764af8a2b60569332a4360f279f599400cbcfa339f4f24f9500d61bbca456fe -->
+<!-- Source-SHA256: 202ad20dae6fd67b5441428a3dc7ac2dbd94da72b86bd434e527685f4f0c24a7 -->
 
 ## 设计语言
 
@@ -167,6 +167,8 @@ import { UiButton, UiCard, UiField, UiInput } from '@neoverse-ui/react';
 bun install
 bun run dev
 ```
+
+设计台使用 Vite 热更新 Vue、React 和 CSS。修改单个组件或样式时，不会重载页面，未受影响区域的状态会保留。修改热更新边界之外的共享入口时，仍可能重载页面。
 
 `bun run check` 运行全部检查。架构、测试与发布规则见 [AGENTS.md](AGENTS.md) 与[文档规范](docs/AGENTS.md)。
 

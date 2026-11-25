@@ -232,10 +232,10 @@ test('keeps grouped controls on a compact, shared geometry contract', async () =
     '--neoverse-control-surface-divider-gap: var(--neoverse-space-0);',
   );
   expect(controlSurfaceCss).toContain(
-    '--neoverse-control-surface-indicator-duration: var(--neoverse-motion-spatial-duration);',
+    '--neoverse-control-surface-indicator-duration: var(--neoverse-motion-state-duration);',
   );
   expect(controlSurfaceCss).toContain(
-    '--neoverse-control-surface-indicator-easing: var(--neoverse-motion-spatial-easing);',
+    '--neoverse-control-surface-indicator-easing: var(--neoverse-motion-state-easing);',
   );
   expect(controlSurfaceCss).toContain('--neoverse-control-surface-trailing-padding');
   expect(navigationItemCss).toContain(
@@ -272,8 +272,8 @@ test('keeps grouped controls on a compact, shared geometry contract', async () =
     '--neoverse-control-segmented-option-radius: var(--neoverse-radius-pill);',
     '--neoverse-control-segmented-rounded-corner-radius: var(--neoverse-control-corner-radius);',
     '--neoverse-control-segmented-rounded-option-radius: var(--neoverse-control-compact-radius);',
-    '--neoverse-control-segmented-slider-duration: 320ms;',
-    '--neoverse-control-segmented-slider-easing: var(--neoverse-motion-easing-emphasized);',
+    '--neoverse-control-segmented-slider-duration: var(--neoverse-motion-state-duration);',
+    '--neoverse-control-segmented-slider-easing: var(--neoverse-motion-state-easing);',
     '--neoverse-control-segmented-active-shadow: var(--neoverse-effect-choice-selected-inset-shadow);',
   ]) {
     expect(segmentedControlCss).toContain(declaration);

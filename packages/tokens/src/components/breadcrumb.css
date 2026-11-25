@@ -18,19 +18,22 @@
     --neoverse-breadcrumb-focus-offset: var(--neoverse-focus-ring-offset);
     --neoverse-breadcrumb-focus-radius: var(--neoverse-radius-control-inner);
 
-    /* The link grows its own box by this inset and pulls the same amount back
-       with a negative margin, so the hit area and the hover plate both reach
-       past the label while the trail keeps its exact geometry. */
+    /* The link grows its own box by these insets and pulls the same amount back
+       with negative margins, so the hit area and the hover plate both reach
+       past the label while the trail keeps its exact geometry. The inline inset
+       is wider than the block inset: a breadcrumb plate needs visible side
+       clearance without borrowing a button's full horizontal padding. */
     --neoverse-breadcrumb-link-plate-inset: calc(var(--neoverse-space-1) / 2);
-    /* The plate runs in the shared hover field, the same wash plain links use,
-       so breadcrumb feedback matches footer and prose links instead of the
-       quieter control tint. */
-    --neoverse-breadcrumb-link-plate-background: var(--neoverse-effect-hover-field);
+    --neoverse-breadcrumb-link-plate-inset-inline: calc(var(--neoverse-space-1) * 1.5);
+    /* The plate uses the global quiet-control hover wash so breadcrumb feedback
+       matches buttons, menu rows and navigation items instead of introducing a
+       second, more saturated accent field. */
+    --neoverse-breadcrumb-link-plate-background: var(--neoverse-control-ghost-hover-background);
     /* The plate fades in while it grows from slightly smaller to the link box. */
     --neoverse-breadcrumb-link-plate-rest-scale: 0.92;
     /* The container must not clip the plate or the focus ring, which reaches
-       one plate inset plus one focus offset and width past the trail box. This
-       stays a plain length because Chromium rejects calc() in
+       one inline plate inset plus one focus offset and width past the trail box.
+       This stays a plain length because Chromium rejects calc() in
        overflow-clip-margin. */
     --neoverse-breadcrumb-clip-margin: 0.625rem;
   }

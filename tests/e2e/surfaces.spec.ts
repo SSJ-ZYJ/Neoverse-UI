@@ -2,6 +2,45 @@ import { expect, test } from '../support/e2e';
 
 test.describe('surfaces', () => {
   for (const adapter of ['Vue', 'React'] as const) {
+    test(`${adapter}: grouped controls animate scale only when motion is allowed`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.goto(
+        adapter === 'Vue'
+          ? '/frame?theme=light&lang=en#dock'
+          : '/react-fixture?theme=light&lang=en',
+      );
+      const dock = page.locator(
+        adapter === 'Vue'
+          ? '[data-dock-specimen="standard"] .ui-dock'
+          : '[data-react-adapter="UiDock"]',
+      );
+      await expect(dock).toHaveCSS(
+        'transition-property',
+        'background-color, border-color, box-shadow, zoom',
+      );
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await expect(dock).toHaveCSS(
+        'transition-property',
+        'background-color, border-color, box-shadow',
+      );
+
+      if (adapter === 'Vue') {
+        await page.goto('/frame?theme=light&lang=en#controls-surface');
+      }
+      const surface = page
+        .locator(
+          adapter === 'Vue'
+            ? '#controls-surface .ui-control-surface[data-surface="none"]'
+            : '[data-dock-section]',
+        )
+        .first();
+      await expect(surface).toHaveCSS('transition-duration', '0s');
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await expect(surface).toHaveCSS('transition-property', 'zoom');
+      await expect(surface).not.toHaveCSS('transition-duration', '0s');
+    });
     test(`${adapter}: selected plates disable spatial animation when motion is reduced`, async ({
       page,
     }) => {
@@ -232,6 +271,45 @@ test.describe('surfaces', () => {
     expect(await state.getAttribute('aria-labelledby')).toBe(await heading.getAttribute('id'));
     await expect(state.getByRole('button', { name: 'Create project' })).toBeVisible();
   });
+  for (const adapter of ['Vue', 'React'] as const) {
+    test(`${adapter}: empty states render distinct boundary, density, and background treatments`, async ({
+      page,
+    }) => {
+      await page.goto(
+        adapter === 'Vue'
+          ? '/frame?theme=light&lang=en#data-display-empty-state'
+          : '/react-fixture?theme=dark&lang=en',
+      );
+      const standard = page.locator('[data-empty-state-sample="onboarding"]');
+      const outlined = page.locator('[data-empty-state-sample="search"]');
+      const compact = page.locator('[data-empty-state-sample="activity"]');
+      const subtle = page.locator('[data-empty-state-sample="access"]');
+      await expect(standard).not.toHaveCSS('min-height', '0px');
+      await expect(standard).toHaveCSS('border-top-style', 'solid');
+      await expect(standard.getByRole('heading')).toHaveCSS('text-align', 'center');
+      await expect(standard).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+      const icon = standard.locator('.ui-empty-state__icon');
+      await expect(icon).toHaveCSS('border-top-width', '1px');
+      await expect(icon).toHaveCSS('border-top-style', 'solid');
+      await expect(icon).not.toHaveCSS('border-top-color', 'rgba(0, 0, 0, 0)');
+      await expect(outlined).toHaveCSS('border-top-style', 'dashed');
+      await expect(outlined).toHaveCSS('border-top-width', '2px');
+      await expect(compact).toHaveCSS('min-height', '0px');
+      await expect(compact.getByRole('heading')).toHaveCSS('text-align', 'start');
+      const standardInset = await standard.evaluate((element) =>
+        Number.parseFloat(getComputedStyle(element).paddingTop),
+      );
+      const compactInset = await compact.evaluate((element) =>
+        Number.parseFloat(getComputedStyle(element).paddingTop),
+      );
+      expect(compactInset).toBeLessThan(standardInset);
+      await expect(subtle).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+      await expect(subtle).toHaveCSS('backdrop-filter', 'none');
+      await expect(subtle.getByRole('heading')).toHaveCSS('text-align', 'start');
+      await expect(subtle).toHaveCSS('border-left-width', '0px');
+      await expect(subtle).toHaveCSS('border-right-width', '0px');
+    });
+  }
   for (const theme of ['light', 'dark'] as const) {
     test(`Vue: the card comparison backdrop keeps color below the reference card / ${theme}`, async ({
       page,

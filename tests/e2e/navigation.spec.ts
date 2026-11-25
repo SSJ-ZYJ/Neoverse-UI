@@ -122,9 +122,9 @@ const expectTransformFlight = (samples: FlightSample[], commit: FlightCommit): v
   }
   const last = flying[flying.length - 1];
   if (last === undefined) throw new Error('The indicator flight has no samples');
-  // Every engine drops defaulted components when it serializes the inline
-  // transform: WebKit writes translate(88px) scale(1, 1), Firefox writes
-  // translate(88px) scale(1). Parse the function list instead of one shape.
+  // One bar travels its path: the flight is a translate only. The destination
+  // size is committed before it starts, so a scale here would stretch the bar
+  // mid-flight and read as a drag.
   const parts = Array.from(
     last.transform.matchAll(/([a-z]+)\(([^)]*)\)/g),
     ([, name = '', args = '']) => ({
@@ -132,20 +132,14 @@ const expectTransformFlight = (samples: FlightSample[], commit: FlightCommit): v
       args: args.split(',').map((arg) => Number.parseFloat(arg)),
     }),
   );
+  expect(parts.some((part) => part.name === 'scale')).toBe(false);
   const translate = parts.find((part) => part.name === 'translate');
-  const scale = parts.find((part) => part.name === 'scale');
-  if (!translate || !scale)
-    throw new Error(`Unexpected indicator flight transform: ${last.transform}`);
+  if (!translate) throw new Error(`Unexpected indicator flight transform: ${last.transform}`);
   const [translateX = Number.NaN, translateY = 0] = translate.args;
-  const [scaleX = Number.NaN, scaleY = scaleX] = scale.args;
   expect(
     Math.abs(translateX - (Number.parseFloat(commit.box.left) - Number.parseFloat(last.left))),
   ).toBeLessThan(0.5);
   expect(Math.abs(translateY)).toBeLessThan(0.5);
-  expect(
-    Math.abs(scaleX - Number.parseFloat(commit.box.width) / Number.parseFloat(last.width)),
-  ).toBeLessThan(0.01);
-  expect(Math.abs(scaleY - 1)).toBeLessThan(0.01);
 };
 
 test.describe('navigation', () => {
@@ -211,10 +205,13 @@ test.describe('navigation', () => {
     });
 
     // The plate covers the padded link box, which is taller than the breadcrumb's
-    // single line, and the negative margin returns the same space to the trail.
+    // single line, and the negative margins return the same space to the trail.
+    // Horizontal clearance exceeds the block inset so the wash does not hug the
+    // glyphs, while staying well below a button's horizontal padding.
     expect(rest.overflow).toBe('clip');
     expect(rest.paddingBlock).toBeGreaterThan(0);
-    expect(rest.paddingInline).toBe(rest.paddingBlock);
+    expect(rest.paddingInline).toBeGreaterThan(rest.paddingBlock);
+    expect(rest.paddingInline).toBeLessThan(12);
     expect(rest.marginBlock).toBeCloseTo(-rest.paddingBlock, 1);
     expect(rest.marginInline).toBeCloseTo(-rest.paddingInline, 1);
     expect(rest.plateOpacity).toBe('0');
@@ -244,6 +241,17 @@ test.describe('navigation', () => {
       const hovered = await readPlate();
       expect(hovered.background).not.toBe('rgba(0, 0, 0, 0)');
       expect(hovered.color).not.toBe(rest.color);
+      // Breadcrumb feedback must read the global quiet-control wash rather than
+      // a second accent field, so it matches buttons and navigation items.
+      const globalWash = await page.evaluate(() => {
+        const probe = document.createElement('span');
+        probe.style.backgroundColor = 'var(--neoverse-control-ghost-hover-background)';
+        document.body.append(probe);
+        const value = getComputedStyle(probe).backgroundColor;
+        probe.remove();
+        return value;
+      });
+      expect(hovered.background).toBe(globalWash);
 
       // Pressing deepens the plate instead of fading it and pulls it in.
       await page.mouse.down();
@@ -351,7 +359,7 @@ test.describe('navigation', () => {
   });
 
   for (const theme of ['light', 'dark'] as const) {
-    test(`holding the current navigation item matches primary selection feedback in ${theme} without moving or losing selection`, async ({
+    test(`holding the current navigation item gives distinct feedback in ${theme} without moving or losing selection`, async ({
       page,
     }, testInfo) => {
       await page.emulateMedia({ reducedMotion: 'reduce' });
@@ -362,23 +370,30 @@ test.describe('navigation', () => {
       await current.scrollIntoViewIfNeeded();
       const rest = await current.evaluate((node) => getComputedStyle(node).backgroundImage);
       const restBg = await current.evaluate((node) => getComputedStyle(node).backgroundColor);
+      if (theme === 'dark') {
+        const paint = await current.evaluate((node) => {
+          const style = getComputedStyle(node);
+          const indicator = node.querySelector('.ui-navigation-item__indicator');
+          if (indicator === null) throw new Error('Missing current-page indicator');
+          return {
+            label: style.color,
+            indicator: getComputedStyle(indicator).backgroundColor,
+            blur: style.backdropFilter,
+          };
+        });
+        expect(paint.blur).toContain('blur(');
+        expect(restBg).toMatch(/(?:\/|,)\s*0\.64\)$/);
+        for (const color of [paint.label, paint.indicator]) {
+          const channels = color.match(/\d+/g)?.map(Number) ?? [];
+          expect(Math.max(...channels)).toBeGreaterThan(220);
+        }
+      }
       await current.hover();
       const hover = await current.evaluate((node) => getComputedStyle(node).backgroundImage);
       const hoverBg = await current.evaluate((node) => getComputedStyle(node).backgroundColor);
       if (!testInfo.project.use.hasTouch) {
         expect(hover).not.toBe(rest);
         expect(hoverBg).not.toBe(restBg);
-        if (theme === 'dark') {
-          const primaryHover = await current.evaluate((node) => {
-            const probe = document.createElement('span');
-            probe.style.backgroundColor = 'var(--neoverse-control-primary-hover-background)';
-            node.parentElement?.append(probe);
-            const value = getComputedStyle(probe).backgroundColor;
-            probe.remove();
-            return value;
-          });
-          expect(hoverBg).toBe(primaryHover);
-        }
       }
       const shadow = await current.evaluate((node) => getComputedStyle(node).boxShadow);
       const bounds = await current.boundingBox();
@@ -388,17 +403,7 @@ test.describe('navigation', () => {
         await expect(current).toHaveCSS('box-shadow', shadow);
         expect(await current.boundingBox()).toEqual(bounds);
         await expect(current).toHaveAttribute('aria-current', 'page');
-        if (theme === 'dark') {
-          const primaryActive = await current.evaluate((node) => {
-            const probe = document.createElement('span');
-            probe.style.backgroundColor = 'var(--neoverse-control-primary-active-background)';
-            node.parentElement?.append(probe);
-            const value = getComputedStyle(probe).backgroundColor;
-            probe.remove();
-            return value;
-          });
-          await expect(current).toHaveCSS('background-color', primaryActive);
-        }
+        await expect(current).not.toHaveCSS('background-color', hoverBg);
       } finally {
         await page.mouse.up();
       }
@@ -432,6 +437,51 @@ test.describe('navigation', () => {
     await inspector.getByRole('switch', { name: 'Compact' }).press('Space');
     await expect.poll(iconWidth).toBe(20);
     await expect.poll(itemHeight).toBe(40);
+  });
+
+  test('start and bottom navigation indicators keep the same length', async ({
+    page,
+  }, testInfo) => {
+    // The placement now animates the same bar; read the settled geometry.
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/?theme=light&lang=en#controls-navigation-item', {
+      waitUntil: 'domcontentloaded',
+    });
+    const item = page.locator('[data-design-lab-region="specimen"] .ui-navigation-item');
+    const indicator = item.locator('.ui-navigation-item__indicator');
+    const length = (axis: 'width' | 'height') =>
+      indicator.evaluate((element, axis) => element.getBoundingClientRect()[axis], axis);
+
+    const bottom = await length('width');
+    const inspector = await showInspector(page, testInfo.project.name === 'mobile');
+    await chooseOption(inspector, 'indicatorPlacement', 'Start');
+    await expect(item).toHaveClass(/ui-navigation-item--indicator-start/);
+    expect(await length('height')).toBeCloseTo(bottom, 1);
+
+    await inspector.getByRole('switch', { name: 'Compact' }).press('Space');
+    await chooseOption(inspector, 'indicatorPlacement', 'Bottom');
+    const compactBottom = await length('width');
+    await chooseOption(inspector, 'indicatorPlacement', 'Start');
+    expect(await length('height')).toBeCloseTo(compactBottom, 1);
+  });
+
+  test('the navigation indicator travels when the Inspector changes placement', async ({
+    page,
+  }) => {
+    await page.goto('/?theme=light&lang=en#controls-navigation-item', {
+      waitUntil: 'domcontentloaded',
+    });
+    const indicator = page.locator(
+      '[data-design-lab-region="specimen"] .ui-navigation-item__indicator',
+    );
+    const transition = await indicator.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return { property: style.transitionProperty, duration: style.transitionDuration };
+    });
+    expect(transition.property).toContain('top');
+    expect(transition.property).toContain('left');
+    expect(transition.property).toContain('transform');
+    expect(transition.duration.split(',')[0]?.trim()).toBe('0.24s');
   });
 
   test.describe('dock shared indicator', () => {
@@ -483,6 +533,15 @@ test.describe('navigation', () => {
         expect(
           await indicator.evaluate((element) => getComputedStyle(element).transitionProperty),
         ).toBe('transform');
+        const timing = await indicator.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return {
+            duration: style.transitionDuration,
+            easing: style.transitionTimingFunction,
+          };
+        });
+        expect(timing.duration).toBe('0.24s');
+        expect(timing.easing).toBe('cubic-bezier(0.22, 1, 0.36, 1)');
 
         const settleOn = async (index: number) => {
           const before = await readIndicatorBox(indicator);

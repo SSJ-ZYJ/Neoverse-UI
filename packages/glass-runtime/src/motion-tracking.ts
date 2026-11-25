@@ -114,7 +114,7 @@ export interface MotionTrackingContext {
   glassSelector: string;
   occluderSelector: string;
   getStyle: (element: Element) => CSSStyleDeclaration | undefined;
-  isStrictTopLayerDescendant: (element: Element) => boolean;
+  isInTopLayer: (element: Element) => boolean;
 }
 
 export const animationIsActive = (animation: Animation): boolean =>
@@ -142,6 +142,24 @@ export function isInHiddenTree(
     if (style?.display === 'none') return true;
   }
   return false;
+}
+
+export function isVisualOnlyMotionEvent(event: Event): boolean {
+  if (event.type === 'transitionrun' || event.type === 'transitionstart') {
+    const property = (event as TransitionEvent).propertyName;
+    return (
+      typeof property === 'string' && property.length > 0 && visualOnlyProperties.has(property)
+    );
+  }
+  return (
+    event.type === 'pointerdown' ||
+    event.type === 'pointerup' ||
+    event.type === 'pointercancel' ||
+    event.type === 'keydown' ||
+    event.type === 'keyup' ||
+    event.type === 'focusin' ||
+    event.type === 'focusout'
+  );
 }
 
 export function shouldTrackMotionEvent(
@@ -234,9 +252,11 @@ export function needsEdgeFrame(animation: Animation, context: MotionTrackingCont
       target.querySelector(context.glassSelector) !== null ||
       target.querySelector(context.occluderSelector) !== null;
     if (!affectsSurface) return false;
-    // Surfaces inside the native top layer keep CSS edges; only the top-layer
-    // container itself stays tracked while moving to update underlying occlusion.
-    if (context.isStrictTopLayerDescendant(target)) return false;
+    // Native top-layer elements (:modal, :popover-open, leaving overlay: auto)
+    // paint above the document WebGL canvas and own local CSS edges. Settled
+    // occlusion refreshes on open, close, and transitionend without spinning
+    // uncapped per-frame repaints during visual-only transitions.
+    if (context.isInTopLayer(target)) return false;
     return true;
   }
 

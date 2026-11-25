@@ -1,12 +1,8 @@
 <script setup lang="ts">
+import { syncCaretFlight } from '@neoverse-ui/motion';
 import { computed, onBeforeUnmount, ref, useAttrs, watch } from 'vue';
 import type { TextareaProps } from '../../types';
-import {
-  type CaretPoint,
-  deferPointerFocus,
-  slideCaret2d,
-  watchCaretSelection,
-} from '../motion/caret-motion';
+import { deferPointerFocus, watchCaretSelection } from '../motion/caret-motion';
 import { resolveAriaInvalid } from './form-control';
 
 defineOptions({ inheritAttrs: false });
@@ -31,9 +27,9 @@ const scrollLeft = ref(0);
 const scrollTop = ref(0);
 const caretHolding = ref(false);
 let holdTimer: ReturnType<typeof setTimeout> | undefined;
-let caretPoint: CaretPoint | null = null;
 let lastScrollLeft = 0;
 let lastScrollTop = 0;
+let lastWidth = 0;
 let pointerFocusing = false;
 let cancelPointerFocus: (() => void) | undefined;
 let stopSelectionWatch: (() => void) | undefined;
@@ -118,12 +114,16 @@ watch(
   { flush: 'post' },
 );
 watch(
-  [caretPrefix, scrollLeft, scrollTop, showsCaret, caretText],
+  [caretPrefix, scrollLeft, scrollTop, showsCaret, caretText, caretWidth],
   () => {
-    const scrolled = scrollLeft.value !== lastScrollLeft || scrollTop.value !== lastScrollTop;
-    caretPoint = slideCaret2d(caretGlyph.value, caretPoint, caretText.value, scrolled);
+    const reset =
+      scrollLeft.value !== lastScrollLeft ||
+      scrollTop.value !== lastScrollTop ||
+      caretWidth.value !== lastWidth;
+    syncCaretFlight(caretGlyph.value, caretText.value, reset);
     lastScrollLeft = scrollLeft.value;
     lastScrollTop = scrollTop.value;
+    lastWidth = caretWidth.value;
   },
   { flush: 'post' },
 );

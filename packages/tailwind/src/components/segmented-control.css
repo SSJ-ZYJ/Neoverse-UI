@@ -163,6 +163,13 @@
       0s, 0s, var(--neoverse-motion-duration-fast), var(--neoverse-motion-feedback-duration);
   }
 
+  /* A theme or locale View Transition freezes the page into snapshots. Landing
+     the thumb immediately keeps the revealed frame in sync with the committed
+     selection instead of replaying the previous position after the reveal. */
+  .ui-segmented-control__slider[data-instant] {
+    transition-duration: 0s, 0s, 0s, var(--neoverse-motion-feedback-duration);
+  }
+
   .ui-segmented-control .ui-segmented-control__option {
     position: relative;
     z-index: 1;
@@ -210,9 +217,12 @@
   }
 
   .ui-segmented-control__icon {
+    /* Alias the shared action token so a slotted SVG with its own size rule
+       still follows the option's icon geometry on scaled surfaces. */
+    --ui-action-icon-size: var(--neoverse-icon-size-md);
     display: inline-flex;
-    width: var(--neoverse-icon-size-md);
-    height: var(--neoverse-icon-size-md);
+    width: var(--ui-action-icon-size);
+    height: var(--ui-action-icon-size);
   }
 
   .ui-segmented-control__icon > * {

@@ -1,8 +1,11 @@
-import { replayPresence } from '@neoverse-ui/motion';
 import {
   type AnchoredOverlayOptions,
+  focusElement,
   hideAnchoredOverlay,
+  installFocusModality,
   isOverlayOpen,
+  openOverlayWithMotion,
+  refreshOverlayExit,
   resolveOverlayViewportLayoutBounds,
   showAnchoredOverlay,
   stopOverlayTracking,
@@ -11,9 +14,7 @@ import {
 import { computed, nextTick, onBeforeUnmount, type Ref, ref, watch } from 'vue';
 import type { ContextMenuEntry, ContextMenuItem, ContextMenuProps } from '../../types';
 
-// The column overlaps the panel rim by one Glass edge width. Covering the rim is
-// not enough on its own: the shared Glass edge canvas paints above the top layer,
-// and only an occluder inside the panel's 2px hit-test sample suppresses that rim.
+// Overlap enough for the submenu surface to cover the parent's CSS rim.
 const SUBMENU_EDGE_OVERLAP = 4;
 
 export function isContextMenuItem(entry: ContextMenuEntry): entry is ContextMenuItem {
@@ -50,14 +51,15 @@ export interface UseContextMenuOptions {
 /** Manages top-layer placement, submenu column tracking, focus restoration and keyboard traversal. */
 export function createContextMenuState(options: UseContextMenuOptions) {
   const { panelRef, submenuRef, props, onUpdateOpen, onSelect } = options;
-  const openSubmenu = ref<ContextMenuItem | null>(null);
+  const submenuState = ref<{ item: ContextMenuItem; open: boolean } | null>(null);
+  const openSubmenu = computed(() => (submenuState.value?.open ? submenuState.value.item : null));
+  const submenuContent = computed(() => submenuState.value?.item);
   const visibleEntries = computed(() => props.entries);
-  const submenuEntries = computed(() => openSubmenu.value?.children ?? []);
+  const submenuEntries = computed(() => submenuContent.value?.children ?? []);
 
   let restoreTarget: HTMLElement | null = null;
   let ignoreNativeClose = false;
   let submenuOpener: HTMLButtonElement | null = null;
-  let submenuEntryId: string | null = null;
   let observer: ResizeObserver | null = null;
   let positionObserver: MutationObserver | null = null;
 
@@ -89,7 +91,7 @@ export function createContextMenuState(options: UseContextMenuOptions) {
     requestAnimationFrame(() => {
       const panel = panelRef.value;
       if (props.open && panel && isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')) {
-        menuItems()[0]?.focus();
+        focusElement(menuItems()[0], { preventScroll: true });
       }
     });
   }
@@ -136,13 +138,15 @@ export function createContextMenuState(options: UseContextMenuOptions) {
   }
 
   function closeSubmenuPopover() {
+    if (!submenuState.value?.open) return;
     stopTrackingSubmenu();
-    submenuEntryId = null;
+    submenuState.value.open = false;
     const submenu = submenuRef.value;
     if (submenu === null) return;
     if (supportsPopover(submenu)) {
       if (submenu.matches(':popover-open')) submenu.hidePopover();
     } else {
+      refreshOverlayExit(submenu);
       submenu.classList.remove('ui-context-menu__submenu--open');
     }
   }
@@ -152,23 +156,25 @@ export function createContextMenuState(options: UseContextMenuOptions) {
     const overlay = overlayOptions();
     if (overlay === undefined) return;
     if (value) {
-      restoreTarget = props.focusReturn ?? (document.activeElement as HTMLElement | null);
+      const opening = !isOverlayOpen(overlay.overlay, overlay.fallbackOpenClass);
+      if (opening) {
+        restoreTarget = props.focusReturn ?? (document.activeElement as HTMLElement | null);
+      } else closeSubmenuPopover();
       showAnchoredOverlay(overlay);
       syncMotionOrigin();
-      if (props.autoFocus) focusFirstItem();
+      if (opening && props.autoFocus) focusFirstItem();
     } else {
       if (isOverlayOpen(overlay.overlay, overlay.fallbackOpenClass)) ignoreNativeClose = true;
       closeSubmenuPopover();
-      openSubmenu.value = null;
       hideAnchoredOverlay(overlay);
     }
   }
 
-  function closeAndRestoreFocus() {
+  function closeAndRestoreFocus(modality: 'auto' | 'keyboard' | 'pointer' = 'auto') {
     onUpdateOpen(false);
     void nextTick(() => {
       const target = props.focusReturn ?? restoreTarget;
-      if (target?.isConnected) target.focus();
+      if (target?.isConnected) focusElement(target, { preventScroll: true, modality });
       restoreTarget = null;
     });
   }
@@ -187,7 +193,6 @@ export function createContextMenuState(options: UseContextMenuOptions) {
     if (isOverlayOpen(panel, 'ui-overlay-panel--fallback-open')) return;
 
     closeSubmenuPopover();
-    openSubmenu.value = null;
     stopOverlayTracking(panel);
     if (props.open) onUpdateOpen(false);
   }
@@ -200,21 +205,27 @@ export function createContextMenuState(options: UseContextMenuOptions) {
 
   async function enterSubmenu(item: ContextMenuItem, opener: HTMLButtonElement, moveFocus = true) {
     if (item.disabled || !item.children?.length) return;
-    const alreadyOpen = submenuEntryId === item.id;
-    submenuEntryId = item.id;
-    openSubmenu.value = item;
+    const alreadyOpen = openSubmenu.value?.id === item.id;
+    if (!alreadyOpen) submenuState.value = { item, open: true };
     submenuOpener = opener;
     await nextTick();
+    if (openSubmenu.value?.id !== item.id) return;
     const panel = panelRef.value;
     const submenu = submenuRef.value;
     if (panel === null || submenu === null) return;
-    if (supportsPopover(submenu)) {
-      if (!submenu.matches(':popover-open')) submenu.showPopover();
-    } else {
-      submenu.classList.add('ui-context-menu__submenu--open');
-    }
-    placeSubmenu(opener);
-    if (!alreadyOpen) replayPresence(submenu);
+    openOverlayWithMotion(
+      submenu,
+      opener,
+      () => {
+        if (supportsPopover(submenu)) {
+          if (!submenu.matches(':popover-open')) submenu.showPopover();
+        } else {
+          submenu.classList.add('ui-context-menu__submenu--open');
+        }
+        placeSubmenu(opener);
+      },
+      !alreadyOpen,
+    );
     observer?.disconnect();
     observer = new ResizeObserver(() => placeSubmenu(opener));
     observer.observe(panel);
@@ -223,27 +234,26 @@ export function createContextMenuState(options: UseContextMenuOptions) {
     positionObserver.observe(panel, { attributes: true, attributeFilter: ['style'] });
     window.addEventListener('scroll', onViewportChange, true);
     window.addEventListener('resize', onViewportChange);
-    if (moveFocus) void nextTick(() => rowsOf(submenu)[0]?.focus());
+    if (moveFocus) void nextTick(() => focusElement(rowsOf(submenu)[0], { preventScroll: true }));
   }
 
-  function onItemPointerEnter(entry: ContextMenuItem, event: PointerEvent) {
-    if (entry.disabled) return;
+  function onItemPointerMove(entry: ContextMenuItem, event: PointerEvent) {
+    // A moving column can change hit targets under a stationary pointer.
+    if (event.pointerType === 'touch' || entry.disabled) return;
     if (entry.children?.length) {
-      if (submenuEntryId === entry.id) return;
+      if (openSubmenu.value?.id === entry.id) return;
       void enterSubmenu(entry, event.currentTarget as HTMLButtonElement, false);
       return;
     }
     closeSubmenuPopover();
-    openSubmenu.value = null;
   }
 
   function leaveSubmenu() {
     const openerId = openSubmenu.value?.id;
     closeSubmenuPopover();
-    openSubmenu.value = null;
     void nextTick(() => {
       const row = menuItems().find((element) => element.dataset.entryId === openerId);
-      (row ?? menuItems()[0])?.focus();
+      focusElement(row ?? menuItems()[0], { modality: 'keyboard' });
     });
   }
 
@@ -252,12 +262,32 @@ export function createContextMenuState(options: UseContextMenuOptions) {
     const items = rowsOf(scope as HTMLElement | null);
     if (items.length === 0) return;
     const index = items.indexOf(current);
-    items[(index + direction + items.length) % items.length]?.focus();
+    focusElement(items[(index + direction + items.length) % items.length], {
+      modality: 'keyboard',
+    });
   }
 
   function onDocumentKeydown(event: KeyboardEvent) {
-    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
     if (!props.open) return;
+    if (event.key === 'Tab') {
+      const panel = panelRef.value;
+      const submenu = submenuRef.value;
+      const target = event.target;
+      const active = document.activeElement;
+      const insideMenu =
+        (target instanceof Node && (panel?.contains(target) || submenu?.contains(target))) ||
+        panel?.contains(active) ||
+        submenu?.contains(active);
+      if (insideMenu) {
+        event.preventDefault();
+        closeAndRestoreFocus('keyboard');
+      } else {
+        onUpdateOpen(false);
+      }
+      return;
+    }
+
+    if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
     const panel = panelRef.value;
     if (panel === null) return;
     const target = event.target;
@@ -265,17 +295,17 @@ export function createContextMenuState(options: UseContextMenuOptions) {
     const items = menuItems();
     if (items.length === 0) return;
     event.preventDefault();
-    (event.key === 'ArrowDown' ? items[0] : items.at(-1))?.focus();
+    focusElement(event.key === 'ArrowDown' ? items[0] : items.at(-1), { modality: 'keyboard' });
   }
 
   function onMenuKeydown(event: KeyboardEvent) {
     const inSubmenu = openSubmenu.value !== null;
     if (!(event.target instanceof HTMLButtonElement)) {
       if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
-      const items = menuItems();
+      const items = inSubmenu ? rowsOf(submenuRef.value) : menuItems();
       if (items.length === 0) return;
       event.preventDefault();
-      (event.key === 'ArrowDown' ? items[0] : items.at(-1))?.focus();
+      focusElement(event.key === 'ArrowDown' ? items[0] : items.at(-1), { modality: 'keyboard' });
       return;
     }
     const current = event.target;
@@ -308,7 +338,7 @@ export function createContextMenuState(options: UseContextMenuOptions) {
       event.preventDefault();
       const scope = current.closest('.ui-context-menu__submenu') ?? panelRef.value;
       const items = rowsOf(scope as HTMLElement | null);
-      (event.key === 'Home' ? items[0] : items.at(-1))?.focus();
+      focusElement(event.key === 'Home' ? items[0] : items.at(-1), { modality: 'keyboard' });
     }
   }
 
@@ -316,6 +346,7 @@ export function createContextMenuState(options: UseContextMenuOptions) {
     () => props.open,
     (value) => {
       if (typeof document === 'undefined') return;
+      installFocusModality(document);
       if (value) document.addEventListener('keydown', onDocumentKeydown);
       else document.removeEventListener('keydown', onDocumentKeydown);
     },
@@ -340,12 +371,13 @@ export function createContextMenuState(options: UseContextMenuOptions) {
 
   return {
     openSubmenu,
+    submenuContent,
     visibleEntries,
     submenuEntries,
     onPanelToggle,
     selectItem,
     enterSubmenu,
-    onItemPointerEnter,
+    onItemPointerMove,
     onMenuKeydown,
   };
 }

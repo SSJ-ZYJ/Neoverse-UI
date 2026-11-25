@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isKeyboardModality } from '@neoverse-ui/overlay-runtime';
 import { ref, useId } from 'vue';
 import type { ContextMenuItem, ContextMenuProps } from '../../types';
 import { presence } from '../motion/presence';
@@ -8,6 +9,8 @@ import {
   createContextMenuState,
   isContextMenuItem,
 } from './useContextMenu';
+
+defineOptions({ inheritAttrs: false });
 
 const props = withDefaults(defineProps<ContextMenuProps>(), { autoFocus: true });
 const emit = defineEmits<{
@@ -22,12 +25,13 @@ const submenuId = `${useId()}-context-submenu`;
 
 const {
   openSubmenu,
+  submenuContent,
   visibleEntries,
   submenuEntries,
   onPanelToggle,
   selectItem,
   enterSubmenu,
-  onItemPointerEnter,
+  onItemPointerMove,
   onMenuKeydown,
 } = createContextMenuState({
   panelRef,
@@ -41,12 +45,12 @@ const {
 <template>
   <div
     ref="panelRef"
+    v-bind="{ ...$attrs, ...presence('pop', 'top') }"
     :id="panelId"
-    class="ui-overlay-panel ui-context-menu material-glass-immersive nv-presence"
+    class="ui-overlay-panel ui-context-menu material-glass-elevated nv-presence"
     popover="manual"
     role="menu"
     :aria-label="props.ariaLabel"
-    v-bind="presence('pop', 'top')"
     @toggle="onPanelToggle"
     @keydown="onMenuKeydown"
   >
@@ -63,6 +67,7 @@ const {
           v-else-if="isContextMenuItem(entry)"
           class="ui-context-menu__item"
           type="button"
+          tabindex="-1"
           :role="contextMenuItemRole(entry)"
           :disabled="entry.disabled"
           :data-entry-id="entry.id"
@@ -74,10 +79,14 @@ const {
           "
           :aria-controls="entry.children?.length ? submenuId : undefined"
           v-bind="contextMenuCheckableState(entry)"
-          @pointerenter="onItemPointerEnter(entry, $event)"
+          @pointermove="onItemPointerMove(entry, $event)"
           @click="
             entry.children?.length
-              ? enterSubmenu(entry, $event.currentTarget as HTMLButtonElement)
+              ? enterSubmenu(
+                  entry,
+                  $event.currentTarget as HTMLButtonElement,
+                  isKeyboardModality(($event.currentTarget as HTMLElement).ownerDocument),
+                )
               : selectItem(entry)
           "
         >
@@ -100,40 +109,43 @@ const {
         </button>
       </template>
     </div>
-
-    <Teleport to="body">
-      <div
-        v-if="openSubmenu !== null"
-        :id="submenuId"
-        ref="submenuRef"
-        class="ui-context-menu__submenu nv-presence"
-        popover="manual"
-        role="menu"
-        :aria-label="openSubmenu.label"
-        v-bind="presence('slide-end', 'start')"
-      >
-        <button
-          v-for="child in submenuEntries"
-          :key="child.id"
-          class="ui-context-menu__item"
-          type="button"
-          :role="contextMenuItemRole(child)"
-          :disabled="child.disabled"
-          :data-entry-id="child.id"
-          v-bind="contextMenuCheckableState(child)"
-          @click="selectItem(child)"
-        >
-          <span
-            v-if="child.selection !== undefined"
-            class="ui-context-menu__check"
-            aria-hidden="true"
-            >{{
-              child.checked ? '✓' : ''
-            }}</span
-          >
-          <span class="ui-context-menu__label">{{ child.label }}</span>
-        </button>
-      </div>
-    </Teleport>
   </div>
+
+  <Teleport to="body">
+    <div
+      v-if="submenuContent !== undefined"
+      :id="submenuId"
+      ref="submenuRef"
+      class="ui-overlay-panel ui-context-menu__submenu material-glass-elevated nv-presence"
+      popover="manual"
+      role="menu"
+      :aria-label="submenuContent.label"
+      :inert="openSubmenu === null"
+      v-bind="presence('slide-end', 'start')"
+      @keydown="onMenuKeydown"
+    >
+      <button
+        v-for="child in submenuEntries"
+        :key="child.id"
+        class="ui-context-menu__item"
+        type="button"
+        tabindex="-1"
+        :role="contextMenuItemRole(child)"
+        :disabled="child.disabled"
+        :data-entry-id="child.id"
+        v-bind="contextMenuCheckableState(child)"
+        @click="selectItem(child)"
+      >
+        <span
+          v-if="child.selection !== undefined"
+          class="ui-context-menu__check"
+          aria-hidden="true"
+          >{{
+            child.checked ? '✓' : ''
+          }}</span
+        >
+        <span class="ui-context-menu__label">{{ child.label }}</span>
+      </button>
+    </div>
+  </Teleport>
 </template>

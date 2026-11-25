@@ -25,6 +25,8 @@
   justify-content: center;
 }
 
+/* Local appearance simulation only. The package media query also handles
+   opt-in edge strokes, per-component fallbacks, and effect layers. */
 .playground-reduced-transparency-preview
   :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
     .ui-button--ghost
