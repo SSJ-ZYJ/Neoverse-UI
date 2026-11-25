@@ -204,9 +204,9 @@ test.describe('playground', () => {
       return { accent, bar: bar === null ? null : getComputedStyle(bar).backgroundColor };
     });
 
-    // The Explorer owns a blue selection plate, so its start rail must resolve
-    // the same accent. The library default pairs the mint plate with the mint
-    // bar; a surface that retunes one retunes the other.
+    // The Explorer uses a soft azure selection plate and keeps its start rail on
+    // the same primary accent. Any surface that retunes the plate retunes the
+    // rail together.
     expect(colors.bar).toBe(colors.accent);
   });
   for (const [selected, absent] of [

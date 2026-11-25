@@ -372,7 +372,7 @@ test.describe('segmented control', () => {
   }
 
   for (const theme of ['light', 'dark'] as const) {
-    test(`segmented control keyboard focus keeps the selected accent in ${theme}`, async ({
+    test(`segmented control keyboard focus keeps the primary focus ring in ${theme}`, async ({
       page,
     }) => {
       await page.goto(`/frame?theme=${theme}&lang=en#controls-segmented-control`, {
@@ -382,16 +382,20 @@ test.describe('segmented control', () => {
       const selected = group.getByRole('radio', { checked: true }).first();
       await selected.focus();
 
-      const { outlineColor, color } = await selected.evaluate((element) => {
-        const style = getComputedStyle(element);
-        return { outlineColor: style.outlineColor, color: style.color };
+      const { outlineColor, expected } = await selected.evaluate((element) => {
+        const probe = document.createElement('span');
+        probe.style.color = 'var(--neoverse-color-focus-ring)';
+        document.body.append(probe);
+        const expected = getComputedStyle(probe).color;
+        probe.remove();
+        return { outlineColor: getComputedStyle(element).outlineColor, expected };
       });
-      expect(outlineColor).toBe(color);
+      expect(outlineColor).toBe(expected);
     });
 
     test(`segmented control preserves the Aurora Glass well and pill/rounded geometry in ${theme}`, async ({
       page,
-    }) => {
+    }, testInfo) => {
       await page.goto(`/frame?theme=${theme}&lang=en#controls-segmented-control`, {
         waitUntil: 'domcontentloaded',
       });
@@ -417,7 +421,11 @@ test.describe('segmented control', () => {
           bg: style.backgroundColor,
           backdrop: style.backdropFilter,
           sliderRadius: sliderStyle ? Number.parseFloat(sliderStyle.borderTopLeftRadius) : 0,
+          sliderBgColor: sliderStyle?.backgroundColor ?? '',
           sliderBgImage: sliderStyle?.backgroundImage ?? '',
+          sliderBgOrigin: sliderStyle?.backgroundOrigin ?? '',
+          sliderBgRepeat: sliderStyle?.backgroundRepeat ?? '',
+          sliderBackdrop: sliderStyle?.backdropFilter ?? '',
           sliderBoxShadow: sliderStyle?.boxShadow ?? '',
         };
       });
@@ -425,7 +433,12 @@ test.describe('segmented control', () => {
       expect(pillMetrics.sliderRadius).toBeGreaterThanOrEqual(999);
       expect(pillMetrics.bg).toContain('/ 0.15');
       expect(pillMetrics.backdrop).toContain('blur(12px)');
+      expect(pillMetrics.sliderBackdrop).toContain('blur(12px)');
+      expect(pillMetrics.sliderBackdrop).toContain('saturate(1.32)');
+      expect(pillMetrics.sliderBgColor).not.toBe('rgb(255, 255, 255)');
       expect(pillMetrics.sliderBgImage).toContain('linear-gradient');
+      expect(pillMetrics.sliderBgOrigin).toContain('border-box');
+      expect(pillMetrics.sliderBgRepeat).toContain('no-repeat');
       expect(pillMetrics.sliderBoxShadow).toBe('none');
 
       const roundedMetrics = await rounded.evaluate((element) => {
@@ -442,6 +455,27 @@ test.describe('segmented control', () => {
       expect(roundedMetrics.sliderRadius).toBeLessThan(roundedMetrics.radius);
       expect(roundedMetrics.sliderRadius).toBeGreaterThan(6);
       expect(roundedMetrics.sliderBoxShadow).toBe('none');
+
+      if (!testInfo.project.use.hasTouch) {
+        const activeOption = pill.locator('.ui-segmented-control__option--active');
+        const slider = pill.locator('.ui-segmented-control__slider');
+        const restColor = await slider.evaluate((el) => getComputedStyle(el).backgroundColor);
+        await activeOption.hover();
+        await expect
+          .poll(() => slider.evaluate((el) => getComputedStyle(el).backgroundColor))
+          .not.toBe(restColor);
+        if (theme === 'dark') {
+          const primaryHover = await slider.evaluate((el) => {
+            const probe = document.createElement('span');
+            probe.style.backgroundColor = 'var(--neoverse-control-primary-hover-background)';
+            el.parentElement?.append(probe);
+            const value = getComputedStyle(probe).backgroundColor;
+            probe.remove();
+            return value;
+          });
+          await expect(slider).toHaveCSS('background-color', primaryHover);
+        }
+      }
     });
   }
 });

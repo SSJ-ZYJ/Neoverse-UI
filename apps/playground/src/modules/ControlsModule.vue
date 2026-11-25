@@ -48,7 +48,7 @@ const sections = [
         :href="`#${section.id}`"
         :label="localize(section.label, props.locale)"
         size="lg"
-        class="h-auto min-h-0 rounded-control px-3 py-1.5 text-body-sm font-regular text-secondary hover:bg-accent-soft hover:text-primary"
+        class="h-auto min-h-0 rounded-control px-3 py-1.5 text-body-sm font-regular text-secondary hover:text-primary"
       />
     </UiSurface>
 

@@ -46,6 +46,7 @@ test.describe('surfaces', () => {
         );
         await expect(indicator).toHaveCSS('opacity', '1');
         await expect(indicator).not.toHaveCSS('background-image', 'none');
+        await expect(indicator).toHaveCSS('backdrop-filter', /blur\(12px\)/);
         const activeTab = tabs.locator('[role="tab"][aria-selected="true"]');
         await page.evaluate(() => document.fonts.ready.then(() => undefined));
         // Compare the final plate with the tab after any resize from font loading.
@@ -113,6 +114,7 @@ test.describe('surfaces', () => {
         );
         await expect(indicator).toHaveCSS('opacity', '1');
         await expect(indicator).not.toHaveCSS('background-image', 'none');
+        await expect(indicator).toHaveCSS('backdrop-filter', /blur\(12px\)/);
         const [paginationBox, parentBox, ellipsisBox, firstPageBox] = await Promise.all([
           pagination.boundingBox(),
           pagination.evaluate((element) => {

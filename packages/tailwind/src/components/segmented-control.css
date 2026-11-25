@@ -11,9 +11,6 @@
     padding: var(--neoverse-control-segmented-inset);
     overflow: hidden;
     touch-action: pan-y pinch-zoom;
-    /* The selected segment owns the mint accent, so keyboard focus follows
-       that accent instead of the global primary ring. */
-    --neoverse-color-focus-ring: var(--neoverse-control-segmented-active-foreground);
   }
 
   .ui-segmented-control--pill {
@@ -59,10 +56,14 @@
   .ui-segmented-control__slider-track {
     position: absolute;
     z-index: 0;
-    inset: 0;
-    /* Keep the paint inside its well while the buttons' touch hit areas stay unclipped. */
+    inset: calc(var(--neoverse-control-segmented-track-bleed) * -1);
+    /* Keep the paint inside its well with subpixel edge clearance while the
+       buttons' touch hit areas stay unclipped. */
     overflow: hidden;
-    border-radius: var(--neoverse-control-segmented-option-radius);
+    border-radius: calc(
+      var(--neoverse-control-segmented-option-radius) +
+      var(--neoverse-control-segmented-track-bleed)
+    );
     pointer-events: none;
     /* Match the selected content-sized track before hydration has measured any buttons. */
     grid-column: var(--segment-active-column, calc(var(--segment-index) + 1) / span 1);
@@ -72,19 +73,27 @@
   .ui-segmented-control__slider {
     position: absolute;
     box-sizing: border-box;
-    inset-block: 0;
-    left: 0;
-    width: var(--segment-active-width, 100%);
+    inset-block: var(--neoverse-control-segmented-track-bleed);
+    left: var(--neoverse-control-segmented-track-bleed);
+    width: var(
+      --segment-active-width,
+      calc(100% - var(--neoverse-control-segmented-track-bleed) * 2)
+    );
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
       var(--neoverse-control-segmented-active-border);
     border-radius: var(--neoverse-control-segmented-option-radius);
+    background-origin: border-box;
+    background-repeat: no-repeat;
     background-image: var(--neoverse-control-segmented-active-background);
     background-color: var(--neoverse-control-segmented-active-fill);
     box-shadow: var(--neoverse-control-segmented-active-shadow);
+    -webkit-backdrop-filter: var(--neoverse-control-segmented-active-filter);
+    backdrop-filter: var(--neoverse-control-segmented-active-filter);
     pointer-events: none;
     transform-origin: center;
     translate: var(--segment-active-offset, 0);
-    transition: none;
+    transition: background-color var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing);
   }
 
   .ui-segmented-control__slider::after {
@@ -100,14 +109,19 @@
         .ui-segmented-control__option--active:hover:not(:active, :disabled)
       )
       .ui-segmented-control__slider:not([data-pressed], [data-dragging]) {
-      --segment-feedback: var(--neoverse-control-ghost-hover-background);
+      background-image: var(--neoverse-control-segmented-active-hover-background);
+      background-color: var(--neoverse-control-segmented-active-hover-fill);
+      --segment-feedback: var(--neoverse-control-segmented-active-hover-wash);
     }
   }
 
   .ui-segmented-control__options:has(.ui-segmented-control__option--active:active:not(:disabled))
     .ui-segmented-control__slider,
   .ui-segmented-control__options .ui-segmented-control__slider:is([data-pressed], [data-dragging]) {
-    --segment-feedback: var(--neoverse-control-ghost-active-background);
+    background-image: var(--neoverse-control-segmented-active-press-background);
+    background-color: var(--neoverse-control-segmented-active-press-fill);
+    --segment-feedback: var(--neoverse-control-segmented-active-press-wash);
+    transition-property: translate, width, scale;
   }
 
   .ui-segmented-control__slider[data-ready='true'] {
@@ -117,7 +131,9 @@
       width var(--neoverse-control-segmented-slider-duration)
       var(--neoverse-control-segmented-slider-easing),
       scale var(--neoverse-control-segmented-slider-duration)
-      var(--neoverse-motion-easing-spring-soft);
+      var(--neoverse-motion-easing-spring-soft),
+      background-color var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing);
   }
 
   .ui-segmented-control__slider[data-pressed] {
@@ -253,9 +269,34 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
+    .ui-segmented-control__slider,
     .ui-segmented-control__slider[data-ready='true'],
     .ui-segmented-control .ui-segmented-control__option {
       transition: none;
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    .ui-segmented-control__slider {
+      background-color: var(--neoverse-effect-choice-selected-fill-opaque);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    @media (hover: hover) {
+      .ui-segmented-control__options:has(
+          .ui-segmented-control__option--active:hover:not(:active, :disabled)
+        )
+        .ui-segmented-control__slider:not([data-pressed], [data-dragging]) {
+        background-color: var(--neoverse-effect-choice-selected-hover-fill-opaque);
+      }
+    }
+
+    .ui-segmented-control__options:has(.ui-segmented-control__option--active:active:not(:disabled))
+      .ui-segmented-control__slider,
+    .ui-segmented-control__options
+      .ui-segmented-control__slider:is([data-pressed], [data-dragging]) {
+      background-color: var(--neoverse-effect-choice-selected-press-fill-opaque);
     }
   }
 }

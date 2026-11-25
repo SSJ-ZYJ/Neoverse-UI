@@ -274,7 +274,7 @@ test('keeps grouped controls on a compact, shared geometry contract', async () =
     '--neoverse-control-segmented-rounded-option-radius: var(--neoverse-control-compact-radius);',
     '--neoverse-control-segmented-slider-duration: 320ms;',
     '--neoverse-control-segmented-slider-easing: var(--neoverse-motion-easing-emphasized);',
-    '--neoverse-control-segmented-active-shadow: var(--neoverse-shadow-none);',
+    '--neoverse-control-segmented-active-shadow: var(--neoverse-effect-choice-selected-inset-shadow);',
   ]) {
     expect(segmentedControlCss).toContain(declaration);
   }

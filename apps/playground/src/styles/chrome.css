@@ -63,11 +63,6 @@
   text-align: end;
 }
 
-.playground-shell__toolbar-actions,
-.playground-overview-hero__stage {
-  --neoverse-control-segmented-active-foreground: var(--neoverse-color-text-primary);
-}
-
 .playground-shell__brand-wordmark {
   display: block;
   inline-size: clamp(4.75rem, 20vw, 6rem);
@@ -161,6 +156,9 @@
   color: var(--neoverse-color-text-muted);
   font-family: var(--neoverse-font-family-sans);
   cursor: pointer;
+  transition:
+    background-color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+    color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
 }
 
 .playground-explorer__section-toggle {
@@ -249,14 +247,28 @@
 }
 
 @media (hover: hover) {
-  .playground-explorer__section-toggle:hover,
-  .playground-explorer__disclosure:hover {
-    background-color: var(--neoverse-effect-hover-field);
+  .playground-explorer__section-toggle:hover:not(:active),
+  .playground-explorer__disclosure:hover:not(:active) {
+    background-color: var(--neoverse-control-ghost-hover-background);
     color: var(--neoverse-color-text-secondary);
   }
 
-  .playground-explorer__section[data-active] .playground-explorer__section-toggle:hover {
+  .playground-explorer__section[data-active]
+    .playground-explorer__section-toggle:hover:not(:active) {
     color: var(--neoverse-color-text-primary);
+  }
+}
+
+.playground-explorer__section-toggle:active,
+.playground-explorer__disclosure:active {
+  background-color: var(--neoverse-control-ghost-active-background);
+  transition: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playground-explorer__section-toggle,
+  .playground-explorer__disclosure {
+    transition: none;
   }
 }
 
@@ -278,15 +290,22 @@
 
 .playground-explorer__link {
   inline-size: 100%;
-  /* The explorer owns a blue selection, so it must also own the bar that marks
-     it: the library default pairs the mint selection field with the mint
-     indicator, and a surface that retunes one has to retune the other. Both
-     read from the same accent family here, so the plate and the rail can never
-     show different hues. */
+  /* The explorer uses a flat soft azure selection plate rather than the raised
+     neutral choice plate, keeping its rail on the same primary accent. */
   --neoverse-navigation-item-indicator-color: var(--neoverse-color-accent-primary);
   --neoverse-navigation-item-active-foreground: var(--neoverse-color-text-primary);
   --neoverse-navigation-item-active-background: none;
   --neoverse-navigation-item-active-fill: var(--neoverse-color-accent-soft);
+  --neoverse-navigation-item-active-hover-background: linear-gradient(
+    var(--neoverse-control-ghost-hover-background),
+    var(--neoverse-control-ghost-hover-background)
+  );
+  --neoverse-navigation-item-active-hover-fill: var(--neoverse-color-accent-soft);
+  --neoverse-navigation-item-active-press-background: linear-gradient(
+    var(--neoverse-control-ghost-active-background),
+    var(--neoverse-control-ghost-active-background)
+  );
+  --neoverse-navigation-item-active-press-fill: var(--neoverse-color-accent-soft);
   --neoverse-navigation-item-active-shadow: var(--neoverse-shadow-none);
 }
 

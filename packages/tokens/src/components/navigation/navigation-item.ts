@@ -1,6 +1,10 @@
 export const navigationItemCssVariables = {
   activeBackground: '--neoverse-navigation-item-active-background',
   activeFill: '--neoverse-navigation-item-active-fill',
+  activeHoverBackground: '--neoverse-navigation-item-active-hover-background',
+  activeHoverFill: '--neoverse-navigation-item-active-hover-fill',
+  activePressBackground: '--neoverse-navigation-item-active-press-background',
+  activePressFill: '--neoverse-navigation-item-active-press-fill',
   activeBorder: '--neoverse-navigation-item-active-border',
   activeForeground: '--neoverse-navigation-item-active-foreground',
   activeShadow: '--neoverse-navigation-item-active-shadow',

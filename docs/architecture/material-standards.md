@@ -311,13 +311,26 @@ label, with no full-height side accent inside the content card; other status lab
 remain text and future steps retain neutral markers. Container-based horizontal/vertical layout, native
 list/date semantics and consumer-owned state remain unchanged.
 
-A selected SegmentedControl slider and a selected navigation item use a local accent
-field. Dock trailing groups retain a local grouping wash and match the embedded
-SegmentedControl shape. These fields express selection or grouping, never create
-another backdrop filter, and remain consistent through hover and press. The
-surrounding Aurora Glass plate keeps its tier alpha/filter and shared outer glass edge.
-Segmented options, navigation items, tabs, pagination, menu items, and number
-steppers share the quiet button wash. Hover adds the wash; press uses a deeper
+A selected SegmentedControl slider and a selected navigation item use a frosted
+translucent ice-azure selection plate in Light (`--neoverse-color-blue-100` to
+`--neoverse-color-accent-primary` over `--neoverse-color-blue-300` with primary
+text `--neoverse-color-text-primary`) and the primary sky-blue selection fill in
+Dark (`--neoverse-effect-primary-rest-field-dark` paired with
+`--neoverse-control-primary-foreground`), resolved through
+`--neoverse-effect-choice-selected-foreground` with Light-tier backdrop blur
+(`12px`), keeping selection vivid, borderless, and legible across both Aurora
+Glass and solid surfaces. Dock trailing groups retain a local
+grouping wash and match the embedded SegmentedControl shape.
+These plates sample and soften the backdrop beneath them while transient hover
+and press shift smoothly onto Primary-matched selection feedback
+(`--neoverse-effect-choice-selected-hover-*` / `-press-*`, pixel-matched to
+Primary button hover/press in Dark and Primary-hue azure intensifies in Light)
+rather than stacking a dull neutral ghost wash onto the active plate. The
+surrounding Aurora Glass well keeps its tier alpha/filter and shared outer
+glass edge.
+Unselected segmented options, navigation items, tabs, pagination buttons, menu
+items, toast dismiss buttons, and number steppers share the quiet button wash
+(`--neoverse-quiet-control-feedback`). Hover adds the wash; press uses a deeper
 shade without moving the control or changing its shadow.
 Breadcrumb links answer like plain links instead: the link grows its own box by
 the plate inset and gives the same space back with a negative margin, and the
@@ -327,11 +340,14 @@ rises from slightly smaller as it fades in, deepens on press, and the label rise
 to the primary text role — accent-on-accent text would drop below 3:1 in Light.
 The container clips with `overflow-clip-margin` rather than hard
 `overflow: hidden`, which would cut the plate and the focus ring.
-A navigation surface owns one accent: a surface that retunes its selection plate
-retunes the start rail and the bottom bar with the same accent, and the placement
-alias resolves on the item rather than at the document root. The library default
-pairs the mint selection field with the mint indicator, so only a surface that
-replaces the plate needs to declare its own accent.
+A navigation surface owns one accent: a surface that retunes its indicator
+retunes the start rail and the bottom bar together, and the placement alias
+resolves on the item rather than at the document root. Light pairs the frosted
+ice-azure selection plate with `--neoverse-color-accent-primary`, while Dark
+pairs the primary sky-blue selection fill with rich cobalt azure
+(`--neoverse-color-blue-700`) on `--neoverse-navigation-item-indicator-color`
+so the active bar stays vivid and legible against both the sky-blue fill and the
+dark canvas.
 Current-page, checked, open and selected indicators remain visible, and
 activation rather than press commits selection.
 
@@ -372,13 +388,10 @@ paint only a local neutral wash on hover or press.
 The sampled plate, tint, and glass rim use the button's outer radius, including
 circular icon buttons. The rim replaces the painted stroke; reduced transparency,
 forced colors, and browsers without backdrop filters retain a fallback boundary.
-Keyboard focus keeps its own outline. Default controls resolve that outline from
-the primary azure accent in both themes, so a blue Button keeps a blue ring.
-Green selection controls, currently SegmentedControl and active navigation
-items, retune the ring locally to their mint selection accent; a selected control
-never pairs a green label with a blue outline. Inactive navigation items keep the
-default azure ring. The border policy for cards, glass planes, segmented wells,
-and other compact controls is unchanged.
+Keyboard focus keeps its own outline. Controls resolve that outline from the
+primary azure accent (`--neoverse-color-focus-ring`) in both themes, including
+SegmentedControl and active navigation items. The border policy for cards, glass
+planes, segmented wells, and other compact controls is unchanged.
 
 Dock's original desktop `lg` scale is 1.3, with a 0.9 optical type factor for
 navigation and embedded segmented labels. Compact Dock remains `md` at 1. These
@@ -394,14 +407,16 @@ as edge-neutral content and does not reserve edge frames for their motion.
 Reduced motion commits the target geometry directly without a flight.
 
 SegmentedControl renders a translucent Aurora Glass outer shell with its tier-owned
-backdrop blur and shared WebGL/CSS outer glass edge, framing an embedded selection
-slider that retains the library's aurora mint-to-sky selection field in Light and
-luminous selection field in Dark. It defaults to the `pill` shape and also supports
-`rounded` via `shape`, with its geometry and selection tokens decoupled from
-`ControlSurface`, `Tabs`, `Pagination`, and `NavigationItem`.
-The plate shares the well's shape and clips inside the inner track, independently
-of the options' expanded touch hit areas, and stays flat without a shadow
-(`--neoverse-control-segmented-active-shadow: var(--neoverse-shadow-none)`).
+backdrop blur and shared WebGL/CSS outer glass edge, framing an embedded
+selection slider (frosted translucent ice-azure in Light and primary sky-blue in
+Dark, `--neoverse-control-segmented-active-filter` at Light-tier `12px` backdrop
+blur), paired with `--neoverse-effect-choice-selected-foreground` ink contrast. It
+defaults to the `pill` shape and also supports `rounded` via `shape`, with its
+geometry and selection tokens decoupled from `ControlSurface`, `Tabs`,
+`Pagination`, and `NavigationItem`. The plate shares the well's shape and clips
+inside the inner track, independently of the options' expanded touch hit areas,
+and omits outer shadow bleed or top stroke lines across both themes
+(`--neoverse-control-segmented-active-shadow: var(--neoverse-effect-choice-selected-inset-shadow)`).
 
 On pointer down, the selection plate glides toward the pressed option, briefly
 stretches in transit, and compresses while held: capsule (`pill`) plates squish
@@ -412,9 +427,11 @@ A canceled drag or rejected activation returns the plate to the committed
 selection. Touch input still permits vertical scrolling. Keyboard and
 programmatic changes glide directly to the new selection. Reduced motion
 preserves direct dragging but skips animated previews and settling. Hover on
-the selected option and feedback during a press or drag tint the plate itself,
-so the feedback moves and scales with it. Idle, unselected options retain the
-shared quiet hover feedback.
+the selected option and feedback during a press or drag transition the plate
+directly through the shared Primary-aligned choice hover/press roles (while
+keeping the slider glaze active on press or drag), so feedback moves and scales
+with the plate without muddying the azure tint. Idle, unselected options and
+toast dismiss/stepper controls retain the shared quiet hover feedback.
 
 Both adapters support `variant="text"` (the default content-sized labels),
 `variant="icon"` (equal-width segments with decorative `options[].icon`), and
@@ -430,10 +447,10 @@ or alter shared Aurora Glass Dock depth.
 
 | Component | Preserved visual role | Shared role / source |
 | --- | --- | --- |
-| Button, Action, IconButton | Translucent primary and secondary tints, quiet Ghost feedback | `command-*`, `primary-*`, `quiet-command-*` in `control-effects.css` |
-| SegmentedControl | Translucent Aurora Glass outer shell, shared outer glass edge, embedded shadowless aurora selection plate, and `pill` / `rounded` shapes | `choice-rest-shadow`, `choice-selected-field`, `choice-selected-fill`, `choice-selected-border` |
+| Button, Action, IconButton, Toast dismiss | Translucent primary and secondary tints, unified quiet Ghost feedback across ghost buttons, icon dismiss, steppers, and menus | `command-*`, `primary-*`, `quiet-command-*` in `control-effects.css` |
+| SegmentedControl | Translucent Aurora Glass outer shell, shared outer glass edge, borderless frosted ice-azure (Light) / primary sky-blue (Dark) selection plate with backdrop blur, Primary-matched selection hover/press, and `pill` / `rounded` shapes | `choice-rest-shadow`, `choice-selected-field`, `choice-selected-fill`, `choice-selected-hover-*`, `choice-selected-press-*`, `choice-selected-border`, `choice-selected-inset-shadow`, `choice-selected-filter`, `choice-selected-foreground` |
 | Dock, ControlSurface | Selected Aurora Glass tier depth/boundary and local trailing group contrast | Aurora Glass material tokens, `control-surface-*`, `grouped-inset-*` |
-| NavigationItem | Persistent selection under the quiet button wash | `selection-*`, `quiet-command-*` |
+| NavigationItem | Persistent selection matching Primary selection hover/press while unselected items keep the quiet button wash | `choice-selected-*`, `choice-selected-hover-*`, `choice-selected-press-*`, `quiet-command-*` |
 | Skeleton, Badge, Tooltip, Scrollbar | Skeleton highlight and pulse without an edge, plus badge/tooltip accent depth and scrollbar thumb state | `placeholder-*`, `label-edge`, `accent-*`, `rail-*` |
 | StatusIndicator | Established 42% glow, 88% pulse and separate glow/pulse spread | Status roles in `effects.css` |
 

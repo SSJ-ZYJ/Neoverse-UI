@@ -26,6 +26,64 @@ test('exposes canonical component token namespaces', () => {
   expect(cssVariables.components.segmentedControl.activeShadow).toBe(
     '--neoverse-control-segmented-active-shadow',
   );
+  expect(cssVariables.components.segmentedControl.activeFilter).toBe(
+    '--neoverse-control-segmented-active-filter',
+  );
+  expect(cssVariables.components.segmentedControl.trackBleed).toBe(
+    '--neoverse-control-segmented-track-bleed',
+  );
+  expect(cssVariables.components.tabs.selectedFilter).toBe('--neoverse-tabs-selected-filter');
+  expect(cssVariables.components.tabs.selectedForeground).toBe(
+    '--neoverse-tabs-selected-foreground',
+  );
+  expect(cssVariables.components.pagination.currentFilter).toBe(
+    '--neoverse-pagination-current-filter',
+  );
+  expect(cssVariables.components.pagination.currentForeground).toBe(
+    '--neoverse-pagination-current-foreground',
+  );
+  expect(cssVariables.effects.controls.selectedChoiceInsetShadow).toBe(
+    '--neoverse-effect-choice-selected-inset-shadow',
+  );
+  expect(cssVariables.effects.controls.selectedChoiceFilter).toBe(
+    '--neoverse-effect-choice-selected-filter',
+  );
+  expect(cssVariables.effects.controls.selectedChoiceOpaqueFill).toBe(
+    '--neoverse-effect-choice-selected-fill-opaque',
+  );
+  expect(cssVariables.effects.controls.selectedChoiceForeground).toBe(
+    '--neoverse-effect-choice-selected-foreground',
+  );
+  expect(cssVariables.effects.controls.selectedChoiceHoverField).toBe(
+    '--neoverse-effect-choice-selected-hover-field',
+  );
+  expect(cssVariables.effects.controls.selectedChoiceHoverFill).toBe(
+    '--neoverse-effect-choice-selected-hover-fill',
+  );
+  expect(cssVariables.effects.controls.selectedChoiceHoverWash).toBe(
+    '--neoverse-effect-choice-selected-hover-wash',
+  );
+  expect(cssVariables.effects.controls.selectedChoicePressField).toBe(
+    '--neoverse-effect-choice-selected-press-field',
+  );
+  expect(cssVariables.effects.controls.selectedChoicePressFill).toBe(
+    '--neoverse-effect-choice-selected-press-fill',
+  );
+  expect(cssVariables.effects.controls.selectedChoicePressWash).toBe(
+    '--neoverse-effect-choice-selected-press-wash',
+  );
+  expect(cssVariables.components.segmentedControl.activeHoverFill).toBe(
+    '--neoverse-control-segmented-active-hover-fill',
+  );
+  expect(cssVariables.components.tabs.selectedHoverBackgroundColor).toBe(
+    '--neoverse-tabs-selected-hover-background-color',
+  );
+  expect(cssVariables.components.pagination.currentHoverBackgroundColor).toBe(
+    '--neoverse-pagination-current-hover-background-color',
+  );
+  expect(cssVariables.components.navigationItem.activeHoverFill).toBe(
+    '--neoverse-navigation-item-active-hover-fill',
+  );
   expect(cssVariables.components.segmentedControl.shellHoverBackgroundColor).toBe(
     '--neoverse-control-segmented-shell-hover-background-color',
   );
@@ -231,4 +289,26 @@ test('keeps high-traffic component recipes semantic instead of locally hardcoded
     expect(source).not.toMatch(/\b\d+(?:\.\d+)?(?:ms|%)\b/);
     expect(source).not.toContain('color-mix(');
   }
+
+  const [formTokens, overlayTokens, toastCss, controlFeedbackCss] = await Promise.all([
+    readTokenCss('components/form-control.css'),
+    readTokenCss('components/overlay.css'),
+    readCssFile(new URL('../../tailwind/src/components/toast.css', import.meta.url)),
+    readCssFile(new URL('../../tailwind/src/components/control-feedback.css', import.meta.url)),
+  ]);
+  expect(formTokens).toContain(
+    '--neoverse-input-step-hover-background: var(--neoverse-control-ghost-hover-background);',
+  );
+  expect(formTokens).toContain(
+    '--neoverse-input-step-active-background: var(--neoverse-control-ghost-active-background);',
+  );
+  expect(formTokens).toContain(
+    '--neoverse-select-option-hover-background: var(--neoverse-control-ghost-hover-background);',
+  );
+  expect(overlayTokens).toContain(
+    '--neoverse-overlay-item-hover-background: var(--neoverse-control-ghost-hover-background);',
+  );
+  expect(toastCss).toContain('background-color: var(--neoverse-quiet-control-feedback);');
+  expect(toastCss).not.toContain('.ui-toast__dismiss:hover');
+  expect(controlFeedbackCss).toContain('.ui-toast__dismiss');
 });

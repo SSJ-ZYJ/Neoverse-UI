@@ -19,9 +19,13 @@
     width: var(--neoverse-selection-width, var(--neoverse-space-0));
     border: var(--neoverse-border-width-thin) solid var(--neoverse-tabs-selected-border);
     border-radius: var(--neoverse-tabs-tab-radius);
+    background-origin: border-box;
+    background-repeat: no-repeat;
     background-image: var(--neoverse-tabs-selected-background-image);
     background-color: var(--neoverse-tabs-selected-background-color);
     box-shadow: var(--neoverse-tabs-selected-shadow);
+    -webkit-backdrop-filter: var(--neoverse-tabs-selected-filter);
+    backdrop-filter: var(--neoverse-tabs-selected-filter);
     transform: translateX(var(--neoverse-selection-offset, var(--neoverse-space-0)));
     opacity: 0;
     pointer-events: none;
@@ -30,7 +34,9 @@
     opacity: 1;
     transition:
       transform var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
-      width var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
+      width var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing),
+      background-color var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing);
   }
   .ui-tabs__tab {
     position: relative;
@@ -53,22 +59,46 @@
       color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
   }
   .ui-tabs__tab--active {
-    color: var(--neoverse-color-text-primary);
+    --neoverse-quiet-control-feedback: transparent;
+    color: var(--neoverse-tabs-selected-foreground);
     border-color: var(--neoverse-tabs-selected-border);
-    background-image:
-      linear-gradient(
-        var(--neoverse-quiet-control-feedback),
-        var(--neoverse-quiet-control-feedback)
-      ),
-      var(--neoverse-tabs-selected-background-image);
+    background-origin: border-box;
+    background-repeat: no-repeat;
+    background-image: var(--neoverse-tabs-selected-background-image);
     background-color: var(--neoverse-tabs-selected-background-color);
     box-shadow: var(--neoverse-tabs-selected-shadow);
+    -webkit-backdrop-filter: var(--neoverse-tabs-selected-filter);
+    backdrop-filter: var(--neoverse-tabs-selected-filter);
+  }
+  @media (hover: hover) {
+    .ui-tabs__tab--active:hover:not(:active, :disabled) {
+      background-image: var(--neoverse-tabs-selected-hover-background-image);
+      background-color: var(--neoverse-tabs-selected-hover-background-color);
+    }
+    .ui-tabs__list:has(.ui-tabs__tab--active:hover:not(:active, :disabled))
+      .ui-tabs__indicator[data-ready='true'] {
+      background-image: var(--neoverse-tabs-selected-hover-background-image);
+      background-color: var(--neoverse-tabs-selected-hover-background-color);
+    }
+  }
+  .ui-tabs__tab--active:active:not(:disabled) {
+    background-image: var(--neoverse-tabs-selected-press-background-image);
+    background-color: var(--neoverse-tabs-selected-press-background-color);
+    transition: none;
+  }
+  .ui-tabs__list:has(.ui-tabs__tab--active:active:not(:disabled))
+    .ui-tabs__indicator[data-ready='true'] {
+    background-image: var(--neoverse-tabs-selected-press-background-image);
+    background-color: var(--neoverse-tabs-selected-press-background-color);
+    transition-property: transform, width;
   }
   .ui-tabs__indicator[data-ready='true'] ~ .ui-tabs__tab--active {
     border-color: transparent;
     background-image: none;
-    background-color: var(--neoverse-quiet-control-feedback);
+    background-color: transparent;
     box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
   }
   .ui-tabs__tab:focus-visible {
     outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
@@ -102,6 +132,29 @@
     .ui-tabs__tab,
     .ui-tabs__indicator[data-ready='true'] {
       transition: none;
+    }
+  }
+  @media (prefers-reduced-transparency: reduce) {
+    .ui-tabs__indicator,
+    .ui-tabs__tab--active {
+      background-color: var(--neoverse-effect-choice-selected-fill-opaque);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+    @media (hover: hover) {
+      .ui-tabs__tab--active:hover:not(:active, :disabled),
+      .ui-tabs__list:has(.ui-tabs__tab--active:hover:not(:active, :disabled))
+        .ui-tabs__indicator[data-ready='true'] {
+        background-color: var(--neoverse-effect-choice-selected-hover-fill-opaque);
+      }
+    }
+    .ui-tabs__tab--active:active:not(:disabled),
+    .ui-tabs__list:has(.ui-tabs__tab--active:active:not(:disabled))
+      .ui-tabs__indicator[data-ready='true'] {
+      background-color: var(--neoverse-effect-choice-selected-press-fill-opaque);
+    }
+    .ui-tabs__indicator[data-ready='true'] ~ .ui-tabs__tab--active {
+      background-color: transparent;
     }
   }
 }

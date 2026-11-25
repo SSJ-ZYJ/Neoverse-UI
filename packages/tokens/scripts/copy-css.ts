@@ -35,6 +35,7 @@ const sourceFiles = [
   'components/overlay.css',
   'components/context-menu.css',
   'effects.css',
+  'surface-effects.css',
   'control-effects.css',
 ] as const;
 const lightSource = new URL('themes/light.css', sourceDirectory);

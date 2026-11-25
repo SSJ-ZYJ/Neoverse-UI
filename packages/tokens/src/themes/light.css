@@ -23,8 +23,39 @@
   --neoverse-effect-choice-rest-shadow: var(--neoverse-effect-choice-rest-shadow-light);
   --neoverse-effect-choice-selected-field: var(--neoverse-effect-choice-selected-field-light);
   --neoverse-effect-choice-selected-fill: var(--neoverse-effect-choice-selected-fill-light);
+  --neoverse-effect-choice-selected-fill-opaque: var(
+    --neoverse-effect-choice-selected-fill-light-opaque
+  );
+  --neoverse-effect-choice-selected-hover-field: var(
+    --neoverse-effect-choice-selected-hover-field-light
+  );
+  --neoverse-effect-choice-selected-hover-fill: var(
+    --neoverse-effect-choice-selected-hover-fill-light
+  );
+  --neoverse-effect-choice-selected-hover-fill-opaque: var(
+    --neoverse-effect-choice-selected-hover-fill-light-opaque
+  );
+  --neoverse-effect-choice-selected-hover-wash: var(
+    --neoverse-effect-choice-selected-hover-wash-light
+  );
+  --neoverse-effect-choice-selected-press-field: var(
+    --neoverse-effect-choice-selected-press-field-light
+  );
+  --neoverse-effect-choice-selected-press-fill: var(
+    --neoverse-effect-choice-selected-press-fill-light
+  );
+  --neoverse-effect-choice-selected-press-fill-opaque: var(
+    --neoverse-effect-choice-selected-press-fill-light-opaque
+  );
+  --neoverse-effect-choice-selected-press-wash: var(
+    --neoverse-effect-choice-selected-press-wash-light
+  );
   --neoverse-effect-choice-selected-border: var(--neoverse-effect-choice-selected-border-light);
   --neoverse-effect-choice-selected-shadow: var(--neoverse-effect-choice-selected-shadow-light);
+  --neoverse-effect-choice-selected-inset-shadow: var(
+    --neoverse-effect-choice-selected-inset-shadow-light
+  );
+  --neoverse-effect-choice-selected-foreground: var(--neoverse-color-text-primary);
   --neoverse-effect-choice-filled-field: var(--neoverse-effect-choice-filled-field-light);
   --neoverse-effect-choice-filled-field-opaque: var(
     --neoverse-effect-choice-filled-field-light-opaque
@@ -265,7 +296,7 @@
   --neoverse-control-active-shadow: var(--neoverse-effect-selection-shadow);
 
   /* Keep the outer shell clean Aurora Glass while the embedded slider carries
-       the library's translucent aurora mint-to-sky selection plate. */
+       the library's frosted ice-azure selection plate. */
   --neoverse-control-segmented-background-image: none;
   --neoverse-control-segmented-border: transparent;
   --neoverse-control-segmented-edge-refraction-opacity: var(
@@ -273,31 +304,9 @@
   );
   --neoverse-control-segmented-edge-display: block;
   --neoverse-control-segmented-shadow: var(--neoverse-effect-choice-rest-shadow);
-  --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
-  /* Keep the selected field's 0.3.0 accent without changing the global blue. */
-  --neoverse-control-segmented-active-background: linear-gradient(
-    145deg,
-    color-mix(
-      in srgb,
-      var(--neoverse-color-accent-secondary) var(--neoverse-effect-strength-24),
-      transparent
-    ),
-    color-mix(in srgb, #74bae5 var(--neoverse-effect-alpha-quiet), transparent)
-  );
-  --neoverse-control-segmented-active-fill: var(--neoverse-effect-choice-selected-fill);
-  /* Preserve the pale selected outline from 0.3.0 independently of the newer accent. */
-  --neoverse-control-segmented-active-border: color-mix(
-    in srgb,
-    rgb(116 186 229 / 48%) var(--neoverse-effect-strength-34),
-    transparent
-  );
   /* The segmented shell stays visually still on hover in both themes. */
   --neoverse-control-segmented-shell-hover-border: transparent;
   --neoverse-control-segmented-shell-hover-shadow: var(--neoverse-control-segmented-shadow);
-  --neoverse-navigation-item-active-background: var(--neoverse-effect-choice-selected-field);
-  --neoverse-navigation-item-active-fill: var(--neoverse-effect-choice-selected-fill);
-  --neoverse-navigation-item-active-border: transparent;
-  --neoverse-navigation-item-active-shadow: var(--neoverse-effect-choice-selected-shadow);
 
   /* Button tint is independent of the selected Aurora Glass tier. */
   --neoverse-control-button-filled-background: var(--neoverse-effect-command-rest-field-light);

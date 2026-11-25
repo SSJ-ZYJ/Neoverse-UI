@@ -6,7 +6,21 @@
     --neoverse-pagination-button-font-size: var(--neoverse-font-size-sm);
     --neoverse-pagination-current-background-image: var(--neoverse-effect-choice-selected-field);
     --neoverse-pagination-current-background-color: var(--neoverse-effect-choice-selected-fill);
+    --neoverse-pagination-current-hover-background-image: var(
+      --neoverse-effect-choice-selected-hover-field
+    );
+    --neoverse-pagination-current-hover-background-color: var(
+      --neoverse-effect-choice-selected-hover-fill
+    );
+    --neoverse-pagination-current-press-background-image: var(
+      --neoverse-effect-choice-selected-press-field
+    );
+    --neoverse-pagination-current-press-background-color: var(
+      --neoverse-effect-choice-selected-press-fill
+    );
     --neoverse-pagination-current-border: var(--neoverse-effect-choice-selected-border);
+    --neoverse-pagination-current-foreground: var(--neoverse-effect-choice-selected-foreground);
     --neoverse-pagination-current-shadow: var(--neoverse-effect-choice-selected-shadow);
+    --neoverse-pagination-current-filter: var(--neoverse-effect-choice-selected-filter);
   }
 }

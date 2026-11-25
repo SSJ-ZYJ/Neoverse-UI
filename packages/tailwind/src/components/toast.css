@@ -132,18 +132,16 @@
     border: 0;
     border-radius: var(--neoverse-radius-control-inner);
     color: inherit;
-    background: transparent;
+    background-color: var(--neoverse-quiet-control-feedback);
     font: inherit;
     cursor: pointer;
+    transition: background-color var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing);
   }
 
   @media (hover: hover) {
     :where(.ui-toast__action > :is(a, button)):hover {
       text-decoration: underline;
-    }
-
-    .ui-toast__dismiss:hover {
-      background: var(--neoverse-control-hover-background);
     }
   }
 
@@ -161,6 +159,12 @@
   :where(.ui-toast__action > :is(a, button)):focus-visible {
     outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
     outline-offset: var(--neoverse-focus-ring-offset);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-toast__dismiss {
+      transition: none;
+    }
   }
 
   @media (forced-colors: active) {

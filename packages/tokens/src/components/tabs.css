@@ -9,8 +9,22 @@
     --neoverse-tabs-tab-font-size: var(--neoverse-font-size-sm);
     --neoverse-tabs-selected-background-image: var(--neoverse-effect-choice-selected-field);
     --neoverse-tabs-selected-background-color: var(--neoverse-effect-choice-selected-fill);
+    --neoverse-tabs-selected-hover-background-image: var(
+      --neoverse-effect-choice-selected-hover-field
+    );
+    --neoverse-tabs-selected-hover-background-color: var(
+      --neoverse-effect-choice-selected-hover-fill
+    );
+    --neoverse-tabs-selected-press-background-image: var(
+      --neoverse-effect-choice-selected-press-field
+    );
+    --neoverse-tabs-selected-press-background-color: var(
+      --neoverse-effect-choice-selected-press-fill
+    );
     --neoverse-tabs-selected-border: var(--neoverse-effect-choice-selected-border);
+    --neoverse-tabs-selected-foreground: var(--neoverse-effect-choice-selected-foreground);
     --neoverse-tabs-selected-shadow: var(--neoverse-effect-choice-selected-shadow);
+    --neoverse-tabs-selected-filter: var(--neoverse-effect-choice-selected-filter);
     --neoverse-tabs-panel-padding-block: var(--neoverse-space-4);
   }
 }

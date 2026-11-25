@@ -5,14 +5,35 @@
     --neoverse-control-segmented-background-image: none;
     --neoverse-control-segmented-background-color: var(--neoverse-material-glass-subtle-background);
     --neoverse-control-segmented-foreground: var(--neoverse-color-text-secondary);
-    /* The selected accent belongs to the active option only. Hover and press
-       reuse the shared quiet feedback tint, so no hover foreground is needed. */
-    --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
+    /* The active option lifts onto the shared selection plate and selected choice
+       ink. Hover and press mirror the Primary choice response. */
+    --neoverse-control-segmented-active-foreground: var(
+      --neoverse-effect-choice-selected-foreground
+    );
     --neoverse-control-segmented-active-background: var(--neoverse-effect-choice-selected-field);
     --neoverse-control-segmented-active-fill: var(--neoverse-effect-choice-selected-fill);
+    --neoverse-control-segmented-active-hover-background: var(
+      --neoverse-effect-choice-selected-hover-field
+    );
+    --neoverse-control-segmented-active-hover-fill: var(
+      --neoverse-effect-choice-selected-hover-fill
+    );
+    --neoverse-control-segmented-active-hover-wash: var(
+      --neoverse-effect-choice-selected-hover-wash
+    );
+    --neoverse-control-segmented-active-press-background: var(
+      --neoverse-effect-choice-selected-press-field
+    );
+    --neoverse-control-segmented-active-press-fill: var(
+      --neoverse-effect-choice-selected-press-fill
+    );
+    --neoverse-control-segmented-active-press-wash: var(
+      --neoverse-effect-choice-selected-press-wash
+    );
     --neoverse-control-segmented-active-border: var(--neoverse-effect-choice-selected-border);
-    /* The embedded slider sits inside a clipped well, so it stays flat without a shadow. */
-    --neoverse-control-segmented-active-shadow: var(--neoverse-shadow-none);
+    /* The embedded slider sits inside a clipped track, so depth stays inset. */
+    --neoverse-control-segmented-active-shadow: var(--neoverse-effect-choice-selected-inset-shadow);
+    --neoverse-control-segmented-active-filter: var(--neoverse-effect-choice-selected-filter);
     --neoverse-control-segmented-shell-hover-background-image: var(
       --neoverse-control-segmented-background-image
     );
@@ -29,6 +50,7 @@
        Embedded controls rely on parent chrome for edge spacing. */
     --neoverse-control-segmented-inset: 0.25rem;
     --neoverse-control-segmented-embedded-inset: var(--neoverse-space-0);
+    --neoverse-control-segmented-track-bleed: var(--neoverse-border-width-strong);
     /* Default shape is pill; rounded shape tokens stay available for alternate
        geometry presets and future shape variants. */
     --neoverse-control-segmented-corner-radius: var(--neoverse-radius-pill);

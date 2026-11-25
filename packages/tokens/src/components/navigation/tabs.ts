@@ -8,8 +8,14 @@ export const tabsCssVariables = {
   tabFontSize: '--neoverse-tabs-tab-font-size',
   selectedBackgroundImage: '--neoverse-tabs-selected-background-image',
   selectedBackgroundColor: '--neoverse-tabs-selected-background-color',
+  selectedHoverBackgroundImage: '--neoverse-tabs-selected-hover-background-image',
+  selectedHoverBackgroundColor: '--neoverse-tabs-selected-hover-background-color',
+  selectedPressBackgroundImage: '--neoverse-tabs-selected-press-background-image',
+  selectedPressBackgroundColor: '--neoverse-tabs-selected-press-background-color',
   selectedBorder: '--neoverse-tabs-selected-border',
+  selectedForeground: '--neoverse-tabs-selected-foreground',
   selectedShadow: '--neoverse-tabs-selected-shadow',
+  selectedFilter: '--neoverse-tabs-selected-filter',
   panelPaddingBlock: '--neoverse-tabs-panel-padding-block',
 } as const;
 

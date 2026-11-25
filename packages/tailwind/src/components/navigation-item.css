@@ -15,12 +15,6 @@
     line-height: var(--neoverse-control-compact-line-height);
   }
 
-  .ui-navigation-item--active {
-    /* The active label owns the mint accent; match the keyboard ring to it.
-       Inactive navigation items keep the global primary ring. */
-    --neoverse-color-focus-ring: var(--neoverse-navigation-item-active-foreground);
-  }
-
   .ui-navigation-item.ui-action--sm {
     --ui-action-icon-size: var(--neoverse-navigation-item-icon-size-sm);
     height: var(--neoverse-navigation-item-height-sm);
@@ -136,16 +130,14 @@
 }
 
 @layer utilities {
-  /* The persistent selection field is a local navigation effect. It must also
-     remain independent of transient feedback. */
+  /* The persistent selection field mirrors Primary selection hover and press
+     feedback directly instead of dimming the azure plate with a neutral wash. */
   .ui-navigation-item.ui-navigation-item--active.ui-button--ghost {
+    --neoverse-quiet-control-feedback: transparent;
     color: var(--neoverse-navigation-item-active-foreground);
-    background-image:
-      linear-gradient(
-        var(--neoverse-quiet-control-feedback),
-        var(--neoverse-quiet-control-feedback)
-      ),
-      var(--neoverse-navigation-item-active-background);
+    background-origin: padding-box;
+    background-repeat: no-repeat;
+    background-image: var(--neoverse-navigation-item-active-background);
     background-color: var(--neoverse-navigation-item-active-fill);
     border-color: var(--neoverse-navigation-item-active-border);
     background-clip: padding-box;
@@ -157,11 +149,48 @@
     backdrop-filter: var(--neoverse-navigation-item-filter);
   }
 
+  @media (hover: hover) {
+    .ui-navigation-item.ui-navigation-item--active.ui-button--ghost:hover:not(
+        :active,
+        :disabled,
+        [aria-disabled='true']
+      ) {
+      background-image: var(--neoverse-navigation-item-active-hover-background);
+      background-color: var(--neoverse-navigation-item-active-hover-fill);
+    }
+  }
+
+  .ui-navigation-item.ui-navigation-item--active.ui-button--ghost:active:not(
+    :disabled,
+    [aria-disabled='true']
+  ) {
+    background-image: var(--neoverse-navigation-item-active-press-background);
+    background-color: var(--neoverse-navigation-item-active-press-fill);
+    transition: none;
+  }
+
   @media (prefers-reduced-transparency: reduce) {
     .ui-navigation-item.ui-navigation-item--active.ui-button--ghost {
-      background-color: var(--neoverse-material-glass-subtle-background-fallback);
+      background-color: var(--neoverse-effect-choice-selected-fill-opaque);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
+    }
+
+    @media (hover: hover) {
+      .ui-navigation-item.ui-navigation-item--active.ui-button--ghost:hover:not(
+          :active,
+          :disabled,
+          [aria-disabled='true']
+        ) {
+        background-color: var(--neoverse-effect-choice-selected-hover-fill-opaque);
+      }
+    }
+
+    .ui-navigation-item.ui-navigation-item--active.ui-button--ghost:active:not(
+        :disabled,
+        [aria-disabled='true']
+      ) {
+      background-color: var(--neoverse-effect-choice-selected-press-fill-opaque);
     }
   }
 }

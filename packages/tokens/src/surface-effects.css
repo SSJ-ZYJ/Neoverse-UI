@@ -1,0 +1,70 @@
+/* Shared non-control surface, placeholder, label, and floating accent roles.
+   Aurora Glass base alpha/filter belong exclusively to material.css. */
+@layer neoverse.tokens {
+  :root {
+    /* Local grouping contrast borrows the parent's material; it has no blur. */
+    --neoverse-effect-grouped-inset-field-light:
+      linear-gradient(
+        125deg,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-edge-light) var(--neoverse-effect-alpha-quiet),
+          transparent
+        ),
+        transparent 30%,
+        transparent 68%,
+        color-mix(
+          in srgb,
+          var(--neoverse-color-accent-soft) var(--neoverse-effect-alpha-quiet),
+          transparent
+        )
+      ),
+      var(--neoverse-material-glass-subtle-background);
+    --neoverse-effect-grouped-inset-field-dark: rgb(
+      255 255 255 /
+      var(--neoverse-effect-strength-3)
+    );
+    --neoverse-effect-grouped-inset-border-light: var(--neoverse-color-transparent);
+    --neoverse-effect-grouped-inset-border-dark: rgb(
+      219 234 254 /
+      var(--neoverse-effect-strength-9)
+    );
+    --neoverse-effect-grouped-inset-field: var(--neoverse-effect-grouped-inset-field-light);
+    --neoverse-effect-grouped-inset-border: var(--neoverse-effect-grouped-inset-border-light);
+    --neoverse-effect-placeholder-edge: inset 0 1px 0
+      color-mix(
+        in srgb,
+        var(--neoverse-color-text-primary) var(--neoverse-effect-strength-8),
+        transparent
+      );
+    --neoverse-effect-placeholder-highlight: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) var(--neoverse-effect-strength-14),
+      transparent
+    );
+    /* Both themes share quiet Badge optics; ink follows the semantic palette. */
+    --neoverse-effect-label-fill-strength: var(--neoverse-effect-alpha-quiet);
+    --neoverse-effect-label-fill-base: transparent;
+    --neoverse-effect-label-info-foreground: var(--neoverse-color-status-info);
+    --neoverse-effect-label-success-foreground: var(--neoverse-color-status-success);
+    --neoverse-effect-label-warning-foreground: var(--neoverse-color-status-warning);
+    --neoverse-effect-label-danger-foreground: var(--neoverse-color-status-danger);
+    /* An outer bloom paired with backdrop blur can flash a darker cap on
+       compact pills in Chromium. Keep both lighting passes inside the edge. */
+    --neoverse-effect-label-edge:
+      var(--neoverse-material-edge-highlight-subtle), var(--neoverse-material-inner-glow-subtle);
+    --neoverse-effect-accent-foreground: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) var(--neoverse-effect-strength-76),
+      var(--neoverse-color-accent-secondary)
+    );
+    --neoverse-effect-accent-floating-shadow:
+      var(--neoverse-shadow-xs),
+      0 8px 18px -16px
+      color-mix(
+        in srgb,
+        var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-54),
+        transparent
+      );
+  }
+}

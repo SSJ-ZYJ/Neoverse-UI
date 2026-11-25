@@ -9,6 +9,7 @@
     .ui-tabs__tab,
     .ui-pagination__button,
     .ui-input-number__step,
+    .ui-toast__dismiss,
     .ui-select__option,
     .ui-dropdown-menu__item,
     .ui-context-menu__item
@@ -41,6 +42,18 @@
       background-color: var(--neoverse-quiet-control-feedback);
       pointer-events: none;
       content: '';
+      transition: background-color var(--neoverse-motion-feedback-duration)
+        var(--neoverse-motion-feedback-easing);
+    }
+
+    &:active:not(:disabled, [aria-disabled='true'])::after {
+      transition: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      &::after {
+        transition: none;
+      }
     }
   }
 }

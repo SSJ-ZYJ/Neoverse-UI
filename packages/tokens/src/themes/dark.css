@@ -32,8 +32,39 @@
   --neoverse-effect-choice-rest-shadow: var(--neoverse-effect-choice-rest-shadow-dark);
   --neoverse-effect-choice-selected-field: var(--neoverse-effect-choice-selected-field-dark);
   --neoverse-effect-choice-selected-fill: var(--neoverse-effect-choice-selected-fill-dark);
+  --neoverse-effect-choice-selected-fill-opaque: var(
+    --neoverse-effect-choice-selected-fill-dark-opaque
+  );
+  --neoverse-effect-choice-selected-hover-field: var(
+    --neoverse-effect-choice-selected-hover-field-dark
+  );
+  --neoverse-effect-choice-selected-hover-fill: var(
+    --neoverse-effect-choice-selected-hover-fill-dark
+  );
+  --neoverse-effect-choice-selected-hover-fill-opaque: var(
+    --neoverse-effect-choice-selected-hover-fill-dark-opaque
+  );
+  --neoverse-effect-choice-selected-hover-wash: var(
+    --neoverse-effect-choice-selected-hover-wash-dark
+  );
+  --neoverse-effect-choice-selected-press-field: var(
+    --neoverse-effect-choice-selected-press-field-dark
+  );
+  --neoverse-effect-choice-selected-press-fill: var(
+    --neoverse-effect-choice-selected-press-fill-dark
+  );
+  --neoverse-effect-choice-selected-press-fill-opaque: var(
+    --neoverse-effect-choice-selected-press-fill-dark-opaque
+  );
+  --neoverse-effect-choice-selected-press-wash: var(
+    --neoverse-effect-choice-selected-press-wash-dark
+  );
   --neoverse-effect-choice-selected-border: var(--neoverse-effect-choice-selected-border-dark);
   --neoverse-effect-choice-selected-shadow: var(--neoverse-effect-choice-selected-shadow-dark);
+  --neoverse-effect-choice-selected-inset-shadow: var(
+    --neoverse-effect-choice-selected-inset-shadow-dark
+  );
+  --neoverse-effect-choice-selected-foreground: var(--neoverse-control-primary-foreground);
   --neoverse-effect-choice-filled-field: var(--neoverse-effect-choice-filled-field-dark);
   --neoverse-effect-choice-filled-field-opaque: var(
     --neoverse-effect-choice-filled-field-dark-opaque
@@ -176,18 +207,14 @@
   --neoverse-control-secondary-border: var(--neoverse-color-border-subtle);
   --neoverse-control-segmented-background-image: none;
   --neoverse-control-segmented-foreground: var(--neoverse-color-text-secondary);
-  --neoverse-control-segmented-active-foreground: var(--neoverse-color-accent-secondary);
   /* The segmented well keeps its clean Aurora Glass silhouette while the
-     embedded slider carries the translucent aurora selection field. */
+     embedded slider carries the primary sky-blue selection field. */
   --neoverse-control-segmented-border: transparent;
   --neoverse-control-segmented-shadow: var(--neoverse-effect-choice-rest-shadow);
   --neoverse-control-segmented-edge-refraction-opacity: var(
     --neoverse-material-edge-refraction-opacity-subtle
   );
   --neoverse-control-segmented-edge-display: block;
-  --neoverse-control-segmented-active-background: var(--neoverse-effect-choice-selected-field);
-  --neoverse-control-segmented-active-fill: var(--neoverse-effect-choice-selected-fill);
-  --neoverse-control-segmented-active-border: var(--neoverse-effect-choice-selected-border);
   --neoverse-control-segmented-shell-hover-border: var(--neoverse-control-segmented-border);
   --neoverse-control-segmented-shell-hover-shadow: var(--neoverse-control-segmented-shadow);
   /* Compact buttons keep the tier-owned sampled plate. */
@@ -200,12 +227,8 @@
   --neoverse-control-active-border: transparent;
   --neoverse-control-active-highlight: var(--neoverse-effect-selection-highlight);
   --neoverse-control-active-shadow: var(--neoverse-effect-selection-shadow);
-  --neoverse-navigation-item-active-background: var(--neoverse-control-active-background);
-  --neoverse-navigation-item-active-fill: transparent;
-  --neoverse-navigation-item-active-border: var(--neoverse-control-active-border);
-  --neoverse-navigation-item-active-foreground: var(--neoverse-color-accent-secondary);
-  --neoverse-navigation-item-active-shadow: var(--neoverse-control-active-highlight);
   --neoverse-control-primary-foreground: #081324;
+  --neoverse-navigation-item-indicator-color: var(--neoverse-color-blue-700);
   --neoverse-control-primary-border: #869cc8;
   --neoverse-control-button-border: #566b8b;
   --neoverse-control-primary-shadow: var(--neoverse-effect-primary-rest-shadow);
