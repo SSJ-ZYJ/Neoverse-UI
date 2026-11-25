@@ -187,8 +187,6 @@
     --neoverse-overlay-filter: var(--neoverse-material-glass-elevated-filter);
     --neoverse-select-popover-background: var(--neoverse-material-glass-elevated-background);
     --neoverse-select-popover-filter: var(--neoverse-material-glass-elevated-filter);
-    --neoverse-prose-quote-background: var(--neoverse-material-glass-subtle-background);
-    --neoverse-prose-quote-filter: var(--neoverse-material-glass-subtle-filter);
     --neoverse-prose-code-block-background: var(--neoverse-material-glass-subtle-background);
     --neoverse-prose-code-block-filter: var(--neoverse-material-glass-subtle-filter);
     --neoverse-prose-kbd-background: var(--neoverse-material-glass-subtle-background);
@@ -435,14 +433,14 @@
     );
   }
 
-  /* Give the explicit Inset preset a distinct plane without changing the
-     shared inset material used by inputs, tables, and disclosure panels. */
+  /* The explicit Inset preset and prose quotes share one quiet plane defined by
+     the material layer; both consumers alias that role. */
   :where(.ui-surface-inset) {
-    --neoverse-surface-inset-preset-background: color-mix(
-      in srgb,
-      var(--neoverse-color-text-primary) var(--neoverse-effect-alpha-faint),
-      var(--neoverse-surface-inset-rest-background)
-    );
+    --neoverse-surface-inset-preset-background: var(--neoverse-surface-inset-plane-background);
+  }
+
+  :where(.neoverse-prose blockquote) {
+    --neoverse-prose-quote-background: var(--neoverse-surface-inset-plane-background);
   }
 
   /* A small tone shift gives inline code a readable shape on pale backdrops. */

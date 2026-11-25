@@ -66,7 +66,14 @@ function requireSourceFile(path: string, label: string): ts.SourceFile {
   return source;
 }
 
-const vueSources: readonly ts.SourceFile[] = [requireSourceFile(vueTypesPath, 'Vue type')];
+requireSourceFile(vueTypesPath, 'Vue type');
+const vueSources = program
+  .getSourceFiles()
+  .filter((source) =>
+    source.fileName
+      .replaceAll('\\', '/')
+      .startsWith(`${resolve(root, 'packages/vue/src').replaceAll('\\', '/')}/`),
+  );
 const reactSources = program
   .getSourceFiles()
   .filter((source) =>

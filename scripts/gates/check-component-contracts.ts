@@ -40,10 +40,17 @@ const docsPath = resolve(root, 'docs/architecture/component-contract-matrix.md')
 const vueIndexPath = resolve(root, 'packages/vue/src/index.ts');
 const reactIndexPath = resolve(root, 'packages/react/src/index.tsx');
 const reactFixturePath = resolve(root, 'apps/playground/src/react-fixture.tsx');
+const reactFixtureDir = resolve(root, 'apps/playground/src/react-fixture');
 
 const matrix = (await Bun.file(matrixPath).json()) as ComponentMatrix;
 const vueIndex = await Bun.file(vueIndexPath).text();
-const reactFixture = await Bun.file(reactFixturePath).text();
+const reactFixtureSources = [
+  await Bun.file(reactFixturePath).text(),
+  ...readdirSync(reactFixtureDir, { recursive: true })
+    .filter((name): name is string => typeof name === 'string' && /\.tsx$/.test(name))
+    .sort()
+    .map((name) => readFileSync(resolve(reactFixtureDir, name), 'utf8')),
+];
 const docs = await Bun.file(docsPath).text();
 
 const unitTestCorpus = [resolve(root, 'packages/vue/src'), resolve(root, 'packages/react/src')]
@@ -93,9 +100,12 @@ for (const symbol of checker.getExportsOfModule(moduleSymbol)) {
     reactPublic.add(symbol.name);
 }
 
-const runtimeFixture = collectReactRuntimeAdapters(reactFixture);
-errors.push(...runtimeFixture.errors);
-const reactRuntime = runtimeFixture.adapters;
+const reactRuntime = new Set<string>();
+for (const sourceText of reactFixtureSources) {
+  const analysis = collectReactRuntimeAdapters(sourceText);
+  errors.push(...analysis.errors);
+  for (const name of analysis.adapters) reactRuntime.add(name);
+}
 
 const assertSameSet = (label: string, declared: Set<string>, observed: Set<string>): void => {
   const missing = [...declared].filter((name) => !observed.has(name)).sort();

@@ -7,20 +7,15 @@ import {
   primitiveShadowTokens,
   semanticShadowTokens,
 } from '../lab-data';
+import { lazyComponent, withPreload } from '../lazy-component';
 import { type Locale, localize, moduleCopy } from '../playground-content';
 import TokenRow from '../TokenRow.vue';
-import ColorPalettesExample from './ColorPalettesExample.vue';
-import MotionPageExample from './MotionPageExample.vue';
-import MotionPlaygroundExample from './MotionPlaygroundExample.vue';
-import MotionPresenceExample from './MotionPresenceExample.vue';
-import MotionPrimitivesExample from './MotionPrimitivesExample.vue';
-import MotionStaggerExample from './MotionStaggerExample.vue';
-import MotionWidthExample from './MotionWidthExample.vue';
-import ProseExample from './ProseExample.vue';
-import ScrollbarViewportExample from './ScrollbarViewportExample.vue';
-import SpacingExample from './SpacingExample.vue';
-import TerminalTranscriptExample from './TerminalTranscriptExample.vue';
-import TypographyScaleExample from './TypographyScaleExample.vue';
+
+const ColorPalettesExample = lazyComponent(() => import('./ColorPalettesExample.vue'));
+const ProseExample = lazyComponent(() => import('./ProseExample.vue'));
+const ScrollbarViewportExample = lazyComponent(() => import('./ScrollbarViewportExample.vue'));
+const SpacingExample = lazyComponent(() => import('./SpacingExample.vue'));
+const TypographyScaleExample = lazyComponent(() => import('./TypographyScaleExample.vue'));
 
 const previewWidth = 'w-full min-w-0 max-w-reading-wide';
 
@@ -38,19 +33,22 @@ function tokenGrid(
   );
 }
 
-export function colors(locale: Locale): VNode {
-  return h(ColorPalettesExample, { locale, class: previewWidth });
-}
+export const colors = withPreload(
+  (locale: Locale): VNode => h(ColorPalettesExample, { locale, class: previewWidth }),
+  ColorPalettesExample,
+);
 
-export function typography(locale: Locale): VNode {
-  return h(TypographyScaleExample, { locale, class: previewWidth });
-}
+export const typography = withPreload(
+  (locale: Locale): VNode => h(TypographyScaleExample, { locale, class: previewWidth }),
+  TypographyScaleExample,
+);
 
-export function prose(locale: Locale): VNode {
-  return h(ProseExample, { locale, class: previewWidth });
-}
+export const prose = withPreload(
+  (locale: Locale): VNode => h(ProseExample, { locale, class: previewWidth }),
+  ProseExample,
+);
 
-export function layoutShape(locale: Locale): VNode {
+export const layoutShape = withPreload((locale: Locale): VNode => {
   const groups = [
     { label: moduleCopy.spacing.label, render: () => h(SpacingExample, { locale, kind: 'scale' }) },
     { label: moduleCopy.radius.label, render: radius },
@@ -66,24 +64,26 @@ export function layoutShape(locale: Locale): VNode {
       ]),
     ),
   );
-}
+}, SpacingExample);
 
-export function spacing(locale: Locale): VNode {
-  return h(
-    'div',
-    { class: ['grid gap-grid', previewWidth] },
-    (['aliases', 'primitive'] as const).map((group) => {
-      const { label, description } = moduleCopy.spacing[group];
-      return h('section', { key: group, class: 'grid min-w-0 gap-3' }, [
-        h(LabSpecimenHeader, {
-          title: localize(label, locale),
-          description: localize(description, locale),
-        }),
-        h(SpacingExample, { locale, kind: group === 'primitive' ? 'scale' : 'usage' }),
-      ]);
-    }),
-  );
-}
+export const spacing = withPreload(
+  (locale: Locale): VNode =>
+    h(
+      'div',
+      { class: ['grid gap-grid', previewWidth] },
+      (['aliases', 'primitive'] as const).map((group) => {
+        const { label, description } = moduleCopy.spacing[group];
+        return h('section', { key: group, class: 'grid min-w-0 gap-3' }, [
+          h(LabSpecimenHeader, {
+            title: localize(label, locale),
+            description: localize(description, locale),
+          }),
+          h(SpacingExample, { locale, kind: group === 'primitive' ? 'scale' : 'usage' }),
+        ]);
+      }),
+    ),
+  SpacingExample,
+);
 
 export function radius(locale: Locale): VNode {
   return tokenGrid(locale, primitiveRadiusTokens, 'radius');
@@ -101,33 +101,7 @@ export function shadowAlias(locale: Locale): VNode {
   return tokenGrid(locale, semanticShadowTokens, 'shadow');
 }
 
-export function motion(locale: Locale): VNode {
-  return h(MotionPrimitivesExample, { locale, class: previewWidth });
-}
-
-export function motionPresence(locale: Locale): VNode {
-  return h('div', { class: ['grid gap-grid', previewWidth] }, [
-    h(MotionPresenceExample, { locale }),
-    h(MotionStaggerExample, { locale }),
-  ]);
-}
-
-export function motionWidth(locale: Locale): VNode {
-  return h(MotionWidthExample, { locale, class: previewWidth });
-}
-
-export function motionPlayground(locale: Locale): VNode {
-  return h(MotionPlaygroundExample, { locale, class: previewWidth });
-}
-
-export function motionPage(locale: Locale): VNode {
-  return h(MotionPageExample, { locale });
-}
-
-export function terminal(locale: Locale): VNode {
-  return h(TerminalTranscriptExample, { locale, class: previewWidth });
-}
-
-export function scrollbar(locale: Locale): VNode {
-  return h(ScrollbarViewportExample, { locale, class: previewWidth });
-}
+export const scrollbar = withPreload(
+  (locale: Locale): VNode => h(ScrollbarViewportExample, { locale, class: previewWidth }),
+  ScrollbarViewportExample,
+);

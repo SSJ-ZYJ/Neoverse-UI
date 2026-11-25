@@ -110,10 +110,18 @@ export function UiControlSurface({
         }
         return;
       }
+      // The committed geometry lives in the group's own layout pixels, but the
+      // measured marker rect includes every rendered scale above it: CSS `zoom`
+      // and any ancestor `scale` transform. A visually magnified preview keeps
+      // its layout at 100%, so both must be divided out or the indicator is
+      // offset and sized twice and leaves the clipping group.
       let zoom = 1;
       for (let element: HTMLElement | null = group; element; element = element.parentElement) {
-        const factor = Number.parseFloat(getComputedStyle(element).zoom);
+        const style = getComputedStyle(element);
+        const factor = Number.parseFloat(style.zoom);
         if (Number.isFinite(factor) && factor > 0) zoom *= factor;
+        const rendered = Number.parseFloat((style.scale || '1').split(/\s+/)[0] ?? '1');
+        if (Number.isFinite(rendered) && rendered > 0) zoom *= rendered;
       }
       const origin = group.getBoundingClientRect();
       const rect = marker.getBoundingClientRect();

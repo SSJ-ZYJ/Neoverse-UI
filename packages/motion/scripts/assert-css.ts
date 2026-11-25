@@ -1,6 +1,9 @@
 const motionOutput = new URL('../dist/motion.css', import.meta.url);
+const pageTransitionOutput = new URL('../dist/page-transition.css', import.meta.url);
+const pageRevealsOutput = new URL('../dist/page-reveals.css', import.meta.url);
 const tokenOutput = new URL('../../tokens/dist/tokens.css', import.meta.url);
 const motionCss = await Bun.file(motionOutput).text();
+const pageTransitionCss = `${await Bun.file(pageTransitionOutput).text()}\n${await Bun.file(pageRevealsOutput).text()}`;
 const tokenCss = await Bun.file(tokenOutput).text();
 
 const motionFragments = [
@@ -67,6 +70,25 @@ const motionFragments = [
   '--neoverse-motion-sway-angle: 0deg',
   '--neoverse-motion-easing-spring: step-end',
 ];
+const pageTransitionFragments = [
+  '@property --neoverse-page-reveal-progress',
+  "data-neoverse-page-scope='region'",
+  "data-neoverse-page-background='shared'",
+  "data-neoverse-page-background='surface'",
+  '[data-neoverse-page-target]',
+  'view-transition-name: nv-page',
+  "data-neoverse-page-transition='fade'",
+  "data-neoverse-page-transition='glide'",
+  "data-neoverse-page-transition='slide'",
+  "data-neoverse-page-transition='push'",
+  "data-neoverse-page-transition='depth'",
+  "data-neoverse-page-transition='veil'",
+  "data-neoverse-page-transition='curtain'",
+  "data-neoverse-page-transition='iris'",
+  "data-neoverse-page-transition='morph'",
+  '--neoverse-motion-page-duration: 1ms',
+  '--neoverse-motion-page-blur: 0px',
+];
 const tokenFragments = [
   '--neoverse-motion-duration-fast: 140ms',
   '--neoverse-motion-duration-standard: 240ms',
@@ -89,9 +111,23 @@ const tokenFragments = [
   '--neoverse-motion-particle-duration: 910ms',
   '--neoverse-motion-particle-enter-delay: 455ms',
   '--neoverse-motion-particle-enter-duration: 234ms',
+  '--neoverse-motion-page-duration: 360ms',
+  '--neoverse-motion-page-expressive-duration: 520ms',
+  '--neoverse-motion-page-exit-duration: var(--neoverse-motion-duration-fast)',
+  '--neoverse-motion-page-enter-duration: var(--neoverse-motion-duration-standard)',
+  '--neoverse-motion-page-enter-delay: 120ms',
+  '--neoverse-motion-page-glide-distance: var(--neoverse-motion-distance-mid)',
+  '--neoverse-motion-page-parallax-offset: 24%',
+  '--neoverse-motion-page-depth-in-scale: 1.02',
+  '--neoverse-motion-page-depth-out-scale: 0.985',
+  '--neoverse-motion-page-veil-scale: 0.99',
+  '--neoverse-motion-page-blur: var(--neoverse-motion-veil-blur)',
+  '--neoverse-motion-page-feather: clamp(0.75rem, 2vmin, 1.25rem)',
+  '--neoverse-motion-page-backdrop-opacity: 0.35',
 ];
 const missingFragments = [
   ...motionFragments.filter((fragment) => !motionCss.includes(fragment)),
+  ...pageTransitionFragments.filter((fragment) => !pageTransitionCss.includes(fragment)),
   ...tokenFragments.filter((fragment) => !tokenCss.includes(fragment)),
 ];
 
@@ -100,5 +136,5 @@ if (missingFragments.length > 0) {
 }
 
 console.log(
-  `Motion CSS contract passed with ${motionFragments.length + tokenFragments.length} fragments.`,
+  `Motion CSS contract passed with ${motionFragments.length + pageTransitionFragments.length + tokenFragments.length} fragments.`,
 );

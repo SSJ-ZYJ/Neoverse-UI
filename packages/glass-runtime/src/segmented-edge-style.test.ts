@@ -120,6 +120,14 @@ describe('segmented selection styling', () => {
     },
   );
 
+  it.each(['light', 'dark'] as const)(
+    'removes the slider shadow across themes in %s mode',
+    (theme) => {
+      const { slider } = install(theme, 'none');
+      expect(resolveVars(slider, 'var(--neoverse-control-segmented-active-shadow)')).toBe('none');
+    },
+  );
+
   it('uses the shared thin solid border, shape modifiers and no separate slider edge field', () => {
     expect(source).toMatch(
       /border:\s*var\(--neoverse-border-width-thin\)\s+var\(--neoverse-border-style-solid\)\s+var\(--neoverse-control-segmented-active-border\)/,
@@ -143,11 +151,24 @@ describe('segmented selection styling', () => {
     },
   );
 
-  it('reserves the selected accent for the active label and keeps the press wash stable', () => {
+  it('reserves the selected accent for the active label and focus ring and keeps the press wash stable', () => {
     const activeAccentUses = source.match(/--neoverse-control-segmented-active-foreground/g) ?? [];
-    expect(activeAccentUses).toHaveLength(1);
+    expect(activeAccentUses).toHaveLength(2);
+    expect(source).toContain(
+      '--neoverse-color-focus-ring: var(--neoverse-control-segmented-active-foreground);',
+    );
+    expect(source).toContain('color: var(--neoverse-control-segmented-active-foreground);');
     expect(source).toContain('background-color: var(--neoverse-quiet-control-feedback);');
     expect(source).not.toContain('--neoverse-effect-press-wash');
     expect(source).not.toContain('--neoverse-effect-press-shadow');
+  });
+
+  it('squishes only capsule pills on press and scales circular and rounded thumbs uniformly', () => {
+    expect(source).toContain('transform-origin: center;');
+    expect(source).toContain('scale: var(--neoverse-control-segmented-press-scale);');
+    expect(source).toContain(
+      'scale: var(--neoverse-control-segmented-press-scale)\n      var(--neoverse-control-segmented-pill-press-scale-y);',
+    );
+    expect(source).toContain('scale: var(--neoverse-control-segmented-circular-press-scale);');
   });
 });

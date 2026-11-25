@@ -11,7 +11,8 @@
     --neoverse-control-segmented-active-background: var(--neoverse-effect-choice-selected-field);
     --neoverse-control-segmented-active-fill: var(--neoverse-effect-choice-selected-fill);
     --neoverse-control-segmented-active-border: var(--neoverse-effect-choice-selected-border);
-    --neoverse-control-segmented-active-shadow: var(--neoverse-effect-choice-selected-shadow);
+    /* The embedded slider sits inside a clipped well, so it stays flat without a shadow. */
+    --neoverse-control-segmented-active-shadow: var(--neoverse-shadow-none);
     --neoverse-control-segmented-shell-hover-background-image: var(
       --neoverse-control-segmented-background-image
     );
@@ -55,6 +56,8 @@
     --neoverse-control-segmented-slider-duration: 320ms;
     --neoverse-control-segmented-slider-easing: var(--neoverse-motion-easing-emphasized);
     --neoverse-control-segmented-press-scale: var(--neoverse-effect-press-scale);
+    --neoverse-control-segmented-circular-press-scale: 0.88;
+    --neoverse-control-segmented-pill-press-scale-y: 0.84;
     --neoverse-control-segmented-disabled-opacity: var(--neoverse-effect-disabled-content-opacity);
     --neoverse-control-segmented-border: var(--neoverse-control-button-border);
     --neoverse-control-segmented-shadow: var(--neoverse-effect-choice-rest-shadow);

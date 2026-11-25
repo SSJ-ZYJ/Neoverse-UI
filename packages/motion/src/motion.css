@@ -1,6 +1,8 @@
 /* biome-ignore-all lint/complexity/noImportantStyles: particle capture sanitization intentionally overrides arbitrary consumer author styles inside a detached capture-only subtree. */
 @import '@neoverse-ui/tokens/css';
 @import './appearance.css';
+@import './page-transition.css';
+@import './page-reveals.css';
 
 @layer neoverse.motion {
   :root {

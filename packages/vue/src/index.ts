@@ -13,6 +13,21 @@ export { useLayoutWidthMotion } from './layout-width-motion';
 export type { PresenceAttrs, StaggerStyle } from './presence';
 export { presence, staggerStyle } from './presence';
 export { getSurfaceClass, isGlassSurface, surfaceClasses } from './surface';
+export {
+  detectTerminalEnvironment,
+  matchTerminalSegmentIcon,
+  type ResolvedTerminalSegmentIcon,
+  type ResolvedTerminalTitlebar,
+  readTerminalNavigatorHints,
+  resolveTerminalSegmentIcon,
+  resolveTerminalTitlebar,
+  type TerminalEnvironmentInfo,
+  type TerminalIconGlyph,
+  type TerminalNavigatorHints,
+  type TerminalSvgNode,
+  terminalSegmentIconNames,
+} from './terminal-environment';
+export { terminalSegmentGlyphs } from './terminal-icons';
 export type {
   ActionProps,
   ActionScale,
@@ -95,8 +110,11 @@ export type {
   TerminalPromptProps,
   TerminalPromptSegment,
   TerminalPromptTone,
+  TerminalSegmentIcon,
   TerminalSurfaceProps,
+  TerminalTitlebar,
   TerminalTranscriptProps,
+  TerminalWindowAction,
   TextareaProps,
   TimelineItem,
   TimelineProps,

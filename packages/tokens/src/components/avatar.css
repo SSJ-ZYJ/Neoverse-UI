@@ -8,5 +8,12 @@
     --neoverse-avatar-fallback-background: var(--neoverse-surface-inset-rest-background);
     --neoverse-avatar-fallback-foreground: var(--neoverse-color-text-primary);
     --neoverse-avatar-font-size: var(--neoverse-font-size-sm);
+    /* The default placeholder avatar paints a neutral person glyph instead of
+       initials. Its ink stays quieter than a real name and scales with the box. */
+    --neoverse-avatar-icon-foreground: var(--neoverse-color-text-secondary);
+    --neoverse-avatar-icon-size-sm: var(--neoverse-space-4);
+    --neoverse-avatar-icon-size-md: var(--neoverse-space-5);
+    --neoverse-avatar-icon-size-lg: var(--neoverse-space-6);
+    --neoverse-avatar-icon-size: var(--neoverse-avatar-icon-size-md);
   }
 }

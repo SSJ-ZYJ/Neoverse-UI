@@ -67,6 +67,12 @@
   --neoverse-terminal-prompt: var(--neoverse-color-accent-secondary);
   --neoverse-terminal-cursor: var(--neoverse-color-accent-primary);
   --neoverse-terminal-selection: var(--neoverse-color-accent-soft);
+  --neoverse-terminal-window-close: var(--neoverse-color-status-danger);
+  --neoverse-terminal-window-close-foreground: var(--neoverse-color-status-danger-foreground);
+  --neoverse-terminal-window-minimize: var(--neoverse-color-status-warning);
+  --neoverse-terminal-window-minimize-foreground: var(--neoverse-color-status-warning-foreground);
+  --neoverse-terminal-window-maximize: var(--neoverse-color-status-success);
+  --neoverse-terminal-window-maximize-foreground: var(--neoverse-color-status-success-foreground);
   /* Keep the layered terminal hierarchy while deriving its tint from the theme. */
   --neoverse-terminal-segment-host-background: color-mix(
     in srgb,
@@ -134,7 +140,9 @@
   --neoverse-color-status-warning-foreground: var(--neoverse-color-neutral-950);
   --neoverse-color-status-danger: var(--neoverse-color-red-400);
   --neoverse-color-status-danger-foreground: var(--neoverse-color-neutral-950);
-  --neoverse-color-focus-ring: var(--neoverse-color-accent-secondary);
+  /* Default controls keep the primary azure ring in both themes. Mint
+     selection controls override this locally instead of retuning the theme. */
+  --neoverse-color-focus-ring: var(--neoverse-color-accent-primary);
   --neoverse-color-overlay-scrim: rgb(0 0 0 / 64%);
   --neoverse-color-ambient-ice: rgb(56 189 248 / 13%);
   --neoverse-color-ambient-mint: rgb(61 214 166 / 8%);
@@ -180,7 +188,6 @@
   --neoverse-control-segmented-active-background: var(--neoverse-effect-choice-selected-field);
   --neoverse-control-segmented-active-fill: var(--neoverse-effect-choice-selected-fill);
   --neoverse-control-segmented-active-border: var(--neoverse-effect-choice-selected-border);
-  --neoverse-control-segmented-active-shadow: var(--neoverse-effect-choice-selected-shadow);
   --neoverse-control-segmented-shell-hover-border: var(--neoverse-control-segmented-border);
   --neoverse-control-segmented-shell-hover-shadow: var(--neoverse-control-segmented-shadow);
   /* Compact buttons keep the tier-owned sampled plate. */

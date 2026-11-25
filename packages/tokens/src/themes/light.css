@@ -64,6 +64,12 @@
   --neoverse-terminal-prompt: var(--neoverse-color-mint-700);
   --neoverse-terminal-cursor: var(--neoverse-color-blue-600);
   --neoverse-terminal-selection: var(--neoverse-color-accent-soft);
+  --neoverse-terminal-window-close: var(--neoverse-color-red-400);
+  --neoverse-terminal-window-close-foreground: var(--neoverse-color-red-950);
+  --neoverse-terminal-window-minimize: var(--neoverse-color-amber-400);
+  --neoverse-terminal-window-minimize-foreground: var(--neoverse-color-amber-950);
+  --neoverse-terminal-window-maximize: var(--neoverse-color-green-400);
+  --neoverse-terminal-window-maximize-foreground: var(--neoverse-color-green-950);
   --neoverse-terminal-segment-host-background: color-mix(
     in srgb,
     var(--neoverse-color-accent-primary) var(--neoverse-effect-alpha-soft),
@@ -152,6 +158,8 @@
   --neoverse-effect-label-success-foreground: var(--neoverse-color-mint-600);
   --neoverse-effect-label-warning-foreground: var(--neoverse-color-amber-600);
   --neoverse-effect-label-danger-foreground: var(--neoverse-color-red-500);
+  /* Default controls keep the primary azure ring. Green selection controls
+     override this locally so a blue button never receives a mint outline. */
   --neoverse-color-focus-ring: color-mix(
     in srgb,
     var(--neoverse-color-accent-primary) 56%,
@@ -283,7 +291,6 @@
     rgb(116 186 229 / 48%) var(--neoverse-effect-strength-34),
     transparent
   );
-  --neoverse-control-segmented-active-shadow: var(--neoverse-effect-choice-selected-shadow);
   /* The segmented shell stays visually still on hover in both themes. */
   --neoverse-control-segmented-shell-hover-border: transparent;
   --neoverse-control-segmented-shell-hover-shadow: var(--neoverse-control-segmented-shadow);

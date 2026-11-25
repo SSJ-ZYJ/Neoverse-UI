@@ -140,6 +140,9 @@ export function attachLayoutSizeMotion(
         () => undefined,
       );
     }
+    if (typeof view.Event === 'function' && typeof root.dispatchEvent === 'function') {
+      root.dispatchEvent(new view.Event('neoverse-motion-start', { bubbles: true }));
+    }
   }
 
   root.querySelectorAll(targets).forEach(observe);

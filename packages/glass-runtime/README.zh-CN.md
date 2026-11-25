@@ -3,7 +3,7 @@
 [English](README.md)
 
 <!-- Source: packages/glass-runtime/README.md -->
-<!-- Source-SHA256: 6951bd2f5d9ade43ec6b0be76194e733133e6f783df3767cffc9fd70664b5090 -->
+<!-- Source-SHA256: e687eba17971c1816a83bdb454cf857d5f1dfe0d537a8ff91c1326b07b03aad5 -->
 
 Neoverse-UI 的共享、可选、方向性极光玻璃（Aurora Glass）边缘增强。极光玻璃是唯一的共享玻璃材质；Light / 轻薄、Standard / 标准与 Immersive / 厚实层级共享同一名称。展示标签从 `@neoverse-ui/tokens` 的 `glassMaterial` 获取；详见[材质标准](../../docs/zh-CN/architecture/material-standards.md)。包与渲染器标识保持稳定。
 
@@ -13,7 +13,9 @@ Neoverse-UI 的共享、可选、方向性极光玻璃（Aurora Glass）边缘�
 
 WebGL 渲染器还识别共享的 Input、Textarea、Select、选择控件与 Disclosure 类，以及 `UiTable`、正文表格与正文 details。它在同一画布上绘制表格外框与可见的内部单元格边框，而 CSS 保留表格唯一的背景滤镜。最后一行的局部下侧高光只走 CSS 边缘路径，避免渲染器外框被第二条薄荷色线重复。浏览器顶层中的 Select 面板使用局部 CSS 边缘场，因为共享画布无法绘制在该层之上。可选的历史 `native` 后端不会把位移滤镜扩展到这些隐式控件、折叠内容与表格表面。顶层弹出层或模态框内的原生文本输入、折叠内容与表格网格保留既有内嵌样式，因为共享画布无法触达它们。
 
-动画跟踪会重绘移动的边缘与遮挡物。仅改变背景位置的动效仍留在 CSS；被变换或淡入淡出的后代，如果其最近的 Glass 表面在两个轴上都隔离并裁剪，且内部没有嵌套 Glass，也留在 CSS。共享选择指示器（`.ui-control-surface__indicator`、`.ui-navigation-item__indicator`）是限制在自身表面内的装饰内容，因此它们的过渡不会调度边缘帧。未知动效仍被跟踪。隐藏子树不会维持帧循环；可见性与裁剪变更会触发重新求值，包括已经在运行的动画。这些规则不改变边缘着色器。
+动画跟踪会重绘移动的边缘与遮挡物。仅改变背景位置与纯绘制属性的动效仍留在 CSS；非 Glass、非遮挡物后代上的纯视觉动效（transform、opacity、filter）以及 `::view-transition` 遮罩不会空转边缘重绘。会改变布局的 CSS/WAAPI 动画（包括会推挤相邻 Glass 控件的非 Glass 兄弟元素、`details::details-content` 展开以及 `neoverse-motion-start` 事件）会在整份文档范围内被跟踪，并且活跃动效会绕过被动的 60 fps 滚动与视口缩放帧率上限，使边缘紧贴每一次屏幕刷新。元素 `ResizeObserver` 回调会在绘制前同步重绘，动效结束时必定补绘一帧落定帧。
+
+表面几何通过方向基向量跟踪二维 CSS 变换（`rotate`、`scale`、`zoom`、`transform` 矩阵），而不再使用膨胀的轴对齐包围盒；同时支持百分比圆角与 CSS §4.5 等比收紧圆角，在 `filter: blur(...)` 过渡期间平滑衰减边缘不透明度，避免 `position: fixed` 表面被非包含块的 `overflow: hidden` 祖先错误裁剪，并将原生顶层元素（`:popover-open`、`:modal`、离场中的 `overlay: auto`）排除在文档 WebGL 画布之外但继续作为遮挡物保留，防止在局部 CSS 边缘背后画出延迟的双重边缘。
 
 ## 为页面过渡暂停边缘重绘
 

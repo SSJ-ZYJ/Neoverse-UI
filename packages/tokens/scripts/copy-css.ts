@@ -30,6 +30,7 @@ const sourceFiles = [
   'components/table.css',
   'components/disclosure.css',
   'components/prose.css',
+  'components/terminal.css',
   'components/form-control.css',
   'components/overlay.css',
   'components/context-menu.css',

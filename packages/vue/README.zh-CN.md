@@ -3,7 +3,7 @@
 [English](README.md)
 
 <!-- Source: packages/vue/README.md -->
-<!-- Source-SHA256: f95023a15e4579adac86a527b1586d2cead23d34de28303a12cfb4886963f2e8 -->
+<!-- Source-SHA256: 224e40a4ce9ad9b5d583383d67fc22514102409c1f9f4dc7a16c39f2861dbdea -->
 
 Neoverse-UI 设计系统的 Vue 3 组件，以极光玻璃作为共享玻璃材质。Light、Standard 与 Immersive 是它的层级，不是独立样式。展示标签使用 [Tokens 的 `glassMaterial` 元数据](../tokens/README.zh-CN.md#极光玻璃)；`glass-*` surface 标识保持稳定。详见[材质标准](../../docs/zh-CN/architecture/material-standards.md)。
 
@@ -33,9 +33,9 @@ Vue `>=3.5 <4` 是必需的 peer dependency。Field 与选择控件的 ID 使用
 
 `UiBadge` 的 `sm` / `md` / `lg` 尺寸共享 `--neoverse-badge-font-family` 与 `--neoverse-badge-font-weight`。字号遵循共享标签尺度（16px 根字号下为 13 / 14 / 16px）；各尺寸的行高与内边距保留既有几何。
 
-终端组合（极光玻璃窗口、输出行、滚动历史与原生终端输入）记录在[终端组合](../../docs/zh-CN/architecture/terminal-composition.md)。内嵌 transcript 使用 `scrollbar-immersive`；`UiScrollbar` 保留给文档滚动。服务端渲染的 `UiScrollbar` 会发布 `data-hide-native`，因此原生滚动条在首次绘制时消失，而不是等到水合后；用 `ClientOnly` 包裹则保留旧的挂载后切换行为。
+终端组合（极光玻璃窗口、多套标题栏预设、命令行系统与应用图标识别、输出行、滚动历史与原生终端输入）记录在[终端组合](../../docs/zh-CN/architecture/terminal-composition.md)。`UiTerminalSurface` 支持 `titlebar`（`default`、`auto`、`macos`、`windows`、`linux`）、`maximized` 与 `@window-action`，`TerminalPromptSegment` 支持内置系统/终端/浏览器/运行时 `icon` 识别（`auto` 或显式图标名）与 `iconOnly`。内嵌 transcript 使用 `scrollbar-immersive`；`UiScrollbar` 保留给文档滚动。服务端渲染的 `UiScrollbar` 会发布 `data-hide-native`，因此原生滚动条在首次绘制时消失，而不是等到水合后；用 `ClientOnly` 包裹则保留旧的挂载后切换行为。
 
-`UiTerminalEcho` 显示已记录命令的 `text`，沿用实时提示的 `segments`、`symbol`、`error` 状态与 `#segment` 渲染，但没有输入或 Tab 停靠点。提交历史时捕获 segment 值；不要把旧命令绑定到当前目录。
+`UiTerminalEcho` 显示已记录命令的 `text`，沿用实时提示的 `segments`、`symbol`、`error` 状态与内置或 `#segment` 渲染，但没有输入或 Tab 停靠点。提交历史时捕获 segment 值；不要把旧命令绑定到当前目录。
 
 ## 指标、里程碑与步骤
 
@@ -145,6 +145,6 @@ useLayoutWidthMotion({
 
 该组合式函数在更新前采样每个可见目标，随后在共享 `spatial` 角色上为变化的宽度做动画，因此随文案增减的一组盒子——语言切换、主题标签——会沿同一条曲线运动。消费项目提供容器、选择器与触发值；采样、终点解析、中断与清理保留在共享库中。被中断的变化从已到达的帧继续；缩放、减少动效切换或卸载会结束运行，而不是留下过期终点。首次渲染或水合时不播放动画。变宽的盒子在运行期间保持替换文案在一行，使更长标签随盒子展开而显现，而不是在动画中途换行；共享方法在运行结束时恢复消费项目的内联样式。
 
-Design Lab 在两处使用该组合式函数：Motion 模块的 `foundation-motion-width` 样例，以及它自己的工具栏——主题、语言与返回总览控件在语言切换时一起运动。两者都由实验室语言控件驱动。
+Design Lab 在两处使用该组合式函数：「切换动效」样例（`foundation-motion-playground`）在语言切换时伸缩标识、导航与偏好盒子，以及它自己的工具栏——主题、语言与返回总览控件在语言切换时一起运动。两者都由实验室语言控件驱动。
 
 完整组件 API 与架构说明见 [Neoverse-UI 仓库](https://github.com/SSJ-ZYJ/Neoverse-UI)。

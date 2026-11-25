@@ -1,13 +1,24 @@
 <script setup lang="ts">
-import { UiBadge, UiButton, UiCard, UiSurface } from '@neoverse-ui/vue';
-import LabIcon from '../LabIcon.vue';
+import { type CardProps, UiCard, UiSurface } from '@neoverse-ui/vue';
+import LabSpecimenSection from '../LabSpecimenSection.vue';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, localized, moduleCopy } from '../playground-content';
+import ReferenceCardContent from '../previews/ReferenceCardContent.vue';
 import QaPreviewMatrix from '../QaPreviewMatrix.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
 const copy = moduleCopy.card;
+const surfaceExamples = [
+  { id: 'default', cardProps: {}, ...copy.defaultExample },
+  { id: 'elevated', cardProps: { surface: 'elevated' }, ...copy.elevatedExample },
+  { id: 'transparent', cardProps: { surface: 'none' }, ...copy.transparentExample },
+] as const satisfies readonly {
+  id: string;
+  cardProps: Pick<CardProps, 'surface'>;
+  label: typeof copy.label;
+  description: typeof copy.description;
+}[];
 const qaCopy = {
   label: localized('Card backdrop QA', '卡片背景 QA'),
   hint: localized(
@@ -18,76 +29,59 @@ const qaCopy = {
 </script>
 
 <template>
-  <div id="card-card" class="scroll-mt-24">
-    <MaterialBackdrop>
-      <div class="playground-preview-columns">
-        <UiCard data-card-default>
-          <div class="grid gap-3">
-            <div class="flex items-center justify-between gap-3">
-              <div class="flex items-center gap-2">
-                <LabIcon name="spark" />
-                <h3 class="text-label font-label text-primary">
-                  {{ localize(copy.reference, props.locale) }}
-                </h3>
-              </div>
-              <UiBadge variant="success">{{ localize(copy.ready, props.locale) }}</UiBadge>
-            </div>
-            <p class="text-body text-secondary">{{ localize(copy.body, props.locale) }}</p>
-            <UiButton variant="ghost" class="justify-self-start">
-              {{ localize(copy.continue, props.locale) }}
-              <template #trailing><LabIcon name="arrow-right" /></template>
-            </UiButton>
-          </div>
-        </UiCard>
-        <UiCard surface="elevated" class="max-w-container-md">
-          <div class="grid gap-2">
-            <h3 class="text-label font-label text-primary">
-              {{ localize(copy.externalClass, props.locale) }}
-            </h3>
-            <p class="text-caption text-secondary">
-              {{ localize(copy.externalBody, props.locale) }}
-            </p>
-          </div>
-        </UiCard>
-        <UiSurface surface="subtle" class="max-w-container-md rounded-card p-1">
-          <UiCard data-card-transparent-optout surface="none">
-            <div class="grid gap-2">
-              <h3 class="text-label font-label text-primary">
-                {{ localize(copy.glassCard, props.locale) }}
-              </h3>
+  <div class="grid gap-grid">
+    <LabSpecimenSection
+      id="card-card"
+      :title="localize(copy.surfaceLabel, props.locale)"
+      :description="localize(copy.surfaceDescription, props.locale)"
+    >
+      <MaterialBackdrop>
+        <div class="playground-preview-columns">
+          <div
+            v-for="example in surfaceExamples"
+            :key="example.id"
+            :data-specimen-card-surface="example.id"
+            class="grid min-w-0 content-start gap-2"
+          >
+            <div class="grid gap-1 px-1">
+              <h4 class="text-label-sm font-label text-primary">
+                {{ localize(example.label, props.locale) }}
+              </h4>
               <p class="text-caption text-secondary">
-                {{ localize(copy.glassCardBody, props.locale) }}
+                {{ localize(example.description, props.locale) }}
               </p>
             </div>
-          </UiCard>
-        </UiSurface>
-      </div>
-    </MaterialBackdrop>
-
-    <div class="mt-3 grid gap-2" data-card-qa>
-      <div class="grid gap-1 px-1">
-        <h3 class="text-label-sm font-label text-primary">
-          {{ localize(qaCopy.label, props.locale) }}
-        </h3>
-        <p class="text-caption text-secondary">
-          {{ localize(qaCopy.hint, props.locale) }}
-        </p>
-      </div>
-      <QaPreviewMatrix :locale="props.locale">
-        <UiCard class="w-full max-w-container-sm">
-          <div class="grid gap-3">
-            <div class="flex items-center justify-between gap-3">
-              <h4 class="text-label font-label text-primary">
-                {{ localize(copy.reference, props.locale) }}
-              </h4>
-              <UiBadge variant="success">{{ localize(copy.ready, props.locale) }}</UiBadge>
-            </div>
-            <p class="text-caption text-secondary">
-              {{ localize(copy.body, props.locale) }}
-            </p>
+            <UiSurface
+              :surface="example.id === 'transparent' ? 'subtle' : 'none'"
+              class="rounded-card p-1"
+            >
+              <UiCard
+                v-bind="example.cardProps"
+                :data-card-default="example.id === 'default' ? '' : undefined"
+                :data-card-transparent-optout="example.id === 'transparent' ? '' : undefined"
+              >
+                <ReferenceCardContent :locale="props.locale" presentation="gallery" />
+              </UiCard>
+            </UiSurface>
           </div>
-        </UiCard>
-      </QaPreviewMatrix>
-    </div>
+        </div>
+      </MaterialBackdrop>
+
+      <div class="mt-3 grid gap-2" data-card-qa>
+        <div class="grid gap-1 px-1">
+          <h4 class="text-label-sm font-label text-primary">
+            {{ localize(qaCopy.label, props.locale) }}
+          </h4>
+          <p class="text-caption text-secondary">
+            {{ localize(qaCopy.hint, props.locale) }}
+          </p>
+        </div>
+        <QaPreviewMatrix :locale="props.locale">
+          <UiCard class="w-full max-w-container-sm">
+            <ReferenceCardContent :locale="props.locale" presentation="qa" />
+          </UiCard>
+        </QaPreviewMatrix>
+      </div>
+    </LabSpecimenSection>
   </div>
 </template>

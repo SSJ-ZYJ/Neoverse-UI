@@ -1,0 +1,301 @@
+@layer components {
+  .ui-terminal-surface[data-titlebar='macos'] .ui-terminal-surface__header,
+  .ui-terminal-surface[data-titlebar='linux'] .ui-terminal-surface__header {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    align-items: center;
+    gap: var(--neoverse-space-3);
+    min-height: var(--neoverse-terminal-header-min-height);
+    padding: var(--neoverse-terminal-header-padding-block)
+      var(--neoverse-terminal-header-padding-inline);
+    border-block-end: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-terminal-header-border);
+  }
+
+  .ui-terminal-surface[data-titlebar='windows'] .ui-terminal-surface__header {
+    display: flex;
+    align-items: center;
+    gap: var(--neoverse-space-3);
+    min-height: var(--neoverse-terminal-header-min-height);
+    padding: var(--neoverse-terminal-header-padding-block) var(--neoverse-space-2)
+      var(--neoverse-terminal-header-padding-block) var(--neoverse-terminal-header-padding-inline);
+    border-block-end: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-terminal-header-border);
+  }
+
+  .ui-terminal-surface[data-density='expanded'][data-titlebar='macos'] .ui-terminal-surface__header,
+  .ui-terminal-surface[data-density='expanded'][data-titlebar='linux'] .ui-terminal-surface__header,
+  .ui-terminal-surface[data-density='expanded'][data-titlebar='windows']
+    .ui-terminal-surface__header {
+    padding-block: var(--neoverse-space-3);
+    padding-inline: var(--neoverse-space-5);
+  }
+
+  .ui-terminal-surface__title-group {
+    display: inline-flex;
+    min-width: 0;
+    max-width: 100%;
+    align-items: center;
+    gap: var(--neoverse-space-2);
+  }
+
+  .ui-terminal-surface[data-titlebar='macos'] .ui-terminal-surface__title-group,
+  .ui-terminal-surface[data-titlebar='linux'] .ui-terminal-surface__title-group {
+    grid-column: 2;
+    justify-self: center;
+  }
+
+  .ui-terminal-surface[data-titlebar='windows'] .ui-terminal-surface__title-group {
+    flex: 1 1 auto;
+  }
+
+  .ui-terminal-surface[data-titlebar='macos'] .ui-terminal-surface__actions {
+    grid-column: 3;
+    justify-self: end;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
+    max-width: 100%;
+    margin-inline-start: 0;
+  }
+
+  .ui-terminal-surface[data-titlebar='linux'] .ui-terminal-surface__actions {
+    grid-column: 1;
+    justify-self: start;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    min-width: 0;
+    max-width: 100%;
+    margin-inline-start: 0;
+  }
+
+  .ui-terminal-surface[data-titlebar='windows'] .ui-terminal-surface__actions {
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    min-width: 0;
+    max-width: 100%;
+    margin-inline-start: 0;
+  }
+
+  .ui-terminal-surface__app-icon {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    color: var(--neoverse-terminal-muted);
+  }
+
+  .ui-terminal-surface__app-icon svg {
+    width: var(--neoverse-terminal-window-icon-size);
+    height: var(--neoverse-terminal-window-icon-size);
+  }
+
+  .ui-terminal-surface__window-controls {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+  }
+
+  .ui-terminal-surface__window-controls[data-window-controls='macos'] {
+    grid-column: 1;
+    justify-self: start;
+    gap: var(--neoverse-terminal-window-control-gap);
+  }
+
+  .ui-terminal-surface__window-controls[data-window-controls='windows'] {
+    gap: var(--neoverse-space-1);
+  }
+
+  .ui-terminal-surface__window-controls[data-window-controls='linux'] {
+    grid-column: 3;
+    justify-self: end;
+    gap: var(--neoverse-space-1);
+  }
+
+  .ui-terminal-surface__window-button {
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
+    appearance: none;
+    background: transparent;
+    color: var(--neoverse-terminal-foreground);
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+
+  .ui-terminal-surface__window-button:focus-visible {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: var(--neoverse-focus-ring-offset);
+  }
+
+  .ui-terminal-surface__window-controls[data-window-controls='macos']
+    .ui-terminal-surface__window-button {
+    width: var(--neoverse-terminal-window-control-size);
+    height: var(--neoverse-terminal-window-control-size);
+    border-radius: var(--neoverse-radius-pill);
+    box-shadow: inset 0 0 0 var(--neoverse-border-width-thin) var(--neoverse-color-border-subtle);
+    transition: transform var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing);
+  }
+
+  .ui-terminal-surface__window-controls[data-window-controls='macos']
+    .ui-terminal-surface__window-button
+    svg {
+    width: var(--neoverse-terminal-window-glyph-size);
+    height: var(--neoverse-terminal-window-glyph-size);
+    opacity: 0;
+    transition: opacity var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing);
+  }
+
+  .ui-terminal-surface__window-controls[data-window-controls='windows']
+    .ui-terminal-surface__window-button
+    svg,
+  .ui-terminal-surface__window-controls[data-window-controls='linux']
+    .ui-terminal-surface__window-button
+    svg {
+    width: var(--neoverse-terminal-window-icon-size);
+    height: var(--neoverse-terminal-window-icon-size);
+  }
+
+  .ui-terminal-surface__window-controls[data-window-controls='macos']:is(:hover, :focus-within)
+    .ui-terminal-surface__window-button
+    svg {
+    opacity: 1;
+  }
+
+  .ui-terminal-surface__window-controls[data-window-controls='macos']
+    .ui-terminal-surface__window-button--close {
+    background: var(--neoverse-terminal-window-close);
+    color: var(--neoverse-terminal-window-close-foreground);
+  }
+
+  .ui-terminal-surface__window-controls[data-window-controls='macos']
+    .ui-terminal-surface__window-button--minimize {
+    background: var(--neoverse-terminal-window-minimize);
+    color: var(--neoverse-terminal-window-minimize-foreground);
+  }
+
+  .ui-terminal-surface__window-controls[data-window-controls='macos']
+    .ui-terminal-surface__window-button--maximize {
+    background: var(--neoverse-terminal-window-maximize);
+    color: var(--neoverse-terminal-window-maximize-foreground);
+  }
+
+  .ui-terminal-surface__window-controls[data-window-controls='windows']
+    .ui-terminal-surface__window-button {
+    width: var(--neoverse-terminal-window-caption-width);
+    height: var(--neoverse-terminal-window-caption-height);
+    border-radius: var(--neoverse-radius-xs);
+    color: var(--neoverse-terminal-muted);
+    transition:
+      background-color var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing),
+      color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
+  }
+
+  .ui-terminal-surface__window-controls[data-window-controls='linux']
+    .ui-terminal-surface__window-button {
+    width: var(--neoverse-terminal-window-linux-button-size);
+    height: var(--neoverse-terminal-window-linux-button-size);
+    border-radius: var(--neoverse-radius-pill);
+    background: var(--neoverse-terminal-window-caption-hover-background);
+    color: var(--neoverse-terminal-foreground);
+    transition:
+      background-color var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing),
+      color var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing),
+      transform var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
+  }
+
+  @media (hover: hover) {
+    .ui-terminal-surface__window-controls[data-window-controls='windows']
+      .ui-terminal-surface__window-button:hover {
+      background: var(--neoverse-terminal-window-caption-hover-background);
+      color: var(--neoverse-terminal-foreground);
+    }
+
+    .ui-terminal-surface__window-controls[data-window-controls='linux']
+      .ui-terminal-surface__window-button:hover {
+      background: var(--neoverse-terminal-window-caption-active-background);
+    }
+
+    .ui-terminal-surface__window-controls:is(
+        [data-window-controls='windows'],
+        [data-window-controls='linux']
+      )
+      .ui-terminal-surface__window-button--close:hover {
+      background: var(--neoverse-terminal-window-close-hover-background);
+      color: var(--neoverse-terminal-window-close-hover-foreground);
+    }
+  }
+
+  .ui-terminal-surface__window-controls[data-window-controls='windows']
+    .ui-terminal-surface__window-button:active {
+    background: var(--neoverse-terminal-window-caption-active-background);
+  }
+
+  .ui-terminal-surface__window-controls:is(
+      [data-window-controls='windows'],
+      [data-window-controls='linux']
+    )
+    .ui-terminal-surface__window-button--close:active {
+    background: var(--neoverse-terminal-window-close-hover-background);
+    color: var(--neoverse-terminal-window-close-hover-foreground);
+  }
+
+  .ui-terminal-surface__window-controls:is(
+      [data-window-controls='macos'],
+      [data-window-controls='linux']
+    )
+    .ui-terminal-surface__window-button:active {
+    transform: scale(var(--neoverse-effect-press-scale));
+  }
+
+  @media (pointer: coarse) {
+    .ui-terminal-surface__window-controls[data-window-controls='macos']
+      .ui-terminal-surface__window-button::before {
+      position: absolute;
+      inset: calc(var(--neoverse-terminal-window-control-touch-hit-area) * -1);
+      border-radius: inherit;
+      content: '';
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-terminal-surface__window-button,
+    .ui-terminal-surface__window-button svg {
+      transition: none;
+    }
+
+    .ui-terminal-surface__window-button:active {
+      transform: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ui-terminal-surface__window-button,
+    .ui-terminal-surface__window-controls[data-window-controls='macos']
+      .ui-terminal-surface__window-button,
+    .ui-terminal-surface__window-controls[data-window-controls='linux']
+      .ui-terminal-surface__window-button {
+      border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) ButtonText;
+      background: ButtonFace;
+      color: ButtonText;
+      box-shadow: none;
+    }
+
+    .ui-terminal-surface__window-controls[data-window-controls='macos']
+      .ui-terminal-surface__window-button
+      svg {
+      opacity: 1;
+    }
+  }
+}

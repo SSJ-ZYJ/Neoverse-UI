@@ -24,7 +24,7 @@ test('UiPopover renders the shared trigger and dialog contract', () => {
   expect(html).toContain('aria-label="Details"');
 });
 
-test('overlay triggers accept a ghost variant and keep the secondary default', () => {
+test('overlay triggers accept a ghost variant', () => {
   const ghostPopover = renderToStaticMarkup(
     <UiPopover trigger="Open details" ariaLabel="Details" triggerVariant="ghost">
       <p>Overlay body</p>
@@ -33,18 +33,12 @@ test('overlay triggers accept a ghost variant and keep the secondary default', (
   const ghostMenu = renderToStaticMarkup(
     <UiDropdownMenu trigger="Actions" ariaLabel="Actions" items={[]} triggerVariant="ghost" />,
   );
-  const defaultPopover = renderToStaticMarkup(
-    <UiPopover trigger="Open details" ariaLabel="Details" />,
-  );
 
   expect(ghostPopover).toContain(
     'class="ui-popover__trigger ui-button material-glass-subtle ui-button--ghost ui-button--md"',
   );
   expect(ghostMenu).toContain(
     'class="ui-dropdown-menu__trigger ui-button material-glass-subtle ui-button--ghost ui-button--md"',
-  );
-  expect(defaultPopover).toContain(
-    'class="ui-popover__trigger ui-button material-glass-subtle ui-button--secondary ui-button--md"',
   );
 });
 

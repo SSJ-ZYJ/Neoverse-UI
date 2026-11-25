@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { UiButton, UiNotice, UiToast, UiTooltipSurface } from '@neoverse-ui/vue';
+import { type ToastProps, UiButton, UiNotice, UiToast, UiTooltipSurface } from '@neoverse-ui/vue';
 import { ref } from 'vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
+import { toastPresentationOptions, toastPreviewCopy } from '../lab-specimens/status';
 import { localize, localized, moduleCopy } from '../playground-content';
 import QaPreviewMatrix from '../QaPreviewMatrix.vue';
 import BadgeModule from './BadgeModule.vue';
@@ -11,6 +12,20 @@ import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
 const toastOpen = ref(false);
+const toastPresentation = ref<NonNullable<ToastProps['presentation']>>('compact');
+const toastDetails = ref(false);
+
+function showToast(presentation: NonNullable<ToastProps['presentation']>) {
+  toastPresentation.value = presentation;
+  toastDetails.value = false;
+  toastOpen.value = true;
+}
+
+function revealToastDetails() {
+  toastDetails.value = true;
+  toastOpen.value = false;
+}
+
 const noticeVariants = ['neutral', 'info', 'success', 'warning', 'danger'] as const;
 const copy = {
   notice: {
@@ -121,23 +136,46 @@ const copy = {
       :description="
         localize(
           localized(
-            'Short feedback fits its content and uses the standard Aurora Glass surface.',
-            '短暂反馈按内容收宽，复用标准层级的极光玻璃表面。',
+            'Three notification layouts share the same Aurora Glass surface.',
+            '三个通知布局复用同一套极光玻璃表面。',
           ),
           props.locale,
         )
       "
     >
-      <UiButton data-toast-open @click="toastOpen = true">
-        {{ localize(localized('Show feedback', '显示反馈'), props.locale) }}
-      </UiButton>
+      <div class="flex flex-wrap justify-center gap-2">
+        <UiButton
+          v-for="{ value, label } in toastPresentationOptions"
+          :key="value"
+          :data-toast-open="value"
+          @click="showToast(value)"
+        >
+          {{ localize(label, props.locale) }}
+        </UiButton>
+      </div>
+      <p v-if="toastDetails" data-toast-details role="status">
+        {{ localize(toastPreviewCopy.details, props.locale) }}
+      </p>
       <UiToast
         v-model:open="toastOpen"
+        :presentation="toastPresentation"
         variant="success"
-        :duration="0"
-        :message="localize(localized('Changes saved successfully.', '修改已保存。'), props.locale)"
+        :message="
+          localize(
+            toastPresentation === 'notification'
+              ? toastPreviewCopy.notification
+              : localized('Changes saved.', '修改已保存。'),
+            props.locale,
+          )
+        "
         :dismiss-label="localize(localized('Dismiss notification', '关闭通知'), props.locale)"
-      />
+      >
+        <template v-if="toastPresentation === 'action'" #action>
+          <button type="button" data-toast-action @click="revealToastDetails">
+            {{ localize(toastPreviewCopy.action, props.locale) }}
+          </button>
+        </template>
+      </UiToast>
     </LabSpecimenSection>
   </div>
 </template>

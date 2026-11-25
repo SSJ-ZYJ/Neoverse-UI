@@ -42,16 +42,19 @@ export default defineConfig(({ mode }) => ({
       },
       output: {
         entryFileNames: '[name].js',
-        chunkFileNames: 'chunks/[name]-[hash].js',
+        chunkFileNames: mode === 'development' ? 'chunks/[name].js' : 'chunks/[name]-[hash].js',
         assetFileNames: '[name][extname]',
-        // The shell entry statically imports the whole Design Lab catalogue.
-        // Keep the shared Vue runtime in its own cacheable chunk so no emitted
-        // chunk crosses Vite's 500 kB advisory limit.
+        // Modules, heavy previews, and React runtime dependencies load dynamically.
+        // Keep shared framework runtimes in cacheable chunks across routes.
         codeSplitting: {
           groups: [
             {
               name: 'vue-runtime',
               test: /node_modules[\\/]@vue[\\/]/,
+            },
+            {
+              name: 'react-runtime',
+              test: /node_modules[\\/](?:react|react-dom|scheduler)[\\/]/,
             },
           ],
         },

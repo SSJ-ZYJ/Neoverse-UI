@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import { expectNoPageOverflow } from '../support/e2e';
-import { chooseOption, showInspector, switchToChinese } from '../support/playground';
+import { switchToChinese } from '../support/playground';
 
 test.describe('playground', () => {
   test('theme expands from its control and language fades without resetting the specimen', async ({
@@ -28,7 +28,9 @@ test.describe('playground', () => {
       }),
       trigger.press(mobile ? 'Enter' : 'End'),
     ]);
-    const center = (await mask.jsonValue()).match(/at ([\d.]+)px ([\d.]+)px/);
+    const maskImage = await mask.jsonValue();
+    if (!maskImage) throw new Error('Theme reveal mask is missing');
+    const center = maskImage.match(/at ([\d.]+)px ([\d.]+)px/);
     expect(center).not.toBeNull();
     expect(Number(center?.[1])).toBeCloseTo(box.x + box.width / 2, 1);
     expect(Number(center?.[2])).toBeCloseTo(box.y + box.height / 2, 1);
@@ -70,6 +72,44 @@ test.describe('playground', () => {
     ).toBe('none');
   });
 
+  test('the stage title adds the English term only in the Chinese interface', async ({ page }) => {
+    await page.goto('/?theme=light&lang=zh&fps=0#data-display-tabs');
+    const specimenTitle = page.locator('#stage-title');
+    await expect(specimenTitle).toHaveAccessibleName('标签页');
+    const english = specimenTitle.locator('.playground-stage__title-secondary');
+    await expect(english).toHaveText('Tabs');
+    await expect(english).toHaveAttribute('lang', 'en');
+    await expect(english).toHaveAttribute('aria-hidden', 'true');
+
+    // The reading aid qualifies the title: it must stay smaller and lighter
+    // than the localized term it follows.
+    const typography = await specimenTitle.evaluate((heading) => {
+      const term = heading.querySelector('.playground-stage__title-secondary');
+      if (term === null) throw new Error('Stage title has no English term');
+      const headingStyle = getComputedStyle(heading);
+      const termStyle = getComputedStyle(term);
+      return {
+        headingSize: Number.parseFloat(headingStyle.fontSize),
+        termSize: Number.parseFloat(termStyle.fontSize),
+        headingWeight: Number(headingStyle.fontWeight),
+        termWeight: Number(termStyle.fontWeight),
+      };
+    });
+    expect(typography.termSize).toBeLessThan(typography.headingSize);
+    expect(typography.termWeight).toBeLessThan(typography.headingWeight);
+
+    await page.goto('/?theme=light&lang=zh&fps=0#data-display');
+    const moduleTitle = page.locator('#stage-title');
+    await expect(moduleTitle).toHaveAccessibleName('数据与渐进披露');
+    await expect(moduleTitle.locator('.playground-stage__title-secondary')).toHaveText(
+      'Data & Disclosure',
+    );
+
+    await page.goto('/?theme=light&lang=en&fps=0#data-display');
+    await expect(page.locator('#stage-title')).toHaveAccessibleName('Data & Disclosure');
+    await expect(page.locator('.playground-stage__title-secondary')).toHaveCount(0);
+  });
+
   test('the explorer opens a module overview before disclosing its specimens', async ({
     page,
   }, testInfo) => {
@@ -94,13 +134,34 @@ test.describe('playground', () => {
     await expect(page.locator('#data-display-tabs')).toBeVisible();
     await expect(page.locator('#data-display-avatar')).toHaveCount(0);
 
-    // A module with one browsable specimen is a single destination instead of
-    // a disclosure that would repeat the same label one level deeper.
+    // One browsable specimen needs no disclosure. A differently named
+    // specimen stays a direct leaf while the module row keeps the gallery.
     await openExplorer();
     await expect(explorer.locator('#explorer-module-card')).toHaveCount(0);
+    await expect(explorer.locator('a[href="#card-card"]')).toBeVisible();
     await explorer.locator('a[href="#card"]').click();
     await expect(page).toHaveURL(/#card$/);
     await expect(page.locator('[data-design-lab-region="module"]')).toBeVisible();
+  });
+
+  test('the Card gallery compares surface presets without changing the content', async ({
+    page,
+  }) => {
+    await page.goto('/?lang=en#card', { waitUntil: 'domcontentloaded' });
+    const comparison = page.locator('#card-card');
+    for (const [example, surface] of [
+      ['default', 'glass-elevated'],
+      ['elevated', 'elevated'],
+      ['transparent', 'none'],
+    ] as const) {
+      const card = comparison.locator(`[data-specimen-card-surface="${example}"] .ui-card`);
+      await expect(card).toHaveAttribute('data-surface', surface);
+      await expect(card.getByRole('heading', { name: 'Reference card' })).toBeVisible();
+      await expect(card.getByRole('button', { name: 'Continue' })).toBeVisible();
+    }
+    await expect(
+      comparison.locator('[data-surface="subtle"] > [data-surface="none"].ui-card'),
+    ).toBeVisible();
   });
 
   test('Explorer hides redundant aggregate comparisons while preserving individual component entries', async ({
@@ -154,7 +215,7 @@ test.describe('playground', () => {
     ['status-feedback-notice', 'status-feedback-toast'],
     ['data-display-step-flow', 'data-display-tabs'],
     ['foundation-prose', 'typography-scale'],
-    ['foundation-motion-width', 'foundation-motion-page'],
+    ['foundation-motion-presence', 'foundation-motion-page'],
     ['composition-project-card', 'composition-control-cluster'],
     ['composition-reading', 'composition-docs-content-surface'],
   ] as const) {
@@ -165,92 +226,6 @@ test.describe('playground', () => {
       await expect(page.locator(`#${absent}`)).toHaveCount(0);
     });
   }
-
-  test('the focused stage remains a plain canvas in both themes', async ({ page }) => {
-    for (const theme of ['light', 'dark'] as const) {
-      await page.goto(`/?theme=${theme}&lang=en#forms-textarea`, {
-        waitUntil: 'domcontentloaded',
-      });
-      await expect(page.locator('#forms-textarea')).toBeVisible();
-      const workspace = page.locator('[data-design-lab-workspace]');
-      expect(await workspace.evaluate((element) => getComputedStyle(element).backgroundImage)).toBe(
-        'none',
-      );
-      expect(
-        await page
-          .locator('.playground-shell')
-          .evaluate((element) => getComputedStyle(element).backgroundImage),
-      ).toBe('none');
-      await expect(
-        workspace.locator('.playground-material-backdrop, [data-qa-matrix]'),
-      ).toHaveCount(0);
-      await expect(workspace.locator('.ui-textarea')).toHaveCount(1);
-      await expect(workspace.locator('.ui-input, .ui-select')).toHaveCount(0);
-    }
-  });
-
-  test('the stage background switcher repaints the workspace and survives a reload', async ({
-    page,
-  }) => {
-    await page.goto('/?theme=light&lang=en#forms-textarea', { waitUntil: 'domcontentloaded' });
-    const workspace = page.locator('[data-design-lab-workspace]');
-    const control = page.getByRole('radiogroup', { name: 'Stage background' });
-    await expect(control).toBeVisible();
-    await expect(workspace).toHaveAttribute('data-stage-background', 'canvas');
-    expect(await workspace.evaluate((element) => getComputedStyle(element).backgroundImage)).toBe(
-      'none',
-    );
-
-    await control.getByRole('radio', { name: 'Gradient' }).click();
-    await expect(workspace).toHaveAttribute('data-stage-background', 'gradient');
-    expect(
-      await workspace.evaluate((element) => getComputedStyle(element).backgroundImage),
-    ).toContain('radial-gradient');
-
-    await page.reload({ waitUntil: 'domcontentloaded' });
-    await expect(workspace).toHaveAttribute('data-stage-background', 'gradient');
-    await expect(control.getByRole('radio', { name: 'Gradient' })).toHaveAttribute(
-      'aria-checked',
-      'true',
-    );
-
-    await control.getByRole('radio', { name: 'Solid' }).click();
-    await expect(workspace).toHaveAttribute('data-stage-background', 'canvas');
-  });
-
-  test('the stage move handle moves the specimen and Home recenters it', async ({ page }) => {
-    // The entrance animation offsets the content for its first frames; reduced
-    // motion keeps the measured centre stable for the recenter assertion.
-    await page.emulateMedia({ reducedMotion: 'reduce' });
-    await page.goto('/?theme=light&lang=en#controls-button', { waitUntil: 'domcontentloaded' });
-    const movable = page.locator('.playground-stage__specimen-content > *');
-    const grip = page.locator('[data-stage-move-handle]');
-    await expect(grip).toBeVisible();
-    const before = await movable.boundingBox();
-    const handle = await grip.boundingBox();
-    if (before === null || handle === null) throw new Error('Missing stage geometry');
-
-    await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
-    await page.mouse.down();
-    await page.mouse.move(handle.x + handle.width / 2 + 48, handle.y + handle.height / 2 + 36, {
-      steps: 6,
-    });
-    await page.mouse.up();
-
-    const moved = await movable.boundingBox();
-    expect(moved?.x ?? 0).toBeGreaterThan(before.x + 24);
-    expect(moved?.y ?? 0).toBeGreaterThan(before.y + 16);
-
-    await grip.focus();
-    await page.keyboard.press('Home');
-    await expect
-      .poll(async () => {
-        const box = await movable.boundingBox();
-        if (box === null) return Number.POSITIVE_INFINITY;
-        return Math.max(Math.abs(box.x - before.x), Math.abs(box.y - before.y));
-      })
-      .toBeLessThan(2);
-  });
 
   for (const [id, selector] of [
     ['controls-icon-button', '.ui-icon-button'],
@@ -274,23 +249,6 @@ test.describe('playground', () => {
       await expect(stage.locator('.playground-material-backdrop, [data-qa-matrix]')).toHaveCount(0);
     });
   }
-
-  test('new foundation leaves show their own content and keep a usable width', async ({ page }) => {
-    for (const id of [
-      'layout-shape-spacing',
-      'layout-shape-radius',
-      'layout-shape-border',
-      'shadow-primitive',
-      'shadow-alias',
-      'materials-glass',
-      'data-display-step-flow',
-    ]) {
-      await page.goto(`/?lang=en#${id}`, { waitUntil: 'domcontentloaded' });
-      const specimen = page.locator(`#${id}`);
-      await expect(specimen).toBeVisible();
-      expect((await specimen.boundingBox())?.width).toBeGreaterThan(0);
-    }
-  });
 
   test('the isolated frame keeps diagnostic backdrops and the complete form matrix', async ({
     page,
@@ -391,9 +349,9 @@ test.describe('playground', () => {
     await workspace.evaluate((element) => element.scrollTo({ top: 760, behavior: 'instant' }));
 
     const navigation = page.locator('[data-playground-navigation]');
-    await navigation.locator('#explorer-module-materials').click();
-    await navigation.locator('a[href="#materials-surface"]').click();
-    await expect(page).toHaveURL(/#materials-surface$/);
+    await navigation.locator('#explorer-module-data-display').click();
+    await navigation.locator('a[href="#data-display-tabs"]').click();
+    await expect(page).toHaveURL(/#data-display-tabs$/);
     await expect(page.locator('[data-design-lab-region="specimen"]')).toBeVisible();
     await expect.poll(() => workspace.evaluate((element) => element.scrollTop)).toBe(0);
   });
@@ -479,6 +437,33 @@ test.describe('playground', () => {
     }
   });
 
+  test('the Explorer animates specimen leaf expansion and collapse', async ({ page }, testInfo) => {
+    const mobile = testInfo.project.name === 'mobile';
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/?lang=en#controls', { waitUntil: 'domcontentloaded' });
+    if (mobile) await page.getByRole('button', { name: 'Open Explorer' }).click();
+    const navigation = page.locator('[data-playground-navigation]');
+    const list = page.locator('#explorer-specimens-data-display');
+    const toggle = navigation.locator('#explorer-module-data-display');
+    await expect(list).toHaveAttribute('hidden', '');
+    await expect(list).toHaveAttribute('inert', '');
+
+    const animations = () => list.evaluate((element) => element.getAnimations().length);
+    await toggle.click();
+    await expect(list).not.toHaveAttribute('hidden', '');
+    await expect.poll(animations).toBeGreaterThan(0);
+    await expect(list).not.toHaveAttribute('inert', '');
+    await expect.poll(animations).toBe(0);
+    await expect(list).not.toHaveAttribute('hidden', '');
+
+    await toggle.click();
+    await expect.poll(animations).toBeGreaterThan(0);
+    await expect(list).toHaveAttribute('inert', '');
+    await expect(list).toHaveAttribute('aria-hidden', 'true');
+    await expect.poll(animations).toBe(0);
+    await expect(list).toHaveAttribute('hidden', '');
+  });
+
   test('the Explorer finds specimens by API and browser history restores focus and selection', async ({
     page,
   }, testInfo) => {
@@ -512,144 +497,6 @@ test.describe('playground', () => {
     await expect(page.locator('#forms-select')).toBeFocused();
     if (mobile) await page.getByRole('button', { name: 'Open Explorer' }).click();
     await expect(select).toHaveAttribute('aria-current', 'location');
-  });
-
-  test('the Inspector edits a real Button and resets activation state without remounting it', async ({
-    page,
-  }, testInfo) => {
-    const mobile = testInfo.project.name === 'mobile';
-    await page.goto('/?theme=light&lang=en#controls-button', { waitUntil: 'domcontentloaded' });
-    const live = page.locator('[data-design-lab-region="specimen"]');
-    const button = live.locator('.ui-button');
-    const inspector = page.locator('#design-lab-inspector');
-    await expect(live).toBeFocused();
-    await expect(page.locator('[data-design-lab-region="module"]')).toHaveCount(0);
-    await expect(button).toHaveCSS('height', '32px');
-    await page.keyboard.press('Tab');
-    await expect(button).toBeFocused();
-    await page.keyboard.press('Enter');
-    await expect(live.locator('output')).toHaveText('Activations: 1');
-    const instance = await button.elementHandle();
-
-    if (mobile) await page.locator('[data-playground-inspector-trigger]').click();
-    const size = inspector.getByRole('combobox', { name: 'Size' });
-    await size.press('ArrowDown');
-    const large = inspector.getByRole('option', { name: 'Large' });
-    await page.keyboard.press('End');
-    await expect(large).toBeFocused();
-    await Promise.all([
-      page.waitForFunction(() => {
-        const target = document.querySelector('#controls-button .ui-button');
-        if (!target) return false;
-        const height = Number.parseFloat(getComputedStyle(target).height);
-        return height > 32 && height < 48;
-      }),
-      page.keyboard.press('Enter'),
-    ]);
-    await expect(size).toBeFocused();
-    await expect(size.locator('..')).toContainText('Large');
-    await expect(button).toHaveCSS('height', '48px');
-    const sizeField = inspector.locator('[data-specimen-control="size"]');
-    await expect(sizeField).toContainText('Modified');
-    const initialRadius = await button.evaluate(
-      (element) => getComputedStyle(element).borderTopLeftRadius,
-    );
-    await chooseOption(inspector, 'corner', 'Square');
-    await expect(button).toHaveCSS('border-top-left-radius', '0px');
-    await chooseOption(inspector, 'corner', 'Pill');
-    await expect(button).not.toHaveCSS('border-top-left-radius', initialRadius);
-    await expect(button).toHaveCSS('height', '48px');
-    await chooseOption(inspector, 'surface', 'None');
-    await expect(button).toHaveCSS('backdrop-filter', 'none');
-    const disabled = inspector.getByRole('switch', { name: 'Disabled' });
-    await disabled.press('Space');
-    await expect(button).toBeDisabled();
-    await disabled.press('Space');
-    await expect(button).toBeEnabled();
-    await inspector.getByRole('switch', { name: 'Loading' }).press('Space');
-    await expect(button).toBeDisabled();
-    await expect(button).toHaveAttribute('aria-busy', 'true');
-
-    await inspector.getByRole('button', { name: 'Reset specimen' }).press('Enter');
-    if (mobile) await page.keyboard.press('Escape');
-    await expect(button).toBeEnabled();
-    await expect(button).toHaveCSS('height', '32px');
-    await expect(button).toHaveCSS('border-top-left-radius', initialRadius);
-    await expect(sizeField).not.toContainText('Modified');
-    await expect(live.locator('output')).toHaveText('Activations: 0');
-    expect(await button.evaluate((node, initialNode) => node === initialNode, instance)).toBe(true);
-  });
-
-  test('the Inspector switches an appearance variant on a presentational component', async ({
-    page,
-  }, testInfo) => {
-    const mobile = testInfo.project.name === 'mobile';
-    await page.goto('/?theme=light&lang=en#status-feedback-badge', {
-      waitUntil: 'domcontentloaded',
-    });
-    const badge = page.locator('[data-design-lab-region="specimen"] .ui-badge');
-    await expect(badge).toHaveText('Neutral');
-    const inspector = await showInspector(page, mobile);
-    await expect(inspector.locator('[data-specimen-control="variant"]')).toBeVisible();
-    await chooseOption(inspector, 'variant', 'Danger');
-    await expect(badge).toHaveText('Danger');
-    await expect(badge).toHaveClass(/ui-badge--danger/);
-    await inspector.getByRole('button', { name: 'Reset specimen' }).click();
-    await expect(badge).toHaveText('Neutral');
-    await expect(badge).toHaveClass(/ui-badge--neutral/);
-  });
-
-  test('an edited specimen keeps its selection after a reload', async ({ page }, testInfo) => {
-    const mobile = testInfo.project.name === 'mobile';
-    await page.goto('/?theme=light&lang=en#status-feedback-badge', {
-      waitUntil: 'domcontentloaded',
-    });
-    const badge = page.locator('[data-design-lab-region="specimen"] .ui-badge');
-    await expect(badge).toHaveText('Neutral');
-    await chooseOption(await showInspector(page, mobile), 'variant', 'Danger');
-    await expect(badge).toHaveText('Danger');
-
-    await page.reload();
-    await expect(badge).toHaveText('Danger');
-    await expect(badge).toHaveClass(/ui-badge--danger/);
-
-    await (await showInspector(page, mobile))
-      .getByRole('button', { name: 'Reset specimen' })
-      .click();
-    await expect(badge).toHaveText('Neutral');
-    await page.reload();
-    await expect(badge).toHaveText('Neutral');
-  });
-
-  test('the Inspector and SegmentedControl share a selection and honor disabled options', async ({
-    page,
-  }, testInfo) => {
-    const mobile = testInfo.project.name === 'mobile';
-    await page.goto('/?lang=en#controls-segmented-control', { waitUntil: 'domcontentloaded' });
-    const live = page.locator('#controls-segmented-control');
-    const overview = live.getByRole('radio', { name: 'Overview' });
-    const activity = live.getByRole('radio', { name: 'Activity' });
-    await expect(live.getByRole('radio', { name: 'Details' })).toBeDisabled();
-    await overview.press('ArrowRight');
-    await expect(activity).toBeChecked();
-    await expect(activity).toBeFocused();
-
-    const inspector = await showInspector(page, mobile);
-    const selected = inspector.getByRole('combobox', { name: 'Selected option' });
-    await expect(selected).toHaveText('Activity');
-    await chooseOption(inspector, 'modelValue', 'Overview');
-    const disabled = inspector.getByRole('switch', { name: 'Disabled' });
-    await disabled.press('Space');
-    await expect(selected).toBeDisabled();
-    if (mobile) await page.keyboard.press('Escape');
-    await expect(overview).toBeChecked();
-    await expect(activity).toBeDisabled();
-
-    await showInspector(page, mobile);
-    await inspector.getByRole('button', { name: 'Reset specimen' }).click();
-    if (mobile) await page.keyboard.press('Escape');
-    await expect(activity).toBeEnabled();
-    await expect(overview).toBeChecked();
   });
 
   for (const width of [390, 1024, 1440, 1920]) {

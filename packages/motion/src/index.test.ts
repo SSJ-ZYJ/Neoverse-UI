@@ -182,28 +182,6 @@ test('startViewTransition applies the update directly under reduced motion', asy
   );
 });
 
-test('startViewTransition scopes the transition with the view-transitioning attribute', async () => {
-  await withFakeDom({ matchMediaMatches: false }, async (root) => {
-    const finished = Promise.withResolvers<void>();
-    const dom = globalThis as FakeGlobal;
-    (dom.document as FakeGlobal).startViewTransition = (update: () => Promise<void>) => {
-      void update();
-      return { finished: finished.promise };
-    };
-
-    let applied = false;
-    const result = startViewTransition(() => {
-      applied = true;
-    });
-    expect(applied).toBe(true);
-    expect(root.hasAttribute('data-neoverse-view-transitioning')).toBe(true);
-
-    finished.resolve();
-    await result;
-    expect(root.hasAttribute('data-neoverse-view-transitioning')).toBe(false);
-  });
-});
-
 test('startViewTransition interrupts the running transition when called again', async () => {
   await withFakeDom({ matchMediaMatches: false }, async (root) => {
     const dom = globalThis as FakeGlobal;

@@ -7,14 +7,16 @@
  * preset they need, and this package decides how it moves.
  */
 
-import { createParticleDissolve, type ParticleDissolveHandle } from './particle-dissolve.js';
-import { prefersReducedMotion } from './reduced-motion.js';
-
 export type {
   AppearanceTransitionKind,
   AppearanceTransitionOptions,
 } from './appearance-transition.js';
 export { animateAppearanceChange, stopAppearanceTransition } from './appearance-transition.js';
+export type {
+  DisclosureAnimation,
+  DisclosureMotionOptions,
+} from './disclosure.js';
+export { animateDisclosure } from './disclosure.js';
 export type { LayoutSizeMotionOptions } from './layout-size.js';
 export { attachLayoutSizeMotion } from './layout-size.js';
 export type {
@@ -30,6 +32,54 @@ export {
   motionEasings,
   motionRoles,
 } from './motion-tokens.js';
+export type {
+  PageTransitionBackgroundMode,
+  PageTransitionDirection,
+  PageTransitionOrigin,
+  PageTransitionScope,
+  PageTransitionVariant,
+  ParticlePipelinePreference,
+  ViewTransitionOptions,
+} from './page-transition.js';
+export {
+  dissolveSourceAttribute,
+  incomingAttribute,
+  isWholePageTransitionVariant,
+  pageTransitionAttribute,
+  pageTransitionBackgroundAttribute,
+  pageTransitionContentAttribute,
+  pageTransitionDirectionAttribute,
+  pageTransitionDirections,
+  pageTransitionMorphAttribute,
+  pageTransitionScopeAttribute,
+  pageTransitionSnapshotName,
+  pageTransitionTargetAttribute,
+  pageTransitionVariants,
+  particleCanvasClassName,
+  particleTransitionAttribute,
+  startViewTransition,
+  stopViewTransition,
+  supportsViewTransition,
+  toMorphSnapshotName,
+  viewTransitionAttribute,
+  wholePageTransitionVariants,
+} from './page-transition.js';
+export type {
+  ParticleDissolveDebugState,
+  ParticleDissolveHandle,
+  ParticleDissolveMode,
+  ParticleDissolveOptions,
+  ParticleDissolvePreset,
+  ParticleDissolvePresetName,
+} from './particle-dissolve.js';
+export {
+  createParticleDissolve,
+  particleDissolvePresets,
+  prewarmParticleDissolve,
+  supportsParticleCapture,
+  supportsParticleDissolve,
+} from './particle-dissolve.js';
+export { prefersReducedMotion } from './reduced-motion.js';
 export { attachSegmentedControlSlider } from './segmented-control-slider.js';
 export { attachSelectionIndicator } from './selection-indicator.js';
 
@@ -147,324 +197,6 @@ export const presenceAppearClassName = 'nv-appear';
  * wins when both are present.
  */
 export const presenceVanishClassName = 'nv-vanish';
-
-/** Attribute set on `<html>` while a startViewTransition() capture is live. */
-export const viewTransitionAttribute = 'data-neoverse-view-transitioning';
-
-/** Attribute marking the element the WebGL particle dissolve captures. */
-export const dissolveSourceAttribute = 'data-neoverse-dissolve';
-
-/**
- * Attribute the engine sets on the freshly mounted region after the DOM
- * update; only it plays the delayed incoming entrance.
- */
-export const incomingAttribute = 'data-neoverse-motion-incoming';
-
-/** Attribute set on `<html>` while the WebGL particle dissolve is on screen. */
-export const particleTransitionAttribute = 'data-neoverse-particle-transitioning';
-
-/** Class of the fullscreen WebGL overlay canvas; always pointer-transparent. */
-export const particleCanvasClassName = 'nv-particle-canvas';
-
-/**
- * Which choreography startViewTransition should run:
- * - `true` (default): auto — WebGL capture → WebGL synthetic dust → crossfade.
- * - `'capture'` / `'synthetic'`: force one WebGL texture source.
- * - `'crossfade'`: force the plain View Transition crossfade (no particles).
- * - `false`: no choreography — a plain DOM update.
- */
-export type ParticlePipelinePreference = boolean | 'capture' | 'synthetic' | 'crossfade';
-
-export type {
-  ParticleDissolveDebugState,
-  ParticleDissolveHandle,
-  ParticleDissolveMode,
-  ParticleDissolveOptions,
-  ParticleDissolvePreset,
-  ParticleDissolvePresetName,
-} from './particle-dissolve.js';
-export {
-  createParticleDissolve,
-  particleDissolvePresets,
-  prewarmParticleDissolve,
-  supportsParticleCapture,
-  supportsParticleDissolve,
-} from './particle-dissolve.js';
-export { prefersReducedMotion } from './reduced-motion.js';
-
-export interface ViewTransitionOptions {
-  /** Skip the animation entirely under prefers-reduced-motion (DOM update still runs). */
-  respectReducedMotion?: boolean;
-  /** Which choreography to run; see {@link ParticlePipelinePreference}. */
-  particle?: ParticlePipelinePreference;
-  /** Element captured into particles; defaults to the [data-neoverse-dissolve] element. */
-  dissolveSource?: HTMLElement | null;
-}
-
-/** The view transition currently animating for this document, if any. */
-let activeViewTransition: ViewTransition | undefined;
-/** The particle dissolve currently on screen, if any. */
-let activeParticleDissolve: ParticleDissolveHandle | undefined;
-/** The incoming region currently fading beneath the active dissolve. */
-let activeIncomingElement: HTMLElement | undefined;
-let restoreIncomingDelay: (() => void) | undefined;
-
-const particleEnterDelayProperty = '--neoverse-motion-particle-enter-delay';
-
-function clearActiveIncoming(): void {
-  activeIncomingElement?.removeAttribute(incomingAttribute);
-  restoreIncomingDelay?.();
-  activeIncomingElement = undefined;
-  restoreIncomingDelay = undefined;
-}
-
-function setActiveIncoming(element: HTMLElement, delayMs?: number): void {
-  clearActiveIncoming();
-  if (delayMs !== undefined) {
-    const previousValue = element.style.getPropertyValue(particleEnterDelayProperty);
-    const previousPriority = element.style.getPropertyPriority(particleEnterDelayProperty);
-    element.style.setProperty(particleEnterDelayProperty, `${Math.max(0, delayMs)}ms`);
-    restoreIncomingDelay = () => {
-      if (previousValue) {
-        element.style.setProperty(particleEnterDelayProperty, previousValue, previousPriority);
-      } else {
-        element.style.removeProperty(particleEnterDelayProperty);
-      }
-    };
-  }
-  element.setAttribute(incomingAttribute, '');
-  activeIncomingElement = element;
-}
-
-function cancelActiveChoreography(root: HTMLElement): void {
-  activeParticleDissolve?.destroy();
-  activeParticleDissolve = undefined;
-  activeViewTransition?.skipTransition();
-  activeViewTransition = undefined;
-  clearActiveIncoming();
-  root.removeAttribute(particleTransitionAttribute);
-  root.removeAttribute(viewTransitionAttribute);
-}
-
-/** How long to wait for the particle capture before falling back; cloning and
- * first-painting a large region can take real time on slower machines. */
-const firstFrameTimeoutMs = 2000;
-/** Let the final particle frame clear before an interrupted page starts fading in. */
-const particleHandoffBufferMs = 32;
-
-/** Monotonic counter; only the newest startViewTransition call owns the screen. */
-let transitionRequest = 0;
-
-async function waitForElementAnimations(element: Element): Promise<void> {
-  await new Promise<void>((resolve) => {
-    window.requestAnimationFrame(() => resolve());
-  });
-
-  const animations = element
-    .getAnimations()
-    .filter((animation) => animation.playState !== 'finished');
-  if (animations.length === 0) return;
-
-  await Promise.allSettled(animations.map((animation) => animation.finished));
-}
-
-/**
- * Run a DOM update so the change reads as one continuous shot instead of a
- * hard cut. Resolves once the choreography finishes; a plain update runs when
- * the API or motion is unavailable.
- *
- * Choreography, in order of preference:
- * 1. WebGL particle dissolve — the leaving region is captured through the
- *    official HTML-in-Canvas API (or synthesized as theme-colored dust) and
- *    erodes into fine dust while the update swaps content underneath and the
- *    incoming region fades in late, or after the remaining particles on retry.
- * 2. Crossfade — without WebGL2 the View Transition's own crossfade runs,
- *    timed by the spatial role.
- *
- * Interruption: a visible particle dissolve keeps its canvas and progress;
- * the newest page fades in after the remaining particles clear. Pending
- * captures and crossfades are canceled, so rapid navigation never queues.
- * The overlay is pointer-transparent while the old page is dissolving.
- *
- * Shared elements stay put by giving them `view-transition-name` in CSS —
- * from-where-it-was to-where-it-goes is then handled by the browser.
- */
-export async function startViewTransition(
-  update: () => void | Promise<void>,
-  options: ViewTransitionOptions = {},
-): Promise<void> {
-  const { respectReducedMotion = true, particle = true, dissolveSource } = options;
-
-  const runUpdate = (): Promise<void> => Promise.resolve(update()).then(() => undefined);
-
-  if (typeof document === 'undefined') {
-    return runUpdate();
-  }
-
-  const root = document.documentElement;
-  const request = ++transitionRequest;
-  /* Only the newest request owns cleanup. Older callers may still be awaiting
-     the shared dissolve, but they must not remove the new page's entrance or
-     the particle layer after an interruption. */
-  const superseded = (): boolean => request !== transitionRequest;
-
-  if (respectReducedMotion && prefersReducedMotion()) {
-    cancelActiveChoreography(root);
-    return runUpdate();
-  }
-
-  if (particle === false) {
-    cancelActiveChoreography(root);
-    return runUpdate();
-  }
-
-  const source =
-    dissolveSource ??
-    (document.querySelector(`[${dissolveSourceAttribute}]`) as HTMLElement | null);
-  const findIncoming = (previousSources: Set<Element>): HTMLElement | undefined => {
-    const currentSources = [...document.querySelectorAll(`[${dissolveSourceAttribute}]`)];
-    return (
-      currentSources.find(
-        (element): element is HTMLElement =>
-          element instanceof HTMLElement && !previousSources.has(element),
-      ) ??
-      (source?.isConnected ? source : undefined) ??
-      currentSources.find((element): element is HTMLElement => element instanceof HTMLElement)
-    );
-  };
-
-  /* A visible dissolve already owns the particle layer. Keep its canvas and
-     progress when another page update arrives; only replace the incoming
-     content and restart that content's fade from opacity 0. */
-  const runningParticle = activeParticleDissolve;
-  if (
-    particle !== 'crossfade' &&
-    runningParticle !== undefined &&
-    !runningParticle.debug().destroyed &&
-    root.hasAttribute(particleTransitionAttribute)
-  ) {
-    activeViewTransition?.skipTransition();
-    activeViewTransition = undefined;
-    const previousSources = new Set(document.querySelectorAll(`[${dissolveSourceAttribute}]`));
-    try {
-      await runUpdate();
-      if (superseded()) return;
-
-      const incoming = findIncoming(previousSources);
-      if (incoming !== undefined) {
-        const { durationMs, progress } = runningParticle.debug();
-        const remainingMs = Math.max(0, durationMs * (1 - progress));
-        setActiveIncoming(incoming, Math.ceil(remainingMs + particleHandoffBufferMs));
-      }
-      const incomingSettled =
-        incoming === undefined ? Promise.resolve() : waitForElementAnimations(incoming);
-      await Promise.all([runningParticle.settled, incomingSettled]);
-    } finally {
-      if (!superseded() && activeParticleDissolve === runningParticle) {
-        clearActiveIncoming();
-        runningParticle.destroy();
-        activeParticleDissolve = undefined;
-        root.removeAttribute(particleTransitionAttribute);
-      }
-    }
-    return;
-  }
-
-  /* Starting a fresh pipeline (or switching to crossfade) cancels the prior
-     one. A captured, visible particle dissolve took the reuse path above. */
-  cancelActiveChoreography(root);
-
-  if (particle !== 'crossfade' && source !== null) {
-    const handle = createParticleDissolve({
-      source,
-      mode: particle === 'capture' || particle === 'synthetic' ? particle : 'auto',
-    });
-    if (handle !== null) {
-      activeParticleDissolve = handle;
-      /* Show the captured frame first, start the dissolve, and only then
-         swap the DOM underneath — the overlay covers the swap with the old
-         region still on screen. A capture that never paints (broken engine)
-         times out into the CSS fallback instead of swallowing the click.
-         The transitioning attribute is set only after the capture is
-         confirmed: the capture clone carries data-neoverse-dissolve too,
-         and the attribute would let the incoming-enter animation freeze
-         the clone at opacity 0 — an empty texture. */
-      document.body.append(handle.canvas);
-      handle.play();
-      const captured = await Promise.race([
-        handle.firstFrame,
-        new Promise<false>((resolve) => {
-          window.setTimeout(() => resolve(false), firstFrameTimeoutMs);
-        }),
-      ]);
-      if (superseded()) {
-        handle.destroy();
-        if (activeParticleDissolve === handle) {
-          activeParticleDissolve = undefined;
-        }
-        return;
-      }
-      if (captured) {
-        root.setAttribute(particleTransitionAttribute, '');
-        try {
-          /* Prefer a newly mounted source, but fade the original region if the
-             framework reused its dissolve root for the new page content. */
-          const previousSources = new Set(
-            document.querySelectorAll(`[${dissolveSourceAttribute}]`),
-          );
-          await runUpdate();
-          if (superseded()) return;
-
-          const incoming = findIncoming(previousSources);
-          if (incoming !== undefined) {
-            setActiveIncoming(incoming);
-          }
-          const incomingSettled =
-            incoming === undefined ? Promise.resolve() : waitForElementAnimations(incoming);
-          await Promise.all([handle.settled, incomingSettled]);
-        } finally {
-          if (!superseded()) {
-            clearActiveIncoming();
-            handle.destroy();
-            if (activeParticleDissolve === handle) {
-              activeParticleDissolve = undefined;
-            }
-            root.removeAttribute(particleTransitionAttribute);
-          }
-        }
-        return;
-      }
-      handle.destroy();
-      if (activeParticleDissolve === handle) {
-        activeParticleDissolve = undefined;
-      }
-    }
-  }
-
-  if (superseded()) {
-    return;
-  }
-
-  if (typeof document.startViewTransition !== 'function') {
-    return runUpdate();
-  }
-
-  /* Terminal fallback: the View Transition's own crossfade, timed by the
-     spatial role through the engine CSS. */
-  root.setAttribute(viewTransitionAttribute, '');
-  const transition = document.startViewTransition(runUpdate);
-  activeViewTransition = transition;
-
-  return transition.finished.finally(() => {
-    if (superseded()) {
-      return;
-    }
-    if (activeViewTransition === transition) {
-      activeViewTransition = undefined;
-    }
-    root.removeAttribute(viewTransitionAttribute);
-  });
-}
 
 /**
  * Stagger helper for `<TransitionGroup>` lists. Bind the returned style map

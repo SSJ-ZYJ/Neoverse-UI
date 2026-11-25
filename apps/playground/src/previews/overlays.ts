@@ -1,7 +1,9 @@
 import { UiButton, UiDialog, UiDropdownMenu, UiPopover } from '@neoverse-ui/vue';
 import { defineComponent, h, ref } from 'vue';
+import { lazyComponent, withPreload } from '../lazy-component';
 import { type Locale, localize, localized } from '../playground-content';
-import ContextMenuPreview from './ContextMenuPreview.vue';
+
+const ContextMenuPreview = lazyComponent(() => import('./ContextMenuPreview.vue'));
 
 const copy = {
   popoverTrigger: localized('Open popover', '打开弹层'),
@@ -130,6 +132,9 @@ export const popover = (locale: Locale) => h(PopoverPreview, { locale });
 export const dropdownMenu = (locale: Locale) =>
   h('div', { class: 'grid justify-items-start gap-3' }, [h(DropdownPreview, { locale })]);
 /** Mount the ContextMenu and its activation zone without the diagnostic backdrop */
-export const contextMenu = (locale: Locale) => h(ContextMenuPreview, { locale });
+export const contextMenu = withPreload(
+  (locale: Locale) => h(ContextMenuPreview, { locale }),
+  ContextMenuPreview,
+);
 /** Mount the modal dialog example */
 export const dialog = (locale: Locale) => h(DialogPreview, { locale });

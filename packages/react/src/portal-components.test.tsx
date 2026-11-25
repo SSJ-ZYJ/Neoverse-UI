@@ -32,6 +32,11 @@ test('React avatar and pagination preserve readable accessible state', () => {
   const circleAvatar = renderToStaticMarkup(<UiAvatar name="Lin Chen" shape="circle" />);
   expect(circleAvatar).toContain('ui-avatar--circle');
   expect(circleAvatar).not.toContain('ui-avatar--rounded');
+  const iconAvatar = renderToStaticMarkup(<UiAvatar name="Anonymous" placeholder="icon" />);
+  expect(iconAvatar).toContain('ui-avatar__icon');
+  expect(iconAvatar).toContain('aria-label="Anonymous"');
+  expect(iconAvatar).not.toContain('ui-avatar__fallback');
+  expect(iconAvatar).toContain('<svg');
   const pagination = renderToStaticMarkup(
     <UiPagination
       page={3}

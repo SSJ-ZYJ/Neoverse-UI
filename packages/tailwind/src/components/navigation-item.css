@@ -15,6 +15,12 @@
     line-height: var(--neoverse-control-compact-line-height);
   }
 
+  .ui-navigation-item--active {
+    /* The active label owns the mint accent; match the keyboard ring to it.
+       Inactive navigation items keep the global primary ring. */
+    --neoverse-color-focus-ring: var(--neoverse-navigation-item-active-foreground);
+  }
+
   .ui-navigation-item.ui-action--sm {
     --ui-action-icon-size: var(--neoverse-navigation-item-icon-size-sm);
     height: var(--neoverse-navigation-item-height-sm);

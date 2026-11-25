@@ -28,28 +28,28 @@
     );
     --neoverse-effect-command-press-field-dark: rgb(69 93 128 / var(--neoverse-effect-strength-24));
     --neoverse-effect-primary-rest-field-light: rgb(
-      189 211 244 /
+      150 206 255 /
       var(--neoverse-effect-strength-72)
     );
     --neoverse-effect-primary-hover-field-light: rgb(
-      181 203 239 /
+      137 195 250 /
       var(--neoverse-effect-strength-76)
     );
     --neoverse-effect-primary-press-field-light: rgb(
-      166 190 228 /
+      127 183 240 /
       var(--neoverse-effect-strength-76)
     );
     --neoverse-effect-primary-rest-field-dark: rgb(
-      174 198 255 /
-      var(--neoverse-effect-strength-64)
+      101 186 242 /
+      var(--neoverse-effect-strength-86)
     );
     --neoverse-effect-primary-hover-field-dark: rgb(
-      185 206 255 /
-      var(--neoverse-effect-strength-68)
+      126 202 253 /
+      var(--neoverse-effect-strength-88)
     );
     --neoverse-effect-primary-press-field-dark: rgb(
-      160 184 236 /
-      var(--neoverse-effect-strength-68)
+      85 172 232 /
+      var(--neoverse-effect-strength-86)
     );
     --neoverse-effect-strength-3: 3%;
     --neoverse-effect-strength-6: 6%;

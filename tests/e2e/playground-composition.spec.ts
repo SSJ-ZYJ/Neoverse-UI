@@ -460,89 +460,60 @@ test('Composition presets keep keyboard order and remove hidden actions from the
   }
 });
 
-test('Composition presets fit the stage across themes and viewport sizes with reduced motion', async ({
+test('Composition presets fit the stage at representative widths in both languages', async ({
   page,
 }, testInfo) => {
-  // Four scenes across two presets, themes, and widths: 40 fresh loads.
   test.setTimeout(240_000);
-  await page.addInitScript(() => {
-    const key = 'neoverse-design-lab.preferences';
-    try {
-      const raw = window.localStorage.getItem(key);
-      if (raw === null) return;
-      const stored: unknown = JSON.parse(raw);
-      if (typeof stored !== 'object' || stored === null || Array.isArray(stored)) return;
-      delete (stored as Record<string, unknown>).specimens;
-      window.localStorage.setItem(key, JSON.stringify(stored));
-    } catch {
-      // Malformed storage is already ignored by the application.
-    }
-  });
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  for (const width of testInfo.project.name === 'mobile' ? [390] : [768, 1024, 1440, 1920]) {
+  // Sample both themes without repeating each geometry check in both.
+  const layouts =
+    testInfo.project.name === 'mobile'
+      ? ([
+          [390, 'dark', 'en'],
+          [390, 'light', 'zh'],
+        ] as const)
+      : ([
+          [768, 'light', 'en'],
+          [1024, 'dark', 'en'],
+          [1440, 'dark', 'en'],
+          [1440, 'light', 'zh'],
+          [1920, 'light', 'en'],
+        ] as const);
+
+  for (const [width, theme, lang] of layouts) {
     await page.setViewportSize({ width, height: 900 });
-    for (const theme of ['light', 'dark']) {
-      for (const { id, alternate, surfaces } of compositionCases) {
-        await test.step(`${width}px ${theme}: ${id}`, async () => {
-          await page.goto(`/?lang=en&theme=${theme}#${id}`);
-          const stage = page.locator('[data-design-lab-workspace]');
-          const surface = stage.locator('[data-composition-surface]');
-          await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-          async function expectSceneFit(presetSurface: string): Promise<void> {
-            await expect(surface).toHaveAttribute('data-surface', presetSurface);
-            await expect(surface).toHaveCSS(
-              'backdrop-filter',
-              presetSurface.startsWith('glass-') ? /blur\(/ : 'none',
-            );
-            await expectNoPageOverflow(page);
-            expect(
-              await stage.evaluate((node) => node.scrollWidth - node.clientWidth),
-            ).toBeLessThanOrEqual(1);
-            expect(
-              await surface.evaluate((node) => node.scrollWidth - node.clientWidth),
-            ).toBeLessThanOrEqual(1);
-          }
-
-          await expectSceneFit(surfaces[0]);
-          const drawer = width < 1280;
-          const inspector = await showInspector(page, drawer);
-          await chooseOption(inspector, 'preset', alternate);
-          if (drawer) await page.keyboard.press('Escape');
-          await expectSceneFit(surfaces[1]);
-          if (id !== 'composition-project-card') {
-            await expect(surface).toHaveCSS('padding', '8px');
-            await expect(surface).toHaveCSS('transition-property', 'none');
-          }
-        });
-      }
-    }
-  }
-});
-
-test('Composition presets fit long Chinese labels at the touch and desktop breakpoints', async ({
-  page,
-}, testInfo) => {
-  test.setTimeout(240_000);
-  const width = testInfo.project.name === 'mobile' ? 390 : 1440;
-  await page.setViewportSize({ width, height: 900 });
-  for (const theme of ['light', 'dark'] as const) {
-    for (const { id, alternateZh } of compositionCases) {
-      await test.step(`${width}px ${theme}: ${id}`, async () => {
-        await page.goto(`/?lang=zh&theme=${theme}#${id}`);
+    for (const { id, alternate, alternateZh, surfaces } of compositionCases) {
+      await test.step(`${width}px ${theme} ${lang}: ${id}`, async () => {
+        await page.goto(`/?lang=${lang}&theme=${theme}#${id}`);
         const stage = page.locator('[data-design-lab-workspace]');
         const surface = stage.locator('[data-composition-surface]');
-        await expectNoPageOverflow(page);
-        expect(
-          await stage.evaluate((node) => node.scrollWidth - node.clientWidth),
-        ).toBeLessThanOrEqual(1);
+        await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
+
+        async function expectSceneFit(presetSurface: string): Promise<void> {
+          await expect(surface).toHaveAttribute('data-surface', presetSurface);
+          await expect(surface).toHaveCSS(
+            'backdrop-filter',
+            presetSurface.startsWith('glass-') ? /blur\(/ : 'none',
+          );
+          await expectNoPageOverflow(page);
+          expect(
+            await stage.evaluate((node) => node.scrollWidth - node.clientWidth),
+          ).toBeLessThanOrEqual(1);
+          expect(
+            await surface.evaluate((node) => node.scrollWidth - node.clientWidth),
+          ).toBeLessThanOrEqual(1);
+        }
+
+        await expectSceneFit(surfaces[0]);
         const drawer = width < 1280;
         const inspector = await showInspector(page, drawer);
-        await chooseOption(inspector, 'preset', alternateZh);
+        await chooseOption(inspector, 'preset', lang === 'zh' ? alternateZh : alternate);
         if (drawer) await page.keyboard.press('Escape');
-        await expectNoPageOverflow(page);
-        expect(
-          await surface.evaluate((node) => node.scrollWidth - node.clientWidth),
-        ).toBeLessThanOrEqual(1);
+        await expectSceneFit(surfaces[1]);
+        if (id !== 'composition-project-card') {
+          await expect(surface).toHaveCSS('padding', '8px');
+          await expect(surface).toHaveCSS('transition-property', 'none');
+        }
       });
     }
   }

@@ -15,6 +15,7 @@ export default defineConfig({
     '**/forms.spec.ts',
     '**/overlays.spec.ts',
     '**/navigation.spec.ts',
+    '**/segmented-control.spec.ts',
     '**/surfaces.spec.ts',
     '**/motion.spec.ts',
     '**/parity.spec.ts',

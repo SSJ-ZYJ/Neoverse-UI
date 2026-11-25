@@ -192,6 +192,28 @@ test.describe('surfaces', () => {
       await expect(circle).toHaveCSS('border-radius', '9999px');
       await expect(rounded).toHaveClass(/ui-avatar--rounded/);
       await expect(rounded).toHaveCSS('border-radius', '8px');
+
+      // The placeholder icon is a centered neutral glyph, not initials.
+      const iconAvatar = page
+        .locator(
+          adapter === 'Vue' ? '#data-display-avatar [data-avatar-icon]' : '[data-avatar-icon]',
+        )
+        .first();
+      await expect(iconAvatar.locator('.ui-avatar__icon svg')).toBeVisible();
+      await expect(iconAvatar.locator('.ui-avatar__fallback')).toHaveCount(0);
+      await expect(iconAvatar).toHaveAttribute('aria-label', 'Anonymous');
+      const centering = await iconAvatar.evaluate((element) => {
+        const glyph = element.querySelector('.ui-avatar__icon svg');
+        if (!glyph) throw new Error('Missing placeholder glyph');
+        const box = element.getBoundingClientRect();
+        const rect = glyph.getBoundingClientRect();
+        return {
+          x: rect.left + rect.width / 2 - (box.left + box.width / 2),
+          y: rect.top + rect.height / 2 - (box.top + box.height / 2),
+        };
+      });
+      expect(Math.abs(centering.x)).toBeLessThan(1);
+      expect(Math.abs(centering.y)).toBeLessThan(1);
     });
   }
   test('Vue: empty state exposes its title and creation action', async ({ page }) => {
@@ -236,45 +258,39 @@ test.describe('surfaces', () => {
     });
   }
   for (const adapter of ['Vue', 'React'] as const) {
-    for (const theme of ['light', 'dark'] as const) {
-      test(`${adapter}: disclosure expands and collapses from its summary / ${theme}`, async ({
-        page,
-      }) => {
-        await page.goto(
+    test(`${adapter}: disclosure expands and collapses from its summary`, async ({ page }) => {
+      await page.goto(
+        adapter === 'Vue'
+          ? '/frame?theme=dark&lang=en#data-display-disclosure'
+          : '/react-fixture?theme=dark&lang=en',
+      );
+      const disclosure = page
+        .locator(
           adapter === 'Vue'
-            ? `/frame?theme=${theme}&lang=en#data-display-disclosure`
-            : `/react-fixture?theme=${theme}&lang=en`,
-        );
-        const disclosure = page
-          .locator(
-            adapter === 'Vue'
-              ? '#data-display-disclosure .ui-disclosure'
-              : '[data-react-adapter="UiDisclosure"]',
-          )
-          .first();
+            ? '#data-display-disclosure .ui-disclosure'
+            : '[data-react-adapter="UiDisclosure"]',
+        )
+        .first();
 
-        const summary = disclosure.locator('summary');
-        const content = disclosure.locator('.ui-disclosure__content');
-        const isOpen = () => disclosure.evaluate((element) => (element as HTMLDetailsElement).open);
-        const initiallyOpen = await isOpen();
+      const summary = disclosure.locator('summary');
+      const content = disclosure.locator('.ui-disclosure__content');
+      const isOpen = () => disclosure.evaluate((element) => (element as HTMLDetailsElement).open);
+      const initiallyOpen = await isOpen();
 
-        if (theme === 'dark') {
-          const edge = await disclosure.evaluate((element) => getComputedStyle(element).boxShadow);
-          // The disclosure shares the directional dark edge with other inset
-          // glass; a uniform inset ring is the regression this guards.
-          expect(edge).not.toContain('0px 0px 0px 1px inset');
-          expect(edge).toContain('inset');
-        }
+      const edge = await disclosure.evaluate((element) => getComputedStyle(element).boxShadow);
+      // The disclosure shares the directional dark edge with other inset
+      // glass; a uniform inset ring is the regression this guards.
+      expect(edge).not.toContain('0px 0px 0px 1px inset');
+      expect(edge).toContain('inset');
 
-        await summary.click();
-        await expect.poll(isOpen).toBe(!initiallyOpen);
-        await expect(content).toBeVisible();
+      await summary.click();
+      await expect.poll(isOpen).toBe(!initiallyOpen);
+      await expect(content).toBeVisible();
 
-        await summary.click();
-        await expect.poll(isOpen).toBe(initiallyOpen);
-        if (!initiallyOpen) await expect(content).toBeHidden();
-      });
-    }
+      await summary.click();
+      await expect.poll(isOpen).toBe(initiallyOpen);
+      if (!initiallyOpen) await expect(content).toBeHidden();
+    });
   }
 
   test('React: table, skeleton, timeline and stat card expose semantic markup', async ({

@@ -152,13 +152,3 @@ export const contractLabSummary = {
   stable: componentContracts.filter((component) => component.maturity === 'stable').length,
   frameworkParity: frameworkParity.components.length,
 } as const;
-
-export function interactionContractForSpecimen(
-  specimenId: string,
-): InteractionContract | undefined {
-  return interactionContracts.find((contract) => contract.specimenId === specimenId);
-}
-
-export function componentContractByName(name: string): ComponentContract | undefined {
-  return componentContracts.find((component) => component.name === name);
-}

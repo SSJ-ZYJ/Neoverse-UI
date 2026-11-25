@@ -28,17 +28,23 @@ type IndicatorRect = { left: number; top: number; width: number; height: number 
 let indicatorBase: IndicatorRect | undefined;
 let indicatorTarget: IndicatorRect | undefined;
 
-function getCumulativeZoom(element: HTMLElement): number {
-  let zoom = 1;
+// The indicator's committed geometry lives in the group's own layout pixels,
+// but the measured marker rect includes every rendered scale above it: CSS
+// `zoom` and any ancestor `scale` transform. A visually magnified preview keeps
+// its layout at 100%, so both must be divided out or the indicator is offset and
+// sized twice and leaves the clipping group.
+function getCumulativeScale(element: HTMLElement): number {
+  let scale = 1;
   let current: HTMLElement | null = element;
   while (current) {
-    const value = Number.parseFloat(getComputedStyle(current).zoom);
-    if (Number.isFinite(value) && value > 0) {
-      zoom *= value;
-    }
+    const style = getComputedStyle(current);
+    const zoom = Number.parseFloat(style.zoom);
+    if (Number.isFinite(zoom) && zoom > 0) scale *= zoom;
+    const factor = Number.parseFloat((style.scale || '1').split(/\s+/)[0] ?? '1');
+    if (Number.isFinite(factor) && factor > 0) scale *= factor;
     current = current.parentElement;
   }
-  return zoom;
+  return scale;
 }
 
 function sameIndicatorRect(first: IndicatorRect, second: IndicatorRect): boolean {
@@ -92,7 +98,7 @@ function measureIndicator() {
   }
   const group = primary.value.getBoundingClientRect();
   const rect = marker.getBoundingClientRect();
-  const zoom = getCumulativeZoom(primary.value);
+  const zoom = getCumulativeScale(primary.value);
   const target: IndicatorRect = {
     left: (rect.left - group.left) / zoom,
     top: (rect.top - group.top) / zoom,

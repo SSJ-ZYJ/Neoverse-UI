@@ -1,0 +1,353 @@
+[data-playground-view='shell'] {
+  /* The shell and the original-size preview use the consumer's root size. */
+  font-size: 1rem;
+}
+
+.playground-shell {
+  display: grid;
+  block-size: 100dvh;
+  grid-template: 'toolbar' auto 'stage' minmax(0, 1fr) / minmax(0, 1fr);
+  gap: var(--neoverse-playground-shell-gap);
+  padding: var(--neoverse-playground-shell-inset);
+  background: var(--neoverse-color-surface-canvas);
+}
+
+.playground-shell[data-persistent] {
+  grid-template:
+    'toolbar toolbar toolbar' auto
+    'explorer stage inspector' minmax(0, 1fr)
+    / var(--neoverse-playground-explorer-width) minmax(0, 1fr) var(
+      --neoverse-playground-inspector-width
+    );
+}
+
+.playground-shell__toolbar {
+  grid-area: toolbar;
+  display: flex;
+  min-block-size: var(--neoverse-playground-toolbar-min-height);
+  min-inline-size: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--neoverse-space-2);
+  border-radius: var(--neoverse-radius-panel);
+  padding-inline: var(--neoverse-space-3);
+}
+
+.playground-shell__identity,
+.playground-shell__toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--neoverse-space-1);
+}
+
+.playground-shell__identity {
+  min-inline-size: 0;
+}
+
+.playground-shell__toolbar-actions {
+  flex: none;
+}
+
+.playground-shell__fps {
+  display: inline-flex;
+  gap: var(--neoverse-space-1);
+  align-items: baseline;
+  margin-inline-end: var(--neoverse-space-1);
+  padding-inline-end: var(--neoverse-space-2);
+  border-inline-end: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+  font-variant-numeric: tabular-nums;
+}
+
+.playground-shell__fps-value {
+  min-inline-size: 3ch;
+  text-align: end;
+}
+
+.playground-shell__toolbar-actions,
+.playground-overview-hero__stage {
+  --neoverse-control-segmented-active-foreground: var(--neoverse-color-text-primary);
+}
+
+.playground-shell__brand-wordmark {
+  display: block;
+  inline-size: clamp(4.75rem, 20vw, 6rem);
+  block-size: 2rem;
+  flex: none;
+  background-color: currentColor;
+  mask-position: center;
+  mask-repeat: no-repeat;
+  mask-size: contain;
+}
+
+.playground-shell__name {
+  overflow: hidden;
+  margin-inline-start: var(--neoverse-space-1);
+  border-inline-start: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+  padding-inline-start: var(--neoverse-space-2);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.playground-shell__panel-header {
+  display: grid;
+  min-inline-size: 0;
+  flex: none;
+  gap: var(--neoverse-space-3);
+  padding: var(--neoverse-playground-navigation-inset);
+  padding-block-end: var(--neoverse-space-2);
+}
+
+.playground-shell__panel-title {
+  display: flex;
+  min-block-size: var(--neoverse-space-8);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--neoverse-space-2);
+}
+
+/* The panel clips at a 24px corner while a native rail runs to its own bottom
+   edge, cutting the thumb cap; the block-end inset keeps the rail on the
+   straight edge, reusing the document overlay rail's inset. The stage is
+   excluded because its plate carries its own backdrop. */
+.playground-shell__panel-body {
+  display: grid;
+  /* Implicit grid tracks are auto, so one unbreakable row widens the track past
+     the panel and adds a horizontal scrollbar. */
+  grid-template-columns: minmax(0, 1fr);
+  flex: auto;
+  align-content: start;
+  margin-block-end: var(--neoverse-scrollbar-overlay-inset-block);
+  padding: var(--neoverse-space-2) var(--neoverse-playground-navigation-inset)
+    var(--neoverse-playground-navigation-inset);
+}
+
+.playground-explorer {
+  display: grid;
+  align-content: start;
+  gap: 0;
+}
+
+.playground-explorer__overview {
+  margin-block-end: var(--neoverse-space-2);
+  font-weight: var(--neoverse-font-weight-medium);
+}
+
+/* Three levels, three visual weights: a muted 12px section label, a 14px
+   primary module destination, and a 13px secondary specimen below a rail. */
+.playground-explorer__section {
+  margin-block-start: var(--neoverse-space-4);
+}
+
+.playground-explorer__section:first-of-type {
+  margin-block-start: var(--neoverse-space-1);
+}
+
+.playground-explorer__section[data-kind='utility'] {
+  margin-block-start: var(--neoverse-space-5);
+  border-block-start: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+  padding-block-start: var(--neoverse-space-3);
+}
+
+.playground-explorer__section-toggle,
+.playground-explorer__disclosure {
+  display: flex;
+  min-block-size: var(--neoverse-space-8);
+  align-items: center;
+  gap: var(--neoverse-space-1);
+  border: 0;
+  border-radius: var(--neoverse-radius-control-inner);
+  padding-inline: var(--neoverse-navigation-item-padding-inline-md);
+  background: none;
+  color: var(--neoverse-color-text-muted);
+  font-family: var(--neoverse-font-family-sans);
+  cursor: pointer;
+}
+
+.playground-explorer__section-toggle {
+  inline-size: 100%;
+  padding-block: var(--neoverse-space-1);
+  font-size: var(--neoverse-font-size-2xs);
+  font-weight: var(--neoverse-font-weight-medium);
+  text-align: start;
+}
+
+.playground-explorer__disclosure {
+  min-inline-size: var(--neoverse-space-8);
+  flex: none;
+  justify-content: end;
+}
+
+.playground-explorer__section[data-active] .playground-explorer__section-toggle {
+  color: var(--neoverse-color-text-secondary);
+}
+
+.playground-explorer__section-label {
+  flex: 1;
+  letter-spacing: var(--neoverse-letter-spacing-wide);
+}
+
+.playground-explorer__section-label,
+.playground-explorer__module-link .ui-navigation-item__label {
+  min-inline-size: 0;
+  overflow-wrap: anywhere;
+}
+
+.playground-catalogue-label__secondary {
+  display: block;
+  color: var(--neoverse-color-text-muted);
+  font-size: 0.85em;
+  font-weight: var(--neoverse-font-weight-regular);
+  letter-spacing: normal;
+}
+
+/* Specimen links retain their compact inline reading aid. */
+.playground-explorer__leaf .playground-catalogue-label__secondary {
+  display: inline;
+  margin-inline-start: var(--neoverse-space-1);
+}
+
+.playground-explorer__heading {
+  margin: 0;
+}
+
+.playground-explorer__specimens {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.playground-explorer__module-row {
+  display: flex;
+  align-items: center;
+  gap: var(--neoverse-space-1);
+}
+
+.playground-explorer__module-link,
+.playground-explorer__leaf,
+.playground-explorer__overview,
+.playground-inspector__frame-link {
+  justify-content: start;
+  text-align: start;
+}
+
+.playground-explorer__module-link {
+  block-size: auto;
+  flex: 1 1 auto;
+  color: var(--neoverse-color-text-primary);
+  font-weight: var(--neoverse-font-weight-medium);
+}
+
+.playground-explorer__module[data-active] .playground-explorer__module-link {
+  color: var(--neoverse-color-accent-primary);
+}
+
+.playground-explorer__count {
+  color: var(--neoverse-color-text-muted);
+  font-size: var(--neoverse-font-size-2xs);
+  font-variant-numeric: tabular-nums;
+  font-weight: var(--neoverse-font-weight-regular);
+}
+
+@media (hover: hover) {
+  .playground-explorer__section-toggle:hover,
+  .playground-explorer__disclosure:hover {
+    background-color: var(--neoverse-effect-hover-field);
+    color: var(--neoverse-color-text-secondary);
+  }
+
+  .playground-explorer__section[data-active] .playground-explorer__section-toggle:hover {
+    color: var(--neoverse-color-text-primary);
+  }
+}
+
+.playground-explorer__section-toggle:focus-visible,
+.playground-explorer__disclosure:focus-visible {
+  outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+  outline-offset: var(--neoverse-focus-ring-offset);
+}
+
+.playground-explorer__chevron {
+  flex: none;
+  transition: rotate var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+}
+
+.playground-explorer__section-toggle[aria-expanded='true'] .playground-explorer__chevron,
+.playground-explorer__disclosure[aria-expanded='true'] .playground-explorer__chevron {
+  rotate: 90deg;
+}
+
+.playground-explorer__link {
+  inline-size: 100%;
+  /* The explorer owns a blue selection, so it must also own the bar that marks
+     it: the library default pairs the mint selection field with the mint
+     indicator, and a surface that retunes one has to retune the other. Both
+     read from the same accent family here, so the plate and the rail can never
+     show different hues. */
+  --neoverse-navigation-item-indicator-color: var(--neoverse-color-accent-primary);
+  --neoverse-navigation-item-active-foreground: var(--neoverse-color-text-primary);
+  --neoverse-navigation-item-active-background: none;
+  --neoverse-navigation-item-active-fill: var(--neoverse-color-accent-soft);
+  --neoverse-navigation-item-active-shadow: var(--neoverse-shadow-none);
+}
+
+/* Let module labels expand for both languages and English specimen names wrap. */
+.playground-explorer__module-link .ui-navigation-item__label,
+html[lang='en'] .playground-explorer__link .ui-navigation-item__label {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.playground-explorer__leaf {
+  color: var(--neoverse-color-text-secondary);
+  font-size: var(--neoverse-font-size-xs);
+  font-weight: var(--neoverse-font-weight-regular);
+}
+
+.playground-explorer__specimens {
+  margin-inline-start: var(--neoverse-space-2);
+  border-inline-start: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+  padding-inline-start: var(--neoverse-space-2);
+}
+
+.playground-inspector,
+.playground-inspector section {
+  display: grid;
+  gap: var(--neoverse-space-3);
+}
+
+.playground-inspector section {
+  padding-block: var(--neoverse-space-3);
+  border-block-start: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-subtle);
+}
+
+.playground-inspector__label {
+  color: var(--neoverse-color-text-secondary);
+  font-size: var(--neoverse-typography-label-sm-size);
+  font-weight: var(--neoverse-font-weight-semibold);
+}
+
+.playground-inspector__details {
+  display: grid;
+  min-inline-size: 0;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: baseline;
+  gap: var(--neoverse-space-2) var(--neoverse-space-3);
+  overflow-wrap: anywhere;
+}
+
+.playground-inspector__details dt {
+  color: var(--neoverse-color-text-secondary);
+}
+
+.playground-inspector__frame-link {
+  justify-self: start;
+  max-inline-size: 100%;
+}
+
+/* The ControlSurface and Dock scale props intentionally change layout zoom. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-playground-view] .ui-control-surface {
+    transition: zoom var(--neoverse-motion-spatial-duration) var(--neoverse-motion-spatial-easing);
+  }
+}

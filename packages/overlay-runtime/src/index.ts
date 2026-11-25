@@ -121,15 +121,28 @@ function resolveCssLength(element: HTMLElement, value: string): number {
   return parsed;
 }
 
-function resolveEffectiveZoom(element: HTMLElement): number {
-  let zoom = 1;
-  let node: HTMLElement | null = element;
+/**
+ * Rendered scale from CSS `zoom` and ancestor `scale` transforms. A visual zoom
+ * on a preview keeps layout at 100%, so only the painted size changes; a
+ * fallback panel positioned in that subtree must convert the same way. The
+ * element's own `scale` is its entrance motion and stays out of the conversion:
+ * its left/top are resolved before that transform applies.
+ */
+function resolveEffectiveScale(element: HTMLElement): number {
+  let scale = 1;
+  const ownZoom = Number.parseFloat(getComputedStyle(element).zoom);
+  if (Number.isFinite(ownZoom) && ownZoom > 0) scale *= ownZoom;
+  let node: HTMLElement | null = element.parentElement;
   while (node !== null) {
-    const value = Number.parseFloat(getComputedStyle(node).zoom);
-    if (Number.isFinite(value) && value > 0) zoom *= value;
+    const style = getComputedStyle(node);
+    const zoom = Number.parseFloat(style.zoom);
+    if (Number.isFinite(zoom) && zoom > 0) scale *= zoom;
+    // `scale` takes one or two values; the uniform factor is the first.
+    const factor = Number.parseFloat((style.scale || '1').split(/\s+/)[0] ?? '1');
+    if (Number.isFinite(factor) && factor > 0) scale *= factor;
     node = node.parentElement;
   }
-  return zoom;
+  return scale;
 }
 
 // `window.innerWidth` follows the scrollable overflow of the document, so a
@@ -181,7 +194,7 @@ export function resolveOverlayViewportLayoutBounds(element: HTMLElement): {
   bottom: number;
 } {
   const style = getComputedStyle(element);
-  const zoom = resolveEffectiveZoom(element);
+  const zoom = resolveEffectiveScale(element);
   const rect = element.getBoundingClientRect();
   const motion = resolveMotionOffset(element, style);
   const left = rect.left - motion.x * zoom;
@@ -227,7 +240,7 @@ export function positionAnchoredOverlay({
         }
       : trigger.getBoundingClientRect();
   const overlayStyle = getComputedStyle(overlay);
-  const effectiveZoom = resolveEffectiveZoom(overlay);
+  const effectiveZoom = resolveEffectiveScale(overlay);
   const gap =
     Math.max(0, resolveCssLength(overlay, overlayStyle.getPropertyValue(gapVariable))) *
     effectiveZoom;

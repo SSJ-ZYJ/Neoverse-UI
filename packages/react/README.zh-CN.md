@@ -3,7 +3,7 @@
 [English](README.md)
 
 <!-- Source: packages/react/README.md -->
-<!-- Source-SHA256: bd02402f4c4ba54263f5598fbef775c7ce642925f1213f52c47166564bb9d3a4 -->
+<!-- Source-SHA256: ad95aef32c445bf96d2b733df35e18797aeff4d4d0c6e0757dd0047d2d4a73d1 -->
 
 Neoverse-UI 的 React 适配器，以极光玻璃作为共享玻璃材质。Light、Standard 与 Immersive 是它的层级，不是独立样式。展示标签使用 [Tokens 的 `glassMaterial` 元数据](../tokens/README.md#极光玻璃)；`glass-*` surface 标识保持稳定。详见[材质标准](../../docs/zh-CN/architecture/material-standards.md)。
 
@@ -140,10 +140,10 @@ import { UiPresence } from '@neoverse-ui/react';
 
 ## 终端与滚动条
 
-[终端组合](../../docs/zh-CN/architecture/terminal-composition.md)包含 React 示例。`UiTerminalSurface` 接受 `status` 与 `actions` 内容。`UiTerminalTranscript` 仅在读者位于尾部时跟随输出，并保留嵌套的无障碍日志。`UiTerminalLine` 渲染转义文本或子节点。
+[终端组合](../../docs/zh-CN/architecture/terminal-composition.md)包含 React 示例。`UiTerminalSurface` 接受 `titlebar`（`default | auto | macos | windows | linux`）、`maximized`、`onWindowAction`、`status` 与 `actions` 内容。`UiTerminalTranscript` 仅在读者位于尾部时跟随输出，并保留嵌套的无障碍日志。`UiTerminalLine` 渲染转义文本或子节点。
 
-`UiTerminalPrompt` 使用 `value/defaultValue/onValueChange`，保留原生 `onChange`、键盘/组合事件与输入 ref。`suggestion` 仅在光标位于末尾且聚焦时显示匹配的残影后缀。`context` 与 `renderSegment(segment)` 定制上下文内容。命令执行与接受建议归应用负责。
+`UiTerminalPrompt` 使用 `value/defaultValue/onValueChange`，保留原生 `onChange`、键盘/组合事件与输入 ref。`suggestion` 仅在光标位于末尾且聚焦时显示匹配的残影后缀。`TerminalPromptSegment` 的 `icon`（`auto` 或系统/终端/浏览器/运行时预设）与 `iconOnly` 会自动渲染内置 SVG 图标，同时 `context` 与 `renderSegment(segment)` 仍可定制上下文内容。命令执行与接受建议归应用负责。
 
-`UiTerminalEcho` 显示转义后的记录 `text`，其 `segments`、`symbol`、`error` 状态与 `renderSegment` 外观和实时提示一致，但没有输入或 Tab 停靠点。提交历史时捕获 segment 值，避免后续目录变化改写旧提示。
+`UiTerminalEcho` 显示转义后的记录 `text`，其 `segments`、`symbol`、`error` 状态与内置或 `renderSegment` 外观和实时提示一致，但没有输入或 Tab 停靠点。提交历史时捕获 segment 值，避免后续目录变化改写旧提示。
 
 `UiScrollbar` 用 `autoHideMs`（1200）、`minThumbRatio`（0.1）、`refreshKey` 与 `hideNative`（true）装饰文档滚动。设置 `autoHideMs={0}` 可在文档有溢出时保持显示。它支持轨道跳转与指针拖拽，并在卸载时恢复原生滚动条所有权。它是装饰性的，不替代原生文档键盘滚动。滚动条在服务端渲染时带 `data-hide-native`，因此服务端渲染的轨道会在首次绘制时移除原生滚动条，而不是等到水合后；`hideNative={false}` 保留原生滚动条。

@@ -138,7 +138,7 @@
       "name": "UiAvatar",
       "vueType": "AvatarProps",
       "reactType": "UiAvatarProps",
-      "props": ["name", "src", "fallback", "size", "shape"]
+      "props": ["name", "src", "fallback", "size", "shape", "placeholder"]
     },
     {
       "name": "UiPagination",
@@ -279,7 +279,7 @@
       "name": "UiToast",
       "vueType": "ToastProps",
       "reactType": "UiToastProps",
-      "props": ["open", "message", "dismissLabel", "variant", "duration"]
+      "props": ["open", "message", "dismissLabel", "variant", "presentation", "duration"]
     },
     {
       "name": "UiTooltipSurface",
@@ -313,7 +313,18 @@
       "name": "UiTerminalSurface",
       "vueType": "TerminalSurfaceProps",
       "reactType": "UiTerminalSurfaceProps",
-      "props": ["title", "ariaLabel", "density", "surface"]
+      "props": [
+        "title",
+        "ariaLabel",
+        "density",
+        "surface",
+        "titlebar",
+        "maximized",
+        "closeLabel",
+        "minimizeLabel",
+        "maximizeLabel",
+        "restoreLabel"
+      ]
     },
     {
       "name": "UiTerminalLine",
@@ -421,7 +432,7 @@
       "name": "TerminalPromptSegment",
       "vueType": "TerminalPromptSegment",
       "reactType": "TerminalPromptSegment",
-      "props": ["id", "label", "tone"]
+      "props": ["id", "label", "tone", "icon", "iconOnly"]
     }
   ],
   "literalUnions": [
@@ -481,6 +492,11 @@
       "reactType": "UiAvatarShape"
     },
     {
+      "name": "AvatarPlaceholder",
+      "vueType": "AvatarPlaceholder",
+      "reactType": "UiAvatarPlaceholder"
+    },
+    {
       "name": "StatusIndicatorStatus",
       "vueType": "StatusIndicatorStatus",
       "reactType": "StatusIndicatorStatus"
@@ -514,6 +530,21 @@
       "name": "TerminalPromptTone",
       "vueType": "TerminalPromptTone",
       "reactType": "TerminalPromptTone"
+    },
+    {
+      "name": "TerminalTitlebar",
+      "vueType": "TerminalTitlebar",
+      "reactType": "TerminalTitlebar"
+    },
+    {
+      "name": "TerminalWindowAction",
+      "vueType": "TerminalWindowAction",
+      "reactType": "TerminalWindowAction"
+    },
+    {
+      "name": "TerminalSegmentIcon",
+      "vueType": "TerminalSegmentIcon",
+      "reactType": "TerminalSegmentIcon"
     },
     {
       "name": "ControlSurfaceScale",

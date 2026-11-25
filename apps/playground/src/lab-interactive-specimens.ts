@@ -8,4 +8,6 @@ export * from './lab-specimens/controls';
 export * from './lab-specimens/data-display';
 export * from './lab-specimens/forms';
 export * from './lab-specimens/materials';
+export * from './lab-specimens/motion';
 export * from './lab-specimens/status';
+export * from './lab-specimens/terminal';

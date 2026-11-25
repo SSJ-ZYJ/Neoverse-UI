@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { glassMaterial } from '@neoverse-ui/tokens';
-import { UiButton, UiSegmentedControl, UiSurface } from '@neoverse-ui/vue';
-import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
+import { UiButton, UiIconButton, UiSegmentedControl } from '@neoverse-ui/vue';
+import { computed } from 'vue';
 import LabIcon from './LabIcon.vue';
+import LabOverviewHero from './LabOverviewHero.vue';
 import {
   type LabModule,
   type LabSpecimen,
@@ -14,14 +14,22 @@ import {
 import type { SpecimenSession } from './lab-specimen-config';
 import {
   appCopy,
+  catalogueSecondary,
   formatLocalized,
   type Locale,
   type LocalizedText,
   localize,
   localized,
 } from './playground-content';
-import { type ShowcaseSurface, showcaseSurfaces } from './showcase-surface';
+import type { ShowcaseSurface } from './showcase-surface';
 import { type StageBackground, stageBackgrounds } from './stage-background';
+import {
+  createStageTransform,
+  maxStageZoom,
+  minStageZoom,
+  stageZoomStepRatio,
+  stageZoomTrackSteps,
+} from './useStageTransform';
 
 const props = defineProps<{
   locale: Locale;
@@ -50,129 +58,53 @@ const copy = {
     '{modules} modules · {specimens} specimens',
     '{modules} 个模块 · {specimens} 个示例',
   ),
-  caption: localized('Live specimen', '实时示例'),
-  detail: localized(
-    'Switch material tiers to compare the same surface on this backdrop.',
-    '切换材质层级，在同一背景上对比表面效果。',
-  ),
-  surfaceLabel: localized('Preview material', '预览材质'),
-  components: localized('Components', '查看组件'),
-  materials: localized('Materials', '浏览材质'),
   move: localized('Move preview', '移动预览'),
   moveHint: localized(
     'Drag, or use the arrow keys. Press Home to recenter.',
     '拖拽或使用方向键移动，按 Home 复位。',
   ),
+  zoomRange: localized('Preview zoom', '预览缩放'),
+  zoomOut: localized('Zoom out preview', '缩小预览'),
+  zoomIn: localized('Zoom in preview', '放大预览'),
+  zoomReset: localized('Reset preview zoom', '恢复原始大小'),
+  zoomStatus: localized('Preview zoom: {zoom}%', '预览缩放：{zoom}%'),
 } as const;
 
-// The specimen moves inside the stage so the same component can be judged
-// against different parts of the backdrop. The grip owns the gesture: dragging
-// the component itself would fight its own press, focus and text selection.
-const content = ref<HTMLElement | null>(null);
-const offset = ref({ x: 0, y: 0 });
-const dragging = ref(false);
-const edgeGap = 8;
-// A translate keeps the move out of layout. It is not a backdrop root, so
-// nested Aurora Glass keeps sampling the stage; the preview also stays the
-// direct grid child, so a `w-full` component still resolves against the stage
-// column instead of collapsing into a shrink-wrapped wrapper.
-const contentStyle = computed(() => ({
-  '--stage-offset-x': `${offset.value.x}px`,
-  '--stage-offset-y': `${offset.value.y}px`,
-}));
+const specimenSecondary = computed(() =>
+  props.specimen === undefined ? undefined : catalogueSecondary(props.specimen.label, props.locale),
+);
+const moduleSecondary = computed(() =>
+  props.module === undefined ? undefined : catalogueSecondary(props.module.label, props.locale),
+);
 
-function clampOffset(x: number, y: number): { x: number; y: number } {
-  const area = content.value?.getBoundingClientRect();
-  const box = content.value?.firstElementChild?.getBoundingClientRect();
-  if (area === undefined || box === undefined) return { x: 0, y: 0 };
-  const maxX = Math.max(0, (area.width - box.width) / 2 - edgeGap);
-  const maxY = Math.max(0, (area.height - box.height) / 2 - edgeGap);
-  return {
-    x: Math.min(maxX, Math.max(-maxX, x)),
-    y: Math.min(maxY, Math.max(-maxY, y)),
-  };
-}
+const {
+  dragging,
+  zoom,
+  zoomTrack,
+  contentStyle,
+  startDrag,
+  startStageDrag,
+  dragMove,
+  endDrag,
+  nudge,
+  resetPosition,
+  adjustZoom,
+  updateZoom,
+  zoomWithWheel,
+  resetZoom,
+} = createStageTransform(() => props.specimen?.id);
 
-let dragOrigin: { pointerX: number; pointerY: number; x: number; y: number } | null = null;
-
-function startDrag(event: PointerEvent): void {
-  if (event.button !== 0) return;
-  event.preventDefault();
-  dragOrigin = {
-    pointerX: event.clientX,
-    pointerY: event.clientY,
-    x: offset.value.x,
-    y: offset.value.y,
-  };
-  dragging.value = true;
-  (event.currentTarget as HTMLElement).setPointerCapture(event.pointerId);
-}
-
-function dragMove(event: PointerEvent): void {
-  if (dragOrigin === null) return;
-  offset.value = clampOffset(
-    dragOrigin.x + event.clientX - dragOrigin.pointerX,
-    dragOrigin.y + event.clientY - dragOrigin.pointerY,
-  );
-}
-
-function endDrag(event: PointerEvent): void {
-  if (dragOrigin === null) return;
-  dragOrigin = null;
-  dragging.value = false;
-  const target = event.currentTarget as HTMLElement;
-  if (target.hasPointerCapture(event.pointerId)) target.releasePointerCapture(event.pointerId);
-}
-
-const nudgeSteps: Record<string, readonly [number, number] | undefined> = {
-  ArrowLeft: [-1, 0],
-  ArrowRight: [1, 0],
-  ArrowUp: [0, -1],
-  ArrowDown: [0, 1],
-};
-
-function nudge(event: KeyboardEvent): void {
-  if (event.key === 'Home') {
-    event.preventDefault();
-    resetPosition();
-    return;
-  }
-  const direction = nudgeSteps[event.key];
-  if (direction === undefined) return;
-  event.preventDefault();
-  const step = event.shiftKey ? 24 : 8;
-  offset.value = clampOffset(
-    offset.value.x + direction[0] * step,
-    offset.value.y + direction[1] * step,
-  );
-}
-
-function resetPosition(): void {
-  offset.value = { x: 0, y: 0 };
-}
-
-function reclampPosition(): void {
-  if (offset.value.x === 0 && offset.value.y === 0) return;
-  offset.value = clampOffset(offset.value.x, offset.value.y);
-}
-
-watch(() => props.specimen?.id, resetPosition);
-onMounted(() => window.addEventListener('resize', reclampPosition));
-onBeforeUnmount(() => window.removeEventListener('resize', reclampPosition));
 const backgroundOptions = computed(() =>
   stageBackgrounds.map((value) => ({
     value,
     label: localize(appCopy.stageBackground.options[value], props.locale),
   })),
 );
-const showcaseOptions = computed(() =>
-  showcaseSurfaces.map((value) => ({
-    value,
-    label: localize(
-      value === 'glass-subtle' ? glassMaterial.tiers.subtle : glassMaterial.tiers.elevated,
-      props.locale,
-    ),
-  })),
+const overviewSummary = computed(() =>
+  formatLocalized(copy.summary, props.locale, {
+    modules: labModules.length,
+    specimens: labSpecimens.length,
+  }),
 );
 </script>
 
@@ -192,6 +124,7 @@ const showcaseOptions = computed(() =>
           {{ localize(copy.label, locale) }}
         </p>
         <button
+          v-if="specimen"
           type="button"
           class="playground-stage__grip"
           data-stage-move-handle
@@ -208,6 +141,59 @@ const showcaseOptions = computed(() =>
         >
           <LabIcon name="move" />
         </button>
+        <div v-if="specimen" class="playground-stage__zoom">
+          <UiIconButton
+            data-stage-zoom="out"
+            size="sm"
+            variant="ghost"
+            surface="none"
+            :label="localize(copy.zoomOut, locale)"
+            :disabled="zoom <= minStageZoom"
+            @click="adjustZoom(1 / stageZoomStepRatio)"
+          >
+            <LabIcon name="minus" />
+          </UiIconButton>
+          <input
+            data-stage-zoom="range"
+            class="playground-stage__zoom-range"
+            type="range"
+            min="0"
+            :max="stageZoomTrackSteps"
+            step="1"
+            :value="zoomTrack"
+            :aria-label="localize(copy.zoomRange, locale)"
+            :aria-valuetext="`${Math.round(zoom)}%`"
+            :style="{
+              '--ui-zoom-fill': `${(zoomTrack / stageZoomTrackSteps) * 100}%`,
+            }"
+            @input="updateZoom"
+          >
+          <UiButton
+            data-stage-zoom="reset"
+            size="sm"
+            variant="ghost"
+            class="playground-stage__zoom-value"
+            :aria-label="localize(copy.zoomReset, locale)"
+            :title="localize(copy.zoomReset, locale)"
+            @click="resetZoom"
+          >
+            {{ Math.round(zoom) }}%
+          </UiButton>
+          <UiIconButton
+            data-stage-zoom="in"
+            size="sm"
+            variant="ghost"
+            surface="none"
+            :label="localize(copy.zoomIn, locale)"
+            :disabled="zoom >= maxStageZoom"
+            @click="adjustZoom(stageZoomStepRatio)"
+          >
+            <LabIcon name="plus" />
+          </UiIconButton>
+          <span class="sr-only" role="status">
+            {{ formatLocalized(copy.zoomStatus, locale, { zoom: Math.round(zoom) }) }}
+          </span>
+        </div>
       </div>
       <UiSegmentedControl
         :aria-label="localize(appCopy.stageBackground.label, locale)"
@@ -236,13 +222,26 @@ const showcaseOptions = computed(() =>
           class="playground-stage__specimen-title text-heading font-heading tracking-heading text-primary"
         >
           {{ localize(specimen.label, locale) }}
+          <span
+            v-if="specimenSecondary"
+            class="playground-stage__title-secondary"
+            lang="en"
+            aria-hidden="true"
+          >
+            {{ specimenSecondary }}
+          </span>
         </h2>
       </header>
       <div
-        ref="content"
         class="playground-stage__specimen-content"
         :style="contentStyle"
         :data-dragging="dragging || undefined"
+        @wheel.ctrl="zoomWithWheel"
+        @pointerdown="startStageDrag"
+        @pointermove="dragMove"
+        @pointerup="endDrag"
+        @pointercancel="endDrag"
+        @lostpointercapture="endDrag"
       >
         <FocusedSpecimen />
       </div>
@@ -260,6 +259,14 @@ const showcaseOptions = computed(() =>
           class="text-heading font-heading tracking-heading text-primary"
         >
           {{ localize(module.label, locale) }}
+          <span
+            v-if="moduleSecondary"
+            class="playground-stage__title-secondary"
+            lang="en"
+            aria-hidden="true"
+          >
+            {{ moduleSecondary }}
+          </span>
         </h2>
         <p class="max-w-reading text-body-lg text-secondary">
           {{ localize(module.description, locale) }}
@@ -270,75 +277,13 @@ const showcaseOptions = computed(() =>
       </div>
     </section>
 
-    <section
+    <LabOverviewHero
       v-else
-      data-overview-hero
-      aria-labelledby="stage-title"
-      class="playground-overview-hero"
-    >
-      <header class="playground-stage__heading playground-overview-hero__intro">
-        <p class="text-label-sm font-label text-secondary">
-          {{ localize(appCopy.overview.eyebrow, locale) }}
-        </p>
-        <h2
-          id="stage-title"
-          tabindex="-1"
-          data-stage-heading
-          class="text-primary font-heading tracking-heading"
-        >
-          {{ localize(appCopy.overview.title, locale) }}
-        </h2>
-        <p class="max-w-reading text-body-lg text-secondary">
-          {{ localize(appCopy.overview.description, locale) }}
-        </p>
-        <p class="text-caption tabular-nums text-secondary">
-          {{
-            formatLocalized(copy.summary, locale, {
-              modules: labModules.length,
-              specimens: labSpecimens.length,
-            })
-          }}
-        </p>
-      </header>
-
-      <div class="playground-overview-hero__stage">
-        <p class="text-label-sm font-label text-secondary">
-          {{ localize(copy.caption, locale) }}
-        </p>
-        <UiSurface
-          :surface="props.surface"
-          data-neoverse-surface-hover="static"
-          content-overflow="visible"
-          class="playground-overview-hero__sample grid gap-4 rounded-card p-5"
-        >
-          <div class="grid gap-1">
-            <h3 class="text-title-sm font-title text-primary">
-              {{ localize(glassMaterial.name, locale) }}
-            </h3>
-            <p class="text-body-sm text-secondary">{{ localize(copy.detail, locale) }}</p>
-          </div>
-          <div class="flex flex-wrap items-center gap-2">
-            <UiButton size="sm" @click="emit('navigate', 'controls-button')">
-              {{ localize(copy.components, locale) }}
-            </UiButton>
-            <UiButton
-              size="sm"
-              variant="ghost"
-              surface="none"
-              @click="emit('navigate', 'materials-surface')"
-            >
-              {{ localize(copy.materials, locale) }}
-            </UiButton>
-          </div>
-        </UiSurface>
-        <UiSegmentedControl
-          :aria-label="localize(copy.surfaceLabel, locale)"
-          :model-value="props.surface"
-          :options="showcaseOptions"
-          surface="glass-subtle"
-          @update:model-value="emit('surface', $event)"
-        />
-      </div>
-    </section>
+      :locale="locale"
+      :surface="props.surface"
+      :summary="overviewSummary"
+      @navigate="emit('navigate', $event)"
+      @surface="emit('surface', $event)"
+    />
   </div>
 </template>

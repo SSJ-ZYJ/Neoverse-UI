@@ -31,8 +31,11 @@ Import the shared motion layer with:
    framework, driven by the `data-neoverse-motion` preset attribute.
 4. **Layout width motion**: `captureLayoutWidths` / `animateLayoutWidths` keep a
    group of boxes in step when their content changes size.
-5. **Page-change choreography**: the WebGL particle dissolve with a CSS
-   snapshot fallback, orchestrated by `startViewTransition()`.
+5. **Page-change choreography**: nine standard View Transition presets
+   (`fade`, `glide`, `slide`, `push`, `depth`, `veil`, `curtain`, `iris`, `morph`)
+   with scoped `nv-page` / `nv-morph-*` snapshots and WAAPI fallbacks, plus the
+   optional WebGL particle `dissolve` pipeline, all orchestrated by
+   `startViewTransition()`.
 
 ## Presence engine
 
@@ -124,7 +127,29 @@ The two phases are required: the natural width only exists after the update.
 
 `captureLayoutWidths` and `animateLayoutWidths` are framework-agnostic; the Vue
 adapter is `useLayoutWidthMotion` from `@neoverse-ui/vue`. The Design Lab's
-`foundation-motion-width` specimen shows the result on a language switch.
+Transitions specimen (`foundation-motion-playground`) shows the result on a
+language switch.
+
+## Disclosure motion
+
+`animateDisclosure(element, expanded)` animates one mounted disclosure region
+between zero and its natural height on the `state` role. Closing applies
+`inert` and `aria-hidden` immediately and `hidden` when the height reaches zero;
+opening removes those guards before measuring. An interrupted run continues
+from the height currently on screen, inline `height` and `overflow` are restored
+when the run settles, and reduced motion or a missing Web Animations API applies
+the target state immediately.
+
+```ts
+import { animateDisclosure } from '@neoverse-ui/motion';
+
+const animation = animateDisclosure(list, expanded);
+await animation.finished;
+// animation.cancel() stops at the current height.
+```
+
+The Design Lab uses it for Explorer specimen leaves and demonstrates it in the
+Motion module's Disclosure motion specimen.
 
 ## Appearance and control size transitions
 
@@ -212,36 +237,60 @@ three effects. The Inspector's isolated preview link follows its visible label.
 ```ts
 import { startViewTransition } from '@neoverse-ui/motion';
 
-await startViewTransition(() => {
-  route.content = next; // swap the DOM
-});
+await startViewTransition(
+  () => {
+    route.content = next; // swap the DOM
+  },
+  {
+    variant: 'push',
+    direction: 'forward',
+    target: outletElement,
+  },
+);
 ```
 
-Preference order:
+### Presets
 
-1. **WebGL particle dissolve** — if the browser has WebGL2, the element marked
-   `data-neoverse-dissolve` is rasterized (HTML-in-Canvas capture where
-   available, synthetic theme-colored dust otherwise) and erodes into fine
-   dust on a pointer-transparent fullscreen canvas; the incoming region fades
-   in late (`--neoverse-motion-particle-enter-delay/-duration`). The shared
-   sampling spacing favors a lighter field; tune further with
-   `particleDissolvePresets` (`high` / `medium`).
-2. **Crossfade** — without WebGL2 the View Transition's own crossfade runs,
-   timed by the spatial role. A dissolve that cannot be particles simply
-   fades.
-3. **Plain update** — reduced motion, or no View Transition support: the DOM
-   update runs directly.
+Nine standard presets run on baseline View Transitions (with non-sticky WAAPI entrance and FLIP morph fallbacks when `document.startViewTransition` is unavailable) and require no experimental browser flags.
 
-Force a pipeline with `particle: 'capture' | 'synthetic' | 'crossfade' | false`.
+Following the shared-background continuity principle, **content-only presets** (`fade`, `glide`, `depth`, `veil`, `morph`) keep a shared page or card background stationary by targeting `contentTarget` / `[data-neoverse-page-content]` unless `background: 'surface'` is passed for genuinely distinct backdrops. **Whole-page presets** (`slide`, `push`, `curtain`, `iris`) transition the complete canvas-backed surface:
+
+| Preset | Group | Motion | Best for |
+| --- | --- | --- | --- |
+| `fade` | Shared backdrop | Asymmetric content fade-through (`exit` before `enter`) | Unrelated lateral destinations |
+| `glide` | Shared backdrop | Shared-axis content exit-then-enter (`--neoverse-motion-page-glide-distance`) | Documentation pages and workspace tabs |
+| `depth` | Shared backdrop | Subtle Z-axis content zoom (`1.02` / `0.985`, exit before enter) | Overview-to-detail navigation |
+| `veil` | Shared backdrop | Sequential foreground focus pull via `--neoverse-motion-page-blur` | Glass-rich surfaces with a static plate |
+| `morph` | Shared backdrop | Smooth PPT-style shared-element geometry morph (`[data-neoverse-page-morph]`) over fade-through unmatched copy | Slide decks, hero element handoffs, and evolving layouts |
+| `slide` | Whole page | Edge-to-edge side-by-side slide (`100%`) with canvas backing | Sequential steps and slide decks |
+| `push` | Whole page | Opaque layered sheet glides over a dimmed recessed backdrop (`24%` parallax) | Hierarchical drill-down and pop back |
+| `curtain` | Whole page | Opaque directional linear wipe with `--neoverse-motion-page-feather` | Editorial reveals and storytelling slides |
+| `iris` | Whole page | Opaque feathered radial reveal anchored to `origin` (`Element` or `{ x, y }`) | Card or button launches into a detail page |
+
+Set `variant: 'none'` (or `particle: false`) to run the update immediately, or call `stopViewTransition()` to cancel an active choreography. Check baseline View Transition availability with `supportsViewTransition()`.
+
+### Direction, background mode, scope, and fallbacks
+
+- **Direction (`direction`)**: `'forward' | 'backward' | 'up' | 'down'` (defaults to `'forward'`). Inline travel and `curtain` angles mirror automatically in `:dir(rtl)`.
+- **Shared backdrop preservation (`contentTarget`, `background`, `[data-neoverse-page-content]`)**: Under default `background: 'auto'`, `fade`, `glide`, `depth`, `veil`, and `morph` resolve `contentTarget` or `[data-neoverse-page-content]` and apply `nv-page` to that transparent slot while leaving its outer card, shell, or document canvas stationary. Pass `background: 'surface'` when the next page introduces a different background, or use a whole-page preset (`slide`, `push`, `curtain`, `iris`).
+- **Morph element matching (`[data-neoverse-page-morph]`)**: Mark persistent or corresponding elements across outgoing and incoming views with matching `data-neoverse-page-morph="<key>"` attributes. `variant: 'morph'` temporarily assigns deterministic `nv-morph-<key>` snapshot names (with duplicate-key protection and full cleanup on settle or cancel), and falls back to non-sticky WAAPI FLIP transforms when `document.startViewTransition` is unavailable.
+- **Scoped region (`target`, `scope`, `resizeTarget`)**: Pass `target` (with default `scope: 'auto'` or `'region'`) to assign `view-transition-name: nv-page` solely within that outlet while disabling the `root` snapshot. Surrounding docks, toolbars, and sidebars remain live and unclipped, and `::view-transition-group(nv-page)` inherits the outlet corner radius (`--neoverse-page-transition-radius`). Pass `scope: 'document'` and `background: 'surface'` (or a whole-page preset) to snapshot the whole root. When consecutive pages have different natural heights, `resizeTarget` (defaulting to `target`) smoothly animates the container height across pages once the transition snapshots are ready.
+- **Mask and blur fallbacks**: Without `CSS.registerProperty`, `curtain` falls back to `glide` and `iris` falls back to `depth` in View Transitions. Under `no-filter` or `@supports not (filter: blur(1px))`, `veil` and `depth` omit the blur pass cleanly.
+- **WAAPI outlet fallback**: Without `document.startViewTransition`, passing `target` animates the incoming view via the Web Animations API (`fill: 'none'`) so Glass backdrop sampling is never locked after settle.
+
+### Particle dissolve (`variant: 'dissolve'`)
+
+1. **WebGL particle dissolve** — selected by `variant: 'dissolve'` (or by default when `dissolveSource` or `[data-neoverse-dissolve]` is present without another `variant`). When the browser has WebGL2, the leaving element is rasterized (experimental HTML-in-Canvas capture where available, synthetic theme-colored dust otherwise) and erodes into fine dust on a pointer-transparent fullscreen canvas; the incoming region fades in late (`--neoverse-motion-particle-enter-delay/-duration`). Tune sampling with `particleDissolvePresets` (`high` / `medium`).
+2. **Crossfade** — without WebGL2 or with `particle: 'crossfade'`, the transition falls back to `fade`.
+3. **Plain update** — reduced motion, or no View Transition support: the DOM update runs directly.
+
+Force a dissolve pipeline with `particle: 'capture' | 'synthetic' | 'crossfade' | false`.
 
 Guarantees:
 
-- **Interruptible** — a new call skips the running choreography at its current
-  frame; rapid navigation never queues.
-- **Parallel** — every layer is `pointer-events: none` while animating; the
-  new page is interactive while the old one is still dissolving.
-- **Stable chrome** — give persistent elements `view-transition-name` so they
-  never flash between states.
+- **Interruptible** — a new call skips the running choreography at its current frame; rapid navigation never queues.
+- **Parallel** — every layer is `pointer-events: none` while animating; the new page is interactive while the old one is still settling.
+- **Stable chrome** — use `target` for region scoping, or give persistent elements `view-transition-name` so they never flash between states.
 
 ## Token reference
 
@@ -250,6 +299,7 @@ Guarantees:
 | Durations | `fast` 140ms · `standard` 240ms · `expressive` 420ms |
 | Easings | `linear` · `standard` · `emphasized` · `accelerate` · `spring` |
 | Distances | `near` · `mid` · `far` (space-2 / space-4 / space-8) |
+| Page | `duration` 360ms · `expressive` 520ms · `exit` 140ms · `enter` 240ms · `delay` 120ms · `blur` 8px |
 | Particle | `duration` 910ms · `enter-delay` 455ms · `enter-duration` 234ms |
 
 For architecture and contribution guidance, see the

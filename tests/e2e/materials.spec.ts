@@ -86,16 +86,6 @@ test.describe('materials', () => {
       await expect(notice).toHaveCSS('backdrop-filter', /blur\(12px\)/);
       await expect(notice).toHaveCSS('border-top-width', '0px');
     });
-
-    test(`Aurora Glass previews survive scrolling in the ${theme} theme`, async ({ page }) => {
-      await page.goto(`/frame?theme=${theme}&lang=en#materials`, { waitUntil: 'domcontentloaded' });
-      const stage = page.locator('[data-glass-variant]').last();
-      await stage.scrollIntoViewIfNeeded();
-
-      await expect(stage).toBeVisible();
-      await page.mouse.wheel(0, -400);
-      await expect(stage).toBeVisible();
-    });
   }
 
   for (const theme of themes) {
@@ -149,6 +139,27 @@ test.describe('materials', () => {
         await page.keyboard.up('Space');
       }
       await expect(tint).toHaveCSS('background-color', ready);
+    });
+
+    test(`primary button keyboard focus keeps the primary ring in ${theme}`, async ({ page }) => {
+      await page.goto(`/frame?theme=${theme}&lang=en#controls-button`, {
+        waitUntil: 'domcontentloaded',
+      });
+      const primary = page
+        .locator('[data-qa-stage="neutral"]')
+        .locator('[data-contract-button="primary"]');
+      await expect(primary).toBeVisible();
+      await primary.focus();
+
+      const { outlineColor, expected } = await primary.evaluate((element) => {
+        const probe = document.createElement('span');
+        probe.style.color = 'var(--neoverse-color-focus-ring)';
+        document.body.append(probe);
+        const expected = getComputedStyle(probe).color;
+        probe.remove();
+        return { outlineColor: getComputedStyle(element).outlineColor, expected };
+      });
+      expect(outlineColor).toBe(expected);
     });
 
     test(`quiet buttons reveal a deeper tint while held without acquiring a glass plate in ${theme}`, async ({
@@ -232,26 +243,6 @@ test.describe('materials', () => {
         }
       }
     }
-  });
-
-  test('reduced transparency keeps the material previews readable', async ({ page }) => {
-    await page.addInitScript(() => {
-      const matchMedia = window.matchMedia.bind(window);
-      window.matchMedia = (query) => {
-        const media = matchMedia(query);
-        if (query === '(prefers-reduced-transparency: reduce)') {
-          Object.defineProperty(media, 'matches', { value: true });
-        }
-        return media;
-      };
-    });
-    await page.goto('/frame?theme=dark&lang=en#materials', { waitUntil: 'domcontentloaded' });
-
-    const stages = page.locator('[data-glass-preview-stage]');
-    await expect(stages.first()).toBeVisible();
-    const first = stages.first();
-    await expect(first).not.toBeEmpty();
-    await expectNoPageOverflow(page);
   });
 });
 

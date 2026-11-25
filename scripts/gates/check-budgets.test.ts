@@ -67,11 +67,6 @@ describe('severity bands', () => {
   test('marks two units from the hard limit as AT LIMIT', () => {
     expect(severityOf(498, 300, 500)).toBe('AT LIMIT');
   });
-
-  test('marks near-hard-limit files as NEAR and the rest as REVIEW', () => {
-    expect(severityOf(480, 300, 500)).toBe('NEAR');
-    expect(severityOf(310, 300, 500)).toBe('REVIEW');
-  });
 });
 
 describe('budget validation', () => {

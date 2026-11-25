@@ -140,11 +140,13 @@ const renderReactFixtureDocument = (locale: Locale, theme: ThemeMode): string =>
 const resolveRequestTheme = (url: URL): ThemeMode =>
   readThemeModeFromSearch(url.search) ?? defaultThemeMode;
 
+const cacheControl = liveReload ? 'no-store' : 'no-cache';
+
 const missingAssetResponse = (asset: string, locale: Locale): Response =>
   new Response(formatLocalized(appCopy.server.assetsUnavailable, locale, { asset }), {
     status: 503,
     headers: {
-      'cache-control': 'no-cache',
+      'cache-control': 'no-store',
       'content-type': 'text/plain; charset=utf-8',
     },
   });
@@ -204,7 +206,7 @@ const server = Bun.serve({
 
       return new Response(stylesheet, {
         headers: {
-          'cache-control': 'no-cache',
+          'cache-control': cacheControl,
           'content-type': 'text/css; charset=utf-8',
         },
       });
@@ -217,7 +219,7 @@ const server = Bun.serve({
       if (!(await scopedCss.exists())) {
         return new Response('', {
           headers: {
-            'cache-control': 'no-cache',
+            'cache-control': cacheControl,
             'content-type': 'text/css; charset=utf-8',
           },
         });
@@ -225,7 +227,7 @@ const server = Bun.serve({
 
       return new Response(scopedCss, {
         headers: {
-          'cache-control': 'no-cache',
+          'cache-control': cacheControl,
           'content-type': 'text/css; charset=utf-8',
         },
       });
@@ -278,13 +280,13 @@ const server = Bun.serve({
         return new Response(localize(appCopy.server.notFound, locale), { status: 404 });
       }
       const asset = Bun.file(new URL(`../dist/assets/${relativePath}`, import.meta.url));
-      if (!(await asset.exists())) {
+      if (!(await asset.exists()) && !(await waitForServedAssets([asset]))) {
         return missingAssetResponse(url.pathname, locale);
       }
 
       return new Response(asset, {
         headers: {
-          'cache-control': 'no-cache',
+          'cache-control': cacheControl,
           'content-type': assetContentType(relativePath),
         },
       });
@@ -308,6 +310,7 @@ const server = Bun.serve({
 
       return new Response(renderDocument({ frame: true, theme, locale }), {
         headers: {
+          'cache-control': cacheControl,
           'content-type': 'text/html; charset=utf-8',
         },
       });
@@ -321,6 +324,7 @@ const server = Bun.serve({
 
       return new Response(renderReactFixtureDocument(locale, resolveRequestTheme(url)), {
         headers: {
+          'cache-control': cacheControl,
           'content-type': 'text/html; charset=utf-8',
         },
       });
@@ -334,6 +338,7 @@ const server = Bun.serve({
 
       return new Response(renderDocument({ theme: resolveRequestTheme(url), locale }), {
         headers: {
+          'cache-control': cacheControl,
           'content-type': 'text/html; charset=utf-8',
         },
       });

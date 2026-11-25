@@ -264,7 +264,6 @@ test('the Tabs session accepts only enabled tabs and resets the selected tab', (
 
 /** Each entry is one appearance variant the Inspector must be able to switch. */
 const variantEdits = [
-  ['controls-icon-button', 'variant', 'ghost'],
   ['controls-action', 'variant', 'ghost'],
   ['controls-segmented-control', 'shape', 'rounded'],
   ['controls-navigation-item', 'active', false],
@@ -274,12 +273,12 @@ const variantEdits = [
   ['status-feedback-skeleton', 'variant', 'circle'],
   ['status-feedback-notice', 'variant', 'warning'],
   ['status-feedback-toast', 'variant', 'danger'],
+  ['status-feedback-toast', 'presentation', 'action'],
   ['status-feedback-tooltip', 'variant', 'accent'],
   ['data-display-avatar', 'size', 'lg'],
   ['data-display-table', 'striped', false],
   ['data-display-stat-card', 'surface', 'solid'],
   ['materials-surface', 'surface', 'elevated'],
-  ['materials-glass', 'surface', 'glass-immersive'],
   ['card-card', 'surface', 'solid'],
 ] as const;
 
@@ -306,15 +305,6 @@ test('every appearance variant is editable and returns to its specimen default',
     session.reset();
     expect(renderedProps(session.render('en')).every((props) => props[key] !== value)).toBe(true);
   }
-});
-
-test('the editable skeleton rectangle renders with the shared large radius', () => {
-  const session = openSession('status-feedback-skeleton');
-  expect(
-    renderedProps(session.render('en')).some(
-      (props) => props.radius === 'var(--neoverse-radius-xl)',
-    ),
-  ).toBe(true);
 });
 
 test('switching a variant is rejected when the value is not a declared option', () => {

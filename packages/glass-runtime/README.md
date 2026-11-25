@@ -30,14 +30,24 @@ top-layer popovers or modals retain their existing inset styling because the
 shared canvas cannot reach them.
 
 Animation tracking redraws moving edges and occluders. Background-position-only
-effects stay in CSS; transformed or fading descendants also stay in CSS when
-their nearest Glass surface isolates and clips both axes and they contain no
-nested Glass. Shared selection indicators (`.ui-control-surface__indicator`,
-`.ui-navigation-item__indicator`) are decorative content confined to their
-surface, so their transitions never schedule edge frames. Unknown effects remain
-tracked. Hidden subtrees do not sustain a frame loop; visibility and clipping
-mutations trigger reevaluation, including animations that are already running.
-These rules do not change the edge shader.
+and paint-only effects stay in CSS; visual-only animations (transform, opacity,
+filter) on non-Glass, non-occluder descendants and `::view-transition` masks
+do not spin edge repaints. Layout-affecting CSS/WAAPI animations (including
+non-Glass siblings that shift neighboring Glass controls, `details::details-content`
+unfolds, and `neoverse-motion-start` events) stay tracked across the document,
+and active motion bypasses the passive 60 fps scroll/viewport-resize cap so edges
+remain locked to every display refresh. Element `ResizeObserver` callbacks
+repaint synchronously before paint, and one final settle frame is always drawn
+when motion ends.
+
+Surface geometry tracks 2D CSS transforms (`rotate`, `scale`, `zoom`, `transform`
+matrices) via oriented basis vectors rather than an inflated axis-aligned bounding
+box, resolves percentage and CSS §4.5 proportionally clamped border radii,
+attenuates edge opacity smoothly during `filter: blur(...)` transitions, avoids
+clipping `position: fixed` surfaces by non-containing `overflow: hidden`
+ancestors, and excludes native top-layer elements (`:popover-open`, `:modal`,
+leaving `overlay: auto`) from the document WebGL canvas while keeping them as
+occluders so they never paint a duplicate lagging edge behind local CSS rims.
 
 ## Pausing edge repaints for page transitions
 

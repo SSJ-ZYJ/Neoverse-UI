@@ -194,8 +194,10 @@ material and `--neoverse-control-surface-*` for grouping geometry instead.
 The `inset` preset on Surface and Card keeps the Light-tier filter and soft
 inset shadow. A translucent, theme-aware fill separates it from the canvas
 without a border. This fill belongs to the preset, not to other components
-that share the inset material. Status colors use shared semantic
-effect roles. Typography, geometry, and native control semantics remain independent.
+that share the inset material. Prose quotes consume the same plane role, so a
+reading callout reads as a distinct surface instead of a bare glass tint. Status
+colors use shared semantic effect roles. Typography, geometry, and native control
+semantics remain independent.
 
 ```vue
 <UiButton surface="glass-elevated">Save</UiButton>
@@ -282,10 +284,14 @@ visible on a flat backdrop. It retains the Light-tier fill alpha, backdrop
 blur, and inset shadows without adding a border. Status variants retain their
 semantic tints.
 
-Toast uses the Standard tier for its floating notification surface. Short
-messages size the surface to their content; long messages wrap within the
-width limit and viewport margins. Tone is carried by a compact status dot
-rather than a painted stripe on the glass edge.
+Toast uses the Standard tier in all three `presentation` modes. `compact`
+shows a semantic icon and a brief message in a pill. `action` uses a rounded
+bar with an inline action and is inferred if an action is supplied without an
+explicit presentation. `notification` wraps longer copy, moves any action
+below the message, and always shows a dismiss button. Compact and action
+toasts dismiss after four seconds by default; notification stays open by
+default. Setting `duration` to zero keeps any Toast open and shows its
+dismiss button.
 
 Disclosure panels use the shared directional inset edge roles in every state,
 together with the shared control shadow. The directional catches separate the
@@ -353,10 +359,11 @@ fill without the raised navigation gradient or shadow. The quiet feedback
 wash sits over this fill without changing the current destination.
 
 Button, Action, and IconButton share one compact Aurora Glass plate and one
-translucent command tint. Primary is pale blue with deep blue ink in Light and
-muted blue with dark ink in Dark. Secondary uses a neutral tint. Press uses a
-deeper shade of the hover tint without changing the shadow, silhouette, text,
-or blur. Neither state uses the selected field or a pointer-positioned light.
+translucent command tint. Primary uses a clear blue tint in both themes, with
+deep blue ink in Light and near-black ink in Dark. Secondary uses a neutral tint.
+Press uses a deeper shade of the hover tint without changing the shadow,
+silhouette, text, or blur. Neither state uses the selected field or a
+pointer-positioned light.
 The tint sits over the sampled plate without adding another filter, layout geometry,
 or hit testing. Disabled and loading controls keep the resting tint and dim only
 their content. Ghost and `surface="none"` do not own a material plate; they
@@ -365,8 +372,13 @@ paint only a local neutral wash on hover or press.
 The sampled plate, tint, and glass rim use the button's outer radius, including
 circular icon buttons. The rim replaces the painted stroke; reduced transparency,
 forced colors, and browsers without backdrop filters retain a fallback boundary.
-Keyboard focus keeps its own outline. The border policy for cards, glass planes,
-segmented wells, and other compact controls is unchanged.
+Keyboard focus keeps its own outline. Default controls resolve that outline from
+the primary azure accent in both themes, so a blue Button keeps a blue ring.
+Green selection controls, currently SegmentedControl and active navigation
+items, retune the ring locally to their mint selection accent; a selected control
+never pairs a green label with a blue outline. Inactive navigation items keep the
+default azure ring. The border policy for cards, glass planes, segmented wells,
+and other compact controls is unchanged.
 
 Dock's original desktop `lg` scale is 1.3, with a 0.9 optical type factor for
 navigation and embedded segmented labels. Compact Dock remains `md` at 1. These
@@ -388,11 +400,14 @@ luminous selection field in Dark. It defaults to the `pill` shape and also suppo
 `rounded` via `shape`, with its geometry and selection tokens decoupled from
 `ControlSurface`, `Tabs`, `Pagination`, and `NavigationItem`.
 The plate shares the well's shape and clips inside the inner track, independently
-of the options' expanded touch hit areas.
+of the options' expanded touch hit areas, and stays flat without a shadow
+(`--neoverse-control-segmented-active-shadow: var(--neoverse-shadow-none)`).
 
 On pointer down, the selection plate glides toward the pressed option, briefly
-stretches in transit, and compresses while held. During a horizontal drag, the
-plate follows the pointer; releasing it selects the nearest enabled option.
+stretches in transit, and compresses while held: capsule (`pill`) plates squish
+vertically, while circular (`icon` or equal-aspect) and `rounded` plates shrink
+uniformly around their center. During a horizontal drag, the plate follows the
+pointer; releasing it selects the nearest enabled option.
 A canceled drag or rejected activation returns the plate to the committed
 selection. Touch input still permits vertical scrolling. Keyboard and
 programmatic changes glide directly to the new selection. Reduced motion
@@ -416,7 +431,7 @@ or alter shared Aurora Glass Dock depth.
 | Component | Preserved visual role | Shared role / source |
 | --- | --- | --- |
 | Button, Action, IconButton | Translucent primary and secondary tints, quiet Ghost feedback | `command-*`, `primary-*`, `quiet-command-*` in `control-effects.css` |
-| SegmentedControl | Translucent Aurora Glass outer shell, shared outer glass edge, embedded aurora selection plate, and `pill` / `rounded` shapes | `choice-rest-shadow`, `choice-selected-*` |
+| SegmentedControl | Translucent Aurora Glass outer shell, shared outer glass edge, embedded shadowless aurora selection plate, and `pill` / `rounded` shapes | `choice-rest-shadow`, `choice-selected-field`, `choice-selected-fill`, `choice-selected-border` |
 | Dock, ControlSurface | Selected Aurora Glass tier depth/boundary and local trailing group contrast | Aurora Glass material tokens, `control-surface-*`, `grouped-inset-*` |
 | NavigationItem | Persistent selection under the quiet button wash | `selection-*`, `quiet-command-*` |
 | Skeleton, Badge, Tooltip, Scrollbar | Skeleton highlight and pulse without an edge, plus badge/tooltip accent depth and scrollbar thumb state | `placeholder-*`, `label-edge`, `accent-*`, `rail-*` |

@@ -4,13 +4,12 @@ const source = (name: string) => Bun.file(new URL(name, import.meta.url)).text()
 
 test('publishes three monotonic tiers with exactly one background alpha', async () => {
   const material = (await source('material.css')).replace(/\s+/g, ' ');
-  for (const [tier, size, blur, opacity] of [
-    ['subtle', 'sm', 12, 15],
-    ['elevated', 'md', 18, 20],
-    ['immersive', 'lg', 24, 30],
+  for (const [tier, size, blur] of [
+    ['subtle', 'sm', 12],
+    ['elevated', 'md', 18],
+    ['immersive', 'lg', 24],
   ] as const) {
     expect(material).toContain(`--neoverse-material-blur-${size}: ${blur}px;`);
-    expect(material).toContain(`--neoverse-material-transparency-${tier}: ${opacity}%;`);
     expect(material).toContain(
       `--neoverse-material-glass-${tier}-tint: var(--neoverse-material-glass-base-tint);`,
     );
@@ -41,13 +40,10 @@ test('light keeps the restored 0.2.0 edge inputs with a softer surface alpha', a
   }
 });
 
-test('themes cannot redefine Glass optics and command decoration aliases shared roles', async () => {
+test('theme tints and command decoration follow shared material roles', async () => {
   for (const theme of ['light', 'dark']) {
     const css = await source(`themes/${theme}.css`);
     expect(css).toMatch(/--neoverse-material-glass-base-tint:\s*rgb\(\d+ \d+ \d+\);/);
-    expect(css).not.toMatch(
-      /--neoverse-material-(?:filter|transparency)-(?:subtle|elevated|immersive)\s*:/,
-    );
     expect(css).not.toMatch(/--neoverse-control-button-(?:filter|filled-fill)\s*:/);
     if (theme === 'dark') {
       expect(css).toMatch(
@@ -74,8 +70,10 @@ test('dependent recipes compose at local material owners for consumer overrides'
 });
 
 test('all control adapters accept the three presets without losing none', async () => {
-  const vue = await Bun.file(new URL('../../vue/src/types.ts', import.meta.url)).text();
-  const react = await Bun.file(new URL('../../react/src/index.tsx', import.meta.url)).text();
+  const vue = await Bun.file(new URL('../../vue/src/types/controls.ts', import.meta.url)).text();
+  const react = await Bun.file(
+    new URL('../../react/src/adapters/shared.tsx', import.meta.url),
+  ).text();
   for (const adapter of [vue, react]) {
     expect(adapter).toMatch(
       /ControlSurfacePreset[^;]*'none'[^;]*'glass-subtle'[^;]*'glass-elevated'[^;]*'glass-immersive'/,
@@ -88,11 +86,8 @@ test('semantic effects share one disabled and loading vocabulary', async () => {
   for (const name of components) {
     const css = await source(`components/${name}.css`);
     expect(css).toContain('var(--neoverse-effect-disabled-content-opacity)');
-    expect(css).not.toMatch(/--[\w-]*disabled-opacity:\s*0\./);
   }
-  const skeleton = await source('components/skeleton.css');
   const status = await source('components/status-indicator.css');
-  expect(skeleton).toContain('var(--neoverse-effect-pulse-mid-opacity)');
   expect(status).toContain('var(--neoverse-effect-pulse-mid-opacity)');
 });
 

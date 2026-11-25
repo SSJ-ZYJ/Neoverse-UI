@@ -27,6 +27,13 @@ Cross-browser coverage is declared in `playwright.cross-browser.config.ts` and c
 
 A test asserts an observable user outcome: a panel opens, focus returns, a value is submitted, a link navigates, a control keeps its token size. Geometry, color contrast and material-tier wiring stay as computed-style assertions because they are deterministic across engines and describe a contract. Pixel probes, screenshot baselines and animation-frame accounting were removed: genuine optical quality (directional light, chroma retention, refraction) is verified by manual acceptance against [Material standards](../architecture/material-standards.md), not by the e2e gate. Tests use both Playwright projects (1920×1080 desktop and 390px touch), and a test that only applies to one layout skips itself with a stated reason.
 
+Use the narrowest layer that can detect the regression. Browser specs cover
+rendered layout, real interaction, and adapter integration, not fixture wiring
+or a second copy of a unit assertion. Repeat a scenario across themes only when
+its expected appearance or behavior depends on the theme. For layout, sample
+the widths and languages that exercise distinct responsive behavior instead of
+running every theme, width, and language combination.
+
 ## Browser specs
 
 `tests/e2e/` is organised by product module, not by component: one spec per area, split into focused specs when an area outgrows the test-file budget, with the shared adapter and fixture helpers in `tests/support/e2e.ts`.
@@ -34,22 +41,26 @@ A test asserts an observable user outcome: a panel opens, focus returns, a value
 | Spec | Covers |
 | --- | --- |
 | `forms.spec.ts` | Field wiring, text submission and IME, Select keyboard and controlled rejection, readonly choice submission and consumer reset, number inputs, accessibility roles |
-| `overlays.spec.ts` | Popover, dropdown and context menu lifecycle, dismissal, focus return, anchor tracking, viewport clamping, tooltip content |
-| `navigation.spec.ts` | Breadcrumb, dock, segmented control direction keys and roving tab stop, step flow |
-| `surfaces.spec.ts` | Disclosure, table, skeleton, timeline, stat card, scrollbar |
+| `overlays.spec.ts` | Dialog, popover, dropdown and context menu lifecycle, dismissal, focus return, anchor tracking, viewport clamping, tooltip and toast behavior |
+| `navigation.spec.ts` | Breadcrumb, dock and step flow, shared navigation indicator inside a magnified preview |
+| `segmented-control.spec.ts` | Segmented control direction keys and roving tab stop, rejected and disabled reconciliation, held-drag preview and release commit, theme icon and language label geometry, Aurora Glass well |
+| `surfaces.spec.ts` | Disclosure, table, skeleton, timeline, stat card, scrollbar, avatar initials and placeholder icon |
 | `terminal.spec.ts` | Transcript composition, suggestions, IME guard, tail following, reader intent |
-| `motion.spec.ts` | List reorder, entrance replay, page dissolve, React presence exit, reduced motion, layout width on a language switch |
+| `motion.spec.ts` | List reorder, entrance replay, page transitions, page dissolve, disclosure expansion and collapse, React presence exit, reduced motion, layout width on a language switch |
+| `motion-hierarchy.spec.ts` | Promoted Motion section, right-hand Inspector category switching, distinct-scene zero-flash transitions |
 | `materials.spec.ts` | Aurora Glass previews render and stay readable across themes, the inset preset stays distinct without changing other presets, glass buttons change tint without losing blur on press, reduced transparency removes blur and canvas, and both adapters wire the three tier recipes |
 | `glass-runtime.spec.ts` | One shared noninteractive renderer canvas, fixed placement, theme stability, context loss/restore, runtime reduced transparency, forced colors and adapter lifecycle |
 | `layout.spec.ts` | Control size baseline in both adapters, badge type scale, 24px minimum target, no implicit specimen magnification |
 | `contrast.spec.ts` | WCAG contrast floors for the primary, secondary and muted text roles in both themes |
-| `playground.spec.ts` | Explorer disclosure and specimen search, stage canvas and specimen dragging, preview persistence and reading position, browser history and deep links, drawer focus, Inspector selection, responsive shell overflow |
+| `playground.spec.ts` | Explorer disclosure and specimen search, preview persistence and reading position, browser history and deep links, drawer focus, responsive shell overflow |
+| `playground-stage.spec.ts` | Focused stage canvas, stage background switcher and persistence, specimen move handle and Home recentering, preview zoom, wheel zoom around the pointer, magnified pan without clipping the shadow, chrome and heading above a magnified preview |
 | `playground-specimens.spec.ts` | Catalogue previews at their own size, Colors gallery, Markdown heading and inline style rendering, specimen title hierarchy, stage backdrop without painted specimen wrappers, focused and QA galleries |
-| `playground-composition.spec.ts` | Composition presets and reset without remounting, dynamic focus fallback, mobile composition drawer, preset geometry across themes, languages and reduced motion, anchored overlay isolation and cleanup |
-| `playground-inspector.spec.ts` | Inspector edits shared with Select, Checkbox, Tabs, Card and Dock, isolated specimen frame, desktop and mobile toolbar, Giscus themes, demo destinations, React fixture link |
+| `playground-composition.spec.ts` | Composition presets and reset without remounting, dynamic focus fallback, mobile composition drawer, preset geometry at representative widths in both languages, reduced motion, anchored overlay isolation and cleanup |
+| `playground-inspector.spec.ts` | Inspector edits shared with Button, Badge, SegmentedControl, Select, Checkbox, Tabs, Card and Dock |
+| `playground-shell.spec.ts` | Isolated specimen frame, desktop and mobile toolbar, Giscus themes, direct Explorer leaves, demo destinations, React fixture link |
 | `parity.spec.ts` | Every React adapter renders, theme resolution, shared control names |
 
-The cross-browser configuration runs the interaction specs that do not depend on the Chromium-only optical harness: forms, overlays, navigation, surfaces, motion and parity. Terminal IME and scroll-tail timing, Glass and materials, layout and contrast probes, and the Playground shell stay Chromium-only because they either depend on that rendering harness or duplicate an existing cross-engine contract at disproportionate CI cost. Extending the list requires running both Firefox and WebKit before the spec enters the registry. `tests/optics/glass.spec.ts` runs separately under Chromium with SwiftShader and reports optical diagnostics rather than a release pass/fail signal.
+The cross-browser configuration runs the interaction specs that do not depend on the Chromium-only optical harness: forms, overlays, navigation, segmented control, surfaces, motion and parity. Terminal IME and scroll-tail timing, Glass and materials, layout and contrast probes, and the Playground shell stay Chromium-only because they either depend on that rendering harness or duplicate an existing cross-engine contract at disproportionate CI cost. Extending the list requires running both Firefox and WebKit before the spec enters the registry. `tests/optics/glass.spec.ts` runs separately under Chromium with SwiftShader and reports optical diagnostics rather than a release pass/fail signal.
 
 These specs import the `test` fixture from `tests/support/e2e.ts`, which keeps navigation on `domcontentloaded` and then waits until the document height is stable for ten animation frames. The Design Lab mounts its specimen backdrops after DOM ready, and Firefox's scroll anchoring can move a control between Playwright's scroll and the dispatched click, aiming it at a neighbouring row.
 

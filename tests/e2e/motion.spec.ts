@@ -1,18 +1,8 @@
 import { expect, expectNoPageOverflow, test } from '../support/e2e';
+import { capturePagePreset, expectPageDissolveSwap } from '../support/motion';
+import { chooseOption, showInspector } from '../support/playground';
 
 test.describe('motion', () => {
-  test('presence specimens render the library badge instead of a local chip', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#motion');
-    const specimen = page.locator('[data-motion-presence-specimen="veil"]');
-
-    await expect(specimen).toBeVisible();
-    // The specimen must be the real UiBadge, so its status tint, hairline and
-    // glass depth follow the library instead of a hand-written pill.
-    await expect(specimen).toHaveClass(/ui-badge/);
-    await expect(specimen).toHaveClass(/ui-badge--info/);
-    await expect(specimen).toHaveAttribute('data-neoverse-motion', 'veil');
-  });
-
   test('presence fallback profiles rewrite the frames the engine applies', async ({ page }) => {
     await page.goto('/frame?theme=light&lang=en#motion');
     const grid = page.locator('[data-motion-presence-grid]');
@@ -48,20 +38,6 @@ test.describe('motion', () => {
     await expect.poll(() => frame('--neoverse-motion-from-filter')).toBe('blur(8px)');
   });
 
-  test('presence presets are split into helper and component paths', async ({ page }) => {
-    await page.goto('/frame?theme=light&lang=en#motion');
-    const helper = page.locator('[data-motion-presence-path="helper"]');
-    const adapter = page.locator('[data-motion-presence-path="adapter"]');
-
-    await expect(helper).toBeVisible();
-    await expect(adapter).toBeVisible();
-    // The helper path owns every preset; the component path owns only the
-    // UiPresence specimen, so the two mechanisms never share a cell.
-    await expect(helper.locator('[data-motion-presence-specimen]')).toHaveCount(11);
-    await expect(adapter.locator('[data-motion-presence-specimen]')).toHaveCount(0);
-    await expect(adapter.locator('[data-motion-presence-adapter]')).toHaveCount(1);
-  });
-
   test('every preset enters at once and replays on its own', async ({ page }) => {
     await page.goto('/frame?theme=light&lang=en#motion');
     const specimens = page.locator('[data-motion-presence-specimen]');
@@ -73,7 +49,9 @@ test.describe('motion', () => {
         getComputedStyle(node).getPropertyValue('--neoverse-motion-enter-delay').trim(),
       ),
     );
-    expect(new Set(delays)).toEqual(new Set(['0ms']));
+    expect(delays.length).toBeGreaterThan(0);
+    expect(new Set(delays).size).toBe(1);
+    expect(['0ms', '0s']).toContain(delays[0]);
 
     const veil = page.locator('[data-motion-presence-specimen="veil"]');
     const rise = page.locator('[data-motion-presence-specimen="rise"]');
@@ -89,7 +67,6 @@ test.describe('motion', () => {
     // The replayed cell mounts a fresh node; its neighbour is untouched.
     await expect(veil).not.toHaveAttribute('data-replay-probe', 'veil');
     await expect(rise).toHaveAttribute('data-replay-probe', 'rise');
-    await expect(page.locator('[data-motion-presence-replay-specimen]')).toHaveCount(12);
   });
 
   test('replaying a hidden preset shows it again', async ({ page }) => {
@@ -142,11 +119,34 @@ test.describe('motion', () => {
     for (const item of await items.all()) await expect(item).toBeVisible();
   });
 
-  test('a language switch reflows the width specimen without wrapping its copy', async ({
+  test('disclosure motion expands and collapses the mounted leaf list', async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
+    await page.goto('/?theme=light&lang=en&fps=0#foundation-motion-disclosure');
+    const specimen = page.locator('#foundation-motion-disclosure');
+    const list = specimen.locator('[data-motion-disclosure-list]');
+    const toggle = specimen.locator('[data-motion-disclosure-toggle]');
+    const animations = () => list.evaluate((element) => element.getAnimations().length);
+    await expect(list).not.toHaveAttribute('hidden', '');
+
+    await toggle.click();
+    await expect(list).toHaveAttribute('inert', '');
+    await expect.poll(animations).toBeGreaterThan(0);
+    await expect.poll(animations).toBe(0);
+    await expect(list).toHaveAttribute('hidden', '');
+    await expect(list).toHaveAttribute('aria-hidden', 'true');
+
+    await toggle.click();
+    await expect(list).not.toHaveAttribute('hidden', '');
+    await expect(list).not.toHaveAttribute('inert', '');
+    await expect.poll(animations).toBeGreaterThan(0);
+    await expect.poll(animations).toBe(0);
+  });
+
+  test('a language switch reflows the Transitions width group without wrapping its copy', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1440, height: 1000 });
-    await page.goto('/?lang=en#motion');
+    await page.goto('/?lang=en#foundation-motion-playground');
     const stage = page.locator('[data-motion-width-stage]');
     await expect(stage).toBeVisible();
     await stage.scrollIntoViewIfNeeded();
@@ -245,6 +245,7 @@ test('translated actions resize and move without wrapping their labels', async (
   ]);
 
   const during = await frame.jsonValue();
+  if (!during) throw new Error('Localized size transition did not start');
   await expect.poll(() => sample.evaluate((element) => element.getAnimations().length)).toBe(0);
   const after = await sample.boundingBox();
   const iconAfter = await icon.boundingBox();
@@ -295,10 +296,50 @@ test('a larger text button keeps its label on one line throughout resize', async
   ]);
 
   const during = await frame.jsonValue();
+  if (!during) throw new Error('Text size transition did not start');
   expect(during.height).toBeGreaterThan(32);
   expect(during.height).toBeLessThan(48);
   expect(during.lines).toBe(1);
   await expect(sample).toHaveCSS('height', '48px');
+});
+
+test('an indicator keeps its label on one line as the status changes', async ({
+  page,
+}, testInfo) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/?theme=light&lang=zh&fps=0#status-feedback-indicator');
+  const inspector = await showInspector(page, testInfo.project.name === 'mobile');
+  const selector = '#status-feedback-indicator .ui-status-indicator';
+  const label = page.locator(`${selector} .ui-status-indicator__label`);
+  await expect(label).toHaveText('空闲');
+
+  const [frame] = await Promise.all([
+    page.waitForFunction((target) => {
+      const indicator = document.querySelector(target);
+      if (!indicator) return;
+      const label = indicator.querySelector('.ui-status-indicator__label');
+      if (label?.textContent !== '性能下降') return;
+      const resize = indicator
+        .getAnimations()
+        .find(
+          ({ effect }) =>
+            effect instanceof KeyframeEffect &&
+            effect.getKeyframes().some((frame) => 'width' in frame),
+        );
+      if (!resize) return;
+      resize.pause();
+      resize.currentTime = 0;
+      const range = document.createRange();
+      range.selectNodeContents(label);
+      const lines = range.getClientRects().length;
+      resize.finish();
+      return { lines };
+    }, selector),
+    chooseOption(inspector, 'status', '警告'),
+  ]);
+
+  expect(await frame.jsonValue()).toEqual({ lines: 1 });
+  await expect(label).toHaveText('性能下降');
 });
 
 test('theme reveal stays clickable and reverses from its current edge', async ({ page }) => {
@@ -412,31 +453,142 @@ test('reversing from the toolbar does not replay Glass colors outside the reveal
   await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-appearance-live');
 });
 
-test('page dissolve swaps the specimen and clears the particle layer', async ({ page }) => {
-  await page.goto('/frame?theme=light&lang=en#foundation-motion-page');
-  const trigger = page.locator('[data-motion-page-dissolve]');
-  const stage = page.locator('#foundation-motion-page .playground-motion-stage');
+const pagePresets = ['fade', 'glide', 'slide', 'push', 'depth', 'veil', 'curtain', 'iris', 'morph'];
 
-  await expect(stage).toContainText('{ dissolveSource }');
-  await trigger.click();
-  await expect(stage).toContainText('{ particle }');
-  await expect(trigger).toBeEnabled();
-  await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-particle-transitioning');
-  await expect(page.locator('.nv-particle-canvas')).toHaveCount(0);
+test('page transitions switch presets, directions, and pages without overflowing', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/frame?theme=light&lang=en#foundation-motion-page');
+  const specimen = page.locator('#foundation-motion-page');
+  const stage = specimen.locator('[data-motion-page-stage]');
+
+  await expect(stage).toContainText('Aurora Glass Surfaces');
+  await expect(stage).toContainText('Edge tracking active');
+  for (const variant of pagePresets) {
+    await expect(specimen.locator(`[data-motion-page-variant="${variant}"]`)).toBeVisible();
+  }
+
+  await specimen.locator('[data-motion-page-variant="push"]').click();
+  await expect(stage).toContainText('Spatial Motion Cadence');
+  await expect(specimen).toContainText("variant: 'push'");
+  await expect(specimen.locator('[data-motion-page-direction-hint]')).toHaveAttribute('hidden', '');
+
+  await specimen.locator('[data-motion-page-next]').click();
+  await expect(stage).toContainText('Interruptible Choreography');
+
+  await specimen.locator('[data-motion-page-prev]').click();
+  await expect(stage).toContainText('Spatial Motion Cadence');
+  await expect(specimen).toContainText("direction: 'backward'");
+
+  await specimen.locator('[data-motion-page-variant="morph"]').click();
+  await expect(specimen.locator('[data-motion-page-direction-hint]')).not.toHaveAttribute(
+    'hidden',
+    '',
+  );
+
+  await expectNoPageOverflow(page);
+});
+
+test('scoped transitions, shared backdrops, and morph choreography preserve contracts and clean up', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/frame?theme=light&lang=en#foundation-motion-page');
+  test.skip(
+    !(await page.evaluate(() => typeof document.startViewTransition === 'function')),
+    'The engine has no view-transition snapshots',
+  );
+
+  const specimen = page.locator('#foundation-motion-page');
+  const stage = specimen.locator('[data-motion-page-stage]');
+
+  const capturePreset = (variant: string) => capturePagePreset(page, specimen, variant);
+
+  const push = await capturePreset('push');
+  expect(push).toMatchObject({
+    scope: 'region',
+    direction: 'forward',
+    backgroundMode: 'surface',
+    animationName: 'nv-page-push-enter',
+    stageTargeted: true,
+    contentTargeted: false,
+  });
+
+  const glide = await capturePreset('glide');
+  expect(glide).toMatchObject({
+    animationName: 'nv-page-glide-in',
+    backgroundMode: 'shared',
+    backgroundColor: 'rgba(0, 0, 0, 0)',
+    contentTargeted: true,
+    stageTargeted: false,
+  });
+  expect(glide?.delay).toBeGreaterThan(0);
+
+  const curtain = await capturePreset('curtain');
+  expect(curtain?.backgroundMode).toBe('surface');
+  expect(curtain?.stageTargeted).toBe(true);
+  expect(curtain?.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
+  expect(curtain?.maskImage).toContain('linear-gradient');
+
+  await specimen
+    .locator('[data-motion-page-background]')
+    .getByRole('radio', { name: 'Distinct', exact: true })
+    .click();
+  expect(await capturePreset('glide')).toMatchObject({
+    backgroundMode: 'surface',
+    stageTargeted: true,
+  });
+
+  await specimen
+    .locator('[data-motion-page-background]')
+    .getByRole('radio', { name: 'Same canvas', exact: true })
+    .click();
+  const [morph, stageResized] = await Promise.all([
+    capturePreset('morph'),
+    page
+      .waitForFunction(() => {
+        const el = document.querySelector('[data-motion-page-stage]');
+        return Boolean(el && el.getAnimations().length > 0);
+      })
+      .then(() => true),
+  ]);
+  expect(morph?.backgroundMode).toBe('shared');
+  expect(morph?.contentTargeted).toBe(true);
+  expect(morph?.figureName).toBe('nv-morph-stage-figure');
+  expect(morph?.morphGroupDuration).toBeGreaterThan(0);
+  expect(stageResized).toBe(true);
+
+  await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-view-transitioning');
+  await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-page-transition');
+  await expect(stage).not.toHaveAttribute('data-neoverse-page-target');
+  await expect(specimen.locator('[data-motion-page-figure]')).toHaveCSS(
+    'view-transition-name',
+    'none',
+  );
+});
+
+test('page transitions honor reduced motion immediately across every preset', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/frame?theme=light&lang=en#foundation-motion-page');
+  const specimen = page.locator('#foundation-motion-page');
+  const stage = specimen.locator('[data-motion-page-stage]');
+
+  await specimen.locator('[data-motion-page-variant="veil"]').click();
+  await expect(stage).toContainText('Spatial Motion Cadence');
+  await specimen.locator('[data-motion-page-variant="morph"]').click();
+  await expect(stage).toContainText('Interruptible Choreography');
+  await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-view-transitioning');
+  await expect(stage).not.toHaveAttribute('data-neoverse-page-target');
+});
+
+test('page dissolve swaps the specimen and clears the particle layer', async ({ page }) => {
+  await expectPageDissolveSwap(page);
 });
 
 test('page dissolve honors reduced motion without keeping a particle layer', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/frame?theme=light&lang=en#foundation-motion-page');
-  const trigger = page.locator('[data-motion-page-dissolve]');
-  const stage = page.locator('#foundation-motion-page .playground-motion-stage');
-
-  await expect(stage).toContainText('{ dissolveSource }');
-  await trigger.click();
-  await expect(stage).toContainText('{ particle }');
-  await expect(trigger).toBeEnabled();
-  await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-particle-transitioning');
-  await expect(page.locator('.nv-particle-canvas')).toHaveCount(0);
+  await expectPageDissolveSwap(page);
 });
 
 test('React presence removes the exited region and returns it on show', async ({ page }) => {

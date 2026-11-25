@@ -24,8 +24,8 @@ const attrs = useAttrs();
   >
     <div v-if="props.segments.length > 0" class="ui-terminal-prompt__context">
       <TerminalPromptSegments :segments="props.segments">
-        <template #segment="{ segment }">
-          <slot name="segment" :segment="segment">{{ segment.label }}</slot>
+        <template v-if="$slots.segment" #segment="{ segment }">
+          <slot name="segment" :segment="segment" />
         </template>
       </TerminalPromptSegments>
     </div>

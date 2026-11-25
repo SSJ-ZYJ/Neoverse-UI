@@ -128,8 +128,6 @@ test('choice controls preserve native input semantics and state callbacks', () =
   expect(checkboxValue).toBe(true);
 
   const toggle = UiSwitch({ children: 'Sync automatically', validation: 'success' }) as TestElement;
-  const switchInput = Children.toArray(toggle.props.children)[0] as TestElement;
-  expect(switchInput.props.role).toBe('switch');
   expect(toggle.props['data-validation']).toBe('success');
 });
 

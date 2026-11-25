@@ -305,7 +305,7 @@ jobs:
         run: bunx playwright install chromium
 
       - name: Verify browser keyboard, overlay and theme behavior
-        run: bunx playwright test tests/e2e/forms.spec.ts tests/e2e/overlays.spec.ts tests/e2e/navigation.spec.ts tests/e2e/parity.spec.ts --workers=2 --reporter=list,html
+        run: bunx playwright test tests/e2e/forms.spec.ts tests/e2e/overlays.spec.ts tests/e2e/navigation.spec.ts tests/e2e/segmented-control.spec.ts tests/e2e/parity.spec.ts --workers=2 --reporter=list,html
 
       - name: Upload failed browser check evidence
         if: ${{ failure() }}

@@ -5,7 +5,7 @@ Status: adopted
 [English](../../architecture/terminal-composition.md)
 
 <!-- Source: docs/architecture/terminal-composition.md -->
-<!-- Source-SHA256: 09c623e7e6b04cb8e2a2edf24a0b284c2dc851257b3b0127aaf2f66dc1ada7ab -->
+<!-- Source-SHA256: b1405297b31cabb4271fa65ec37cad3fe16516fcd4bccf2bccb81b900cd170db -->
 
 Neoverse-UI 提供的是**终端展示**，不是 Shell 模拟器或命令运行时。提示行是文本行，不是表单字段表面：半透明极光玻璃留在外层 `UiTerminalSurface` 上；编辑器本身没有边框、填充、阴影或圆角盒子。
 
@@ -68,9 +68,15 @@ function submit(event: KeyboardEvent) {
 
 ### 消费项目自有页头
 
-Vue 的 `#header` 插槽与 React 的可选 `header` ReactNode 只替换既有 `UiTerminalSurface` 页头的内容。没有 Vue header 插槽，或 React `header` 为 nullish 时，标题、状态与操作保留既有回退。自定义 header 会替换全部三项：回退标题、状态与操作工具栏不会与它一起渲染。
+Vue 的 `#header` 插槽与 React 的可选 `header` ReactNode 只替换既有 `UiTerminalSurface` 页头的内容。没有 Vue header 插槽，或 React `header` 为 nullish 时，`UiTerminalSurface` 会根据 `titlebar`（`'default' | 'auto' | 'macos' | 'windows' | 'linux'`）、`maximized` 以及可选无障碍标签（`closeLabel`、`minimizeLabel`、`maximizeLabel`、`restoreLabel`）渲染默认 Neoverse 标题栏或内置系统窗口控制栏，并在 Vue 中触发 `windowAction`（`'close' | 'minimize' | 'maximize'`）事件或在 React 中调用 `onWindowAction`。`titlebar="auto"` 会把 `navigator` 检测推迟到挂载之后，使 SSR HTML 保持 `'default'` 并无失配水合；关闭、最小化与最大化等窗口状态变化仍归消费项目持有。自定义 header 会替换全部内置标题、状态、操作与窗口按钮：请保留 `title`（及必要的 `ariaLabel`），并使用 `UiButton` / `UiIconButton` 构建自定义控件。
 
-共享组件仍拥有页头元素、内边距与材质、无障碍表面标签（`ariaLabel`，回退到 `title`）以及不变的正文。即使替换可见渲染，也要继续传 `title`。消费项目负责替换布局、可见标题/状态、操作分组与无障碍操作名称；真实控件使用 `UiButton` / `UiIconButton`。平台检测、窗口外观与平台特定样式留在消费项目，不进入共享终端组件。
+```vue
+<UiTerminalSurface title="Workspace terminal" titlebar="macos" @window-action="onWindowAction">
+  <p>Ready</p>
+</UiTerminalSurface>
+```
+
+提示词与回显片段（`TerminalPromptSegment`）支持可选 `icon?: TerminalSegmentIcon` 与 `iconOnly?: boolean`，可渲染内置 16×16 单色 SVG 图标（操作系统、发行版、Shell/终端、浏览器、运行时及提示语境，如 `macos`、`windows`、`linux`、`ubuntu`、`windows-terminal`、`powershell`、`bash`、`zsh`、`iterm2`、`warp`、`ghostty`、`vscode`、`chrome`、`edge`、`safari`、`firefox`、`bun`、`node`），也可设 `icon: 'auto'` 从片段标签、tone 或挂载后的浏览器环境自动识别。`iconOnly` 通过 `.sr-only` 保留片段文本的屏幕阅读器标签与工具提示；自定义 `#segment`（Vue）或 `renderSegment`（React）插槽仍具最高优先级。两套适配器均导出 `detectTerminalEnvironment`、`resolveTerminalTitlebar`、`matchTerminalSegmentIcon`、`resolveTerminalSegmentIcon`、`terminalSegmentIconNames` 与 `terminalSegmentGlyphs`。
 
 ```vue
 <UiTerminalSurface title="Workspace terminal">

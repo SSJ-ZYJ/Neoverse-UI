@@ -1,8 +1,30 @@
 <script setup lang="ts">
+import { computed, onMounted, ref } from 'vue';
+import TerminalSegmentIconGlyph from './TerminalSegmentIconGlyph.vue';
+import {
+  readTerminalNavigatorHints,
+  resolveTerminalSegmentIcon,
+  type TerminalNavigatorHints,
+} from './terminal-environment';
 import type { TerminalPromptSegment } from './types';
 
-defineProps<{ segments: readonly TerminalPromptSegment[] }>();
+const props = defineProps<{ segments: readonly TerminalPromptSegment[] }>();
 defineSlots<{ segment?: (props: { segment: TerminalPromptSegment }) => unknown }>();
+
+const browserHints = ref<TerminalNavigatorHints | undefined>(undefined);
+onMounted(() => {
+  browserHints.value = readTerminalNavigatorHints();
+});
+
+const resolvedSegments = computed(() =>
+  props.segments.map((segment) => ({
+    segment,
+    icon:
+      segment.icon === undefined
+        ? undefined
+        : resolveTerminalSegmentIcon(segment, browserHints.value),
+  })),
+);
 </script>
 
 <template>
@@ -10,12 +32,16 @@ defineSlots<{ segment?: (props: { segment: TerminalPromptSegment }) => unknown }
     <span /><span /><span />
   </span>
   <span
-    v-for="segment in segments"
-    :key="segment.id"
+    v-for="entry in resolvedSegments"
+    :key="entry.segment.id"
     class="ui-terminal-prompt__segment"
-    :data-tone="segment.tone ?? 'runtime'"
-    :title="segment.label"
+    :data-tone="entry.segment.tone ?? 'runtime'"
+    :data-icon="entry.icon"
+    :title="entry.segment.label"
   >
-    <slot name="segment" :segment="segment">{{ segment.label }}</slot>
+    <slot name="segment" :segment="entry.segment">
+      <TerminalSegmentIconGlyph v-if="entry.icon" :name="entry.icon" />
+      <span :class="{ 'sr-only': entry.segment.iconOnly }">{{ entry.segment.label }}</span>
+    </slot>
   </span>
 </template>

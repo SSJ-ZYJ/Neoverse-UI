@@ -69,16 +69,32 @@ function submit(event: KeyboardEvent) {
 
 Vue's `#header` slot and React's optional `header` ReactNode replace only the contents
 of the existing `UiTerminalSurface` header. Without a Vue header slot, or with a
-nullish React `header`, the title, status and actions retain their existing fallback.
-A custom header replaces all three: fallback titles, status and action toolbars are
-not rendered alongside it.
+nullish React `header`, `UiTerminalSurface` renders either the default Neoverse header or
+built-in window chrome controlled by `titlebar` (`'default' | 'auto' | 'macos' | 'windows' | 'linux'`),
+`maximized`, and optional accessible labels (`closeLabel`, `minimizeLabel`, `maximizeLabel`,
+`restoreLabel`), emitting `windowAction` (`'close' | 'minimize' | 'maximize'`) in Vue or calling
+`onWindowAction` in React. `titlebar="auto"` defers `navigator` inspection until mount so SSR HTML
+keeps `'default'` and hydrates without mismatch; consumers still own close, minimize and maximize
+window state. A custom header replaces all built-in chrome (title, status, actions and window
+controls): preserve `title` (and `ariaLabel` when needed) and build custom controls with
+`UiButton` / `UiIconButton`.
 
-The shared component still owns the header element, padding and material, accessible
-surface label (`ariaLabel`, falling back to `title`), and unchanged body. Keep passing
-`title` even when replacing its visible rendering. The consumer owns the replacement
-layout, visible title/status, action grouping and accessible action names; use
-`UiButton` / `UiIconButton` for real controls. Platform detection, window chrome and
-platform-specific styling stay in the consumer, not the shared terminal components.
+```vue
+<UiTerminalSurface title="Workspace terminal" titlebar="macos" @window-action="onWindowAction">
+  <p>Ready</p>
+</UiTerminalSurface>
+```
+
+Prompt and echo segments (`TerminalPromptSegment`) accept optional `icon?: TerminalSegmentIcon`
+and `iconOnly?: boolean` to render built-in 16×16 monochrome SVG glyphs (OS, distro, shell/terminal,
+browser, runtime and prompt roles such as `macos`, `windows`, `linux`, `ubuntu`, `windows-terminal`,
+`powershell`, `bash`, `zsh`, `iterm2`, `warp`, `ghostty`, `vscode`, `chrome`, `edge`, `safari`,
+`firefox`, `bun`, `node`), or `icon: 'auto'` to recognize the label, segment tone or browser
+environment safely after mount. `iconOnly` visually hides the segment text with `.sr-only` while
+keeping the tooltip and accessible name; custom `#segment` (Vue) or `renderSegment` (React) overrides
+take precedence. Both adapters export `detectTerminalEnvironment`, `resolveTerminalTitlebar`,
+`matchTerminalSegmentIcon`, `resolveTerminalSegmentIcon`, `terminalSegmentIconNames` and
+`terminalSegmentGlyphs`.
 
 ```vue
 <UiTerminalSurface title="Workspace terminal">

@@ -277,6 +277,13 @@
     --neoverse-surface-inset-hover-background: var(--neoverse-surface-inset-fill);
     --neoverse-surface-inset-strong-fill: var(--neoverse-material-glass-subtle-background);
     --neoverse-surface-inset-strong-background: var(--neoverse-surface-inset-fill);
+    /* The explicit Inset preset and prose quotes share this quiet plane so a
+       reading callout reads as a distinct surface instead of a bare outline. */
+    --neoverse-surface-inset-plane-background: color-mix(
+      in srgb,
+      var(--neoverse-color-text-primary) var(--neoverse-effect-alpha-faint),
+      var(--neoverse-surface-inset-rest-background)
+    );
     --neoverse-surface-inset-header-fill: var(--neoverse-material-glass-subtle-background);
     --neoverse-surface-inset-header-background: var(--neoverse-surface-inset-fill);
     --neoverse-surface-inset-alternate-fill: var(--neoverse-material-glass-subtle-background);

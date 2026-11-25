@@ -52,7 +52,7 @@ packages/tokens/src/
     table.css
     status-indicator.css segmented-control.css badge.css
     skeleton.css         scrollbar.css       notice.css
-    tooltip.css          prose.css
+    tooltip.css          prose.css           terminal.css
   themes/
     light.css            dark.css
 ```
@@ -126,7 +126,7 @@ UiTimeline
 UiStepFlow
 ```
 
-They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. Components that own a visual plane consume the shared `surface` contract instead of hard-coding Aurora Glass as an intrinsic component trait. `UiButton`, `UiAction`, `UiIconButton`, and `UiSegmentedControl` use `glass-subtle` as their canonical default, while `UiNavigationItem` defaults to `none` so grouped navigation inherits the parent chrome rather than creating nested Aurora Glass. `UiSegmentedControl` keeps its active slider and keyboard interaction independent from the outer Surface, so `surface="none"` can be used inside a composition that already owns the chrome. Its roving tab stop follows the checked option whenever focus is outside the group. `UiSurface` is the generic polymorphic material primitive. `UiCard` owns standard card geometry (`rounded-card` + base card padding) while consuming the same `surface` contract; standard cards should therefore use `UiCard surface="..."` rather than rebuilding card geometry around `UiSurface`. `UiControlSurface` owns one grouped-control chrome boundary and optional trailing separation. It also owns grouped-surface behavior policy: `hoverMode="static"` keeps parent material stable while descendants hover, and `edgeMode="local"` requests a locally rendered Aurora Glass edge without exposing renderer attributes to consumers. `UiDock` defaults to `glass-elevated`, while `UiControlSurface` defaults to `glass-subtle`; the separate `chrome` preset and `ui-surface-chrome` renderer have been removed without an alias. `UiDock` specializes that contract for reusable floating navigation: it owns Dock layout, chrome, scale, compact composition, and trailing separation while route data, destination state, icons, and trailing controls stay consumer-owned. `UiStatusIndicator` leaves live-region announcements to the caller. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities.
+They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. Components that own a visual plane consume the shared `surface` contract instead of hard-coding Aurora Glass as an intrinsic component trait. `UiButton`, `UiAction`, `UiIconButton`, and `UiSegmentedControl` use `glass-subtle` as their canonical default, while `UiNavigationItem` defaults to `none` so grouped navigation inherits the parent chrome rather than creating nested Aurora Glass. `UiSegmentedControl` keeps its active slider and keyboard interaction independent from the outer Surface, so `surface="none"` can be used inside a composition that already owns the chrome. Its roving tab stop follows the checked option whenever focus is outside the group. `UiSurface` is the generic polymorphic material primitive. `UiCard` owns standard card geometry (`rounded-card` + base card padding) while consuming the same `surface` contract; standard cards should therefore use `UiCard surface="..."` rather than rebuilding card geometry around `UiSurface`. `UiControlSurface` owns one grouped-control chrome boundary and optional trailing separation. It also owns grouped-surface behavior policy: `hoverMode="static"` keeps parent material stable while descendants hover, and `edgeMode="local"` requests a locally rendered Aurora Glass edge without exposing renderer attributes to consumers. `UiDock` defaults to `glass-elevated`, while `UiControlSurface` defaults to `glass-subtle`; the separate `chrome` preset and `ui-surface-chrome` renderer have been removed without an alias. `UiDock` specializes that contract for reusable floating navigation: it owns Dock layout, chrome, scale, compact composition, and trailing separation while route data, destination state, icons, and trailing controls stay consumer-owned. The shared navigation indicator commits geometry in its group's layout pixels, so it divides out every rendered `zoom` and ancestor `scale` above the group; a visually magnified preview therefore keeps the bar on the active item instead of doubling its offset and clipping it. `UiStatusIndicator` leaves live-region announcements to the caller. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities.
 
 ## React components
 
@@ -143,6 +143,8 @@ Framework parity is declared in `contracts/framework-parity.json` and validated 
 `UiPopover`, `UiDropdownMenu`, and `UiSelect` all consume this runtime instead of owning independent positioning algorithms. Framework adapters remain responsible for state bindings, focus policy, ARIA roles, and menu keyboard semantics. Generic Aurora Glass rules deliberately exclude top-layer panels from their normal `position: relative` context so runtime-owned viewport coordinates remain authoritative.
 
 Display-only semantic primitives do not gain a `surface` prop merely for API symmetry. `UiBadge` owns status/semantic color, `UiStatusIndicator` owns presence language, `UiSkeleton` owns loading geometry/effect, and `UiScrollbar` owns document-scroll runtime. Consumers should wrap those primitives in `UiSurface`, `UiCard`, or `UiControlSurface` when a material plane is needed instead of making every primitive an Aurora Glass surface.
+
+`UiAvatar` paints either an image, derived initials, or a neutral person glyph. `placeholder="icon"` selects the glyph for a source-less identity and accepts a consumer `icon` slot or prop to replace it; the default remains `initials`, so a named person still shows their letters. Both placeholders centre on a 1:1 line box rather than a normal line height, which keeps capitals and the glyph optically centred at every size.
 
 `UiScrollbar` owns the document-level immersive scrollbar runtime: geometry measurement, auto-hide, thumb dragging, track jumps, route/layout refreshes, and native-scrollbar visibility through the `hideNative` prop. Consumers may pass a `refreshKey` when a route transition changes the scrollable document.
 
@@ -185,7 +187,9 @@ real-device performance remain subject to manual acceptance.
 
 ## Motion
 
-`@neoverse-ui/motion` is framework-agnostic. It owns the base duration/easing scale plus `feedback`, `state`, and `spatial` semantic roles. Shared component CSS consumes those roles directly, and the same stylesheet ships the presence engine: the `data-neoverse-motion` presets, the `.nv-*` enter/exit classes and top-layer `.nv-presence`. Every preset resolves to the same frame variables, so an exit returns along the path the entrance took. Declared fallback profiles (`data-neoverse-motion-fallback`) cover engines without the filter pass or individual transform properties, and `@supports not (filter: blur(1px))` applies the filter fallback automatically. It also owns the DOM behavior that CSS cannot express: the page-change choreography, and the layout width primitives `captureLayoutWidths` / `animateLayoutWidths`, which reconcile a group of boxes whose content changes size. The width primitives sample every rendered box before the update, resolve all natural endpoints before the first animation starts, animate on the `spatial` role, and let an interrupted run continue from the frame it reached because the sample reads the animated style. Boxes that grow temporarily lock their copy to one line (`white-space: nowrap`, `overflow: clip`, restored on finish or cancellation); otherwise the longer replacement text wraps inside the still-narrow box and its height jumps mid-animation. Endpoint measurement assumes fonts have finished loading. Framework adapters stay in the component packages: Vue exposes `useLayoutWidthMotion`, which owns the pre/post update phases, viewport-resize and reduced-motion termination, and unmount cleanup. Reduced motion removes spatial distance and collapses durations so component state remains predictable.
+`@neoverse-ui/motion` is framework-agnostic. It owns the base duration/easing scale plus `feedback`, `state`, and `spatial` semantic roles. Shared component CSS consumes those roles directly, and the same stylesheet ships the presence engine: the `data-neoverse-motion` presets, the `.nv-*` enter/exit classes and top-layer `.nv-presence`. Every preset resolves to the same frame variables, so an exit returns along the path the entrance took. Declared fallback profiles (`data-neoverse-motion-fallback`) cover engines without the filter pass or individual transform properties, and `@supports not (filter: blur(1px))` applies the filter fallback automatically. It also owns the DOM behavior that CSS cannot express: page-change choreography in `startViewTransition` (eight standard View Transition presets with scoped `nv-page` region snapshots and WAAPI fallbacks, plus the optional WebGL particle `dissolve`), and the layout width primitives `captureLayoutWidths` / `animateLayoutWidths`, which reconcile a group of boxes whose content changes size. The width primitives sample every rendered box before the update, resolve all natural endpoints before the first animation starts, animate on the `spatial` role, and let an interrupted run continue from the frame it reached because the sample reads the animated style. Boxes that grow temporarily lock their copy to one line (`white-space: nowrap`, `overflow: clip`, restored on finish or cancellation); otherwise the longer replacement text wraps inside the still-narrow box and its height jumps mid-animation. Endpoint measurement assumes fonts have finished loading. Framework adapters stay in the component packages: Vue exposes `useLayoutWidthMotion`, which owns the pre/post update phases, viewport-resize and reduced-motion termination, and unmount cleanup. Reduced motion removes spatial distance and collapses durations so component state remains predictable.
+
+Mounted disclosure regions use the reusable `animateDisclosure()` primitive. It animates one region between zero and its natural height on the `state` role, applies `hidden`/`inert`/`aria-hidden` while closed, continues from the visible frame when reversed, and restores the consumer's inline `height` and `overflow` when it settles. The Explorer's specimen leaf lists use it, and the Motion module's Disclosure motion specimen demonstrates it; the animation is not owned by the shell.
 
 ## Density and touch strategy
 
@@ -219,6 +223,22 @@ a corner prop to their public API.
 
 A focused specimen exposes a move handle in the stage header: drag it, or use the arrow keys with Shift for a larger step, to place the component anywhere inside the stage; Home or a double-click recenters it. Movement translates the preview directly, so it never joins the specimen's tab order, never wraps the component in a shrink-to-fit container, and never creates a backdrop root around nested Aurora Glass. The isolated `/frame` route paints its comparison stages with the same optical field, so a specimen keeps one backdrop language between the shell and its isolated render.
 
+Focused previews start at 100%. The Stage zoom slider scales continuously from
+25% to 400% on a logarithmic track, so a drag changes the same ratio at every
+size and fine control stays available near 100%. The minus and plus buttons
+step by 10%, and Ctrl + wheel over the preview zooms around the pointer. The
+percentage button restores original size and position. Zoom is visual only: the
+specimen keeps its 100% layout and is scaled for inspection, so text, rows, and
+percentage widths never reflow.
+A magnified preview is never clipped to an inner box, so its shadows paint in
+full; drag any non-interactive part of it, or use the move handle, to pan it.
+The stage chrome and specimen heading keep their own layer above the preview, so
+a magnified body never covers the stage tools or the title.
+The workspace remains the only scroll port, so the page itself never scrolls
+sideways. Zoom does not change Inspector settings. Opening another specimen
+restores 100%. Fallback overlay panels inside a scaled preview convert the
+rendered scale when they position, so a Select still opens against its trigger.
+
 Every entry in `labSpecimens` declares a `FocusedPreview`: either a localized renderer for a read-only Inspector or a `SpecimenDefinition` that opens one editable `SpecimenSession`. A read-only preview can still support native interactions without exposing a session to the Inspector. Every component specimen whose public API exposes an appearance variant has an editable session: Button, IconButton, Action, SegmentedControl, NavigationItem, ControlSurface, Dock, Badge, StatusIndicator, Skeleton, Notice, Toast, TooltipSurface, Avatar, Table, Disclosure, StatCard, Surface (including the three Aurora Glass tiers), Card, Input, Textarea, Select, Checkbox, RadioGroup, Switch, Field and Tabs. Data-only specimens (Breadcrumb, Pagination, EmptyState, Timeline, StepFlow) and the four overlay specimens stay read-only; overlays own focus, placement and light dismiss, which an Inspector value cannot reproduce. To add a specimen, register its explicit renderer on the catalogue entry and retain its stable QA anchor in the owning module. Interactive definitions live in the `lab-specimens/` family files and are re-exported through `lab-interactive-specimens.ts`; they provide typed initial props, an initial state factory, and editable controls. The session rejects undeclared edits, invalid values, and edits to temporarily disabled fields.
 
 The Stage paints the shared backdrop for both module galleries and focused
@@ -228,6 +248,11 @@ retain their configured materials. Only the isolated `/frame` paints the
 diagnostic comparison backdrops.
 
 Module URLs and `/frame` render the full QA galleries, including fixed state matrices and optical fixtures. The Inspector opens the isolated gallery at the specimen anchor without transferring local edits. `/react-fixture` remains the React contract host. Neither isolated entry mounts the shell.
+
+The Card module has one editable Card specimen. Its Inspector changes the
+`surface` prop without replacing the card or its contents. The gallery compares
+default, elevated, and transparent surfaces using the same card content and
+keeps the backdrop QA matrix separate from the comparison.
 
 ControlSurface previews and gallery specimens use automatic Aurora Glass edge
 rendering. Only the edge-mode comparison requests the local CSS edge explicitly.
@@ -269,7 +294,7 @@ text nested in a link keep the link color, and all three forms use a rounded
 
 The focused Scrollbar specimen demonstrates `scrollbar-immersive` on a local scroll container. The document-bound `UiScrollbar` and its ownership checks stay in the frame; the focused renderer does not bind the shell document to demonstrate a container scrollbar.
 
-Effective props are the session's overrides over the specimen's explicit initial props. Omitted props are resolved by the component, not the Playground. The Inspector marks changed values and can remove an override to inherit the component default where the specimen leaves the prop unset. Preview events and the editor share one specimen-owned value for controlled inputs and selections. Reset clears overrides, restores the specimen's initial interaction state without remounting its component, and clears its saved edits. Edited fields are saved per specimen in the shared preference record and restored when that specimen opens on a fresh page load; a reload therefore keeps the last selection. Leaving a specimen still discards the in-memory session, and navigation history restores selection, not edits. Locale, theme, and browser hover, focus, and press do not participate in this session.
+Effective props are the session's overrides over the specimen's explicit initial props. Omitted props are resolved by the component, not the Playground. The Inspector marks changed values and can remove an override to inherit the component default where the specimen leaves the prop unset. Preview events and the editor share one specimen-owned value for controlled inputs and selections. Reset clears overrides and restores the specimen's initial interaction state without remounting its component. The session lives in memory only: leaving a specimen discards it, a reload starts again from the specimen's initial state, and navigation history restores selection rather than edits. Locale, theme, and browser hover, focus, and press do not participate in this session.
 
 Select and Checkbox suspend their value editors while the specimen is disabled;
 Select does the same while read-only. Neither clears the current value. The
@@ -324,8 +349,6 @@ Explorer and Inspector links explicitly join the tab order so the same navigatio
 
 Playground-only composition helpers keep specimen structure consistent without becoming consumer API. `LabSpecimenSection` owns section spacing and the header divider. `LabSpecimenHeader` owns specimen typography across module sections, nested examples and state rows: section headings use `title-lg` (20px) with `body-md` descriptions, and nested headings use `title-md` (18px) with `body-sm` descriptions. This does not change the type scale inside the examples. `playground-token-grid` and `playground-specimen-grid` use the available content width rather than fixed viewport column counts, while `playground-specimen-panel` and `playground-specimen-row` provide shared specimen geometry. Module specimens select material through `UiSurface surface="..."` instead of directly attaching Aurora Glass implementation classes; the toolbar and side panels are application chrome boundaries. `StateRow` exposes stable `data-specimen-state-row` markers only for Design Lab validation; these markers are not public component API.
 
-The Motion module's `foundation-motion-width` specimen demonstrates the shared layout width motion with real content: the Design Lab language control is the trigger, and `useLayoutWidthMotion` keeps the brand, navigation, and preference boxes on one `spatial` curve without scaling text. The stage stacks its boxes below the `md` breakpoint so a width change cannot switch the flex-wrap row count mid-animation. It is registered in the specimen catalogue, so deep links cover it.
-
 Changing the shell language fades the outgoing snapshot over the live UI with
 the `state` role. The live UI keeps its DOM, focus, route, and specimen session.
 The outgoing capture excludes the viewport Glass canvases, as the theme
@@ -338,11 +361,11 @@ height of existing controls when DOM updates change their natural size. This
 covers Inspector sizes and resets, density and scale changes, and content
 changes in persistent controls. The animation runs on the `spatial` role
 without scaling text or replacing elements. Initial and newly mounted sizes,
-native resize gestures, and viewport resizing are not animated. The dedicated
-layout width specimen retains its own animation.
+native resize gestures, and viewport resizing are not animated.
 Language changes use the same size motion beneath the outgoing snapshot.
-Compact labels stay on one line and reveal their full text as space becomes
-available; intentional multiline Explorer labels are not constrained.
+Compact labels, including StatusIndicator labels during Inspector status changes,
+stay on one line and reveal their full text as space becomes available.
+Intentional multiline Explorer labels are not constrained.
 
 `@neoverse-ui/motion` exposes the appearance transition and size observer
 independently of the Playground. The [Motion package guide](../../packages/motion/README.md#appearance-and-control-size-transitions)
@@ -350,8 +373,11 @@ describes consumer setup and the single-line translated-label strategy used by
 the Inspector's isolated preview link.
 
 The Motion module's Transitions specimen (`foundation-motion-playground`) exposes the live
-theme reveal and crossfade side by side, the language crossfade, and a shared
-size control for a text button and an icon button. It runs in the shell and
+theme reveal and crossfade side by side, the language crossfade with the layout
+width motion on the brand, navigation, and preference boxes, and a shared size
+control for a text button and an icon button. The width group stacks its boxes
+below the `md` breakpoint so a width change cannot switch the flex-wrap row
+count mid-animation. It runs in the shell and
 isolated frame. Appearance changes in the isolated frame do not overwrite
 shell preferences.
 

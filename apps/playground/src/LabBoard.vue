@@ -3,6 +3,7 @@ import { nextTick, onBeforeUnmount, onMounted, provide, ref } from 'vue';
 import { applyFrameContextFromDocument, frameLocale } from './frame-state';
 import LabSection from './LabSection.vue';
 import { labModules, type ModuleId, resolveLabHash, type SpecimenId } from './lab-modules';
+import { preloadComponent } from './lazy-component';
 import { appearanceControls, applyPlaygroundLocale } from './playground-appearance';
 import { localize } from './playground-content';
 import { applyThemeMode } from './theme-runtime';
@@ -49,22 +50,24 @@ function focusSpecimen(specimenId: SpecimenId): void {
   });
 }
 
-function syncActiveModule(): void {
+async function syncActiveModule(): Promise<void> {
   const nextRoute = routeFromHash();
   if (nextRoute === null) {
     return;
   }
 
+  const nextModule = labModules.find((module) => module.id === nextRoute.moduleId);
+  await preloadComponent(nextModule?.component);
   activeModuleId.value = nextRoute.moduleId;
   activeSpecimenId.value = nextRoute.specimenId ?? null;
-  activeModule.value = labModules.find((module) => module.id === nextRoute.moduleId);
+  activeModule.value = nextModule;
   if (activeSpecimenId.value !== null) {
     focusSpecimen(activeSpecimenId.value);
   }
 }
 
 function handleHashChange(): void {
-  syncActiveModule();
+  void syncActiveModule();
 }
 
 onMounted(() => {

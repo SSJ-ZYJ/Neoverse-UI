@@ -20,7 +20,7 @@
     --neoverse-prose-marker-foreground: var(--neoverse-color-text-muted);
 
     --neoverse-prose-quote-foreground: var(--neoverse-color-text-primary);
-    --neoverse-prose-quote-background: var(--neoverse-surface-inset-strong-background);
+    --neoverse-prose-quote-background: var(--neoverse-surface-inset-plane-background);
     --neoverse-prose-quote-shadow:
       var(--neoverse-surface-inset-edge-active), var(--neoverse-surface-inset-active-highlight),
       var(--neoverse-surface-inset-bloom-rest), var(--neoverse-shadow-inset);

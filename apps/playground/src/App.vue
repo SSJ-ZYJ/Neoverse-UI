@@ -1,7 +1,6 @@
 <script setup lang="ts">
+import { LabBoard, LabWorkspace } from './app-views';
 import { frameView } from './frame-state';
-import LabBoard from './LabBoard.vue';
-import LabWorkspace from './LabWorkspace.vue';
 </script>
 
 <template>

@@ -11,6 +11,9 @@
     padding: var(--neoverse-control-segmented-inset);
     overflow: hidden;
     touch-action: pan-y pinch-zoom;
+    /* The selected segment owns the mint accent, so keyboard focus follows
+       that accent instead of the global primary ring. */
+    --neoverse-color-focus-ring: var(--neoverse-control-segmented-active-foreground);
   }
 
   .ui-segmented-control--pill {
@@ -79,6 +82,7 @@
     background-color: var(--neoverse-control-segmented-active-fill);
     box-shadow: var(--neoverse-control-segmented-active-shadow);
     pointer-events: none;
+    transform-origin: center;
     translate: var(--segment-active-offset, 0);
     transition: none;
   }
@@ -117,11 +121,25 @@
   }
 
   .ui-segmented-control__slider[data-pressed] {
-    scale: var(--neoverse-control-segmented-press-scale) 0.84;
+    scale: var(--neoverse-control-segmented-press-scale);
     transition-duration:
       var(--neoverse-control-segmented-slider-duration),
-      var(--neoverse-control-segmented-slider-duration),
-      var(--neoverse-motion-duration-fast);
+      var(--neoverse-control-segmented-slider-duration), var(--neoverse-motion-duration-fast);
+  }
+
+  /* Only elongated capsule thumbs compress vertically; circular and rounded
+     thumbs scale uniformly from their center. */
+  .ui-segmented-control--pill:not([data-variant='icon'])
+    .ui-segmented-control__slider[data-pressed]:not([data-circular='true']),
+  .ui-segmented-control--pill .ui-segmented-control__slider[data-pressed][data-circular='false'] {
+    scale: var(--neoverse-control-segmented-press-scale)
+      var(--neoverse-control-segmented-pill-press-scale-y);
+  }
+
+  .ui-segmented-control[data-variant='icon']
+    .ui-segmented-control__slider[data-pressed]:not([data-circular='false']),
+  .ui-segmented-control__slider[data-pressed][data-circular='true'] {
+    scale: var(--neoverse-control-segmented-circular-press-scale);
   }
 
   .ui-segmented-control__slider[data-dragging] {

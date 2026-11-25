@@ -1,5 +1,10 @@
 <script setup lang="ts">
-import { type PresenceFallback, presenceFallbacks, presenceVariants } from '@neoverse-ui/motion';
+import {
+  type PresenceFallback,
+  type PresenceVariant,
+  presenceFallbacks,
+  presenceVariants,
+} from '@neoverse-ui/motion';
 import {
   presence,
   UiBadge,
@@ -9,15 +14,36 @@ import {
   UiSegmentedControl,
   UiSurface,
 } from '@neoverse-ui/vue';
-import { type Component, computed, reactive, ref } from 'vue';
+import { type Component, computed, reactive, ref, watch } from 'vue';
 import LabIcon from '../LabIcon.vue';
 import type { LabModuleProps } from '../modules/types';
 import { formatLocalized, localize, localized, moduleCopy } from '../playground-content';
 import { MotionPreviewFrame } from './motion-preview-frame';
 
-const props = defineProps<LabModuleProps & { frame?: Component }>();
+/** `full` keeps the engine's own geometry; the other two are declared profiles. */
+type ProfileSelection = 'full' | PresenceFallback;
+
+const props = withDefaults(
+  defineProps<
+    LabModuleProps & {
+      frame?: Component;
+      category?: 'all' | 'helper' | 'component';
+      fallback?: ProfileSelection;
+      visible?: boolean;
+      preset?: PresenceVariant;
+      inlineControls?: boolean;
+    }
+  >(),
+  {
+    category: 'all',
+    fallback: 'full',
+    visible: true,
+    preset: 'veil',
+    inlineControls: true,
+  },
+);
 const presenceCopy = moduleCopy.motion.presence;
-const presenceOn = ref(true);
+const presenceOn = ref(props.visible);
 
 /* Copy owned by this preview only: the shared content file is at its scale
    budget, and no other specimen describes these two execution paths. */
@@ -35,9 +61,19 @@ const pathCopy = {
   replay: localized('Replay {name}', '重播 {name}'),
 };
 
-/** `full` keeps the engine's own geometry; the other two are declared profiles. */
-type ProfileSelection = 'full' | PresenceFallback;
-const profile = ref<ProfileSelection>('full');
+const profile = ref<ProfileSelection>(props.fallback);
+watch(
+  () => props.fallback,
+  (next) => {
+    profile.value = next;
+  },
+);
+watch(
+  () => props.visible,
+  (next) => {
+    presenceOn.value = next;
+  },
+);
 const profileAttribute = computed(() => (profile.value === 'full' ? undefined : profile.value));
 const profileOptions = computed(() => [
   { value: 'full', label: localize(presenceCopy.fallbackFull, props.locale) },
@@ -65,6 +101,14 @@ function setProfile(value: string): void {
    look like a dead control. */
 const ADAPTER_KEY = 'adapter';
 const replayCounts = reactive<Record<string, number>>({});
+
+watch(
+  () => props.preset,
+  (next) => {
+    replayCounts[next] = (replayCounts[next] ?? 0) + 1;
+    replayCounts[ADAPTER_KEY] = (replayCounts[ADAPTER_KEY] ?? 0) + 1;
+  },
+);
 
 function replay(key: string): void {
   presenceOn.value = true;
@@ -101,7 +145,10 @@ function replayLabel(name: string): string {
       <!-- The profile rewrites the engine's frame variables. Remounting the grid
            on every switch replays the entrance, so the fallback is something the
            reader watches happen instead of a caption to trust. -->
-      <div class="grid gap-2 md:grid-cols-[minmax(0,1fr)_auto] md:items-center">
+      <div
+        v-if="props.inlineControls"
+        class="grid gap-2 md:grid-cols-[minmax(0,1fr)_auto] md:items-center"
+      >
         <p class="min-w-0 text-caption text-secondary">
           {{ localize(presenceCopy.fallbackHint, props.locale) }}
         </p>
@@ -125,7 +172,11 @@ function replayLabel(name: string): string {
       >
         <!-- Two execution paths of the same presets. They are separate groups
              because a reader compares them by mechanism, not by preset list. -->
-        <section class="grid gap-2" data-motion-presence-path="helper">
+        <section
+          v-if="props.category !== 'component'"
+          class="grid gap-2"
+          data-motion-presence-path="helper"
+        >
           <div class="grid gap-1">
             <h4 class="text-label font-label text-primary">
               {{ localize(pathCopy.helper, props.locale) }}
@@ -135,7 +186,11 @@ function replayLabel(name: string): string {
             </p>
           </div>
           <div class="grid gap-3 md:grid-cols-3 xl:grid-cols-4">
-            <div v-for="variant in presenceVariants" :key="variant" class="grid gap-2">
+            <div
+              v-for="variant in props.category === 'helper' ? [props.preset] : presenceVariants"
+              :key="variant"
+              class="grid gap-2"
+            >
               <div class="flex min-w-0 items-center justify-between gap-2">
                 <code class="min-w-0 truncate text-code text-secondary">
                   presence('{{ variant }}')
@@ -168,7 +223,11 @@ function replayLabel(name: string): string {
           </div>
         </section>
 
-        <section class="grid gap-2 border-t border-subtle pt-4" data-motion-presence-path="adapter">
+        <section
+          v-if="props.category !== 'helper'"
+          class="grid gap-2 border-t border-subtle pt-4"
+          data-motion-presence-path="adapter"
+        >
           <div class="grid gap-1">
             <h4 class="text-label font-label text-primary">
               {{ localize(pathCopy.adapter, props.locale) }}
@@ -181,7 +240,7 @@ function replayLabel(name: string): string {
             <div class="grid gap-2">
               <div class="flex min-w-0 items-center justify-between gap-2">
                 <code class="min-w-0 truncate text-code text-secondary">
-                  &lt;UiPresence show variant="veil"&gt;
+                  &lt;UiPresence show variant="{{ props.preset }}"&gt;
                 </code>
                 <UiIconButton
                   :data-motion-presence-replay-specimen="ADAPTER_KEY"
@@ -199,7 +258,7 @@ function replayLabel(name: string): string {
                   :key="replayKey(ADAPTER_KEY)"
                   :show="presenceOn"
                   data-motion-presence-adapter="vue"
-                  variant="veil"
+                  :variant="props.preset"
                 >
                   <UiBadge size="md" variant="info">UiPresence</UiBadge>
                 </UiPresence>

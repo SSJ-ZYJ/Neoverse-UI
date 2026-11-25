@@ -168,4 +168,129 @@ test.describe('terminal', () => {
       await expect.poll(() => transcript.evaluate((node) => node.scrollTop)).toBe(0);
     });
   }
+
+  test('Vue terminal switches macOS, Windows, Linux and auto titlebar styles with interactive window controls', async ({
+    page,
+  }) => {
+    await page.goto('/frame?theme=light&lang=en#terminal', { waitUntil: 'domcontentloaded' });
+    const terminal = page.locator('.ui-terminal-surface');
+    const titlebarTrigger = page.getByRole('combobox', { name: 'Titlebar style' });
+    const selectTitlebar = async (label: string) => {
+      await titlebarTrigger.click();
+      await titlebarTrigger
+        .locator('xpath=..')
+        .getByRole('option', { name: label, exact: true })
+        .click();
+    };
+
+    const initialTitlebar = await terminal.getAttribute('data-titlebar');
+    expect(['default', 'macos', 'windows', 'linux']).toContain(initialTitlebar);
+
+    await selectTitlebar('macOS');
+    await expect(terminal).toHaveAttribute('data-titlebar', 'macos');
+    await expect(terminal.locator('.ui-terminal-surface__window-button')).toHaveCount(3);
+    const macosOrder = await terminal
+      .locator('.ui-terminal-surface__window-button')
+      .evaluateAll((buttons) => buttons.map((button) => button.getAttribute('data-window-action')));
+    expect(macosOrder).toEqual(['close', 'minimize', 'maximize']);
+
+    const maximizeButton = terminal.locator('[data-window-action="maximize"]');
+    await maximizeButton.click();
+    await expect(terminal).toHaveAttribute('data-maximized', 'true');
+    await expect(maximizeButton).toHaveAttribute('aria-pressed', 'true');
+
+    await terminal.locator('[data-window-action="minimize"]').click();
+    await expect(terminal.locator('.ui-terminal-transcript')).toBeHidden();
+    await terminal.locator('[data-terminal-restore]').click();
+    await expect(terminal.locator('.ui-terminal-transcript')).toBeVisible();
+
+    await selectTitlebar('Windows');
+    await expect(terminal).toHaveAttribute('data-titlebar', 'windows');
+    await expect(terminal.locator('.ui-terminal-surface__app-icon svg')).toBeVisible();
+    const windowsOrder = await terminal
+      .locator('.ui-terminal-surface__window-button')
+      .evaluateAll((buttons) => buttons.map((button) => button.getAttribute('data-window-action')));
+    expect(windowsOrder).toEqual(['minimize', 'maximize', 'close']);
+
+    await selectTitlebar('Linux / GNOME');
+    await expect(terminal).toHaveAttribute('data-titlebar', 'linux');
+    await expect(terminal.locator('.ui-terminal-surface__app-icon')).toHaveCount(0);
+
+    await terminal.locator('[data-window-action="close"]').click();
+    await expect(terminal).toHaveCount(0);
+    await page.locator('[data-terminal-reopen]').click();
+    await expect(terminal).toHaveCount(1);
+    await expect(terminal).toHaveAttribute('data-titlebar', 'linux');
+  });
+
+  test('Vue terminal commandline recognizes OS, shell, browser and runtime icons', async ({
+    page,
+  }) => {
+    await page.goto('/frame?theme=light&lang=en#terminal', { waitUntil: 'domcontentloaded' });
+    const terminal = page.locator('.ui-terminal-surface');
+    const promptHostSegment = terminal.locator(
+      '.ui-terminal-prompt .ui-terminal-prompt__segment[data-tone="host"]',
+    );
+    const runtimeSegment = terminal.locator(
+      '.ui-terminal-prompt .ui-terminal-prompt__segment[data-tone="runtime"]',
+    );
+
+    const detectedIcon = await promptHostSegment.getAttribute('data-icon');
+    expect(detectedIcon).toBeTruthy();
+    expect(detectedIcon).not.toBe('auto');
+    await expect(promptHostSegment.locator('svg')).toBeVisible();
+    await expect(runtimeSegment).toHaveAttribute('data-icon', 'bun');
+    await expect(runtimeSegment.locator('svg')).toBeVisible();
+
+    for (const expectedIcon of [
+      'powershell',
+      'windows-terminal',
+      'macos',
+      'ubuntu',
+      'vscode',
+    ] as const) {
+      await page.locator(`[data-terminal-icon-chip="${expectedIcon}"]`).click();
+      await expect(promptHostSegment).toHaveAttribute('data-icon', expectedIcon);
+      await expect(promptHostSegment.locator('.sr-only')).toHaveText(expectedIcon);
+    }
+
+    const input = terminal.locator('.ui-terminal-prompt__editor');
+    await input.fill('pwsh --version');
+    await input.press('Enter');
+    const latestEchoHost = terminal
+      .locator('.ui-terminal-transcript .ui-terminal-echo')
+      .last()
+      .locator('.ui-terminal-prompt__segment[data-tone="host"]');
+    await expect(latestEchoHost).toHaveAttribute('data-icon', 'vscode');
+  });
+
+  test('React terminal renders titlebar presets, caption controls and commandline icon recognition', async ({
+    page,
+  }) => {
+    await page.goto('/react-fixture?theme=light&contract-fixtures=1', {
+      waitUntil: 'domcontentloaded',
+    });
+    const terminal = page.locator('[data-react-adapter="UiTerminalSurface"]');
+    const promptHostSegment = terminal.locator(
+      '.ui-terminal-prompt .ui-terminal-prompt__segment[data-tone="host"]',
+    );
+    const titlebarButton = page.locator('[data-react-titlebar-cycle]');
+    const iconButton = page.locator('[data-react-icon-cycle]');
+
+    await expect(promptHostSegment.locator('svg')).toBeVisible();
+
+    await titlebarButton.click();
+    await expect(terminal).toHaveAttribute('data-titlebar', 'macos');
+    await terminal.locator('[data-window-action="maximize"]').click();
+    await expect(terminal).toHaveAttribute('data-maximized', 'true');
+
+    await titlebarButton.click();
+    await expect(terminal).toHaveAttribute('data-titlebar', 'windows');
+    await expect(terminal.locator('.ui-terminal-surface__app-icon svg')).toBeVisible();
+
+    await iconButton.click();
+    await expect(promptHostSegment).toHaveAttribute('data-icon', 'windows-terminal');
+    await iconButton.click();
+    await expect(promptHostSegment).toHaveAttribute('data-icon', 'powershell');
+  });
 });

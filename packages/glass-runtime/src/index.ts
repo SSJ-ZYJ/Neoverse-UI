@@ -1,7 +1,30 @@
+import { paintBackdropChroma } from './backdrop-chroma.js';
 import { createProgram, type GlassGl } from './gl-program.js';
+import {
+  hasActiveEdgeMotion,
+  hasAnyDocumentEdgeMotion,
+  type MotionTrackingContext,
+  motionStaticSelector,
+  motionWakeEventName,
+  shouldTrackMotionEvent,
+} from './motion-tracking.js';
 import { NativeGlassRenderer, supportsNativeRefraction } from './native.js';
 import { type ClipRect, clipSurfaceRect, type OverflowClipCache } from './overflow-clip.js';
 import { type Color, parseColor } from './style-colors.js';
+import {
+  type Basis2D,
+  createTopLayerHelpers,
+  getRadii,
+  type Mat2,
+  parseFirstNumber,
+  parsePixels,
+  type Radii,
+  resolveSurfaceGeometry,
+  resolveSurfaceVisualState,
+  type StyleGetter,
+  type SurfaceVisualState,
+  type TopLayerHelpers,
+} from './surface-geometry.js';
 import { getTableGridEdges, getTableOuterRect } from './table-edges.js';
 
 export const glassRendererAttribute = 'data-neoverse-glass-renderer';
@@ -24,15 +47,18 @@ const cssEdgePassSelector = '[data-neoverse-glass-edge-pass="css"]';
 const reducedTransparencyQuery = '(prefers-reduced-transparency: reduce)';
 const systemDarkQuery = '(prefers-color-scheme: dark)';
 const maxDefaultDevicePixelRatio = 2;
-// Cap edge repaints at roughly 60 fps. Unthrottled RAF on 240-360 Hz displays
-// otherwise allocates a full render's worth of temporary objects every 3 ms and
-// triggers repeated V8/CppGC collections.
-const minFrameIntervalMs = 16;
+// Cap passive scroll and viewport-resize bursts at roughly 60 fps while keeping
+// active motion and element resizes locked to vsync. Using 15 ms avoids 60 Hz
+// frame-timestamp jitter dropping to 30 fps.
+const minFrameIntervalMs = 15;
 const glassMutationAttributes = [
   'class',
   'style',
   'hidden',
+  'open',
   'data-theme',
+  'data-presentation',
+  'data-surface',
   glassRendererAttribute,
   'data-neoverse-glass-edge-pass',
   'data-neoverse-glass-edge-pass-active',
@@ -48,6 +74,9 @@ const glassMutationAttributes = [
 // thousands of style mutations per second from exactly that region.
 const sceneRelevantAttributes = new Set([
   'data-theme',
+  'open',
+  'data-presentation',
+  'data-surface',
   glassRendererAttribute,
   'data-neoverse-glass-edge-pass',
   'data-neoverse-glass-edge-pass-active',
@@ -61,69 +90,6 @@ const sceneRelevantAttributes = new Set([
 ]);
 const occluderSelector = '[data-neoverse-glass-occluder]';
 const maxOccluders = 6;
-// Selection indicators are decorative content confined to their surface: their
-// motion cannot move an edge or occlude another surface, so tracking their
-// transitions would repaint the whole scene on every frame of a Dock selection.
-const motionStaticSelector = '.ui-control-surface__indicator, .ui-navigation-item__indicator';
-const staticEdgeFrameProperties = new Set([
-  'offset',
-  'computedOffset',
-  'easing',
-  'composite',
-  'backgroundPosition',
-  'backgroundPositionX',
-  'backgroundPositionY',
-]);
-const clippedContentFrameProperties = new Set([
-  ...staticEdgeFrameProperties,
-  'transform',
-  'translate',
-  'rotate',
-  'scale',
-  'opacity',
-]);
-const animationIsActive = (animation: Animation): boolean =>
-  animation.playState === 'running' || animation.pending;
-
-function isInHiddenTree(element: Element): boolean {
-  if (element.getClientRects().length > 0) return false;
-  const view = element.ownerDocument.defaultView;
-  for (let ancestor: Element | null = element; ancestor; ancestor = ancestor.parentElement) {
-    if (view?.getComputedStyle(ancestor).display === 'none') return true;
-  }
-  return false;
-}
-
-function needsEdgeFrame(animation: Animation): boolean {
-  if (!animationIsActive(animation)) return false;
-  const effect = animation.effect;
-  // Keep unknown effects conservative; only known background-position motion
-  // can be left to live CSS compositing without redrawing the edge geometry.
-  if (!effect || !('getKeyframes' in effect)) return true;
-  const keyframeEffect = effect as KeyframeEffect;
-  const properties = keyframeEffect.getKeyframes().flatMap((frame) => Object.keys(frame));
-  if (properties.every((property) => staticEdgeFrameProperties.has(property))) return false;
-  const target = keyframeEffect.target;
-  const boundary = target?.closest(glassSelector);
-  if (
-    target &&
-    boundary &&
-    target !== boundary &&
-    !target.querySelector(glassSelector) &&
-    properties.every((property) => clippedContentFrameProperties.has(property))
-  ) {
-    const style = target.ownerDocument.defaultView?.getComputedStyle(boundary);
-    // Isolated, clipped content cannot change its surface geometry or occlude
-    // another surface outside the boundary. CSS composites glyph motion live.
-    if (
-      style?.isolation === 'isolate' &&
-      (style.overflowX === 'hidden' || style.overflowX === 'clip') &&
-      (style.overflowY === 'hidden' || style.overflowY === 'clip')
-    )
-      return false;
-  }
-  return true;
-}
 const occlusionSampleInset = 2;
 const quadPositions = new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]);
 const motionEvents = [
@@ -135,36 +101,25 @@ const motionEvents = [
   'focusin',
   'focusout',
   'transitionrun',
+  'transitionstart',
   'transitionend',
   'transitioncancel',
   'animationstart',
   'animationend',
   'animationcancel',
+  motionWakeEventName,
 ] as const;
 
-/** Color-only transitions cannot move a surface, change its clip, or alter
- *  occlusion. A theme switch starts one such transition per color property on
- *  every glass surface; handling each of those events would schedule hundreds
- *  of edge repaints whose geometry is identical. Events without a property name
- *  (animations and synthetic realms) stay on the conservative path. */
-const staticTransitionProperty = /^(?:color|box-shadow|text-shadow|.+?-color)$/i;
-
-function isStaticTransition(event: Event): boolean {
-  const property = (event as TransitionEvent).propertyName;
-  return (
-    typeof property === 'string' &&
-    property.length > 0 &&
-    // Registered custom properties may carry geometry; leave them on the tracked path.
-    !property.startsWith('--') &&
-    staticTransitionProperty.test(property)
-  );
-}
-
 type GlassVariant = 'subtle' | 'elevated' | 'immersive';
-type Radii = [number, number, number, number];
 
 type GlassStyle = {
   rect: DOMRect;
+  centerX: number;
+  centerY: number;
+  width: number;
+  height: number;
+  basis: Basis2D;
+  rotated: boolean;
   clipRect: ClipRect;
   radii: Radii;
   pointer: [number, number, number];
@@ -216,6 +171,7 @@ type ProgramLocations = {
   position: number;
   viewport: WebGLUniformLocation | null;
   rect: WebGLUniformLocation | null;
+  basis: WebGLUniformLocation | null;
   rectSize: WebGLUniformLocation | null;
   pixelRatio: WebGLUniformLocation | null;
   radii: WebGLUniformLocation | null;
@@ -301,25 +257,6 @@ const resolveDevicePixelRatio = (view: Window, maximum: number): number => {
   return Math.min(Math.max(ratio, 1), maximum);
 };
 
-const parseFirstNumber = (value: string, fallback: number): number => {
-  const match = /-?[\d.]+/.exec(value);
-  if (match === null) {
-    return fallback;
-  }
-
-  const parsed = Number.parseFloat(match[0]);
-  return Number.isFinite(parsed) ? parsed : fallback;
-};
-
-const parsePixels = (value: string, fallback: number): number => {
-  const match = /-?[\d.]+\s*px/.exec(value);
-  if (match === null) {
-    return parseFirstNumber(value, fallback);
-  }
-
-  return parseFirstNumber(match[0], fallback);
-};
-
 const getExplicitVariant = (element: Element): GlassVariant | undefined => {
   const materialClassName = glassClassNames.find((className) =>
     element.classList.contains(className),
@@ -383,24 +320,6 @@ const firstPropertyValue = (
   return undefined;
 };
 
-const getRadii = (
-  style: CSSStyleDeclaration,
-  scale: number,
-  width: number,
-  height: number,
-): Radii => {
-  // The canvas uses viewport coordinates; computed CSS radii do not include
-  // ancestor zoom. Match the rendered silhouette and CSS radius clamping.
-  const radius = (value: string): number =>
-    Math.min(Math.max(parsePixels(value, 0) * scale, 0), width / 2, height / 2);
-  return [
-    radius(style.borderTopRightRadius),
-    radius(style.borderBottomRightRadius),
-    radius(style.borderBottomLeftRadius),
-    radius(style.borderTopLeftRadius),
-  ];
-};
-
 const getCanvasViewport = (
   canvas: HTMLCanvasElement,
   ownerDocument: Document,
@@ -457,6 +376,7 @@ const getEdgeScissors = (
   drawingWidth: number,
   drawingHeight: number,
 ): ReturnType<typeof getScissorRect>[] => {
+  if (style.rotated) return [scissor];
   // Small controls need one draw. Large panels should not evaluate five SDFs
   // for every transparent interior pixel on each scroll frame.
   if (scissor.width * scissor.height < 128_000) return [scissor];
@@ -467,15 +387,17 @@ const getEdgeScissors = (
       style.edgeWidth + Math.min(Math.max(style.softness * 0.65, 0.75), 1.5),
     ) + 2,
   );
-  const width = style.rect.width - padding * 2;
-  const height = style.rect.height - padding * 2;
+  const width = style.width - padding * 2;
+  const height = style.height - padding * 2;
   if (width <= 0 || height <= 0) return [scissor];
+  const rectLeft = style.centerX - style.width / 2;
+  const rectTop = style.centerY - style.height / 2;
   const inner = getScissorRect(
     {
-      left: style.rect.left + padding,
-      top: style.rect.top + padding,
-      right: style.rect.right - padding,
-      bottom: style.rect.bottom - padding,
+      left: rectLeft + padding,
+      top: rectTop + padding,
+      right: rectLeft + style.width - padding,
+      bottom: rectTop + style.height - padding,
       width,
       height,
     },
@@ -497,100 +419,6 @@ const getEdgeScissors = (
     { x: scissor.x, y: bottom, width: left - scissor.x, height: top - bottom },
     { x: right, y: bottom, width: scissor.x + scissor.width - right, height: top - bottom },
   ].filter((strip) => strip.width > 0 && strip.height > 0);
-};
-
-const paintBackdropChroma = (
-  context: CanvasRenderingContext2D,
-  style: GlassStyle,
-  viewport: CanvasViewport,
-  occluders: readonly Occluder[],
-  gain: number,
-  boostLowerRight: boolean,
-): void => {
-  const opacity = Math.min(style.opacity * 0.7 * gain, 0.55);
-  if (opacity <= 0) return;
-  const inset = 0.65;
-  const x = style.rect.left - viewport.left + inset;
-  const y = style.rect.top - viewport.top + inset;
-  const width = Math.max(style.rect.width - inset * 2, 0);
-  const height = Math.max(style.rect.height - inset * 2, 0);
-  if (width === 0 || height === 0) return;
-  const radii = [style.radii[3], style.radii[0], style.radii[1], style.radii[2]].map((radius) =>
-    Math.min(Math.max(radius - inset, 0), width / 2, height / 2),
-  );
-  context.save();
-  context.beginPath();
-  context.rect(
-    style.clipRect.left - viewport.left,
-    style.clipRect.top - viewport.top,
-    style.clipRect.width,
-    style.clipRect.height,
-  );
-  context.clip();
-  for (const occluder of occluders) {
-    context.beginPath();
-    context.rect(0, 0, viewport.width, viewport.height);
-    context.roundRect(
-      occluder.left - viewport.left,
-      occluder.top - viewport.top,
-      occluder.width,
-      occluder.height,
-      occluder.radius,
-    );
-    context.clip('evenodd');
-  }
-  const path = new Path2D();
-  if (style.pointer[2] > 0) {
-    const [topLeft = 0, topRight = 0, bottomRight = 0, bottomLeft = 0] = radii;
-    const right = x + width;
-    const bottom = y + height;
-    const arrow = x + width / 2 + style.pointer[0];
-    const halfArrow = Math.min(style.pointer[1], width / 2);
-    path.moveTo(x + topLeft, y);
-    path.lineTo(right - topRight, y);
-    path.arcTo(right, y, right, y + topRight, topRight);
-    path.lineTo(right, bottom - bottomRight);
-    path.arcTo(right, bottom, right - bottomRight, bottom, bottomRight);
-    path.lineTo(arrow + halfArrow, bottom);
-    path.lineTo(arrow, bottom + style.pointer[2]);
-    path.lineTo(arrow - halfArrow, bottom);
-    path.lineTo(x + bottomLeft, bottom);
-    path.arcTo(x, bottom, x, bottom - bottomLeft, bottomLeft);
-    path.lineTo(x, y + topLeft);
-    path.arcTo(x, y, x + topLeft, y, topLeft);
-    path.closePath();
-  } else {
-    path.roundRect(x, y, width, height, radii);
-  }
-  // Only the saturation of this signal is used; its hue is never painted.
-  context.lineWidth = Math.max(style.edgeWidth, 0.75);
-  const reach = Math.max(Math.min(width * 0.5, height * 1.25), 16);
-  const shortSide = Math.min(style.rect.width, style.rect.height);
-  const size = boostLowerRight ? Math.min(Math.max((shortSide - 64) / 80, 0), 1) : 0;
-  const cornerBoost = size * size * (3 - 2 * size) * 1.5;
-  const boostEnd = Math.min(shortSide * 0.36, 96) / reach;
-  for (let corner = 0; corner < 2; corner += 1) {
-    const lowerRight = corner === 1;
-    const cx = lowerRight ? x + width : x;
-    const cy = lowerRight ? y + height + style.pointer[2] : y;
-    const gradient = context.createRadialGradient(cx, cy, 0, cx, cy, reach);
-    gradient.addColorStop(0, 'rgb(255 0 0)');
-    if (lowerRight && cornerBoost > 0) {
-      // Return to the original gradient beyond the arc's lighting footprint.
-      const boostedOpacity = Math.min(opacity * (1 + cornerBoost), 0.68);
-      context.globalAlpha = boostedOpacity;
-      gradient.addColorStop(
-        boostEnd,
-        `rgb(255 0 0 / ${(opacity / boostedOpacity) * (1 - boostEnd)})`,
-      );
-    } else {
-      context.globalAlpha = opacity;
-    }
-    gradient.addColorStop(1, 'rgb(255 0 0 / 0%)');
-    context.strokeStyle = gradient;
-    context.stroke(path);
-  }
-  context.restore();
 };
 
 // The shared edge canvas paints above every overlay, so an edge must be
@@ -840,37 +668,6 @@ const getDefaultEdgeValues = (
   return { width: 1, softness: 3, opacity: 0.46 };
 };
 
-const resolveSurfaceOpacity = (
-  element: HTMLElement,
-  view: Window,
-  cache: Map<Element, number | null> | undefined,
-  ownStyle?: CSSStyleDeclaration,
-): number | undefined => {
-  const cached = cache?.get(element);
-  if (cached !== undefined) return cached === null ? undefined : cached;
-
-  const style = ownStyle ?? view.getComputedStyle(element);
-  if (style.display === 'none') {
-    cache?.set(element, null);
-    return undefined;
-  }
-
-  const own = Math.min(Math.max(parseFirstNumber(style.opacity, 1), 0), 1);
-  const parent = element.parentElement;
-  let value = own;
-  if (parent !== null) {
-    const inherited = resolveSurfaceOpacity(parent, view, cache);
-    if (inherited === undefined) {
-      cache?.set(element, null);
-      return undefined;
-    }
-    value = own * inherited;
-  }
-
-  cache?.set(element, value);
-  return value;
-};
-
 const intersectsViewport = (rect: CanvasViewport, viewport: CanvasViewport): boolean =>
   rect.width > 0 &&
   rect.height > 0 &&
@@ -885,10 +682,12 @@ const readStyle = (
   colorProbe: HTMLElement,
   viewport: CanvasViewport,
   rect: DOMRect,
-  opacityCache: Map<Element, number | null>,
+  getStyle: StyleGetter,
+  visualCache: Map<Element, SurfaceVisualState | null>,
+  matrixCache: Map<Element, Mat2>,
   overflowClips: OverflowClipCache,
 ): GlassStyle | undefined => {
-  const style = view.getComputedStyle(element);
+  const style = getStyle(element);
   if (
     rect.width <= 0 ||
     rect.height <= 0 ||
@@ -904,18 +703,12 @@ const readStyle = (
   }
 
   // The shared canvas is outside the surface's DOM subtree, so it must
-  // explicitly reproduce opacity applied to the surface and its ancestors.
-  // Resolve the chain through a per-frame cache: a document-wide refresh visits
-  // every surface, so an uncached walk costs one style resolution per ancestor
-  // per surface.
-  const surfaceOpacity = resolveSurfaceOpacity(element, view, opacityCache, style);
-  if (surfaceOpacity === undefined || surfaceOpacity === 0) return undefined;
+  // explicitly reproduce opacity and blur applied to the surface and its ancestors.
+  const visual = resolveSurfaceVisualState(element, getStyle, visualCache, style);
+  if (visual === undefined || visual.opacity === 0) return undefined;
 
-  // offsetWidth is measured in layout pixels; the renderer samples the
-  // zoomed viewport box. This includes both the control's and its ancestors'
-  // zoom without depending on a single inherited CSS zoom declaration.
-  const scale = element.offsetWidth > 0 ? rect.width / element.offsetWidth : 1;
-  const surfaceScale = Number.isFinite(scale) && scale > 0 ? scale : 1;
+  const geometry = resolveSurfaceGeometry(element, rect, getStyle, matrixCache);
+  const surfaceScale = Math.min(geometry.scaleX, geometry.scaleY);
   const pointer: GlassStyle['pointer'] = [0, 0, 0];
   if (element.hasAttribute('data-neoverse-tooltip-surface') && style.overflow === 'visible') {
     const arrow = view.getComputedStyle(element, '::after');
@@ -924,11 +717,12 @@ const readStyle = (
     if (arrow.display !== 'none' && arrowWidth > 0 && arrowHeight > 0) {
       // Read resolved pseudo-element geometry so custom pointer positions and
       // ancestor zoom keep the CSS fill and refractive contour aligned.
+      const layoutWidth =
+        element.offsetWidth > 0 ? element.offsetWidth : geometry.width / surfaceScale;
       pointer[0] =
-        (parsePixels(arrow.left, rect.width / surfaceScale / 2) +
-          parsePixels(style.borderLeftWidth, 0)) *
+        (parsePixels(arrow.left, layoutWidth / 2) + parsePixels(style.borderLeftWidth, 0)) *
           surfaceScale -
-        rect.width / 2;
+        geometry.width / 2;
       pointer[1] = arrowWidth / 2;
       pointer[2] = arrowHeight;
     }
@@ -961,6 +755,7 @@ const readStyle = (
     ),
     1,
   );
+  const blurFade = visual.blur > 0 ? 1 / (1 + visual.blur * 0.5) : 1;
   const carrier = firstPropertyValue(style, ['--neoverse-material-edge-refraction-carrier']);
   const carrierColor = resolveColor(
     style,
@@ -974,12 +769,18 @@ const readStyle = (
 
   return {
     rect,
-    clipRect: clipSurfaceRect(element, rect, pointer[2], view, overflowClips),
-    radii: getRadii(style, surfaceScale, rect.width, rect.height),
+    centerX: geometry.centerX,
+    centerY: geometry.centerY,
+    width: geometry.width,
+    height: geometry.height,
+    basis: geometry.basis,
+    rotated: geometry.rotated,
+    clipRect: clipSurfaceRect(element, rect, pointer[2], view, overflowClips, getStyle),
+    radii: getRadii(style, geometry.scaleX, geometry.scaleY, geometry.width, geometry.height),
     pointer,
     edgeWidth,
     softness,
-    opacity: opacity * surfaceOpacity,
+    opacity: opacity * visual.opacity * blurFade,
     chroma: Math.min(
       Math.max(
         parseFirstNumber(
@@ -1018,6 +819,12 @@ class GlassRendererImpl implements GlassRenderer {
   private animationFrame: number | undefined;
   private paintedEdges = false;
   private contextLost = false;
+  private uncappedRefresh = false;
+  private wasMoving = false;
+  private isRendering = false;
+  private topLayer: TopLayerHelpers | undefined;
+  private readonly occluderRects = new Float32Array(maxOccluders * 4);
+  private readonly occluderRadii = new Float32Array(maxOccluders);
   private readonly animatedElements = new Set<Element>();
   // Occlusion depends on the surface box, the boxes of the surfaces that can
   // overlap it, and stacking/visibility mutations. Re-probing every point on
@@ -1034,28 +841,33 @@ class GlassRendererImpl implements GlassRenderer {
   private signatureHash = 2166136261;
   private lastFrameTime = 0;
   private readonly handleMotion = (event: Event): void => {
-    if (!this.active || isStaticTransition(event)) {
-      return;
-    }
+    if (!this.active) return;
     const target = event.target as Element | null;
     if (
       typeof target?.matches !== 'function' ||
-      (!target.closest(glassSelector) && !target.querySelector(glassSelector))
+      !shouldTrackMotionEvent(event, target, glassSelector, occluderSelector)
     ) {
       return;
     }
-    if (target.closest(motionStaticSelector)) {
-      return;
-    }
     this.animatedElements.add(target);
-    this.scheduleRefresh();
+    this.scheduleRefresh(true);
   };
   private previousRendererAttribute: string | null = null;
-  private readonly handleResize = (): void => {
+  private readonly handleViewportResize = (): void => {
     // Responsive colors are checked against the root tokens when we paint.
     // Geometry changes must not discard them or restart the frame clock.
     this.invalidateFrame();
-    this.scheduleRefresh();
+    this.scheduleRefresh(false);
+  };
+  private readonly handleElementResize = (): void => {
+    if (!this.active || this.suspended || this.isRendering) return;
+    // ResizeObserver runs after requestAnimationFrame and before paint; draw
+    // immediately so WAAPI and CSS size changes stay aligned on the same frame.
+    this.invalidateFrame();
+    this.render(false);
+    if (this.hasLiveEdgeMotion()) {
+      this.scheduleRefresh(true);
+    }
   };
   private readonly handleScroll = (event?: Event): void => {
     const target = event?.target;
@@ -1083,22 +895,27 @@ class GlassRendererImpl implements GlassRenderer {
     }
 
     this.invalidateFrame();
-    this.scheduleRefresh();
+    this.scheduleRefresh(false);
   };
   private readonly handleToggle = (): void => {
     this.invalidateScene();
-    this.scheduleRefresh();
+    this.scheduleRefresh(true);
   };
   private readonly handleSystemSchemeChange = (): void => {
     this.invalidateScene();
-    this.scheduleRefresh();
+    this.scheduleRefresh(true);
   };
   private readonly handleMutations = (records: MutationRecord[]): void => {
     if (records.some((record) => record.target === this.canvas)) this.syncChromaVisibility();
-    if (records.every((record) => !this.isSceneMutation(record))) return;
+    if (records.every((record) => !this.isSceneMutation(record))) {
+      if (this.hasLiveDocumentEdgeMotion()) {
+        this.scheduleRefresh(true);
+      }
+      return;
+    }
 
     this.mutationRevision += 1;
-    this.scheduleRefresh();
+    this.scheduleRefresh(true);
   };
 
   /** Decorative attribute churn cannot change edge geometry; only scene-bearing
@@ -1186,6 +1003,8 @@ class GlassRendererImpl implements GlassRenderer {
     if (!this.active) return;
 
     this.contextLost = true;
+    this.uncappedRefresh = false;
+    this.wasMoving = false;
     this.cancelScheduledRefresh();
     this.animatedElements.clear();
     this.disconnectObservers();
@@ -1221,6 +1040,7 @@ class GlassRendererImpl implements GlassRenderer {
     }
 
     this.mounted = true;
+    this.topLayer = createTopLayerHelpers(this.ownerDocument);
     activeRenderers.set(this.ownerDocument, this);
     const view = getWindow(this.ownerDocument);
     this.transparencyQuery = view?.matchMedia?.(reducedTransparencyQuery);
@@ -1233,7 +1053,7 @@ class GlassRendererImpl implements GlassRenderer {
       this.ownerDocument.addEventListener(event, this.handleMotion, true);
     }
     view?.addEventListener('scroll', this.handleScroll, { passive: true });
-    view?.addEventListener('resize', this.handleResize);
+    view?.addEventListener('resize', this.handleViewportResize);
     this.activate();
   }
 
@@ -1247,6 +1067,8 @@ class GlassRendererImpl implements GlassRenderer {
   public suspend(): void {
     if (this.suspended) return;
     this.suspended = true;
+    this.uncappedRefresh = false;
+    this.wasMoving = false;
     this.cancelScheduledRefresh();
     this.animatedElements.clear();
   }
@@ -1275,8 +1097,9 @@ class GlassRendererImpl implements GlassRenderer {
       this.ownerDocument?.removeEventListener(event, this.handleMotion, true);
     }
     getWindow(this.ownerDocument)?.removeEventListener('scroll', this.handleScroll);
-    getWindow(this.ownerDocument)?.removeEventListener('resize', this.handleResize);
+    getWindow(this.ownerDocument)?.removeEventListener('resize', this.handleViewportResize);
     this.deactivate();
+    this.topLayer = undefined;
     if (this.ownerDocument !== undefined && activeRenderers.get(this.ownerDocument) === this) {
       activeRenderers.delete(this.ownerDocument);
     }
@@ -1329,6 +1152,7 @@ class GlassRendererImpl implements GlassRenderer {
       position: gl.getAttribLocation(program, 'a_position'),
       viewport: gl.getUniformLocation(program, 'u_viewport'),
       rect: gl.getUniformLocation(program, 'u_rect'),
+      basis: gl.getUniformLocation(program, 'u_basis'),
       rectSize: gl.getUniformLocation(program, 'u_rect_size'),
       pixelRatio: gl.getUniformLocation(program, 'u_pixel_ratio'),
       radii: gl.getUniformLocation(program, 'u_radii'),
@@ -1529,6 +1353,8 @@ class GlassRendererImpl implements GlassRenderer {
   }
 
   private deactivate(): void {
+    this.uncappedRefresh = false;
+    this.wasMoving = false;
     this.cancelScheduledRefresh();
     this.animatedElements.clear();
     this.disconnectObservers();
@@ -1592,7 +1418,7 @@ class GlassRendererImpl implements GlassRenderer {
     const view = getWindow(this.ownerDocument);
     const ResizeObserverConstructor = view?.ResizeObserver;
     if (ResizeObserverConstructor !== undefined) {
-      this.resizeObserver = new ResizeObserverConstructor(this.handleResize);
+      this.resizeObserver = new ResizeObserverConstructor(this.handleElementResize);
     }
 
     const MutationObserverConstructor = view?.MutationObserver;
@@ -1609,13 +1435,67 @@ class GlassRendererImpl implements GlassRenderer {
     }
   }
 
-  private scheduleRefresh(): void {
-    if (!this.active || this.suspended || this.animationFrame !== undefined) {
+  private createMotionContext(): MotionTrackingContext | undefined {
+    const view = getWindow(this.ownerDocument);
+    if (!this.ownerDocument || !view) return undefined;
+    const styleCache = new Map<Element, CSSStyleDeclaration>();
+    const topLayerCache = new Map<Element, boolean>();
+    const topLayer = this.topLayer ?? createTopLayerHelpers(this.ownerDocument);
+    this.topLayer = topLayer;
+    const getStyle: StyleGetter = (element) => {
+      let cached = styleCache.get(element);
+      if (cached === undefined) {
+        cached = view.getComputedStyle(element);
+        styleCache.set(element, cached);
+      }
+      return cached;
+    };
+    return {
+      glassSelector,
+      occluderSelector,
+      getStyle,
+      isStrictTopLayerDescendant: (element) =>
+        topLayer.isStrictTopLayerDescendant(element, getStyle, topLayerCache),
+    };
+  }
+
+  private hasLiveDocumentEdgeMotion(): boolean {
+    if (!this.ownerDocument?.getAnimations || this.ownerDocument.getAnimations().length === 0) {
+      return false;
+    }
+    const context = this.createMotionContext();
+    return context !== undefined && hasAnyDocumentEdgeMotion(this.ownerDocument, context);
+  }
+
+  private hasLiveEdgeMotion(): boolean {
+    if (
+      this.animatedElements.size === 0 &&
+      (!this.ownerDocument?.getAnimations || this.ownerDocument.getAnimations().length === 0)
+    ) {
+      return false;
+    }
+    if (!this.ownerDocument) return false;
+    const context = this.createMotionContext();
+    return (
+      context !== undefined &&
+      hasActiveEdgeMotion(this.ownerDocument, this.animatedElements, context)
+    );
+  }
+
+  private scheduleRefresh(uncapped = false): void {
+    if (!this.active || this.suspended) {
+      return;
+    }
+    if (uncapped) {
+      this.uncappedRefresh = true;
+    }
+    if (this.animationFrame !== undefined) {
       return;
     }
 
     const view = getWindow(this.ownerDocument);
     if (view?.requestAnimationFrame === undefined) {
+      this.uncappedRefresh = false;
       this.refresh();
       return;
     }
@@ -1627,39 +1507,25 @@ class GlassRendererImpl implements GlassRenderer {
     const frame = view.requestAnimationFrame((timestamp: number) => {
       completedSynchronously = true;
       this.animationFrame = undefined;
+      const immediate = this.uncappedRefresh;
+      this.uncappedRefresh = false;
+      const movingEdges = this.hasLiveEdgeMotion();
       const elapsed =
         timestamp > 0 && this.lastFrameTime > 0
           ? timestamp - this.lastFrameTime
           : Number.POSITIVE_INFINITY;
-      if (elapsed < minFrameIntervalMs) {
-        // The cap defers the frame; it must not discard the request. A skipped
-        // frame that is never rescheduled leaves the fixed canvas painting the
-        // previous offset, so the rim stays visibly misaligned with its surface
-        // after the gesture ends. Keep the request pending and paint on the next
-        // frame that clears the interval; synchronous RAF shims report 0 and
-        // stay on the immediate path. Rendering still stops once the scene rests.
-        this.scheduleRefresh();
+      if (!immediate && !movingEdges && !this.wasMoving && elapsed < minFrameIntervalMs) {
+        // The cap defers passive scroll/resize frames without dropping them.
+        // Active motion and direct scene mutations bypass the cap to stay
+        // locked to vsync on high-refresh displays.
+        this.scheduleRefresh(false);
         return;
       }
       if (timestamp > 0) this.lastFrameTime = timestamp;
-      // CSS transforms/opacity emit no DOM mutation or resize event, so the
-      // static scene signature cannot see them. Scan the live animations first:
-      // one that can move or reveal an edge has to repaint this frame rather
-      // than be deduplicated against the previous one. Resting scenes keep the
-      // signature dedup, and the interval cap above still bounds the rate.
-      let movingEdges = false;
-      for (const element of this.animatedElements) {
-        const animations = element.getAnimations?.() ?? [];
-        if (!element.isConnected || !animations.some(animationIsActive)) {
-          this.animatedElements.delete(element);
-        } else if (!isInHiddenTree(element) && animations.some(needsEdgeFrame)) {
-          movingEdges = true;
-        }
-      }
-      this.render(movingEdges);
-      // Retain live decorative targets so clip/style changes can make them
-      // relevant again, without reserving frames while their edges rest.
-      if (movingEdges) this.scheduleRefresh();
+      const forceRender = movingEdges || this.wasMoving;
+      this.wasMoving = movingEdges;
+      this.render(forceRender);
+      if (movingEdges) this.scheduleRefresh(true);
     });
     if (!completedSynchronously) {
       this.animationFrame = frame;
@@ -1773,292 +1639,338 @@ class GlassRendererImpl implements GlassRenderer {
       return;
     }
 
-    const viewport = getCanvasViewport(this.canvas, this.ownerDocument, view);
-    // One document-wide query feeds both the edge pass and the occlusion list.
-    const candidates = Array.from(
-      this.ownerDocument.querySelectorAll<HTMLElement>(
-        `${glassSelector}, [data-neoverse-glass-occluder='topmost']`,
-      ),
-      (element): OcclusionCandidate => ({ element, rect: element.getBoundingClientRect() }),
-    );
-    const elements = this.getGlassElements(candidates.map(({ element }) => element));
-    if (elements.length === 0 && !this.paintedEdges) return;
-    const measuredRects = new Map(candidates.map(({ element, rect }) => [element, rect]));
-    const visibleCandidates = candidates
-      .filter(({ rect }) => intersectsViewport(rect, viewport))
-      .sort((first, second) => first.rect.top - second.rect.top);
-    const opacityCache = new Map<Element, number | null>();
-    const hitTestCache = new Map<string, Element[]>();
-    const hitTest = (x: number, y: number): Element[] => {
-      const key = `${x},${y}`;
-      const cached = hitTestCache.get(key);
-      if (cached !== undefined) return cached;
-      const stack = this.ownerDocument?.elementsFromPoint?.(x, y) ?? [];
-      hitTestCache.set(key, stack);
-      return stack;
-    };
-    const occlusionContext: OcclusionContext = { hitTest, sortedByTop: true };
-    const ownerDocument = this.ownerDocument;
-    const changedSurfaces = new Set<Element>();
-    const surfaceRects = new Map<Element, DOMRect>();
-    for (const { element, rect } of candidates) {
-      surfaceRects.set(element, rect);
-      const previous = this.surfaceRects.get(element);
-      if (
-        previous === undefined ||
-        previous.left !== rect.left ||
-        previous.top !== rect.top ||
-        previous.width !== rect.width ||
-        previous.height !== rect.height
-      ) {
-        changedSurfaces.add(element);
-      }
-    }
-    this.surfaceRects = surfaceRects;
-    const width = viewport.width;
-    const height = viewport.height;
-    const pixelRatio = resolveDevicePixelRatio(view, this.maxDevicePixelRatio);
-    // Skip a full repaint when every input to the edge pass is unchanged. Keep
-    // the compositing contract intact: no partial clear, no altered blend mode,
-    // just the previous frame retained on the fixed canvas.
-    this.signatureHash = 2166136261;
-    this.mixSignature(this.mutationRevision);
-    this.mixSignature(viewport.left);
-    this.mixSignature(viewport.top);
-    this.mixSignature(width);
-    this.mixSignature(height);
-    this.mixSignature(pixelRatio);
-    for (const { rect } of candidates) {
-      this.mixSignature(rect.left);
-      this.mixSignature(rect.top);
-      this.mixSignature(rect.width);
-      this.mixSignature(rect.height);
-    }
-    for (const element of elements) {
-      this.mixSignatureText(element.className);
-      this.mixSignatureText(element.getAttribute?.('style') ?? '');
-    }
-    const sceneSignature = this.signatureHash || 1;
-    if (!force && this.paintedEdges && this.sceneSignature === sceneSignature) return;
-    this.sceneSignature = sceneSignature;
-    const drawingWidth = Math.max(Math.round(width * pixelRatio), 1);
-    const drawingHeight = Math.max(Math.round(height * pixelRatio), 1);
-    if (this.canvas.width !== drawingWidth) this.canvas.width = drawingWidth;
-    if (this.canvas.height !== drawingHeight) this.canvas.height = drawingHeight;
-    const gl = this.gl;
-    const locations = this.locations;
-    gl.viewport(0, 0, drawingWidth, drawingHeight);
-    gl.disable(gl.SCISSOR_TEST);
-    gl.clearColor(0, 0, 0, 0);
-    gl.clear(gl.COLOR_BUFFER_BIT);
-    this.paintedEdges = elements.length > 0;
-    if (!this.paintedEdges) {
-      if (this.chromaCanvas) this.chromaCanvas.style.display = 'none';
-      this.observeTableCells(new Set());
-      return;
-    }
-    gl.useProgram(this.program);
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
-    gl.enableVertexAttribArray(locations.position);
-    gl.vertexAttribPointer(locations.position, 2, gl.FLOAT, false, 0, 0);
-    gl.uniform2f(locations.viewport, width, height);
-    gl.uniform1f(locations.pixelRatio, pixelRatio);
-
-    const rootStyle = view.getComputedStyle(this.ownerDocument.documentElement);
-    const { gain, edgeLight, primary, secondary, tertiary, lightSurface, isLight, colorDodge } =
-      this.resolveSceneColors(rootStyle, view, this.colorProbe);
-    gl.uniform1f(locations.gain, gain);
-    const backdropChroma = isLight || colorDodge;
-    const boostLowerRight = isLight && colorDodge;
-    if (backdropChroma) this.ensureChromaCanvas();
-    if (this.chromaCanvas && this.chromaContext) {
-      if (!this.chromaCanvas.isConnected && this.canvas.isConnected) {
-        this.canvas.before(this.chromaCanvas);
-      }
-      const display = backdropChroma ? 'block' : 'none';
-      if (this.chromaCanvas.style.display !== display) this.chromaCanvas.style.display = display;
-      this.syncChromaVisibility();
-      if (backdropChroma) {
-        let resized = false;
-        if (this.chromaCanvas.width !== drawingWidth) {
-          this.chromaCanvas.width = drawingWidth;
-          resized = true;
+    this.isRendering = true;
+    try {
+      const styleCache = new Map<Element, CSSStyleDeclaration>();
+      const getStyle: StyleGetter = (element) => {
+        let cached = styleCache.get(element);
+        if (cached === undefined) {
+          cached = view.getComputedStyle(element);
+          styleCache.set(element, cached);
         }
-        if (this.chromaCanvas.height !== drawingHeight) {
-          this.chromaCanvas.height = drawingHeight;
-          resized = true;
-        }
-        if (!resized) {
-          this.chromaContext.resetTransform();
-          this.chromaContext.clearRect(0, 0, drawingWidth, drawingHeight);
-        }
-        this.chromaContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
-      }
-    }
-    gl.uniform1f(locations.lightSurface, lightSurface);
-    const blendMode = colorDodge ? 'color-dodge' : 'overlay';
-    if (this.canvas.style.mixBlendMode !== blendMode) this.canvas.style.mixBlendMode = blendMode;
-    gl.uniform1f(locations.colorDodge, colorDodge ? 1 : 0);
+        return cached;
+      };
+      const topLayerCache = new Map<Element, boolean>();
+      const topLayer = this.topLayer ?? createTopLayerHelpers(this.ownerDocument);
+      this.topLayer = topLayer;
 
-    gl.enable(gl.SCISSOR_TEST);
-    const occluderRects = new Float32Array(maxOccluders * 4);
-    const occluderRadii = new Float32Array(maxOccluders);
-    const overflowClips: OverflowClipCache = new Map();
-    const visibleTableCells = new Set<HTMLElement>();
-    const uploadOccluders = (occluders: readonly Occluder[]): void => {
-      if (locations.occluders === null || locations.occluderCount === null) return;
-      let count = 0;
-      for (const occluder of occluders) {
-        occluderRects.set(
-          [
-            occluder.left - viewport.left,
-            occluder.top - viewport.top,
-            occluder.width,
-            occluder.height,
-          ],
-          count * 4,
-        );
-        occluderRadii[count] = occluder.radius;
-        count += 1;
-      }
-      gl.uniform4fv(locations.occluders, occluderRects);
-      if (locations.occluderRadii !== null) gl.uniform1fv(locations.occluderRadii, occluderRadii);
-      gl.uniform1f(locations.occluderCount, count);
-    };
-    for (const element of elements) {
-      const table = element.matches(tableGlassSelector) ? (element as HTMLTableElement) : undefined;
-      const measuredRect = measuredRects.get(element) ?? element.getBoundingClientRect();
-      const rect = table ? getTableOuterRect(table, measuredRect) : measuredRect;
-      // Skip surfaces the fixed canvas cannot show before reading their style:
-      // a document-wide refresh otherwise resolves computed style and the
-      // ancestor opacity chain for every offscreen control.
-      if (!intersectsViewport(rect, viewport)) continue;
-      const style = readStyle(
-        element,
-        view,
-        this.colorProbe,
-        viewport,
-        rect,
-        opacityCache,
-        overflowClips,
-      );
-      if (style === undefined) {
-        continue;
-      }
-
-      const scissor = getScissorRect(
-        style.clipRect,
-        viewport,
-        pixelRatio,
-        drawingWidth,
-        drawingHeight,
-      );
-      if (scissor.width === 0 || scissor.height === 0) {
-        continue;
-      }
-
-      gl.uniform4f(
-        locations.rect,
-        style.rect.left - viewport.left,
-        style.rect.top - viewport.top,
-        style.rect.width,
-        style.rect.height + style.pointer[2],
-      );
-      gl.uniform2f(locations.rectSize, style.rect.width, style.rect.height);
-      gl.uniform4f(locations.radii, ...style.radii);
-      gl.uniform3f(locations.pointer, ...style.pointer);
-      gl.uniform1f(locations.edgeWidth, style.edgeWidth);
-      gl.uniform1f(locations.softness, style.softness);
-      gl.uniform1f(locations.opacity, style.opacity);
-      gl.uniform1f(
-        locations.cornerFocus,
-        isLight ? 0.4 : element.classList.contains('ui-button') ? 1 : 0,
-      );
-      gl.uniform1f(locations.chroma, style.chroma);
-      gl.uniform3f(locations.carrier, ...style.carrier);
-      gl.uniform3f(locations.edgeLight, ...edgeLight);
-      gl.uniform3f(locations.primary, ...primary);
-      gl.uniform3f(locations.secondary, ...secondary);
-      gl.uniform3f(locations.tertiary, ...tertiary);
-      const occluders = this.collectCachedOccluders(
-        element,
-        style.rect,
-        false,
-        changedSurfaces,
-        () =>
-          collectOccluders(
-            element,
-            style.rect,
-            ownerDocument,
-            view,
-            visibleCandidates,
-            false,
-            occlusionContext,
-          ),
-      );
-      uploadOccluders(occluders);
-      if (backdropChroma && this.chromaContext) {
-        paintBackdropChroma(this.chromaContext, style, viewport, occluders, gain, boostLowerRight);
-      }
-      for (const strip of getEdgeScissors(
-        style,
-        scissor,
-        viewport,
-        pixelRatio,
-        drawingWidth,
-        drawingHeight,
-      )) {
-        gl.scissor(strip.x, strip.y, strip.width, strip.height);
-        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-      }
-
-      if (!table) continue;
-      const grid = getTableGridEdges(
-        table,
-        style.rect,
-        style.clipRect,
-        viewport,
-        style.edgeWidth,
-        view,
-      );
-      if (grid.length === 0) continue;
-      // Unlike the outer rim, a grid can be covered by an overlay entirely
-      // inside the table. Share one interior occlusion pass across its cells.
-      uploadOccluders(
-        this.collectCachedOccluders(element, style.rect, true, changedSurfaces, () =>
-          collectOccluders(
-            element,
-            style.rect,
-            ownerDocument,
-            view,
-            visibleCandidates,
-            true,
-            occlusionContext,
-          ),
+      const viewport = getCanvasViewport(this.canvas, this.ownerDocument, view);
+      // One document-wide query feeds both the edge pass and the occlusion list.
+      const candidates = Array.from(
+        this.ownerDocument.querySelectorAll<HTMLElement>(
+          `${glassSelector}, [data-neoverse-glass-occluder='topmost']`,
         ),
+        (element): OcclusionCandidate => ({ element, rect: element.getBoundingClientRect() }),
       );
-      gl.uniform4f(locations.radii, 0, 0, 0, 0);
-      gl.uniform3f(locations.pointer, 0, 0, 0);
-      for (const { cell, rect: cellRect, strips } of grid) {
-        visibleTableCells.add(cell);
+      const elements = this.getGlassElements(
+        candidates.map(({ element }) => element),
+        getStyle,
+        topLayerCache,
+        topLayer,
+      );
+      if (elements.length === 0 && !this.paintedEdges) return;
+      const measuredRects = new Map(candidates.map(({ element, rect }) => [element, rect]));
+      const visibleCandidates = candidates
+        .filter(({ rect }) => intersectsViewport(rect, viewport))
+        .sort((first, second) => first.rect.top - second.rect.top);
+      const visualCache = new Map<Element, SurfaceVisualState | null>();
+      const matrixCache = new Map<Element, Mat2>();
+      const hitTestCache = new Map<string, Element[]>();
+      const hitTest = (x: number, y: number): Element[] => {
+        const key = `${x},${y}`;
+        const cached = hitTestCache.get(key);
+        if (cached !== undefined) return cached;
+        const stack = this.ownerDocument?.elementsFromPoint?.(x, y) ?? [];
+        hitTestCache.set(key, stack);
+        return stack;
+      };
+      const occlusionContext: OcclusionContext = { hitTest, sortedByTop: true };
+      const ownerDocument = this.ownerDocument;
+      const changedSurfaces = new Set<Element>();
+      const surfaceRects = new Map<Element, DOMRect>();
+      for (const { element, rect } of candidates) {
+        surfaceRects.set(element, rect);
+        const previous = this.surfaceRects.get(element);
+        if (
+          previous === undefined ||
+          previous.left !== rect.left ||
+          previous.top !== rect.top ||
+          previous.width !== rect.width ||
+          previous.height !== rect.height
+        ) {
+          changedSurfaces.add(element);
+        }
+      }
+      this.surfaceRects = surfaceRects;
+      const width = viewport.width;
+      const height = viewport.height;
+      const pixelRatio = resolveDevicePixelRatio(view, this.maxDevicePixelRatio);
+      // Skip a full repaint when every input to the edge pass is unchanged. Keep
+      // the compositing contract intact: no partial clear, no altered blend mode,
+      // just the previous frame retained on the fixed canvas.
+      this.signatureHash = 2166136261;
+      this.mixSignature(this.mutationRevision);
+      this.mixSignature(viewport.left);
+      this.mixSignature(viewport.top);
+      this.mixSignature(width);
+      this.mixSignature(height);
+      this.mixSignature(pixelRatio);
+      for (const { rect } of candidates) {
+        this.mixSignature(rect.left);
+        this.mixSignature(rect.top);
+        this.mixSignature(rect.width);
+        this.mixSignature(rect.height);
+      }
+      for (const element of elements) {
+        this.mixSignatureText(element.className);
+        this.mixSignatureText(element.getAttribute?.('style') ?? '');
+      }
+      const sceneSignature = this.signatureHash || 1;
+      if (!force && this.paintedEdges && this.sceneSignature === sceneSignature) return;
+      this.sceneSignature = sceneSignature;
+      const drawingWidth = Math.max(Math.round(width * pixelRatio), 1);
+      const drawingHeight = Math.max(Math.round(height * pixelRatio), 1);
+      if (this.canvas.width !== drawingWidth) this.canvas.width = drawingWidth;
+      if (this.canvas.height !== drawingHeight) this.canvas.height = drawingHeight;
+      const gl = this.gl;
+      const locations = this.locations;
+      gl.viewport(0, 0, drawingWidth, drawingHeight);
+      gl.disable(gl.SCISSOR_TEST);
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      this.paintedEdges = elements.length > 0;
+      if (!this.paintedEdges) {
+        if (this.chromaCanvas) this.chromaCanvas.style.display = 'none';
+        this.observeTableCells(new Set());
+        return;
+      }
+      gl.useProgram(this.program);
+      gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer);
+      gl.enableVertexAttribArray(locations.position);
+      gl.vertexAttribPointer(locations.position, 2, gl.FLOAT, false, 0, 0);
+      gl.uniform2f(locations.viewport, width, height);
+      gl.uniform1f(locations.pixelRatio, pixelRatio);
+
+      const rootStyle = getStyle(this.ownerDocument.documentElement);
+      const { gain, edgeLight, primary, secondary, tertiary, lightSurface, isLight, colorDodge } =
+        this.resolveSceneColors(rootStyle, view, this.colorProbe);
+      gl.uniform1f(locations.gain, gain);
+      const backdropChroma = isLight || colorDodge;
+      const boostLowerRight = isLight && colorDodge;
+      if (backdropChroma) this.ensureChromaCanvas();
+      if (this.chromaCanvas && this.chromaContext) {
+        if (!this.chromaCanvas.isConnected && this.canvas.isConnected) {
+          this.canvas.before(this.chromaCanvas);
+        }
+        const display = backdropChroma ? 'block' : 'none';
+        if (this.chromaCanvas.style.display !== display) this.chromaCanvas.style.display = display;
+        this.syncChromaVisibility();
+        if (backdropChroma) {
+          let resized = false;
+          if (this.chromaCanvas.width !== drawingWidth) {
+            this.chromaCanvas.width = drawingWidth;
+            resized = true;
+          }
+          if (this.chromaCanvas.height !== drawingHeight) {
+            this.chromaCanvas.height = drawingHeight;
+            resized = true;
+          }
+          if (!resized) {
+            this.chromaContext.resetTransform();
+            this.chromaContext.clearRect(0, 0, drawingWidth, drawingHeight);
+          }
+          this.chromaContext.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+        }
+      }
+      gl.uniform1f(locations.lightSurface, lightSurface);
+      const blendMode = colorDodge ? 'color-dodge' : 'overlay';
+      if (this.canvas.style.mixBlendMode !== blendMode) this.canvas.style.mixBlendMode = blendMode;
+      gl.uniform1f(locations.colorDodge, colorDodge ? 1 : 0);
+
+      gl.enable(gl.SCISSOR_TEST);
+      const occluderRects = this.occluderRects;
+      const occluderRadii = this.occluderRadii;
+      const overflowClips: OverflowClipCache = new Map();
+      const visibleTableCells = new Set<HTMLElement>();
+      const uploadOccluders = (occluders: readonly Occluder[]): void => {
+        if (locations.occluders === null || locations.occluderCount === null) return;
+        let count = 0;
+        for (const occluder of occluders) {
+          occluderRects.set(
+            [
+              occluder.left - viewport.left,
+              occluder.top - viewport.top,
+              occluder.width,
+              occluder.height,
+            ],
+            count * 4,
+          );
+          occluderRadii[count] = occluder.radius;
+          count += 1;
+        }
+        gl.uniform4fv(locations.occluders, occluderRects);
+        if (locations.occluderRadii !== null) gl.uniform1fv(locations.occluderRadii, occluderRadii);
+        gl.uniform1f(locations.occluderCount, count);
+      };
+      for (const element of elements) {
+        const table = element.matches(tableGlassSelector)
+          ? (element as HTMLTableElement)
+          : undefined;
+        const measuredRect = measuredRects.get(element) ?? element.getBoundingClientRect();
+        const rect = table ? getTableOuterRect(table, measuredRect) : measuredRect;
+        // Skip surfaces the fixed canvas cannot show before reading their style:
+        // a document-wide refresh otherwise resolves computed style and the
+        // ancestor opacity chain for every offscreen control.
+        if (!intersectsViewport(rect, viewport)) continue;
+        const style = readStyle(
+          element,
+          view,
+          this.colorProbe,
+          viewport,
+          rect,
+          getStyle,
+          visualCache,
+          matrixCache,
+          overflowClips,
+        );
+        if (style === undefined) {
+          continue;
+        }
+
+        const scissor = getScissorRect(
+          style.clipRect,
+          viewport,
+          pixelRatio,
+          drawingWidth,
+          drawingHeight,
+        );
+        if (scissor.width === 0 || scissor.height === 0) {
+          continue;
+        }
+
+        const drawHeight = style.height + style.pointer[2];
+        const cx =
+          style.pointer[2] > 0
+            ? style.centerX + style.basis[2] * (style.pointer[2] / 2)
+            : style.centerX;
+        const cy =
+          style.pointer[2] > 0
+            ? style.centerY + style.basis[3] * (style.pointer[2] / 2)
+            : style.centerY;
         gl.uniform4f(
           locations.rect,
-          cellRect.left - viewport.left,
-          cellRect.top - viewport.top,
-          cellRect.width,
-          cellRect.height,
+          cx - viewport.left - style.width / 2,
+          cy - viewport.top - drawHeight / 2,
+          style.width,
+          drawHeight,
         );
-        gl.uniform2f(locations.rectSize, cellRect.width, cellRect.height);
-        for (const strip of strips) {
-          const area = getScissorRect(strip, viewport, pixelRatio, drawingWidth, drawingHeight);
-          if (area.width === 0 || area.height === 0) continue;
-          gl.scissor(area.x, area.y, area.width, area.height);
+        gl.uniform2f(locations.rectSize, style.width, style.height);
+        gl.uniform4f(locations.basis, ...style.basis);
+        gl.uniform4f(locations.radii, ...style.radii);
+        gl.uniform3f(locations.pointer, ...style.pointer);
+        gl.uniform1f(locations.edgeWidth, style.edgeWidth);
+        gl.uniform1f(locations.softness, style.softness);
+        gl.uniform1f(locations.opacity, style.opacity);
+        gl.uniform1f(
+          locations.cornerFocus,
+          isLight ? 0.4 : element.classList.contains('ui-button') ? 1 : 0,
+        );
+        gl.uniform1f(locations.chroma, style.chroma);
+        gl.uniform3f(locations.carrier, ...style.carrier);
+        gl.uniform3f(locations.edgeLight, ...edgeLight);
+        gl.uniform3f(locations.primary, ...primary);
+        gl.uniform3f(locations.secondary, ...secondary);
+        gl.uniform3f(locations.tertiary, ...tertiary);
+        const occluders = this.collectCachedOccluders(
+          element,
+          style.rect,
+          false,
+          changedSurfaces,
+          () =>
+            collectOccluders(
+              element,
+              style.rect,
+              ownerDocument,
+              view,
+              visibleCandidates,
+              false,
+              occlusionContext,
+            ),
+        );
+        uploadOccluders(occluders);
+        if (backdropChroma && this.chromaContext) {
+          paintBackdropChroma(
+            this.chromaContext,
+            style,
+            viewport,
+            occluders,
+            gain,
+            boostLowerRight,
+          );
+        }
+        for (const strip of getEdgeScissors(
+          style,
+          scissor,
+          viewport,
+          pixelRatio,
+          drawingWidth,
+          drawingHeight,
+        )) {
+          gl.scissor(strip.x, strip.y, strip.width, strip.height);
           gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
         }
+
+        if (!table) continue;
+        const grid = getTableGridEdges(
+          table,
+          style.rect,
+          style.clipRect,
+          viewport,
+          style.edgeWidth,
+          view,
+        );
+        if (grid.length === 0) continue;
+        // Unlike the outer rim, a grid can be covered by an overlay entirely
+        // inside the table. Share one interior occlusion pass across its cells.
+        uploadOccluders(
+          this.collectCachedOccluders(element, style.rect, true, changedSurfaces, () =>
+            collectOccluders(
+              element,
+              style.rect,
+              ownerDocument,
+              view,
+              visibleCandidates,
+              true,
+              occlusionContext,
+            ),
+          ),
+        );
+        gl.uniform4f(locations.basis, 1, 0, 0, 1);
+        gl.uniform4f(locations.radii, 0, 0, 0, 0);
+        gl.uniform3f(locations.pointer, 0, 0, 0);
+        for (const { cell, rect: cellRect, strips } of grid) {
+          visibleTableCells.add(cell);
+          gl.uniform4f(
+            locations.rect,
+            cellRect.left - viewport.left,
+            cellRect.top - viewport.top,
+            cellRect.width,
+            cellRect.height,
+          );
+          gl.uniform2f(locations.rectSize, cellRect.width, cellRect.height);
+          for (const strip of strips) {
+            const area = getScissorRect(strip, viewport, pixelRatio, drawingWidth, drawingHeight);
+            if (area.width === 0 || area.height === 0) continue;
+            gl.scissor(area.x, area.y, area.width, area.height);
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+          }
+        }
       }
+      gl.disable(gl.SCISSOR_TEST);
+      this.observeTableCells(visibleTableCells);
+    } finally {
+      this.isRendering = false;
     }
-    gl.disable(gl.SCISSOR_TEST);
-    this.observeTableCells(visibleTableCells);
   }
 
   private observeTableCells(current: Set<HTMLElement>): void {
@@ -2075,7 +1987,12 @@ class GlassRendererImpl implements GlassRenderer {
     }
   }
 
-  private getGlassElements(candidates?: readonly HTMLElement[]): HTMLElement[] {
+  private getGlassElements(
+    candidates: readonly HTMLElement[] | undefined,
+    getStyle: StyleGetter,
+    topLayerCache: Map<Element, boolean>,
+    topLayer: TopLayerHelpers,
+  ): HTMLElement[] {
     if (this.ownerDocument === undefined) {
       return [];
     }
@@ -2090,6 +2007,9 @@ class GlassRendererImpl implements GlassRenderer {
         continue;
       }
       if (inheritsParentGlassEdge(element)) {
+        continue;
+      }
+      if (topLayer.isInTopLayer(element, getStyle, topLayerCache)) {
         continue;
       }
 

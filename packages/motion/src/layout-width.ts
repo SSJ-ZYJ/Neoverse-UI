@@ -202,6 +202,9 @@ export function animateLayoutWidths(
     releases[index] = release;
     void animation.finished.then(release, release);
   }
+  if (typeof Event === 'function' && typeof pending[0]?.element.dispatchEvent === 'function') {
+    pending[0].element.dispatchEvent(new Event('neoverse-motion-start', { bubbles: true }));
+  }
 
   return {
     animations,

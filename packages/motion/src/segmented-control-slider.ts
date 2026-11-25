@@ -82,6 +82,7 @@ export function attachSegmentedControlSlider(track: HTMLElement): () => void {
       : track.querySelector<HTMLButtonElement>('button[aria-checked="true"]');
     const wasDragging = slider.hasAttribute('data-dragging');
     const width = drag ? dragWidth(drag) : next?.offsetWidth;
+    const height = slider.offsetHeight;
     if (!next || !width) return;
 
     const offset = `${drag ? drag.center - width / 2 : next.offsetLeft}px`;
@@ -104,6 +105,11 @@ export function attachSegmentedControlSlider(track: HTMLElement): () => void {
       slider.style.setProperty('--segment-active-width', inlineSize);
     }
     if (!target) slider.parentElement?.style.setProperty('--segment-active-column', '1 / -1');
+    if (height > 0) {
+      slider.dataset.circular = width <= Math.max(height + 1, height * 1.05) ? 'true' : 'false';
+    } else {
+      slider.removeAttribute('data-circular');
+    }
     slider.toggleAttribute('data-pressed', !reducedMotion.matches && Boolean(preview || drag));
     if (!target) {
       readyFrame = view.requestAnimationFrame(() => {
@@ -265,6 +271,7 @@ export function attachSegmentedControlSlider(track: HTMLElement): () => void {
     slider?.removeAttribute('data-ready');
     slider?.removeAttribute('data-pressed');
     slider?.removeAttribute('data-dragging');
+    slider?.removeAttribute('data-circular');
     view.cancelAnimationFrame(frame);
     view.cancelAnimationFrame(readyFrame);
   };

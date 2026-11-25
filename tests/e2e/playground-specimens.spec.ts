@@ -19,6 +19,9 @@ test('every Explorer specimen opens a nonempty, independently sized preview', as
       await expect(
         stage.locator('[data-design-lab-region="module"], [data-qa-matrix]'),
       ).toHaveCount(0);
+      await expect(
+        specimen.locator('.playground-stage__specimen-content > *').first(),
+      ).toBeAttached();
       expect(
         await specimen.locator('.playground-stage__specimen-content').evaluate((content) => {
           const { height, width } = content.getBoundingClientRect();

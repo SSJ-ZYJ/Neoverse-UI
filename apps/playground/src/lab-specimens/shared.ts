@@ -5,7 +5,6 @@ export const variantLabel = localized('Variant', '变体');
 export const sizeLabel = localized('Size', '尺寸');
 export const shapeLabel = localized('Shape', '形状');
 export const surfaceLabel = localized('Surface', '表面');
-export const stateLabel = localized('State', '状态');
 
 export const disabled = { kind: 'boolean', label: localized('Disabled', '禁用') } as const;
 export const loading = { kind: 'boolean', label: localized('Loading', '加载中') } as const;

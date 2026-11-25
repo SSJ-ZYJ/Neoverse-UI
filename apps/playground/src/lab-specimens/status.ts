@@ -156,6 +156,24 @@ export const notice = defineSpecimen<Pick<NoticeProps, 'variant'>>()({
     h(UiNotice, { ...props }, () => localize(statusMessages[props.variant ?? 'neutral'], locale)),
 });
 
+export const toastPresentationOptions = [
+  { value: 'compact', label: localized('Brief feedback', '简短反馈') },
+  { value: 'action', label: localized('Feedback with action', '带操作反馈') },
+  { value: 'notification', label: localized('Multiline notification', '多行通知') },
+] as const;
+
+export const toastPreviewCopy = {
+  action: localized('View details', '查看详情'),
+  details: localized(
+    'The saved changes are available in this preview.',
+    '保存的修改已在此预览中生效。',
+  ),
+  notification: localized(
+    'Your changes are saved. Review the preview before sharing it with your team.',
+    '修改已保存。分享给团队之前，请先检查预览。',
+  ),
+};
+
 const toastCopy = {
   trigger: localized('Show feedback', '显示反馈'),
   dismiss: localized('Dismiss notification', '关闭通知'),
@@ -163,12 +181,20 @@ const toastCopy = {
 };
 
 /** The editable Toast specimen */
-export const toast = defineSpecimen<Pick<ToastProps, 'variant'>, { open: boolean }>()({
-  initialProps: { variant: 'success' },
-  initialState: () => ({ open: false }),
+export const toast = defineSpecimen<
+  Pick<ToastProps, 'variant' | 'presentation'>,
+  { open: boolean; details: boolean }
+>()({
+  initialProps: { variant: 'success', presentation: 'compact' },
+  initialState: () => ({ open: false, details: false }),
   controls: {
     props: {
       variant: { kind: 'select', label: variantLabel, options: statusVariantOptions },
+      presentation: {
+        kind: 'select',
+        label: localized('Layout', '布局'),
+        options: toastPresentationOptions,
+      },
     },
     state: { open: { kind: 'boolean', label: toastCopy.visible } },
   },
@@ -178,18 +204,50 @@ export const toast = defineSpecimen<Pick<ToastProps, 'variant'>, { open: boolean
         UiButton,
         {
           'data-toast-open': '',
-          onClick: () => setState('open', true),
+          onClick: () => {
+            setState('details', false);
+            setState('open', true);
+          },
         },
         () => localize(toastCopy.trigger, locale),
       ),
-      h(UiToast, {
-        open: state.open,
-        variant: props.variant ?? 'success',
-        duration: 0,
-        message: localize(statusMessages[props.variant ?? 'neutral'], locale),
-        dismissLabel: localize(toastCopy.dismiss, locale),
-        'onUpdate:open': (value: boolean) => setState('open', value),
-      }),
+      h(
+        UiToast,
+        {
+          open: state.open,
+          variant: props.variant ?? 'success',
+          presentation: props.presentation ?? 'compact',
+          message: localize(
+            props.presentation === 'notification'
+              ? toastPreviewCopy.notification
+              : statusMessages[props.variant ?? 'neutral'],
+            locale,
+          ),
+          dismissLabel: localize(toastCopy.dismiss, locale),
+          'onUpdate:open': (value: boolean) => setState('open', value),
+        },
+        props.presentation === 'action'
+          ? {
+              action: () =>
+                h(
+                  'button',
+                  {
+                    type: 'button',
+                    onClick: () => {
+                      setState('details', true);
+                      setState('open', false);
+                    },
+                  },
+                  localize(toastPreviewCopy.action, locale),
+                ),
+            }
+          : undefined,
+      ),
+      h(
+        'p',
+        { hidden: !state.details, role: 'status' },
+        localize(toastPreviewCopy.details, locale),
+      ),
     ]),
 });
 

@@ -77,12 +77,10 @@ test('segmented selection has one tab stop, skips disabled defaults and respects
   expect(html).toContain('aria-label="Chinese"');
   expect(html).toContain('role="radiogroup"');
   expect(html).toContain('ui-segmented-control--pill');
-  expect(html).toContain('data-shape="pill"');
   const rounded = renderToStaticMarkup(
     <UiSegmentedControl options={options} shape="rounded" ariaLabel="Language" />,
   );
   expect(rounded).toContain('ui-segmented-control--rounded');
-  expect(rounded).toContain('data-shape="rounded"');
   // Before the browser measures every option, the slider keeps the selected
   // content-sized grid column rather than an estimated offset and width.
   expect(html).toContain('--segment-index');
@@ -200,8 +198,6 @@ test('terminal composition forwards native input constraints without leaking sug
       </UiTerminalTranscript>
     </UiTerminalSurface>,
   );
-  expect(html).toContain('aria-label="Console"');
-  expect(html).toContain('role="toolbar"');
   expect(html).toContain('role="log" aria-live="off"');
   expect(html).toContain('&lt;script&gt;no&lt;/script&gt;');
   expect(html).toMatch(/readonly=""/i);

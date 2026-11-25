@@ -18,6 +18,7 @@ export function mountPlaygroundEffects(root: HTMLElement): void {
       '.ui-action__content',
       '.ui-navigation-item__label:not(.sr-only)',
       '.ui-badge__label',
+      '.ui-status-indicator__label',
       '.ui-select__value',
     ].join(', '),
     attributes: [

@@ -25,12 +25,6 @@ import {
   type ShowcaseSurface,
 } from './showcase-surface';
 import {
-  clearSpecimenSession,
-  persistSpecimenSession,
-  restoreSpecimenSession,
-  snapshotSpecimenSession,
-} from './specimen-session-storage';
-import {
   defaultStageBackground,
   isStageBackground,
   type StageBackground,
@@ -70,36 +64,12 @@ const specimenId = computed(() => route.value?.specimenId);
 const specimen = computed(() =>
   specimenId.value === undefined ? undefined : specimenById(specimenId.value),
 );
-let restoredInitialSession = false;
+// Editing is intentionally page-lifetime state: leaving the specimen or
+// reloading the document starts again from the specimen's initial fields.
 const session = computed(() => {
   const preview = specimen.value?.preview;
-  const id = specimenId.value;
-  if (typeof preview !== 'object' || id === undefined) return undefined;
-  const created = preview.createSession();
-  if (!restoredInitialSession) {
-    restoredInitialSession = true;
-    restoreSpecimenSession(created, id);
-  }
-  return {
-    ...created,
-    reset() {
-      created.reset();
-      clearSpecimenSession(id);
-    },
-  };
+  return typeof preview === 'object' ? preview.createSession() : undefined;
 });
-watch(
-  () => {
-    const id = specimenId.value;
-    const current = session.value;
-    return id === undefined || current === undefined
-      ? null
-      : { id, edits: snapshotSpecimenSession(current) };
-  },
-  (value) => {
-    if (value !== null) persistSpecimenSession(value.id, value.edits);
-  },
-);
 
 const preferences = readPreferences();
 const parameters = new URLSearchParams(window.location.search);

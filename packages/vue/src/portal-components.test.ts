@@ -42,12 +42,12 @@ describe('portal components', () => {
     expect(wrapper.find('img').exists()).toBe(true);
   });
 
-  it('Avatar supports a circle shape', () => {
+  it('hides the decorative Avatar placeholder from assistive technology', () => {
     const wrapper = mount(UiAvatar, {
-      props: { name: 'Lin Chen', shape: 'circle' },
+      props: { name: 'Anonymous', placeholder: 'icon' },
     });
-    expect(wrapper.classes()).toContain('ui-avatar--circle');
-    expect(wrapper.classes()).not.toContain('ui-avatar--rounded');
+    const icon = wrapper.get('.ui-avatar__icon');
+    expect(icon.attributes('aria-hidden')).toBe('true');
     wrapper.unmount();
   });
 

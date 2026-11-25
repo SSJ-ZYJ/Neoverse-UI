@@ -1,0 +1,178 @@
+.playground-token-grid {
+  display: grid;
+  grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--neoverse-playground-token-card-min-width)), 1fr)
+    );
+  gap: var(--neoverse-layout-grid-gap);
+}
+
+.playground-layout-preview {
+  position: relative;
+  display: grid;
+  inline-size: var(--neoverse-playground-layout-preview-inline-size);
+  block-size: var(--neoverse-playground-layout-preview-block-size);
+  place-items: center;
+  overflow: hidden;
+  border: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+  border-radius: var(--neoverse-radius-control);
+  background: var(--neoverse-playground-stage-color-field), var(--neoverse-color-surface-canvas);
+  padding: var(--neoverse-space-1);
+}
+
+.playground-layout-preview__measure {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  block-size: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.playground-layout-preview__page {
+  position: relative;
+  display: grid;
+  inline-size: 100%;
+  block-size: 100%;
+  grid-template-rows: var(--neoverse-playground-layout-preview-header-height) minmax(0, 1fr);
+  overflow: hidden;
+  border: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-subtle);
+  border-radius: var(--neoverse-radius-control-inner);
+  background: var(--neoverse-color-surface-subtle);
+}
+
+.playground-layout-preview__header {
+  border-block-end: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-subtle);
+  background: var(--neoverse-color-surface-raised);
+}
+
+.playground-layout-preview__body {
+  display: flex;
+  min-block-size: 0;
+}
+
+.playground-layout-preview__sidebar {
+  inline-size: var(--neoverse-playground-layout-preview-sidebar-width);
+  flex: none;
+  border-inline-end: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-subtle);
+  background: color-mix(in srgb, var(--neoverse-color-surface-raised) 72%, transparent);
+}
+
+.playground-layout-preview__content {
+  display: grid;
+  inline-size: var(--neoverse-playground-layout-preview-content-width);
+  min-inline-size: 0;
+  place-items: center;
+  margin-inline: auto;
+  padding: var(--neoverse-space-1);
+}
+
+.playground-layout-preview__reading {
+  display: grid;
+  inline-size: var(--neoverse-playground-layout-preview-reading-width);
+  gap: var(--neoverse-space-1);
+}
+
+.playground-layout-preview__reading > span {
+  block-size: var(--neoverse-border-width-strong);
+  border-radius: var(--neoverse-radius-pill);
+  background: var(--neoverse-color-border-default);
+}
+
+.playground-layout-preview__reading > span:last-child {
+  inline-size: var(--neoverse-playground-layout-preview-reading-wide-width);
+}
+
+.playground-layout-preview__padding-inline,
+.playground-layout-preview__padding-block,
+.playground-layout-preview__drawer {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.playground-layout-preview__padding-inline {
+  inset: 0;
+  background: linear-gradient(
+    to right,
+    var(--neoverse-color-accent-soft) 0 var(--neoverse-playground-layout-preview-inline-gutter),
+    transparent var(--neoverse-playground-layout-preview-inline-gutter)
+      calc(100% - var(--neoverse-playground-layout-preview-inline-gutter)),
+    var(--neoverse-color-accent-soft)
+      calc(100% - var(--neoverse-playground-layout-preview-inline-gutter)) 100%
+  );
+}
+
+.playground-layout-preview__padding-block {
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    var(--neoverse-color-accent-soft) 0 var(--neoverse-playground-layout-preview-block-gutter),
+    transparent var(--neoverse-playground-layout-preview-block-gutter)
+      calc(100% - var(--neoverse-playground-layout-preview-block-gutter)),
+    var(--neoverse-color-accent-soft)
+      calc(100% - var(--neoverse-playground-layout-preview-block-gutter)) 100%
+  );
+}
+
+.playground-layout-preview__drawer {
+  inset-block: 0;
+  inset-inline-start: 0;
+  inline-size: var(--neoverse-playground-layout-preview-drawer-width);
+  border-inline-end: var(--neoverse-border-width-thin) solid var(--neoverse-color-accent-primary);
+  background: color-mix(
+    in srgb,
+    var(--neoverse-color-accent-soft) 86%,
+    var(--neoverse-color-surface-raised)
+  );
+  box-shadow: var(--neoverse-shadow-sm);
+}
+
+.playground-layout-preview[data-layout-role='page'] .playground-layout-preview__page {
+  inline-size: var(--neoverse-playground-layout-preview-page-width);
+  border-color: var(--neoverse-color-accent-primary);
+  box-shadow: inset 0 0 0 var(--neoverse-border-width-thin) var(--neoverse-color-accent-soft);
+}
+
+.playground-layout-preview[data-layout-role='content'] .playground-layout-preview__content {
+  background: var(--neoverse-color-accent-soft);
+  box-shadow: inset 0 0 0 var(--neoverse-border-width-thin) var(--neoverse-color-accent-primary);
+}
+
+.playground-layout-preview[data-layout-role='reading'] .playground-layout-preview__reading,
+.playground-layout-preview[data-layout-role='reading-wide'] .playground-layout-preview__reading {
+  border-radius: var(--neoverse-radius-control-inner);
+  background: var(--neoverse-color-accent-soft);
+  padding: var(--neoverse-space-1);
+}
+
+.playground-layout-preview[data-layout-role='reading'] .playground-layout-preview__reading > span,
+.playground-layout-preview[data-layout-role='reading-wide']
+  .playground-layout-preview__reading
+  > span {
+  background: var(--neoverse-color-accent-primary);
+}
+
+.playground-layout-preview[data-layout-role='reading-wide'] .playground-layout-preview__reading {
+  inline-size: var(--neoverse-playground-layout-preview-reading-wide-width);
+}
+
+.playground-layout-preview[data-layout-role='padding-inline']
+  .playground-layout-preview__padding-inline,
+.playground-layout-preview[data-layout-role='padding-block']
+  .playground-layout-preview__padding-block,
+.playground-layout-preview[data-layout-role='sidebar-drawer'] .playground-layout-preview__drawer {
+  opacity: 1;
+}
+
+.playground-layout-preview[data-layout-role='sidebar'] .playground-layout-preview__sidebar {
+  border-color: var(--neoverse-color-accent-primary);
+  background: var(--neoverse-color-accent-soft);
+  box-shadow: inset 0 0 0 var(--neoverse-border-width-thin) var(--neoverse-color-accent-primary);
+}
+
+.playground-layout-preview[data-layout-role='header'] .playground-layout-preview__header {
+  border-color: var(--neoverse-color-accent-primary);
+  background: var(--neoverse-color-accent-soft);
+  box-shadow: inset 0 0 0 var(--neoverse-border-width-thin) var(--neoverse-color-accent-primary);
+}

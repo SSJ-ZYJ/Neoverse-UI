@@ -30,9 +30,9 @@ Vue `>=3.5 <4` is required as a peer dependency. Field and choice-control IDs us
 
 `UiBadge` sizes `sm` / `md` / `lg` share `--neoverse-badge-font-family` and `--neoverse-badge-font-weight`. Their font sizes follow the shared label scale (13 / 14 / 16px at a 16px root); size-specific line heights and padding retain the existing geometry.
 
-Terminal composition (Aurora Glass window, output lines, scrollback, and native terminal input) is documented in [Terminal composition](../../docs/architecture/terminal-composition.md). The embedded transcript uses `scrollbar-immersive`; `UiScrollbar` is reserved for document scrolling. A server-rendered `UiScrollbar` publishes `data-hide-native`, so the native bar disappears on the first paint instead of after hydration; wrapping it in `ClientOnly` keeps the older post-mount swap.
+Terminal composition (Aurora Glass window, titlebar presets, commandline environment icon recognition, output lines, scrollback, and native terminal input) is documented in [Terminal composition](../../docs/architecture/terminal-composition.md). `UiTerminalSurface` supports `titlebar` (`default`, `auto`, `macos`, `windows`, `linux`), `maximized`, and `@window-action`, while `TerminalPromptSegment` supports built-in OS/shell/browser/runtime `icon` recognition (`auto` or explicit icon) and `iconOnly`. The embedded transcript uses `scrollbar-immersive`; `UiScrollbar` is reserved for document scrolling. A server-rendered `UiScrollbar` publishes `data-hide-native`, so the native bar disappears on the first paint instead of after hydration; wrapping it in `ClientOnly` keeps the older post-mount swap.
 
-`UiTerminalEcho` displays recorded command `text` with the live prompt's `segments`, `symbol`, `error` state and `#segment` rendering, without an input or tab stop. Capture segment values when committing history; do not bind old commands to the live directory.
+`UiTerminalEcho` displays recorded command `text` with the live prompt's `segments`, `symbol`, `error` state and built-in or `#segment` rendering, without an input or tab stop. Capture segment values when committing history; do not bind old commands to the live directory.
 
 ## Metrics, milestones, and steps
 
@@ -153,9 +153,10 @@ replacement copy on one line for the duration of the run, so longer labels are
 revealed as the box opens instead of wrapping mid-animation; the shared primitive
 restores the consumer's inline styles when the run ends.
 
-The Design Lab uses the composable in two places: the `foundation-motion-width`
-specimen in the Motion module, and its own toolbar, where the theme, language,
-and back-to-overview controls move together on a language switch. Both are driven
-by the laboratory language control.
+The Design Lab uses the composable in two places: the Transitions specimen
+(`foundation-motion-playground`), where a language switch resizes the brand,
+navigation, and preference boxes, and its own toolbar, where the theme,
+language, and back-to-overview controls move together on a language switch.
+Both are driven by the laboratory language control.
 
 For the complete component API and architecture guidance, see the [Neoverse-UI repository](https://github.com/SSJ-ZYJ/Neoverse-UI).

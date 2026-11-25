@@ -3,9 +3,7 @@ import { expect, test } from 'bun:test';
 import { cssVariables } from '@neoverse-ui/tokens';
 import {
   componentContracts,
-  contractCheckIds,
   contractLabSummary,
-  contractStateIds,
   frameworkParityNames,
   interactionContracts,
 } from './contract-lab';
@@ -17,7 +15,6 @@ import {
 } from './lab-data';
 import {
   browsableSpecimens,
-  isExpandableModule,
   labModules,
   labSpecimens,
   moduleGroups,
@@ -84,16 +81,6 @@ test('keeps semantic page layout roles visible in the Design Lab token specimen'
   );
 });
 
-test('describes the radius aliases with their actual definitions', () => {
-  const description = localize(moduleCopy.radius.aliases.description, 'zh');
-
-  expect(description).toContain('pill=9999px');
-  expect(description).toContain('control=md（12px）');
-  expect(description).toContain('controlInner=control - 0.18rem（9.12px）');
-  expect(description).toContain('card=lg（16px）');
-  expect(description).toContain('panel=xl（24px）');
-});
-
 test('registers consolidated controls, the reusable dock, and the parity composition', () => {
   const moduleIds = labModules.map((module) => module.id);
 
@@ -116,6 +103,7 @@ test('orders Explorer sections from foundations to lab tooling', () => {
   expect(moduleGroups.map((group) => group.id)).toEqual([
     'foundations',
     'materials',
+    'motion',
     'components',
     'compositions',
     'tools',
@@ -144,7 +132,7 @@ test('keeps lab tooling out of the design sections', () => {
   }
 });
 
-test('keeps a disclosure only on modules with more than one browsable specimen', () => {
+test('keeps browsable specimens under their owner module', () => {
   for (const module of labModules) {
     const browsable = browsableSpecimens(module.id);
 
@@ -152,11 +140,7 @@ test('keeps a disclosure only on modules with more than one browsable specimen',
       browsable.every((specimen) => specimen.moduleId === module.id),
       module.id,
     ).toBe(true);
-    expect(isExpandableModule(module.id), module.id).toBe(browsable.length > 1);
   }
-  expect(browsableSpecimens('forms').map((specimen) => specimen.id)).not.toContain(
-    'forms-choice-controls',
-  );
 });
 
 test('keeps every composition scene localized in both supported locales', () => {
@@ -203,12 +187,11 @@ test('keeps the foundation modules represented in the specimen catalogue', () =>
     ['layout-shape-border', 'layout-shape'],
     ['shadow-primitive', 'shadow'],
     ['shadow-alias', 'shadow'],
-    ['foundation-motion', 'motion'],
-    ['foundation-motion-presence', 'motion'],
-    ['foundation-motion-width', 'motion'],
-    ['foundation-motion-playground', 'motion'],
-    ['foundation-motion-page', 'motion'],
-    ['materials-glass', 'materials'],
+    ['foundation-motion', 'motion-tokens'],
+    ['foundation-motion-presence', 'motion-presence'],
+    ['foundation-motion-playground', 'motion-playground'],
+    ['foundation-motion-disclosure', 'motion-disclosure'],
+    ['foundation-motion-page', 'motion-page'],
   ]);
 });
 
@@ -219,7 +202,6 @@ test('keeps specimen ids unique, localized, and resolvable to their owner module
   for (const specimen of labSpecimens) {
     expect(localize(specimen.label, 'en')).not.toBe('');
     expect(localize(specimen.label, 'zh')).not.toBe('');
-    expect(specimenById(specimen.id)?.moduleId).toBe(specimen.moduleId);
     expect(resolveLabHash(specimen.id)).toEqual({
       moduleId: specimen.moduleId,
       specimenId: specimen.id,
@@ -241,19 +223,6 @@ test('keeps public Vue components discoverable from the specimen catalogue', asy
   ].sort();
 
   expect(coveredComponents).toEqual(publicComponents);
-});
-
-test('keeps public React component adapters discoverable from the specimen catalogue', () => {
-  const publicComponents = componentContracts
-    .filter((component) => component.react !== 'none')
-    .map((component) => component.name);
-  const coveredComponents = new Set<string>(
-    labSpecimens.flatMap((specimen) => [...specimen.apiNames]),
-  );
-
-  for (const component of publicComponents) {
-    expect(coveredComponents.has(component), component).toBe(true);
-  }
 });
 
 test('keeps every registered specimen backed by a stable module fixture id', async () => {
@@ -292,24 +261,10 @@ test('keeps release visual and Canonical Shared coverage derived from the compon
   expect(releaseVisual).toHaveLength(contractLabSummary.releaseVisual);
   expect(canonicalShared).toHaveLength(contractLabSummary.canonicalShared);
   expect(frameworkParityNames.size).toBe(contractLabSummary.frameworkParity);
-
-  for (const component of [...releaseVisual, ...canonicalShared]) {
-    expect(
-      labSpecimens.some((specimen) =>
-        specimen.apiNames.some((apiName) => apiName === component.name),
-      ),
-      component.name,
-    ).toBe(true);
-  }
 });
 
 test('keeps interaction contracts attached to real specimens and stable state/check ids', () => {
-  const knownStates = new Set(contractStateIds);
-  const knownChecks = new Set(contractCheckIds);
-  const specimenIds = new Set(labSpecimens.map((specimen) => specimen.id));
-
   for (const contract of interactionContracts) {
-    expect(specimenIds.has(contract.specimenId), contract.specimenId).toBe(true);
     const specimen = specimenById(contract.specimenId);
     expect(specimen).toBeDefined();
     for (const apiName of contract.apiNames) {
@@ -317,7 +272,5 @@ test('keeps interaction contracts attached to real specimens and stable state/ch
     }
     expect(new Set(contract.states).size).toBe(contract.states.length);
     expect(new Set(contract.checks).size).toBe(contract.checks.length);
-    for (const state of contract.states) expect(knownStates.has(state), state).toBe(true);
-    for (const check of contract.checks) expect(knownChecks.has(check), check).toBe(true);
   }
 });

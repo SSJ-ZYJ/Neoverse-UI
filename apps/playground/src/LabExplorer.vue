@@ -3,6 +3,7 @@ import { glassMaterial } from '@neoverse-ui/tokens';
 import { UiIconButton, UiInput, UiNavigationItem } from '@neoverse-ui/vue';
 import { computed, reactive, ref, watch } from 'vue';
 import CatalogueLabel from './CatalogueLabel.vue';
+import LabDisclosureList from './LabDisclosureList.vue';
 import LabIcon from './LabIcon.vue';
 import {
   browsableSpecimens,
@@ -75,19 +76,45 @@ function specimenTerms(specimen: LabSpecimen): string[] {
   ];
 }
 
+function repeatsModuleLabel(module: ExplorerModule): boolean {
+  const only = module.specimens[0];
+  return (
+    module.specimens.length === 1 &&
+    only !== undefined &&
+    only.label.en === module.label.en &&
+    only.label.zh === module.label.zh
+  );
+}
+
+function moduleTargetHash(module: ExplorerModule): string {
+  const sole = module.specimens[0];
+  if (repeatsModuleLabel(module) && sole !== undefined && typeof sole.preview === 'object') {
+    return sole.id;
+  }
+  return module.id;
+}
+
+function isModuleLinkActive(module: ExplorerModule): boolean {
+  if (props.route?.moduleId !== module.id) return false;
+  if (props.route.specimenId === undefined) return true;
+  const sole = module.specimens[0];
+  return repeatsModuleLabel(module) && sole !== undefined && props.route.specimenId === sole.id;
+}
+
 const results = computed<ResultSection[]>(() => {
   return groups.flatMap((group) => {
     const modules = group.modules.flatMap((module) => {
-      // One browsable specimen means the module row already is the destination,
-      // so the tree never repeats the same label at a third level.
-      const single = module.specimens.length === 1;
+      // A single specimen whose label matches the module is the module row
+      // itself. A differently named specimen stays a leaf so its editable
+      // session can be inspected without repeating the module label.
+      const direct = repeatsModuleLabel(module);
       if (!searching.value) {
-        return [{ ...module, leaves: single ? [] : module.specimens }];
+        return [{ ...module, leaves: direct ? [] : module.specimens }];
       }
       const names = [module.id, module.label.en, module.label.zh, group.label.en, group.label.zh];
       const leaves = module.specimens.filter((specimen) => matches(specimenTerms(specimen)));
       if (leaves.length === 0 && !matches(names)) return [];
-      return [{ ...module, leaves: single ? [] : leaves }];
+      return [{ ...module, leaves: direct ? [] : leaves }];
     });
     return modules.length > 0 ? [{ ...group, modules }] : [];
   });
@@ -97,7 +124,7 @@ function groupCount(group: ResultSection): number {
   // Counts describe the tree: a direct destination counts once, a family
   // counts its visible specimens, which shrink to the matches while searching.
   return group.modules.reduce(
-    (total, module) => total + (module.specimens.length > 1 ? module.leaves.length : 1),
+    (total, module) => total + (module.leaves.length > 0 ? module.leaves.length : 1),
     0,
   );
 }
@@ -216,14 +243,14 @@ function toggleModule(id: string): void {
         >
           <div class="playground-explorer__module-row">
             <UiNavigationItem
-              :href="`#${module.id}`"
+              :href="`#${moduleTargetHash(module)}`"
               tabindex="0"
               :label="localize(module.label, locale)"
-              :active="route?.moduleId === module.id && route.specimenId === undefined"
+              :active="isModuleLinkActive(module)"
               stretch
               indicator-placement="start"
               class="playground-explorer__link playground-explorer__module-link"
-              @click="emit('navigate', $event, module.id)"
+              @click="emit('navigate', $event, moduleTargetHash(module))"
             >
               <template v-if="catalogueSecondary(module.label, locale)" #suffix>
                 <span class="playground-catalogue-label__secondary" lang="en" aria-hidden="true">
@@ -251,10 +278,10 @@ function toggleModule(id: string): void {
             </button>
           </div>
 
-          <ul
-            v-if="module.specimens.length > 1"
-            v-show="moduleExpanded(module.id)"
+          <LabDisclosureList
+            v-if="module.leaves.length > 0"
             :id="`explorer-specimens-${module.id}`"
+            :expanded="module.specimens.length === 1 || moduleExpanded(module.id)"
             class="playground-explorer__specimens"
           >
             <li v-for="specimen in module.leaves" :key="specimen.id">
@@ -276,7 +303,7 @@ function toggleModule(id: string): void {
                 </template>
               </UiNavigationItem>
             </li>
-          </ul>
+          </LabDisclosureList>
         </li>
       </ul>
     </section>

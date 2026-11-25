@@ -169,8 +169,8 @@ defineExpose({ focus });
     <div v-if="props.segments.length > 0 || $slots.context" class="ui-terminal-prompt__context">
       <slot name="context">
         <TerminalPromptSegments :segments="props.segments">
-          <template #segment="{ segment }">
-            <slot name="segment" :segment="segment">{{ segment.label }}</slot>
+          <template v-if="$slots.segment" #segment="{ segment }">
+            <slot name="segment" :segment="segment" />
           </template>
         </TerminalPromptSegments>
       </slot>

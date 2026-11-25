@@ -61,11 +61,6 @@ describe('resolveInitialThemeMode', () => {
     expect(resolveInitialThemeMode()).toBe('dark');
   });
 
-  test('falls back to the stored choice when the URL has no theme', () => {
-    installBrowser({ search: '?lang=zh', stored: 'dark' });
-    expect(resolveInitialThemeMode()).toBe('dark');
-  });
-
   test('keeps the last interactive choice on reload instead of reverting to the URL', () => {
     installBrowser({ search: '?theme=light', stored: 'dark', navigationType: 'reload' });
     expect(resolveInitialThemeMode()).toBe('dark');

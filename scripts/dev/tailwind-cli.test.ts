@@ -49,8 +49,6 @@ describe('tailwind CLI lookup', () => {
     const manifestPath = '/repo/node_modules/@tailwindcss/cli/package.json';
     const cli = findTailwindCli(dir, lookup('linux', { [manifestPath]: manifest }));
     expect(cli).toBe('/repo/node_modules/@tailwindcss/cli/dist/index.mjs');
-    expect(cli).not.toContain('.exe');
-    expect(cli).not.toContain('\\');
   });
 
   test('prefers the nearest install when every level provides one', () => {

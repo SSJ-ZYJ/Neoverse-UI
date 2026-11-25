@@ -1,0 +1,296 @@
+/* Back layered and sliding snapshots with the semantic canvas color so
+   translucent surfaces never bleed underlying typography through. */
+:root:is(
+  [data-neoverse-page-transition='slide'],
+  [data-neoverse-page-transition='push'],
+  [data-neoverse-page-transition='curtain'],
+  [data-neoverse-page-transition='iris']
+)::view-transition-old(root),
+:root:is(
+  [data-neoverse-page-transition='slide'],
+  [data-neoverse-page-transition='push'],
+  [data-neoverse-page-transition='curtain'],
+  [data-neoverse-page-transition='iris']
+)::view-transition-new(root),
+:root:is(
+  [data-neoverse-page-transition='slide'],
+  [data-neoverse-page-transition='push'],
+  [data-neoverse-page-transition='curtain'],
+  [data-neoverse-page-transition='iris']
+)::view-transition-old(nv-page),
+:root:is(
+  [data-neoverse-page-transition='slide'],
+  [data-neoverse-page-transition='push'],
+  [data-neoverse-page-transition='curtain'],
+  [data-neoverse-page-transition='iris']
+)::view-transition-new(nv-page) {
+  background-color: var(--neoverse-color-surface-canvas);
+}
+
+/* Slide — edge-to-edge side-by-side track with zero overlap. */
+:root[data-neoverse-page-transition='slide']::view-transition-old(root),
+:root[data-neoverse-page-transition='slide']::view-transition-old(nv-page) {
+  z-index: 1;
+  animation: nv-page-slide-out var(--neoverse-motion-page-duration)
+    var(--neoverse-motion-easing-emphasized) both;
+}
+
+:root[data-neoverse-page-transition='slide']::view-transition-new(root),
+:root[data-neoverse-page-transition='slide']::view-transition-new(nv-page) {
+  z-index: 2;
+  animation: nv-page-slide-in var(--neoverse-motion-page-duration)
+    var(--neoverse-motion-easing-emphasized) both;
+}
+
+@keyframes nv-page-slide-out {
+  to {
+    transform: translate3d(
+      calc(var(--neoverse-page-dir-x, 1) * -100%),
+      calc(var(--neoverse-page-dir-y, 0) * -100%),
+      0
+    );
+  }
+}
+
+@keyframes nv-page-slide-in {
+  from {
+    transform: translate3d(
+      calc(var(--neoverse-page-dir-x, 1) * 100%),
+      calc(var(--neoverse-page-dir-y, 0) * 100%),
+      0
+    );
+  }
+}
+
+/* Push — opaque layered sheet over a dimmed recessed backdrop. */
+:root[data-neoverse-page-transition='push']:is(
+  [data-neoverse-page-direction='forward'],
+  [data-neoverse-page-direction='up']
+)::view-transition-old(root),
+:root[data-neoverse-page-transition='push']:is(
+  [data-neoverse-page-direction='forward'],
+  [data-neoverse-page-direction='up']
+)::view-transition-old(nv-page) {
+  z-index: 1;
+  animation: nv-page-push-recede var(--neoverse-motion-page-duration)
+    var(--neoverse-motion-easing-emphasized) both;
+}
+
+:root[data-neoverse-page-transition='push']:is(
+  [data-neoverse-page-direction='forward'],
+  [data-neoverse-page-direction='up']
+)::view-transition-new(root),
+:root[data-neoverse-page-transition='push']:is(
+  [data-neoverse-page-direction='forward'],
+  [data-neoverse-page-direction='up']
+)::view-transition-new(nv-page) {
+  z-index: 2;
+  animation: nv-page-push-enter var(--neoverse-motion-page-duration)
+    var(--neoverse-motion-easing-emphasized) both;
+}
+
+:root[data-neoverse-page-transition='push']:is(
+  [data-neoverse-page-direction='backward'],
+  [data-neoverse-page-direction='down']
+)::view-transition-old(root),
+:root[data-neoverse-page-transition='push']:is(
+  [data-neoverse-page-direction='backward'],
+  [data-neoverse-page-direction='down']
+)::view-transition-old(nv-page) {
+  z-index: 2;
+  animation: nv-page-push-exit var(--neoverse-motion-page-duration)
+    var(--neoverse-motion-easing-emphasized) both;
+}
+
+:root[data-neoverse-page-transition='push']:is(
+  [data-neoverse-page-direction='backward'],
+  [data-neoverse-page-direction='down']
+)::view-transition-new(root),
+:root[data-neoverse-page-transition='push']:is(
+  [data-neoverse-page-direction='backward'],
+  [data-neoverse-page-direction='down']
+)::view-transition-new(nv-page) {
+  z-index: 1;
+  animation: nv-page-push-restore var(--neoverse-motion-page-duration)
+    var(--neoverse-motion-easing-emphasized) both;
+}
+
+@keyframes nv-page-push-recede {
+  to {
+    opacity: var(--neoverse-motion-page-backdrop-opacity);
+    transform: translate3d(
+        calc(var(--neoverse-page-dir-x, 1) * var(--neoverse-motion-page-parallax-offset) * -1),
+        calc(var(--neoverse-page-dir-y, 0) * var(--neoverse-motion-page-parallax-offset) * -1),
+        0
+      )
+      scale(var(--neoverse-motion-page-veil-scale));
+  }
+}
+
+@keyframes nv-page-push-enter {
+  from {
+    transform: translate3d(
+      calc(var(--neoverse-page-dir-x, 1) * 100%),
+      calc(var(--neoverse-page-dir-y, 0) * 100%),
+      0
+    );
+  }
+}
+
+@keyframes nv-page-push-exit {
+  to {
+    transform: translate3d(
+      calc(var(--neoverse-page-dir-x, -1) * -100%),
+      calc(var(--neoverse-page-dir-y, 0) * -100%),
+      0
+    );
+  }
+}
+
+@keyframes nv-page-push-restore {
+  from {
+    opacity: var(--neoverse-motion-page-backdrop-opacity);
+    transform: translate3d(
+        calc(var(--neoverse-page-dir-x, -1) * var(--neoverse-motion-page-parallax-offset)),
+        calc(var(--neoverse-page-dir-y, 0) * var(--neoverse-motion-page-parallax-offset)),
+        0
+      )
+      scale(var(--neoverse-motion-page-veil-scale));
+  }
+}
+
+/* Curtain & Iris — opaque optical reveals whose outgoing text clears early
+   so typography never ghosts across the feathered boundary. */
+:root[data-neoverse-page-transition='curtain']::view-transition-old(root),
+:root[data-neoverse-page-transition='curtain']::view-transition-old(nv-page),
+:root[data-neoverse-page-transition='iris']:is(
+  [data-neoverse-page-direction='forward'],
+  [data-neoverse-page-direction='up']
+)::view-transition-old(root),
+:root[data-neoverse-page-transition='iris']:is(
+  [data-neoverse-page-direction='forward'],
+  [data-neoverse-page-direction='up']
+)::view-transition-old(nv-page) {
+  z-index: 1;
+  animation: nv-page-backdrop-clear calc(var(--neoverse-motion-page-expressive-duration) * 0.45)
+    var(--neoverse-motion-easing-accelerate) both;
+}
+
+:root[data-neoverse-page-transition='curtain']::view-transition-new(root),
+:root[data-neoverse-page-transition='curtain']::view-transition-new(nv-page) {
+  z-index: 2;
+  animation: nv-page-reveal-expand var(--neoverse-motion-page-expressive-duration)
+    var(--neoverse-motion-easing-symmetric) both;
+  mask-image: linear-gradient(
+    var(--neoverse-page-curtain-angle, 90deg),
+    black
+      calc(
+        var(--neoverse-page-reveal-progress) *
+        (100% + var(--neoverse-motion-page-feather)) -
+        var(--neoverse-motion-page-feather)
+      ),
+    transparent
+      calc(var(--neoverse-page-reveal-progress) * (100% + var(--neoverse-motion-page-feather)))
+  );
+}
+
+:root[data-neoverse-page-transition='iris']:is(
+  [data-neoverse-page-direction='forward'],
+  [data-neoverse-page-direction='up']
+)::view-transition-new(root),
+:root[data-neoverse-page-transition='iris']:is(
+  [data-neoverse-page-direction='forward'],
+  [data-neoverse-page-direction='up']
+)::view-transition-new(nv-page) {
+  z-index: 2;
+  animation: nv-page-reveal-expand var(--neoverse-motion-page-expressive-duration)
+    var(--neoverse-motion-easing-emphasized) both;
+  mask-image: radial-gradient(
+    circle at var(--neoverse-page-origin, 50% 50%),
+    black
+      calc(
+        var(--neoverse-page-reveal-progress) *
+        (var(--neoverse-page-reveal-radius, 150%) + var(--neoverse-motion-page-feather)) -
+        var(--neoverse-motion-page-feather)
+      ),
+    transparent
+      calc(
+        var(--neoverse-page-reveal-progress) *
+        (var(--neoverse-page-reveal-radius, 150%) + var(--neoverse-motion-page-feather))
+      )
+  );
+}
+
+:root[data-neoverse-page-transition='iris']:is(
+  [data-neoverse-page-direction='backward'],
+  [data-neoverse-page-direction='down']
+)::view-transition-old(root),
+:root[data-neoverse-page-transition='iris']:is(
+  [data-neoverse-page-direction='backward'],
+  [data-neoverse-page-direction='down']
+)::view-transition-old(nv-page) {
+  z-index: 2;
+  animation: nv-page-reveal-contract var(--neoverse-motion-page-expressive-duration)
+    var(--neoverse-motion-easing-emphasized) both;
+  mask-image: radial-gradient(
+    circle at var(--neoverse-page-origin, 50% 50%),
+    black
+      calc(
+        var(--neoverse-page-reveal-progress) *
+        (var(--neoverse-page-reveal-radius, 150%) + var(--neoverse-motion-page-feather)) -
+        var(--neoverse-motion-page-feather)
+      ),
+    transparent
+      calc(
+        var(--neoverse-page-reveal-progress) *
+        (var(--neoverse-page-reveal-radius, 150%) + var(--neoverse-motion-page-feather))
+      )
+  );
+}
+
+:root[data-neoverse-page-transition='iris']:is(
+  [data-neoverse-page-direction='backward'],
+  [data-neoverse-page-direction='down']
+)::view-transition-new(root),
+:root[data-neoverse-page-transition='iris']:is(
+  [data-neoverse-page-direction='backward'],
+  [data-neoverse-page-direction='down']
+)::view-transition-new(nv-page) {
+  z-index: 1;
+  animation: nv-page-backdrop-restore var(--neoverse-motion-page-expressive-duration)
+    var(--neoverse-motion-easing-emphasized) both;
+}
+
+@keyframes nv-page-backdrop-clear {
+  to {
+    opacity: var(--neoverse-motion-page-backdrop-opacity);
+    transform: scale(var(--neoverse-motion-page-veil-scale));
+  }
+}
+
+@keyframes nv-page-backdrop-restore {
+  from {
+    opacity: var(--neoverse-motion-page-backdrop-opacity);
+    transform: scale(var(--neoverse-motion-page-veil-scale));
+  }
+}
+
+@keyframes nv-page-reveal-expand {
+  from {
+    --neoverse-page-reveal-progress: 0;
+  }
+
+  to {
+    --neoverse-page-reveal-progress: 1;
+  }
+}
+
+@keyframes nv-page-reveal-contract {
+  from {
+    --neoverse-page-reveal-progress: 1;
+  }
+
+  to {
+    --neoverse-page-reveal-progress: 0;
+  }
+}

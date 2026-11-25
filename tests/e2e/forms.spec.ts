@@ -5,27 +5,9 @@ import {
   expect,
   formValues,
   test,
-  themes,
 } from '../support/e2e';
 
 test.describe('forms', () => {
-  for (const theme of themes) {
-    test(`renders every form control in the ${theme} theme`, async ({ page }) => {
-      await page.goto(adapters[0]?.url(theme) ?? '/');
-
-      const form = page.locator('[data-text-contract-form]');
-      await expect(form.getByRole('textbox', { name: 'Contract text', exact: true })).toBeVisible();
-      await expect(
-        form.getByRole('textbox', { name: 'Contract notes', exact: true }),
-      ).toBeVisible();
-      await expect(form.getByRole('combobox', { name: 'Contract selection' })).toBeVisible();
-      await expect(
-        page.locator('[data-contract-form]').getByRole('checkbox').first(),
-      ).toBeVisible();
-      await expect(page.locator('html')).toHaveAttribute('data-theme', theme);
-    });
-  }
-
   for (const adapter of adapters) {
     test(`${adapter.name}: field wires its label, description and validation state`, async ({
       page,

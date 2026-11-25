@@ -3,7 +3,7 @@
 [English](README.md)
 
 <!-- Source: packages/motion/README.md -->
-<!-- Source-SHA256: 0ac4e4d54c61fe14e8ea5c83edc58c6d492e37bfc2097e5eacb5db428baf7e14 -->
+<!-- Source-SHA256: 85e5f1f56a7ae8eaac83dc3d577e00dd3f272af360d61b7b9767cdab53713eac -->
 
 Neoverse-UI 的单一动效规范：变量、Presence 引擎与页面切换动画。组件库中的一切动画都解析到这里发布的值——组件从不硬编码时长、缓动或关键帧。
 
@@ -25,7 +25,7 @@ bun add @neoverse-ui/motion
 2. **语义角色**：`feedback`、`state`、`spatial`、`enter` 与 `exit`。组件引用角色而不是原始值，因此修改一个变量即可重新调节整个系统。
 3. **Presence 引擎**（`.nv-*` 类）：为所有框架提供统一的入场/出场行为，由 `data-neoverse-motion` 预设属性驱动。
 4. **布局宽度动效**：`captureLayoutWidths` / `animateLayoutWidths` 让一组盒子在内容尺寸变化时保持同步。
-5. **页面切换动画**：由 `startViewTransition()` 驱动的 WebGL 粒子消散，带 CSS 快照回退。
+5. **页面切换动画**：由 `startViewTransition()` 编排的 9 种标准 View Transition 预设（`fade`、`glide`、`slide`、`push`、`depth`、`veil`、`curtain`、`iris`、`morph`），支持 `nv-page` / `nv-morph-*` 快照与 WAAPI 回退，并保留可选的 WebGL 粒子 `dissolve` 管线。
 
 ## Presence 引擎
 
@@ -81,7 +81,21 @@ animateLayoutWidths(samples);
 - 减少动效、缺少时长变量或没有 Web Animations API 时，解析为无动画并使用自然宽度。
 - 终点从渲染布局测量，因此消费项目必须在测量前等待字体加载完成（`document.fonts.ready`）——更新期间的字体切换会在动画开始后改变自然宽度。
 
-`captureLayoutWidths` 与 `animateLayoutWidths` 与框架无关；Vue 适配为 `@neoverse-ui/vue` 的 `useLayoutWidthMotion`。Design Lab 的 `foundation-motion-width` 样例展示了语言切换下的结果。
+`captureLayoutWidths` 与 `animateLayoutWidths` 与框架无关；Vue 适配为 `@neoverse-ui/vue` 的 `useLayoutWidthMotion`。Design Lab 的「切换动效」样例（`foundation-motion-playground`）展示了语言切换下的结果。
+
+## 披露区域动效
+
+`animateDisclosure(element, expanded)` 在 `state` 角色上让一个已挂载的披露区域在零高度与自然高度之间运动。关闭时立即加上 `inert` 与 `aria-hidden`，高度归零后再设置 `hidden`；展开时先移除这些状态再测量。被中断的运行会从当前屏幕高度继续，运行结束时恢复消费项目原有的内联 `height` 与 `overflow`；减少动效或缺少 Web Animations API 时直接应用目标状态。
+
+```ts
+import { animateDisclosure } from '@neoverse-ui/motion';
+
+const animation = animateDisclosure(list, expanded);
+await animation.finished;
+// animation.cancel() 会在当前高度停止。
+```
+
+Design Lab 用它播放资源浏览中示例叶子的展开与收缩，并在动效模块的「展开与收起」样例中展示。
 
 ## 外观与控件尺寸动效
 
@@ -118,31 +132,67 @@ const detach = attachLayoutSizeMotion(controlGroup);
 
 带尾部图标的紧凑操作控件用当前译文决定宽度，文字保持单行，图标不收缩，两者之间沿用组件间距。容器极窄时只截断可见文字，无障碍名称仍使用完整的当前译文。不要按最长译文固定标签宽度，否则较短的译文会在图标前留下空白。如果外部布局必须等宽，把预留空间放在文字和图标组合之外。需要播放宽度动画时，使用 `attachLayoutSizeMotion` 或布局宽度原语的临时不换行行为。
 
-「切换动效」（`foundation-motion-playground`）提供三种动效的操作示例；检查器的独立预览链接按当前译文排布。
+「切换动效」（`foundation-motion-playground`）提供主题、语言（含布局宽度动效）与控件尺寸的操作示例；检查器的独立预览链接按当前译文排布。
 
 ## 页面切换动画
 
 ```ts
 import { startViewTransition } from '@neoverse-ui/motion';
 
-await startViewTransition(() => {
-  route.content = next; // 替换 DOM
-});
+await startViewTransition(
+  () => {
+    route.content = next; // 替换 DOM
+  },
+  {
+    variant: 'push',
+    direction: 'forward',
+    target: outletElement,
+  },
+);
 ```
 
-优先级顺序：
+### 预设效果
 
-1. **WebGL 粒子消散**——浏览器支持 WebGL2 时，标记为 `data-neoverse-dissolve` 的元素会被光栅化（可用时使用 HTML-in-Canvas 捕获，否则生成主题色合成尘埃），并在指针透明的全屏画布上侵蚀为细尘；进入区域稍后淡入（`--neoverse-motion-particle-enter-delay/-duration`）。共享采样间距偏向更轻的场；可用 `particleDissolvePresets`（`high` / `medium`）继续调节。
-2. **交叉淡化**——没有 WebGL2 时，View Transition 自带的交叉淡化按 spatial 角色计时。无法使用粒子的消散直接淡出。
-3. **普通更新**——减少动效或不支持 View Transition 时，直接执行 DOM 更新。
+9 种标准预设均运行在标准 View Transitions 之上（当 `document.startViewTransition` 不可用时回退为非粘滞的 WAAPI 入场与 FLIP 平滑切换动画），无需开启任何实验性浏览器特性。
 
-可用 `particle: 'capture' | 'synthetic' | 'crossfade' | false` 强制指定管线。
+遵循“同背景不移动背景、保持网站一体性”的原则，**内容级预设**（`fade`、`glide`、`depth`、`veil`、`morph`）默认将动画限定在 `contentTarget` / `[data-neoverse-page-content]` 内容层，让相同背景或底板始终保持静止；仅当两页背景确实不同并显式传入 `background: 'surface'` 时才带动整面过渡。**整体切换预设**（`slide`、`push`、`curtain`、`iris`）则始终作为整页动效带动带画布底色的完整页面表面过渡：
+
+| 预设 | 分组 | 动效形式 | 适用场景 |
+| --- | --- | --- | --- |
+| `fade` | 同背景 | 非对称先退后入内容淡隐淡现（旧页先退场再淡入新页） | 彼此独立的横向页面跳转 |
+| `glide` | 同背景 | 共享轴先退后入内容轻滑（`--neoverse-motion-page-glide-distance`） | 文档阅读与工作台路由切换 |
+| `depth` | 同背景 | 细腻 Z 轴内容景深缩放（`1.02` / `0.985`，先退后入） | 总览网格与详情页面往返 |
+| `veil` | 同背景 | 前景内容柔和虚化聚焦（`--neoverse-motion-page-blur`） | 同背景极光玻璃表面与静谧视图 |
+| `morph` | 同背景 | 模仿 PPT 的跨页共享元素平滑几何变形与位移（`[data-neoverse-page-morph]`），未匹配文案先退后入 | 幻灯片演示、跨页视觉焦点衔接与版式演进 |
+| `slide` | 整体切换 | 端到端并排方向滑动（`100%`）并带画布底色支撑 | 连续步骤流与幻灯片切换 |
+| `push` | 整体切换 | 不透明图层在前景滑入覆盖退后并变暗的旧页面（`24%` 视差） | 层级钻入与返回 |
+| `curtain` | 整体切换 | 带画布底色支撑的方向窄羽化渐变光幕（`--neoverse-motion-page-feather`） | 叙事揭示与演示视图 |
+| `iris` | 整体切换 | 带画布底色支撑的径向羽化光圈展开与收拢，锚定到 `origin`（`Element` 或 `{ x, y }`） | 从卡片或按钮中心展开详情页 |
+
+传入 `variant: 'none'`（或 `particle: false`）可直接应用更新；调用 `stopViewTransition()` 可立即取消当前编排。使用 `supportsViewTransition()` 检测标准 View Transitions 支持状态。
+
+### 方向、背景策略、局部范围与回退
+
+- **方向（`direction`）**：支持 `'forward' | 'backward' | 'up' | 'down'`（默认 `'forward'`）。在 `:dir(rtl)` 下，水平位移与 `curtain` 渐变角度会自动镜像翻转。
+- **同背景静止保护（`contentTarget`、`background`、`[data-neoverse-page-content]`）**：在默认 `background: 'auto'` 下，`fade`、`glide`、`depth`、`veil` 与 `morph` 会自动解析 `contentTarget` 或 `[data-neoverse-page-content]`，仅对透明内容插槽施加 `nv-page` 快照，而让卡片底板、页面背景与外围壳层完全保持静止。仅当新页面拥有不同底色时传 `background: 'surface'`，或选用整体切换预设（`slide`、`push`、`curtain`、`iris`）。
+- **平滑元素匹配（`[data-neoverse-page-morph]`）**：在前后两页对应的持久或同类元素上标注相同的 `data-neoverse-page-morph="<key>"` 属性。启用 `variant: 'morph'` 时，运行时会临时分配确定性的 `nv-morph-<key>` 快照名（带重名去重保护并在结束或中断时自动清理）；当 `document.startViewTransition` 不可用时，回退为非粘滞的 WAAPI FLIP 变换。
+- **局部区域快照（`target`、`scope`、`resizeTarget`）**：传入 `target`（`scope` 默认 `'auto'`，也可显式指定 `'region'`）时，仅在该容器范围内分配 `view-transition-name: nv-page` 并停用 `root` 快照。外围导航栏、工具栏与侧栏保持实时可交互，且 `::view-transition-group(nv-page)` 会继承容器圆角（`--neoverse-page-transition-radius`）。使用 `scope: 'document'` 且传入 `background: 'surface'`（或整体预设）时可对整页根视图做快照。相邻页面自然高度不一致时，`resizeTarget`（默认随 `target`）会在切换快照就绪后平滑伸缩容器高度。
+- **遮罩与模糊回退**：缺少 `CSS.registerProperty` 时，View Transitions 中的 `curtain` 自动回退为 `glide`，`iris` 自动回退为 `depth`。在 `no-filter` 或 `@supports not (filter: blur(1px))` 下，`veil` 与 `depth` 会跳过模糊通道。
+- **WAAPI 局部回退**：不支持 `document.startViewTransition` 且传入 `target` 时，通过 Web Animations API（`fill: 'none'`）播放新页面入场，确保结束后不锁定极光玻璃的背景采样。
+
+### 粒子消散（`variant: 'dissolve'`）
+
+1. **WebGL 粒子消散**——显式选择 `variant: 'dissolve'`，或在未指定 `variant` 且存在 `dissolveSource` / `[data-neoverse-dissolve]` 时启用。浏览器支持 WebGL2 时，离场元素会被光栅化（可用时使用实验性 HTML-in-Canvas 捕获，否则生成主题色合成尘埃），并在指针透明的全屏画布上侵蚀为细尘；进入区域稍后淡入（`--neoverse-motion-particle-enter-delay/-duration`）。可用 `particleDissolvePresets`（`high` / `medium`）继续调节采样密度。
+2. **交叉淡化**——不支持 WebGL2 或设置 `particle: 'crossfade'` 时，回退为 `fade`。
+3. **普通更新**——减少动效或无可用的 View Transition 宿主时，直接执行 DOM 更新。
+
+可用 `particle: 'capture' | 'synthetic' | 'crossfade' | false` 强制指定消散管线。
 
 保证：
 
 - **可中断**——新调用会在当前帧跳过正在运行的动画；快速导航从不排队。
-- **并行**——动画期间每一层都是 `pointer-events: none`；旧页面仍在消散时，新页面已可交互。
-- **稳定 chrome**——为持久元素指定 `view-transition-name`，避免它们在状态之间闪烁。
+- **并行**——动画期间每一层都是 `pointer-events: none`；旧页面仍在过渡时，新页面已可交互。
+- **稳定 chrome**——使用 `target` 限定局部区域，或为持久元素指定 `view-transition-name` 避免状态间闪烁。
 
 ## 变量参考
 
@@ -151,6 +201,7 @@ await startViewTransition(() => {
 | 时长 | `fast` 140ms · `standard` 240ms · `expressive` 420ms |
 | 缓动 | `linear` · `standard` · `emphasized` · `accelerate` |
 | 距离 | `near` · `mid` · `far`（space-2 / space-4 / space-8） |
+| 页面 | `duration` 360ms · `expressive` 520ms · `exit` 140ms · `enter` 240ms · `delay` 120ms · `blur` 8px |
 | 粒子 | `duration` 910ms · `enter-delay` 455ms · `enter-duration` 234ms |
 
 架构与贡献说明见 [Neoverse-UI 仓库](https://github.com/SSJ-ZYJ/Neoverse-UI)。

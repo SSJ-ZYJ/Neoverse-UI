@@ -1,5 +1,5 @@
 import { execFileSync } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 
 // Test registry governance, described in docs/testing/README.md. The Scope
@@ -138,7 +138,7 @@ export function collectTestFiles(): string[] {
   }
   return output
     .split('\n')
-    .filter((file) => /\.(test|spec)\.tsx?$/.test(file))
+    .filter((file) => /\.(test|spec)\.tsx?$/.test(file) && existsSync(resolve(root, file)))
     .sort();
 }
 

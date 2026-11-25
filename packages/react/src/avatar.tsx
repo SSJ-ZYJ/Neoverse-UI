@@ -1,6 +1,8 @@
-import { type HTMLAttributes, useState } from 'react';
+import { type HTMLAttributes, type ReactNode, useState } from 'react';
 
 export type UiAvatarShape = 'circle' | 'rounded';
+/** What a source-less avatar paints: derived initials or the neutral person glyph. */
+export type UiAvatarPlaceholder = 'initials' | 'icon';
 
 export interface UiAvatarProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'children'> {
   name: string;
@@ -8,7 +10,16 @@ export interface UiAvatarProps extends Omit<HTMLAttributes<HTMLSpanElement>, 'ch
   fallback?: string;
   size?: 'sm' | 'md' | 'lg';
   shape?: UiAvatarShape;
+  placeholder?: UiAvatarPlaceholder;
+  /** Replaces the built-in person glyph when `placeholder` is `icon`. */
+  icon?: ReactNode;
 }
+
+const defaultIcon = (
+  <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+    <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm0 2c-4.42 0-8 2.24-8 5v1h16v-1c0-2.76-3.58-5-8-5Z" />
+  </svg>
+);
 
 export function UiAvatar({
   name,
@@ -16,6 +27,8 @@ export function UiAvatar({
   fallback,
   size = 'md',
   shape = 'rounded',
+  placeholder = 'initials',
+  icon,
   className,
   ...rest
 }: UiAvatarProps) {
@@ -55,6 +68,10 @@ export function UiAvatar({
           decoding="async"
           onError={() => setFailedSource(src)}
         />
+      ) : placeholder === 'icon' ? (
+        <span className="ui-avatar__icon" aria-hidden="true">
+          {icon ?? defaultIcon}
+        </span>
       ) : (
         <span className="ui-avatar__fallback" aria-hidden="true">
           {initials}

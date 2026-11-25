@@ -3,12 +3,15 @@ export const glassVertexShader = `
 
   uniform vec2 u_viewport;
   uniform vec4 u_rect;
+  uniform vec4 u_basis;
 
   varying vec2 v_local;
   varying vec2 v_viewport;
 
   void main() {
-    vec2 position = u_rect.xy + (a_position * u_rect.zw);
+    vec2 center = u_rect.xy + (u_rect.zw * 0.5);
+    vec2 localOffset = (a_position - 0.5) * u_rect.zw;
+    vec2 position = center + (u_basis.xy * localOffset.x) + (u_basis.zw * localOffset.y);
     vec2 clip = (position / u_viewport) * 2.0 - 1.0;
     clip.y *= -1.0;
     gl_Position = vec4(clip, 0.0, 1.0);

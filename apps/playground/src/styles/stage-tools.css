@@ -1,0 +1,236 @@
+.playground-overview-hero {
+  display: grid;
+  grid-template-columns: repeat(
+      auto-fit,
+      minmax(min(100%, var(--neoverse-playground-showcase-card-width)), 1fr)
+    );
+  align-content: center;
+  align-items: center;
+  gap: clamp(var(--neoverse-space-6), 5vw, var(--neoverse-space-12));
+  padding-block: var(--neoverse-space-6) var(--neoverse-space-12);
+}
+
+.playground-overview-hero__intro {
+  max-inline-size: var(--neoverse-layout-reading-width);
+  gap: var(--neoverse-space-4);
+}
+
+.playground-overview-hero__intro h2 {
+  font-size: var(--neoverse-typography-display-md-size);
+  line-height: var(--neoverse-typography-display-md-line-height);
+  letter-spacing: var(--neoverse-typography-display-md-letter-spacing);
+  white-space: nowrap;
+}
+
+@media (max-width: 480px) {
+  .playground-overview-hero__intro h2 {
+    white-space: normal;
+  }
+}
+
+.playground-overview-hero__stage {
+  display: grid;
+  justify-items: center;
+  gap: var(--neoverse-space-3);
+}
+
+.playground-overview-hero__sample {
+  inline-size: 100%;
+  max-inline-size: calc(var(--neoverse-playground-showcase-card-width) + var(--neoverse-space-12));
+}
+
+/* Stage tools sit outside the magnified specimen and retain their hit sizes. */
+.playground-stage__identity {
+  display: flex;
+  flex-wrap: wrap;
+  min-inline-size: 0;
+  align-items: center;
+  gap: var(--neoverse-space-2);
+}
+
+.playground-stage__zoom {
+  display: flex;
+  flex-wrap: wrap;
+  flex: none;
+  align-items: center;
+}
+
+.playground-stage__zoom-range {
+  /* The native accent fill paints the track at full strength, which reads as a
+     heavy blue bar. Draw a pale sky-blue fill instead, sized by the value. */
+  --ui-zoom-fill: 20%;
+  --ui-zoom-track: color-mix(
+    in srgb,
+    var(--neoverse-color-blue-300) var(--neoverse-effect-strength-24),
+    var(--neoverse-color-surface-raised)
+  );
+  --ui-zoom-fill-color: color-mix(
+    in srgb,
+    var(--neoverse-color-blue-300) var(--neoverse-effect-strength-72),
+    var(--neoverse-color-surface-raised)
+  );
+  --ui-zoom-thumb: color-mix(in srgb, var(--neoverse-color-blue-300) 84%, white);
+  inline-size: clamp(7rem, 22vw, 12rem);
+  block-size: var(--neoverse-space-5);
+  flex: none;
+  margin-inline: var(--neoverse-space-1);
+  background: transparent;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.playground-stage__zoom-range::-webkit-slider-runnable-track {
+  block-size: var(--neoverse-space-1);
+  border-radius: var(--neoverse-radius-pill);
+  background:
+    linear-gradient(var(--ui-zoom-fill-color), var(--ui-zoom-fill-color)) 0 / var(--ui-zoom-fill)
+    100% no-repeat,
+    var(--ui-zoom-track);
+}
+
+.playground-stage__zoom-range::-webkit-slider-thumb {
+  inline-size: var(--neoverse-space-4);
+  block-size: var(--neoverse-space-4);
+  margin-block-start: calc((var(--neoverse-space-1) - var(--neoverse-space-4)) / 2);
+  border: var(--neoverse-border-width-thin) solid
+    color-mix(in srgb, var(--neoverse-color-blue-500) 30%, transparent);
+  border-radius: var(--neoverse-radius-pill);
+  background: var(--ui-zoom-thumb);
+  box-shadow: var(--neoverse-shadow-xs);
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.playground-stage__zoom-range::-moz-range-track {
+  block-size: var(--neoverse-space-1);
+  border-radius: var(--neoverse-radius-pill);
+  background: var(--ui-zoom-track);
+}
+
+.playground-stage__zoom-range::-moz-range-progress {
+  block-size: var(--neoverse-space-1);
+  border-radius: var(--neoverse-radius-pill);
+  background: var(--ui-zoom-fill-color);
+}
+
+.playground-stage__zoom-range::-moz-range-thumb {
+  inline-size: var(--neoverse-space-4);
+  block-size: var(--neoverse-space-4);
+  border: var(--neoverse-border-width-thin) solid
+    color-mix(in srgb, var(--neoverse-color-blue-500) 30%, transparent);
+  border-radius: var(--neoverse-radius-pill);
+  background: var(--ui-zoom-thumb);
+  box-shadow: var(--neoverse-shadow-xs);
+}
+
+.playground-stage__zoom-range:focus-visible {
+  outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+  outline-offset: var(--neoverse-focus-ring-offset);
+}
+
+@media (forced-colors: active) {
+  .playground-stage__zoom-range {
+    appearance: auto;
+    -webkit-appearance: auto;
+    accent-color: auto;
+  }
+}
+
+.playground-stage__zoom-value {
+  min-inline-size: 5ch;
+  font-variant-numeric: tabular-nums;
+}
+
+/* A magnified preview is never clipped to an inner box: its shadows must paint
+   in full. The stage pans it instead, and the workspace scroll port keeps the
+   page itself from scrolling sideways. */
+.playground-stage__specimen-content {
+  cursor: grab;
+}
+
+.playground-stage__specimen-content[data-dragging] {
+  cursor: grabbing;
+  user-select: none;
+}
+
+.playground-stage__specimen-content > * {
+  /* Visual magnification only: the specimen keeps its 100% layout and is scaled
+     for inspection, so text and rows never reflow. */
+  transform-origin: center center;
+  scale: var(--stage-scale, 1);
+  translate: var(--stage-offset-x, 0px) var(--stage-offset-y, 0px);
+}
+
+.playground-stage__grip {
+  position: relative;
+  display: inline-flex;
+  inline-size: var(--neoverse-space-6);
+  block-size: var(--neoverse-space-6);
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  border: var(--neoverse-border-width-thin) solid var(--neoverse-color-border-default);
+  border-radius: var(--neoverse-radius-pill);
+  background-color: var(--neoverse-color-surface-raised);
+  color: var(--neoverse-color-text-secondary);
+  box-shadow: var(--neoverse-shadow-sm);
+  cursor: grab;
+  opacity: 0.75;
+  touch-action: none;
+  transition:
+    opacity var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+    box-shadow var(--neoverse-motion-feedback-duration) var(--neoverse-motion-feedback-easing);
+}
+
+.playground-stage__grip:hover,
+.playground-stage__grip:focus-visible,
+.playground-stage__grip[data-dragging] {
+  opacity: 1;
+}
+
+.playground-stage__grip:focus-visible {
+  outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+  outline-offset: var(--neoverse-focus-ring-offset);
+}
+
+.playground-stage__grip:active {
+  cursor: grabbing;
+  box-shadow: var(--neoverse-effect-press-shadow);
+}
+
+@media (pointer: coarse) {
+  .playground-stage__grip::before {
+    position: absolute;
+    inset: calc(var(--neoverse-control-touch-hit-area) * -1);
+    border-radius: inherit;
+    content: '';
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playground-stage__grip {
+    transition: none;
+  }
+}
+
+/* A composition is a product scene, not a control on a studio plinth. Give it
+   the reading measure and start it under the heading instead of centering a
+   workspace in the middle of an empty canvas. */
+.playground-stage--composition .playground-stage__specimen-content {
+  align-items: start;
+  padding-block: var(--neoverse-space-6) var(--neoverse-space-12);
+}
+
+.playground-stage--composition .playground-stage__specimen-content > * {
+  inline-size: 100%;
+  max-inline-size: var(--neoverse-layout-reading-width);
+}
+
+/* A sidebar preview stays a sidebar; stretching it to the reading measure makes
+   every navigation row read as a full-page banner. */
+.playground-stage--composition
+  .playground-stage__specimen-content
+  > [data-composition-measure='narrow'] {
+  max-inline-size: var(--neoverse-playground-scene-narrow-width);
+}

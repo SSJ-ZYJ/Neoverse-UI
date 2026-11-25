@@ -1,7 +1,6 @@
 import { h, type VNode } from 'vue';
 import { defineComposition } from '../lab-specimen-config';
-import ReadingComposition from '../modules/ReadingComposition.vue';
-import ReducedTransparencyComposition from '../modules/ReducedTransparencyComposition.vue';
+import { lazyComponent, withPreload } from '../lazy-component';
 import { type Locale, localized } from '../playground-content';
 import { resolvedTheme } from '../theme-state';
 import {
@@ -24,129 +23,148 @@ import {
   surfaceControl,
   type ToolbarConfiguration,
 } from './composition-settings';
-import ControlCluster from './scenes/ControlCluster.vue';
-import DocsArticleHeader from './scenes/DocsArticleHeader.vue';
-import DocsContentSurface from './scenes/DocsContentSurface.vue';
-import DocsNavigationGroup from './scenes/DocsNavigationGroup.vue';
-import DocsToolbar from './scenes/DocsToolbar.vue';
-import FloatingToolbar from './scenes/FloatingToolbar.vue';
-import GiscusTheme from './scenes/GiscusTheme.vue';
-import ProjectCard from './scenes/ProjectCard.vue';
 
-export function standardComposition(locale: Locale): VNode {
-  return h(
-    'div',
-    {
-      class: 'grid w-full min-w-0 max-w-reading-wide gap-grid',
-      'data-composition-mode': 'glass',
-    },
-    [h(ControlCluster, { locale }), h(ProjectCard, { locale })],
-  );
-}
+const ReadingComposition = lazyComponent(() => import('../modules/ReadingComposition.vue'));
+const ReducedTransparencyComposition = lazyComponent(
+  () => import('../modules/ReducedTransparencyComposition.vue'),
+);
+const ControlCluster = lazyComponent(() => import('./scenes/ControlCluster.vue'));
+const DocsArticleHeader = lazyComponent(() => import('./scenes/DocsArticleHeader.vue'));
+const DocsContentSurface = lazyComponent(() => import('./scenes/DocsContentSurface.vue'));
+const DocsNavigationGroup = lazyComponent(() => import('./scenes/DocsNavigationGroup.vue'));
+const DocsToolbar = lazyComponent(() => import('./scenes/DocsToolbar.vue'));
+const FloatingToolbar = lazyComponent(() => import('./scenes/FloatingToolbar.vue'));
+const GiscusTheme = lazyComponent(() => import('./scenes/GiscusTheme.vue'));
+const ProjectCard = lazyComponent(() => import('./scenes/ProjectCard.vue'));
 
-export function accessibleComposition(locale: Locale): VNode {
-  return h(ReducedTransparencyComposition, { locale });
-}
-
-export const controlCluster = defineComposition<
-  ControlClusterConfiguration,
-  { mode: ControlClusterMode }
->()({
-  presets: controlClusterPresets,
-  controls: {
-    props: {
-      compact: compactControl,
-      surface: surfaceControl,
-      showStatus: {
-        kind: 'boolean',
-        group: 'content',
-        label: localized('Show status', '显示状态'),
+export const standardComposition = withPreload(
+  (locale: Locale): VNode =>
+    h(
+      'div',
+      {
+        class: 'grid w-full min-w-0 max-w-reading-wide gap-grid',
+        'data-composition-mode': 'glass',
       },
-    },
-    state: { mode: controlClusterMode },
-  },
-  render: ({ locale, props, state, setState }) =>
-    h(ControlCluster, {
-      locale,
-      configuration: props,
-      modelValue: state.mode,
-      'onUpdate:modelValue': (mode) => setState('mode', mode),
-    }),
-});
+      [h(ControlCluster, { locale }), h(ProjectCard, { locale })],
+    ),
+  [ControlCluster, ProjectCard],
+);
 
-export const projectCard = defineComposition<ProjectCardConfiguration>()({
-  presets: projectCardPresets,
-  controls: {
-    props: {
-      content: projectContentControl,
-      surface: surfaceControl,
-      status: projectStatusControl,
-      progress: {
-        kind: 'number',
-        group: 'content',
-        label: localized('Delivery progress', '交付进度'),
-        min: 0,
-        max: 100,
+export const accessibleComposition = withPreload(
+  (locale: Locale): VNode => h(ReducedTransparencyComposition, { locale }),
+  ReducedTransparencyComposition,
+);
+
+export const controlCluster = withPreload(
+  defineComposition<ControlClusterConfiguration, { mode: ControlClusterMode }>()({
+    presets: controlClusterPresets,
+    controls: {
+      props: {
+        compact: compactControl,
+        surface: surfaceControl,
+        showStatus: {
+          kind: 'boolean',
+          group: 'content',
+          label: localized('Show status', '显示状态'),
+        },
       },
+      state: { mode: controlClusterMode },
     },
-    state: {},
-  },
-  render: ({ locale, props }) => h(ProjectCard, { locale, configuration: props }),
-});
+    render: ({ locale, props, state, setState }) =>
+      h(ControlCluster, {
+        locale,
+        configuration: props,
+        modelValue: state.mode,
+        'onUpdate:modelValue': (mode) => setState('mode', mode),
+      }),
+  }),
+  ControlCluster,
+);
 
-export const floatingToolbar = defineComposition<
-  ToolbarConfiguration,
-  { mode: FloatingToolbarMode }
->()({
-  presets: floatingToolbarPresets,
-  controls: {
-    props: { compact: compactControl, surface: surfaceControl, showActions: showActionsControl },
-    state: { mode: floatingToolbarMode },
-  },
-  render: ({ locale, props, state, setState }) =>
-    h(FloatingToolbar, {
-      locale,
-      configuration: props,
-      modelValue: state.mode,
-      'onUpdate:modelValue': (mode) => setState('mode', mode),
-    }),
-});
-
-export function docsArticleHeader(locale: Locale): VNode {
-  return h(DocsArticleHeader, { locale });
-}
-
-export function docsNavigationGroup(locale: Locale): VNode {
-  return h(DocsNavigationGroup, { locale });
-}
-
-export const docsToolbar = defineComposition<ToolbarConfiguration, { mode: DocsToolbarMode }>()({
-  presets: docsToolbarPresets,
-  controls: {
-    props: {
-      compact: compactControl,
-      surface: surfaceControl,
-      showActions: { ...showActionsControl, label: localized('Show copy link', '显示复制链接') },
+export const projectCard = withPreload(
+  defineComposition<ProjectCardConfiguration>()({
+    presets: projectCardPresets,
+    controls: {
+      props: {
+        content: projectContentControl,
+        surface: surfaceControl,
+        status: projectStatusControl,
+        progress: {
+          kind: 'number',
+          group: 'content',
+          label: localized('Delivery progress', '交付进度'),
+          min: 0,
+          max: 100,
+        },
+      },
+      state: {},
     },
-    state: { mode: docsToolbarMode },
-  },
-  render: ({ locale, props, state, setState }) =>
-    h(DocsToolbar, {
-      locale,
-      configuration: props,
-      modelValue: state.mode,
-      'onUpdate:modelValue': (mode) => setState('mode', mode),
-    }),
-});
+    render: ({ locale, props }) => h(ProjectCard, { locale, configuration: props }),
+  }),
+  ProjectCard,
+);
 
-export function docsContentSurface(locale: Locale): VNode {
-  return h(DocsContentSurface, { locale });
-}
+export const floatingToolbar = withPreload(
+  defineComposition<ToolbarConfiguration, { mode: FloatingToolbarMode }>()({
+    presets: floatingToolbarPresets,
+    controls: {
+      props: { compact: compactControl, surface: surfaceControl, showActions: showActionsControl },
+      state: { mode: floatingToolbarMode },
+    },
+    render: ({ locale, props, state, setState }) =>
+      h(FloatingToolbar, {
+        locale,
+        configuration: props,
+        modelValue: state.mode,
+        'onUpdate:modelValue': (mode) => setState('mode', mode),
+      }),
+  }),
+  FloatingToolbar,
+);
 
-export function reading(locale: Locale): VNode {
-  return h(ReadingComposition, { locale, id: 'composition-reading-content' });
-}
+export const docsArticleHeader = withPreload(
+  (locale: Locale): VNode => h(DocsArticleHeader, { locale }),
+  DocsArticleHeader,
+);
 
-export function giscus(locale: Locale): VNode {
-  return h(GiscusTheme, { locale, theme: resolvedTheme.value });
-}
+export const docsNavigationGroup = withPreload(
+  (locale: Locale): VNode => h(DocsNavigationGroup, { locale }),
+  DocsNavigationGroup,
+);
+
+export const docsToolbar = withPreload(
+  defineComposition<ToolbarConfiguration, { mode: DocsToolbarMode }>()({
+    presets: docsToolbarPresets,
+    controls: {
+      props: {
+        compact: compactControl,
+        surface: surfaceControl,
+        showActions: { ...showActionsControl, label: localized('Show copy link', '显示复制链接') },
+      },
+      state: { mode: docsToolbarMode },
+    },
+    render: ({ locale, props, state, setState }) =>
+      h(DocsToolbar, {
+        locale,
+        configuration: props,
+        modelValue: state.mode,
+        'onUpdate:modelValue': (mode) => setState('mode', mode),
+      }),
+  }),
+  DocsToolbar,
+);
+
+export const docsContentSurface = withPreload(
+  (locale: Locale): VNode => h(DocsContentSurface, { locale }),
+  DocsContentSurface,
+);
+
+export const reading = withPreload(
+  (locale: Locale): VNode => h(ReadingComposition, { locale, id: 'composition-reading-content' }),
+  ReadingComposition,
+);
+
+export const giscus = withPreload(
+  (locale: Locale): VNode => h(GiscusTheme, { locale, theme: resolvedTheme.value }),
+  GiscusTheme,
+);

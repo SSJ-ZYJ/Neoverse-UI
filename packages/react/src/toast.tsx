@@ -17,6 +17,9 @@ export interface UiToastProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onCh
   message: string;
   dismissLabel: string;
   variant?: NoticeVariant;
+  /** Defaults to compact, or action when action content is supplied. */
+  presentation?: 'compact' | 'action' | 'notification';
+  /** Auto-dismiss delay in milliseconds. Defaults to 4 seconds, or zero for notification. */
   duration?: number;
   action?: ReactNode;
   onOpenChange: (open: boolean) => void;
@@ -27,7 +30,8 @@ export function UiToast({
   message,
   dismissLabel,
   variant = 'neutral',
-  duration = 4000,
+  presentation: requestedPresentation,
+  duration: requestedDuration,
   action,
   onOpenChange,
   className,
@@ -38,6 +42,9 @@ export function UiToast({
   onBlur,
   ...rest
 }: UiToastProps) {
+  const hasAction = action !== undefined && action !== null && typeof action !== 'boolean';
+  const presentation = requestedPresentation ?? (hasAction ? 'action' : 'compact');
+  const duration = requestedDuration ?? (presentation === 'notification' ? 0 : 4000);
   const [mounted, setMounted] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const callback = useRef(onOpenChange);
@@ -70,6 +77,7 @@ export function UiToast({
           .filter(Boolean)
           .join(' ')}
         data-surface="glass-elevated"
+        data-presentation={presentation}
         data-neoverse-glass-occluder="topmost"
         data-neoverse-surface-overflow="visible"
         data-neoverse-surface-hover="static"
@@ -93,15 +101,17 @@ export function UiToast({
       >
         <span className="ui-toast__indicator" aria-hidden="true" />
         <div className="ui-toast__message">{children ?? message}</div>
-        {action}
-        <button
-          className="ui-toast__dismiss"
-          type="button"
-          aria-label={dismissLabel}
-          onClick={() => onOpenChange(false)}
-        >
-          <span aria-hidden="true">×</span>
-        </button>
+        {hasAction && <div className="ui-toast__action">{action}</div>}
+        {(presentation === 'notification' || duration <= 0) && (
+          <button
+            className="ui-toast__dismiss"
+            type="button"
+            aria-label={dismissLabel}
+            onClick={() => onOpenChange(false)}
+          >
+            <span aria-hidden="true">×</span>
+          </button>
+        )}
       </UiPresence>
     </div>,
     document.body,

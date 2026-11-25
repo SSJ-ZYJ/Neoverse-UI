@@ -11,45 +11,42 @@ import {
 
 test.describe('modal and transient feedback', () => {
   for (const adapter of adapters) {
-    for (const theme of ['light', 'dark'] as const) {
-      test(`${adapter.name}: Escape closes the modal and restores focus / ${theme}`, async ({
-        page,
-      }) => {
-        await page.goto(adapter.url(theme, 'overlays'));
-        const trigger =
-          adapter.name === 'Vue'
-            ? page.locator('#overlays-dialog [data-dialog-open]')
-            : page.locator('[data-react-adapter="UiDialog"] [data-dialog-open]');
-        // WebKit does not move focus to a button on pointer activation, so a
-        // clicked trigger never owned focus for the dialog to return. Keyboard
-        // activation exercises the return-to-invoker contract on every engine.
-        await trigger.focus();
-        await trigger.press('Enter');
-        const dialog = page.locator('dialog.ui-dialog');
-        await expect(dialog).toBeVisible();
-        await expect(dialog).toHaveAttribute('aria-labelledby', /dialog-title|title/);
-        const title = dialog.locator('.ui-dialog__title');
-        await expect(title).toHaveCSS('font-size', '18px');
-        await title.evaluate((element) =>
-          element.style.setProperty('--neoverse-typography-title-md-size', '26px'),
-        );
-        await expect(title).toHaveCSS('font-size', '26px');
-        await page.keyboard.press('Escape');
-        await expect(dialog).toBeHidden();
-        await expect(trigger).toBeFocused();
-      });
+    test(`${adapter.name}: Escape closes the modal and restores focus`, async ({ page }) => {
+      await page.goto(adapter.url('light', 'overlays'));
+      const trigger =
+        adapter.name === 'Vue'
+          ? page.locator('#overlays-dialog [data-dialog-open]')
+          : page.locator('[data-react-adapter="UiDialog"] [data-dialog-open]');
+      // WebKit does not move focus to a button on pointer activation, so a
+      // clicked trigger never owned focus for the dialog to return. Keyboard
+      // activation exercises the return-to-invoker contract on every engine.
+      await trigger.focus();
+      await trigger.press('Enter');
+      const dialog = page.locator('dialog.ui-dialog');
+      await expect(dialog).toBeVisible();
+      await expect(dialog).toHaveAttribute('aria-labelledby', /dialog-title|title/);
+      const title = dialog.locator('.ui-dialog__title');
+      await expect(title).toHaveCSS('font-size', '18px');
+      await title.evaluate((element) =>
+        element.style.setProperty('--neoverse-typography-title-md-size', '26px'),
+      );
+      await expect(title).toHaveCSS('font-size', '26px');
+      await page.keyboard.press('Escape');
+      await expect(dialog).toBeHidden();
+      await expect(trigger).toBeFocused();
+    });
 
-      test(`${adapter.name}: compact glass feedback is announced and can be dismissed / ${theme}`, async ({
+    for (const theme of ['light', 'dark'] as const) {
+      test(`${adapter.name}: feedback stays compact, exposes its action and fits long notifications / ${theme}`, async ({
         page,
       }) => {
         await page.goto(adapter.url(theme, 'status-feedback'));
-        const trigger =
-          adapter.name === 'Vue'
-            ? page.locator('#status-feedback-toast [data-toast-open]')
-            : page.locator('[data-react-adapter="UiToast"] [data-toast-open]');
-        await trigger.click();
+        const fixture = page.locator(
+          adapter.name === 'Vue' ? '#status-feedback-toast' : '[data-react-adapter="UiToast"]',
+        );
+        await fixture.locator('[data-toast-open="compact"]').click();
         const toast = page.locator('.ui-toast[role="status"]');
-        await expect(toast).toBeVisible();
+        await expect(toast.getByRole('button')).toHaveCount(0);
         await expect(toast).toHaveCSS('backdrop-filter', /blur\(18px\)/);
         const { alpha, width, height } = await toast.evaluate((element) => {
           const { backgroundColor } = getComputedStyle(element);
@@ -64,8 +61,26 @@ test.describe('modal and transient feedback', () => {
           };
         });
         expect(alpha).toBeCloseTo(0.2);
-        expect(width).toBeLessThan(300);
+        expect(width).toBeLessThan(230);
         expect(height).toBeLessThanOrEqual(42);
+
+        await fixture.locator('[data-toast-open="action"]').click();
+        const action = toast.locator('[data-toast-action]');
+        await expect(action).toBeVisible();
+        await expect(toast.getByRole('button')).toHaveCount(1);
+        await action.click();
+        await expect(fixture.locator('[data-toast-details]')).toBeVisible();
+        await expect(toast).toBeHidden();
+
+        await fixture.locator('[data-toast-open="notification"]').click();
+        await expect(toast.getByRole('button')).toBeVisible();
+        const notification = await toast.evaluate((element) => {
+          const { left, right, height } = element.getBoundingClientRect();
+          return { left, right, height, viewport: document.documentElement.clientWidth };
+        });
+        expect(notification.height).toBeGreaterThan(height);
+        expect(notification.left).toBeGreaterThan(0);
+        expect(notification.right).toBeLessThan(notification.viewport);
         await toast.getByRole('button').click();
         await expect(toast).toBeHidden();
       });

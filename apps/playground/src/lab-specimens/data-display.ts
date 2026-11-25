@@ -66,15 +66,24 @@ const avatarShapeOptions = [
   { value: 'circle', label: localized('Circle', '圆形') },
   { value: 'rounded', label: localized('Rounded', '圆角') },
 ] as const;
+const avatarPlaceholderOptions = [
+  { value: 'initials', label: localized('Initials', '首字母') },
+  { value: 'icon', label: localized('Default icon', '默认图标') },
+] as const;
 
 /** The editable Avatar specimen */
 export const avatar = defineSpecimen<AvatarProps>()({
-  initialProps: { size: 'md', shape: 'circle' },
+  initialProps: { size: 'md', shape: 'circle', placeholder: 'initials' },
   initialState: () => ({}),
   controls: {
     props: {
       size: { kind: 'select', label: sizeLabel, options: sizeOptions },
       shape: { kind: 'select', label: shapeLabel, options: avatarShapeOptions },
+      placeholder: {
+        kind: 'select',
+        label: localized('Placeholder', '占位样式'),
+        options: avatarPlaceholderOptions,
+      },
     },
   },
   render: ({ props }) =>

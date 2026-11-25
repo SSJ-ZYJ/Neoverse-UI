@@ -15,10 +15,12 @@ import {
 import { ref } from 'vue';
 import LabIcon from '../LabIcon.vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
+import { lazyComponent } from '../lazy-component';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, localized } from '../playground-content';
-import DataDisplayVisualFixture from './DataDisplayVisualFixture.vue';
 import type { LabModuleProps } from './types';
+
+const DataDisplayVisualFixture = lazyComponent(() => import('./DataDisplayVisualFixture.vue'));
 
 const props = defineProps<LabModuleProps>();
 const selectedTab = ref('overview');
@@ -169,6 +171,8 @@ const copy = {
           data-avatar-sample
         />
         <UiAvatar :name="avatarName" :fallback="avatarFallback" size="lg" shape="circle" />
+        <UiAvatar name="Anonymous" placeholder="icon" size="md" shape="circle" data-avatar-icon />
+        <UiAvatar name="Anonymous" placeholder="icon" size="lg" data-avatar-icon />
       </div>
     </LabSpecimenSection>
     <LabSpecimenSection

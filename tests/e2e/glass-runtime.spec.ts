@@ -305,3 +305,218 @@ test('forced colors keeps the glass surfaces usable without a page overflow', as
   expect(style.forcedColorAdjust).toBe('auto');
   await expectNoPageOverflow(page);
 });
+
+test('WAAPI layout size motion keeps WebGL edges aligned with resizing and shifted controls', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.addInitScript(() => {
+    const origGetUniformLocation = WebGL2RenderingContext.prototype.getUniformLocation;
+    const origClear = WebGL2RenderingContext.prototype.clear;
+    const origUniform4f = WebGL2RenderingContext.prototype.uniform4f;
+    const names = new WeakMap<WebGLUniformLocation, string>();
+    WebGL2RenderingContext.prototype.getUniformLocation = function (program, name) {
+      const location = origGetUniformLocation.call(this, program, name);
+      if (location) names.set(location, name);
+      return location;
+    };
+    const scope = window as Window & {
+      __glassFrames?: Array<{ rects: number[][] }>;
+    };
+    scope.__glassFrames = [];
+    let current: { rects: number[][] } | null = null;
+    WebGL2RenderingContext.prototype.clear = function (...args) {
+      current = { rects: [] };
+      scope.__glassFrames?.push(current);
+      return origClear.apply(this, args);
+    };
+    WebGL2RenderingContext.prototype.uniform4f = function (location, a, b, c, d) {
+      if (location && names.get(location) === 'u_rect' && current) {
+        current.rects.push([a, b, c, d]);
+      }
+      return origUniform4f.call(this, location, a, b, c, d);
+    };
+  });
+
+  await page.goto('/?theme=light&lang=en&fps=0#foundation-motion-playground', {
+    waitUntil: 'domcontentloaded',
+  });
+  await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
+  await page.evaluate(() => document.fonts.ready);
+
+  const tracePromise = page.evaluate(() => {
+    const scope = window as Window & { __glassFrames?: Array<{ rects: number[][] }> };
+    scope.__glassFrames = [];
+    const start = performance.now();
+    const channel = new MessageChannel();
+    const samples: Array<{ maxErr: number; width: number }> = [];
+    let pending: { targets: number[][] } | null = null;
+    channel.port1.onmessage = () => {
+      if (!pending) return;
+      const latest = scope.__glassFrames?.at(-1);
+      if (latest) {
+        for (const dom of pending.targets) {
+          let bestErr = Number.POSITIVE_INFINITY;
+          for (const rect of latest.rects) {
+            const err = Math.max(
+              Math.abs((rect[0] ?? 0) - (dom[0] ?? 0)),
+              Math.abs((rect[1] ?? 0) - (dom[1] ?? 0)),
+              Math.abs((rect[2] ?? 0) - (dom[2] ?? 0)),
+              Math.abs((rect[3] ?? 0) - (dom[3] ?? 0)),
+            );
+            if (err < bestErr) bestErr = err;
+          }
+          samples.push({ maxErr: bestErr, width: dom[2] ?? 0 });
+        }
+      }
+      pending = null;
+    };
+    return new Promise<typeof samples>((resolve) => {
+      const step = () => {
+        const text = document.querySelector('[data-motion-size-sample="text"]');
+        const icon = document.querySelector('[data-motion-size-sample="icon"]');
+        if (text && icon) {
+          const t = text.getBoundingClientRect();
+          const i = icon.getBoundingClientRect();
+          pending = {
+            targets: [
+              [t.left, t.top, t.width, t.height],
+              [i.left, i.top, i.width, i.height],
+            ],
+          };
+          channel.port2.postMessage(null);
+        }
+        if (performance.now() - start < 450) requestAnimationFrame(step);
+        else setTimeout(() => resolve(samples), 30);
+      };
+      requestAnimationFrame(step);
+    });
+  });
+
+  await page.locator('[data-motion-size-control]').getByRole('radio', { name: 'Large' }).click();
+  const samples = await tracePromise;
+  expect(samples.length).toBeGreaterThan(4);
+  const maxError = Math.max(...samples.map((entry) => entry.maxErr));
+  expect(maxError).toBeLessThanOrEqual(0.5);
+});
+
+test('rotated glass surfaces upload tilted basis vectors matching their local dimensions', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const origGetUniformLocation = WebGL2RenderingContext.prototype.getUniformLocation;
+    const origClear = WebGL2RenderingContext.prototype.clear;
+    const origUniform4f = WebGL2RenderingContext.prototype.uniform4f;
+    const origUniform2f = WebGL2RenderingContext.prototype.uniform2f;
+    const names = new WeakMap<WebGLUniformLocation, string>();
+    WebGL2RenderingContext.prototype.getUniformLocation = function (program, name) {
+      const location = origGetUniformLocation.call(this, program, name);
+      if (location) names.set(location, name);
+      return location;
+    };
+    const scope = window as Window & {
+      __lastRotatedDraw?: { basis: number[]; size: number[] };
+    };
+    let currentBasis: number[] = [];
+    let currentSize: number[] = [];
+    WebGL2RenderingContext.prototype.clear = function (...args) {
+      currentBasis = [];
+      currentSize = [];
+      return origClear.apply(this, args);
+    };
+    WebGL2RenderingContext.prototype.uniform2f = function (location, a, b) {
+      if (location && names.get(location) === 'u_rect_size') currentSize = [a, b];
+      return origUniform2f.call(this, location, a, b);
+    };
+    WebGL2RenderingContext.prototype.uniform4f = function (location, a, b, c, d) {
+      if (location && names.get(location) === 'u_basis') {
+        currentBasis = [a, b, c, d];
+        if (Math.abs(b) > 0.01) {
+          scope.__lastRotatedDraw = { basis: currentBasis, size: currentSize };
+        }
+      }
+      return origUniform4f.call(this, location, a, b, c, d);
+    };
+  });
+
+  await page.goto(glassPage, { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
+  await page.waitForFunction(() => '__neoverseGlassRenderer' in window);
+
+  const rotated = await page.evaluate(() => {
+    const card = document.createElement('div');
+    card.className = 'material-glass-elevated';
+    card.style.cssText =
+      'position:fixed;left:120px;top:120px;width:240px;height:100px;rotate:-5deg;';
+    document.body.append(card);
+    (
+      window as Window & { __neoverseGlassRenderer?: { refresh(force?: boolean): void } }
+    ).__neoverseGlassRenderer?.refresh(true);
+    const draw = (window as Window & { __lastRotatedDraw?: { basis: number[]; size: number[] } })
+      .__lastRotatedDraw;
+    card.remove();
+    return draw;
+  });
+
+  expect(rotated).toBeDefined();
+  expect(rotated?.size[0]).toBeCloseTo(240, 0);
+  expect(rotated?.size[1]).toBeCloseTo(100, 0);
+  const rad = (-5 * Math.PI) / 180;
+  expect(rotated?.basis[0]).toBeCloseTo(Math.cos(rad), 2);
+  expect(rotated?.basis[1]).toBeCloseTo(Math.sin(rad), 2);
+});
+
+test('open native top-layer popovers keep local CSS edges without duplicate WebGL draws', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const origGetUniformLocation = WebGL2RenderingContext.prototype.getUniformLocation;
+    const origClear = WebGL2RenderingContext.prototype.clear;
+    const origUniform4f = WebGL2RenderingContext.prototype.uniform4f;
+    const names = new WeakMap<WebGLUniformLocation, string>();
+    WebGL2RenderingContext.prototype.getUniformLocation = function (program, name) {
+      const location = origGetUniformLocation.call(this, program, name);
+      if (location) names.set(location, name);
+      return location;
+    };
+    const scope = window as Window & { __latestGlRects?: number[][] };
+    let current: number[][] = [];
+    WebGL2RenderingContext.prototype.clear = function (...args) {
+      current = [];
+      scope.__latestGlRects = current;
+      return origClear.apply(this, args);
+    };
+    WebGL2RenderingContext.prototype.uniform4f = function (location, a, b, c, d) {
+      if (location && names.get(location) === 'u_rect') current.push([a, b, c, d]);
+      return origUniform4f.call(this, location, a, b, c, d);
+    };
+  });
+
+  await page.goto('/frame?theme=light&lang=en#overlays', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
+
+  const popover = page.locator('.ui-overlay-panel[popover]').first();
+  test.skip((await popover.count()) === 0, 'No native popover fixture on overlays frame');
+
+  const result = await popover.evaluate((panel) => {
+    (panel as HTMLElement).showPopover();
+    (
+      window as Window & { __neoverseGlassRenderer?: { refresh(force?: boolean): void } }
+    ).__neoverseGlassRenderer?.refresh(true);
+    const rect = panel.getBoundingClientRect();
+    const beforeDisplay = getComputedStyle(panel, '::before').display;
+    const glRects = (window as Window & { __latestGlRects?: number[][] }).__latestGlRects ?? [];
+    const matchedGl = glRects.some(
+      (entry) =>
+        Math.abs((entry[0] ?? 0) - rect.left) < 1 &&
+        Math.abs((entry[1] ?? 0) - rect.top) < 1 &&
+        Math.abs((entry[2] ?? 0) - rect.width) < 1 &&
+        Math.abs((entry[3] ?? 0) - rect.height) < 1,
+    );
+    (panel as HTMLElement).hidePopover();
+    return { beforeDisplay, matchedGl };
+  });
+
+  expect(result.beforeDisplay).toBe('block');
+  expect(result.matchedGl).toBe(false);
+});

@@ -49,5 +49,21 @@
     --neoverse-motion-particle-duration: 910ms;
     --neoverse-motion-particle-enter-delay: 455ms;
     --neoverse-motion-particle-enter-duration: 234ms;
+
+    /* Page transitions — shared durations, optical depth, feather width and
+       directional travel for standard View Transitions and scoped swaps. */
+    --neoverse-motion-page-duration: 360ms;
+    --neoverse-motion-page-expressive-duration: 520ms;
+    --neoverse-motion-page-exit-duration: var(--neoverse-motion-duration-fast);
+    --neoverse-motion-page-enter-duration: var(--neoverse-motion-duration-standard);
+    --neoverse-motion-page-enter-delay: 120ms;
+    --neoverse-motion-page-glide-distance: var(--neoverse-motion-distance-mid);
+    --neoverse-motion-page-parallax-offset: 24%;
+    --neoverse-motion-page-depth-in-scale: 1.02;
+    --neoverse-motion-page-depth-out-scale: 0.985;
+    --neoverse-motion-page-veil-scale: 0.99;
+    --neoverse-motion-page-blur: var(--neoverse-motion-veil-blur);
+    --neoverse-motion-page-feather: clamp(0.75rem, 2vmin, 1.25rem);
+    --neoverse-motion-page-backdrop-opacity: 0.35;
   }
 }
