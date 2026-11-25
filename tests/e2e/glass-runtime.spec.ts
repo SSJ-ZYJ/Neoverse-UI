@@ -55,6 +55,26 @@ test.describe('Aurora Glass runtime', () => {
     }));
     expect(material.filter).toContain('blur(18px)');
     expect(material.edgeDisplay).not.toBe('none');
+
+    await page.goto('/frame?theme=light&lang=en#controls-button', {
+      waitUntil: 'domcontentloaded',
+    });
+    const button = page.locator('[data-qa-stage="neutral"] [data-contract-button="primary"]');
+    await expect(button).toBeVisible();
+    const fallback = await button.evaluate((element) => {
+      const body = getComputedStyle(element);
+      const rim = getComputedStyle(element, '::after');
+      return {
+        bodyRadius: body.borderTopLeftRadius,
+        bodyWidth: body.width,
+        edgeRadius: rim.borderTopLeftRadius,
+        edgeWidth: rim.width,
+        edgeFilter: rim.backdropFilter,
+      };
+    });
+    expect(fallback.edgeRadius).toBe(fallback.bodyRadius);
+    expect(fallback.edgeWidth).toBe(fallback.bodyWidth);
+    expect(fallback.edgeFilter).toContain('brightness(');
   });
 
   test('painted strokes affect opted-in dark surfaces without altering the body blur', async ({

@@ -32,7 +32,7 @@ Dock 尾部的嵌入式语言切换保持 0.2.0 的独立几何：外层高 30px
 `lg` 档保留语言字号的 0.9 补偿。Dock 通过独立的
 `--neoverse-dock-scale-md` / `--neoverse-dock-scale-lg` 将整体缩放设为 1.1 / 1.3；
 外壳、图标、间距及语言控件一起放大，导航文字另用
-`--neoverse-dock-navigation-type-factor: 0.95` 收敛字号，通用 ControlSurface 仍为 1 / 1.3。
+`--neoverse-dock-navigation-type-factor: 0.95` 收敛字号，通用 ControlSurface 为 1.08 / 1.18。
 在 16px 根字号下，md 导航项实际高约 35.2px，文字约 14.6px，Dock 外壳约 49px。
 Neoverse 当前显式使用 `scale="md"`，Playground 标准、紧凑及消费一致性示例均使用同档，
 组件省略 `scale` 时仍使用 lg。

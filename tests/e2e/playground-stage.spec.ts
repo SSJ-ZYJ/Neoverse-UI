@@ -126,6 +126,37 @@ test.describe('playground stage', () => {
     await expect(specimen.locator('output')).toHaveText('Activations: 1');
   });
 
+  test('magnified action controls keep their hover feedback on the same outline', async ({
+    page,
+  }, testInfo) => {
+    test.skip(testInfo.project.use.hasTouch === true, 'Hover requires a hover-capable pointer');
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+
+    for (const [id, role] of [
+      ['controls-action', 'link'],
+      ['controls-icon-button', 'button'],
+      ['controls-button', 'button'],
+    ] as const) {
+      await page.goto(`/?theme=light&lang=zh&fps=0#${id}`, { waitUntil: 'domcontentloaded' });
+      await page.mouse.move(0, 0);
+      const control = page.locator(`#${id}[data-design-lab-region="specimen"]`).getByRole(role);
+      await expect(control).toBeVisible();
+      const original = await control.boundingBox();
+      await page.locator('[data-stage-zoom="range"]').fill('900');
+      const magnified = await control.boundingBox();
+      if (!original || !magnified) throw new Error(`Missing ${id} geometry`);
+      expect(magnified.width / original.width).toBeGreaterThan(3);
+      await expect(control).toHaveCSS('background-clip', 'border-box');
+      const rest = await control.evaluate((element) => getComputedStyle(element).backgroundImage);
+      await control.hover();
+      await expect(control).not.toHaveCSS('background-image', rest);
+      await expect(control).toHaveCSS('background-clip', 'border-box');
+      expect(await control.boundingBox()).toEqual(magnified);
+      await page.mouse.move(0, 0);
+      await expect(control).toHaveCSS('background-image', rest);
+    }
+  });
+
   test('ctrl and wheel zooms continuously around the pointer inside the preview', async ({
     page,
   }) => {

@@ -9,7 +9,6 @@ import { mergeClassNames } from '../../internal.js';
 import type { ControlSurfacePreset } from '../surfaces/control-surface.js';
 import { surfaceClasses } from '../surfaces/surface-presets.js';
 import type { ActionSize } from './action-size.js';
-import { ButtonMaterialShell } from './button-material-shell.js';
 import { type ButtonVariant, buttonVariantClasses } from './button-variants.js';
 import { loadingIndicatorClass } from './loading-indicator.js';
 
@@ -101,12 +100,9 @@ export function UiIconButton(props: UiIconButtonProps) {
     children
   );
   const content = (
-    <>
-      <ButtonMaterialShell />
-      <span className="ui-icon-button__content" aria-hidden="true">
-        {icon}
-      </span>
-    </>
+    <span className="ui-icon-button__content" aria-hidden="true">
+      {icon}
+    </span>
   );
 
   if (as === 'a') {

@@ -362,7 +362,6 @@ export const controlSurface = defineSpecimen<
             key: value,
             href: '#controls-surface',
             label: localize(label, locale),
-            size: 'sm',
             active: state.active === value,
             surface: 'none',
             onClick: (event: MouseEvent) => {

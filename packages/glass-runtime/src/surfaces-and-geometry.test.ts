@@ -262,6 +262,7 @@ describe('Glass renderer surfaces and geometry', () => {
     installCanvasContext({ webgl2: gl });
     const viewport = document.createElement('section');
     viewport.style.overflow = 'hidden';
+    viewport.style.scale = '1.5';
     setRect(viewport, { left: 0, top: 0, width: 300, height: 95 });
     const tooltip = document.createElement('div');
     tooltip.className = 'material-glass-subtle';
@@ -366,12 +367,14 @@ describe('Glass renderer surfaces and geometry', () => {
   it('scales the WebGL corner radius to match CSS when a parent enlarges the control', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
+    const parent = document.createElement('div');
+    parent.style.zoom = '1.5';
     const glass = document.createElement('article');
     glass.className = 'material-glass-subtle';
     glass.style.borderRadius = '12px';
-    Object.defineProperty(glass, 'offsetWidth', { configurable: true, value: 100 });
     setRect(glass, { width: 150, height: 90 });
-    document.body.append(glass);
+    parent.append(glass);
+    document.body.append(parent);
 
     const renderer = createTestRenderer();
     renderer.mount();

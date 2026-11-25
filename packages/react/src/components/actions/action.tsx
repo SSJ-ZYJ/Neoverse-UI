@@ -14,7 +14,6 @@ import { mergeClassNames } from '../../internal.js';
 import type { ControlSurfacePreset } from '../surfaces/control-surface.js';
 import { surfaceClasses } from '../surfaces/surface-presets.js';
 import type { ActionSize } from './action-size.js';
-import { ButtonMaterialShell } from './button-material-shell.js';
 import { type ButtonVariant, buttonVariantClasses } from './button-variants.js';
 
 export type ActionScale = 'md' | 'lg';
@@ -121,7 +120,6 @@ export function UiAction({
   });
   const renderContent = (content: ReactNode) => (
     <>
-      <ButtonMaterialShell />
       {leading ? (
         <span className="ui-action__leading" aria-hidden="true">
           {leading}

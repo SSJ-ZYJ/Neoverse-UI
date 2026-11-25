@@ -80,6 +80,31 @@ describe('Glass surface geometry and top-layer exclusion', () => {
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
   });
 
+  it('keeps a rounded button aligned when magnifying a fractional-width border box', () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const stage = document.createElement('div');
+    stage.style.scale = '4';
+    const button = document.createElement('button');
+    button.className = 'ui-button material-glass-subtle';
+    button.style.borderRadius = '8px';
+    // A 48.5px layout width rounds up through offsetWidth, but not on screen.
+    setOffsetBox(button, 49, 32);
+    setRect(button, { left: 12.5, top: 20.25, width: 194, height: 128 });
+    stage.append(button);
+    document.body.append(stage);
+
+    createTestRenderer({ maxDevicePixelRatio: 1 }).mount();
+
+    expect(gl.uniform4f).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'u_radii' }),
+      32,
+      32,
+      32,
+      32,
+    );
+  });
+
   it('supports percentage border-radius and CSS §4.5 proportional radius clamping', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });

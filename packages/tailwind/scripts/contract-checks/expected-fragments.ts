@@ -11,7 +11,6 @@ export const expectedFragments = [
   'data-neoverse-glass-edge-pass=css',
   'data-neoverse-surface-hover=static',
   ':is([data-neoverse-glass-renderer=webgl],[data-neoverse-glass-renderer=native]) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow)',
-  ':is([data-neoverse-glass-renderer=webgl],[data-neoverse-glass-renderer=native]) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow);-webkit-backdrop-filter:var(--neoverse-material-filter);backdrop-filter:var(--neoverse-material-filter);background-clip:padding-box',
   'var(--neoverse-material-inner-glow)',
   'var(--neoverse-material-seam-glow)',
   'var(--neoverse-material-bloom)',

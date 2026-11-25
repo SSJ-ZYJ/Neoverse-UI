@@ -46,7 +46,7 @@ running every theme, width, and language combination.
 | `segmented-control.spec.ts` | Segmented control direction keys and roving tab stop, rejected and disabled reconciliation, held-drag preview and release commit, theme icon and language label geometry, Aurora Glass well |
 | `surfaces.spec.ts` | Disclosure, table, skeleton, timeline, stat card, scrollbar, avatar initials and placeholder icon |
 | `terminal.spec.ts` | Transcript composition, suggestions, IME guard, tail following, reader intent |
-| `motion.spec.ts` | List reorder, entrance replay, page transitions, page dissolve, disclosure expansion and collapse, React presence exit, reduced motion, layout width on a language switch |
+| `motion.spec.ts` | List reorder, entrance replay, page transitions, page dissolve, disclosure expansion and collapse, React presence exit, reduced motion, layout width on a language switch, theme reveal reversal and thumb color continuity |
 | `motion-hierarchy.spec.ts` | Promoted Motion section, right-hand Inspector category switching, distinct-scene zero-flash transitions |
 | `materials.spec.ts` | Aurora Glass previews render and stay readable across themes, the inset preset stays distinct without changing other presets, glass buttons change tint without losing blur on press, reduced transparency removes blur and canvas, and both adapters wire the three tier recipes |
 | `glass-runtime.spec.ts` | One shared noninteractive renderer canvas, fixed placement, theme stability, context loss/restore, runtime reduced transparency, forced colors and adapter lifecycle |

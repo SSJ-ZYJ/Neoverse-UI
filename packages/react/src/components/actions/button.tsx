@@ -3,7 +3,6 @@ import { mergeClassNames } from '../../internal.js';
 import type { ControlSurfacePreset } from '../surfaces/control-surface.js';
 import { surfaceClasses } from '../surfaces/surface-presets.js';
 import type { ActionSize } from './action-size.js';
-import { ButtonMaterialShell } from './button-material-shell.js';
 import { type ButtonVariant, buttonVariantClasses } from './button-variants.js';
 import { loadingIndicatorClass } from './loading-indicator.js';
 
@@ -60,7 +59,6 @@ export function UiButton({
         className,
       )}
     >
-      <ButtonMaterialShell />
       {leading || loading ? (
         <span className="ui-button__leading">
           {loading && leading ? (

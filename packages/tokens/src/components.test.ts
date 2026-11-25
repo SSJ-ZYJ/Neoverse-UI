@@ -312,3 +312,33 @@ test('keeps high-traffic component recipes semantic instead of locally hardcoded
   expect(toastCss).not.toContain('.ui-toast__dismiss:hover');
   expect(controlFeedbackCss).toContain('.ui-toast__dismiss');
 });
+
+test('keeps ControlSurface scale steps distinct from unscaled controls while preserving Dock scales', async () => {
+  const [controlSurfaceTokens, controlSurfaceStyles] = await Promise.all([
+    readTokenCss('components/control-surface.css'),
+    readCssFile(new URL('../../tailwind/src/components/control-surface.css', import.meta.url)),
+  ]);
+
+  expect(controlSurfaceTokens).toContain('--neoverse-control-surface-scale-md: 1.08;');
+  expect(controlSurfaceTokens).toContain('--neoverse-control-surface-scale-lg: 1.18;');
+  expect(controlSurfaceTokens).toContain('--neoverse-dock-scale-md: 1.1;');
+  expect(controlSurfaceTokens).toContain('--neoverse-dock-scale-lg: 1.3;');
+
+  const largeRule = controlSurfaceStyles.match(
+    /\.ui-control-surface--scale-lg\s*\{[\s\S]*?\}/,
+  )?.[0];
+  expect(largeRule).toBeDefined();
+  expect(largeRule).toContain('var(--neoverse-font-size-xs)');
+  expect(largeRule).toContain('var(--neoverse-icon-size-sm)');
+
+  const genericNavEdgeRule = controlSurfaceStyles.match(
+    /\.ui-control-surface:has\([^)]+\)\s*\{[\s\S]*?\}/,
+  )?.[0];
+  expect(genericNavEdgeRule).toContain(
+    '--neoverse-control-surface-padding-inline: var(--neoverse-control-surface-padding-block);',
+  );
+  const dockNavEdgeRule = controlSurfaceStyles.match(/\.ui-dock:has\([^)]+\)\s*\{[\s\S]*?\}/)?.[0];
+  expect(dockNavEdgeRule).toMatch(
+    /--neoverse-control-surface-padding-inline:\s*var\(\s*--neoverse-control-surface-navigation-edge-inset\s*\);/,
+  );
+});

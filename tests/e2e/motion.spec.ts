@@ -463,6 +463,62 @@ test('reversing from the toolbar does not replay Glass colors outside the reveal
   await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-appearance-live');
 });
 
+test('the theme thumb blends into its pressed tint when reversing a reveal', async ({
+  page,
+}, testInfo) => {
+  test.skip(testInfo.project.use.hasTouch, 'The compact toolbar has no theme thumb');
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto('/?theme=light&lang=en&fps=0');
+  test.skip(
+    !(await page.evaluate(() => typeof document.startViewTransition === 'function')),
+    'The engine has no view-transition snapshots',
+  );
+  const theme = page.locator('[data-playground-theme-control="segments"]');
+  const light = theme.getByRole('radio', { name: 'Light', exact: true });
+  const thumb = theme.locator('.ui-segmented-control__slider');
+  await theme.getByRole('radio', { name: 'Dark', exact: true }).press('Space');
+  await page.waitForFunction(() => {
+    const reveal = document
+      .getAnimations()
+      .find((entry) => entry instanceof CSSAnimation && entry.animationName === 'nv-theme-reveal');
+    if (!reveal) return false;
+    reveal.pause();
+    reveal.currentTime = 320;
+    return true;
+  });
+
+  await light.hover();
+  const before = await thumb.evaluate((element) => getComputedStyle(element).backgroundColor);
+  await page.mouse.down();
+  await expect(thumb).toHaveAttribute('data-pressed', '');
+  const pressed = await thumb.evaluate((element) => {
+    const fill = () => getComputedStyle(element).backgroundColor;
+    const transition = element
+      .getAnimations()
+      .find(
+        (entry) =>
+          entry instanceof CSSTransition && entry.transitionProperty === 'background-color',
+      );
+    if (!transition?.effect) return { start: fill(), middle: fill(), end: fill() };
+    const endTime = transition.effect.getComputedTiming().endTime;
+    transition.pause();
+    transition.currentTime = 0;
+    const start = fill();
+    transition.currentTime = endTime / 2;
+    const middle = fill();
+    transition.currentTime = endTime;
+    const end = fill();
+    transition.play();
+    return { start, middle, end };
+  });
+  await page.mouse.up();
+  await expect(light).toBeChecked();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  expect(pressed.start).toBe(before);
+  expect(pressed.middle).not.toBe(pressed.start);
+  expect(pressed.middle).not.toBe(pressed.end);
+});
+
 const pagePresets = ['fade', 'glide', 'slide', 'push', 'depth', 'veil', 'curtain', 'iris', 'morph'];
 
 test('page transitions switch presets, directions, and pages without overflowing', async ({

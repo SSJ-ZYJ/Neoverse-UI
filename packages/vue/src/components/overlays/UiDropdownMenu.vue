@@ -183,8 +183,6 @@ onBeforeUnmount(() => {
       :disabled="props.disabled"
       @click="toggleOpen"
     >
-      <span class="ui-button__tone-field" aria-hidden="true" />
-      <span class="ui-button__edge-field" aria-hidden="true" />
       <slot name="trigger" />
     </button>
 

@@ -121,10 +121,11 @@ export const animationIsActive = (animation: Animation): boolean =>
   animation.playState === 'running' || animation.pending;
 
 const isStaticPropertyName = (property: string): boolean =>
-  property.length > 0 && !property.startsWith('--') && staticTransitionProperty.test(property);
+  property === '--neoverse-button-tone-color' ||
+  (property.length > 0 && !property.startsWith('--') && staticTransitionProperty.test(property));
 
 /** Color-only and paint-only transitions cannot move a surface, change its clip,
- *  or alter occlusion. Registered custom properties remain tracked. */
+ *  or alter occlusion. Track custom properties unless they only paint feedback. */
 export function isStaticTransition(event: Event): boolean {
   const property = (event as TransitionEvent).propertyName;
   return typeof property === 'string' && isStaticPropertyName(property);

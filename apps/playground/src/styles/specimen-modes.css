@@ -30,12 +30,16 @@
     .ui-button--ghost
   ) {
   background-color: var(--neoverse-material-background-fallback);
-  background-image: none;
   box-shadow:
     var(--neoverse-material-edge-highlight), var(--neoverse-material-inner-glow),
     var(--neoverse-material-shadow);
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
+}
+
+.playground-reduced-transparency-preview
+  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(.ui-button) {
+  background-image: none;
 }
 
 .playground-reduced-transparency-preview .ui-segmented-control.material-glass-subtle {
@@ -137,14 +141,6 @@
     .ui-tooltip-surface
   )::after {
   display: none;
-}
-
-/* The accessibility preview removes backdrop sampling, not interaction
-   feedback. Re-enable UiButton's existing internal press field only while
-   pressed so fallback buttons feel identical to their standard counterparts. */
-.playground-reduced-transparency-preview
-  .ui-button.material-glass-subtle:active:not(:disabled):not([aria-disabled='true'])::after {
-  display: block;
 }
 
 .playground-specimen-panel {

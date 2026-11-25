@@ -13,8 +13,6 @@ test('UiPopover renders the shared trigger and dialog contract', () => {
   expect(html).toContain(
     'class="ui-popover__trigger ui-button material-glass-subtle ui-button--secondary ui-button--md"',
   );
-  expect(html).toContain('class="ui-button__tone-field"');
-  expect(html).toContain('class="ui-button__edge-field"');
   expect(html).toContain('aria-expanded="false"');
   expect(html).toContain(
     'class="ui-overlay-panel ui-popover__content material-glass-elevated nv-presence"',

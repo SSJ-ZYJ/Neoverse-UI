@@ -236,6 +236,14 @@ describe('Glass motion tracking', () => {
         keyframes: [{ backgroundColor: 'red' }, { backgroundColor: 'blue' }],
         transitionProperty: 'background-color',
       }),
+      makeMockAnimation({
+        target: button,
+        keyframes: [
+          { '--neoverse-button-tone-color': 'red' },
+          { '--neoverse-button-tone-color': 'blue' },
+        ],
+        transitionProperty: '--neoverse-button-tone-color',
+      }),
     ];
     Object.defineProperty(document, 'getAnimations', {
       configurable: true,
@@ -248,6 +256,11 @@ describe('Glass motion tracking', () => {
 
     spinner.dispatchEvent(new Event('animationstart', { bubbles: true }));
     slider.dispatchEvent(new Event('transitionrun', { bubbles: true }));
+    button.dispatchEvent(
+      Object.assign(new Event('transitionrun', { bubbles: true }), {
+        propertyName: '--neoverse-button-tone-color',
+      }),
+    );
     frames.flush(1000);
     expect(frames.size()).toBe(0);
     expect(gl.clear).not.toHaveBeenCalled();

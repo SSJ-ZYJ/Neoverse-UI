@@ -52,8 +52,6 @@ export function UiPopover({
         aria-controls={controller.panelId}
         onClick={controller.toggle}
       >
-        <span className="ui-button__tone-field" aria-hidden="true" />
-        <span className="ui-button__edge-field" aria-hidden="true" />
         {trigger}
       </button>
       <div

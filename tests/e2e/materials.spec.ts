@@ -116,29 +116,40 @@ test.describe('materials', () => {
         .locator('[data-contract-button="primary"]');
       await expect(primary).toBeVisible();
       await primary.scrollIntoViewIfNeeded();
-      const tint = primary.locator('.ui-button__tone-field');
-      const rest = await tint.evaluate((element) => getComputedStyle(element).backgroundColor);
-      const blur = await primary.evaluate((element) => getComputedStyle(element).backdropFilter);
-      const shadow = await primary.evaluate((element) => getComputedStyle(element).boxShadow);
+      const readPaint = () =>
+        primary.evaluate((element) => {
+          const style = getComputedStyle(element);
+          return {
+            feedback: style.backgroundImage,
+            fill: style.backgroundColor,
+            clip: style.backgroundClip,
+            blur: style.backdropFilter,
+            shadow: style.boxShadow,
+          };
+        });
+      const { feedback: rest, blur, shadow, fill, clip } = await readPaint();
       expect(blur).toContain('blur(');
-      expect(rest).toMatch(/^rgba\(/);
+      expect(rest).toMatch(/^linear-gradient\(/);
+      expect(clip).toBe('border-box');
 
       if (!testInfo.project.use.hasTouch) await primary.hover();
-      const ready = await tint.evaluate((element) => getComputedStyle(element).backgroundColor);
+      const { feedback: ready } = await readPaint();
       if (!testInfo.project.use.hasTouch) expect(ready).not.toBe(rest);
       await expect(primary).toHaveCSS('box-shadow', shadow);
 
       await primary.focus();
       await page.keyboard.down('Space');
       try {
-        await expect(tint).not.toHaveCSS('background-color', ready);
+        await expect(primary).not.toHaveCSS('background-image', ready);
+        await expect(primary).toHaveCSS('background-color', fill);
+        await expect(primary).toHaveCSS('background-clip', clip);
         await expect(primary).toHaveCSS('backdrop-filter', blur);
         await expect(primary).toHaveCSS('box-shadow', shadow);
         await expect(primary).toHaveCSS('border-top-color', 'rgba(0, 0, 0, 0)');
       } finally {
         await page.keyboard.up('Space');
       }
-      await expect(tint).toHaveCSS('background-color', ready);
+      await expect(primary).toHaveCSS('background-image', ready);
     });
 
     test(`primary button keyboard focus keeps the primary ring in ${theme}`, async ({ page }) => {
@@ -263,6 +274,10 @@ test('the React fixture wires the same three Glass tiers', async ({ page }) => {
     const backdrop = await card.evaluate((element) => getComputedStyle(element).backdropFilter);
     expect(backdrop).toContain(`blur(${tier.blur}px)`);
     expect(backdrop).toContain(`saturate(${tier.saturation})`);
+    await expect(card).toHaveCSS('background-clip', 'border-box');
+    const action = page.locator(`[data-tier-action="${tier.tier}"]`);
+    await expect(action).toHaveCSS('background-image', /^linear-gradient\(/);
+    await expect(action).toHaveCSS('background-clip', 'border-box');
   }
 });
 

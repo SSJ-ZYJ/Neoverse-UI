@@ -1,4 +1,5 @@
 import { expect, type Locator, test } from '@playwright/test';
+import { chooseOption, showInspector } from '../support/playground';
 
 const box = (locator: Locator) =>
   locator.evaluate((element) => {
@@ -153,4 +154,103 @@ test('React adapters keep the shared control baseline', async ({ page }) => {
     page.locator('[data-react-adapter="UiSegmentedControl"] .ui-segmented-control__option').first(),
   );
   expect(segment.height).toBeCloseTo(32, 0);
+});
+
+test('control surface scales step smoothly from medium to large without altering dock scales', async ({
+  page,
+}, testInfo) => {
+  await page.goto('/frame?theme=light&lang=en#controls-surface', {
+    waitUntil: 'domcontentloaded',
+  });
+  const frameSurfaces = page.locator('#controls-surface .ui-control-surface');
+  await expect(frameSurfaces.first()).toBeVisible();
+
+  const scaleSamples = await frameSurfaces.evaluateAll((elements) =>
+    elements.map((element) => ({
+      text: element.textContent?.trim() ?? '',
+      zoom: getComputedStyle(element).zoom,
+    })),
+  );
+  const mediumFrame = scaleSamples.find((entry) => entry.text.includes('scale="md"'));
+  const largeFrame = scaleSamples.find((entry) => entry.text.includes('scale="lg"'));
+  expect(mediumFrame?.zoom).toBe('1.08');
+  expect(largeFrame?.zoom).toBe('1.18');
+
+  await page.goto('/frame?theme=light&lang=en#dock', { waitUntil: 'domcontentloaded' });
+  const dockLocator = page.locator('[data-dock-specimen="standard"] .ui-dock');
+  const dock = await box(dockLocator);
+  expect(dock.zoom).toBe('1.1');
+  const dockInsets = await dockLocator.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const zoom = Number.parseFloat(style.zoom) || 1;
+    const border = Number.parseFloat(style.borderLeftWidth) * zoom;
+    const surfaceRect = element.getBoundingClientRect();
+    const items = Array.from(element.querySelectorAll('.ui-navigation-item')).map((item) =>
+      item.getBoundingClientRect(),
+    );
+    const first = items[0];
+    if (!first) throw new Error('Missing dock navigation item');
+    return {
+      paddingLeft: Number.parseFloat(style.paddingLeft),
+      left: first.left - (surfaceRect.left + border),
+      top: first.top - (surfaceRect.top + border),
+      bottom: surfaceRect.bottom - border - first.bottom,
+    };
+  });
+  expect(dockInsets.paddingLeft).toBeCloseTo(6, 1);
+  expect(dockInsets.left).toBeCloseTo(6 * 1.1, 0);
+  expect(dockInsets.top).toBeCloseTo(6 * 1.1, 0);
+  expect(dockInsets.bottom).toBeCloseTo(6 * 1.1, 0);
+
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/?theme=light&lang=en#controls-surface', { waitUntil: 'domcontentloaded' });
+  const specimenSurface = page.locator('#controls-surface .ui-control-surface');
+  const firstItem = specimenSurface.locator('.ui-navigation-item').first();
+  await expect(specimenSurface).toBeVisible();
+
+  const mediumSurface = await box(specimenSurface);
+  const mediumItem = await box(firstItem);
+  expect(mediumSurface.zoom).toBe('1.08');
+  expect(mediumItem.height).toBeCloseTo(32 * 1.08, 1);
+  expect(mediumItem.fontSize).toBeCloseTo(14, 1);
+
+  const surfaceInsets = await specimenSurface.evaluate((element) => {
+    const style = getComputedStyle(element);
+    const zoom = Number.parseFloat(style.zoom) || 1;
+    const border = Number.parseFloat(style.borderLeftWidth) * zoom;
+    const surfaceRect = element.getBoundingClientRect();
+    const items = Array.from(element.querySelectorAll('.ui-navigation-item')).map((item) =>
+      item.getBoundingClientRect(),
+    );
+    const first = items[0];
+    const second = items[1];
+    const last = items.at(-1);
+    if (!first || !second || !last) throw new Error('Missing control-surface navigation items');
+    return {
+      paddingLeft: Number.parseFloat(style.paddingLeft),
+      paddingTop: Number.parseFloat(style.paddingTop),
+      left: first.left - (surfaceRect.left + border),
+      right: surfaceRect.right - border - last.right,
+      top: first.top - (surfaceRect.top + border),
+      bottom: surfaceRect.bottom - border - first.bottom,
+      gap: second.left - first.right,
+    };
+  });
+  expect(surfaceInsets.paddingLeft).toBeCloseTo(4, 1);
+  expect(surfaceInsets.paddingTop).toBeCloseTo(4, 1);
+  expect(surfaceInsets.left).toBeCloseTo(4 * 1.08, 0);
+  expect(surfaceInsets.right).toBeCloseTo(4 * 1.08, 0);
+  expect(surfaceInsets.top).toBeCloseTo(4 * 1.08, 0);
+  expect(surfaceInsets.bottom).toBeCloseTo(4 * 1.08, 0);
+  expect(surfaceInsets.gap).toBeCloseTo(4 * 1.08, 0);
+
+  const inspector = await showInspector(page, testInfo.project.name === 'mobile');
+  await chooseOption(inspector, 'scale', 'Large');
+
+  await expect.poll(async () => (await box(specimenSurface)).zoom).toBe('1.18');
+  const largeSurface = await box(specimenSurface);
+  const largeItem = await box(firstItem);
+  expect(largeItem.height).toBeCloseTo(32 * 1.18, 1);
+  expect(largeItem.fontSize).toBeCloseTo(14, 1);
+  expect(largeSurface.height).toBeGreaterThan(mediumSurface.height);
 });

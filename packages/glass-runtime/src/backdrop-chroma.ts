@@ -40,7 +40,10 @@ export const paintBackdropChroma = (
 ): void => {
   const opacity = Math.min(style.opacity * 0.7 * gain, 0.55);
   if (opacity <= 0) return;
-  const inset = 0.65;
+  const lineWidth = Math.max(style.edgeWidth, 0.75);
+  // Canvas centers the stroke on this path. Magnification must not push its
+  // outer half past the rounded contour that the surface paints.
+  const inset = Math.max(0.65, lineWidth / 2);
   const width = Math.max(style.width - inset * 2, 0);
   const height = Math.max(style.height - inset * 2, 0);
   if (width === 0 || height === 0) return;
@@ -104,7 +107,7 @@ export const paintBackdropChroma = (
     path.roundRect(x, y, width, height, radii);
   }
   // Only the saturation of this signal is used; its hue is never painted.
-  context.lineWidth = Math.max(style.edgeWidth, 0.75);
+  context.lineWidth = lineWidth;
   const reach = Math.max(Math.min(width * 0.5, height * 1.25), 16);
   const shortSide = Math.min(style.width, style.height);
   const size = boostLowerRight ? Math.min(Math.max((shortSide - 64) / 80, 0), 1) : 0;

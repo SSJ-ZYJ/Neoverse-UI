@@ -43,8 +43,8 @@
     --neoverse-control-surface-divider-height: 1rem;
     --neoverse-control-surface-divider-gap: var(--neoverse-space-0);
     /* Scale the complete composition as one unit so every existing proportion remains intact. */
-    --neoverse-control-surface-scale-md: 1;
-    --neoverse-control-surface-scale-lg: 1.3;
+    --neoverse-control-surface-scale-md: 1.08;
+    --neoverse-control-surface-scale-lg: 1.18;
     /* Dock navigation needs a larger baseline than generic grouped controls. */
     --neoverse-dock-scale-md: 1.1;
     --neoverse-dock-scale-lg: 1.3;

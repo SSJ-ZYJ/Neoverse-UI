@@ -58,8 +58,6 @@ const classes = computed(() => [
     :data-surface="props.surface"
     :class="[classes, attrs.class]"
   >
-    <span class="ui-button__tone-field" aria-hidden="true" />
-    <span class="ui-button__edge-field" aria-hidden="true" />
     <Transition name="nv">
       <span v-if="props.loading || $slots.leading" class="ui-button__leading">
         <template v-if="props.loading">

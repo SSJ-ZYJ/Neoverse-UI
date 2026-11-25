@@ -192,15 +192,14 @@ export function resolveSurfaceGeometry(
 ): SurfaceGeometry {
   const centerX = rect.left + rect.width / 2;
   const centerY = rect.top + rect.height / 2;
-  const rawScaleX = element.offsetWidth > 0 ? rect.width / element.offsetWidth : 1;
-  const scaleX = Number.isFinite(rawScaleX) && rawScaleX > 0 ? rawScaleX : 1;
-  const rawScaleY = element.offsetHeight > 0 ? rect.height / element.offsetHeight : scaleX;
-  const scaleY = Number.isFinite(rawScaleY) && rawScaleY > 0 ? rawScaleY : scaleX;
-
   const total = resolveCumulativeMatrix(element, getStyle, matrixCache);
   const rotated = Math.abs(total[1]) > 1e-4 || Math.abs(total[2]) > 1e-4;
-  const localWidth = element.offsetWidth;
-  const localHeight = element.offsetHeight;
+  // The computed transform preserves the fractional layout size that offsetWidth
+  // rounds away. Use the offsets only to reconstruct a rotated box from its bounds.
+  const scaleX = rotated ? Math.hypot(total[0], total[1]) : Math.abs(total[0]);
+  const scaleY = rotated ? Math.hypot(total[2], total[3]) : Math.abs(total[3]);
+  const localWidth = rotated ? element.offsetWidth : 0;
+  const localHeight = rotated ? element.offsetHeight : 0;
   if (!rotated || localWidth <= 0 || localHeight <= 0) {
     return {
       centerX,

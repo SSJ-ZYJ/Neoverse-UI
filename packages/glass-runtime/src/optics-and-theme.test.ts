@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { paintBackdropChroma } from './backdrop-chroma';
 import { createFakeGl, installCanvasContext } from './fake-webgl.test-support';
 import {
   createTestRenderer,
@@ -21,6 +22,60 @@ describe('Glass renderer optics and theme profiles', () => {
     renderer.mount();
 
     expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the saturation catch inside a magnified rounded control', () => {
+    const roundRect =
+      vi.fn<(x: number, y: number, width: number, height: number, radii: number[]) => void>();
+    vi.stubGlobal(
+      'Path2D',
+      class {
+        roundRect = roundRect;
+      },
+    );
+    const context = {
+      save: vi.fn(),
+      restore: vi.fn(),
+      beginPath: vi.fn(),
+      rect: vi.fn(),
+      clip: vi.fn(),
+      stroke: vi.fn(),
+      createRadialGradient: () => ({ addColorStop: vi.fn() }),
+      lineWidth: 0,
+    };
+    try {
+      paintBackdropChroma(
+        context as unknown as CanvasRenderingContext2D,
+        {
+          centerX: 240,
+          centerY: 104,
+          width: 400,
+          height: 128,
+          basis: [1, 0, 0, 1],
+          rotated: false,
+          clipRect: { left: 40, top: 40, right: 440, bottom: 168, width: 400, height: 128 },
+          radii: [32, 32, 32, 32],
+          pointer: [0, 0, 0],
+          edgeWidth: 4,
+          opacity: 0.4,
+        },
+        { left: 0, top: 0, width: 960, height: 600 },
+        [],
+        1,
+        true,
+      );
+    } finally {
+      vi.unstubAllGlobals();
+    }
+    const [left, top, , , radii] = roundRect.mock.calls[0] ?? [];
+    const topLeft = radii?.[0];
+    if (left === undefined || top === undefined || topLeft === undefined) {
+      throw new Error('Missing rounded saturation stroke');
+    }
+    const outerStrokeRadius = topLeft + context.lineWidth / 2;
+    expect(left + topLeft).toBeCloseTo(72);
+    expect(top + topLeft).toBeCloseTo(72);
+    expect(outerStrokeRadius).toBeLessThanOrEqual(32);
   });
 
   it('applies a consumer edge gain and refreshes it on the same canvas', () => {

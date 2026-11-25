@@ -447,7 +447,8 @@ choice immediately; the live palette commits once the reversed snapshot covers
 it, avoiding a full-viewport color jump.
 Palette updates settle their new color and shadow transitions while the
 snapshot still covers them. Glass controls do not replay the previous tint
-after the reveal, and control layout and selection motion run independently.
+after the reveal. The segmented thumb keeps interpolating its feedback fill
+when pressed or released, independently of selection travel.
 
 ## Verification
 

@@ -96,6 +96,12 @@ repaint by at most one interval and never drops the request; a discarded request
 would leave the rim painting the previous offset, detached from a surface that
 has already scrolled.
 
+The body tint keeps the DOM border box in both the canvas and CSS edge paths.
+For axis-aligned magnification, the runtime derives corner scale from the
+resolved CSS transform rather than rounded layout dimensions. As the saturation
+stroke grows with magnification, its path moves inward to keep the stroke from
+extending past the rounded contour.
+
 Whole-page position/opacity transitions can opt into the renderer's
 `suspend()` / `resume()` lightweight path, which retains the last painted frame
 and defers enumeration and occlusion probes until one full refresh on resume;
@@ -226,6 +232,9 @@ overriding `backdrop-filter`. `cssVariables.material.glass` exposes the public n
 
 - Hover is available only on hover-capable devices. Hover and press do not
   change the Aurora Glass base alpha or filter.
+  Filled Button, Action, IconButton, and overlay triggers paint feedback on the
+  same border box as the tier tint. The CSS-only rim clips its own blur without
+  clipping the control's focus ring or expanded touch target.
 - Press takes precedence over hover and restores hover or rest on release.
   It does not select an option until native activation.
 - Selected, checked, and expanded states persist independently of transient press.

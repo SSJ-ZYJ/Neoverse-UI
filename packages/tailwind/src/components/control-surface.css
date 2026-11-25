@@ -27,7 +27,7 @@
 
   .ui-control-surface--scale-lg {
     --neoverse-navigation-item-font-size-sm: calc(
-      var(--neoverse-font-size-sm) *
+      var(--neoverse-font-size-xs) *
       var(--neoverse-control-surface-scale-lg-type-factor)
     );
     --neoverse-navigation-item-font-size-md: calc(
@@ -39,7 +39,7 @@
       var(--neoverse-control-surface-scale-lg-type-factor)
     );
     --neoverse-navigation-item-icon-size-sm: calc(
-      var(--neoverse-icon-size-md) *
+      var(--neoverse-icon-size-sm) *
       var(--neoverse-control-surface-scale-lg-type-factor)
     );
     --neoverse-navigation-item-icon-size-md: calc(
@@ -58,7 +58,13 @@
     zoom: var(--neoverse-control-surface-scale-lg);
   }
 
+  /* Generic navigation surfaces match their block inset so all four outer edges
+     stay concentric and balanced; Dock keeps its taller group edge inset. */
   .ui-control-surface:has(.ui-control-surface__group--primary .ui-navigation-item) {
+    --neoverse-control-surface-padding-inline: var(--neoverse-control-surface-padding-block);
+  }
+
+  .ui-dock:has(.ui-control-surface__group--primary .ui-navigation-item) {
     --neoverse-control-surface-padding-inline: var(
       --neoverse-control-surface-navigation-edge-inset
     );

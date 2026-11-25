@@ -539,13 +539,7 @@
     /* Keep the environmental refraction field behind the material content.
        It should tint the surface, never wash out readable text or controls. */
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
-      > :not(
-        .ui-button__edge-field,
-        .ui-button__tone-field,
-        .ui-navigation-item__indicator,
-        .ui-tabs__indicator,
-        .ui-pagination__indicator
-      ) {
+      > :not(.ui-navigation-item__indicator, .ui-tabs__indicator, .ui-pagination__indicator) {
       position: relative;
       z-index: 1;
     }
@@ -646,11 +640,8 @@
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
       :focus-visible
     ) {
-    /* The runtime owns refraction. Keep the normal
-       material shadow and backdrop filter so the DOM surface still carries
-       the same depth and sampling as the CSS fallback. Focus rings stay
-       outside this selector so the shared keyboard affordance remains visible. */
-    background-clip: padding-box;
+    /* The rim follows the DOM border box; keep the tint there in every state.
+       Focus rings stay outside this selector so the keyboard affordance remains visible. */
     box-shadow: var(--neoverse-material-shadow);
     -webkit-backdrop-filter: var(--neoverse-material-filter);
     backdrop-filter: var(--neoverse-material-filter);
@@ -660,7 +651,6 @@
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
       .ui-button
     )[data-neoverse-glass-edge-pass='css']:not(:focus-visible) {
-    background-clip: padding-box;
     box-shadow: var(--neoverse-material-bloom), var(--neoverse-material-shadow);
     -webkit-backdrop-filter: var(--neoverse-material-filter);
     backdrop-filter: var(--neoverse-material-filter);
@@ -683,7 +673,6 @@
         .ui-overlay-panel,
         .ui-select__popover
       ):not([data-neoverse-surface-hover='static']):not(:focus-visible):hover {
-      background-clip: padding-box;
       box-shadow:
         var(--neoverse-material-bloom),
         var(--neoverse-material-hover-shadow, var(--neoverse-material-shadow));
@@ -700,12 +689,17 @@
       /* Match the normal sampled-plane specificity so reduced-transparency
          fallback wins at rest as well as on non-interactive surfaces. */
       background-color: var(--neoverse-material-background-fallback);
-      background-image: none;
       box-shadow:
         var(--neoverse-material-edge-highlight), var(--neoverse-material-inner-glow),
         var(--neoverse-material-shadow);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
+    }
+
+    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+        .ui-button
+      ) {
+      background-image: none;
     }
 
     /* The painted stroke survives the reduced-transparency fallback; only surfaces

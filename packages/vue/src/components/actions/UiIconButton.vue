@@ -86,8 +86,6 @@ function handleDisabledClick(event: MouseEvent): void {
     :style="attrs.style"
     @click.capture="handleDisabledClick"
   >
-    <span class="ui-button__tone-field" aria-hidden="true" />
-    <span class="ui-button__edge-field" aria-hidden="true" />
     <span class="ui-icon-button__content" aria-hidden="true">
       <Transition name="nv" mode="out-in">
         <UiLoadingIndicator v-if="props.loading" v-bind="presence('pop')" />
