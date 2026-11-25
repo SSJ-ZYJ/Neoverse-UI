@@ -250,8 +250,17 @@ test.describe('navigation', () => {
       await expect.poll(async () => (await readPlate()).image).toContain('gradient');
       await expect.poll(async () => (await readPlate()).transform).not.toBe('none');
       expect((await readPlate()).background).toBe(hovered.background);
-      await page.mouse.move(0, 0);
+      // Park the pointer in the far corner. The stage can scroll the trail to
+      // the top edge, where 0,0 still falls inside the grown plate hit box.
+      const viewport = page.viewportSize();
+      await page.mouse.move((viewport?.width ?? 1280) - 2, (viewport?.height ?? 720) - 2);
       await page.mouse.up();
+      // Firefox keeps `:focus-visible` on a link pressed with the pointer, which
+      // keeps the plate lit for a keyboard reason. Clear it so the exit below
+      // measures the hover state the test is about.
+      await page.evaluate(() => {
+        if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+      });
 
       // Hover must not resize the link or shift the trail.
       const afterBox = await link.boundingBox();
@@ -381,16 +390,19 @@ test.describe('navigation', () => {
         if (!(svg instanceof SVGElement)) throw new Error('The navigation icon is missing');
         return svg.getBoundingClientRect().width;
       });
+    const itemHeight = () => item.evaluate((element) => element.getBoundingClientRect().height);
     expect(await iconWidth()).toBe(16);
+    expect(await itemHeight()).toBe(32);
 
     const inspector = await showInspector(page, testInfo.project.name === 'mobile');
+    await chooseOption(inspector, 'size', 'Small');
+    await expect.poll(iconWidth).toBe(14);
+    await expect.poll(itemHeight).toBe(28);
     await chooseOption(inspector, 'size', 'Large');
     await expect.poll(iconWidth).toBe(20);
     await inspector.getByRole('switch', { name: 'Compact' }).press('Space');
     await expect.poll(iconWidth).toBe(20);
-    await expect
-      .poll(() => item.evaluate((element) => element.getBoundingClientRect().height))
-      .toBe(40);
+    await expect.poll(itemHeight).toBe(40);
   });
 
   test.describe('dock shared indicator', () => {

@@ -158,6 +158,22 @@ function selectOption(option: SelectOption) {
   focusTrigger();
 }
 
+// WebKit dismisses the native popover between pointerdown and click, so the
+// press itself must commit the option. The click that belongs to the same
+// gesture is then ignored, while a click dispatched without a pointer pair
+// (assistive technology) still selects.
+let pointerCommitAt = 0;
+function onOptionPointerDown(option: SelectOption, event: PointerEvent) {
+  markTriggerPointerFocus();
+  if (!event.isPrimary || event.button !== 0) return;
+  pointerCommitAt = performance.now();
+  selectOption(option);
+}
+function onOptionClick(option: SelectOption) {
+  if (performance.now() - pointerCommitAt < 500) return;
+  selectOption(option);
+}
+
 function onPopoverToggle(event: Event) {
   const popover = event.currentTarget as HTMLElement;
   if (isOverlayOpen(popover, 'ui-select__popover--fallback-open')) return;
@@ -267,8 +283,8 @@ onBeforeUnmount(() => {
         role="option"
         :disabled="option.disabled"
         :aria-selected="String(option.value) === String(props.modelValue ?? '')"
-        @pointerdown="markTriggerPointerFocus"
-        @click="selectOption(option)"
+        @pointerdown="onOptionPointerDown(option, $event)"
+        @click="onOptionClick(option)"
         @keydown="onOptionKeydown"
       >
         <span>{{ option.label }}</span>

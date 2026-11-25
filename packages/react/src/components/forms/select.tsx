@@ -74,6 +74,10 @@ export function UiSelect({
   // by the overlay element, so hold that element rather than re-resolving it
   // from a ref that React has already detached.
   const overlayRef = useRef<HTMLElement | null>(null);
+  // WebKit dismisses the native popover between pointerdown and click, so the
+  // press itself commits an option. The click belonging to that gesture is
+  // ignored, while a click dispatched without a pointer pair still selects.
+  const pointerCommitAt = useRef(0);
   useEffect(
     () => () => {
       const overlay = overlayRef.current;
@@ -127,6 +131,18 @@ export function UiSelect({
       }
       setOpen(false);
     }
+  };
+
+  const commitOption = (option: UiSelectOption, element: HTMLElement) => {
+    if (option.disabled || disabled || readOnly) return;
+    onValueChange?.(option.value);
+    const details = element.closest('details');
+    if (details !== null) {
+      details.open = false;
+      closeSelectPopover(details);
+    }
+    setOpen(false);
+    details?.querySelector<HTMLElement>('.ui-select')?.focus();
   };
 
   return (
@@ -237,17 +253,13 @@ export function UiSelect({
                   .closest('details')
                   ?.querySelector<HTMLElement>('.ui-select');
                 if (trigger) trigger.dataset.neoverseFocusOrigin = 'pointer';
+                if (!event.isPrimary || event.button !== 0) return;
+                pointerCommitAt.current = performance.now();
+                commitOption(option, event.currentTarget);
               }}
               onClick={(event) => {
-                if (option.disabled || disabled || readOnly) return;
-                onValueChange?.(option.value);
-                const details = event.currentTarget.closest('details');
-                if (details) {
-                  details.open = false;
-                  closeSelectPopover(details);
-                }
-                setOpen(false);
-                details?.querySelector<HTMLElement>('.ui-select')?.focus();
+                if (performance.now() - pointerCommitAt.current < 500) return;
+                commitOption(option, event.currentTarget);
               }}
               onKeyDown={onOptionKeyDown}
             >
