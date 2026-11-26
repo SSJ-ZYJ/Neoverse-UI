@@ -1,4 +1,5 @@
 import { expect, test } from 'bun:test';
+import { type ControlSurfacePreset, surfaceClasses } from './index.js';
 
 const source = (name: string) => Bun.file(new URL(name, import.meta.url)).text();
 
@@ -69,15 +70,16 @@ test('dependent recipes compose at local material owners for consumer overrides'
   }
 });
 
-test('all control adapters accept the three presets without losing none', async () => {
-  const vue = await Bun.file(new URL('../../vue/src/types/controls.ts', import.meta.url)).text();
-  const react = await Bun.file(
-    new URL('../../react/src/components/surfaces/control-surface.tsx', import.meta.url),
-  ).text();
-  for (const adapter of [vue, react]) {
-    expect(adapter).toMatch(
-      /ControlSurfacePreset[^;]*'none'[^;]*'glass-subtle'[^;]*'glass-elevated'[^;]*'glass-immersive'/,
-    );
+test('the shared control preset keeps none and all three Glass tiers', () => {
+  const accepted: readonly ControlSurfacePreset[] = [
+    'auto',
+    'none',
+    'glass-subtle',
+    'glass-elevated',
+    'glass-immersive',
+  ];
+  for (const preset of accepted) {
+    expect(Object.keys(surfaceClasses)).toContain(preset);
   }
 });
 
