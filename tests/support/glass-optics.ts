@@ -4,7 +4,14 @@ import { expect } from '@playwright/test';
 
 export type OpticsTheme = 'light' | 'dark';
 export type OpticsTier = 'subtle' | 'elevated' | 'immersive';
-export type OpticsBackdrop = 'neutral' | 'pale' | 'pale-blue' | 'terminal-pale' | 'cool' | 'warm';
+export type OpticsBackdrop =
+  | 'neutral'
+  | 'dark-canvas'
+  | 'pale'
+  | 'pale-blue'
+  | 'terminal-pale'
+  | 'cool'
+  | 'warm';
 
 export const opticsThemes: readonly OpticsTheme[] = ['light', 'dark'];
 export const opticsTiers: readonly OpticsTier[] = ['subtle', 'elevated', 'immersive'];
@@ -12,6 +19,8 @@ export const opticsBackdrops: readonly OpticsBackdrop[] = ['neutral', 'pale', 'c
 
 const backgrounds: Record<OpticsBackdrop, string> = {
   neutral: 'rgb(118 122 131)',
+  // Design Lab's dark Surface specimen backdrop.
+  'dark-canvas': 'rgb(17 32 46)',
   pale: 'rgb(218 229 235)',
   // Sampled from just inside the reported lower-right Glass rim.
   'pale-blue': 'rgb(233 241 251)',
@@ -23,8 +32,11 @@ const backgrounds: Record<OpticsBackdrop, string> = {
 
 const probe = { left: 224, top: 208, width: 320, height: 180, radius: 24 };
 const padding = 12;
-const probeFor = (backdrop: OpticsBackdrop) =>
-  backdrop === 'terminal-pale' ? { ...probe, width: 640, height: 384, radius: 20 } : probe;
+const probeFor = (backdrop: OpticsBackdrop) => {
+  if (backdrop === 'terminal-pale') return { ...probe, width: 640, height: 384, radius: 20 };
+  if (backdrop === 'dark-canvas') return { ...probe, width: 640, height: 88, radius: 16 };
+  return probe;
+};
 
 export type EdgeMetrics = {
   p10: number;
@@ -46,6 +58,7 @@ export type OpticsMetrics = {
   sides: Record<'top' | 'right' | 'bottom' | 'left', EdgeMetrics>;
   corners: Record<'upperLeft' | 'upperRight' | 'lowerLeft' | 'lowerRight', number>;
   cornerLift: Record<'upperLeft' | 'lowerRight', number>;
+  cornerShoulders: Record<'upperLeft' | 'lowerRight', number>;
   blueRetention: Record<'upperLeft' | 'lowerRight', number>;
   interior: { mean: number; p95: number };
 };
@@ -61,7 +74,7 @@ export async function installOpticsProbe(
   });
   await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
   await page.evaluate(
-    ({ surfaceTier, background, position, terminal }) => {
+    ({ surfaceTier, background, position, componentSurface }) => {
       const app = document.querySelector<HTMLElement>('#app');
       if (app) app.style.display = 'none';
       for (const previous of document.querySelectorAll(
@@ -81,7 +94,7 @@ export async function installOpticsProbe(
       });
       const surface = document.createElement('div');
       surface.dataset.neoverseOpticsProbe = '';
-      surface.className = `${terminal ? 'ui-surface ' : ''}material-glass-${surfaceTier}`;
+      surface.className = `${componentSurface ? 'ui-surface ' : ''}material-glass-${surfaceTier}`;
       Object.assign(surface.style, {
         position: 'fixed',
         left: `${position.left}px`,
@@ -98,7 +111,7 @@ export async function installOpticsProbe(
       surfaceTier: tier,
       background: backgrounds[backdrop],
       position: probeFor(backdrop),
-      terminal: backdrop === 'terminal-pale',
+      componentSurface: backdrop === 'terminal-pale' || backdrop === 'dark-canvas',
     },
   );
 
@@ -330,6 +343,20 @@ export async function measureOptics(
         }
         return percentile(retention, 0.5);
       };
+      const horizontalShoulder = (lowerRight: boolean) => {
+        const edge = inset + (lowerRight ? position.height : 0);
+        const peaks: number[] = [];
+        // Measure beyond the curve, where the last arc-only model matched the middle.
+        for (let along = position.radius + 5; along <= position.radius + 16; along += 1) {
+          const x = inset + (lowerRight ? position.width - 1 - along : along);
+          let peak = 0;
+          for (let normal = -6; normal <= 7; normal += 1) {
+            peak = Math.max(peak, delta(x, edge + normal));
+          }
+          peaks.push(peak);
+        }
+        return percentile(peaks, 0.5);
+      };
       const left = inset - 4;
       const top = inset - 4;
       const right = inset + position.width - position.radius - 4;
@@ -352,6 +379,10 @@ export async function measureOptics(
         cornerLift: {
           upperLeft: cornerSignal(left, top, luminanceLift),
           lowerRight: cornerSignal(right, bottom, luminanceLift),
+        },
+        cornerShoulders: {
+          upperLeft: horizontalShoulder(false),
+          lowerRight: horizontalShoulder(true),
         },
         blueRetention: {
           upperLeft: cornerBlueRetention(left, top),

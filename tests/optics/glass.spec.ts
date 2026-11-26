@@ -11,9 +11,14 @@ import {
 test.describe('Aurora Glass optical diagnostics', () => {
   for (const theme of opticsThemes) {
     for (const tier of opticsTiers) {
-      for (const backdrop of opticsBackdrops) {
+      const backdrops =
+        theme === 'dark' ? ([...opticsBackdrops, 'dark-canvas'] as const) : opticsBackdrops;
+      for (const backdrop of backdrops) {
         const paleStandard = theme === 'light' && tier === 'elevated' && backdrop === 'pale';
-        const scope = backdrop === 'neutral' || paleStandard ? '@optics-smoke' : '@optics-full';
+        const scope =
+          backdrop === 'neutral' || backdrop === 'dark-canvas' || paleStandard
+            ? '@optics-smoke'
+            : '@optics-full';
         test(`${theme} ${tier} on ${backdrop} preserves a fine edge ${scope}`, async ({
           page,
         }, testInfo) => {
@@ -38,7 +43,7 @@ test.describe('Aurora Glass optical diagnostics', () => {
             }
             const { upperLeft, upperRight, lowerLeft, lowerRight } = captures.metrics.corners;
             expect(upperLeft + lowerRight).toBeGreaterThan(upperRight + lowerLeft);
-            if (backdrop === 'neutral') {
+            if (backdrop === 'neutral' || backdrop === 'dark-canvas') {
               const { upperLeft: leftLift, lowerRight: rightLift } = captures.metrics.cornerLift;
               const weakerLift = Math.min(leftLift, rightLift);
               expect(weakerLift, 'both corners add light').toBeGreaterThan(0);
@@ -51,6 +56,21 @@ test.describe('Aurora Glass optical diagnostics', () => {
               const quietCorner = Math.max(upperRight, lowerLeft);
               expect(upperLeft, 'upper-left catch').toBeGreaterThanOrEqual(1.04 * quietCorner);
               expect(lowerRight, 'lower-right catch').toBeGreaterThanOrEqual(1.44 * quietCorner);
+              // Allow proportional lift and pixel rounding, not a blue cast.
+              for (const retention of Object.values(captures.metrics.blueRetention)) {
+                expect(retention, 'backdrop blue remains visible').toBeGreaterThanOrEqual(0.9);
+                expect(retention, 'no oversaturated dark rim').toBeLessThanOrEqual(1.75);
+              }
+            }
+            if (backdrop === 'dark-canvas') {
+              const quietCorner = Math.max(upperRight, lowerLeft);
+              expect(
+                Math.min(upperLeft, lowerRight),
+                'both catches stand out on a dark canvas',
+              ).toBeGreaterThanOrEqual(1.35 * quietCorner);
+              const { cornerShoulders, sides } = captures.metrics;
+              expect(cornerShoulders.upperLeft - sides.top.median).toBeGreaterThanOrEqual(3);
+              expect(cornerShoulders.lowerRight - sides.bottom.median).toBeGreaterThanOrEqual(3);
             }
             if (theme === 'light' && backdrop === 'pale') {
               // Both catches need enough volume to stand apart from the quiet corners.

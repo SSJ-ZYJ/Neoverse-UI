@@ -1129,7 +1129,8 @@ class GlassRendererImpl implements GlassRenderer {
       const { gain, edgeLight, primary, secondary, tertiary, lightSurface, isLight, colorDodge } =
         this.resolveSceneColors(rootStyle, view, this.colorProbe);
       gl.uniform1f(locations.gain, gain);
-      const backdropChroma = isLight || colorDodge;
+      // Saturation would exaggerate even a neutral dark backdrop's blue lead.
+      const backdropChroma = isLight;
       const boostLowerRight = isLight && colorDodge;
       if (backdropChroma) this.ensureChromaCanvas();
       if (this.chromaCanvas && this.chromaContext) {

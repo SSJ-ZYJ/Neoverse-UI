@@ -62,14 +62,14 @@ proportionally rather than lifting the weaker channels toward white. Dark
 surfaces use a higher exposure scale to keep the fine rim visible on dark
 backdrops. The upper-left and lower-right catches share one lighting profile.
 On large light surfaces, both catches roll off before the backdrop channels
-clip, with a softer shoulder on the largest surfaces. The saturation pass
-strengthens the live backdrop's hue in both themes, with additional emphasis
-near the lower-right arc on large light surfaces. Neither pass adds a fixed
-highlight hue. Equal lighting does not require equal output on different
-underlying colors.
+clip, with a softer shoulder on the largest surfaces. Only the light theme
+adds a saturation pass, with extra emphasis near the lower-right arc on large
+surfaces. Dark uses the proportional lift alone so it does not exaggerate the
+blue already present in a cool backdrop. Equal lighting does not require equal
+output on different underlying colors.
 
-Browsers without color dodge keep the overlay transfer in either theme.
-CSS still owns the body tint, blur, and shadows.
+Browsers without color dodge keep the overlay transfer in either theme, using
+equal channel gain in dark. CSS still owns the body tint, blur, and shadows.
 
 The edge reacts to the pixels immediately underneath it, but does not sample
 neighboring pixels or bend their position. This is backdrop-dependent
@@ -78,10 +78,11 @@ compositing, not spatial refraction.
 Opacity, clipping, and overlay occlusion still apply. On large light surfaces,
 the upper-left and lower-right catches use the same inward falloff. The
 lighting eases from each straight edge into its arc, so the join does not
-create a second highlight. Dark corners use the same fine contour, with
-additional color-dodge lift on the upper-left and lower-right arcs after the
-base exposure ceiling. The lift tapers to zero at the straight edges without
-changing rim geometry or coverage.
+create a second highlight. Dark catches use a neutral lift weighted by
+covered edge area and a longer inward falloff. Both diagonal catches extend
+past the rounded arc onto the adjacent edge ends; the extension scales with
+the short side and is capped, leaving the middle of each edge and the outer
+contour unchanged.
 Reduced transparency disables the renderer. The CSS fallback uses alpha-only
 gradient masks and backdrop brightness. The historical `backend: 'native'`
 option remains available for compatibility, but must not be used as the repair
@@ -122,10 +123,29 @@ Token and runtime tests guard tier optics, shader composition, frame scheduling,
 canvas ownership and reduced-transparency transitions. Chromium integration tests
 also verify the CSS blur and fallback when WebGL is unavailable. The isolated
 Linux Chromium + SwiftShader optical suite records actual lit/unlit edge
-pixels across both themes, three tiers and four backdrops; the short CI suite
-checks measurable edge regressions. Historical 0.2.0 color-reference matching,
-true backdrop response and overall appearance are not established by those
-diagnostic measurements and still require manual rendering acceptance.
+pixels across both themes, three tiers, the shared backdrops and targeted
+diagnostic scenes. The short CI suite checks measurable edge regressions.
+Historical 0.2.0 color-reference matching and overall appearance still
+require manual rendering acceptance.
+
+### Dark wide-surface baseline
+
+The `dark-canvas` probe in [Glass optics fixtures](../../tests/support/glass-optics.ts)
+is the reference scene for dark wide surfaces. Across all three tiers, both
+diagonal catches stay visible on a flat, dark backdrop. They continue beyond
+the rounded arcs onto the nearby top-left and bottom-right edge ends, then
+fade into the quieter straight middle. All four sides and the other two
+corners remain visible, the outer contour stays fixed, and the glass body
+retains its tier-owned blur. The dark catches lift the live backdrop without
+a separate saturation pass or a painted accent. Their direction matches
+light mode; their absolute color and brightness need not match it.
+
+[The optical smoke cases](../../tests/optics/glass.spec.ts) own the fixture
+tolerances for both catches, the adjacent edge ends, edge continuity, and
+interior leakage. The dark neutral scene separately checks that both catches
+retain rather than oversaturate the backdrop's blue component. This baseline
+defines the rendering contract, not a golden screenshot; pixel appearance
+and interaction performance require remote rendering acceptance.
 
 ### Glass repair guardrails
 
