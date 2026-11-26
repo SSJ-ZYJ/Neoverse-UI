@@ -49,6 +49,7 @@ test.describe('playground', () => {
     expect(await fading.jsonValue()).toBe(true);
     await expect(root).toHaveAttribute('data-theme', 'dark');
     await expect(page).toHaveURL(/lang=zh.*#controls-button$/);
+    await expect(specimenButton).toHaveAccessibleName('运行示例');
     await expect(specimen.locator('output')).toHaveText('触发次数：1');
   });
 

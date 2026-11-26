@@ -151,6 +151,7 @@
   --neoverse-color-border-strong: rgb(219 234 254 / 22%);
   --neoverse-color-border-interactive: rgb(56 189 248 / 50%);
   --neoverse-color-accent-primary: var(--neoverse-color-blue-400);
+  --neoverse-prose-link-foreground: var(--neoverse-color-blue-400);
   --neoverse-color-accent-primary-foreground: var(--neoverse-color-neutral-950);
   --neoverse-color-accent-secondary: var(--neoverse-color-mint-400);
   --neoverse-color-accent-tertiary: #8c9bff;

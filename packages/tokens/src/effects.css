@@ -10,16 +10,6 @@
     --neoverse-effect-alpha-intense: 60%;
     --neoverse-effect-alpha-dominant: 80%;
     --neoverse-effect-alpha-full: 100%;
-    --neoverse-prose-link-decoration: color-mix(
-      in srgb,
-      var(--neoverse-color-blue-400) var(--neoverse-effect-alpha-strong),
-      var(--neoverse-color-blue-600)
-    );
-    --neoverse-prose-link-hover-decoration: color-mix(
-      in srgb,
-      var(--neoverse-color-blue-400) var(--neoverse-effect-alpha-subtle),
-      var(--neoverse-color-blue-600)
-    );
     /* Text-only feedback stays readable when the status field is pastel. */
     --neoverse-effect-status-info-text: var(--neoverse-color-status-info);
     --neoverse-effect-status-success-text: var(--neoverse-color-status-success);

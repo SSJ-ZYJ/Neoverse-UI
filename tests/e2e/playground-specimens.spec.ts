@@ -156,9 +156,6 @@ test('Markdown inline styles stay distinct in rendered combinations', async ({ p
         fontWeight: style.fontWeight === 'normal' ? 400 : Number(style.fontWeight),
         fontStyle: style.fontStyle,
         line: style.textDecorationLine,
-        background: style.backgroundImage,
-        backgroundSize: style.backgroundSize,
-        radius: style.borderRadius,
       };
     });
 
@@ -185,9 +182,6 @@ test('Markdown inline styles stay distinct in rendered combinations', async ({ p
   expect(strike.color).not.toBe(body.color);
 
   const link = await read('link', 'a');
-  expect(link.background).toContain('linear-gradient');
-  expect(link.backgroundSize).toContain('2px');
-  expect(link.radius).toBe('1px');
   expect(link.color).not.toBe(body.color);
 
   const linkBold = await read('link-bold', 'a');
@@ -197,7 +191,6 @@ test('Markdown inline styles stay distinct in rendered combinations', async ({ p
 
   const linkStrike = await read('link-strike', 'a');
   const nestedStrike = await read('link-strike', 'a del');
-  expect(linkStrike.background).toContain('linear-gradient');
   expect(nestedStrike.line).toContain('line-through');
   expect(nestedStrike.color).toBe(linkStrike.color);
 
@@ -206,71 +199,36 @@ test('Markdown inline styles stay distinct in rendered combinations', async ({ p
   ).toBeLessThanOrEqual(1);
 });
 
-test('plain, bold, and struck links stay underlined and darken on hover', async ({
+test('blue prose links reveal their underline on hover and keyboard focus', async ({
   page,
 }, testInfo) => {
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  for (const [theme, backdrop] of [
-    ['light', '#d8e8ef'],
-    ['dark', '#112832'],
+  const transparent = 'linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0))';
+  for (const [theme, blue] of [
+    ['light', 'rgb(3, 105, 161)'],
+    ['dark', 'rgb(56, 189, 248)'],
   ]) {
-    await page.goto(`/?theme=${theme}&lang=en#foundation-typography`, {
+    await page.goto(`/?theme=${theme}&lang=en&fps=0#foundation-typography`, {
       waitUntil: 'domcontentloaded',
     });
     const panel = page.locator('[data-markdown-inline]');
     for (const row of ['link', 'link-bold', 'link-strike']) {
       const link = panel.locator(`[data-markdown-inline-row="${row}"]`).getByRole('link');
-      const underline = await link.evaluate((element) => {
-        const style = getComputedStyle(element);
-        return {
-          background: style.backgroundImage,
-          size: style.backgroundSize,
-          radius: style.borderRadius,
-        };
-      });
-      expect(underline.background).toContain('linear-gradient');
-      expect(underline.size).toContain('2px');
-      expect(underline.radius).toBe('1px');
-      const readUnderline = () =>
-        link.evaluate((element, background) => {
-          const context = new OffscreenCanvas(1, 1).getContext('2d');
-          if (!context) throw new Error('Cannot resolve the underline color without a canvas');
-          const luminance = () => {
-            const channels = context.getImageData(0, 0, 1, 1).data.slice(0, 3);
-            const [red, green, blue] = Array.from(channels, (channel) => {
-              const value = channel / 255;
-              return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
-            });
-            return 0.2126 * (red ?? 0) + 0.7152 * (green ?? 0) + 0.0722 * (blue ?? 0);
-          };
-          context.fillStyle = background;
-          context.fillRect(0, 0, 1, 1);
-          const base = luminance();
-          const decoration = /(color\(srgb[^)]*\)|rgba?\([^)]*\))/.exec(
-            getComputedStyle(element).backgroundImage,
-          )?.[0];
-          if (decoration === undefined) throw new Error('The underline colour is missing');
-          context.fillStyle = decoration;
-          context.fillRect(0, 0, 1, 1);
-          const stroke = luminance();
-          return {
-            stroke,
-            contrast: (Math.max(base, stroke) + 0.05) / (Math.min(base, stroke) + 0.05),
-          };
-        }, backdrop);
-      const rest = await readUnderline();
-      expect
-        .soft(rest.contrast, `${row} underline contrasts with the ${theme} backdrop`)
-        .toBeGreaterThanOrEqual(theme === 'light' ? 2.4 : 3);
-      if (theme === 'light') expect.soft(rest.contrast).toBeLessThan(3);
-      if (row === 'link' && !testInfo.project.use.hasTouch) {
+      const visible = `linear-gradient(${blue}, ${blue})`;
+      await expect(link).toHaveCSS('color', blue);
+      await expect(link).toHaveCSS('background-image', transparent);
+      if (!testInfo.project.use.hasTouch) {
         await link.hover();
-        const hover = await readUnderline();
-        expect.soft(hover.stroke, `${theme} hover darkens the underline`).toBeLessThan(rest.stroke);
-        expect.soft(hover.contrast).toBeGreaterThanOrEqual(theme === 'light' ? 2.8 : 3);
+        await expect(link).toHaveCSS('background-image', visible);
         await page.mouse.move(0, 0);
+        await expect(link).toHaveCSS('background-image', transparent);
       }
     }
+    await page.keyboard.press('Tab');
+    const link = panel.locator('[data-markdown-inline-row="link"]').getByRole('link');
+    await link.focus();
+    await expect(link).toBeFocused();
+    await expect(link).toHaveCSS('outline-style', 'solid');
+    await expect(link).toHaveCSS('background-image', `linear-gradient(${blue}, ${blue})`);
   }
 });
 

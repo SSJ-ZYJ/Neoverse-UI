@@ -1,3 +1,9 @@
+@property --neoverse-prose-link-decoration-color {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: transparent;
+}
+
 @layer components {
   .neoverse-prose {
     min-width: 0;
@@ -79,13 +85,13 @@
   }
 
   .neoverse-prose a {
+    --neoverse-prose-link-decoration-color: var(--neoverse-prose-link-decoration);
     color: var(--neoverse-prose-link-foreground);
     /* The background strip paints per inline fragment, so a wrapped link keeps
-       the underline on every line. The bottom clip radius rounds both caps
-       without replacing the text decoration colour token. */
+       its rounded underline on every line without shifting the text. */
     background-image: linear-gradient(
-      var(--neoverse-prose-link-decoration),
-      var(--neoverse-prose-link-decoration)
+      var(--neoverse-prose-link-decoration-color),
+      var(--neoverse-prose-link-decoration-color)
     );
     background-position: left bottom;
     background-repeat: no-repeat;
@@ -94,10 +100,14 @@
     padding-block-end: var(--neoverse-prose-link-underline-offset);
     -webkit-box-decoration-break: clone;
     box-decoration-break: clone;
-    transition: color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+    transition:
+      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      --neoverse-prose-link-decoration-color var(--neoverse-motion-state-duration)
+      var(--neoverse-motion-state-easing);
   }
 
   .neoverse-prose a:focus-visible {
+    --neoverse-prose-link-decoration-color: var(--neoverse-prose-link-hover-decoration);
     border-radius: var(--neoverse-radius-xs);
     outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
     outline-offset: var(--neoverse-focus-ring-offset);
@@ -273,17 +283,21 @@
 
   @media (hover: hover) {
     .neoverse-prose a:hover {
+      --neoverse-prose-link-decoration-color: var(--neoverse-prose-link-hover-decoration);
       color: var(--neoverse-prose-link-hover-foreground);
-      background-image: linear-gradient(
-        var(--neoverse-prose-link-hover-decoration),
-        var(--neoverse-prose-link-hover-decoration)
-      );
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .neoverse-prose a {
       transition: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .neoverse-prose a {
+      background-image: none;
+      text-decoration: underline;
     }
   }
 

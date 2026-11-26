@@ -447,6 +447,9 @@ test.describe('playground', () => {
     await expect(button).toHaveCSS('height', '44px');
     await chooseOption(inspector, 'surface', 'None');
     await expect(button).toHaveCSS('backdrop-filter', 'none');
+    await chooseOption(inspector, 'variant', 'Success');
+    await expect(button).toHaveAccessibleName('Mark complete');
+    await expect(live.locator('output')).toHaveText('Activations: 1');
     const disabled = inspector.getByRole('switch', { name: 'Disabled' });
     await disabled.press('Space');
     await expect(button).toBeDisabled();
@@ -459,6 +462,7 @@ test.describe('playground', () => {
     await inspector.getByRole('button', { name: 'Reset specimen' }).press('Enter');
     if (mobile) await page.keyboard.press('Escape');
     await expect(button).toBeEnabled();
+    await expect(button).toHaveAccessibleName('Run example');
     await expect(button).toHaveCSS('height', '36px');
     await expect(button).toHaveCSS('border-top-left-radius', initialRadius);
     await expect(sizeField).not.toContainText('Modified');

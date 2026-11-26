@@ -40,7 +40,15 @@ import {
 } from './shared';
 
 const activeOption = localized('Selected option', '所选选项');
-const buttonLabel = localized('Try action', '体验操作');
+const buttonExamples = {
+  primary: { label: localized('Run example', '运行示例'), icon: 'arrow-right' },
+  secondary: { label: localized('View details', '查看详情'), icon: 'article' },
+  ghost: { label: localized('Dismiss', '忽略'), icon: 'close' },
+  danger: { label: localized('Remove item', '移除项目'), icon: 'minus' },
+  success: { label: localized('Mark complete', '标记完成'), icon: 'check' },
+  warning: { label: localized('Review changes', '检查更改'), icon: 'search' },
+  accent: { label: localized('Explore features', '探索功能'), icon: 'spark' },
+} as const;
 const buttonClicks = localized('Activations: {count}', '触发次数：{count}');
 
 const cornerRadii = {
@@ -84,8 +92,9 @@ export const button = defineSpecimen<ButtonProps & PreviewCorners, { clicks: num
       loading,
     },
   },
-  render: ({ props: { corner, ...props }, state, setState, locale }) =>
-    h('div', { class: 'grid justify-items-center gap-3' }, [
+  render: ({ props: { corner, ...props }, state, setState, locale }) => {
+    const example = buttonExamples[props.variant ?? 'primary'];
+    return h('div', { class: 'grid justify-items-center gap-3' }, [
       h(
         UiButton,
         {
@@ -93,14 +102,21 @@ export const button = defineSpecimen<ButtonProps & PreviewCorners, { clicks: num
           style: cornerStyle(corner),
           onClick: () => setState('clicks', state.clicks + 1),
         },
-        () => localize(buttonLabel, locale),
+        {
+          leading: () => h(LabIcon, { name: example.icon }),
+          default: () => localize(example.label, locale),
+        },
       ),
       h(
         'output',
-        { class: 'text-caption text-secondary' },
+        {
+          class:
+            'rounded-pill border border-subtle bg-surface-subtle px-2.5 py-1 text-caption text-secondary tabular-nums',
+        },
         formatLocalized(buttonClicks, locale, { count: state.clicks }),
       ),
-    ]),
+    ]);
+  },
 });
 
 const segmentCopy = moduleCopy.segmentedControl;
