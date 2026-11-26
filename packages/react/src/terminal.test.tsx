@@ -79,7 +79,7 @@ test('terminal custom header replaces fallback controls while preserving the acc
     });
     const surface = container.querySelector('section');
     expect(surface?.getAttribute('aria-label')).toBe('Workspace console');
-    expect(surface?.classList.contains('material-glass-elevated')).toBe(true);
+    expect(surface?.classList.contains('material-role-panel')).toBe(true);
     expect(container.querySelectorAll('header')).toHaveLength(1);
     expect(container.querySelector('header')?.textContent).toBe('Close window');
     expect(container.querySelectorAll('button')).toHaveLength(1);

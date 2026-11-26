@@ -1,7 +1,7 @@
 {
   "name": "@neoverse-ui/tailwind",
   "version": "0.3.1",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "description": "Tailwind CSS v4 semantic theme and component styles for Neoverse UI.",
   "type": "module",
   "repository": {

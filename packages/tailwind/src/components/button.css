@@ -5,6 +5,7 @@
 }
 
 @layer components {
+  @scope (.material-scopes) {
   /* Filled buttons share one sampled Aurora Glass plate. Quiet buttons borrow
      the surrounding surface and only paint a wash during interaction. */
   .ui-button {
@@ -177,14 +178,14 @@
     opacity: var(--neoverse-control-button-disabled-opacity);
   }
 
-  .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) {
+  .ui-button:is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive) {
     /* Retain the existing spacing even when a quiet variant borrows its surface. */
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) transparent;
     overflow: visible;
     isolation: isolate;
   }
 
-  .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+  .ui-button:is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
     :where(.ui-button--ghost, [data-surface='none'])
   ) {
     --neoverse-button-tone-color: var(--neoverse-control-button-filled-background);
@@ -340,11 +341,13 @@
       outline-color: Highlight;
     }
   }
+  }
 }
 
 @layer utilities {
+  @scope (.material-scopes) {
   /* Same layer as Aurora Glass; interactions change feedback, never the base plate. */
-  .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+  .ui-button:is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
     .ui-button--ghost
   ) {
     --neoverse-button-fallback-border: var(--neoverse-control-button-border);
@@ -363,9 +366,9 @@
   }
 
   .ui-button.ui-button--primary:is(
-    .material-glass-subtle,
-    .material-glass-elevated,
-    .material-glass-immersive
+    .material-recipe-glass-subtle,
+    .material-recipe-glass-elevated,
+    .material-recipe-glass-immersive
   ) {
     --neoverse-material-shadow: var(--neoverse-control-primary-shadow);
     box-shadow: var(--neoverse-control-primary-shadow);
@@ -373,7 +376,7 @@
   }
 
   @supports not ((backdrop-filter: none) or (-webkit-backdrop-filter: none)) {
-    .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    .ui-button:is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
         .ui-button--ghost
       ) {
       border-color: var(--neoverse-button-fallback-border);
@@ -381,7 +384,7 @@
   }
 
   @media (prefers-reduced-transparency: reduce) {
-    .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    .ui-button:is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
         .ui-button--ghost
       ) {
       border-color: var(--neoverse-button-fallback-border);
@@ -389,7 +392,7 @@
   }
 
   @media (forced-colors: active) {
-    .ui-button:is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    .ui-button:is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
         .ui-button--ghost
       ) {
       border-color: ButtonText;
@@ -409,11 +412,18 @@
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
+  }
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
-    :where(:scope, :scope *).material-auto:is(.ui-button--primary, .ui-button--secondary) {
+  @scope (.material-solid-scope) {
+    :where(:scope, :scope *).material-recipe-auto.ui-button:not(.ui-button--ghost) {
+      background-image: linear-gradient(var(--neoverse-button-tone-color), var(--neoverse-button-tone-color));
+      background-origin: border-box;
+      background-clip: border-box;
+    }
+
+    :where(:scope, :scope *).material-recipe-auto:is(.ui-button--primary, .ui-button--secondary) {
       --neoverse-button-tone-color: transparent;
       --neoverse-button-hover-tone: var(--neoverse-material-solid-hover);
       --neoverse-button-press-tone: var(--neoverse-material-solid-press);
@@ -430,19 +440,19 @@
       }
     }
 
-    :where(:scope, :scope *).material-auto.ui-button--primary {
+    :where(:scope, :scope *).material-recipe-auto.ui-button--primary {
       --neoverse-solid-plate-fill: var(--neoverse-material-solid-primary);
       --neoverse-button-hover-tone: var(--neoverse-material-solid-primary-hover);
       --neoverse-button-press-tone: var(--neoverse-material-solid-primary-press);
       color: var(--neoverse-material-solid-primary-text);
     }
 
-    :where(:scope, :scope *).material-auto.ui-button--ghost {
+    :where(:scope, :scope *).material-recipe-auto.ui-button--ghost {
       background-color: var(--neoverse-quiet-control-feedback);
     }
 
     @media (prefers-reduced-motion: reduce) {
-      :where(:scope, :scope *).material-auto.ui-button {
+      :where(:scope, :scope *).material-recipe-auto.ui-button {
         transition: none;
       }
     }

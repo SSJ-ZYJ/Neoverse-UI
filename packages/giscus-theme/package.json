@@ -1,7 +1,7 @@
 {
   "name": "@neoverse-ui/giscus-theme",
   "version": "0.2.0",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "description": "Standalone Neoverse UI themes for the cross-origin Giscus widget.",
   "type": "module",
   "repository": {

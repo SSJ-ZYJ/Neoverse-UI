@@ -91,7 +91,7 @@ describe('UiButton', () => {
         'ui-button',
         'ui-button--primary',
         'ui-button--md',
-        'material-glass-subtle',
+        'material-role-control',
       ]),
     );
     expect(wrapper.attributes('data-surface')).toBe('auto');
@@ -105,7 +105,7 @@ describe('UiButton', () => {
     });
 
     expect(wrapper.classes()).toContain('ui-button--ghost');
-    expect(wrapper.classes()).not.toContain('material-glass-subtle');
+    expect(wrapper.classes()).not.toContain('material-role-control');
     expect(wrapper.attributes('data-surface')).toBe('none');
   });
 
@@ -173,7 +173,7 @@ describe('UiAction', () => {
         'ui-action',
         'ui-action--lg',
         'ui-button--primary',
-        'material-glass-subtle',
+        'material-role-control',
       ]),
     );
   });

@@ -214,22 +214,24 @@
 }
 
 @layer utilities {
+  @scope (.material-scopes) {
   @media (prefers-reduced-motion: no-preference) {
     /* Compose scale with the transition in the shared Glass utility layer. */
     .ui-control-surface:is(
-        .material-glass-subtle,
-        .material-glass-elevated,
-        .material-glass-immersive
+        .material-recipe-glass-subtle,
+        .material-recipe-glass-elevated,
+        .material-recipe-glass-immersive
       ):not(.ui-button) {
       transition:
         var(--neoverse-material-transition), var(--neoverse-control-surface-scale-transition);
     }
   }
+  }
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
-    .ui-control-surface.material-auto > .ui-control-surface__divider {
+  @scope (.material-solid-scope) {
+    .ui-control-surface.material-recipe-auto > .ui-control-surface__divider {
       background-color: var(--neoverse-material-solid-divider);
     }
   }

@@ -1,7 +1,7 @@
 {
   "name": "@neoverse-ui/motion",
   "version": "0.2.2",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "description": "Framework-agnostic motion tokens and reduced-motion CSS for Neoverse UI.",
   "type": "module",
   "repository": {

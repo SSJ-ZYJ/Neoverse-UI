@@ -1,6 +1,7 @@
 {
   "schemaVersion": 1,
   "materialStandard": "docs/architecture/material-standards.md",
+  "materialMaturity": { "glass": "existing", "solid": "existing", "frosted": "experimental" },
   "tracks": {
     "canonical-shared": "Framework-shared components that must keep stable Vue and React contracts in lockstep.",
     "consumer-driven": "Components whose framework adapters are added when real consumers require them; framework-count symmetry is not mandatory."

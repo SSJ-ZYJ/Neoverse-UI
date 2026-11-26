@@ -23,7 +23,7 @@ React 的原生事件名称、`className`、`htmlFor` 和 ref 遵循 React 约�
 
 `ButtonVariant` 在两端共享：`primary` 为主要蓝色，`secondary` 为次要样式，`ghost` 无填充；`success` 为成功绿，`warning` 为警告琥珀色，`danger` 为危险红，`accent` 为强调紫。
 
-两端从 `@neoverse-ui/tokens` 重导出 `MaterialMode`、`SurfacePreset` 和 `ControlSurfacePreset`；门禁校验重导出指向同一份类型声明。两端共用自动材质、显式预设和 Portal 作用域规则。Tabs 省略 `variant` 时跟随作用域，显式 `variant="glass"` 保留极光玻璃。材质职责见[组件矩阵](../../contracts/component-matrix.json)，行为细节见[共享材质规范](material-standards.md#shared-material-selection)。
+两端从 `@neoverse-ui/tokens` 重导出 `Material`、`SurfaceRole`、`GlassTier`、`SurfacePreset` 和 `ControlSurfacePreset`；门禁校验重导出指向同一份类型声明。两端共用自动材质、显式预设和 Portal 作用域规则。Tabs 省略 `variant` 时跟随作用域，显式 `variant="glass"` 保留极光玻璃。材质职责见[组件矩阵](../../contracts/component-matrix.json)，行为细节见[共享材质规范](material-standards.md#shared-material-selection)。
 
 ## 命名内容和根元素
 

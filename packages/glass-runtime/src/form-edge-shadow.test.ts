@@ -7,15 +7,20 @@ const unwrap = (source: string, marker: string): string => {
   return source.slice(start + 1, source.indexOf('\n}', start));
 };
 
+// These cases inspect only the default Glass recipe. The browser suite exercises
+// the real scope boundaries; happy-dom does not implement CSS @scope.
+const defaultGlassScope = (source: string): string =>
+  source.replace(/ {2}@scope \(\.material-glass-default\) \{([\s\S]*?)\n {2}\}(?=\r?\n)/g, '$1');
+
 // happy-dom does not support @layer and cannot resolve every nested var()
 // fallback. Keep the actual component rules and resolve their computed custom
 // properties separately, without pretending this is a rendered-pixel test.
-const componentCss = unwrap(read('../../tailwind/src/components/form-control.css'), '@layer')
+const componentCss = defaultGlassScope(unwrap(read('../../tailwind/src/components/form-control.css'), '@layer'))
   .replaceAll(':popover-open', '[data-test-popover-open]')
   .replaceAll(':modal', '[data-test-modal]');
 // happy-dom fails to match a descendant selector inside :where(). Expand only
 // the table-owner selector so prose-table token resolution can be exercised.
-const tableCss = unwrap(read('../../tailwind/src/components/table.css'), '@layer')
+const tableCss = defaultGlassScope(unwrap(read('../../tailwind/src/components/table.css'), '@layer'))
   .replace(
     ':where(.ui-table, .neoverse-prose table) {',
     ':where(.ui-table), :where(.neoverse-prose) table {',
@@ -26,10 +31,10 @@ const materialCss = unwrap(read('../../tokens/src/material.css'), '@layer');
 const controlEffectsCss = unwrap(read('../../tokens/src/control-effects.css'), '@layer');
 const tokenCss = unwrap(read('../../tokens/src/components/form-control.css'), '@layer');
 const tableTokenCss = unwrap(read('../../tokens/src/components/table.css'), '@layer');
-const disclosureCss = unwrap(
+const disclosureCss = defaultGlassScope(unwrap(
   read('../../tailwind/src/components/disclosure.css'),
   '@layer',
-).replace(
+)).replace(
   ':where(.ui-disclosure, .neoverse-prose details) {',
   ':where(.ui-disclosure), :where(.neoverse-prose) details {',
 );
@@ -223,7 +228,7 @@ describe('form control shadows with the shared Glass renderer', () => {
     ['summary', 'ui-select', '0.5'],
     ['span', 'ui-choice__control', '0.5'],
     ['table', 'ui-table', '0.5'],
-    ['div', 'ui-select__popover', '0.54'],
+    ['div', 'ui-select__popover material-role-overlay', '0.54'],
   ])('resolves the dark Glass edge roles on %s', (tag, className, opacity) => {
     installStyles('dark', 'webgl');
     const element = document.createElement(tag);

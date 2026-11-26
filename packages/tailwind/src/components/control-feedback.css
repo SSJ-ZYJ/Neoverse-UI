@@ -58,9 +58,9 @@
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+  @scope (.material-solid-scope) {
     :where(:scope, :scope *):where(
-        .ui-button:is(.material-auto.ui-button--ghost, [data-surface='none']),
+        .ui-button:is(.material-recipe-auto.ui-button--ghost, [data-surface='none']),
         .ui-tabs__tab,
         .ui-pagination__button,
         .ui-breadcrumb__link,

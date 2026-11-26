@@ -114,7 +114,7 @@
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+  @scope (.material-solid-scope) {
     /* `subtle` is an explicit preset and keeps its own paint; only the default
        automatic plate and the internal icon follow the local Solid mode. */
     .ui-empty-state:is([data-empty-state-variant='default'], [data-empty-state-variant='outlined'])

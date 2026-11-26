@@ -1,11 +1,5 @@
 @layer components {
-  :where(:root, [data-neoverse-material='glass']) {
-    --neoverse-portal-material-mode: glass;
-  }
-
-  :where([data-neoverse-material='solid']) {
-    --neoverse-portal-material-mode: solid;
-  }
+  /* Generated material scope values */
 
   .ui-overlay-portal {
     display: contents;
@@ -46,10 +40,6 @@
     font-size: var(--neoverse-overlay-font-size);
     line-height: var(--neoverse-overlay-line-height);
     color: var(--neoverse-overlay-foreground);
-    background: var(--neoverse-overlay-background);
-    box-shadow: var(--neoverse-overlay-shadow);
-    -webkit-backdrop-filter: var(--neoverse-overlay-filter);
-    backdrop-filter: var(--neoverse-overlay-filter);
     z-index: var(--neoverse-overlay-layer);
   }
 
@@ -170,11 +160,12 @@
 }
 
 @layer utilities {
+  @scope (.material-scopes) {
   /* Panel edges travel with the panel in both the native and fallback layers. */
   .ui-overlay-panel:is(
-    .material-glass-subtle,
-    .material-glass-elevated,
-    .material-glass-immersive
+    .material-recipe-glass-subtle,
+    .material-recipe-glass-elevated,
+    .material-recipe-glass-immersive
   ) {
     --neoverse-material-shadow: var(--neoverse-shadow-overlay);
   }
@@ -187,9 +178,9 @@
   @supports (mask-composite: subtract) and
     ((backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1))) {
     .ui-overlay-panel:is(
-        .material-glass-subtle,
-        .material-glass-elevated,
-        .material-glass-immersive
+        .material-recipe-glass-subtle,
+        .material-recipe-glass-elevated,
+        .material-recipe-glass-immersive
       ):not(.ui-button)::before {
       display: block;
       box-sizing: border-box;
@@ -205,16 +196,16 @@
 
   @media (prefers-reduced-transparency: reduce) {
     .ui-overlay-panel:is(
-        .material-glass-subtle,
-        .material-glass-elevated,
-        .material-glass-immersive
+        .material-recipe-glass-subtle,
+        .material-recipe-glass-elevated,
+        .material-recipe-glass-immersive
       ):not(.ui-button)::before {
       display: none;
     }
   }
 
   :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
       .ui-button
     ).ui-overlay-panel:is(
       :popover-open,
@@ -225,9 +216,9 @@
       .ui-context-menu__submenu--open
     ),
   .ui-overlay-panel:is(
-    .material-glass-subtle,
-    .material-glass-elevated,
-    .material-glass-immersive
+    .material-recipe-glass-subtle,
+    .material-recipe-glass-elevated,
+    .material-recipe-glass-immersive
   ):is(
     :popover-open,
     :modal,
@@ -241,5 +232,6 @@
     box-shadow:
       var(--neoverse-material-edge-highlight), var(--neoverse-material-bloom),
       var(--neoverse-material-shadow);
+  }
   }
 }

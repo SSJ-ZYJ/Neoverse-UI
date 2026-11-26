@@ -215,10 +215,10 @@ describe('Glass renderer optics and theme profiles', () => {
       gl.uniform1f.mock.calls
         .filter(([location]) => location?.name === 'u_corner_focus')
         .at(-1)?.[1],
-    ).toBe(0);
+    ).toBe(0.5);
   });
 
-  it('keeps a continuous light contour with a moderate corner focus and retains the dark button profile', () => {
+  it('keeps a continuous light contour and uses moderate corner focus across dark cards and buttons', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const button = document.createElement('button');
@@ -250,7 +250,7 @@ describe('Glass renderer optics and theme profiles', () => {
     renderer.refresh();
     expect(gl.uniform1f).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'u_corner_focus' }),
-      0,
+      0.5,
     );
 
     card.remove();
@@ -259,7 +259,7 @@ describe('Glass renderer optics and theme profiles', () => {
     renderer.refresh();
     expect(gl.uniform1f).toHaveBeenCalledWith(
       expect.objectContaining({ name: 'u_corner_focus' }),
-      1,
+      0.5,
     );
   });
 

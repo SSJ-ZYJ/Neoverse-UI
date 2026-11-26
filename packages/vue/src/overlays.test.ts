@@ -85,7 +85,7 @@ describe('Overlay primitives', () => {
     expect(panel.attributes('popover')).toBe('auto');
     expect(panel.attributes('role')).toBe('dialog');
     expect(panel.attributes('aria-label')).toBe('Details');
-    expect(panel.classes()).toContain('material-glass-elevated');
+    expect(panel.classes()).toContain('material-role-overlay');
   });
 
   it('renders overlay triggers with the shared button variant and keeps the secondary default', () => {
@@ -136,7 +136,7 @@ describe('Overlay primitives', () => {
     expect(panel.attributes('role')).toBe('menu');
     expect(panel.attributes('aria-label')).toBe('Page actions');
     expect(panel.classes()).toContain('ui-overlay-panel');
-    expect(panel.classes()).toContain('material-glass-elevated');
+    expect(panel.classes()).toContain('material-role-overlay');
 
     expect(wrapper.get('.ui-context-menu__heading').text()).toBe('Edit');
     // A native hr carries the separator role without an explicit attribute.
@@ -202,7 +202,7 @@ describe('Overlay primitives', () => {
 
     const childRows = submenu?.querySelectorAll<HTMLElement>('.ui-context-menu__item') ?? [];
     expect(submenu?.classList.contains('ui-overlay-panel')).toBe(true);
-    expect(submenu?.classList.contains('material-glass-elevated')).toBe(true);
+    expect(submenu?.classList.contains('material-role-overlay')).toBe(true);
     expect(childRows).toHaveLength(2);
     expect(childRows[0]?.getAttribute('aria-checked')).toBe('true');
     expect(childRows[1]?.getAttribute('role')).toBe('menuitemradio');

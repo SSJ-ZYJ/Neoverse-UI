@@ -650,6 +650,9 @@ for (const theme of themes) {
     const solidScrim = await scrim.evaluate((element) => getComputedStyle(element).backgroundColor);
     await scene.evaluate((el) => el.setAttribute('data-neoverse-material', 'glass'));
     await expect(dialog).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+    await scene.evaluate((el) => el.setAttribute('data-neoverse-material', 'frosted'));
+    await expect(dialog).toHaveCSS('backdrop-filter', /blur\(12px\)/);
+    await expect(dialog).not.toHaveCSS('background-color', overlayFill);
     await expect(scrim).not.toHaveCSS('background-color', solidScrim);
     await scene.evaluate((el) => el.setAttribute('data-neoverse-material', 'solid'));
     await expect(dialog).toHaveCSS('backdrop-filter', 'none');

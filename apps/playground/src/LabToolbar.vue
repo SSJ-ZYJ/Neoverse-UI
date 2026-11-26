@@ -1,11 +1,9 @@
 <script setup lang="ts">
-import type { MaterialMode } from '@neoverse-ui/tokens';
-import { getSurfaceClass } from '@neoverse-ui/tokens';
+import { defaultMaterial, getSurfaceClass, type Material, materials } from '@neoverse-ui/tokens';
 import { UiIconButton, UiSegmentedControl } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
 import FpsIndicator from './FpsIndicator.vue';
 import LabIcon from './LabIcon.vue';
-import { defaultMaterialMode, materialModes } from './material-runtime';
 import { appCopy, type Locale, localize, localized } from './playground-content';
 import type { ThemeMode } from './playground-types';
 import { languageSegments, materialNames, materialSegments } from './preference-segments';
@@ -16,7 +14,7 @@ const props = defineProps<{
   locale: Locale;
   requestedLocale: Locale;
   theme: ThemeMode;
-  material: MaterialMode;
+  material: Material;
   persistent: boolean;
   openPanel: 'explorer' | 'inspector' | null;
   showFps: boolean;
@@ -33,8 +31,17 @@ const themeOptions = computed(() => themeSegments(themeModes, props.locale));
 const languageOptions = computed(() => languageSegments(props.locale));
 const materialOptions = computed(() => materialSegments(props.locale));
 const toolbarMaterialClasses = getSurfaceClass('auto', 'control');
+const nextMaterial = computed(
+  () => materials[(materials.indexOf(props.material) + 1) % materials.length] ?? defaultMaterial,
+);
 const cycleLabel = localized('Cycle theme', '切换主题');
 const cycleMaterialLabel = localized('Cycle material', '切换材质');
+const nextMaterialLabel = localized('Next', '下一项');
+const experimentalMaterialLabel = localized('Exp.', '实验');
+const materialCycleDescription = computed(
+  () =>
+    `${localize(cycleMaterialLabel, props.locale)}: ${localize(materialNames[props.material], props.locale)}. ${localize(nextMaterialLabel, props.locale)}: ${localize(materialNames[nextMaterial.value], props.locale)}`,
+);
 const languageLabel = localized('Switch language', '切换语言');
 
 function cycleTheme(event: MouseEvent): void {
@@ -46,11 +53,7 @@ function cycleTheme(event: MouseEvent): void {
 }
 
 function cycleMaterial(): void {
-  emit(
-    'material',
-    materialModes[(materialModes.indexOf(props.material) + 1) % materialModes.length] ??
-      defaultMaterialMode,
-  );
+  emit('material', nextMaterial.value);
 }
 
 function selectTheme(value: string): void {
@@ -119,10 +122,14 @@ function selectTheme(value: string): void {
         size="sm"
         variant="ghost"
         surface="none"
-        :label="`${localize(cycleMaterialLabel, locale)}: ${localize(materialNames[material], locale)}`"
+        :label="materialCycleDescription"
+        :title="materialCycleDescription"
         @click="cycleMaterial"
       >
-        <LabIcon name="material" />
+        <span v-if="material === 'frosted'" class="text-caption">
+          {{ localize(experimentalMaterialLabel, locale) }}
+        </span>
+        <LabIcon v-else name="material" />
       </UiIconButton>
       <UiSegmentedControl
         data-playground-theme-control="segments"

@@ -10,28 +10,34 @@ aliases and consumers never need a second material implementation.
 
 ## Shared material selection
 
-`@neoverse-ui/tokens` owns `MaterialMode`, `SurfacePreset`,
-`ControlSurfacePreset`, and `materialSurfacePresets`. Set
-`data-neoverse-material="glass"` or `data-neoverse-material="solid"` on the root
-or on a subtree. The nearest recognized value, including one on the surface
-itself, wins independently of `data-theme`. Missing or unrecognized values do
-not override a parent; the fallback is Aurora Glass.
+**Material** identifies a paint family: `solid`, `frosted` or `glass`. A
+**Surface Role** identifies a component responsibility, such as control, group,
+panel or overlay. A **Surface Recipe** supplies paint for a role. A **Material
+Scope** is a DOM region established with `data-neoverse-material`. A **Glass
+Tier** controls Aurora Glass optics only. **Theme** selects colors separately.
 
-An explicit `surface` overrides the material scope, including `none`, which
-removes the surface plate. The explicit `solid`, `subtle`, `elevated`, `inset`,
-and `glass-*` presets keep their existing paint. In particular, `inset` still
-samples the Light tier; it is not the automatic Solid Inset recipe.
+Import `Material`, `materials`, and `isMaterial` from `@neoverse-ui/tokens`.
+Set `data-neoverse-material` on the document, a subtree or the surface itself.
+The closest recognized value wins; unknown values are transparent to resolution.
+If none is present, the document uses Glass. This resolves in CSS before hydration.
 
-Both frameworks emit the same unresolved role. Tailwind resolves paint in the
-`neoverse-material-mode` layer with `@scope`. Rules that can paint the scope root
-match both `:scope` and its descendants. Moving a node to the browser's top layer
-does not change its DOM scope. A shared bridge mirrors the invocation scope to
-portaled Dialog and modal Drawer panels and scrims, Toast containers, and
-ContextMenu columns while mounted, so an exit transition keeps the paint it
-started with. ContextMenu uses its supplied invoking element
-when available and otherwise uses its render location. Optional Glass backends
-skip automatic Solid surfaces, including internal form controls and native
-Prose tables and disclosures.
+An explicit `surface` selection wins over the scope and does not change the
+scope for descendants. `none` adds no plate. `frosted` selects the experimental
+Frosted recipe. Existing explicit `solid`, `subtle`, `elevated`, `inset` and
+`glass-*` continue to name their treatments. `inset` remains a Light-tier
+sample rather than the Solid Inset role.
+
+Vue and React emit the same class for an unresolved role. Tailwind matches
+recipes within valid scope boundaries; only optical recipes advertise a tier
+to the optional renderer. Native top-layer promotion preserves DOM ancestry.
+Dialog, modal Drawer, Toast and ContextMenu mirror the resolved invocation
+scope to their portal hosts, including while the exit remains mounted.
+
+Migrate from `MaterialMode` to `Material`, and from `MaterialSurfaceRole` to
+`SurfaceRole`. Do not inspect `surfaceClasses` or `materialSurfacePresets`;
+use `getSurfaceClass(selection, role)` for custom surface markup. Replace
+selectors depending on automatic `material-auto`, `material-solid-*` or
+`material-glass-*` classes with the role marker and the material scope.
 
 ## Material runtime and switching
 
@@ -44,18 +50,22 @@ keeps the last interactive choice. Material stays independent of Theme, Locale,
 Stage background and Showcase surface, and the attribute remains the only live
 contract.
 
-The toolbar exposes Aurora Glass and Solid through the shared SegmentedControl
-on desktop and a cycle control on touch layouts. Shell chrome, Explorer,
-Inspector, Stage and Drawer follow the global attribute. Specimens that need
-optical comparison keep explicit presets, and the Inspector keeps a local
-`surface` override above the global mode. Switching does not reset the specimen
-session, form values, selection, focus, scroll position or Stage zoom.
+The toolbar exposes Glass, Solid, and experimental Frosted through the shared
+SegmentedControl or a touch cycle control. Shell chrome follows the global
+scope. Explicit presets remain available for optical comparison. Switching
+does not reset the specimen session, form values, selection, focus, scroll or zoom.
 
 Switching uses the appearance snapshot (`material-fade`) instead of
 interpolating blur, refraction or shadows. Reduced motion and engines without
 the View Transition API swap immediately. Rapid requests settle on the last
 selection: a canceled snapshot paints the newest request, and no optical edge,
 overlay flash or layout jump survives the swap.
+
+## Frosted foundation preview
+
+Frosted uses a theme-owned fill and low blur with an opaque fallback. It has no
+Glass Tier, directional rim, or optional edge backend. The basic recipe is
+available for scope and integration testing, not a validated visual system.
 
 ## Solid material
 
@@ -165,23 +175,26 @@ compositing, not spatial refraction.
 Opacity, clipping, and overlay occlusion still apply. On large light surfaces,
 the upper-left and lower-right catches use the same inward falloff. The
 lighting eases from each straight edge into its arc, so the join does not
-create a second highlight. Dark catches use a neutral lift weighted by
-covered edge area and a longer inward falloff. Both diagonal catches extend
-past the rounded arc onto the adjacent edge ends; the extension scales with
-the short side and is capped, leaving the middle of each edge and the outer
-contour unchanged.
+create a second highlight. Dark surfaces share one moderate diagonal corner
+focus (`0.5`) across both wide panels and controls so straight button rims do
+not vanish and card corners stand out. Dark catches apply a neutral, covered-area
+lift and scale their corner weight, inward falloff, and coverage ceiling by
+surface size: compact controls and circular icon buttons remain restrained so
+bright fills do not clip to glaring brackets, while cards and larger surfaces
+extend stronger diagonal catches past the rounded arc onto the adjacent edge
+ends (scaled by short side and capped), keeping the straight middle fine and
+the outer contour unchanged.
 Reduced transparency disables the renderer. The CSS fallback uses alpha-only
 gradient masks and backdrop brightness. The historical `backend: 'native'`
 option remains available for compatibility, but must not be used as the repair
 approach prohibited below.
 
-The renderer activates only when a drawn, explicit Glass surface exists. A page
-whose automatic surfaces all resolve to Solid owns no canvas, WebGL context,
-shader program or buffer, and keeps only the mutation and media observers.
-Adding a Glass surface activates one shared canvas on the next frame; removing
-the last one releases the context, the native SVG filters and cached maps unless
-a whole-page transition suspends the runtime first. `mount()`, `refresh()`,
-`suspend()`, `resume()` and `destroy()` keep their public contract.
+The renderer activates only when a drawn surface advertises optical eligibility
+or explicitly selects a Glass tier. Pure Solid and Frosted pages own no optical
+canvas, WebGL context, shader program or buffer. Adding an eligible surface can
+activate the renderer; removing the last one releases the context, native SVG
+filters and cached maps unless a whole-page transition suspends it first.
+`mount()`, `refresh()`, `suspend()`, `resume()` and `destroy()` retain their contract.
 
 The canvas is fixed to the viewport and the rim is painted in viewport
 coordinates, so every scroll request has to reach it. The frame cap defers a
@@ -237,10 +250,12 @@ light mode; their absolute color and brightness need not match it.
 
 [The optical smoke cases](../../tests/optics/glass.spec.ts) own the fixture
 tolerances for both catches, the adjacent edge ends, edge continuity, and
-interior leakage. The dark neutral scene separately checks that both catches
-retain rather than oversaturate the backdrop's blue component. This baseline
-defines the rendering contract, not a golden screenshot; pixel appearance
-and interaction performance require remote rendering acceptance.
+interior leakage, plus a dark compact primary button check keeping corner
+brightness restrained without losing the straight top edge. The dark neutral
+scene separately checks that both catches retain rather than oversaturate the
+backdrop's blue component. This baseline defines the rendering contract, not a
+golden screenshot; pixel appearance and interaction performance require remote
+rendering acceptance.
 
 ### Glass repair guardrails
 

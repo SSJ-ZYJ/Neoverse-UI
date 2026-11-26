@@ -9,7 +9,7 @@ import UiTerminalSurface from './components/terminal/UiTerminalSurface.vue';
 import UiTerminalTranscript from './components/terminal/UiTerminalTranscript.vue';
 
 describe('Terminal composition', () => {
-  it('reuses UiSurface Glass and exposes accessible header/action slots', () => {
+  it('reuses an automatic panel surface and exposes accessible header/action slots', () => {
     const wrapper = mount(UiTerminalSurface, {
       props: { title: 'Session', density: 'expanded' },
       slots: {
@@ -18,7 +18,7 @@ describe('Terminal composition', () => {
         default: () => h('p', 'Ready'),
       },
     });
-    expect(wrapper.classes()).toContain('material-glass-elevated');
+    expect(wrapper.classes()).toContain('material-role-panel');
     expect(wrapper.attributes('aria-label')).toBe('Session');
     expect(wrapper.attributes('data-density')).toBe('expanded');
     expect(wrapper.get('.ui-terminal-surface__title').text()).toBe('Session');
@@ -50,7 +50,7 @@ describe('Terminal composition', () => {
     });
     expect(wrapper.element.tagName).toBe('SECTION');
     expect(wrapper.attributes('aria-label')).toBe('Workspace console');
-    expect(wrapper.classes()).toContain('material-glass-elevated');
+    expect(wrapper.classes()).toContain('material-role-panel');
     expect(wrapper.findAll('header')).toHaveLength(1);
     expect(wrapper.get('header').text()).toBe('Close window');
     expect(wrapper.findAll('button')).toHaveLength(1);

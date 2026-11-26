@@ -1,4 +1,4 @@
-import { getSurfaceClass, type MaterialSurfaceRole, type SurfacePreset } from '@neoverse-ui/tokens';
+import { getSurfaceClass, type SurfacePreset, type SurfaceRole } from '@neoverse-ui/tokens';
 import {
   type CSSProperties,
   createElement,
@@ -27,7 +27,7 @@ export interface UiControlSurfaceProps extends HTMLAttributes<HTMLElement> {
 
 type ControlSurfaceCompositionProps = UiControlSurfaceProps & {
   /** Material role of the enclosing adapter; standalone groups use the default. */
-  surfaceRole?: MaterialSurfaceRole;
+  surfaceRole?: SurfaceRole;
 };
 
 type IndicatorRect = { left: number; top: number; width: number; height: number };

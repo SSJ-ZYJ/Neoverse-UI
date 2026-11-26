@@ -3,8 +3,6 @@
 @import '@neoverse-ui/motion/css';
 @import './components.css';
 
-/* These public presets are also emitted by adapters through the Tokens map. */
-@source inline('material-glass-{subtle,elevated,immersive}');
 
 @theme inline {
   --color-surface-canvas: var(--neoverse-color-surface-canvas);
@@ -303,7 +301,10 @@
   transition-timing-function: var(--tw-ease);
 }
 
-@utility material-glass-subtle {
+@layer utilities {
+  @scope (.material-scopes) {
+    .material-recipe-glass-subtle {
+      --neoverse-glass-tier: subtle;
   --neoverse-material-background: var(--neoverse-material-glass-subtle-background);
   --neoverse-material-background-fallback: var(
     --neoverse-material-glass-subtle-background-fallback
@@ -342,9 +343,14 @@
   --neoverse-material-edge-refraction-chroma: var(
     --neoverse-material-edge-refraction-chroma-subtle
   );
+    }
+  }
 }
 
-@utility material-glass-elevated {
+@layer utilities {
+  @scope (.material-scopes) {
+    .material-recipe-glass-elevated {
+      --neoverse-glass-tier: elevated;
   --neoverse-material-background: var(--neoverse-material-glass-elevated-background);
   --neoverse-material-background-fallback: var(
     --neoverse-material-glass-elevated-background-fallback
@@ -385,9 +391,14 @@
   --neoverse-material-edge-refraction-chroma: var(
     --neoverse-material-edge-refraction-chroma-elevated
   );
+    }
+  }
 }
 
-@utility material-glass-immersive {
+@layer utilities {
+  @scope (.material-scopes) {
+    .material-recipe-glass-immersive {
+      --neoverse-glass-tier: immersive;
   --neoverse-material-background: var(--neoverse-material-glass-immersive-background);
   --neoverse-material-background-fallback: var(
     --neoverse-material-glass-immersive-background-fallback
@@ -428,10 +439,13 @@
   --neoverse-material-edge-refraction-chroma: var(
     --neoverse-material-edge-refraction-chroma-immersive
   );
+    }
+  }
 }
 
 /* stylelint-disable property-no-vendor-prefix */
 @layer utilities {
+  @scope (.material-scopes) {
   .duration-fast {
     transition-duration: var(--neoverse-motion-duration-fast);
   }
@@ -456,7 +470,7 @@
     transition-timing-function: var(--neoverse-motion-easing-emphasized);
   }
 
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(.ui-button) {
+  :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(.ui-button) {
     background-color: var(--neoverse-material-background-fallback);
     background-image: none;
     /* Paint the tokenized hairline. Light resolves --neoverse-material-border
@@ -479,7 +493,7 @@
 
   /* Opted-in surfaces paint the stroke ahead of the material highlights, so an
      edge that cannot borrow backdrop light keeps a readable silhouette. */
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+  :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
     .ui-button
   )[data-neoverse-glass-edge-stroke] {
     box-shadow:
@@ -492,7 +506,7 @@
      silhouette. Layout surfaces that intentionally host floating controls,
      focus rings, shadows, or translated children can opt into visible
      overflow without disabling the material plane itself. */
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+  :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
     .ui-button
   )[data-neoverse-surface-overflow='visible'] {
     overflow: visible;
@@ -500,16 +514,16 @@
 
   /* Floating overlay panels scroll their menu items instead of clipping at the frame edge. */
   .ui-overlay-panel:not(.ui-dialog):is(
-    .material-glass-subtle,
-    .material-glass-elevated,
-    .material-glass-immersive
+    .material-recipe-glass-subtle,
+    .material-recipe-glass-elevated,
+    .material-recipe-glass-immersive
   ) {
     overflow: auto;
   }
 
   @supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) and
     (background-color: color-mix(in srgb, white 50%, transparent)) {
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
         .ui-button
       ) {
       background-color: var(--neoverse-material-background);
@@ -526,7 +540,7 @@
     }
 
     @media (hover: hover) {
-      :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+      :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
           .ui-button
         ):not(.ui-card):not(.ui-surface):not(.ui-segmented-control):not(
           .ui-overlay-panel,
@@ -542,7 +556,7 @@
        Its gradients fade through the card while the backdrop filter samples
        whatever is behind each catch, so there is no closed geometric loop. */
     :where(
-        :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+        :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
           .ui-overlay-panel,
           .ui-select__popover,
           .ui-context-menu__submenu,
@@ -554,7 +568,7 @@
 
     /* Keep the environmental refraction field behind the material content.
        It should tint the surface, never wash out readable text or controls. */
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive)
       > :not(
         .ui-navigation-item__indicator,
         .ui-tabs__indicator,
@@ -566,7 +580,7 @@
       z-index: 1;
     }
 
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
         .ui-button
       )::before {
       position: absolute;
@@ -588,21 +602,21 @@
     }
   }
 
-  :is(.ui-card, .ui-surface).material-glass-subtle {
+  :is(.ui-card, .ui-surface).material-recipe-glass-subtle {
     --neoverse-material-edge-refraction-opacity: var(
       --neoverse-surface-glass-subtle-edge-opacity,
       var(--neoverse-material-glass-subtle-edge-refraction-opacity)
     );
   }
 
-  :is(.ui-card, .ui-surface, .ui-overlay-panel).material-glass-elevated {
+  :is(.ui-card, .ui-surface, .ui-overlay-panel).material-recipe-glass-elevated {
     --neoverse-material-edge-refraction-opacity: var(
       --neoverse-surface-glass-elevated-edge-opacity,
       var(--neoverse-material-glass-elevated-edge-refraction-opacity)
     );
   }
 
-  :is(.ui-card, .ui-surface).material-glass-immersive {
+  :is(.ui-card, .ui-surface).material-recipe-glass-immersive {
     --neoverse-material-edge-refraction-opacity: var(
       --neoverse-surface-glass-immersive-edge-opacity,
       var(--neoverse-material-glass-immersive-edge-refraction-opacity)
@@ -610,9 +624,9 @@
   }
 
   :is(.ui-card, .ui-surface):is(
-    .material-glass-subtle,
-    .material-glass-elevated,
-    .material-glass-immersive
+    .material-recipe-glass-subtle,
+    .material-recipe-glass-elevated,
+    .material-recipe-glass-immersive
   ) {
     --neoverse-material-hover-transparency: var(--neoverse-material-transparency);
   }
@@ -620,7 +634,7 @@
   /* Native displacement or the shared WebGL canvas owns refraction.
      Hide duplicate decorative edge fields while either backend is active. */
   :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
       .ui-button,
       .ui-overlay-panel
     )::before {
@@ -630,7 +644,7 @@
   /* An explicitly CSS-backed surface keeps the complete library edge field
      even while the shared renderer paints other Aurora Glass surfaces. */
   :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
       .ui-button
     )[data-neoverse-glass-edge-pass='css']::before {
     display: block;
@@ -638,14 +652,14 @@
 
   /* The shared canvas cannot paint inside a native top layer. */
   [data-neoverse-glass-renderer='webgl']
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
       .ui-button
     ):is(:popover-open, :modal)::before {
     display: block;
   }
 
   @media (hover: hover) {
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
         .ui-button
       ):not(.ui-card):not(.ui-surface):not(.ui-segmented-control):not(
         .ui-overlay-panel,
@@ -659,7 +673,7 @@
   }
 
   :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
       :focus-visible
     ) {
     /* The rim follows the DOM border box; keep the tint there in every state.
@@ -670,7 +684,7 @@
   }
 
   :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
       .ui-button
     )[data-neoverse-glass-edge-pass='css']:not(:focus-visible) {
     box-shadow: var(--neoverse-material-bloom), var(--neoverse-material-shadow);
@@ -681,7 +695,7 @@
   /* The runtime owns refraction, so an opted-in surface adds its painted stroke to
      the runtime shadow instead of the highlights the renderer replaces. */
   :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
       .ui-button
     )[data-neoverse-glass-edge-stroke] {
     box-shadow: var(--neoverse-material-edge-stroke), var(--neoverse-material-shadow);
@@ -689,7 +703,7 @@
 
   @media (hover: hover) {
     :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-      :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+      :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
         .ui-button
       ):not(.ui-card):not(.ui-surface):not(.ui-segmented-control):not(
         .ui-overlay-panel,
@@ -704,8 +718,8 @@
   }
 
   @media (prefers-reduced-transparency: reduce) {
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive),
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive),
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
         .ui-button
       ) {
       /* Match the normal sampled-plane specificity so reduced-transparency
@@ -718,7 +732,7 @@
       backdrop-filter: none;
     }
 
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
         .ui-button
       ) {
       background-image: none;
@@ -726,7 +740,7 @@
 
     /* The painted stroke survives the reduced-transparency fallback; only surfaces
        that asked for it keep it, exactly like the sampled path. */
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
         .ui-button
       )[data-neoverse-glass-edge-stroke] {
       box-shadow:
@@ -738,9 +752,9 @@
        state. Repeat the accessibility fallback at matching specificity so
        reduced transparency cannot be shadowed by that component contract. */
     .ui-segmented-control:is(
-        .material-glass-subtle,
-        .material-glass-elevated,
-        .material-glass-immersive
+        .material-recipe-glass-subtle,
+        .material-recipe-glass-elevated,
+        .material-recipe-glass-immersive
       )[data-surface] {
       background-color: var(--neoverse-material-background-fallback);
       background-image: none;
@@ -749,17 +763,18 @@
       backdrop-filter: none;
     }
 
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
         .ui-button
       )::before {
       display: none;
     }
 
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
         .ui-tooltip-surface
       )::after {
       display: none;
     }
+  }
   }
 }
 /* stylelint-enable property-no-vendor-prefix */

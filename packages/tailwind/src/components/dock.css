@@ -41,8 +41,8 @@
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
-    :where(:scope, :scope *).ui-dock.material-auto {
+  @scope (.material-solid-scope) {
+    :where(:scope, :scope *).ui-dock.material-recipe-auto {
       border-color: var(--neoverse-material-solid-divider);
 
       & > .ui-control-surface__group--trailing {
@@ -52,7 +52,7 @@
     }
 
     @media (hover: hover) {
-      :where(:scope, :scope *).ui-dock.material-auto:not([data-neoverse-surface-hover='static']) {
+      :where(:scope, :scope *).ui-dock.material-recipe-auto:not([data-neoverse-surface-hover='static']) {
         @media (prefers-reduced-motion: no-preference) {
           transition:
             var(--neoverse-control-surface-scale-transition),

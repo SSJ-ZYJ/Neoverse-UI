@@ -160,7 +160,7 @@
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+  @scope (.material-solid-scope) {
     .ui-step-flow__item--current > .ui-step-flow__marker {
       --neoverse-solid-plate-fill: var(--neoverse-material-solid-selection);
       color: var(--neoverse-material-solid-selection-text);

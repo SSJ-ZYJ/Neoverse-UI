@@ -171,4 +171,4 @@ The Design Lab uses Vite hot updates for Vue, React and CSS. Ordinary component 
 
 ## License
 
-Neoverse-UI is released under the [MIT license](LICENSE).
+Neoverse-UI is released under the [Star And Thank Author License 2.0](LICENSE).

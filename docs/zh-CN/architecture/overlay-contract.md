@@ -5,9 +5,9 @@ Status: adopted
 [English](../../architecture/overlay-contract.md)
 
 <!-- Source: docs/architecture/overlay-contract.md -->
-<!-- Source-SHA256: 2b418efd9a7a9680adb32bb633660c387322e145d6562a5bdfa08001c901bdcd -->
+<!-- Source-SHA256: b95c1e806652e7044e34a43882e0402f5b6e7835097180301cbf0430de531976 -->
 
-Neoverse-UI 对锚定的顶层界面使用同一套浮层行为规则。Popover、DropdownMenu 与 Select 共享同一个与框架无关的定位运行时和同一套极光玻璃深度语言。
+Neoverse-UI 对锚定的顶层界面使用同一套浮层行为规则。Popover、DropdownMenu 与 Select 共用与框架无关的定位运行时，按局部材质作用域选择浮层配方。原生顶层保留 DOM 作用域；异地挂载通过共享桥接传递调用位置的有效材质，并在退出动画期间保留最后解析的材质。
 
 ## 运行时归属
 

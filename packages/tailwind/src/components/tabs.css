@@ -219,13 +219,13 @@
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+  @scope (.material-static-scope) {
     :where(:scope, :scope *):is(.ui-tabs[data-variant='pill'] > .ui-tabs__list) {
       background-color: var(--neoverse-material-solid-group);
     }
 
     :where(:scope, :scope *):is(
-        .ui-tabs > .ui-tabs__list.material-auto,
+        .ui-tabs > .ui-tabs__list.material-recipe-auto,
         .ui-tabs[data-variant='pill'] > .ui-tabs__list
       ) {
       --neoverse-tabs-selected-foreground: var(--neoverse-material-solid-selection-text);
@@ -241,7 +241,7 @@
     }
 
     @media (forced-colors: active) {
-      .ui-tabs > .ui-tabs__list.material-auto > .ui-tabs__indicator {
+      .ui-tabs > .ui-tabs__list.material-recipe-auto > .ui-tabs__indicator {
         forced-color-adjust: none;
         background: transparent;
         border-color: Highlight;

@@ -1,7 +1,7 @@
 {
   "name": "@neoverse-ui/glass-runtime",
   "version": "0.2.2",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "description": "Shared WebGL Aurora Glass edge enhancement runtime for Neoverse UI.",
   "type": "module",
   "repository": {

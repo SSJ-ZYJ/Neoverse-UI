@@ -205,7 +205,7 @@ try {
       );
       for (const fragment of [
         '.sr-only{',
-        '.material-glass-elevated{',
+        '.material-glass-elevated',
         '.ui-button{',
         '.ui-table-region{',
         '.ui-disclosure__content{',

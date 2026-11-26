@@ -1,8 +1,24 @@
-/** Select the material family independently of the color theme */
-export type MaterialMode = 'glass' | 'solid';
+/** Enumerate the material families independently of theme and surface role */
+export const materials = ['glass', 'solid', 'frosted'] as const;
 
-/** Map explicit surface presets and the auto marker to shared CSS classes */
-export const surfaceClasses = {
+/** Identify a material family */
+export type Material = (typeof materials)[number];
+
+/** Preserve the default paint for documents that do not select a material */
+export const defaultMaterial: Material = 'glass';
+
+/** Identify a DOM material scope */
+export const materialAttribute = 'data-neoverse-material';
+
+/** Check whether a value names a supported material */
+export function isMaterial(value: unknown): value is Material {
+  return materials.some((material) => material === value);
+}
+
+/** Identify an optical tier of Aurora Glass */
+export type GlassTier = 'subtle' | 'elevated' | 'immersive';
+
+const explicitSurfaces = {
   none: '',
   solid: 'ui-surface-solid',
   subtle: 'ui-surface-subtle',
@@ -11,59 +27,38 @@ export const surfaceClasses = {
   'glass-subtle': 'material-glass-subtle',
   'glass-elevated': 'material-glass-elevated',
   'glass-immersive': 'material-glass-immersive',
-  auto: 'material-auto',
-} satisfies Record<string, string>;
+} as const satisfies Record<'none' | 'solid' | 'subtle' | 'elevated' | 'inset' | `glass-${GlassTier}`, string>;
 
-/** Name a surface recipe or let its role resolve one by material mode */
-export type SurfacePreset = keyof typeof surfaceClasses;
-/** Select a quiet, automatic, or explicit Glass surface for a compact control */
-export type ControlSurfacePreset = Extract<SurfacePreset, 'auto' | 'none' | `glass-${string}`>;
+/** Select automatic paint, no paint, or an explicit surface treatment */
+export type SurfacePreset = 'auto' | 'frosted' | keyof typeof explicitSurfaces;
 
-/** Map auto roles to a Glass utility and to the named Solid plate recipe */
-export const materialSurfacePresets = {
-  control: { glass: 'glass-subtle', solid: 'solid', solidRole: 'control' },
-  panel: { glass: 'glass-elevated', solid: 'solid', solidRole: 'raised' },
-  group: { glass: 'glass-subtle', solid: 'solid', solidRole: 'group' },
-  field: { glass: 'none', solid: 'solid', solidRole: 'inset' },
-  overlay: { glass: 'glass-elevated', solid: 'solid', solidRole: 'overlay' },
-  compactOverlay: { glass: 'glass-subtle', solid: 'solid', solidRole: 'overlay' },
-  table: { glass: 'none', solid: 'solid', solidRole: 'raised' },
-} as const satisfies Record<
-  string,
-  Record<MaterialMode, SurfacePreset> & {
-    solidRole: 'control' | 'raised' | 'group' | 'inset' | 'overlay';
-  }
->;
+/** Select a compatible surface treatment for a compact control */
+export type ControlSurfacePreset = Extract<SurfacePreset, 'auto' | 'none' | 'frosted' | `glass-${GlassTier}`>;
 
-/** Identify the responsibility of a surface independently of its material */
-export type MaterialSurfaceRole = keyof typeof materialSurfacePresets;
+/** Describe a surface's responsibility without specifying its paint */
+export type SurfaceRole = 'control' | 'panel' | 'group' | 'field' | 'overlay' | 'compactOverlay' | 'table';
 
-/** Compose a preset class without resolving its surrounding DOM material scope */
+const roleClasses = {
+  control: 'material-role-control',
+  panel: 'material-role-panel',
+  group: 'material-role-group',
+  field: 'material-role-field',
+  overlay: 'material-role-overlay',
+  compactOverlay: 'material-role-compact-overlay',
+  table: 'material-role-table',
+} as const satisfies Record<SurfaceRole, string>;
+
+/** Mark an unresolved surface role or select an explicit treatment */
 export function getSurfaceClass(
   surface: SurfacePreset = 'none',
-  role: MaterialSurfaceRole = 'panel',
+  role: SurfaceRole = 'panel',
 ): string {
-  if (surface !== 'auto') return surfaceClasses[surface];
-  return autoSurfaceClasses[role];
+  if (surface === 'auto') return roleClasses[role];
+  if (surface === 'frosted') return `${roleClasses[role]} material-frosted`;
+  return explicitSurfaces[surface];
 }
 
 /** Check whether a preset explicitly names an Aurora Glass tier */
-export function isGlassSurface(surface: SurfacePreset): boolean {
+export function isGlassSurface(surface: SurfacePreset): surface is `glass-${GlassTier}` {
   return surface.startsWith('glass-');
-}
-
-const autoSurfaceClasses = {
-  control: autoSurfaceClass('control'),
-  panel: autoSurfaceClass('panel'),
-  group: autoSurfaceClass('group'),
-  field: autoSurfaceClass('field'),
-  overlay: autoSurfaceClass('overlay'),
-  compactOverlay: autoSurfaceClass('compactOverlay'),
-  table: autoSurfaceClass('table'),
-} as const satisfies Record<MaterialSurfaceRole, string>;
-
-function autoSurfaceClass(role: MaterialSurfaceRole): string {
-  const { glass, solidRole } = materialSurfacePresets[role];
-  const glassClass = surfaceClasses[glass];
-  return `${surfaceClasses.auto} material-solid-${solidRole}${glassClass ? ` ${glassClass}` : ''}`;
 }

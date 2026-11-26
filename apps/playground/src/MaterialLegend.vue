@@ -15,18 +15,39 @@ const minRefreshInterval = 200;
 // do not change any material value, so they must not restart a full style scan.
 const locationOnlySelector =
   '[data-overlay-panel], .ui-overlay-panel, .ui-select__popover, [data-neoverse-glass-renderer], canvas';
+const glassTierProperty = '--neoverse-glass-tier';
+const surfaceSelector = '[class*="material-role-"], [class*="material-glass-"]';
 const tiers = {
   'glass-subtle': { name: glassMaterial.tiers.subtle, blur: '12px', alpha: 0.15 },
   'glass-elevated': { name: glassMaterial.tiers.elevated, blur: '18px', alpha: 0.2 },
   'glass-immersive': { name: glassMaterial.tiers.immersive, blur: '24px', alpha: 0.3 },
 } as const;
+const tierKeys = Object.keys(tiers) as (keyof typeof tiers)[];
+
+function glassTier(element: Element, style = getComputedStyle(element)): keyof typeof tiers | null {
+  const resolved = `glass-${style.getPropertyValue(glassTierProperty).trim()}`;
+  if (resolved in tiers) return resolved as keyof typeof tiers;
+  for (const tier of tierKeys) {
+    if (element.classList.contains(`material-${tier}`)) return tier;
+  }
+  return null;
+}
+
+function hasGlassAncestor(element: Element): boolean {
+  let ancestor = element.parentElement?.closest(surfaceSelector);
+  while (ancestor) {
+    if (glassTier(ancestor)) return true;
+    ancestor = ancestor.parentElement?.closest(surfaceSelector);
+  }
+  return false;
+}
 
 function refresh() {
   const region = host.value?.parentElement;
   if (!region) return;
   const result: { id: number; text: string }[] = [];
   const elements = region.querySelectorAll<HTMLElement>(
-    '[data-surface], .ui-input, .ui-textarea, .ui-select, .ui-disclosure, .ui-table, .ui-badge, .ui-notice, .ui-skeleton, .ui-overlay-panel, .ui-select__popover, .ui-choice__control, .ui-status-indicator, .ui-scrollbar, .neoverse-prose table, .neoverse-prose details, .neoverse-prose blockquote, .neoverse-prose pre, .neoverse-prose kbd',
+    `${surfaceSelector}, [data-surface], .ui-input, .ui-textarea, .ui-select, .ui-disclosure, .ui-table, .ui-badge, .ui-notice, .ui-skeleton, .ui-overlay-panel, .ui-select__popover, .ui-choice__control, .ui-status-indicator, .ui-scrollbar, .neoverse-prose table, .neoverse-prose details, .neoverse-prose blockquote, .neoverse-prose pre, .neoverse-prose kbd`,
   );
   for (const element of elements) {
     if (element.closest('[data-material-legend]')) continue;
@@ -35,7 +56,8 @@ function refresh() {
     const plane = element.matches('.ui-table, .neoverse-prose table')
       ? (element.querySelector('td, th') ?? element)
       : element;
-    const surfaceStyle = getComputedStyle(plane);
+    const elementStyle = getComputedStyle(element);
+    const surfaceStyle = plane === element ? elementStyle : getComputedStyle(plane);
     if (surfaceStyle.display === 'none') continue;
     // Tooltip's rounded body and pointer share a sampled pseudo-element.
     const tooltipPlate = element.matches('.ui-tooltip-surface')
@@ -46,22 +68,12 @@ function refresh() {
       element.getAttribute('aria-label') ||
       element.textContent?.trim().slice(0, 32) ||
       element.tagName.toLowerCase();
-    const surface =
-      element.dataset.surface ??
-      Object.keys(tiers).find((tier) => element.classList.contains(`material-${tier}`));
-    const hasGlassParent = Boolean(
-      element.parentElement?.closest(
-        '.material-glass-subtle, .material-glass-elevated, .material-glass-immersive',
-      ),
-    );
-    const inherited = element.dataset.neoverseGlassNesting === 'inherit' && hasGlassParent;
+    const surface = element.dataset.surface ?? 'auto';
+    const tier = glassTier(element, elementStyle);
+    const borrowsGlass = element.dataset.neoverseGlassNesting === 'inherit';
     const none = surface === 'none' || element.classList.contains('ui-button--ghost');
-    const tier =
-      surface && surface in tiers
-        ? (surface as keyof typeof tiers)
-        : !surface
-          ? 'glass-subtle'
-          : null;
+    const hasGlassParent = (borrowsGlass || none) && hasGlassAncestor(element);
+    const inherited = borrowsGlass && hasGlassParent;
     let detail: string;
     if (inherited || none) {
       detail =
@@ -148,7 +160,7 @@ onMounted(() => {
       subtree: true,
       childList: true,
       attributes: true,
-      attributeFilter: ['class', 'style', 'data-surface', 'open'],
+      attributeFilter: ['class', 'style', 'data-surface', 'data-neoverse-material', 'open'],
     });
   for (
     let ancestor = host.value?.parentElement?.parentElement;
@@ -157,12 +169,12 @@ onMounted(() => {
   ) {
     observer.observe(ancestor, {
       attributes: true,
-      attributeFilter: ['class', 'style', 'data-theme', 'lang'],
+      attributeFilter: ['class', 'style', 'data-theme', 'data-neoverse-material', 'lang'],
     });
   }
   observer.observe(document.documentElement, {
     attributes: true,
-    attributeFilter: ['data-theme', 'lang', 'style', 'class'],
+    attributeFilter: ['data-theme', 'data-neoverse-material', 'lang', 'style', 'class'],
   });
   host.value?.parentElement?.addEventListener('transitionend', schedule);
   schedule();

@@ -1,5 +1,6 @@
 @layer components {
   :where(.ui-disclosure, .neoverse-prose details) {
+    --neoverse-disclosure-recipe-filter: initial;
     --neoverse-material-edge-refraction-width: var(
       --neoverse-material-glass-subtle-edge-refraction-width
     );
@@ -21,11 +22,17 @@
     background-color: var(--neoverse-disclosure-fill);
     background-image: var(--neoverse-disclosure-background);
     box-shadow: var(--neoverse-disclosure-shadow);
-    -webkit-backdrop-filter: var(--neoverse-disclosure-filter);
-    backdrop-filter: var(--neoverse-disclosure-filter);
+    -webkit-backdrop-filter: var(--neoverse-disclosure-recipe-filter, none);
+    backdrop-filter: var(--neoverse-disclosure-recipe-filter, none);
     transition:
       background-color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
       box-shadow var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+  @scope (.material-glass-default) {
+    :where(.ui-disclosure, .neoverse-prose details) {
+      --neoverse-disclosure-recipe-filter: var(--neoverse-disclosure-filter);
+      --neoverse-glass-tier: subtle;
+    }
   }
 
   :where(.ui-disclosure__summary, .neoverse-prose summary) {
@@ -178,12 +185,10 @@
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+  @scope (.material-solid-scope) {
     :where(:scope, :scope *):is(.ui-disclosure, .neoverse-prose details) {
       background: var(--neoverse-material-solid-inset);
       box-shadow: none;
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
     }
 
     :where(:scope, :scope *):is(.ui-disclosure__summary, .neoverse-prose summary) {

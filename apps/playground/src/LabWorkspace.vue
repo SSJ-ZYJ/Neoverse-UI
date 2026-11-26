@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { layoutBreakpoints } from '@neoverse-ui/tokens';
+import { isMaterial, layoutBreakpoints } from '@neoverse-ui/tokens';
 import { UiDrawer } from '@neoverse-ui/vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, shallowRef } from 'vue';
 import { isLocale, resolveWorkspaceLocale } from './content/locale';
@@ -16,7 +16,6 @@ import {
 } from './lab-modules';
 import {
   applyMaterialMode,
-  isMaterialMode,
   persistMaterialMode,
   resolveInitialMaterialMode,
 } from './material-runtime';
@@ -110,7 +109,7 @@ function setTheme(value: string, origin?: Element): void {
 }
 
 function setMaterial(value: string): void {
-  if (!isMaterialMode(value) || value === material.value) return;
+  if (!isMaterial(value) || value === material.value) return;
   material.value = value;
   applyMaterialMode(value, true);
   persistMaterialMode(value);

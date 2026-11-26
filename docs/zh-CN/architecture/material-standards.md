@@ -5,25 +5,31 @@ Status: adopted
 [English](../../architecture/material-standards.md)
 
 <!-- Source: docs/architecture/material-standards.md -->
-<!-- Source-SHA256: 476d5a94dae2b2934c8b4603c69fe49962b5362b38035346b7b6493fc0f09b32 -->
+<!-- Source-SHA256: 7c7863e28c97bc1a36fe8c583e5db0f59fe83d0ae480b377ddb5f055f9ce3a79 -->
 
 本文是[英文材质标准](../../architecture/material-standards.md)的中文摘要，覆盖消费项目最常用的材质、层级、嵌套与修复边界。具体光学数值、逐组件审计与历史验收记录以英文原文为准。
 
 ## 共享材质解析
 
-`@neoverse-ui/tokens` 统一定义材质模式、表面预设和语义角色。`data-neoverse-material="glass"` 或 `data-neoverse-material="solid"` 可设在文档根、子树或表面自身；取最近的有效值，与 `data-theme` 独立。未设置有效值时使用极光玻璃。
+`@neoverse-ui/tokens` 定义 `Material`（材质）、`SurfaceRole`（表面角色）与 `GlassTier`（极光玻璃光学层级）。表面角色表达组件职责；表面配方决定该角色在给定材质中的绘制。Theme 独立控制主题颜色。
 
-显式 `surface` 优先，`none` 不绘制独立底板，`inset` 仍保留轻薄层级采样。各公开组件的材质职责在[组件矩阵](../../../contracts/component-matrix.json)中维护。
+在文档根、子树或表面自身设置 `data-neoverse-material`，取最近的有效值：`solid`、`frosted` 或 `glass`。未知值不阻断父级作用域，无有效值时默认极光玻璃。CSS 在框架挂载前解析作用域。显式 `surface` 只覆盖当前表面，不影响后代作用域；`none` 不绘制底板，`frosted` 选择实验性基础配方，原有 `inset` 仍保留轻薄层级采样。
 
-两套适配器输出同一套角色标记，由 CSS 解析。浏览器顶层不改变 DOM 作用域；Dialog、模态 Drawer、Toast 和 ContextMenu 的异地挂载部分在挂载期间由共享桥接同步材质，退出动画不会改回另一种材质。ContextMenu 优先使用传入的调用元素，未提供时使用组件的渲染位置。Glass Runtime 不为自动实体表面绘制光学边缘，包括内部选择控件及 Prose 表格和折叠块。
+两套适配器输出相同的自动表面角色，不再附加具体材质类。浏览器顶层不改变 DOM 作用域；Dialog、模态 Drawer、Toast 与 ContextMenu 的 Portal 在退出动画挂载期间仍同步调用位置的作用域。Glass Runtime 只增强具备光学资格的表面。
+
+迁移时以 `Material` 替换 `MaterialMode`，以 `SurfaceRole` 替换 `MaterialSurfaceRole`；使用 `getSurfaceClass(selection, role)` 替代旧的预设映射。不要再用自动标记上的 `material-auto`、`material-solid-*` 或 `material-glass-*` 推断材质。
 
 ## 材质运行时与切换
 
 Playground、Frame 路由与 React 示例共用一个框架无关的材质模块。保存的 `material` 偏好在首绘启动脚本中写入 `data-neoverse-material`，首帧即使用所选材质。`?material=` 只是同一策略下的临时预览，不写入偏好；刷新保留最后一次交互选择。材质与 Theme、Locale、舞台背景和展示表面相互独立，属性仍是唯一生效契约。
 
-工具栏在桌面用共享 SegmentedControl、触屏布局用循环按钮提供极光玻璃与实体两种材质；外壳、Explorer、Inspector、Stage 与 Drawer 跟随全局属性。需要光学对照的样板保留显式预设，Inspector 的局部 `surface` 覆盖仍优先于全局材质。切换不重置样板会话、表单值、选中项、焦点、滚动位置与 Stage 缩放。
+工具栏在桌面用分段控件、在触屏用循环按钮提供极光玻璃、实体与实验性磨砂。显式表面仍优先于全局材质；切换不重置样板会话、表单值、选中项、焦点、滚动位置与 Stage 缩放。
 
 切换使用外观快照（`material-fade`），不逐帧插值模糊、折射或阴影。减少动效与不支持 View Transition API 的浏览器立即切换。连续快速请求以最后一次为准：被取消的快照只绘制最新选择，切换结束后不残留光学边缘、浮层闪烁或布局跳变。
+
+## 磨砂基础预览
+
+磨砂使用主题底色和低强度背景模糊，并提供不透明回退。它没有极光玻璃层级、方向性边缘或光学运行时。此配方仅用于架构与集成验证，尚未通过视觉验收。
 
 ## 实体材质
 
@@ -55,8 +61,8 @@ Playground、Frame 路由与 React 示例共用一个框架无关的材质模块
 - 极光玻璃提供完整 CSS 基线：不透明回退、着色、背景采样、饱和度、方向性折射场、阴影与减少透明度行为。
 - 浅色和深色边缘共用 `color-dodge`，按比例提亮实际底色。只有浅色额外增强底色饱和度，深色保留较高曝光以维持细边可见，但不额外放大底色中的蓝色。不支持 `color-dodge` 的浏览器继续使用叠加合成；深色各通道的增益相同。
 - 左上角与右下角采用同一条提亮曲线，实际亮度仍随底色变化。浅色大面的两个高光向内收窄的幅度一致，并在通道饱和前抑制过强的提亮；大面的右下圆弧额外增强饱和度。
-- 深色模式对左上、右下圆弧按边缘覆盖面积追加中性提亮，并延长向内的衰减范围。两处高光越过圆弧，延伸到相邻边的端部；延伸范围随短边增长并设上限，直边中段和外轮廓不变。
-- [深色宽卡片基线](../../architecture/material-standards.md#dark-wide-surface-baseline)覆盖三个玻璃层级：两个高光必须延伸到相邻直边端部，四边与另外两角连续可见，主体模糊不变。浅色与深色的高光方向一致，不要求绝对亮度与颜色相同。回归阈值由光学用例维护，不固定逐像素截图。
+- 深色模式在卡片与控件间共用适中的对角高光集中度（`0.5`），既保留直边连续细边，也让卡片与大表面显现左上、右下高光。深色高光的面积提亮、向内衰减与覆盖上限随表面短边尺寸缩放：按钮等紧凑控件与圆形图标按钮保持克制，防止高亮度填充过曝；卡片与较大表面将左上、右下高光平滑延伸至相邻直边端部（按短边设上限），直边中段与外轮廓保持细腻连续。
+- [深色宽卡片基线](../../architecture/material-standards.md#dark-wide-surface-baseline)覆盖三个玻璃层级：两个高光必须延伸到相邻直边端部，四边与另外两角连续可见，主体模糊不变；浅色与深色高光方向一致，不要求绝对亮度与颜色相同。光学套件同时校验深色紧凑主按钮的细边连续性与高光亮度上限，回归阈值由光学用例维护，不固定逐像素截图。
 - 边缘响应正下方像素，不采样或偏移邻近像素，因此不是空间折射。主体色调、模糊与阴影仍由 CSS 负责。
 - 画布与 CSS 回退都以组件外边界为基准。轴向放大时，圆角按实际 CSS 缩放计算，饱和度描边随宽度向内收，避免越出圆角。
 - 普通 Surface 的 `solid`、`subtle` 与 `elevated` 走 Tailwind 组合；极光玻璃只用于需要共享玻璃材质的表面。
@@ -89,7 +95,7 @@ Playground、Frame 路由与 React 示例共用一个框架无关的材质模块
 
 透明度效果不可用或用户偏好减少透明度时，表面必须保持可读。CSS 回退使用仅含 alpha 的渐变遮罩与背景亮度；减少透明度会禁用可选渲染器。强制颜色模式下，原生控件与系统颜色语义优先，材质不得覆盖可见焦点或文本对比。
 
-渲染器仅在存在可绘制的显式 Glass 表面时激活。自动表面全部解析为实体的页面不创建画布、WebGL 上下文、Shader Program 或 Buffer，只保留变更与媒体观察器。新增 Glass 表面会在下一帧激活唯一共享画布；最后一个表面消失后释放上下文、原生 SVG 滤镜与缓存映射，整页过渡先暂停时除外。`mount()`、`refresh()`、`suspend()`、`resume()` 与 `destroy()` 保持既有公共契约。
+渲染器仅在存在可绘制的合格光学表面时激活。纯实体与纯磨砂页面不创建画布、WebGL 上下文、Shader Program 或 Buffer。最后一个合格表面消失后会释放上下文、原生 SVG 滤镜与缓存映射，整页过渡先暂停时除外。
 
 ## Glass 修复守则
 

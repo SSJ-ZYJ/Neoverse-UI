@@ -345,7 +345,15 @@ class GlassRendererImpl implements GlassRenderer {
     if (element.matches?.(glassSelector) || element.closest(glassSelector)) return true;
     if (element.matches?.(occluderSelector) || element.closest(occluderSelector)) return true;
     // An ancestor can move or resize a surface without changing its attributes.
-    return Boolean(element.querySelector?.(glassSelector));
+    if (element.querySelector?.(glassSelector)) return true;
+    // A class removal can erase the old selector match on a surface (or on
+    // its prose ancestor) before the observer sees the mutation.
+    if (name === 'class') {
+      for (const surface of this.observedGlassElements) {
+        if (element.contains(surface)) return true;
+      }
+    }
+    return false;
   }
   private changedOverlaps(
     bounds: { left: number; top: number; width: number; height: number },
@@ -1361,10 +1369,7 @@ class GlassRendererImpl implements GlassRenderer {
         gl.uniform1f(locations.edgeWidth, style.edgeWidth);
         gl.uniform1f(locations.softness, style.softness);
         gl.uniform1f(locations.opacity, style.opacity);
-        gl.uniform1f(
-          locations.cornerFocus,
-          isLight ? 0.4 : element.classList.contains('ui-button') ? 1 : 0,
-        );
+        gl.uniform1f(locations.cornerFocus, isLight ? 0.4 : 0.5);
         gl.uniform1f(locations.chroma, style.chroma);
         gl.uniform3f(locations.carrier, ...style.carrier);
         gl.uniform3f(locations.edgeLight, ...edgeLight);
@@ -1496,7 +1501,7 @@ class GlassRendererImpl implements GlassRenderer {
       if (element.matches(cssEdgePassSelector)) {
         continue;
       }
-      if (!canRenderGlassEdge(element)) {
+      if (!canRenderGlassEdge(element, getStyle)) {
         continue;
       }
       if (topLayer.isInTopLayer(element, getStyle, topLayerCache)) {
@@ -1506,21 +1511,20 @@ class GlassRendererImpl implements GlassRenderer {
       currentElements.push(element);
     }
 
-    if (this.resizeObserver !== undefined) {
-      // ResizeObserver fires an initial callback for every observe() call. Re-observing
-      // unchanged elements on each render would therefore schedule another render and
-      // loop forever, so only subscribe to elements that are not observed yet.
+    if (this.active) {
+      // ResizeObserver fires an initial callback for every observe() call.
+      // Track ownership even without it, for class-removal mutations.
       for (const element of currentElements) {
         if (!this.observedGlassElements.has(element)) {
           this.observedGlassElements.add(element);
-          if (!this.observedTableCells.has(element)) this.resizeObserver.observe(element);
+          if (!this.observedTableCells.has(element)) this.resizeObserver?.observe(element);
         }
       }
 
       const currentSet = new Set(currentElements);
       for (const element of this.observedGlassElements) {
         if (!currentSet.has(element)) {
-          if (!this.observedTableCells.has(element)) this.resizeObserver.unobserve(element);
+          if (!this.observedTableCells.has(element)) this.resizeObserver?.unobserve(element);
           this.observedGlassElements.delete(element);
         }
       }

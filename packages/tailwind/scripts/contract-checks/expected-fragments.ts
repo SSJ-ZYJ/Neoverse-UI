@@ -10,7 +10,7 @@ export const expectedFragments = [
   '[data-neoverse-glass-renderer=webgl]',
   'data-neoverse-glass-edge-pass=css',
   'data-neoverse-surface-hover=static',
-  ':is([data-neoverse-glass-renderer=webgl],[data-neoverse-glass-renderer=native]) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(:focus-visible){box-shadow:var(--neoverse-material-shadow)',
+  ':not(:focus-visible){box-shadow:var(--neoverse-material-shadow)',
   'var(--neoverse-material-inner-glow)',
   'var(--neoverse-material-seam-glow)',
   'var(--neoverse-material-bloom)',
@@ -21,6 +21,8 @@ export const expectedFragments = [
   'background-color:var(--neoverse-material-background-fallback)',
   'background:var(--neoverse-material-borrowed,revert-layer)',
   'background-color:var(--neoverse-solid-plate-fill)',
+  '--neoverse-glass-tier:elevated',
+  'backdrop-filter:var(--neoverse-material-frosted-filter)',
   'box-shadow:var(--neoverse-material-borrowed,revert-layer)',
   '-webkit-backdrop-filter:none',
   'backdrop-filter:none',
@@ -107,7 +109,7 @@ export const expectedNavigationMotionFragments = [
 ];
 
 export const expectedTooltipFragments = [
-  '.ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface]',
+  '.ui-tooltip-surface.material-recipe-glass-subtle[data-neoverse-tooltip-surface]',
   '--neoverse-material-border: transparent;',
   '--neoverse-material-hover-border: transparent;',
   'backdrop-filter: var(--neoverse-material-filter);',

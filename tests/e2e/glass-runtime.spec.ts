@@ -566,7 +566,7 @@ test('native and fallback popovers keep a narrow local rim without duplicate can
   }
 });
 
-test('a page without explicit Glass keeps the renderer dormant and releases optics again', async ({
+test('Solid and Frosted stay dormant until an explicit Glass surface is drawn', async ({
   page,
 }) => {
   await page.addInitScript(() => {
@@ -591,11 +591,9 @@ test('a page without explicit Glass keeps the renderer dormant and releases opti
   await expect(root).toHaveAttribute('data-neoverse-material', 'solid');
   await expect(root).not.toHaveAttribute('data-neoverse-glass-renderer');
   await expect(page.locator(canvasSelector)).toHaveCount(0);
-  // Automatic surfaces may carry their Glass class as a fallback; only an
-  // explicit preset in a Solid scope would legitimately need an optical edge.
   await expect(
     page.locator(
-      '.material-glass-subtle:not(.material-auto), .material-glass-elevated:not(.material-auto), .material-glass-immersive:not(.material-auto), [data-surface^="glass-"]',
+      '.material-glass-subtle, .material-glass-elevated, .material-glass-immersive, [data-surface^="glass-"]',
     ),
   ).toHaveCount(0);
   expect(
@@ -603,6 +601,9 @@ test('a page without explicit Glass keeps the renderer dormant and releases opti
       () => (window as Window & { __solidOptics?: { contexts: number } }).__solidOptics?.contexts,
     ),
   ).toBe(0);
+  await root.evaluate((element) => element.setAttribute('data-neoverse-material', 'frosted'));
+  await expect(page.locator('#forms-notes')).toHaveCSS('backdrop-filter', /blur\(12px\)/);
+  await expect(page.locator(canvasSelector)).toHaveCount(0);
 
   await page.evaluate(() => {
     const probe = document.createElement('article');

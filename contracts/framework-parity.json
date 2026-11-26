@@ -484,10 +484,22 @@
       "tokenType": "ControlSurfacePreset"
     },
     {
-      "name": "MaterialMode",
-      "vueType": "MaterialMode",
-      "reactType": "MaterialMode",
-      "tokenType": "MaterialMode"
+      "name": "Material",
+      "vueType": "Material",
+      "reactType": "Material",
+      "tokenType": "Material"
+    },
+    {
+      "name": "SurfaceRole",
+      "vueType": "SurfaceRole",
+      "reactType": "SurfaceRole",
+      "tokenType": "SurfaceRole"
+    },
+    {
+      "name": "GlassTier",
+      "vueType": "GlassTier",
+      "reactType": "GlassTier",
+      "tokenType": "GlassTier"
     },
     {
       "name": "FormControlValidation",

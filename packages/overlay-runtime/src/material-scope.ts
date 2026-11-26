@@ -1,5 +1,5 @@
 const materialAttribute = 'data-neoverse-material';
-const scopedModeProperty = '--neoverse-portal-material-mode';
+const scopedMaterialProperty = '--neoverse-scope-material';
 const materialChanges = { attributeFilter: [materialAttribute] };
 const ancestryChanges = { ...materialChanges, childList: true };
 
@@ -21,8 +21,8 @@ export function bridgePortalMaterialScope(
   const sync = () => {
     // Let CSS validate an explicit panel override on the local invocation marker.
     if (panelOverride) setMaterialAttribute(source, panelOverride.getAttribute(materialAttribute));
-    const mode = view.getComputedStyle(source).getPropertyValue(scopedModeProperty).trim();
-    setMaterialAttribute(host, mode || null);
+    const material = view.getComputedStyle(source).getPropertyValue(scopedMaterialProperty).trim();
+    setMaterialAttribute(host, material || null);
   };
   const observer = new view.MutationObserver((records) => {
     if (records.some((record) => record.type === 'childList')) observeAncestry();

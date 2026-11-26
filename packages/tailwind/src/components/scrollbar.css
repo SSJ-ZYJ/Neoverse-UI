@@ -189,7 +189,7 @@
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+  @scope (.material-solid-scope) {
     @media (forced-colors: none) {
       @supports not selector(::-webkit-scrollbar) {
         :where(:scope, :scope *):is(.scrollbar-immersive, .scrollbar-immersive *) {

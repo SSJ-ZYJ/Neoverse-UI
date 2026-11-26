@@ -125,7 +125,7 @@ artifact during verification. Do not stop a user's development service or relax
 package checks to accept that race. Exclude `dist` and `*.tsbuildinfo` together
 when preparing a clean validation copy, then install with the frozen lockfile.
 
-The repository and all public packages use the MIT license. `scripts/release/verify-packages.ts` verifies the public package metadata and package contents before release.
+The repository and all public packages use the Star And Thank Author License 2.0 (SATA). It has no SPDX identifier, so package metadata records `SEE LICENSE IN LICENSE` and every package ships the root `LICENSE` unchanged. `scripts/release/verify-packages.ts` verifies the public package metadata and package contents before release.
 
 ### 2026-10-25 Batch A baseline audit
 
@@ -324,7 +324,7 @@ During an explicitly approved release:
 1. Run `bun changeset status`, obtain approval for versioning, and review the resulting
    Version Packages changes (including `bun.lock` and internal SemVer ranges).
 2. Run `bun run release:check` and the browser gates on those exact versioned artifacts.
-   Confirm Overlay Runtime is public, MIT licensed, and uses the official registry.
+   Confirm Overlay Runtime is public, SATA licensed, and uses the official registry.
 3. Obtain approval for the exact initial package/version/artifact and authenticate
    against the official registry. Publish only the verified Overlay Runtime artifact,
    not the whole dependency graph or an arbitrary workspace source directory.

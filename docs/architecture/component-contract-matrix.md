@@ -109,6 +109,9 @@ Each machine-readable row also records its `material` responsibilities.
 The roles are checked without promoting maturity or changing release/consumer
 evidence. See [Material standards](material-standards.md#solid-material) for
 role behavior, Prose and the Design Lab comparison route.
+The matrix records material availability separately: Glass and Solid retain
+existing evidence; Frosted is an experimental foundation and does not promote
+any component or establish visual or consumer validation.
 
 
 Material tiers, customization, component audit and hover/press policy: [Material standards](material-standards.md).

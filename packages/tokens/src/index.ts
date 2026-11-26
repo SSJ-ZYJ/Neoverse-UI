@@ -60,12 +60,15 @@ export type { ShadowToken } from './foundation/shadow.js';
 export type { SpaceToken } from './foundation/space.js';
 export {
   type ControlSurfacePreset,
+  defaultMaterial,
   getSurfaceClass,
+  type GlassTier,
   isGlassSurface,
-  type MaterialMode,
-  type MaterialSurfaceRole,
-  materialSurfacePresets,
+  isMaterial,
+  type Material,
+  materialAttribute,
+  materials,
   type SurfacePreset,
-  surfaceClasses,
+  type SurfaceRole,
 } from './foundation/surface-presets.js';
 export type { TypographyRole } from './foundation/typography.js';

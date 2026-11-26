@@ -23,6 +23,7 @@
   }
 
   :where(.ui-table, .neoverse-prose table) {
+    --neoverse-table-recipe-filter: initial;
     --neoverse-material-edge-refraction-width: var(
       --neoverse-material-glass-subtle-edge-refraction-width
     );
@@ -48,10 +49,16 @@
     box-shadow: var(--neoverse-table-shadow);
     /* Sample one continuous backdrop. Per-cell filters create hundreds of
        compositing layers and clip the blur at every grid line. */
-    -webkit-backdrop-filter: var(--neoverse-table-filter);
-    backdrop-filter: var(--neoverse-table-filter);
+    -webkit-backdrop-filter: var(--neoverse-table-recipe-filter, none);
+    backdrop-filter: var(--neoverse-table-recipe-filter, none);
     font-size: var(--neoverse-table-font-size);
     line-height: var(--neoverse-table-line-height);
+  }
+  @scope (.material-glass-default) {
+    :where(.ui-table, .neoverse-prose table) {
+      --neoverse-table-recipe-filter: var(--neoverse-table-filter);
+      --neoverse-glass-tier: subtle;
+    }
   }
 
   :where(.ui-table, .neoverse-prose table) :where(th, td) {
@@ -211,8 +218,8 @@
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
-    :where(:scope, :scope *):is(.ui-table.material-auto, .neoverse-prose table) {
+  @scope (.material-solid-scope) {
+    :where(:scope, :scope *):is(.ui-table.material-recipe-auto, .neoverse-prose table) {
       /* Without a backdrop filter, the caption still anchors to the table grid. */
       position: relative;
 
@@ -247,8 +254,6 @@
 
     :where(:scope, :scope *):is(.neoverse-prose table:not(.ui-table)) {
       box-shadow: var(--neoverse-material-solid-raised-shadow);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
     }
   }
 }

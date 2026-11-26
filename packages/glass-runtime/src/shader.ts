@@ -202,13 +202,16 @@ export const glassFragmentShader = `
     float cornerReach = max(min(u_rect_size.x * 0.65, u_rect_size.y * 2.4), 16.0);
     float topLeftDistance = length(point + halfSize);
     float bottomRightDistance = length(point - halfSize);
+    float darkSurfaceScale = darkSurface
+      ? smoothstep(42.0, 72.0, shortSide) * (1.0 - roundButton)
+      : 0.0;
     float darkCorner = 0.0;
     if (darkSurface) {
       // A wide, low surface makes an arc-only catch look like a bright dot.
       // Carry that catch onto its adjacent edges, not across their middle.
       float reach = min(shortSide * 0.48, 88.0);
       float distanceToCorner = min(topLeftDistance, bottomRightDistance);
-      float extension = 1.0 - smoothstep(reach * 0.32, reach, distanceToCorner);
+      float extension = (1.0 - smoothstep(reach * 0.32, reach, distanceToCorner)) * (1.0 - roundButton);
       darkCorner = mix(diagonalArc * diagonalArc, 1.0, extension);
     }
     float topLeftFocus = 1.0 - smoothstep(cornerReach * 0.3, cornerReach, topLeftDistance);
@@ -235,8 +238,11 @@ export const glassFragmentShader = `
       edgeFalloff += 0.61 * diagonalVolume;
       directionalAlpha += 0.24 * abs(lighting) * diagonalVolume;
     }
-    // Broaden the dark catch inward without shifting the outer contour.
-    edgeFalloff += 0.42 * darkCorner;
+    if (darkSurface) {
+      directionalAlpha += 0.18 * darkSurfaceScale * darkCorner;
+      // Broaden the dark catch inward without shifting the outer contour.
+      edgeFalloff += mix(0.16, 0.48, darkSurfaceScale) * darkCorner;
+    }
     float edge = 1.0 - smoothstep(0.0, u_edge_width + edgeFalloff, -distance);
     float alpha = inside * edge * u_opacity * directionalAlpha * thicknessScale;
     alpha = clamp(alpha, 0.0, 0.34);
@@ -262,7 +268,7 @@ export const glassFragmentShader = `
     }
     alpha *= occlusionMask;
     if (alpha <= 0.0001) discard;
-    float exposure = u_gain * (1.0 + 0.16 * darkCorner);
+    float exposure = u_gain * (1.0 + mix(0.08, 0.20, darkSurfaceScale) * darkCorner);
     if (u_color_dodge > 0.5) {
       // Encode a proportional backdrop lift rather than raising its RGB floor.
       // Partial coverage retains the original backdrop near channel clipping.
@@ -285,9 +291,14 @@ export const glassFragmentShader = `
         coverage = mix(coverage, 0.8 * (1.0 - remaining * remaining), volumeScale);
       }
       if (darkSurface) {
-        // Keep the straight rim, then allocate more of the covered arc's
-        // headroom to neutral lift. Coverage bounds the catch near the edge.
-        lift = 4.0 * lift + 0.42 * coverage * darkCorner;
+        // Keep compact controls restrained so bright fills do not blow out at
+        // diagonal corners, while giving larger dark surfaces enough corner
+        // contrast against their quieter straight rim.
+        float darkBaseScale = mix(2.0, 2.4, darkSurfaceScale);
+        float darkCornerWeight = mix(0.48, 0.68, darkSurfaceScale);
+        float darkCoverageCap = mix(0.38, 0.67 + 0.08 * darkCorner, darkSurfaceScale);
+        coverage = min(coverage + 0.08 * darkSurfaceScale * darkCorner, darkCoverageCap);
+        lift = darkBaseScale * lift + darkCornerWeight * coverage * darkCorner;
       }
       if (lift <= 0.0) discard;
       // Covered dodge yields lift = coverage * dodge / (1 - dodge) before clipping.
@@ -321,7 +332,7 @@ export const glassFragmentShader = `
       // The dark overlay fallback also lifts the backdrop without adding
       // palette chroma. Keep the luminance of the existing lighting profile.
       color = vec3(dot(color, vec3(0.2126, 0.7152, 0.0722)));
-      exposure *= 1.0 + darkCorner;
+      exposure *= 1.0 + mix(0.45, 1.0, darkSurfaceScale) * darkCorner;
     }
     // Match the former release response at middle gray without adding RGB
     // independently of the backdrop. Gain scales the completed response.

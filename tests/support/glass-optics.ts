@@ -30,9 +30,12 @@ const backgrounds: Record<OpticsBackdrop, string> = {
   warm: 'linear-gradient(125deg, rgb(171 86 53), rgb(235 177 115))',
 };
 
+export type OpticsProbeKind = 'surface' | 'primary-button';
+
 const probe = { left: 224, top: 208, width: 320, height: 180, radius: 24 };
 const padding = 12;
-const probeFor = (backdrop: OpticsBackdrop) => {
+const probeFor = (backdrop: OpticsBackdrop, kind: OpticsProbeKind = 'surface') => {
+  if (kind === 'primary-button') return { left: 224, top: 208, width: 140, height: 36, radius: 10 };
   if (backdrop === 'terminal-pale') return { ...probe, width: 640, height: 384, radius: 20 };
   if (backdrop === 'dark-canvas') return { ...probe, width: 640, height: 88, radius: 16 };
   return probe;
@@ -58,6 +61,7 @@ export type OpticsMetrics = {
   sides: Record<'top' | 'right' | 'bottom' | 'left', EdgeMetrics>;
   corners: Record<'upperLeft' | 'upperRight' | 'lowerLeft' | 'lowerRight', number>;
   cornerLift: Record<'upperLeft' | 'lowerRight', number>;
+  cornerPeakLift: Record<'upperLeft' | 'lowerRight', number>;
   cornerShoulders: Record<'upperLeft' | 'lowerRight', number>;
   blueRetention: Record<'upperLeft' | 'lowerRight', number>;
   interior: { mean: number; p95: number };
@@ -68,13 +72,14 @@ export async function installOpticsProbe(
   theme: OpticsTheme,
   tier: OpticsTier,
   backdrop: OpticsBackdrop,
+  kind: OpticsProbeKind = 'surface',
 ): Promise<{ renderer: string; vendor: string; bodyFilter: string }> {
   await page.goto(`/frame?theme=${theme}&lang=en#materials`, {
     waitUntil: 'domcontentloaded',
   });
   await expect(page.locator('html')).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
   await page.evaluate(
-    ({ surfaceTier, background, position, componentSurface }) => {
+    ({ surfaceTier, background, position, componentSurface, probeKind }) => {
       const app = document.querySelector<HTMLElement>('#app');
       if (app) app.style.display = 'none';
       for (const previous of document.querySelectorAll(
@@ -92,9 +97,16 @@ export async function installOpticsProbe(
         background,
         pointerEvents: 'none',
       });
-      const surface = document.createElement('div');
+      const surface = document.createElement(probeKind === 'primary-button' ? 'button' : 'div');
       surface.dataset.neoverseOpticsProbe = '';
-      surface.className = `${componentSurface ? 'ui-surface ' : ''}material-glass-${surfaceTier}`;
+      surface.className =
+        probeKind === 'primary-button'
+          ? `ui-button ui-button--primary material-glass-${surfaceTier}`
+          : `${componentSurface ? 'ui-surface ' : ''}material-glass-${surfaceTier}`;
+      if (probeKind === 'primary-button') {
+        surface.setAttribute('type', 'button');
+        surface.textContent = 'Run example';
+      }
       Object.assign(surface.style, {
         position: 'fixed',
         left: `${position.left}px`,
@@ -110,8 +122,9 @@ export async function installOpticsProbe(
     {
       surfaceTier: tier,
       background: backgrounds[backdrop],
-      position: probeFor(backdrop),
+      position: probeFor(backdrop, kind),
       componentSurface: backdrop === 'terminal-pale' || backdrop === 'dark-canvas',
+      probeKind: kind,
     },
   );
 
@@ -152,7 +165,8 @@ export async function installOpticsProbe(
     );
   }
   const expectedBlur = { subtle: 12, elevated: 18, immersive: 24 }[tier];
-  expect(graphics.bodyFilter).toContain(`blur(${expectedBlur}px)`);
+  const buttonBlurScale = kind === 'primary-button' && theme === 'dark' ? 0.5 : 1;
+  expect(graphics.bodyFilter).toContain(`blur(${expectedBlur * buttonBlurScale}px)`);
 
   // Flush the mutation-triggered edge render; no arbitrary millisecond sleeps.
   await page.evaluate(
@@ -171,8 +185,9 @@ export async function measureOptics(
   tier: OpticsTier,
   backdrop: OpticsBackdrop,
   graphics: { renderer: string; vendor: string; bodyFilter: string },
+  kind: OpticsProbeKind = 'surface',
 ): Promise<{ metrics: OpticsMetrics; lit: Buffer; unlit: Buffer }> {
-  const position = probeFor(backdrop);
+  const position = probeFor(backdrop, kind);
   const clip = {
     x: position.left - padding,
     y: position.top - padding,
@@ -313,6 +328,16 @@ export async function measureOptics(
         }
         return sum / (size * size);
       };
+      const cornerPeak = (xOrigin: number, yOrigin: number, sample = delta) => {
+        const size = position.radius + 8;
+        let peak = 0;
+        for (let y = 0; y < size; y += 1) {
+          for (let x = 0; x < size; x += 1) {
+            peak = Math.max(peak, sample(xOrigin + x, yOrigin + y));
+          }
+        }
+        return peak;
+      };
       const luminanceLift = (x: number, y: number) => {
         const offset = (y * screenshotWidth + x) * 3;
         return (
@@ -379,6 +404,10 @@ export async function measureOptics(
         cornerLift: {
           upperLeft: cornerSignal(left, top, luminanceLift),
           lowerRight: cornerSignal(right, bottom, luminanceLift),
+        },
+        cornerPeakLift: {
+          upperLeft: cornerPeak(left, top, luminanceLift),
+          lowerRight: cornerPeak(right, bottom, luminanceLift),
         },
         cornerShoulders: {
           upperLeft: horizontalShoulder(false),

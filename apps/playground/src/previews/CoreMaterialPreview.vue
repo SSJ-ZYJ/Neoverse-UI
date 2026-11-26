@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MaterialMode } from '@neoverse-ui/tokens';
+import type { Material } from '@neoverse-ui/tokens';
 import {
   UiButton,
   UiCard,
@@ -19,7 +19,7 @@ import LabIcon from '../LabIcon.vue';
 import { type Locale, localize, localized } from '../playground-content';
 import { resolvedTheme } from '../theme-state';
 
-const props = defineProps<{ mode: MaterialMode; locale: Locale }>();
+const props = defineProps<{ mode: Extract<Material, 'glass' | 'solid'>; locale: Locale }>();
 const copy = {
   title: localized('Release workspace', '发布工作区'),
   name: localized('Project name', '项目名称'),

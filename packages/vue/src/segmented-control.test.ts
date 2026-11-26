@@ -33,14 +33,14 @@ describe('UiSegmentedControl', () => {
 
   it('uses an automatic group surface and can opt out of outer chrome', () => {
     const automatic = mount(UiSegmentedControl, { props: { options } });
-    expect(automatic.classes()).toContain('material-glass-subtle');
+    expect(automatic.classes()).toContain('material-role-group');
     expect(automatic.attributes('data-surface')).toBe('auto');
     expect(automatic.attributes('data-neoverse-surface-hover')).toBe('static');
     expect(automatic.attributes('data-neoverse-glass-edge-pass')).toBeUndefined();
 
     const bare = mount(UiSegmentedControl, { props: { options, surface: 'none' } });
     expect(bare.attributes('data-neoverse-glass-edge-pass')).toBeUndefined();
-    expect(bare.classes()).not.toContain('material-glass-subtle');
+    expect(bare.classes()).not.toContain('material-role-group');
     expect(bare.attributes('data-surface')).toBe('none');
     expect(bare.find('.ui-segmented-control__slider').exists()).toBe(true);
   });

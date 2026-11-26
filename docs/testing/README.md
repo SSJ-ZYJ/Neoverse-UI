@@ -51,12 +51,13 @@ running every theme, width, and language combination.
 | `terminal.spec.ts` | Transcript composition, suggestions, IME guard, tail following, reader intent |
 | `motion.spec.ts` | List reorder, entrance replay, page transitions, page dissolve, disclosure expansion and collapse, React presence exit, reduced motion, layout width on a language switch, theme reveal reversal and thumb color continuity |
 | `motion-hierarchy.spec.ts` | Promoted Motion section, right-hand Inspector category switching, distinct-scene zero-flash transitions |
-| `materials.spec.ts` | Aurora Glass tier paint and reduced transparency, Solid opacity and contrast, mixed scopes, navigation variants, status paint, Prose and shared Vue/React focus behavior |
+| `materials.spec.ts` | Solid opacity and contrast, Glass tier paint and reduced transparency, adapter/portal paint, Prose and focus |
+| `material-scopes.spec.ts` | All nine parent/child material combinations, unknown and removed boundaries, React/Vue paint, Frosted reduced transparency and forced colors |
 | `glass-runtime.spec.ts` | One shared noninteractive renderer canvas, fixed placement, theme stability, context loss/restore, on-demand allocation (a pure Solid page keeps zero optical resources and releases them), runtime reduced transparency, forced colors and adapter lifecycle |
 | `layout.spec.ts` | Control size baseline in both adapters, badge type scale, 24px minimum target, no implicit specimen magnification, table caption placement and corner consistency across previews and composition scenes |
 | `contrast.spec.ts` | WCAG contrast floors for the primary, secondary and muted text roles in both themes |
 | `playground.spec.ts` | Explorer disclosure and specimen search, theme and layout continuity on reload, preview persistence and reading position, browser history and deep links, drawer focus, responsive shell overflow |
-| `material-switching.spec.ts` | Global material selection keeps the specimen session, form values, zoom and scroll, rapid requests settle on the last choice, the `material-fade` snapshot clears its overlay state, and Solid keeps the Glass foreground hierarchy for status ink and selection |
+| `material-switching.spec.ts` | Three-material desktop and touch switching, specimen form/zoom/scroll continuity, last-request-wins, appearance snapshot cleanup, Solid status and selection |
 | `playground-stage.spec.ts` | Focused stage canvas, stage background switcher and persistence, specimen move handle and Home recentering, preview zoom, wheel zoom around the pointer, magnified pan without clipping the shadow, chrome and heading above a magnified preview |
 | `playground-specimens.spec.ts` | Catalogue previews at their own size, Colors gallery, Markdown heading and inline style rendering, specimen title hierarchy, stage backdrop without painted specimen wrappers, focused and QA galleries |
 | `playground-composition.spec.ts` | Composition presets and reset without remounting, dynamic focus fallback, mobile composition drawer, preset geometry at representative widths in both languages, reduced motion, anchored overlay isolation and cleanup |

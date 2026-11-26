@@ -1,5 +1,4 @@
 import { expect, test } from 'bun:test';
-import { type ControlSurfacePreset, surfaceClasses } from './index.js';
 
 const source = (name: string) => Bun.file(new URL(name, import.meta.url)).text();
 
@@ -67,19 +66,6 @@ test('dependent recipes compose at local material owners for consumer overrides'
       `--neoverse-material-glass-${tier}-filter: blur(var(--neoverse-material-glass-${tier}-blur))`,
     );
     expect(effects).toContain(`var(--neoverse-material-glass-${tier}-transparency)`);
-  }
-});
-
-test('the shared control preset keeps none and all three Glass tiers', () => {
-  const accepted: readonly ControlSurfacePreset[] = [
-    'auto',
-    'none',
-    'glass-subtle',
-    'glass-elevated',
-    'glass-immersive',
-  ];
-  for (const preset of accepted) {
-    expect(Object.keys(surfaceClasses)).toContain(preset);
   }
 });
 

@@ -104,19 +104,6 @@ test('lets rectangular skeletons honor short custom heights without losing their
   expect(rectRule).toContain('height: var(--neoverse-skeleton-text-min-height);');
 });
 
-test('reuses ancestor Glass blur instead of filtering every nested skeleton cell', async () => {
-  const skeletonCss = await readCssFile(
-    new URL('../../tailwind/src/components/skeleton.css', import.meta.url),
-  );
-  const nestedRule =
-    skeletonCss.match(
-      /:is\(\.material-glass-subtle,\s*\.material-glass-elevated,\s*\.material-glass-immersive\)\s+:is\(\.ui-skeleton,\s*\.skeleton-surface\)\s*\{([^}]+)\}/,
-    )?.[1] ?? '';
-  expect(nestedRule).toContain('-webkit-backdrop-filter: none;');
-  expect(nestedRule).toContain('backdrop-filter: none;');
-  expect(nestedRule).not.toMatch(/background:|opacity:/);
-});
-
 test('keeps immersive scrollbars on shared affordance roles', async () => {
   const css = await readTokenCss('components/scrollbar.css');
   expect(css).toContain('var(--neoverse-effect-rail-track)');

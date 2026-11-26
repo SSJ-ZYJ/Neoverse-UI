@@ -2,7 +2,7 @@
   "name": "@neoverse-ui/playground",
   "version": "0.1.0",
   "private": true,
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "type": "module",
   "scripts": {
     "dev": "vite --configLoader runner",

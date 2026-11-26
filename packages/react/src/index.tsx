@@ -1,4 +1,4 @@
-export type { ControlSurfacePreset, MaterialMode, SurfacePreset } from '@neoverse-ui/tokens';
+export type { ControlSurfacePreset, GlassTier, Material, SurfacePreset, SurfaceRole } from '@neoverse-ui/tokens';
 export {
   type ActionClassNameOptions,
   type ActionScale,

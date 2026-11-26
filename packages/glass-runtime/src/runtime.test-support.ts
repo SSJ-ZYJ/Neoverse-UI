@@ -75,6 +75,39 @@ export const flushMutations = async (): Promise<void> => {
   await Promise.resolve();
 };
 
+// Runtime suites do not load Tailwind's scoped layers. Supply the computed
+// marker with flat stylesheet rules for the fixture surfaces and boundaries.
+export function installGlassTierStyles(): HTMLStyleElement {
+  const subtle = [
+    '.ui-input',
+    '.ui-textarea',
+    '.ui-select',
+    '.ui-choice__control',
+    'table.ui-table',
+    '.neoverse-prose table',
+    '.ui-disclosure',
+    '.neoverse-prose details',
+  ];
+  const elevated = ['.material-role-panel', '.ui-select__popover'];
+  const nonoptical = ['solid', 'frosted'].flatMap((material) =>
+    [...subtle, ...elevated].map((selector) => `[data-neoverse-material='${material}'] ${selector}`),
+  );
+  const style = document.createElement('style');
+  style.textContent = `
+    ${subtle.join(', ')} { --neoverse-glass-tier: subtle; }
+    ${elevated.join(', ')} { --neoverse-glass-tier: elevated; }
+    ${nonoptical.join(', ')} { --neoverse-glass-tier: initial; }
+    [data-neoverse-material='frosted'].neoverse-prose details { --neoverse-glass-tier: initial; }
+    .material-role-panel[data-neoverse-material='glass'] { --neoverse-glass-tier: elevated; }
+    .ui-input[data-neoverse-material='glass'] { --neoverse-glass-tier: subtle; }
+    .neoverse-prose details[data-neoverse-material='glass'] { --neoverse-glass-tier: subtle; }
+    [data-neoverse-material='frosted'].neoverse-prose details[data-neoverse-material='glass'] { --neoverse-glass-tier: subtle; }
+    .material-role-panel.material-frosted { --neoverse-glass-tier: initial; }
+  `;
+  document.head.append(style);
+  return style;
+}
+
 const mountedRenderers: Array<ReturnType<typeof createGlassRenderer>> = [];
 
 export const createTestRenderer = (...args: Parameters<typeof createGlassRenderer>) => {
@@ -84,11 +117,13 @@ export const createTestRenderer = (...args: Parameters<typeof createGlassRendere
 };
 
 export function registerGlassRendererSuiteHooks(): void {
+  let tierStyles: HTMLStyleElement;
   afterEach(() => {
     for (const renderer of mountedRenderers) {
       renderer.destroy();
     }
     mountedRenderers.length = 0;
+    tierStyles.remove();
   });
 
   beforeEach(() => {
@@ -98,5 +133,6 @@ export function registerGlassRendererSuiteHooks(): void {
     document.documentElement.style.removeProperty('--neoverse-material-edge-refraction-gain');
     document.body.innerHTML = '';
     vi.restoreAllMocks();
+    tierStyles = installGlassTierStyles();
   });
 }

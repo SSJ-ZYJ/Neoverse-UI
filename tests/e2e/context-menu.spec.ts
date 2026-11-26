@@ -82,6 +82,12 @@ test.describe('context menu', () => {
       await setMaterial('glass');
       await expect(panel).toHaveCSS('backdrop-filter', /blur\(18px\)/);
       await expect(submenu).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+      await setMaterial('frosted');
+      await expect(panel).toHaveCSS('backdrop-filter', /blur\(12px\)/);
+      await expect(submenu).toHaveCSS('backdrop-filter', /blur\(12px\)/);
+      await setMaterial('solid');
+      await expect(panel).toHaveCSS('backdrop-filter', 'none');
+      await expect(submenu).toHaveCSS('backdrop-filter', 'none');
     });
 
     test(`${adapter.name}: keyboard opening anchors the menu to the invoking button`, async ({
@@ -91,20 +97,31 @@ test.describe('context menu', () => {
       const trigger = page.locator('[data-context-menu-keyboard]');
       await trigger.evaluate((element) => element.scrollIntoView({ block: 'center' }));
       await trigger.focus();
+      // A point-anchored menu uses the button's bounds at keyboard activation.
+      const invocation = await trigger.evaluateHandle((button) => {
+        const origin = { left: 0, bottom: 0 };
+        button.addEventListener('click', () => {
+          const rect = button.getBoundingClientRect();
+          origin.left = rect.left;
+          origin.bottom = rect.bottom;
+        }, { capture: true, once: true });
+        return origin;
+      });
       await trigger.press('Enter');
       const panel = page.locator('.ui-context-menu');
       await expect(panel.locator('[data-entry-id="copy"]')).toBeFocused();
       await expect(panel).toHaveCSS('opacity', '1');
-      const delta = await panel.evaluate((menu) => {
-        const button = document.querySelector('[data-context-menu-keyboard]');
-        if (button === null) throw new Error('Missing keyboard opener');
-        const triggerRect = button.getBoundingClientRect();
-        const menuRect = menu.getBoundingClientRect();
-        return { x: menuRect.left - triggerRect.left, y: menuRect.top - triggerRect.bottom };
-      });
-      expect(Math.abs(delta.x)).toBeLessThan(2);
-      expect(delta.y).toBeGreaterThanOrEqual(0);
-      expect(delta.y).toBeLessThan(16);
+      // The entrance can reach full opacity before its geometry settles.
+      await expect(async () => {
+        const delta = await panel.evaluate((menu, origin) => {
+          const menuRect = menu.getBoundingClientRect();
+          return { x: menuRect.left - origin.left, y: menuRect.top - origin.bottom };
+        }, invocation);
+        expect(Math.abs(delta.x)).toBeLessThan(2);
+        expect(delta.y).toBeGreaterThanOrEqual(0);
+        expect(delta.y).toBeLessThan(16);
+      }).toPass({ timeout: 5000 });
+      await invocation.dispose();
       await page.keyboard.press('Escape');
       await expect(trigger).toBeFocused();
     });

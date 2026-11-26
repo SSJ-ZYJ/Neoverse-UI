@@ -29,6 +29,10 @@ test.describe('material switching', () => {
     expect(await workspace.evaluate((element) => element.scrollTop)).toBe(scrollTop);
     await expect(mobile ? control : control.getByRole('radio', { name: 'Solid' })).toBeFocused();
 
+    await (mobile ? control : control.getByRole('radio', { name: /Frosted/ })).click();
+    await expect(root).toHaveAttribute('data-neoverse-material', 'frosted');
+    await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCount(0);
+    await expect(textarea).toHaveValue('Solid keeps state');
     await (mobile ? control : control.getByRole('radio', { name: 'Glass' })).click();
     await expect(root).toHaveAttribute('data-neoverse-material', 'glass');
     await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCount(1);
@@ -44,7 +48,7 @@ test.describe('material switching', () => {
     const root = page.locator('html');
     const canvas = page.locator('[data-neoverse-glass-renderer-canvas]');
 
-    await page.evaluate((cycle) => {
+    await page.evaluate(async (cycle) => {
       const host = document.querySelector(
         `[data-playground-material-control="${cycle ? 'cycle' : 'segments'}"]`,
       );
@@ -52,10 +56,13 @@ test.describe('material switching', () => {
       // Click synchronously so every request lands inside one task; a stale
       // run must never win over the newest selection.
       if (cycle) {
-        for (let index = 0; index < 3; index += 1) (host as HTMLElement).click();
+        for (const cycleStep of [1, 2, 3, 4]) {
+          (host as HTMLElement).click();
+          if (cycleStep < 4) await Promise.resolve();
+        }
         return;
       }
-      for (const name of ['Solid', 'Aurora Glass', 'Solid']) {
+      for (const name of ['Frosted (experimental foundation preview)', 'Aurora Glass', 'Solid']) {
         const option = [...host.querySelectorAll('[role="radio"]')].find(
           (radio) => radio.getAttribute('aria-label') === name,
         );
@@ -67,12 +74,14 @@ test.describe('material switching', () => {
     await expect(root).not.toHaveAttribute('data-neoverse-appearance-motion');
     await expect(canvas).toHaveCount(0);
 
-    await page.evaluate((cycle) => {
+    await page.evaluate(async (cycle) => {
       const host = document.querySelector(
         `[data-playground-material-control="${cycle ? 'cycle' : 'segments'}"]`,
       );
       if (!host) throw new Error('Material control is missing');
       if (cycle) {
+        (host as HTMLElement).click();
+        await Promise.resolve();
         (host as HTMLElement).click();
         return;
       }

@@ -1,6 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import ts from 'typescript';
+import { materials } from '../../packages/tokens/src/foundation/surface-presets';
 import { collectReactRuntimeAdapters } from './react-runtime-fixture';
 
 type Track = 'canonical-shared' | 'consumer-driven';
@@ -32,6 +33,7 @@ interface ComponentContract {
 
 interface ComponentMatrix {
   schemaVersion: number;
+  materialMaturity: Record<string, unknown>;
   components: ComponentContract[];
 }
 
@@ -66,6 +68,13 @@ const unitTestCorpus = [resolve(root, 'packages/vue/src'), resolve(root, 'packag
   .join('\n');
 
 const errors: string[] = [];
+const materialMaturity = matrix.materialMaturity ?? {};
+if (
+  Object.keys(materialMaturity).length !== materials.length ||
+  materials.some((material) => materialMaturity[material] !== (material === 'frosted' ? 'experimental' : 'existing'))
+) {
+  errors.push('Component matrix must record the availability of every material.');
+}
 
 const layerStatuses = new Set<LayerStatus>(['stable', 'partial', 'none']);
 const visualStatuses = new Set<VisualStatus>(['release', 'playground', 'none']);

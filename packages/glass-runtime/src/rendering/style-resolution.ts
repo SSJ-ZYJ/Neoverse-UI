@@ -20,17 +20,22 @@ const glassClassNames = [
   'material-glass-immersive',
 ] as const;
 export const materialModeAttribute = 'data-neoverse-material';
-const materialModeSelector = `[${materialModeAttribute}='glass'], [${materialModeAttribute}='solid']`;
-export const glassPresetSelector = glassClassNames.map((name) => `.${name}`).join(', ');
-const implicitAutoGlassSelector =
-  '.ui-choice__control, .neoverse-prose table, .ui-disclosure, .neoverse-prose details';
-const insetGlassSelector = `.ui-input, .ui-textarea, .ui-select, table.ui-table, ${implicitAutoGlassSelector}`;
-const elevatedFormGlassSelector = '.ui-select__popover';
-export const glassSelector = [
-  glassPresetSelector,
-  insetGlassSelector,
-  elevatedFormGlassSelector,
+const glassPlaneRoleSelector = '.material-role-control, .material-role-panel, .material-role-group, .material-role-overlay, .material-role-compact-overlay';
+const automaticGlassSelector = [
+  glassPlaneRoleSelector,
+  '.material-role-field',
+  '.material-role-table',
+  '.ui-input',
+  '.ui-textarea',
+  '.ui-select',
+  '.ui-select__popover',
+  'table.ui-table',
+  '.ui-choice__control',
+  '.neoverse-prose table',
+  '.ui-disclosure',
+  '.neoverse-prose details',
 ].join(', ');
+export const glassSelector = `${glassClassNames.map((name) => `.${name}`).join(', ')}, ${automaticGlassSelector}`;
 
 type GlassVariant = 'subtle' | 'elevated' | 'immersive';
 
@@ -52,11 +57,6 @@ export type GlassStyle = {
   carrier: Color;
 };
 
-const isSolidAutoSurface = (element: Element): boolean =>
-  (element.classList.contains('material-auto') ||
-    (!element.matches(glassPresetSelector) && element.matches(implicitAutoGlassSelector))) &&
-  element.closest(materialModeSelector)?.getAttribute(materialModeAttribute) === 'solid';
-
 const getExplicitVariant = (element: Element): GlassVariant | undefined => {
   const materialClassName = glassClassNames.find((className) =>
     element.classList.contains(className),
@@ -67,20 +67,20 @@ const getExplicitVariant = (element: Element): GlassVariant | undefined => {
   return undefined;
 };
 
-const getVariant = (element: Element): GlassVariant | undefined => {
+const getVariant = (element: Element, getStyle: StyleGetter): GlassVariant | undefined => {
   const explicit = getExplicitVariant(element);
   if (explicit !== undefined) return explicit;
-  if (element.matches(insetGlassSelector)) return 'subtle';
-  if (element.matches(elevatedFormGlassSelector)) return 'elevated';
-  return undefined;
+  if (!element.matches(automaticGlassSelector)) return undefined;
+  // CSS marks the material it actually rendered, including local overrides
+  // and scoped roles. It resets this property on nonoptical candidates.
+  const tier = getStyle(element).getPropertyValue('--neoverse-glass-tier').trim();
+  return tier === 'subtle' || tier === 'elevated' || tier === 'immersive' ? tier : undefined;
 };
 
-export const canRenderGlassEdge = (element: Element): boolean =>
-  !isSolidAutoSurface(element) &&
-  getVariant(element) !== undefined &&
-  !inheritsParentGlassEdge(element);
+export const canRenderGlassEdge = (element: Element, getStyle: StyleGetter): boolean =>
+  getVariant(element, getStyle) !== undefined && !inheritsParentGlassEdge(element, getStyle);
 
-const inheritsParentGlassEdge = (element: Element): boolean => {
+const inheritsParentGlassEdge = (element: Element, getStyle: StyleGetter): boolean => {
   // An independent Aurora Glass surface owns its own refractive silhouette, even
   // when the layout around it is also Aurora Glass. In particular, Playground's
   // Aurora Glass specimen cards and standalone segmented controls must keep the
@@ -91,7 +91,10 @@ const inheritsParentGlassEdge = (element: Element): boolean => {
 
   let ancestor = element.parentElement;
   while (ancestor !== null) {
-    if (getExplicitVariant(ancestor) !== undefined && !isSolidAutoSurface(ancestor)) {
+    if (
+      getExplicitVariant(ancestor) !== undefined ||
+      (ancestor.matches(glassPlaneRoleSelector) && getVariant(ancestor, getStyle) !== undefined)
+    ) {
       return true;
     }
     ancestor = ancestor.parentElement;
@@ -258,7 +261,7 @@ export const readStyle = (
       pointer[2] = arrowHeight;
     }
   }
-  const variant = getVariant(element) ?? 'subtle';
+  const variant = getVariant(element, getStyle) ?? 'subtle';
   const defaults = getDefaultEdgeValues(variant);
   const edgeWidth =
     Math.max(

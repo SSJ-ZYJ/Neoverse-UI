@@ -25,7 +25,7 @@
 </div>
 
 <!-- Source: README.md -->
-<!-- Source-SHA256: 202ad20dae6fd67b5441428a3dc7ac2dbd94da72b86bd434e527685f4f0c24a7 -->
+<!-- Source-SHA256: 8edeecb667cb31b557dc0fe656d53a124847bb8b2bc179bd897fc45597bad67b -->
 
 ## 设计语言
 
@@ -174,4 +174,4 @@ bun run dev
 
 ## 许可
 
-Neoverse-UI 以 [MIT 许可](LICENSE)发布。
+Neoverse-UI 以 [Star And Thank Author License 2.0](LICENSE) 发布。

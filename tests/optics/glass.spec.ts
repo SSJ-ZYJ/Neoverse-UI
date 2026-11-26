@@ -162,4 +162,43 @@ test.describe('Aurora Glass optical diagnostics', () => {
       }
     });
   }
+
+  test('dark compact primary button restrains corner brightness while preserving a continuous rim @optics-smoke', async ({
+    page,
+  }, testInfo) => {
+    const graphics = await installOpticsProbe(
+      page,
+      'dark',
+      'subtle',
+      'dark-canvas',
+      'primary-button',
+    );
+    const captures = await measureOptics(
+      page,
+      testInfo,
+      'dark',
+      'subtle',
+      'dark-canvas',
+      graphics,
+      'primary-button',
+    );
+    try {
+      const { sides, corners, cornerPeakLift } = captures.metrics;
+      for (const side of Object.values(sides)) {
+        expect(side.p10).toBeGreaterThanOrEqual(2);
+        expect(side.maximumGap).toBeLessThanOrEqual(6);
+        expect(side.widthP90).toBeLessThanOrEqual(6);
+      }
+      const quietCorner = Math.max(corners.upperRight, corners.lowerLeft);
+      expect(corners.upperLeft).toBeGreaterThan(quietCorner);
+      expect(corners.lowerRight).toBeGreaterThan(quietCorner);
+      expect(Math.max(cornerPeakLift.upperLeft, cornerPeakLift.lowerRight)).toBeGreaterThanOrEqual(
+        12,
+      );
+      expect(Math.max(cornerPeakLift.upperLeft, cornerPeakLift.lowerRight)).toBeLessThanOrEqual(48);
+    } catch (error) {
+      await attachOpticalFailure(testInfo, captures);
+      throw error;
+    }
+  });
 });

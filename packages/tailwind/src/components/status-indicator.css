@@ -138,7 +138,7 @@
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+  @scope (.material-solid-scope) {
     .ui-status-indicator__dot {
       box-shadow: none;
     }

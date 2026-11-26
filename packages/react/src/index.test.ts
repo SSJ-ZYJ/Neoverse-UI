@@ -238,7 +238,7 @@ test('dock exposes the shared shell without owning product navigation data', () 
   expect(html).toContain('aria-label="Primary navigation"');
   for (const value of [
     'data-surface="auto"',
-    'material-glass-elevated',
+    'material-role-panel',
     'data-neoverse-surface-hover="static"',
     'ui-dock--compact',
     'ui-control-surface--scale-lg',
@@ -522,7 +522,7 @@ test('card keeps consumer root semantics and composes the shared surface', () =>
     children: 'Default card',
   });
   expect(defaultCard.props['data-surface']).toBe('auto');
-  expect(defaultCard.props.className).toContain('material-glass-elevated');
+  expect(defaultCard.props.className).toContain('material-role-panel');
 
   const article = UiCard<'article'>({
     as: 'article',

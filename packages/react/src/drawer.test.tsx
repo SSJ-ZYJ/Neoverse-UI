@@ -74,7 +74,7 @@ test('keeps a controlled modal Drawer in the document layer and an inline Drawer
     expect(closedModal.getAttribute('aria-labelledby')).toBe('filters-title');
     expect(closedModal.querySelector('h2')?.textContent).toBe('Filters');
     expect([...closedModal.classList]).toEqual(
-      expect.arrayContaining(['ui-drawer', 'material-glass-subtle', 'custom-drawer']),
+      expect.arrayContaining(['ui-drawer', 'material-role-compact-overlay', 'custom-drawer']),
     );
     expect(closedModal.dataset.side).toBe('left');
     expect(closedModal.dataset.neoverseGlassEdgePass).toBe('css');

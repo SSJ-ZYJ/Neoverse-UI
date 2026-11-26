@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
   type SurfacePreset,
-  surfaceClasses,
+  getSurfaceClass,
   UiButton,
   UiIconButton,
   UiSurface,
@@ -72,7 +72,7 @@ const copy = {
               }}
             </h3>
             <code class="text-code text-secondary">
-              {{ surfaceClasses[preset] || '(no material class)' }}
+              {{ getSurfaceClass(preset) || '(no material class)' }}
             </code>
           </UiSurface>
         </div>

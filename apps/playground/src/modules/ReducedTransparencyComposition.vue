@@ -19,6 +19,7 @@ const options = computed<readonly SegmentOption[]>(() => [
   <div
     class="playground-reduced-transparency-preview grid gap-grid md:grid-cols-2"
     data-composition-mode="accessibility"
+    data-neoverse-material="glass"
   >
     <UiCard class="grid gap-3" data-accessibility-surface>
       <div class="flex flex-wrap items-start justify-between gap-3">

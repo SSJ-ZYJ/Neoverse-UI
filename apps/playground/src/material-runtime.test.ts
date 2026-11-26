@@ -1,6 +1,5 @@
 import { afterEach, describe, expect, test } from 'bun:test';
 import {
-  isMaterialMode,
   persistMaterialMode,
   readMaterialFromSearch,
   resolveInitialMaterialMode,
@@ -60,34 +59,28 @@ afterEach(() => {
 });
 
 describe('material resolution', () => {
-  test('accepts only the two published modes', () => {
-    expect(isMaterialMode('glass')).toBe(true);
-    expect(isMaterialMode('solid')).toBe(true);
-    expect(isMaterialMode('neon')).toBe(false);
-    expect(isMaterialMode(undefined)).toBe(false);
-  });
-
   test('reads a known query value and ignores anything else', () => {
     expect(readMaterialFromSearch('?material=solid')).toBe('solid');
     expect(readMaterialFromSearch('?material=glass&theme=dark')).toBe('glass');
+    expect(readMaterialFromSearch('?material=frosted')).toBe('frosted');
     expect(readMaterialFromSearch('?material=translucent')).toBeUndefined();
     expect(readMaterialFromSearch('')).toBeUndefined();
   });
 
   test('keeps ?material= a temporary preview without writing a preference', () => {
-    const storage = installBrowser({ search: '?material=solid', stored: 'glass' });
-    expect(resolveInitialMaterialMode()).toBe('solid');
+    const storage = installBrowser({ search: '?material=frosted', stored: 'glass' });
+    expect(resolveInitialMaterialMode()).toBe('frosted');
     expect(storage.get(playgroundPreferencesKey)).toBe(JSON.stringify({ material: 'glass' }));
   });
 
   test('keeps the last interactive choice on reload instead of the URL', () => {
-    installBrowser({ search: '?material=glass', stored: 'solid', navigationType: 'reload' });
-    expect(resolveInitialMaterialMode()).toBe('solid');
+    installBrowser({ search: '?material=glass', stored: 'frosted', navigationType: 'reload' });
+    expect(resolveInitialMaterialMode()).toBe('frosted');
   });
 
   test('falls back to the query on reload when nothing was chosen', () => {
-    installBrowser({ search: '?material=solid', navigationType: 'reload' });
-    expect(resolveInitialMaterialMode()).toBe('solid');
+    installBrowser({ search: '?material=frosted', navigationType: 'reload' });
+    expect(resolveInitialMaterialMode()).toBe('frosted');
   });
 
   test('defaults to Aurora Glass without a choice or a valid query', () => {
@@ -103,7 +96,7 @@ describe('material resolution', () => {
 
   test('persists only the toolbar selection', () => {
     const storage = installBrowser({ search: '' });
-    persistMaterialMode('solid');
-    expect(storage.get(playgroundPreferencesKey)).toBe(JSON.stringify({ material: 'solid' }));
+    persistMaterialMode('frosted');
+    expect(storage.get(playgroundPreferencesKey)).toBe(JSON.stringify({ material: 'frosted' }));
   });
 });

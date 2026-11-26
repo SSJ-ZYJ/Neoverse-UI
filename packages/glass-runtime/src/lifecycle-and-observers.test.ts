@@ -139,38 +139,45 @@ describe('Glass renderer lifecycle and observers', () => {
     }
   });
 
-  it('clears the last Glass edge when its auto surface becomes Solid', async () => {
+  it.each(['solid', 'frosted'])('allocates only for Glass and releases it again under %s', async (material) => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const region = document.createElement('section');
+    region.dataset.neoverseMaterial = material;
     const card = document.createElement('article');
-    card.className = 'material-auto material-glass-elevated';
+    card.className = 'material-role-panel';
+    const frosted = document.createElement('article');
+    frosted.className = 'material-role-panel material-frosted';
+    frosted.dataset.neoverseMaterial = 'glass';
+    setRect(frosted, { top: 100 });
     setRect(card, {});
-    region.append(card);
+    region.append(card, frosted);
     document.body.append(region);
     const frames = installFrameQueue();
     const renderer = createTestRenderer();
     renderer.mount();
-    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
-    gl.drawArrays.mockClear();
-    gl.clear.mockClear();
-
-    region.dataset.neoverseMaterial = 'solid';
-    await vi.waitFor(() => {
-      frames.flush(1000);
-      expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBeNull();
-    });
-    expect(gl.drawArrays).not.toHaveBeenCalled();
+    expect(gl.createProgram).not.toHaveBeenCalled();
+    expect(document.documentElement.hasAttribute(glassRendererAttribute)).toBe(false);
 
     card.dataset.neoverseMaterial = 'glass';
     await vi.waitFor(() => {
       frames.flush(1100);
       expect(gl.drawArrays).toHaveBeenCalledTimes(1);
     });
+    expect(gl.uniform1f).toHaveBeenCalledWith(expect.objectContaining({ name: 'u_edge_width' }), 1.25);
     expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).not.toBeNull();
+
+    delete card.dataset.neoverseMaterial;
+    await vi.waitFor(() => {
+      frames.flush(1200);
+      expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBeNull();
+    });
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    expect(gl.deleteProgram).toHaveBeenCalledTimes(1);
+    expect(document.documentElement.hasAttribute(glassRendererAttribute)).toBe(false);
   });
 
-  it('stops drawing internal form and prose edges under a Solid boundary', async () => {
+  it('stops drawing internal form and prose edges under a Frosted boundary', async () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const region = document.createElement('section');
@@ -189,7 +196,7 @@ describe('Glass renderer lifecycle and observers', () => {
     gl.drawArrays.mockClear();
     gl.clear.mockClear();
 
-    region.dataset.neoverseMaterial = 'solid';
+    region.dataset.neoverseMaterial = 'frosted';
     await vi.waitFor(() => {
       frames.flush(1000);
       expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBeNull();
@@ -200,6 +207,12 @@ describe('Glass renderer lifecycle and observers', () => {
     await vi.waitFor(() => {
       frames.flush(1100);
       expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    });
+
+    region.classList.remove('neoverse-prose');
+    await vi.waitFor(() => {
+      frames.flush(1200);
+      expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBeNull();
     });
   });
 
@@ -231,7 +244,7 @@ describe('Glass renderer lifecycle and observers', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
     const outer = document.createElement('article');
-    outer.className = 'material-glass-elevated';
+    outer.className = 'material-role-panel';
     setRect(outer, { width: 320, height: 200 });
     const nested = document.createElement('div');
     nested.className = 'material-glass-subtle';

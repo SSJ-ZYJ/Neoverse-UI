@@ -1,6 +1,6 @@
 import {
   canRenderGlassEdge,
-  glassPresetSelector,
+  glassSelector,
   materialModeAttribute,
 } from './rendering/style-resolution.js';
 import type { GlassRenderer } from './types.js';
@@ -145,24 +145,11 @@ export class NativeGlassRenderer implements GlassRenderer {
     }
     const view = this.document.defaultView;
     if (!view) return;
-    const candidates = Array.from(this.document.querySelectorAll<HTMLElement>(glassPresetSelector));
-    const effective = candidates.some(
-      (element) =>
-        element.closest(internalSelector) === null &&
-        canRenderGlassEdge(element) &&
-        element.getClientRects().length > 0,
-    );
-    if (!effective) {
-      // No eligible surface: drop the SVG filters and their maps instead of
-      // keeping a dormant document-wide filter registry.
-      this.clear();
-      this.restoreAttribute();
-      return;
-    }
-    this.document.documentElement.setAttribute('data-neoverse-glass-renderer', 'native');
+    const candidates = this.document.querySelectorAll<HTMLElement>(glassSelector);
+    const getStyle = (element: Element) => view.getComputedStyle(element);
     const seen = new Set<HTMLElement>();
     for (const element of candidates) {
-      if (element.closest(internalSelector) || !canRenderGlassEdge(element)) continue;
+      if (element.closest(internalSelector) || !canRenderGlassEdge(element, getStyle)) continue;
       let entry = this.owners.get(element);
       if (entry) {
         const current = element.style.getPropertyValue('backdrop-filter');
@@ -175,7 +162,7 @@ export class NativeGlassRenderer implements GlassRenderer {
         }
         this.restoreInline(element, entry);
       }
-      const style = view.getComputedStyle(element);
+      const style = getStyle(element);
       if (element.getClientRects().length === 0 || style.visibility === 'hidden') {
         if (entry) this.remove(element, entry);
         continue;
@@ -294,6 +281,14 @@ export class NativeGlassRenderer implements GlassRenderer {
       seen.add(element);
     }
     for (const [element, entry] of this.owners) if (!seen.has(element)) this.remove(element, entry);
+    if (this.owners.size === 0) {
+      // The last effective surface opted out or disappeared. Drop empty SVG
+      // defs as well as the document-wide renderer marker.
+      this.clear();
+      this.restoreAttribute();
+    } else {
+      this.document.documentElement.setAttribute('data-neoverse-glass-renderer', 'native');
+    }
   }
 
   private createMap(

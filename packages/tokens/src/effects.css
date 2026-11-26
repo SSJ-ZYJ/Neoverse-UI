@@ -294,18 +294,6 @@
       var(--neoverse-color-blue-500) var(--neoverse-effect-strength-76),
       var(--neoverse-material-glass-base-tint)
     );
-    --neoverse-tooltip-neutral-background: color-mix(
-      in srgb,
-      var(--neoverse-material-tint, var(--neoverse-tooltip-neutral-tint))
-        var(--neoverse-material-transparency, var(--neoverse-material-glass-subtle-transparency)),
-      transparent
-    );
-    --neoverse-tooltip-background-fallback: color-mix(
-      in srgb,
-      var(--neoverse-material-tint, var(--neoverse-material-glass-subtle-tint))
-        var(--neoverse-material-transparency, var(--neoverse-material-glass-subtle-transparency)),
-      var(--neoverse-material-glass-subtle-background-fallback)
-    );
     --neoverse-effect-accent-tint: color-mix(
       in srgb,
       var(--neoverse-color-accent-primary) var(--neoverse-effect-strength-76),
@@ -474,6 +462,22 @@
 
   :where(.neoverse-prose blockquote) {
     --neoverse-prose-quote-background: var(--neoverse-surface-inset-plane-background);
+  }
+
+  /* Resolve color mixes where the tooltip chooses its Glass tint and tier. */
+  :where(.ui-tooltip-surface) {
+    --neoverse-tooltip-neutral-background: color-mix(
+      in srgb,
+      var(--neoverse-material-tint, var(--neoverse-tooltip-neutral-tint))
+        var(--neoverse-material-transparency, var(--neoverse-material-glass-subtle-transparency)),
+      transparent
+    );
+    --neoverse-tooltip-background-fallback: color-mix(
+      in srgb,
+      var(--neoverse-material-tint, var(--neoverse-material-glass-subtle-tint))
+        var(--neoverse-material-transparency, var(--neoverse-material-glass-subtle-transparency)),
+      var(--neoverse-material-glass-subtle-background-fallback)
+    );
   }
 
   /* A small tone shift gives inline code a readable shape on pale backdrops. */

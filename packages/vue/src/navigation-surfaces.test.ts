@@ -344,7 +344,7 @@ describe('UiDock', () => {
         'ui-dock--compact',
         'ui-control-surface',
         'ui-control-surface--scale-lg',
-        'material-glass-elevated',
+        'material-role-panel',
       ]),
     );
     expect(wrapper.classes()).toContain('ui-control-surface--shared-indicator');

@@ -4,7 +4,7 @@ Status: adopted
 
 [Chinese](../zh-CN/architecture/overlay-contract.md)
 
-Neoverse-UI uses one overlay contract for anchored top-layer UI. Popover, DropdownMenu, and Select share the same framework-agnostic positioning runtime and the same Aurora Glass depth language.
+Neoverse-UI uses one overlay contract for anchored top-layer UI. Popover, DropdownMenu, and Select share the same framework-agnostic positioning runtime and resolve their Overlay recipe from the local material scope.
 
 ## Runtime ownership
 
@@ -46,6 +46,12 @@ must cover. Raising individual panel layer values does not resolve an ancestor
 conflict.
 
 Generic Aurora Glass material helpers must not replace top-layer positioning with `position: relative`. Overlay panels and Select popovers therefore own their positioning context directly.
+
+A native top-layer element keeps its DOM ancestry. On a real portal, the shared
+bridge mirrors the invocation's CSS-resolved material to the destination host,
+including local overrides while open. The portaled host keeps its last resolved
+material through exit. The bridge does not own or persist material preferences.
+See [material scopes](material-standards.md#shared-material-selection).
 
 The floating panel owns its narrow CSS glass rim in both layer modes. A rounded alpha mask limits the tier's backdrop brightness pass to the perimeter, with stronger coverage at the upper-left and lower-right. The panel retains its separate body blur. The shared WebGL canvas does not draw a second rim for these panels.
 

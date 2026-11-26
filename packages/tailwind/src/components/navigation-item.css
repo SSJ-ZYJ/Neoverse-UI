@@ -216,9 +216,9 @@
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+  @scope (.material-static-scope) {
     :where(:scope, :scope *).ui-navigation-item--active.ui-button--ghost:is(
-        .material-auto,
+        .material-recipe-auto,
         [data-surface='none']
       ) {
       color: var(--neoverse-material-solid-selection-text);

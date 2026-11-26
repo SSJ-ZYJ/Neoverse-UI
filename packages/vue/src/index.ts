@@ -1,8 +1,9 @@
 export {
   getSurfaceClass,
   isGlassSurface,
-  type MaterialMode,
-  surfaceClasses,
+  type GlassTier,
+  type Material,
+  type SurfaceRole,
 } from '@neoverse-ui/tokens';
 export { updateButtonPointerGlow } from './components/actions/button-pointer-glow';
 export {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getSurfaceClass, type MaterialSurfaceRole } from '@neoverse-ui/tokens';
+import { getSurfaceClass, type SurfaceRole } from '@neoverse-ui/tokens';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, useSlots } from 'vue';
 import type { ControlSurfaceProps } from '../../types';
 
@@ -7,7 +7,7 @@ defineOptions({ inheritAttrs: false });
 
 type ControlSurfaceCompositionProps = ControlSurfaceProps & {
   /** Material role of the enclosing adapter; standalone groups use the default. */
-  surfaceRole?: MaterialSurfaceRole;
+  surfaceRole?: SurfaceRole;
 };
 
 const props = withDefaults(defineProps<ControlSurfaceCompositionProps>(), {

@@ -25,30 +25,43 @@
   justify-content: center;
 }
 
-/* Local appearance simulation only. The package media query also handles
-   opt-in edge strokes, per-component fallbacks, and effect layers. */
+/* These local simulations explicitly scope their samples to Glass. The package
+   media query also handles opt-in edge strokes and per-component fallbacks. */
 .playground-reduced-transparency-preview
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-    .ui-button--ghost
-  ) {
-  background-color: var(--neoverse-material-background-fallback);
-  box-shadow:
-    var(--neoverse-material-edge-highlight), var(--neoverse-material-inner-glow),
-    var(--neoverse-material-shadow);
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
-}
+  :is(
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive,
+    .material-role-control,
+    .material-role-panel,
+    .material-role-group,
+    .material-role-overlay,
+    .material-role-compact-overlay
+  ):not(.material-frosted) {
+  &:not(.ui-button--ghost) {
+    background-color: var(--neoverse-material-background-fallback);
+    box-shadow:
+      var(--neoverse-material-edge-highlight), var(--neoverse-material-inner-glow),
+      var(--neoverse-material-shadow);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 
-.playground-reduced-transparency-preview
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(.ui-button) {
-  background-image: none;
-}
+  &:not(.ui-button) {
+    background-image: none;
+  }
 
-.playground-reduced-transparency-preview .ui-segmented-control.material-glass-subtle {
-  background-color: var(--neoverse-material-background-fallback);
-  background-image: none;
-  -webkit-backdrop-filter: none;
-  backdrop-filter: none;
+  &:not(.ui-button)::before,
+  &:not(.ui-tooltip-surface)::after {
+    display: none;
+  }
+
+  &.ui-segmented-control {
+    background-color: var(--neoverse-material-background-fallback);
+    background-image: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
 }
 
 .playground-reduced-transparency-preview
@@ -120,29 +133,24 @@
 
 @supports (clip-path: shape(from 0 0, line to 100% 100%, close)) {
   .playground-reduced-transparency-preview
-    .ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface][data-surface] {
+    .ui-tooltip-surface:is(
+      .material-glass-subtle,
+      .material-role-compact-overlay:not(.material-frosted)
+    )[data-neoverse-tooltip-surface][data-surface] {
     background-color: transparent;
     box-shadow: none;
   }
 
   .playground-reduced-transparency-preview
-    .ui-tooltip-surface.material-glass-subtle[data-neoverse-tooltip-surface][data-surface]::before {
+    .ui-tooltip-surface:is(
+      .material-glass-subtle,
+      .material-role-compact-overlay:not(.material-frosted)
+    )[data-neoverse-tooltip-surface][data-surface]::before {
     display: block;
     background-color: var(--neoverse-material-background-fallback);
     -webkit-backdrop-filter: none;
     backdrop-filter: none;
   }
-}
-
-.playground-reduced-transparency-preview
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-    .ui-button
-  )::before,
-.playground-reduced-transparency-preview
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-    .ui-tooltip-surface
-  )::after {
-  display: none;
 }
 
 .playground-specimen-panel {

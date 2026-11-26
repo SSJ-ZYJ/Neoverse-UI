@@ -14,6 +14,7 @@ export default defineConfig({
   grepInvert: /@chromium-materials/,
   testMatch: [
     '**/materials.spec.ts',
+    '**/material-scopes.spec.ts',
     '**/forms.spec.ts',
     '**/overlays.spec.ts',
     '**/context-menu.spec.ts',

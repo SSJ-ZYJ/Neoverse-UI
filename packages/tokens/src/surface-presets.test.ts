@@ -1,32 +1,18 @@
 import { expect, test } from 'bun:test';
-import {
-  type ControlSurfacePreset,
-  getSurfaceClass,
-  isGlassSurface,
-  type MaterialMode,
-  materialSurfacePresets,
-  type SurfacePreset,
-} from './index.js';
+import { getSurfaceClass, isGlassSurface, isMaterial } from './index.js';
 
-test('default roles retain their Glass tier and opt into an opaque Solid recipe', () => {
-  const glass: MaterialMode = 'glass';
-  const solid: MaterialMode = 'solid';
-  const automatic: ControlSurfacePreset = 'auto';
-  expect(materialSurfacePresets.control[glass]).toBe('glass-subtle');
-  expect(materialSurfacePresets.panel[glass]).toBe('glass-elevated');
-  expect(materialSurfacePresets.group[glass]).toBe('glass-subtle');
-  expect(getSurfaceClass(materialSurfacePresets.panel[solid])).toBe('ui-surface-solid');
-  expect(materialSurfacePresets.panel.solidRole).toBe('raised');
-  expect(getSurfaceClass(automatic, 'panel')).toBe(
-    'material-auto material-solid-raised material-glass-elevated',
-  );
-  expect(getSurfaceClass(automatic, 'field')).toBe('material-auto material-solid-inset');
-  expect(isGlassSurface(automatic)).toBe(false);
+test('a consumer can select any material but unknown values leave the scope unresolved', () => {
+  for (const material of ['solid', 'frosted', 'glass']) expect(isMaterial(material)).toBe(true);
+  for (const value of ['unknown', 'Glass', null, undefined]) expect(isMaterial(value)).toBe(false);
 });
 
-test('an explicit surface does not use the automatic role default', () => {
-  const explicit: SurfacePreset = 'glass-immersive';
-  expect(getSurfaceClass(explicit, 'control')).toBe('material-glass-immersive');
+test('automatic surfaces emit only their role while explicit surfaces override paint', () => {
+  expect(getSurfaceClass('auto', 'panel')).toBe('material-role-panel');
+  expect(getSurfaceClass('auto', 'field')).toBe('material-role-field');
+  expect(getSurfaceClass('auto', 'compactOverlay')).toBe('material-role-compact-overlay');
+  expect(getSurfaceClass('frosted', 'control')).toBe('material-role-control material-frosted');
+  expect(getSurfaceClass('glass-immersive', 'control')).toBe('material-glass-immersive');
   expect(getSurfaceClass('none', 'panel')).toBe('');
-  expect(isGlassSurface(explicit)).toBe(true);
+  expect(isGlassSurface('frosted')).toBe(false);
+  expect(isGlassSurface('glass-immersive')).toBe(true);
 });

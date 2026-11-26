@@ -1,4 +1,5 @@
 import { mkdir } from 'node:fs/promises';
+import { materialRecipes } from './material-recipes.js';
 
 const packageDirectory = new URL('../', import.meta.url);
 const source = new URL('src/theme.css', packageDirectory);
@@ -28,14 +29,16 @@ const componentCss = (
 ).join('\n\n');
 
 await Promise.all([
-  Bun.write(output, await Bun.file(source).text()),
-  Bun.write(componentsOutput, `${componentCss}\n`),
+  Bun.write(output, materialRecipes(await Bun.file(source).text())),
+  Bun.write(componentsOutput, `${materialRecipes(componentCss)}\n`),
   Bun.write(
     proseOutput,
-    [
-      await Bun.file(tableSource).text(),
-      await Bun.file(disclosureSource).text(),
-      await Bun.file(proseSource).text(),
-    ].join('\n\n'),
+    materialRecipes(
+      [
+        await Bun.file(tableSource).text(),
+        await Bun.file(disclosureSource).text(),
+        await Bun.file(proseSource).text(),
+      ].join('\n\n'),
+    ),
   ),
 ]);

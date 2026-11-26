@@ -63,12 +63,11 @@ under `src/components/`. The CSS build emits `@neoverse-ui/tokens/css` in order:
 primitives, semantic roles, foundation layers, light mapping, component defaults,
 then the canonical dark mapping.
 
-Tokens defines the shared material modes, surface presets, class mapping, and
-semantic roles. Both adapters emit the same unresolved role. Tailwind selects
-Solid or Aurora Glass in the rendered DOM; the optional edge runtime enhances
-effective Glass surfaces only. A portaled Dialog reuses the CSS-resolved source
-scope rather than introducing a material provider. See
-[material selection](material-standards.md#shared-material-selection).
+Tokens defines Material, Surface Role, and explicit surface selections. Both
+adapters emit the same unresolved role. Tailwind selects a Solid, Frosted, or
+Aurora Glass recipe from the nearest valid DOM scope. The optional edge runtime
+enhances positively eligible Glass surfaces only. Portaled overlays reuse the
+invocation scope without a provider. See [material selection](material-standards.md#shared-material-selection).
 
 ## Tailwind Foundation
 
@@ -170,7 +169,8 @@ Framework parity is declared in `contracts/framework-parity.json` and validated 
 
 | Value | Use |
 | --- | --- |
-| `glass` (default) | Aurora Glass track with a moving selection plate for standalone tab groups |
+| Omitted | Automatic material track with a moving selection plate |
+| `glass` | Explicit Aurora Glass track and moving selection plate |
 | `underline` | Full-width baseline and a moving underline with rounded ends for page sections or dense content |
 | `pill` | Compact rounded track with a solid selection pill for cards and side panels |
 

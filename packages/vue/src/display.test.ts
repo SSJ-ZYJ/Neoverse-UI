@@ -60,13 +60,13 @@ describe('display components', () => {
 
     const card = mount(UiCard, { attrs: { class: 'max-w-container-sm' } });
     expect(card.classes()).toEqual(
-      expect.arrayContaining(['ui-card', 'material-glass-elevated', 'max-w-container-sm']),
+      expect.arrayContaining(['ui-card', 'material-role-panel', 'max-w-container-sm']),
     );
     expect(card.attributes('data-surface')).toBe('auto');
 
     const bareCard = mount(UiCard, { props: { surface: 'none' } });
     expect(bareCard.attributes('data-surface')).toBe('none');
-    expect(bareCard.classes().some((className) => className.startsWith('material-glass-'))).toBe(
+    expect(bareCard.classes().some((className) => className.startsWith('material-role-'))).toBe(
       false,
     );
 
@@ -116,7 +116,7 @@ describe('display components', () => {
     expect(tooltip.classes()).toEqual(
       expect.arrayContaining([
         'ui-tooltip-surface',
-        'material-glass-subtle',
+        'material-role-compact-overlay',
         'ui-tooltip-surface--accent',
       ]),
     );

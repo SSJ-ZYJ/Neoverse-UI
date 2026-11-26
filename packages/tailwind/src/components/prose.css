@@ -315,7 +315,7 @@
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+  @scope (.material-static-scope) {
     :where(:scope, :scope *):is(.neoverse-prose blockquote, .neoverse-prose pre) {
       background: var(--neoverse-material-solid-inset);
       box-shadow: none;

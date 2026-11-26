@@ -1,4 +1,4 @@
-import type { MaterialMode } from '@neoverse-ui/tokens';
+import type { Material } from '@neoverse-ui/tokens';
 import { type CardProps, type SurfaceProps, UiCard, UiSurface } from '@neoverse-ui/vue';
 import { h } from 'vue';
 import { defineSpecimen } from '../lab-specimen-config';
@@ -16,7 +16,7 @@ const materialChoices = [
   { value: 'glass', label: localized('Aurora Glass', '极光玻璃') },
   { value: 'solid', label: localized('Solid', '实体') },
 ] as const;
-export const coreMaterialModes = ['glass', 'solid'] as const satisfies readonly MaterialMode[];
+export const coreMaterialModes = ['glass', 'solid'] as const satisfies readonly Material[];
 export const coreMaterialCopy = {
   label: localized('Core material comparison', '核心材质对照'),
   description: localized(

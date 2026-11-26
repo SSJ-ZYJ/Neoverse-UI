@@ -147,7 +147,7 @@
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+  @scope (.material-solid-scope) {
     :where(:scope, :scope *).ui-breadcrumb__link:active::after {
       background: var(--neoverse-material-solid-press);
     }

@@ -313,36 +313,40 @@
 }
 
 @layer utilities {
+  @scope (.material-scopes) {
   /* Tier optics sample the backdrop, edge refraction and bloom for the well,
      while the recessed tint and inset cavity shadow carve the track behind
      the embedded thumb. */
   .ui-segmented-control:is(
-    .material-glass-subtle,
-    .material-glass-elevated,
-    .material-glass-immersive
+    .material-recipe-glass-subtle,
+    .material-recipe-glass-elevated,
+    .material-recipe-glass-immersive
   )[data-surface] {
     --neoverse-material-shadow: var(--neoverse-control-segmented-shadow);
     border-color: var(--neoverse-control-segmented-border);
     background-image: var(--neoverse-control-segmented-background-image);
     box-shadow: var(--neoverse-material-bloom), var(--neoverse-control-segmented-shadow);
   }
+  }
 }
 
 @layer utilities {
+  @scope (.material-scopes) {
   @media (pointer: coarse) {
     .ui-segmented-control:is(
-        .material-glass-subtle,
-        .material-glass-elevated,
-        .material-glass-immersive
+        .material-recipe-glass-subtle,
+        .material-recipe-glass-elevated,
+        .material-recipe-glass-immersive
       ) {
       overflow: visible;
     }
   }
+  }
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
-    :where(:scope, :scope *).ui-segmented-control:is(.material-auto, [data-surface='none']) {
+  @scope (.material-static-scope) {
+    :where(:scope, :scope *).ui-segmented-control:is(.material-recipe-auto, [data-surface='none']) {
       --neoverse-control-segmented-active-background: none;
       --neoverse-control-segmented-active-fill: var(--neoverse-material-solid-selection);
       --neoverse-control-segmented-active-filter: none;
@@ -360,13 +364,13 @@
       --neoverse-control-segmented-active-foreground: var(--neoverse-material-solid-selection-text);
     }
 
-    .ui-segmented-control:is(.material-auto, [data-surface='none']) .ui-segmented-control__option {
+    .ui-segmented-control:is(.material-recipe-auto, [data-surface='none']) .ui-segmented-control__option {
       --neoverse-control-ghost-hover-background: var(--neoverse-material-solid-hover);
       --neoverse-control-ghost-active-background: var(--neoverse-material-solid-press);
     }
 
     @media (forced-colors: active) {
-      .ui-segmented-control:is(.material-auto, [data-surface='none'])
+      .ui-segmented-control:is(.material-recipe-auto, [data-surface='none'])
         .ui-segmented-control__slider {
         border-color: Highlight;
       }

@@ -167,7 +167,7 @@
 }
 
 @layer neoverse-material-mode {
-  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+  @scope (.material-static-scope) {
     :where(:scope, :scope *).ui-pagination__pages {
       --neoverse-pagination-current-foreground: var(--neoverse-material-solid-selection-text);
       --neoverse-pagination-current-border: transparent;
