@@ -9,10 +9,14 @@ import {
   showAnchoredOverlay,
   stopOverlayTracking,
 } from '@neoverse-ui/overlay-runtime';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, useId, watch } from 'vue';
 import type { FormControlValue, SelectOption, SelectProps } from '../../types';
 import { presence } from '../motion/presence';
 import { resolveAriaInvalid } from './form-control';
+
+const triggerSurfaceClass = getSurfaceClass('auto', 'field');
+const popoverSurfaceClass = getSurfaceClass('auto', 'overlay');
 
 defineOptions({ inheritAttrs: false });
 
@@ -43,6 +47,7 @@ const forwardedAttrs = computed(() => {
     value: _value,
     name: _name,
     'aria-invalid': _ariaInvalid,
+    'data-neoverse-material': _materialMode,
     ...rest
   } = attrs;
   return rest;
@@ -267,6 +272,7 @@ onBeforeUnmount(() => {
   <details
     ref="detailsRef"
     class="ui-select-shell"
+    :data-neoverse-material="attrs['data-neoverse-material']"
     :class="{
       'ui-select-shell--disabled': disabled,
       'ui-select-shell--readonly': readonlyState,
@@ -276,7 +282,7 @@ onBeforeUnmount(() => {
     <summary
       v-bind="forwardedAttrs"
       class="ui-select"
-      :class="attrs.class"
+      :class="[triggerSurfaceClass, attrs.class]"
       :style="attrs.style"
       role="combobox"
       aria-haspopup="listbox"
@@ -301,7 +307,8 @@ onBeforeUnmount(() => {
     <div
       ref="popoverRef"
       :id="listboxId"
-      class="ui-overlay-panel ui-select__popover material-glass-elevated nv-presence"
+      class="ui-overlay-panel ui-select__popover nv-presence"
+      :class="popoverSurfaceClass"
       role="listbox"
       popover="auto"
       v-bind="presence('pop', 'top')"

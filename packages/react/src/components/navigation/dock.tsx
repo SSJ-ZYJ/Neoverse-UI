@@ -25,7 +25,7 @@ export interface UiDockProps extends Omit<HTMLAttributes<HTMLElement>, 'children
 /** Reusable Dock shell. Product routing, navigation semantics, and trailing controls stay caller-owned. */
 export function UiDock({
   as = 'nav',
-  surface = 'glass-elevated',
+  surface = 'auto',
   scale = 'lg',
   compact = false,
   hoverMode = 'static',
@@ -42,6 +42,7 @@ export function UiDock({
       ...rest,
       as,
       surface,
+      surfaceRole: 'panel',
       scale,
       hoverMode,
       edgeMode,

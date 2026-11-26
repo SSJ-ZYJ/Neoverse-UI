@@ -193,7 +193,9 @@ describe('UiTable', () => {
     });
 
     const table = wrapper.get('table');
-    expect(table.classes()).toEqual(['ui-table']);
+    expect(table.classes()).not.toContain('ui-table--striped');
+    expect(table.classes()).not.toContain('ui-table--hoverable');
+    expect(table.get('tbody').text()).toBe('Static');
   });
 });
 

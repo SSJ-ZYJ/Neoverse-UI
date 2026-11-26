@@ -18,18 +18,46 @@ itself, wins independently of `data-theme`. Missing or unrecognized values do
 not override a parent; the fallback is Aurora Glass.
 
 An explicit `surface` overrides the material scope, including `none`, which
-removes the surface plate. Button, Card, and ControlSurface default to `auto`.
-Their control, panel, and group roles resolve to `glass-subtle`,
-`glass-elevated`, and `glass-subtle` in Glass mode. Solid uses the existing
-opaque `--neoverse-material-surface-solid-background` without backdrop blur
-or Glass edges. Existing explicit recipes, including the `inset` filter,
-are unchanged. Ghost buttons remain quiet regardless of mode. Other
-components keep their established defaults.
+removes the surface plate. The explicit `solid`, `subtle`, `elevated`, `inset`,
+and `glass-*` presets keep their existing paint. In particular, `inset` still
+samples the Light tier; it is not the automatic Solid Inset recipe.
 
-Both frameworks emit the same surface selection before and after hydration.
-Tailwind resolves the scope in CSS, without a provider or browser state.
-The optional WebGL and Native backends exclude auto surfaces that resolve
-to Solid and drop their edge work when the scope changes.
+Both frameworks emit the same unresolved role. Tailwind resolves paint in the
+`neoverse-material-mode` layer with `@scope`. Select places its material
+attribute on the shell shared by the trigger and panel; the browser's top
+layer does not alter that DOM scope.
+Dialog retains its document-level portal; the portal mirrors the CSS-resolved
+invocation scope for the panel and scrim while open. Optional Glass backends
+skip automatic Solid surfaces, including when the scope changes.
+
+## Solid material
+
+Solid is an independent opaque material, not the reduced-transparency version
+of Aurora Glass. `cssVariables.material.solid` exposes the theme-owned
+palette and effects. Set the Canvas role on an application-owned background;
+choosing a material scope does not repaint a consumer's page.
+
+| Role | Automatic owners | Solid treatment |
+| --- | --- | --- |
+| Canvas | Application backdrop | Pale blue neutral in Light; near-black neutral in Dark |
+| Control | Button | Blue Primary with matching text contrast; neutral Secondary; Ghost paints only feedback |
+| Group | ControlSurface, SegmentedControl | Quiet neutral base, unchanged by SegmentedControl hover |
+| Raised | Card, Dock, Table | Compact neutral elevation without Card hover lift |
+| Inset | Input, Select trigger | Opaque recessed field with a functional boundary, focus and validation feedback |
+| Overlay | Select panel, Dialog | Opaque floating panel with a stronger shadow; Dialog adds a separate scrim |
+| Selection | SegmentedControl thumb, Dock navigation, Select option, selected Table row | Light blue or dark mint fill with paired foreground and independent transient feedback |
+
+Table uses a Group header, Raised body, Inset stripe, and shared dividers.
+SegmentedControl and Dock retain their existing slider and shared-indicator
+motion, and fields and overlays retain native interaction and focus restoration.
+Automatic Solid does not use backdrop blur, optical edge rendering, or
+decorative gradients. Reduced motion and forced colors keep state discernible.
+
+Drawer and Tabs retain their current public presets and variants. When adopting
+Solid, apply Overlay to a Drawer panel and a separate scrim only in modal
+presentation; keep placement, modality and dismissal independent. For Tabs,
+map Group to the owning tablist plate and Selection to the indicator or active
+plate without changing the meaning of the existing `glass` or other variants.
 
 ## Aurora Glass tiers
 
@@ -228,11 +256,9 @@ the repair is still being developed.
 
 ## Selection and customization
 
-Existing Vue and React control adapters accept all three Aurora Glass surface tiers.
-Vue and React SegmentedControl accept all three tiers and retain their explicit
-Glass default.
-Dock defaults to `glass-elevated`; ControlSurface uses the group role described
-in [shared material selection](#shared-material-selection). The `chrome` preset and
+Vue and React SegmentedControl accept all three explicit Aurora Glass tiers.
+Button, SegmentedControl and ControlSurface use `glass-subtle` in automatic
+Glass mode; Card and Dock use `glass-elevated`. The `chrome` preset and
 `ui-surface-chrome` class have been removed; replace explicit uses with
 `glass-subtle` / `material-glass-subtle`. There is no compatibility alias.
 The `--neoverse-control-chrome-*` and `--neoverse-effect-floating-chrome-*` tokens
@@ -514,7 +540,7 @@ rendering rules; Vue/React adapter sources are scanned separately.
 | --- | --- | --- | --- |
 | Button, Action, IconButton, NavigationItem / `components/button.css`, both adapters | Light 18px, Dark 36px, separate layered fills | Selected Aurora Glass tier; shared hover/press roles | Tier/state/disabled tests |
 | SegmentedControl / `components/segmented-control.css` | 6px filter and theme-specific shell | Selected Aurora Glass tier; independent selection indicator | Tier/selection/press tests |
-| ControlSurface, Dock | Separate chrome fill removed | ControlSurface defaults to `glass-subtle`; Dock defaults to `glass-elevated`; both retain grouped ownership | Composition and tier tests |
+| ControlSurface, Dock | Separate chrome fill removed | Automatic Glass resolves to Light and Standard, respectively; both retain grouped ownership | Composition and tier tests |
 | Skeleton | Hardcoded 12px and independent pulse alpha | Light tier blur, shared neutral foreground tint for visible placeholders, shared loading/pulse roles | Fallback and inherited blur tests |
 | Input, Textarea, Select, Checkbox, RadioGroup, Switch, Disclosure, Table, Prose | Inset fill became denser on hover/focus/open | Light inset base; shared interaction shadow | Form/disclosure/inset tests |
 | Popover, Select panel, menus, Tooltip | Panel fill/filter tier mismatch; tooltip arrow denser than body | Standard panel; Light tooltip and matching arrow | Overlay/focus/fallback tests |
@@ -526,7 +552,7 @@ rendering rules; Vue/React adapter sources are scanned separately.
 | Breadcrumb, Field, Presence | No independent material plate | Shared foreground, focus/press and presence roles; 0/1 visibility endpoints | Adapter/unit/native behavior tests |
 | Playground | Local material overrides and unlabeled samples | Shared tiers; live per-sample computed annotations | Annotation/customization tests |
 
-Tables sample the Light inset backdrop once on the table, including prose tables.
+Glass tables sample the Light inset backdrop once on the table, including prose tables.
 Cells retain their semantic fills, grid lines, and interaction shadows without
 separate backdrop filters, so long tables keep continuous frost across cell boundaries.
 Cells in the final table row also reuse the lower directional material catch,

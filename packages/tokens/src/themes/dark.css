@@ -7,6 +7,40 @@
 /* biome-ignore lint/suspicious/noUnknownAtRules: build-only source marker is stripped by copy-css.ts */
 @neoverse-dark-tokens {
   color-scheme: dark;
+
+  --neoverse-material-solid-canvas: var(--neoverse-color-neutral-950);
+  --neoverse-material-solid-control: color-mix(
+    in srgb,
+    var(--neoverse-color-neutral-900),
+    var(--neoverse-color-neutral-800) 65%
+  );
+  --neoverse-material-solid-group: var(--neoverse-color-neutral-900);
+  --neoverse-material-solid-raised: color-mix(
+    in srgb,
+    var(--neoverse-color-neutral-900),
+    var(--neoverse-color-neutral-800) 35%
+  );
+  --neoverse-material-solid-inset: color-mix(
+    in srgb,
+    var(--neoverse-color-neutral-950),
+    var(--neoverse-color-neutral-900) 55%
+  );
+  --neoverse-material-solid-overlay: var(--neoverse-color-neutral-800);
+  --neoverse-material-solid-selection: var(--neoverse-color-mint-950);
+  --neoverse-material-solid-selection-text: var(--neoverse-color-mint-200);
+  --neoverse-material-solid-primary: var(--neoverse-color-blue-300);
+  --neoverse-material-solid-primary-text: var(--neoverse-color-neutral-950);
+  --neoverse-material-solid-divider: var(--neoverse-color-neutral-700);
+  --neoverse-material-solid-field-edge: var(--neoverse-color-neutral-500);
+  --neoverse-material-solid-focus: var(--neoverse-color-blue-300);
+  --neoverse-material-solid-hover: rgb(255 255 255 / 8%);
+  --neoverse-material-solid-press: rgb(255 255 255 / 15%);
+  --neoverse-material-solid-primary-hover: rgb(255 255 255 / 13%);
+  --neoverse-material-solid-primary-press: rgb(0 0 0 / 12%);
+  --neoverse-material-solid-raised-shadow: 0 3px 14px -4px rgb(0 0 0 / 48%);
+  --neoverse-material-solid-overlay-shadow: 0 16px 38px -10px rgb(0 0 0 / 65%);
+  --neoverse-material-solid-scrim: rgb(0 0 0 / 60%);
+
   /* Disclosure uses the same directional Aurora Glass catches as every other
      dark inset surface. The generic inset outline turns its boundary into a
      uniform luminous ring that does not match those refraction edges. */

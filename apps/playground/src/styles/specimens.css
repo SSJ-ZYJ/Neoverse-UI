@@ -101,6 +101,21 @@
   box-shadow: var(--neoverse-shadow-inset);
 }
 
+.playground-core-material-grid {
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+}
+
+.playground-core-material[data-neoverse-material='glass'] {
+  background:
+    var(--neoverse-playground-stage-optical-field), var(--neoverse-playground-stage-underlay),
+    var(--neoverse-color-surface-canvas);
+  background-size: var(--neoverse-playground-stage-optical-size);
+}
+
+.playground-core-material[data-neoverse-material='solid'] {
+  background: var(--neoverse-material-solid-canvas);
+}
+
 [data-playground-view='frame'] .playground-material-backdrop {
   border-radius: var(--neoverse-radius-card);
   padding: var(--neoverse-space-4);

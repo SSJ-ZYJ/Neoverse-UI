@@ -31,12 +31,12 @@ describe('UiSegmentedControl', () => {
     expect(html).not.toContain('--segment-active-column');
   });
 
-  it('uses the shared Glass surface by default and can opt out of outer chrome', () => {
-    const glass = mount(UiSegmentedControl, { props: { options } });
-    expect(glass.classes()).toContain('material-glass-subtle');
-    expect(glass.attributes('data-surface')).toBe('glass-subtle');
-    expect(glass.attributes('data-neoverse-surface-hover')).toBe('static');
-    expect(glass.attributes('data-neoverse-glass-edge-pass')).toBeUndefined();
+  it('uses an automatic group surface and can opt out of outer chrome', () => {
+    const automatic = mount(UiSegmentedControl, { props: { options } });
+    expect(automatic.classes()).toContain('material-glass-subtle');
+    expect(automatic.attributes('data-surface')).toBe('auto');
+    expect(automatic.attributes('data-neoverse-surface-hover')).toBe('static');
+    expect(automatic.attributes('data-neoverse-glass-edge-pass')).toBeUndefined();
 
     const bare = mount(UiSegmentedControl, { props: { options, surface: 'none' } });
     expect(bare.attributes('data-neoverse-glass-edge-pass')).toBeUndefined();

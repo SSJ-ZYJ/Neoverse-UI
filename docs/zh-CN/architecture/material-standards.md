@@ -5,7 +5,7 @@ Status: adopted
 [English](../../architecture/material-standards.md)
 
 <!-- Source: docs/architecture/material-standards.md -->
-<!-- Source-SHA256: 4914b9fe82dc7f75bfa6bdbc0c1c6294a48f05377346d8ede542cef0abf4e897 -->
+<!-- Source-SHA256: 7360575ba8d8dfa4ba160f7757f566456e1dc8c7f3ac59d06baa11052f5bc03e -->
 
 本文是[英文材质标准](../../architecture/material-standards.md)的中文摘要，覆盖消费项目最常用的材质、层级、嵌套与修复边界。具体光学数值、逐组件审计与历史验收记录以英文原文为准。
 
@@ -13,9 +13,19 @@ Status: adopted
 
 `@neoverse-ui/tokens` 统一定义材质模式、表面预设和语义角色。`data-neoverse-material="glass"` 或 `data-neoverse-material="solid"` 可设在文档根、子树或表面自身；取最近的有效值，与 `data-theme` 独立。未设置有效值时使用极光玻璃。
 
-显式 `surface` 优先，`none` 不绘制表面底板。Button、Card 与 ControlSurface 默认使用 `auto`，在极光玻璃模式下分别解析为 `glass-subtle`、`glass-elevated` 与 `glass-subtle`。不透明材质复用现有的不透明背景变量，不施加背景模糊或绘制玻璃光学边缘。Ghost 按钮保持无独立底板，其他组件的默认预设不变。
+显式 `surface` 优先，`none` 不绘制表面底板，`inset` 仍保留轻薄层级采样。Button、Card、ControlSurface、SegmentedControl 和 Dock 默认使用 `auto`；Input、Select、Dialog 和 Table 自动采用各自的语义配方，不增加属性。
 
-两套适配器在服务端和客户端输出一致的预设标记，由 CSS 解析实际材质。作用域切换后，WebGL 与 Native 渲染器停止为不透明表面绘制玻璃边缘。
+两套适配器输出一致的角色标记，由 CSS 解析材质。Select 的材质属性设在触发器与浮层的共同外壳上，进入浏览器顶层也不改变该作用域。Dialog 打开期间将调用位置的材质同步给传送后的面板及遮罩。作用域切换后，WebGL 与 Native 不再为自动实体表面绘制玻璃边缘。
+
+## 实体材质
+
+实体材质不等同于极光玻璃的减少透明度模式。`cssVariables.material.solid` 提供 Canvas、Control、Group、Raised、Inset、Overlay 和 Selection 角色。浅色使用淡蓝中性色阶，深色使用近黑至蓝灰色阶；主按钮使用蓝色，选中底板在浅色使用浅蓝、深色使用薄荷绿，并分别搭配可读文字色。应用自行选择是否在页面背景使用 Canvas。
+
+- Button 分为蓝色主按钮、中性次按钮和无独立底板的 Ghost；Card 用底色与轻量阴影分层，不在悬停时抬升。
+- ControlSurface 与 SegmentedControl 使用中性分组底板。分段底板不随悬停改变，选中滑块保留拖拽和切换动效。
+- Input 与 Select 触发器采用不透明的内嵌面，并保留焦点和校验反馈；Select 面板与 Dialog 使用实体浮层，Dialog 另有遮罩。
+- Dock 保留共享指示器动效；Table 区分表头、正文、条纹、分隔线与交互状态。
+- Drawer、Tabs 仍保留现有公开预设和变体。适配时为 Drawer 面板采用 Overlay，仅在模态下加遮罩；为 Tabs 使用 Group 底板和 Selection 指示或选中底板，不重定义现有变体。
 
 ## 极光玻璃的三个层级
 

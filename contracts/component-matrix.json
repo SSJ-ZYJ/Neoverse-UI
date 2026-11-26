@@ -189,6 +189,7 @@
       "runtime": "validated",
       "evidence": [
         "tests/e2e/forms.spec.ts",
+        "tests/e2e/materials.spec.ts",
         "packages/vue/src/components.test.ts",
         "../Neoverse-Slides/apps/web/app/pages/slides/index.vue",
         ".agents/notes/archives/consumer-validation-2026-10-25.md"
@@ -236,6 +237,7 @@
       "runtime": "validated",
       "evidence": [
         "tests/e2e/forms.spec.ts",
+        "tests/e2e/materials.spec.ts",
         "../Neoverse-Slides/apps/web/app/pages/slides/index.vue",
         ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
@@ -259,6 +261,7 @@
       "runtime": "validated",
       "evidence": [
         "tests/e2e/surfaces.spec.ts",
+        "tests/e2e/materials.spec.ts",
         ".agents/notes/archives/consumer-validation-2026-10-25.md"
       ],
       "reactValidation": {
@@ -451,6 +454,7 @@
         "packages/vue/src/business-interaction.test.ts",
         "packages/react/src/business-interaction.test.tsx",
         "docs/architecture/overlay-contract.md",
+        "tests/e2e/materials.spec.ts",
         "tests/e2e/overlays.spec.ts"
       ],
       "reactValidation": {
@@ -596,6 +600,7 @@
         "packages/vue/src/components.test.ts",
         "packages/react/src/navigation.test.tsx",
         "tests/e2e/navigation.spec.ts",
+        "tests/e2e/materials.spec.ts",
         "docs/architecture/material-standards.md"
       ]
     },
@@ -637,6 +642,7 @@
       "evidence": [
         "packages/react/src/parity.test.tsx",
         "tests/e2e/navigation.spec.ts",
+        "tests/e2e/materials.spec.ts",
         "docs/architecture/framework-parity.md",
         "contracts/component-requests/archive/CR-20261030-41A82EFD.json"
       ],

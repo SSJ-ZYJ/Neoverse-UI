@@ -337,7 +337,7 @@ describe('UiDock', () => {
 
     expect(wrapper.element.tagName).toBe('NAV');
     expect(wrapper.attributes('aria-label')).toBe('Primary navigation');
-    expect(wrapper.attributes('data-surface')).toBe('glass-elevated');
+    expect(wrapper.attributes('data-surface')).toBe('auto');
     expect(wrapper.classes()).toEqual(
       expect.arrayContaining([
         'ui-dock',

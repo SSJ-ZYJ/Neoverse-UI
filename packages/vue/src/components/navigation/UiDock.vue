@@ -7,7 +7,7 @@ defineOptions({ inheritAttrs: false });
 
 const props = withDefaults(defineProps<DockProps>(), {
   as: 'nav',
-  surface: 'glass-elevated',
+  surface: 'auto',
   hoverMode: 'static',
   edgeMode: 'auto',
   scale: 'lg',
@@ -28,6 +28,7 @@ const forwardedAttrs = computed(() => {
     v-bind="forwardedAttrs"
     :as="props.as"
     :surface="props.surface"
+    surface-role="panel"
     :hover-mode="props.hoverMode"
     :edge-mode="props.edgeMode"
     :scale="props.scale"

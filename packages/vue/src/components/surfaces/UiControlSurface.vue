@@ -1,12 +1,18 @@
 <script setup lang="ts">
-import { getSurfaceClass } from '@neoverse-ui/tokens';
+import { getSurfaceClass, type MaterialSurfaceRole } from '@neoverse-ui/tokens';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, useSlots } from 'vue';
 import type { ControlSurfaceProps } from '../../types';
 
 defineOptions({ inheritAttrs: false });
 
-const props = withDefaults(defineProps<ControlSurfaceProps>(), {
+type ControlSurfaceCompositionProps = ControlSurfaceProps & {
+  /** Material role of the enclosing adapter; standalone groups use the default. */
+  surfaceRole?: MaterialSurfaceRole;
+};
+
+const props = withDefaults(defineProps<ControlSurfaceCompositionProps>(), {
   as: 'div',
+  surfaceRole: 'group',
   hoverMode: 'auto',
   edgeMode: 'auto',
   scale: 'md',
@@ -207,7 +213,7 @@ onBeforeUnmount(() => {
 const surface = computed(() => props.surface ?? 'auto');
 const classes = computed(() => [
   'ui-control-surface',
-  getSurfaceClass(surface.value, 'group'),
+  getSurfaceClass(surface.value, props.surfaceRole),
   `ui-control-surface--scale-${props.scale}`,
 ]);
 const forwardedAttrs = computed(() => {

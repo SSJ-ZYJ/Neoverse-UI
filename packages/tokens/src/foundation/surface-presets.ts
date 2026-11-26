@@ -19,12 +19,20 @@ export type SurfacePreset = keyof typeof surfaceClasses;
 /** Select a quiet, automatic, or explicit Glass surface for a compact control */
 export type ControlSurfacePreset = Extract<SurfacePreset, 'auto' | 'none' | `glass-${string}`>;
 
-/** Define the default preset for each material and semantic role */
+/** Map auto roles to a Glass utility and to the named Solid plate recipe */
 export const materialSurfacePresets = {
-  control: { glass: 'glass-subtle', solid: 'solid' },
-  panel: { glass: 'glass-elevated', solid: 'solid' },
-  group: { glass: 'glass-subtle', solid: 'solid' },
-} as const satisfies Record<string, Record<MaterialMode, SurfacePreset>>;
+  control: { glass: 'glass-subtle', solid: 'solid', solidRole: 'control' },
+  panel: { glass: 'glass-elevated', solid: 'solid', solidRole: 'raised' },
+  group: { glass: 'glass-subtle', solid: 'solid', solidRole: 'group' },
+  field: { glass: 'none', solid: 'solid', solidRole: 'inset' },
+  overlay: { glass: 'glass-elevated', solid: 'solid', solidRole: 'overlay' },
+  table: { glass: 'none', solid: 'solid', solidRole: 'raised' },
+} as const satisfies Record<
+  string,
+  Record<MaterialMode, SurfacePreset> & {
+    solidRole: 'control' | 'raised' | 'group' | 'inset' | 'overlay';
+  }
+>;
 
 /** Identify the responsibility of a surface independently of its material */
 export type MaterialSurfaceRole = keyof typeof materialSurfacePresets;
@@ -44,7 +52,16 @@ export function isGlassSurface(surface: SurfacePreset): boolean {
 }
 
 const autoSurfaceClasses = {
-  control: `${surfaceClasses.auto} ${surfaceClasses[materialSurfacePresets.control.glass]}`,
-  panel: `${surfaceClasses.auto} ${surfaceClasses[materialSurfacePresets.panel.glass]}`,
-  group: `${surfaceClasses.auto} ${surfaceClasses[materialSurfacePresets.group.glass]}`,
+  control: autoSurfaceClass('control'),
+  panel: autoSurfaceClass('panel'),
+  group: autoSurfaceClass('group'),
+  field: autoSurfaceClass('field'),
+  overlay: autoSurfaceClass('overlay'),
+  table: autoSurfaceClass('table'),
 } as const satisfies Record<MaterialSurfaceRole, string>;
+
+function autoSurfaceClass(role: MaterialSurfaceRole): string {
+  const { glass, solidRole } = materialSurfacePresets[role];
+  const glassClass = surfaceClasses[glass];
+  return `${surfaceClasses.auto} material-solid-${solidRole}${glassClass ? ` ${glassClass}` : ''}`;
+}

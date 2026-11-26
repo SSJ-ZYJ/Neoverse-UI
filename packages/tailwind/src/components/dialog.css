@@ -1,4 +1,12 @@
 @layer components {
+  :where(body, .ui-dialog-material-source) {
+    --neoverse-dialog-material-mode: glass;
+  }
+
+  .ui-dialog-portal {
+    display: contents;
+  }
+
   /* Modal interaction keeps the background inert visually/by backdrop; block document scrolling too. */
   html:has(.ui-dialog[open]) {
     overflow: hidden;
@@ -140,4 +148,16 @@ dialog.ui-dialog {
   inset: 0;
   margin: auto;
   z-index: var(--neoverse-layout-layer-modal);
+}
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    :where(body, .ui-dialog-material-source) {
+      --neoverse-dialog-material-mode: solid;
+    }
+
+    .ui-dialog__backdrop {
+      --neoverse-dialog-scrim: var(--neoverse-material-solid-scrim);
+    }
+  }
 }

@@ -52,7 +52,7 @@ test('form controls preserve native props and compose canonical classes', () => 
     createElement(UiInput, { type: 'email', name: 'email', className: 'consumer-input' }),
   );
   expect(inputHtml).toContain('<span class="ui-input-shell"');
-  expect(inputHtml).toContain('class="ui-input consumer-input"');
+  expect(inputHtml).toMatch(/<input[^>]*class="[^"]*\bconsumer-input\b[^"]*"/);
   expect(inputHtml).toContain('type="email"');
   expect(inputHtml).toContain('name="email"');
   expect(inputHtml).toContain('data-caret="native"');
@@ -71,6 +71,7 @@ test('form controls preserve native props and compose canonical classes', () => 
   const selectHtml = renderToStaticMarkup(
     createElement(UiSelect, {
       name: 'runtime',
+      'data-neoverse-material': 'solid',
       value: 'native',
       options: [
         { value: 'native', label: 'Native' },
@@ -78,8 +79,8 @@ test('form controls preserve native props and compose canonical classes', () => 
       ],
     }),
   );
-  expect(selectHtml).toContain('<details class="ui-select-shell">');
-  expect(selectHtml).toContain('class="ui-select"');
+  expect(selectHtml).toContain('<details data-neoverse-material="solid" class="ui-select-shell">');
+  expect(selectHtml).toContain('<summary');
   expect(selectHtml).toContain('role="combobox"');
   expect(selectHtml).toContain('aria-haspopup="listbox"');
   expect(selectHtml).toContain('aria-expanded="false"');
@@ -236,7 +237,7 @@ test('dock exposes the shared shell without owning product navigation data', () 
   expect(html).toContain('<nav');
   expect(html).toContain('aria-label="Primary navigation"');
   for (const value of [
-    'data-surface="glass-elevated"',
+    'data-surface="auto"',
     'material-glass-elevated',
     'data-neoverse-surface-hover="static"',
     'ui-dock--compact',

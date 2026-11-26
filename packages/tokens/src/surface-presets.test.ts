@@ -15,8 +15,12 @@ test('default roles retain their Glass tier and opt into an opaque Solid recipe'
   expect(materialSurfacePresets.control[glass]).toBe('glass-subtle');
   expect(materialSurfacePresets.panel[glass]).toBe('glass-elevated');
   expect(materialSurfacePresets.group[glass]).toBe('glass-subtle');
-  expect(materialSurfacePresets.panel[solid]).toBe('solid');
-  expect(getSurfaceClass(automatic, 'panel')).toContain('material-glass-elevated');
+  expect(getSurfaceClass(materialSurfacePresets.panel[solid])).toBe('ui-surface-solid');
+  expect(materialSurfacePresets.panel.solidRole).toBe('raised');
+  expect(getSurfaceClass(automatic, 'panel')).toBe(
+    'material-auto material-solid-raised material-glass-elevated',
+  );
+  expect(getSurfaceClass(automatic, 'field')).toBe('material-auto material-solid-inset');
   expect(isGlassSurface(automatic)).toBe(false);
 });
 

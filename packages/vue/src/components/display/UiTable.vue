@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { computed, useAttrs } from 'vue';
 import type { TableProps } from '../../types';
 
@@ -11,6 +12,7 @@ const props = withDefaults(defineProps<TableProps>(), {
 const attrs = useAttrs();
 const classes = computed(() => [
   'ui-table',
+  getSurfaceClass('auto', 'table'),
   props.striped && 'ui-table--striped',
   props.hoverable && 'ui-table--hoverable',
 ]);

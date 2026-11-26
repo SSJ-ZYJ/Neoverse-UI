@@ -11,7 +11,9 @@ export default defineConfig({
   // software compositor responsive enough for interaction checks.
   // Tests that assert a transition explicitly opt back into normal motion.
   use: { reducedMotion: 'reduce' },
+  grepInvert: /@chromium-materials/,
   testMatch: [
+    '**/materials.spec.ts',
     '**/forms.spec.ts',
     '**/overlays.spec.ts',
     '**/context-menu.spec.ts',

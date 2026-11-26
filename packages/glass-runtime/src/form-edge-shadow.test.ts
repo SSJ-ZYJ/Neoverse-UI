@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it } from 'vitest';
 const read = (path: string): string => readFileSync(new URL(path, import.meta.url), 'utf8');
 const unwrap = (source: string, marker: string): string => {
   const start = source.indexOf('{', source.indexOf(marker));
-  return source.slice(start + 1, source.lastIndexOf('}'));
+  return source.slice(start + 1, source.indexOf('\n}', start));
 };
 
 // happy-dom does not support @layer and cannot resolve every nested var()

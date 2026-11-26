@@ -1,10 +1,12 @@
 import {
+  bridgeDialogMaterialScope,
   focusElement,
   installFocusModality,
   openOverlayWithMotion,
   ownsDocumentModalKeyboard,
   trapModalTabKey,
 } from '@neoverse-ui/overlay-runtime';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import {
   type ComponentPropsWithRef,
   type ReactNode,
@@ -15,6 +17,8 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import { mergeClassNames } from '../../internal.js';
+
+const dialogSurfaceClass = getSurfaceClass('auto', 'overlay');
 
 export type DialogSize = 'sm' | 'md' | 'lg';
 export type DialogRole = 'dialog' | 'alertdialog';
@@ -67,6 +71,7 @@ export function UiDialog({
 }: UiDialogProps) {
   const [mounted, setMounted] = useState(false);
   const element = useRef<HTMLDialogElement | null>(null);
+  const materialSource = useRef<HTMLSpanElement | null>(null);
   const focusReturn = useRef<HTMLElement | null>(null);
   const id = useId();
 
@@ -80,6 +85,10 @@ export function UiDialog({
     const dialog = element.current;
     if (!dialog) return;
     installFocusModality(dialog.ownerDocument);
+    const disconnectMaterial =
+      open && materialSource.current
+        ? bridgeDialogMaterialScope(materialSource.current, dialog)
+        : undefined;
     if (open && !dialog.open) {
       focusReturn.current =
         document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -92,6 +101,7 @@ export function UiDialog({
     } else if (!open && dialog.open) {
       closeDialogNode(dialog);
     }
+    return disconnectMaterial;
   }, [open, mounted, motionSource]);
 
   useEffect(() => {
@@ -125,60 +135,65 @@ export function UiDialog({
     [],
   );
 
-  if (!mounted) return null;
-  return createPortal(
+  return (
     <>
-      <div
-        className="ui-dialog__backdrop"
-        data-open={open ? 'true' : undefined}
-        aria-hidden="true"
-        onClick={() => {
-          if (closeOnBackdrop) onOpenChange(false);
-        }}
-      />
-      <dialog
-        {...rest}
-        ref={element}
-        tabIndex={-1}
-        role={role}
-        data-size={size}
-        className={mergeClassNames(
-          'ui-overlay-panel ui-dialog material-glass-elevated nv-presence',
-          className,
+      {mounted && <span hidden ref={materialSource} className="ui-dialog-material-source" />}
+      {mounted &&
+        createPortal(
+          <div className="ui-dialog-portal">
+            <div
+              className="ui-dialog__backdrop"
+              data-open={open ? 'true' : undefined}
+              aria-hidden="true"
+              onClick={() => {
+                if (closeOnBackdrop) onOpenChange(false);
+              }}
+            />
+            <dialog
+              {...rest}
+              ref={element}
+              tabIndex={-1}
+              role={role}
+              data-size={size}
+              className={mergeClassNames(
+                `ui-overlay-panel ui-dialog ${dialogSurfaceClass} nv-presence`,
+                className,
+              )}
+              data-neoverse-motion="pop"
+              data-surface="auto"
+              data-neoverse-glass-occluder="topmost"
+              data-neoverse-glass-edge-pass="css"
+              aria-modal="true"
+              aria-labelledby={`${id}-title`}
+              aria-describedby={description ? `${id}-description` : undefined}
+              onCancel={(event) => {
+                event.preventDefault();
+                if (closeOnEscape) onOpenChange(false);
+              }}
+              onClose={(event) => {
+                if (event.currentTarget.open) return;
+                if (open) onOpenChange(false);
+                const target = focusReturn.current;
+                focusReturn.current = null;
+                if (target?.isConnected) focusElement(target, { preventScroll: true });
+              }}
+            >
+              <header className="ui-dialog__header">
+                <h2 className="ui-dialog__title" id={`${id}-title`}>
+                  {title}
+                </h2>
+                {description && (
+                  <p className="ui-dialog__description" id={`${id}-description`}>
+                    {description}
+                  </p>
+                )}
+              </header>
+              <div className="ui-dialog__body">{children}</div>
+              {footer && <footer className="ui-dialog__footer">{footer}</footer>}
+            </dialog>
+          </div>,
+          document.body,
         )}
-        data-neoverse-motion="pop"
-        data-surface="glass-elevated"
-        data-neoverse-glass-occluder="topmost"
-        data-neoverse-glass-edge-pass="css"
-        aria-modal="true"
-        aria-labelledby={`${id}-title`}
-        aria-describedby={description ? `${id}-description` : undefined}
-        onCancel={(event) => {
-          event.preventDefault();
-          if (closeOnEscape) onOpenChange(false);
-        }}
-        onClose={(event) => {
-          if (event.currentTarget.open) return;
-          if (open) onOpenChange(false);
-          const target = focusReturn.current;
-          focusReturn.current = null;
-          if (target?.isConnected) focusElement(target, { preventScroll: true });
-        }}
-      >
-        <header className="ui-dialog__header">
-          <h2 className="ui-dialog__title" id={`${id}-title`}>
-            {title}
-          </h2>
-          {description && (
-            <p className="ui-dialog__description" id={`${id}-description`}>
-              {description}
-            </p>
-          )}
-        </header>
-        <div className="ui-dialog__body">{children}</div>
-        {footer && <footer className="ui-dialog__footer">{footer}</footer>}
-      </dialog>
-    </>,
-    document.body,
+    </>
   );
 }

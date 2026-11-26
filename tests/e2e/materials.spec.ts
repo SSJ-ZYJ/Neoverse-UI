@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test';
+import { measureContrast } from '../support/contrast';
 import { expectNoPageOverflow, themes } from '../support/e2e';
 
-test.describe('materials', () => {
+test.describe('materials', { tag: '@chromium-materials' }, () => {
   for (const theme of themes) {
     test(`Aurora Glass previews render in the ${theme} theme`, async ({ page }) => {
       await page.goto(`/frame?theme=${theme}&lang=en#materials`, { waitUntil: 'domcontentloaded' });
@@ -257,7 +258,9 @@ test.describe('materials', () => {
   });
 });
 
-test('the React fixture wires the same three Glass tiers', async ({ page }) => {
+test('the React fixture wires the same three Glass tiers', { tag: '@chromium-materials' }, async ({
+  page,
+}) => {
   await page.goto('/react-fixture?theme=light&lang=en&contract-fixtures=1', {
     waitUntil: 'domcontentloaded',
   });
@@ -281,9 +284,9 @@ test('the React fixture wires the same three Glass tiers', async ({ page }) => {
   }
 });
 
-test('the browser transparency preference removes blur but preserves only opted-in edge strokes', async ({
-  page,
-}) => {
+test('the browser transparency preference removes blur but preserves only opted-in edge strokes', {
+  tag: '@chromium-materials',
+}, async ({ page }) => {
   await page.goto('/frame?theme=dark&lang=en#materials', { waitUntil: 'domcontentloaded' });
   const surface = page.locator('[data-surface="glass-elevated"]').first();
   await expect(surface).toBeVisible();
@@ -327,25 +330,22 @@ test('Vue resolves automatic surface roles without changing theme or explicit pr
   await expect(sample('button')).toHaveCSS('backdrop-filter', /blur\(12px\)/);
   await expect(sample('group')).toHaveCSS('backdrop-filter', /blur\(12px\)/);
   await expect(sample('borrow')).toHaveCSS('backdrop-filter', 'none');
-  const solidBackground = await sample('solid').evaluate(
-    (el) => getComputedStyle(el).backgroundColor,
-  );
-
   const root = page.locator('html');
-  const resolved = await root.evaluate((element) => {
-    element.setAttribute('data-neoverse-material', 'solid');
-    const surfaces = element.querySelectorAll(
-      '[data-contract-material="card"], [data-contract-material="group"], [data-contract-material="button"]',
-    );
-    return Array.from(surfaces, (surface) => {
-      const style = getComputedStyle(surface);
-      return [style.backdropFilter, style.backgroundColor];
-    });
-  });
+  await root.evaluate((element) => element.setAttribute('data-neoverse-material', 'solid'));
   await expect(root).toHaveAttribute('data-theme', 'light');
-  expect(resolved).toEqual(Array.from({ length: 3 }, () => ['none', solidBackground]));
-  expect(solidBackground).toMatch(/^rgb\(\d+, \d+, \d+\)$/);
-  await expect(sample('card')).toHaveCSS('box-shadow', 'none');
+  const fills: string[] = [];
+  for (const role of ['card', 'group', 'button']) {
+    await expect(sample(role)).toHaveCSS('backdrop-filter', 'none');
+    fills.push(await sample(role).evaluate((element) => getComputedStyle(element).backgroundColor));
+  }
+  expect(new Set(fills).size).toBe(fills.length);
+  await expect(sample('card')).not.toHaveCSS('box-shadow', 'none');
+  await expect(sample('group')).toHaveCSS('box-shadow', 'none');
+  await sample('group').evaluate((el) => el.setAttribute('data-neoverse-material', 'unknown'));
+  await expect(sample('group')).toHaveCSS('backdrop-filter', 'none');
+  await sample('group').evaluate((el) => el.setAttribute('data-neoverse-material', 'glass'));
+  await expect(sample('group')).toHaveCSS('backdrop-filter', /blur\(12px\)/);
+  await sample('group').evaluate((el) => el.removeAttribute('data-neoverse-material'));
   expect(await sample('card').evaluate((el) => getComputedStyle(el, '::before').content)).toBe(
     'none',
   );
@@ -366,10 +366,138 @@ test('React uses the same Solid and explicit Glass material boundaries', async (
   const sample = (role: string) => page.locator(`[data-contract-material="${role}"]`);
   for (const role of ['card', 'button', 'group']) {
     await expect(sample(role)).toHaveCSS('backdrop-filter', 'none');
-    await expect(sample(role)).toHaveCSS('background-color', /^rgb\(\d+, \d+, \d+\)$/);
+    await expect(sample(role)).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
   }
   await expect(sample('nested-glass')).toHaveCSS('backdrop-filter', /blur\(18px\)/);
   await expect(sample('explicit-glass')).toHaveCSS('backdrop-filter', /blur\(24px\)/);
   await expect(sample('none')).toHaveCSS('backdrop-filter', 'none');
   await expect(sample('none')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
 });
+
+for (const theme of themes) {
+  test(`core material planes and focus stay consistent in ${theme}`, async ({ page }) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`/frame?theme=${theme}&lang=en#materials-core`, {
+      waitUntil: 'domcontentloaded',
+    });
+    const scene = page.locator('[data-core-material="solid"]');
+    const role = (name: string) => scene.locator(`[data-core-role="${name}"]`);
+    const glass = page.locator('[data-core-material="glass"]');
+    await expect(glass.locator('[data-core-role="card"]')).toHaveCSS(
+      'backdrop-filter',
+      /blur\(18px\)/,
+    );
+
+    const plates = [
+      'card',
+      'group',
+      'primary',
+      'secondary',
+      'input',
+      'select',
+      'segmented',
+      'table',
+      'dock',
+    ];
+    for (const name of plates) {
+      await expect(role(name)).toHaveCSS('backdrop-filter', 'none');
+      expect(
+        await role(name).evaluate((element) => {
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          if (!context) throw new Error('2D canvas unavailable');
+          context.fillStyle = getComputedStyle(element).backgroundColor;
+          context.fillRect(0, 0, 1, 1);
+          return context.getImageData(0, 0, 1, 1).data[3];
+        }),
+        `${name} paints an opaque plate`,
+      ).toBe(255);
+    }
+    await expect(role('ghost')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    await expect(role('segmented').locator('.ui-segmented-control__slider')).toHaveCSS(
+      'backdrop-filter',
+      'none',
+    );
+    await expect(role('dock').locator('[aria-current="page"]')).toHaveCSS(
+      'backdrop-filter',
+      'none',
+    );
+    await expect(role('table').locator('th').first()).not.toHaveCSS(
+      'background-color',
+      await role('table')
+        .locator('td')
+        .first()
+        .evaluate((element) => getComputedStyle(element).backgroundColor),
+    );
+    const samples = await page.evaluate(measureContrast, [
+      '[data-core-material="solid"] [data-core-role="primary"]',
+      '[data-core-material="solid"] [data-core-role="secondary"]',
+      '[data-core-material="solid"] [data-core-role="input"]',
+      '[data-core-material="solid"] [data-core-role="select"]',
+      '[data-core-material="solid"] [data-core-role="table"] :is(th, td)',
+      '[data-core-material="solid"] [data-core-role="dock"] [aria-current="page"]',
+    ]);
+    expect(samples.length).toBeGreaterThanOrEqual(9);
+    for (const sample of samples) expect(sample.ratio, sample.selector).toBeGreaterThanOrEqual(4.5);
+
+    const vueSelect = role('select');
+    await scene.evaluate((el) => el.setAttribute('data-neoverse-material', 'glass'));
+    await expect(vueSelect).toHaveCSS('backdrop-filter', 'none');
+    await vueSelect.press('Enter');
+    const listbox = scene.getByRole('listbox');
+    await expect(listbox).toBeVisible();
+    await expect(listbox).toHaveCSS('backdrop-filter', 'none');
+    const overlayFill = await listbox.evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
+    );
+    await page.keyboard.press('Escape');
+    await expect(listbox).toBeHidden();
+    await expect(vueSelect).toBeFocused();
+    await scene.evaluate((el) => el.setAttribute('data-neoverse-material', 'solid'));
+
+    await role('primary').press('Enter');
+    const dialog = page.locator('dialog[data-core-role="dialog"][open]');
+    await expect(dialog).toHaveCSS('backdrop-filter', 'none');
+    await expect(dialog).toHaveCSS('background-color', overlayFill);
+    const scrim = page.locator('.ui-dialog__backdrop[data-open="true"]');
+    await expect(scrim).toHaveCSS('opacity', '1');
+    const solidScrim = await scrim.evaluate((element) => getComputedStyle(element).backgroundColor);
+    await scene.evaluate((el) => el.setAttribute('data-neoverse-material', 'glass'));
+    await expect(dialog).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+    await expect(scrim).not.toHaveCSS('background-color', solidScrim);
+    await scene.evaluate((el) => el.setAttribute('data-neoverse-material', 'solid'));
+    await expect(dialog).toHaveCSS('backdrop-filter', 'none');
+    await expect(scrim).toHaveCSS('background-color', solidScrim);
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(role('primary')).toBeFocused();
+
+    await page.goto(`/react-fixture?theme=${theme}&lang=en&contract-fixtures=1`, {
+      waitUntil: 'domcontentloaded',
+    });
+    // The opposite scope is local to the portaled dialog and must survive a Glass root.
+    const reactDialogSource = page.locator('[data-react-adapter="UiDialog"]');
+    await expect(reactDialogSource).toBeVisible();
+    await reactDialogSource.evaluate((el) => el.setAttribute('data-neoverse-material', 'solid'));
+    const reactOpen = reactDialogSource.locator('[data-dialog-open]');
+    await reactOpen.press('Enter');
+    const reactDialog = page.locator('dialog.ui-dialog[open]');
+    await expect(reactDialog).toHaveCSS('backdrop-filter', 'none');
+    await expect(reactDialog).toHaveCSS('background-color', overlayFill);
+    await page.keyboard.press('Escape');
+    await expect(reactOpen).toBeFocused();
+
+    await page.locator('html').evaluate((el) => el.setAttribute('data-neoverse-material', 'solid'));
+    for (const name of ['UiInput', 'UiSelect', 'UiSegmentedControl', 'UiTable', 'UiDock']) {
+      await expect(page.locator(`[data-react-adapter="${name}"]`)).toHaveCSS(
+        'backdrop-filter',
+        'none',
+      );
+    }
+    const reactSelect = page.locator('[data-react-adapter="UiSelect"]');
+    await reactSelect.press('Enter');
+    await expect(page.getByRole('listbox')).toHaveCSS('background-color', overlayFill);
+    await page.keyboard.press('Escape');
+    await expect(reactSelect).toBeFocused();
+  });
+}

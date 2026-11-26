@@ -256,16 +256,17 @@ test.describe('playground shell navigation and links', () => {
     expect(canvases[0]).not.toBe(canvases[1]);
   });
 
-  test('a distinctly named single specimen opens its editable Inspector session', async ({
+  test('the Materials presets leaf opens its editable Inspector session', async ({
     page,
   }, testInfo) => {
     const mobile = testInfo.project.name === 'mobile';
     await page.goto('/?theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
     if (mobile) await page.getByRole('button', { name: 'Open Explorer' }).click();
     const navigation = page.locator('[data-playground-navigation]');
+    const disclosure = navigation.locator('#explorer-module-materials');
+    if ((await disclosure.getAttribute('aria-expanded')) === 'false') await disclosure.click();
     const leaf = navigation.locator('a[href="#materials-surface"]');
     await expect(leaf).toBeVisible();
-    await expect(navigation.locator('#explorer-module-materials')).toHaveCount(0);
 
     await leaf.click();
     await expect(page).toHaveURL(/#materials-surface$/);
@@ -285,7 +286,6 @@ test.describe('playground shell navigation and links', () => {
   }, testInfo) => {
     const mobile = testInfo.project.name === 'mobile';
     for (const [moduleId, specimenId] of [
-      ['materials', 'materials-surface'],
       ['card', 'card-card'],
       ['dock', 'dock-component'],
       ['scrollbar', 'scrollbar-component'],

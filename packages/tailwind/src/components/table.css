@@ -209,3 +209,40 @@
     }
   }
 }
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    .ui-table.material-auto {
+      /* Without a backdrop filter, the caption still anchors to the table grid. */
+      position: relative;
+
+      /* The cells own the painted grid, including Glass catches on the last row. */
+      & > :is(thead, tbody, tfoot) > tr > :is(th, td),
+      & > tr > :is(th, td) {
+        background: var(--neoverse-solid-plate-fill);
+        border-color: var(--neoverse-material-solid-divider);
+        box-shadow: none;
+      }
+
+      & > thead > tr > :is(th, td) {
+        background: var(--neoverse-material-solid-group);
+      }
+
+      &.ui-table--striped > tbody > tr:nth-child(even) > :is(th, td) {
+        background: var(--neoverse-material-solid-inset);
+      }
+
+      @media (hover: hover) {
+        &.ui-table--hoverable > tbody > tr:hover > :is(th, td) {
+          color: var(--neoverse-table-hover-foreground);
+          background: var(--neoverse-material-solid-group);
+        }
+      }
+
+      & > tbody > tr[aria-selected='true'] > :is(th, td) {
+        color: var(--neoverse-material-solid-selection-text);
+        background: var(--neoverse-material-solid-selection);
+      }
+    }
+  }
+}

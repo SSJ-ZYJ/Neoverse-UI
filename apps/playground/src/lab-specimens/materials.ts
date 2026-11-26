@@ -1,3 +1,4 @@
+import type { MaterialMode } from '@neoverse-ui/tokens';
 import { type CardProps, type SurfaceProps, UiCard, UiSurface } from '@neoverse-ui/vue';
 import { h } from 'vue';
 import { defineSpecimen } from '../lab-specimen-config';
@@ -6,6 +7,48 @@ import { type LocalizedText, localize, localized } from '../playground-content';
 import { surfaceLabel, surfaceOptions } from './shared';
 
 const ReferenceCardContent = lazyComponent(() => import('../previews/ReferenceCardContent.vue'));
+export const CoreMaterialPreview = lazyComponent(
+  () => import('../previews/CoreMaterialPreview.vue'),
+);
+
+const materialChoices = [
+  { value: 'both', label: localized('Compare both', '并排对照') },
+  { value: 'glass', label: localized('Aurora Glass', '极光玻璃') },
+  { value: 'solid', label: localized('Solid', '实体') },
+] as const;
+export const coreMaterialModes = ['glass', 'solid'] as const satisfies readonly MaterialMode[];
+export const coreMaterialCopy = {
+  label: localized('Core material comparison', '核心材质对照'),
+  description: localized(
+    'One workspace in both materials. Switch the Lab theme to compare the light and dark palettes.',
+    '同一工作区采用两种材质。切换实验室主题可对照浅色和深色色阶。',
+  ),
+};
+
+export const coreMaterials = withPreload(
+  defineSpecimen<{ mode: (typeof materialChoices)[number]['value'] }>()({
+    initialProps: { mode: 'both' },
+    initialState: () => ({}),
+    controls: {
+      props: { mode: { kind: 'select', label: coreMaterialCopy.label, options: materialChoices } },
+    },
+    note: coreMaterialCopy.description,
+    render: ({ props, locale }) =>
+      h(
+        'div',
+        {
+          class: [
+            'grid w-full min-w-0 gap-3',
+            props.mode === 'both' && 'playground-core-material-grid',
+          ],
+        },
+        coreMaterialModes
+          .filter((mode) => props.mode === 'both' || props.mode === mode)
+          .map((mode) => h(CoreMaterialPreview, { key: mode, mode, locale })),
+      ),
+  }),
+  CoreMaterialPreview,
+);
 
 /** The editable Card specimen */
 export const card = withPreload(

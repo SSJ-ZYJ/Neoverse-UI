@@ -1,6 +1,11 @@
 <script setup lang="ts">
 import { UiButton, UiCard, UiControlSurface, UiSurface } from '@neoverse-ui/vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
+import {
+  CoreMaterialPreview,
+  coreMaterialCopy,
+  coreMaterialModes,
+} from '../lab-specimens/materials';
 import { localize, localized, moduleCopy } from '../playground-content';
 import SurfaceModule from './SurfaceModule.vue';
 import type { LabModuleProps } from './types';
@@ -22,6 +27,30 @@ const materialCopy = {
     :description="localize(moduleCopy.surface.description, props.locale)"
   >
     <SurfaceModule :locale="props.locale" />
+  </LabSpecimenSection>
+  <LabSpecimenSection
+    id="materials-core"
+    :title="localize(coreMaterialCopy.label, props.locale)"
+    :description="localize(coreMaterialCopy.description, props.locale)"
+  >
+    <div class="grid min-w-0 gap-3">
+      <div class="playground-core-material-grid grid min-w-0 gap-3">
+        <CoreMaterialPreview
+          v-for="mode in coreMaterialModes"
+          :key="mode"
+          :mode="mode"
+          :locale="props.locale"
+        />
+      </div>
+      <div class="flex flex-wrap gap-3 text-body-sm text-primary">
+        <a class="underline" :href="`/frame?theme=light&lang=${props.locale}#materials-core`">{{
+          localize(localized('Compare in light theme', '对照浅色主题'), props.locale)
+        }}</a>
+        <a class="underline" :href="`/frame?theme=dark&lang=${props.locale}#materials-core`">{{
+          localize(localized('Compare in dark theme', '对照深色主题'), props.locale)
+        }}</a>
+      </div>
+    </div>
   </LabSpecimenSection>
   <section
     id="materials-resolution"

@@ -1,13 +1,18 @@
 <script setup lang="ts">
 import {
+  bridgeDialogMaterialScope,
   focusElement,
   installFocusModality,
   openOverlayWithMotion,
   ownsDocumentModalKeyboard,
   trapModalTabKey,
 } from '@neoverse-ui/overlay-runtime';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
 import type { DialogProps, DialogRole, DialogSize } from '../../types';
+
+defineOptions({ inheritAttrs: false });
+const dialogSurfaceClass = getSurfaceClass('auto', 'overlay');
 
 const props = withDefaults(
   defineProps<
@@ -26,11 +31,13 @@ const props = withDefaults(
 );
 const emit = defineEmits<{ 'update:open': [value: boolean] }>();
 const element = ref<HTMLDialogElement | null>(null);
+const materialSource = ref<HTMLSpanElement | null>(null);
 const mounted = ref(false);
 const titleId = `${useId()}-dialog-title`;
 const descriptionId = `${useId()}-dialog-description`;
 let focusReturn: HTMLElement | null = null;
 let keydownListening = false;
+let disconnectMaterial: (() => void) | undefined;
 
 function restoreFocus() {
   const target = focusReturn;
@@ -88,6 +95,9 @@ async function syncOpen() {
   if (!dialog) return;
   installFocusModality(dialog.ownerDocument);
   if (props.open && !dialog.open) {
+    if (materialSource.value) {
+      disconnectMaterial = bridgeDialogMaterialScope(materialSource.value, dialog);
+    }
     focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     openOverlayWithMotion(
       dialog,
@@ -115,6 +125,8 @@ function onBackdropClick() {
 
 function onNativeClose() {
   if (element.value?.open) return;
+  disconnectMaterial?.();
+  disconnectMaterial = undefined;
   setDocumentListeners(false);
   if (props.open) requestClose();
   restoreFocus();
@@ -131,6 +143,7 @@ onMounted(() => {
   void syncOpen();
 });
 onBeforeUnmount(() => {
+  disconnectMaterial?.();
   setDocumentListeners(false);
   if (element.value?.open) closeDialogNode(element.value);
   restoreFocus();
@@ -138,37 +151,42 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
+  <span v-if="mounted" ref="materialSource" class="ui-dialog-material-source" hidden />
   <Teleport v-if="mounted" to="body">
-    <div
-      class="ui-dialog__backdrop"
-      :data-open="props.open ? 'true' : undefined"
-      aria-hidden="true"
-      @click="onBackdropClick"
-    />
-    <dialog
-      ref="element"
-      tabindex="-1"
-      class="ui-overlay-panel ui-dialog material-glass-elevated nv-presence"
-      :role="props.role"
-      :data-size="props.size"
-      data-neoverse-motion="pop"
-      data-surface="glass-elevated"
-      data-neoverse-glass-occluder="topmost"
-      data-neoverse-glass-edge-pass="css"
-      aria-modal="true"
-      :aria-labelledby="titleId"
-      :aria-describedby="description ? descriptionId : undefined"
-      @cancel="onCancel"
-      @close="onNativeClose"
-    >
-      <header class="ui-dialog__header">
-        <h2 :id="titleId" class="ui-dialog__title">{{ title }}</h2>
-        <p v-if="description" :id="descriptionId" class="ui-dialog__description">
-          {{ description }}
-        </p>
-      </header>
-      <div class="ui-dialog__body"><slot /></div>
-      <footer v-if="$slots.footer" class="ui-dialog__footer"><slot name="footer" /></footer>
-    </dialog>
+    <div class="ui-dialog-portal">
+      <div
+        class="ui-dialog__backdrop"
+        :data-open="props.open ? 'true' : undefined"
+        aria-hidden="true"
+        @click="onBackdropClick"
+      />
+      <dialog
+        v-bind="$attrs"
+        ref="element"
+        tabindex="-1"
+        class="ui-overlay-panel ui-dialog nv-presence"
+        :class="dialogSurfaceClass"
+        :role="props.role"
+        :data-size="props.size"
+        data-neoverse-motion="pop"
+        data-surface="auto"
+        data-neoverse-glass-occluder="topmost"
+        data-neoverse-glass-edge-pass="css"
+        aria-modal="true"
+        :aria-labelledby="titleId"
+        :aria-describedby="description ? descriptionId : undefined"
+        @cancel="onCancel"
+        @close="onNativeClose"
+      >
+        <header class="ui-dialog__header">
+          <h2 :id="titleId" class="ui-dialog__title">{{ title }}</h2>
+          <p v-if="description" :id="descriptionId" class="ui-dialog__description">
+            {{ description }}
+          </p>
+        </header>
+        <div class="ui-dialog__body"><slot /></div>
+        <footer v-if="$slots.footer" class="ui-dialog__footer"><slot name="footer" /></footer>
+      </dialog>
+    </div>
   </Teleport>
 </template>

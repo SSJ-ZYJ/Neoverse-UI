@@ -24,37 +24,60 @@
 
 @layer neoverse-material-mode {
   @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
-    .material-auto > * {
-      --neoverse-material-borrowed: inherit;
-    }
-
-    .material-auto {
-      box-shadow: var(--neoverse-material-surface-solid-shadow);
+    :where(.material-auto) {
+      --neoverse-solid-plate-shadow: none;
+      background-color: var(--neoverse-solid-plate-fill);
+      box-shadow: var(--neoverse-solid-plate-shadow);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
     }
 
-    .material-auto:not(.ui-button--ghost) {
-      background-color: var(--neoverse-material-surface-solid-background);
+    :where(.material-auto.material-solid-control) {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-control);
     }
 
-    /* Solid is opaque immediately. Keep control feedback and scale transitions. */
-    .material-auto.ui-button:not(.ui-button--ghost) {
-      transition-property: --neoverse-button-tone-color;
+    :where(.material-auto.material-solid-raised) {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-raised);
+      --neoverse-solid-plate-shadow: var(--neoverse-material-solid-raised-shadow);
     }
 
-    .material-auto:not(.ui-button) {
+    :where(.material-auto.material-solid-group) {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-group);
+    }
+
+    :where(.material-auto.material-solid-inset) {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-inset);
+    }
+
+    :where(.material-auto.material-solid-overlay) {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-overlay);
+      --neoverse-solid-plate-shadow: var(--neoverse-material-solid-overlay-shadow);
+    }
+
+    :where(.material-auto:is(.material-glass-subtle, .material-glass-elevated)) > * {
+      --neoverse-material-borrowed: inherit;
+    }
+
+    :where(.material-auto:is(.material-glass-subtle, .material-glass-elevated):not(.ui-button)) {
+      border-color: transparent;
       background-image: none;
-      border: 0;
-      transition: none;
+      --neoverse-material-transition: none;
 
-      &::before,
+      &::before {
+        content: none;
+      }
+    }
+
+    /* Keep the coarse-pointer hit target (::before); only the Glass rim is removed. */
+    :where(.material-auto.ui-button) {
+      transition-property: --neoverse-button-tone-color;
+
       &::after {
         content: none;
       }
     }
 
-    .material-auto.ui-control-surface {
+    :where(.material-auto.ui-control-surface) {
       transition: var(--neoverse-control-surface-scale-transition, none);
     }
   }

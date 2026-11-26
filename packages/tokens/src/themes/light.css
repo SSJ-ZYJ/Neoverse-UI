@@ -8,6 +8,32 @@
 /* biome-ignore lint/suspicious/noUnknownAtRules: build-only source marker is stripped by copy-css.ts */
 @neoverse-light-tokens {
   color-scheme: light;
+
+  --neoverse-material-solid-canvas: var(--neoverse-color-neutral-50);
+  --neoverse-material-solid-control: var(--neoverse-color-white);
+  --neoverse-material-solid-group: var(--neoverse-color-neutral-100);
+  --neoverse-material-solid-raised: var(--neoverse-color-white);
+  --neoverse-material-solid-inset: color-mix(
+    in srgb,
+    var(--neoverse-color-neutral-100) 65%,
+    var(--neoverse-color-white)
+  );
+  --neoverse-material-solid-overlay: var(--neoverse-color-white);
+  --neoverse-material-solid-selection: var(--neoverse-color-blue-100);
+  --neoverse-material-solid-selection-text: var(--neoverse-color-blue-900);
+  --neoverse-material-solid-primary: var(--neoverse-color-blue-700);
+  --neoverse-material-solid-primary-text: var(--neoverse-color-white);
+  --neoverse-material-solid-divider: var(--neoverse-color-neutral-200);
+  --neoverse-material-solid-field-edge: var(--neoverse-color-neutral-500);
+  --neoverse-material-solid-focus: var(--neoverse-color-blue-700);
+  --neoverse-material-solid-hover: rgb(15 23 42 / 7%);
+  --neoverse-material-solid-press: rgb(15 23 42 / 14%);
+  --neoverse-material-solid-primary-hover: rgb(255 255 255 / 9%);
+  --neoverse-material-solid-primary-press: rgb(0 0 0 / 16%);
+  --neoverse-material-solid-raised-shadow: 0 2px 10px -3px rgb(15 23 42 / 17%);
+  --neoverse-material-solid-overlay-shadow: 0 12px 32px -10px rgb(15 23 42 / 30%);
+  --neoverse-material-solid-scrim: rgb(15 23 42 / 38%);
+
   --neoverse-effect-grouped-inset-field: var(--neoverse-effect-grouped-inset-field-light);
   --neoverse-effect-grouped-inset-border: var(--neoverse-effect-grouped-inset-border-light);
   /* Effect identity is theme-specific; Aurora Glass blur and alpha remain tier-owned. */

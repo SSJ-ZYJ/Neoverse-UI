@@ -399,15 +399,12 @@ test.describe('segmented control', () => {
       await page.goto(`/frame?theme=${theme}&lang=en#controls-segmented-control`, {
         waitUntil: 'domcontentloaded',
       });
-      const pill = page
-        .locator(
-          '#controls-segmented-control .ui-segmented-control--pill[data-surface="glass-subtle"]',
-        )
+      const gallery = page.locator('#controls-segmented-control');
+      const pill = gallery
+        .locator('[role="radiogroup"][data-shape="pill"][data-surface="auto"]')
         .first();
-      const rounded = page
-        .locator(
-          '#controls-segmented-control .ui-segmented-control--rounded[data-surface="glass-subtle"]',
-        )
+      const rounded = gallery
+        .locator('[role="radiogroup"][data-shape="rounded"][data-surface="auto"]')
         .first();
       await expect(pill).toBeVisible();
       await expect(rounded).toBeVisible();

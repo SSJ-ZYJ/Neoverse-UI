@@ -1,5 +1,5 @@
 import { attachSegmentedControlSlider } from '@neoverse-ui/motion';
-import { surfaceClasses } from '@neoverse-ui/tokens';
+import { type ControlSurfacePreset, getSurfaceClass } from '@neoverse-ui/tokens';
 import {
   type CSSProperties,
   type HTMLAttributes,
@@ -30,7 +30,7 @@ export interface UiSegmentedControlProps
   variant?: SegmentedControlVariant;
   disabled?: boolean;
   ariaLabel?: string;
-  surface?: 'none' | 'glass-subtle' | 'glass-elevated' | 'glass-immersive';
+  surface?: ControlSurfacePreset;
   onValueChange?: (value: string) => void;
 }
 
@@ -43,7 +43,7 @@ export function UiSegmentedControl({
   variant = 'text',
   disabled = false,
   ariaLabel,
-  surface = 'glass-subtle',
+  surface = 'auto',
   onValueChange,
   className = '',
   style,
@@ -97,7 +97,7 @@ export function UiSegmentedControl({
       data-variant={variant}
       data-surface={surface}
       data-neoverse-surface-hover="static"
-      className={`ui-segmented-control ui-segmented-control--${shape} ${surfaceClasses[surface]} ${className}`}
+      className={`ui-segmented-control ui-segmented-control--${shape} ${getSurfaceClass(surface, 'group')} ${className}`}
       style={
         {
           ...style,

@@ -1,3 +1,4 @@
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { type ComponentPropsWithRef, useEffect, useRef, useState } from 'react';
 import { mergeClassNames } from '../../internal.js';
 import { useCaretMotion } from '../motion/caret-motion.js';
@@ -135,7 +136,7 @@ export function UiInput({
         if (typeof forwardedRef === 'function') forwardedRef(node);
         else if (forwardedRef) forwardedRef.current = node;
       }}
-      className={mergeClassNames('ui-input', className)}
+      className={mergeClassNames('ui-input', getSurfaceClass('auto', 'field'), className)}
       data-validation={validation}
       aria-invalid={resolveAriaInvalid(ariaInvalid, validation)}
       onPointerDown={(event) => {

@@ -64,10 +64,11 @@ primitives, semantic roles, foundation layers, light mapping, component defaults
 then the canonical dark mapping.
 
 Tokens defines the shared material modes, surface presets, class mapping, and
-semantic roles. Both adapters re-export the public types and emit the same
-unresolved surface markup on the server and client. Tailwind resolves `auto`
-within the rendered DOM; the optional edge runtime enhances effective Aurora
-Glass surfaces only. See [material selection](material-standards.md#shared-material-selection).
+semantic roles. Both adapters emit the same unresolved role. Tailwind selects
+Solid or Aurora Glass in the rendered DOM; the optional edge runtime enhances
+effective Glass surfaces only. A portaled Dialog reuses the CSS-resolved source
+scope rather than introducing a material provider. See
+[material selection](material-standards.md#shared-material-selection).
 
 ## Tailwind Foundation
 
@@ -137,7 +138,23 @@ UiTimeline
 UiStepFlow
 ```
 
-They compose shared Tailwind classes, expose semantic props and slots, and preserve native interaction semantics. `UiAction` defaults to a real anchor and accepts an injected framework link renderer; `UiNavigationItem` adds current-page, compact-label, and selection-indicator contracts without owning route state. Components that own a visual plane consume the shared `surface` contract instead of hard-coding Aurora Glass as an intrinsic component trait. `UiButton`, `UiAction`, `UiIconButton`, and `UiSegmentedControl` use `glass-subtle` as their canonical default, while `UiNavigationItem` defaults to `none` so grouped navigation inherits the parent chrome rather than creating nested Aurora Glass. `UiSegmentedControl` keeps its active slider and keyboard interaction independent from the outer Surface, so `surface="none"` can be used inside a composition that already owns the chrome. Its roving tab stop follows the checked option whenever focus is outside the group. `UiSurface` is the generic polymorphic material primitive. `UiCard` owns standard card geometry (`rounded-card` + base card padding) while consuming the same `surface` contract; standard cards should therefore use `UiCard surface="..."` rather than rebuilding card geometry around `UiSurface`. `UiControlSurface` owns one grouped-control chrome boundary and optional trailing separation. It also owns grouped-surface behavior policy: `hoverMode="static"` keeps parent material stable while descendants hover, and `edgeMode="local"` requests a locally rendered Aurora Glass edge without exposing renderer attributes to consumers. `UiDock` defaults to `glass-elevated`, while `UiControlSurface` defaults to `glass-subtle`; the separate `chrome` preset and `ui-surface-chrome` renderer have been removed without an alias. `UiDock` specializes that contract for reusable floating navigation: it owns Dock layout, chrome, scale, compact composition, and trailing separation while route data, destination state, icons, and trailing controls stay consumer-owned. The shared navigation indicator commits geometry in its group's layout pixels, so it divides out every rendered `zoom` and ancestor `scale` above the group; a visually magnified preview therefore keeps the bar on the active item instead of doubling its offset and clipping it. `UiStatusIndicator` leaves live-region announcements to the caller. Product route lists, fixed dock positioning, cross-item state, and page content remain composition responsibilities.
+The adapters compose Tailwind classes and preserve native interaction.
+`UiAction` defaults to an anchor and accepts a framework link renderer.
+`UiNavigationItem` owns current-page semantics and selection feedback, not route
+state; its default `surface="none"` lets the surrounding chrome own the plane.
+`UiSurface` is the generic material primitive; `UiCard` adds standard card
+radius and padding. Button, Card, ControlSurface, SegmentedControl, and Dock
+default to `surface="auto"`; see their [shared recipes](material-standards.md#solid-material).
+
+SegmentedControl keeps its roving tab stop on the checked option while focus
+is outside the group. Its selection and keyboard interaction remain available
+with `surface="none"`. ControlSurface owns grouped chrome and trailing
+separation. `hoverMode="static"` holds the surface steady as descendants hover,
+and `edgeMode="local"` requests the CSS Aurora Glass edge. Dock specializes
+that composition for reusable floating navigation; routing, destination state,
+icons, and trailing controls stay consumer-owned. The shared indicator divides
+out CSS `zoom` and ancestor `scale` to commit geometry in the group's layout
+pixels. `UiStatusIndicator` leaves live-region announcements to the caller.
 
 ## React components
 
@@ -286,11 +303,11 @@ rendered scale when they position, so a Select still opens against its trigger.
 
 Every entry in `labSpecimens` declares a `FocusedPreview`: either a localized renderer for a read-only Inspector or a `SpecimenDefinition` that opens one editable `SpecimenSession`. A read-only preview can still support native interactions without exposing a session to the Inspector. Every component specimen whose public API exposes an appearance variant has an editable session: Button, IconButton, Action, SegmentedControl, NavigationItem, ControlSurface, Dock, Badge, StatusIndicator, Skeleton, Notice, Toast, TooltipSurface, Avatar, Table, Disclosure, EmptyState, StatCard, Surface (including the three Aurora Glass tiers), Card, Input, Textarea, Select, Checkbox, RadioGroup, Switch, Field and Tabs. Data-only specimens (Breadcrumb, Pagination, Timeline, StepFlow) and the four overlay specimens stay read-only; overlays own focus, placement and light dismiss, which an Inspector value cannot reproduce. To add a specimen, register its explicit renderer on the catalogue entry and retain its stable QA anchor in the owning module. Interactive definitions live in the `lab-specimens/` family files and are re-exported through `lab-interactive-specimens.ts`; they provide typed initial props, an initial state factory, and editable controls. The session rejects undeclared edits, invalid values, and edits to temporarily disabled fields.
 
-The Stage paints the shared backdrop for both module galleries and focused
-specimens. Section outlines, state rows, and preview wrappers organize the
-gallery without painting an intermediate surface. Actual component specimens
-retain their configured materials. Only the isolated `/frame` paints the
-diagnostic comparison backdrops.
+The Stage provides a shared backdrop for module galleries and focused
+specimens. Materials also uses a local comparison scene: the module and its
+editable Core material comparison specimen render the same components under
+adjacent Glass and Solid scopes. The Lab theme and theme-isolated `/frame`
+links expose the Light and Dark palettes without a second theme resolver.
 
 Module URLs and `/frame` render the full QA galleries, including fixed state matrices and optical fixtures. The Inspector opens the isolated gallery at the specimen anchor without transferring local edits. `/react-fixture` remains the React contract host. Neither isolated entry mounts the shell.
 

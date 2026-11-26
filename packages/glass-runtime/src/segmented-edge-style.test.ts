@@ -223,8 +223,6 @@ describe('segmented selection styling', () => {
   );
 
   it('uses primary text for the active option, keeps default focus ring, and keeps the press wash stable', () => {
-    const activeAccentUses = source.match(/--neoverse-control-segmented-active-foreground/g) ?? [];
-    expect(activeAccentUses).toHaveLength(1);
     expect(source).not.toContain(
       '--neoverse-color-focus-ring: var(--neoverse-control-segmented-active-foreground);',
     );

@@ -15,7 +15,7 @@ const props = withDefaults(
     shape: 'pill',
     variant: 'text',
     disabled: false,
-    surface: 'glass-subtle',
+    surface: 'auto',
   },
 );
 
@@ -65,7 +65,7 @@ const rovingIndex = computed(() => {
 const classes = computed(() => [
   'ui-segmented-control',
   `ui-segmented-control--${props.shape}`,
-  getSurfaceClass(props.surface),
+  getSurfaceClass(props.surface, 'group'),
 ]);
 const forwardedAttrs = computed(() => {
   const { class: _class, style: _style, 'aria-label': _ariaLabel, ...rest } = attrs;

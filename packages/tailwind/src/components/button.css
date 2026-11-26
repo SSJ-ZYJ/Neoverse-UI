@@ -410,3 +410,43 @@
     backdrop-filter: none;
   }
 }
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    .material-auto:is(.ui-button--primary, .ui-button--secondary) {
+      --neoverse-button-tone-color: transparent;
+      --neoverse-button-hover-tone: var(--neoverse-material-solid-hover);
+      --neoverse-button-press-tone: var(--neoverse-material-solid-press);
+
+      @media (hover: hover) {
+        &:hover:not(:active, :disabled, [aria-disabled='true']) {
+          --neoverse-button-tone-color: var(--neoverse-button-hover-tone);
+        }
+      }
+
+      &:active:not(:disabled, [aria-disabled='true']) {
+        --neoverse-button-tone-color: var(--neoverse-button-press-tone);
+        transition: none;
+      }
+    }
+
+    .material-auto.ui-button--primary {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-primary);
+      --neoverse-button-hover-tone: var(--neoverse-material-solid-primary-hover);
+      --neoverse-button-press-tone: var(--neoverse-material-solid-primary-press);
+      color: var(--neoverse-material-solid-primary-text);
+    }
+
+    .material-auto.ui-button--ghost {
+      background-color: var(--neoverse-quiet-control-feedback);
+      --neoverse-control-ghost-hover-background: var(--neoverse-material-solid-hover);
+      --neoverse-control-ghost-active-background: var(--neoverse-material-solid-press);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .material-auto.ui-button {
+        transition: none;
+      }
+    }
+  }
+}

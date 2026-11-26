@@ -226,3 +226,11 @@
     }
   }
 }
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    .ui-control-surface.material-auto > .ui-control-surface__divider {
+      background-color: var(--neoverse-material-solid-divider);
+    }
+  }
+}

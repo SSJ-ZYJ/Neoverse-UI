@@ -5,6 +5,7 @@ import {
   markPointerModality,
   stopOverlayTracking,
 } from '@neoverse-ui/overlay-runtime';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import {
   type ComponentPropsWithRef,
   type ReactNode,
@@ -25,6 +26,8 @@ import {
   openSelectPopover,
 } from './select-overlay.js';
 
+const popoverClasses = `ui-overlay-panel ui-select__popover ${getSurfaceClass('auto', 'overlay')} nv-presence`;
+
 export interface UiSelectOption {
   value: FormControlValue;
   label: ReactNode;
@@ -33,6 +36,7 @@ export interface UiSelectOption {
 
 export interface UiSelectProps
   extends Omit<ComponentPropsWithRef<'summary'>, 'children' | 'onChange'> {
+  'data-neoverse-material'?: string;
   options: readonly UiSelectOption[];
   value?: FormControlValue;
   placeholder?: ReactNode;
@@ -58,6 +62,7 @@ export function UiSelect({
   onKeyDown,
   onBlur,
   'aria-invalid': ariaInvalid,
+  'data-neoverse-material': materialMode,
   ...props
 }: UiSelectProps) {
   const [open, setOpen] = useState(false);
@@ -177,6 +182,7 @@ export function UiSelect({
 
   return (
     <details
+      data-neoverse-material={materialMode}
       ref={detailsRef}
       className={mergeClassNames(
         'ui-select-shell',
@@ -208,7 +214,7 @@ export function UiSelect({
     >
       <summary
         {...props}
-        className={mergeClassNames('ui-select', className)}
+        className={mergeClassNames('ui-select', getSurfaceClass('auto', 'field'), className)}
         role="combobox"
         aria-haspopup="listbox"
         aria-expanded={open && !blocked}
@@ -266,7 +272,7 @@ export function UiSelect({
           // effect cleanup, and the runtime cleanup needs the element identity.
           if (element !== null) overlayRef.current = element;
         }}
-        className="ui-overlay-panel ui-select__popover material-glass-elevated nv-presence"
+        className={popoverClasses}
         role="listbox"
         popover="auto"
         data-neoverse-motion="pop"

@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { syncCaretFlight } from '@neoverse-ui/motion';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { computed, onBeforeUnmount, ref, useAttrs, watch } from 'vue';
 import type { InputProps } from '../../types';
 import { deferPointerFocus, watchCaretSelection } from '../motion/caret-motion';
 import { resolveAriaInvalid } from './form-control';
+
+const fieldSurfaceClass = getSurfaceClass('auto', 'field');
 
 defineOptions({ inheritAttrs: false });
 
@@ -178,7 +181,7 @@ function onBlur(event: FocusEvent) {
       ref="numberInput"
       v-bind="forwardedAttrs"
       class="ui-input"
-      :class="attrs.class"
+      :class="[fieldSurfaceClass, attrs.class]"
       :style="attrs.style"
       :value="props.modelValue"
       :disabled="props.disabled"
@@ -214,7 +217,7 @@ function onBlur(event: FocusEvent) {
       v-model="value"
       v-bind="forwardedAttrs"
       class="ui-input"
-      :class="attrs.class"
+      :class="[fieldSurfaceClass, attrs.class]"
       :style="attrs.style"
       :disabled="props.disabled"
       :readonly="props.readonly"

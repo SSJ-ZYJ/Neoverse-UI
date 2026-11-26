@@ -20,7 +20,7 @@ export const expectedFragments = [
   '@media (prefers-reduced-transparency:reduce)',
   'background-color:var(--neoverse-material-background-fallback)',
   'background:var(--neoverse-material-borrowed,revert-layer)',
-  'background-color:var(--neoverse-material-surface-solid-background)',
+  'background-color:var(--neoverse-solid-plate-fill)',
   'box-shadow:var(--neoverse-material-borrowed,revert-layer)',
   '-webkit-backdrop-filter:none',
   'backdrop-filter:none',

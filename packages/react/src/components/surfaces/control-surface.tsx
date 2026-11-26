@@ -1,4 +1,4 @@
-import { getSurfaceClass, type SurfacePreset } from '@neoverse-ui/tokens';
+import { getSurfaceClass, type MaterialSurfaceRole, type SurfacePreset } from '@neoverse-ui/tokens';
 import {
   type CSSProperties,
   createElement,
@@ -24,6 +24,11 @@ export interface UiControlSurfaceProps extends HTMLAttributes<HTMLElement> {
   navigationIndicator?: boolean;
   trailing?: ReactNode;
 }
+
+type ControlSurfaceCompositionProps = UiControlSurfaceProps & {
+  /** Material role of the enclosing adapter; standalone groups use the default. */
+  surfaceRole?: MaterialSurfaceRole;
+};
 
 type IndicatorRect = { left: number; top: number; width: number; height: number };
 
@@ -63,6 +68,7 @@ const indicatorTransitionDisabled = (element: HTMLElement): boolean =>
 export function UiControlSurface({
   as = 'div',
   surface = 'auto',
+  surfaceRole = 'group',
   scale = 'md',
   hoverMode = 'auto',
   edgeMode = 'auto',
@@ -71,7 +77,7 @@ export function UiControlSurface({
   children,
   className = '',
   ...rest
-}: UiControlSurfaceProps) {
+}: ControlSurfaceCompositionProps) {
   const primary = useRef<HTMLDivElement>(null);
   const indicator = useRef<HTMLSpanElement>(null);
   // Committed geometry lives in left/top/width/height; the flight between
@@ -209,7 +215,7 @@ export function UiControlSurface({
     as,
     {
       ...rest,
-      className: `ui-control-surface ${getSurfaceClass(surface, 'group')} ui-control-surface--scale-${scale}${navigationIndicator ? ' ui-control-surface--shared-indicator' : ''} ${className}`,
+      className: `ui-control-surface ${getSurfaceClass(surface, surfaceRole)} ui-control-surface--scale-${scale}${navigationIndicator ? ' ui-control-surface--shared-indicator' : ''} ${className}`,
       'data-surface': surface,
       'data-neoverse-navigation-indicator-ready': navigationIndicator && ready ? 'true' : undefined,
       'data-neoverse-surface-hover': hoverMode === 'static' ? 'static' : undefined,

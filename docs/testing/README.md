@@ -51,7 +51,7 @@ running every theme, width, and language combination.
 | `terminal.spec.ts` | Transcript composition, suggestions, IME guard, tail following, reader intent |
 | `motion.spec.ts` | List reorder, entrance replay, page transitions, page dissolve, disclosure expansion and collapse, React presence exit, reduced motion, layout width on a language switch, theme reveal reversal and thumb color continuity |
 | `motion-hierarchy.spec.ts` | Promoted Motion section, right-hand Inspector category switching, distinct-scene zero-flash transitions |
-| `materials.spec.ts` | Aurora Glass previews across themes, inset and explicit tier behavior, button feedback, reduced transparency, and automatic Glass/Solid scope resolution in both adapters |
+| `materials.spec.ts` | Aurora Glass tier paint and reduced transparency, Solid opacity and text contrast, mixed scopes, dynamic Dialog scope, and shared Vue/React focus behavior |
 | `glass-runtime.spec.ts` | One shared noninteractive renderer canvas, fixed placement, theme stability, context loss/restore, runtime reduced transparency, forced colors and adapter lifecycle |
 | `layout.spec.ts` | Control size baseline in both adapters, badge type scale, 24px minimum target, no implicit specimen magnification, table caption placement and corner consistency across previews and composition scenes |
 | `contrast.spec.ts` | WCAG contrast floors for the primary, secondary and muted text roles in both themes |
@@ -63,7 +63,7 @@ running every theme, width, and language combination.
 | `playground-shell.spec.ts` | Isolated specimen frame, desktop and mobile toolbar, Giscus themes, direct Explorer leaves, demo destinations, React fixture link |
 | `parity.spec.ts` | Every React adapter renders, theme resolution, shared control names |
 
-The cross-browser configuration runs the interaction specs that do not depend on the Chromium-only optical harness: forms, overlays, context menu, navigation, segmented control, surfaces, motion and parity. Terminal IME and scroll-tail timing, Glass and materials, layout and contrast probes, and the Playground shell stay Chromium-only because they either depend on that rendering harness or duplicate an existing cross-engine contract at disproportionate CI cost. Extending the list requires running both Firefox and WebKit before the spec enters the registry. `tests/optics/glass.spec.ts` runs separately under Chromium with SwiftShader and reports optical diagnostics rather than a release pass/fail signal.
+The cross-browser configuration runs forms, overlays, context menu, navigation, segmented control, surfaces, motion, parity, and the engine-neutral material tests for Solid paint and scope resolution. `@chromium-materials` identifies the Chromium tier and transparency probes; `tests/optics/glass.spec.ts` runs separately under Linux Chromium with SwiftShader and reports optical diagnostics rather than a release pass/fail signal.
 
 These specs import the `test` fixture from `tests/support/e2e.ts`, which keeps navigation on `domcontentloaded` and then waits until the document height is stable for ten animation frames. The Design Lab mounts its specimen backdrops after DOM ready, and Firefox's scroll anchoring can move a control between Playwright's scroll and the dispatched click, aiming it at a neighbouring row.
 

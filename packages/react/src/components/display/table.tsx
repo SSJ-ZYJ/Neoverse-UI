@@ -1,3 +1,4 @@
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 import { mergeClassNames } from '../../internal.js';
 
@@ -23,6 +24,7 @@ export function UiTable({
         {...rest}
         className={mergeClassNames(
           'ui-table',
+          getSurfaceClass('auto', 'table'),
           striped && 'ui-table--striped',
           hoverable && 'ui-table--hoverable',
           className,
