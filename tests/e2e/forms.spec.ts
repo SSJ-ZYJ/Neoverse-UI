@@ -554,6 +554,11 @@ test.describe('forms', () => {
         const glyph = control
           .locator('xpath=..')
           .locator(multiline ? '.ui-textarea-caret__glyph' : '.ui-input-caret__glyph');
+        // Compare geometry in one font; swapping from the fallback can move the same insertion slot.
+        await control.evaluate(async (node) => {
+          const { fontStyle, fontWeight, fontSize, fontFamily } = getComputedStyle(node);
+          await document.fonts.load(`${fontStyle} ${fontWeight} ${fontSize} ${fontFamily}`, 'a');
+        });
         const line = 'a'.repeat(30);
         let text = multiline ? `aaaa\n${line}` : line;
         if (layout === 'wrap') {
@@ -596,6 +601,11 @@ test.describe('forms', () => {
         expect(reversal.top).toBeCloseTo(stretch.top, 0);
         expect(reversal.width).toBeCloseTo(stretch.width, 0);
         expect(reversal.height).toBeCloseTo(stretch.height, 0);
+
+        await expect(control, `${layout}: return to the same insertion slot`).toHaveJSProperty(
+          'selectionStart',
+          text.length,
+        );
 
         await expect(glyph).toBeVisible();
         const landed = await measureCaret(glyph);
