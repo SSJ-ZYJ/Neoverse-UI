@@ -35,6 +35,7 @@ export type SpecimenField = Control & {
   readonly edited: boolean;
   readonly inherits: boolean;
   readonly disabled: boolean;
+  readonly visible: boolean;
 };
 
 /** One disposable preview instance and its Inspector bindings */
@@ -67,6 +68,7 @@ interface Configuration<Props, State> {
   readonly controls: { readonly props?: ControlMap<Props>; readonly state?: ControlMap<State> };
   readonly note?: LocalizedText;
   readonly stateDisabled?: (props: Readonly<Partial<Props>>, key: keyof State) => boolean;
+  readonly stateVisible?: (props: Readonly<Partial<Props>>, key: keyof State) => boolean;
   render(context: RenderContext<Props, State>): VNode;
 }
 
@@ -96,6 +98,7 @@ function bindFields<Values extends object>(
   readInitial: () => Readonly<Partial<Values>>,
   readValues: () => Partial<Values>,
   disabled?: (key: keyof Values) => boolean,
+  visible?: (key: keyof Values) => boolean,
 ): BoundField[] {
   const fields: BoundField[] = [];
   for (const key in controls) {
@@ -119,6 +122,9 @@ function bindFields<Values extends object>(
       },
       get disabled() {
         return disabled?.(key) ?? false;
+      },
+      get visible() {
+        return visible?.(key) ?? true;
       },
       write(value) {
         if (disabled?.(key)) return false;
@@ -163,6 +169,7 @@ export function defineSpecimen<
           () => initialState,
           () => state,
           (key) => configuration.stateDisabled?.(props.value, key) ?? false,
+          (key) => configuration.stateVisible?.(props.value, key) ?? true,
         ),
       ];
       function setState<Key extends keyof State>(key: Key, value: State[Key]): void {
@@ -283,6 +290,7 @@ export function defineComposition<
             edited: false,
             inherits: false,
             disabled: false,
+            visible: true,
             write(value) {
               const preset = typeof value === 'string' ? byId.get(value) : undefined;
               if (!preset) return false;

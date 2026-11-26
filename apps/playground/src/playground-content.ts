@@ -56,6 +56,7 @@ export const appCopy = {
       dark: localized('Dark', '深色'),
     },
   },
+  materialLabel: localized('Playground material', '实验室材质'),
   language: {
     label: localized('Language', '语言'),
     options: {

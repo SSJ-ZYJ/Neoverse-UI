@@ -148,6 +148,8 @@ const segmentThemes = themeModes.map((value) => ({
   label: appCopy.theme.options[value],
 }));
 const segmentLanguages = languageCodes.map((value) => ({ value, label: languageNames[value] }));
+const selectedTheme = localized('Selected theme', '所选主题');
+const selectedLanguage = localized('Selected language', '所选语言');
 
 /** The editable SegmentedControl specimen */
 export const segmented = defineSpecimen<
@@ -169,17 +171,21 @@ export const segmented = defineSpecimen<
     },
     state: {
       modelValue: { kind: 'select', label: activeOption, options: enabledSegments },
-      theme: { kind: 'select', label: appCopy.theme.label, options: segmentThemes },
-      language: { kind: 'select', label: appCopy.language.label, options: segmentLanguages },
+      theme: { kind: 'select', label: selectedTheme, options: segmentThemes },
+      language: { kind: 'select', label: selectedLanguage, options: segmentLanguages },
     },
   },
   note: localized(
     'Size is read-only: the component supports only sm.',
     '尺寸为只读：此组件仅支持 sm。',
   ),
-  stateDisabled: ({ disabled, variant = 'text' }, key) =>
-    disabled === true ||
-    variant !== { modelValue: 'text', theme: 'icon', language: 'language' }[key],
+  stateDisabled: ({ disabled }) => disabled === true,
+  stateVisible: ({ variant = 'text' }, key) =>
+    key === 'modelValue'
+      ? variant === 'text'
+      : key === 'theme'
+        ? variant === 'icon'
+        : variant === 'language',
   render: ({ props, state, setState, locale }) => {
     if (props.variant === 'icon') {
       return h(UiSegmentedControl, {

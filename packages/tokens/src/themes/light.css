@@ -20,7 +20,7 @@
   );
   --neoverse-material-solid-overlay: var(--neoverse-color-white);
   --neoverse-material-solid-selection: var(--neoverse-color-blue-100);
-  --neoverse-material-solid-selection-text: var(--neoverse-color-blue-900);
+  --neoverse-material-solid-selection-text: var(--neoverse-color-text-primary);
   --neoverse-material-solid-primary: var(--neoverse-color-blue-700);
   --neoverse-material-solid-primary-text: var(--neoverse-color-white);
   --neoverse-material-solid-divider: var(--neoverse-color-neutral-200);
@@ -207,6 +207,12 @@
   --neoverse-color-status-warning-foreground: var(--neoverse-color-amber-900);
   --neoverse-color-status-danger: var(--neoverse-color-red-300);
   --neoverse-color-status-danger-foreground: var(--neoverse-color-red-900);
+  /* Solid status plates are soft tints, so small badge text uses the deep
+     status ink rather than the bright accent. */
+  --neoverse-material-solid-status-info: var(--neoverse-color-status-info-foreground);
+  --neoverse-material-solid-status-success: var(--neoverse-color-status-success-foreground);
+  --neoverse-material-solid-status-warning: var(--neoverse-color-status-warning-foreground);
+  --neoverse-material-solid-status-danger: var(--neoverse-color-status-danger-foreground);
   --neoverse-effect-status-info-text: var(--neoverse-color-status-info-foreground);
   --neoverse-effect-status-success-text: var(--neoverse-color-mint-600);
   --neoverse-effect-status-warning-text: var(--neoverse-color-status-warning-foreground);

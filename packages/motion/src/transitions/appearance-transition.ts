@@ -1,5 +1,5 @@
 /** Select the document transition used for an appearance change */
-export type AppearanceTransitionKind = 'theme-reveal' | 'theme-fade' | 'locale';
+export type AppearanceTransitionKind = 'theme-reveal' | 'theme-fade' | 'locale' | 'material-fade';
 
 /** Configure an appearance change without owning theme or locale state */
 export interface AppearanceTransitionOptions {
@@ -114,7 +114,8 @@ export async function animateAppearanceChange(
   const root = document.documentElement;
   let { kind } = options;
   if (typeof document.startViewTransition !== 'function') {
-    if (kind === 'locale') return update();
+    // Material replaces paint wholesale; without a snapshot the swap is instant.
+    if (kind === 'locale' || kind === 'material-fade') return update();
 
     root.setAttribute(tokenFadeAttribute, '');
     // Resolve the transition style before changing any of the registered color tokens.

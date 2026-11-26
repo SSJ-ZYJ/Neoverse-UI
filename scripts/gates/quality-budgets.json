@@ -6,8 +6,8 @@
   },
   "exceptions": {
     "packages/glass-runtime/src/rendering/glass-renderer.ts": {
-      "ceiling": 1441,
-      "reason": "2026-11-25: WebGL rendering, resource recovery and frame scheduling share the renderer lifecycle; remove when render and lifecycle state can be owned independently."
+      "ceiling": 1570,
+      "reason": "2026-11-26: on-demand activation, release and the scene-mutation probe share the renderer lifecycle state; remove when render, lifecycle and observation can be owned independently."
     },
     "packages/tailwind/src/components/form-control.css": {
       "ceiling": 980,

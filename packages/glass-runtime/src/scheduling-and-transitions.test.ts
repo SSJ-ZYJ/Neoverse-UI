@@ -61,9 +61,8 @@ describe('Glass renderer transitions, mutations and reduced transparency', () =>
     running = false;
     glass.remove();
     gl.drawArrays.mockClear();
-    gl.clear.mockClear();
     frames.shift()?.(32);
-    expect(gl.clear).toHaveBeenCalledWith(gl.COLOR_BUFFER_BIT);
+    expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBeNull();
     expect(gl.drawArrays).not.toHaveBeenCalled();
     expect(frames).toHaveLength(0);
   });

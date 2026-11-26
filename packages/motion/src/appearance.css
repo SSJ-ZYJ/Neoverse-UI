@@ -65,6 +65,11 @@
     var(--neoverse-motion-state-easing) both;
 }
 
+:root[data-neoverse-appearance-motion='material-fade']::view-transition-old(root) {
+  animation: nv-appearance-fade var(--neoverse-motion-theme-duration)
+    var(--neoverse-motion-theme-easing) both;
+}
+
 @keyframes nv-appearance-fade {
   to {
     opacity: 0;

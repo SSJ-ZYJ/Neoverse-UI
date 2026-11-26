@@ -83,5 +83,17 @@
     :where(:scope, :scope *):where(.ui-dropdown-menu__item, .ui-context-menu__item) {
       --neoverse-overlay-item-active-background: var(--neoverse-material-solid-selection);
     }
+
+    /* Keyboard focus paints the selection plate instead of the overlay's own
+       row, so the focused label, shortcut and marker take the paired selection
+       ink instead of their muted or accent colors. */
+    :where(:scope, :scope *):where(
+        .ui-dropdown-menu__item,
+        .ui-context-menu__item
+      ):focus-visible:not([data-neoverse-focus-origin='pointer']) {
+      --neoverse-context-menu-shortcut-foreground: var(--neoverse-material-solid-selection-text);
+      --neoverse-context-menu-check-foreground: var(--neoverse-material-solid-selection-text);
+      color: var(--neoverse-material-solid-selection-text);
+    }
   }
 }

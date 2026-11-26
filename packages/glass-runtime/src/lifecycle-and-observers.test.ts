@@ -158,7 +158,7 @@ describe('Glass renderer lifecycle and observers', () => {
     region.dataset.neoverseMaterial = 'solid';
     await vi.waitFor(() => {
       frames.flush(1000);
-      expect(gl.clear).toHaveBeenCalled();
+      expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBeNull();
     });
     expect(gl.drawArrays).not.toHaveBeenCalled();
 
@@ -167,6 +167,7 @@ describe('Glass renderer lifecycle and observers', () => {
       frames.flush(1100);
       expect(gl.drawArrays).toHaveBeenCalledTimes(1);
     });
+    expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).not.toBeNull();
   });
 
   it('stops drawing internal form and prose edges under a Solid boundary', async () => {
@@ -191,7 +192,7 @@ describe('Glass renderer lifecycle and observers', () => {
     region.dataset.neoverseMaterial = 'solid';
     await vi.waitFor(() => {
       frames.flush(1000);
-      expect(gl.clear).toHaveBeenCalled();
+      expect(document.querySelector('[data-neoverse-glass-renderer-canvas]')).toBeNull();
     });
     expect(gl.drawArrays).not.toHaveBeenCalled();
 

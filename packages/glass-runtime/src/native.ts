@@ -145,9 +145,23 @@ export class NativeGlassRenderer implements GlassRenderer {
     }
     const view = this.document.defaultView;
     if (!view) return;
+    const candidates = Array.from(this.document.querySelectorAll<HTMLElement>(glassPresetSelector));
+    const effective = candidates.some(
+      (element) =>
+        element.closest(internalSelector) === null &&
+        canRenderGlassEdge(element) &&
+        element.getClientRects().length > 0,
+    );
+    if (!effective) {
+      // No eligible surface: drop the SVG filters and their maps instead of
+      // keeping a dormant document-wide filter registry.
+      this.clear();
+      this.restoreAttribute();
+      return;
+    }
     this.document.documentElement.setAttribute('data-neoverse-glass-renderer', 'native');
     const seen = new Set<HTMLElement>();
-    for (const element of this.document.querySelectorAll<HTMLElement>(glassPresetSelector)) {
+    for (const element of candidates) {
       if (element.closest(internalSelector) || !canRenderGlassEdge(element)) continue;
       let entry = this.owners.get(element);
       if (entry) {

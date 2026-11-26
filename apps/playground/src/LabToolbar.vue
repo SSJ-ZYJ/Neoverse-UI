@@ -1,11 +1,14 @@
 <script setup lang="ts">
-import { UiIconButton, UiSegmentedControl, UiSurface } from '@neoverse-ui/vue';
+import type { MaterialMode } from '@neoverse-ui/tokens';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
+import { UiIconButton, UiSegmentedControl } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
 import FpsIndicator from './FpsIndicator.vue';
 import LabIcon from './LabIcon.vue';
+import { defaultMaterialMode, materialModes } from './material-runtime';
 import { appCopy, type Locale, localize, localized } from './playground-content';
 import type { ThemeMode } from './playground-types';
-import { languageSegments } from './preference-segments';
+import { languageSegments, materialNames, materialSegments } from './preference-segments';
 import { defaultThemeMode, themeModes } from './theme-runtime';
 import { themeSegments } from './vue-theme-segments';
 
@@ -13,12 +16,14 @@ const props = defineProps<{
   locale: Locale;
   requestedLocale: Locale;
   theme: ThemeMode;
+  material: MaterialMode;
   persistent: boolean;
   openPanel: 'explorer' | 'inspector' | null;
   showFps: boolean;
 }>();
 const emit = defineEmits<{
   theme: [value: string, origin: Element | undefined];
+  material: [value: string];
   locale: [value: string];
   panel: [panel: 'explorer' | 'inspector', event: MouseEvent];
 }>();
@@ -26,7 +31,10 @@ const emit = defineEmits<{
 const actions = ref<HTMLElement | null>(null);
 const themeOptions = computed(() => themeSegments(themeModes, props.locale));
 const languageOptions = computed(() => languageSegments(props.locale));
+const materialOptions = computed(() => materialSegments(props.locale));
+const toolbarMaterialClasses = getSurfaceClass('auto', 'control');
 const cycleLabel = localized('Cycle theme', '切换主题');
+const cycleMaterialLabel = localized('Cycle material', '切换材质');
 const languageLabel = localized('Switch language', '切换语言');
 
 function cycleTheme(event: MouseEvent): void {
@@ -37,6 +45,14 @@ function cycleTheme(event: MouseEvent): void {
   );
 }
 
+function cycleMaterial(): void {
+  emit(
+    'material',
+    materialModes[(materialModes.indexOf(props.material) + 1) % materialModes.length] ??
+      defaultMaterialMode,
+  );
+}
+
 function selectTheme(value: string): void {
   const origin = actions.value?.querySelector('[data-playground-theme-control="segments"]');
   emit('theme', value, origin ?? undefined);
@@ -44,11 +60,11 @@ function selectTheme(value: string): void {
 </script>
 
 <template>
-  <UiSurface
-    as="header"
-    surface="glass-subtle"
+  <header
+    class="playground-shell__toolbar ui-surface"
+    :class="toolbarMaterialClasses"
+    data-surface="auto"
     data-neoverse-surface-hover="static"
-    class="playground-shell__toolbar"
   >
     <div class="playground-shell__identity">
       <UiIconButton
@@ -97,6 +113,17 @@ function selectTheme(value: string): void {
       >
         <LabIcon name="globe" />
       </UiIconButton>
+      <UiIconButton
+        data-playground-material-control="cycle"
+        class="sm:hidden"
+        size="sm"
+        variant="ghost"
+        surface="none"
+        :label="`${localize(cycleMaterialLabel, locale)}: ${localize(materialNames[material], locale)}`"
+        @click="cycleMaterial"
+      >
+        <LabIcon name="material" />
+      </UiIconButton>
       <UiSegmentedControl
         data-playground-theme-control="segments"
         class="hidden sm:inline-flex"
@@ -105,6 +132,14 @@ function selectTheme(value: string): void {
         :model-value="theme"
         variant="icon"
         @update:model-value="selectTheme"
+      />
+      <UiSegmentedControl
+        data-playground-material-control="segments"
+        class="hidden sm:inline-flex"
+        :aria-label="localize(appCopy.materialLabel, locale)"
+        :options="materialOptions"
+        :model-value="material"
+        @update:model-value="emit('material', $event)"
       />
       <UiSegmentedControl
         class="hidden sm:inline-flex"
@@ -128,5 +163,5 @@ function selectTheme(value: string): void {
         <LabIcon name="inspector" />
       </UiIconButton>
     </div>
-  </UiSurface>
+  </header>
 </template>

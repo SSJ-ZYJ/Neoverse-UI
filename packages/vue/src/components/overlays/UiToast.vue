@@ -61,36 +61,61 @@ onBeforeUnmount(pause);
   <span v-if="mounted" ref="materialSource" hidden />
   <Teleport v-if="mounted" to="body">
     <div ref="host" class="ui-toast-container">
-      <UiPresence
+      <div
         v-bind="$attrs"
-        :show="open"
-        variant="rise"
         class="ui-toast"
-        :class="[getSurfaceClass('auto', 'overlay'), `ui-toast--${variant}`]"
-        data-surface="auto"
+        :class="`ui-toast--${variant}`"
         :data-presentation="presentation()"
-        data-neoverse-glass-occluder="topmost"
-        data-neoverse-surface-overflow="visible"
-        data-neoverse-surface-hover="static"
         :role="variant === 'danger' ? 'alert' : 'status'"
         @pointerenter="pause"
         @pointerleave="resume"
         @focusin="pause"
         @focusout="resume"
       >
-        <span class="ui-toast__indicator" aria-hidden="true" />
-        <div class="ui-toast__message"><slot>{{ message }}</slot></div>
-        <div v-if="$slots.action" class="ui-toast__action"><slot name="action" /></div>
-        <button
-          v-if="presentation() === 'notification' || duration <= 0"
+        <UiPresence
+          :show="open"
+          variant="rise"
+          class="ui-toast__surface"
+          :class="getSurfaceClass('auto', 'overlay')"
+          data-surface="auto"
+          data-neoverse-glass-occluder="topmost"
+          data-neoverse-surface-overflow="visible"
+          data-neoverse-surface-hover="static"
+        >
+          <span class="ui-toast__indicator" aria-hidden="true" />
+          <div class="ui-toast__message"><slot>{{ message }}</slot></div>
+          <div v-if="$slots.action" class="ui-toast__action"><slot name="action" /></div>
+        </UiPresence>
+        <UiPresence
+          as="button"
+          :show="open"
+          variant="rise"
           class="ui-toast__dismiss"
+          :class="getSurfaceClass('auto', 'overlay')"
           type="button"
+          data-surface="auto"
+          data-neoverse-glass-occluder="topmost"
+          data-neoverse-surface-overflow="visible"
+          data-neoverse-surface-hover="static"
           :aria-label="dismissLabel"
           @click="emit('update:open', false)"
         >
-          <span aria-hidden="true">×</span>
-        </button>
-      </UiPresence>
+          <span class="ui-toast__dismiss-wash" aria-hidden="true" />
+          <svg
+            class="ui-toast__dismiss-icon"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <path d="m6 6 12 12M18 6 6 18" />
+          </svg>
+        </UiPresence>
+      </div>
     </div>
   </Teleport>
 </template>

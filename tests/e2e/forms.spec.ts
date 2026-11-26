@@ -188,9 +188,30 @@ test.describe('forms', () => {
       const checkbox = form.locator('[data-contract-checkbox]');
       const plate = form.locator('[data-contract-checkbox] + .ui-choice__control');
       await expect(plate).toHaveCSS('backdrop-filter', /blur\(/);
+      const glassPlate = await plate.evaluate(
+        (element) => getComputedStyle(element).backgroundColor,
+      );
       await form.evaluate((element) => element.setAttribute('data-neoverse-material', 'solid'));
       await expect(plate).toHaveCSS('backdrop-filter', 'none');
       await expect(plate.locator('xpath=..')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+      const solidPlate = await plate.evaluate((element) => {
+        const context = document.createElement('canvas').getContext('2d');
+        if (!context) throw new Error('Cannot resolve the Solid plate without a canvas');
+        context.fillStyle = getComputedStyle(element).backgroundColor;
+        context.fillRect(0, 0, 1, 1);
+        return {
+          color: getComputedStyle(element).backgroundColor,
+          alpha: context.getImageData(0, 0, 1, 1).data[3],
+        };
+      });
+      expect(solidPlate.alpha).toBe(255);
+      expect(solidPlate.color).not.toBe(glassPlate);
+      if (await page.evaluate(() => matchMedia('(hover: hover)').matches)) {
+        await checkbox.hover();
+        await expect(plate).toHaveCSS('background-image', /gradient/);
+        await page.mouse.move(0, 0);
+        await expect(plate).toHaveCSS('background-image', 'none');
+      }
       const selectedOpacity = () =>
         plate.evaluate((element) => getComputedStyle(element, '::after').opacity);
       await expect.poll(selectedOpacity).toBe('1');

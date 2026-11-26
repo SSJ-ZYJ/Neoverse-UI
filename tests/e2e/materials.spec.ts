@@ -320,6 +320,50 @@ test('the browser transparency preference removes blur but preserves only opted-
   await expectNoPageOverflow(page);
 });
 
+test('the selected navigation row keeps readable ink on its Solid plate', async ({
+  page,
+}, testInfo) => {
+  const mobile = testInfo.project.name === 'mobile';
+  for (const theme of themes) {
+    await page.goto(`/?theme=${theme}&lang=zh&fps=0&material=solid#controls-button`, {
+      waitUntil: 'domcontentloaded',
+    });
+    if (mobile) await page.locator('[data-playground-nav-trigger]').click();
+    const row = page.locator('.playground-explorer__leaf[aria-current]');
+    await expect(row).toBeVisible();
+    const [sample] = await page.evaluate(measureContrast, [
+      '.playground-explorer__leaf[aria-current]',
+    ]);
+    expect(sample?.ratio, `${theme} navigation selection contrast`).toBeGreaterThanOrEqual(4.5);
+    const secondary = page.locator(
+      '.playground-explorer__leaf[aria-current] .playground-catalogue-label__secondary',
+    );
+    await expect(secondary).toHaveCSS('color', /rgb\(/);
+  }
+});
+
+test('a pure Solid page keeps automatic surfaces opaque and respects explicit Glass', async ({
+  page,
+}) => {
+  await page.goto('/frame?theme=light&lang=en&fps=0&material=solid#forms-textarea', {
+    waitUntil: 'domcontentloaded',
+  });
+  const root = page.locator('html');
+  await expect(root).toHaveAttribute('data-neoverse-material', 'solid');
+  await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCount(0);
+  await expect(page.locator('#forms-notes')).toHaveCSS('backdrop-filter', 'none');
+
+  await page.evaluate(() => {
+    const preset = document.createElement('div');
+    preset.id = 'explicit-glass-probe';
+    preset.className = 'ui-surface material-glass-elevated';
+    preset.dataset.surface = 'glass-elevated';
+    preset.style.cssText = 'position:fixed;top:16px;left:16px;width:180px;height:120px';
+    document.body.append(preset);
+  });
+  await expect(page.locator('#explicit-glass-probe')).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+});
+
 test('Vue resolves automatic surface roles without changing theme or explicit presets', async ({
   page,
 }) => {

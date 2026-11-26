@@ -18,7 +18,7 @@ const props = withDefaults(defineProps<LabSpecimenSectionProps>(), {
 <template>
   <UiSurface
     as="section"
-    :surface="frameView ? 'glass-subtle' : 'none'"
+    :surface="frameView ? 'auto' : 'none'"
     content-overflow="visible"
     :id="props.id"
     class="playground-specimen-section playground-floating-interaction-surface scroll-mt-24 rounded-panel p-4 md:p-5"

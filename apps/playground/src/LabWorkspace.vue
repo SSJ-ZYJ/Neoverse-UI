@@ -14,6 +14,12 @@ import {
   resolveLabHash,
   specimenById,
 } from './lab-modules';
+import {
+  applyMaterialMode,
+  isMaterialMode,
+  persistMaterialMode,
+  resolveInitialMaterialMode,
+} from './material-runtime';
 import { appearanceControls, applyPlaygroundLocale } from './playground-appearance';
 import { readPreferences, writePreferences } from './playground-preferences';
 import { restoreScrollPosition, saveScrollPosition } from './scroll-restoration';
@@ -82,6 +88,8 @@ const locale = ref(resolveWorkspaceLocale(queryLocale, preferences.locale, navig
 const requestedLocale = ref(locale.value);
 const theme = ref(resolveInitialThemeMode());
 applyThemeMode(theme.value, false);
+const material = ref(resolveInitialMaterialMode());
+applyMaterialMode(material.value, false);
 const stageBackground = ref<StageBackground>(
   isStageBackground(preferences.stageBackground)
     ? preferences.stageBackground
@@ -99,6 +107,13 @@ function setTheme(value: string, origin?: Element): void {
   theme.value = value;
   applyThemeMode(value, true, origin);
   persistThemeMode(value);
+}
+
+function setMaterial(value: string): void {
+  if (!isMaterialMode(value) || value === material.value) return;
+  material.value = value;
+  applyMaterialMode(value, true);
+  persistMaterialMode(value);
 }
 
 function setStageBackground(value: string): void {
@@ -269,10 +284,12 @@ onBeforeUnmount(() => {
       :locale="locale"
       :requested-locale="requestedLocale"
       :theme="theme"
+      :material="material"
       :persistent="persistent"
       :open-panel="openPanel"
       :show-fps="showFps"
       @theme="(value, origin) => setTheme(value, fadeTheme ? undefined : origin)"
+      @material="setMaterial"
       @locale="setLocale"
       @panel="showPanel"
     />

@@ -53,7 +53,9 @@
         var(--neoverse-material-solid-group)
       );
       border-color: transparent;
-      color: var(--neoverse-color-text-primary);
+      /* Keep the Glass foreground hierarchy: neutral status text is secondary;
+         Badge variants below carry their own semantic ink. */
+      color: var(--neoverse-color-text-secondary);
       box-shadow: none;
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
@@ -73,6 +75,22 @@
 
     :where(:scope, :scope *):is(.ui-badge--danger, .ui-notice--danger) {
       --neoverse-solid-status-tone: var(--neoverse-color-status-danger);
+    }
+
+    :where(:scope, :scope *).ui-badge--info {
+      color: var(--neoverse-material-solid-status-info);
+    }
+
+    :where(:scope, :scope *).ui-badge--success {
+      color: var(--neoverse-material-solid-status-success);
+    }
+
+    :where(:scope, :scope *).ui-badge--warning {
+      color: var(--neoverse-material-solid-status-warning);
+    }
+
+    :where(:scope, :scope *).ui-badge--danger {
+      color: var(--neoverse-material-solid-status-danger);
     }
 
     :where(:scope, :scope *):where(.material-auto) {

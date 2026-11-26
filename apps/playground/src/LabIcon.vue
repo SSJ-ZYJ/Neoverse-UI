@@ -16,6 +16,7 @@ type LabIconName =
   | 'inspector'
   | 'lock'
   | 'mail'
+  | 'material'
   | 'menu'
   | 'message'
   | 'minus'
@@ -51,6 +52,7 @@ const paths: Record<LabIconName, string> = {
   inspector: 'M3 5h18v14H3V5Zm12 0v14',
   lock: 'M6 10h12v10H6V10Zm3 0V7a3 3 0 0 1 6 0v3m-3 4v2',
   mail: 'M3 6h18v12H3V6Zm1 1 8 6 8-6',
+  material: 'M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z',
   menu: 'M4 7h16M4 12h16M4 17h16',
   message: 'M4 5h16v11H8l-4 4V5Z',
   minus: 'M5 12h14',

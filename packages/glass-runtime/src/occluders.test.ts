@@ -347,4 +347,28 @@ describe('Glass renderer occluders', () => {
 
     expect(occluders).toHaveLength(0);
   });
+
+  it('clamps pill border radii on circular occluders to half the short side', () => {
+    const surface = document.createElement('div');
+    const badge = document.createElement('button');
+    badge.style.borderRadius = '9999px';
+    badge.setAttribute('data-neoverse-glass-occluder', 'topmost');
+    document.body.append(surface, badge);
+    setRect(surface, { left: 100, top: 100, width: 220, height: 38 });
+    setRect(badge, { left: 304, top: 92, width: 24, height: 24 });
+    const fakeDocument = {
+      elementsFromPoint: (): Element[] => [badge, surface],
+    } as unknown as Document;
+
+    const occluders = collectOccluders(
+      surface,
+      surface.getBoundingClientRect(),
+      fakeDocument,
+      window,
+      [{ element: badge, rect: badge.getBoundingClientRect() }],
+    );
+
+    expect(occluders).toHaveLength(1);
+    expect(occluders[0]?.radius).toBe(12);
+  });
 });

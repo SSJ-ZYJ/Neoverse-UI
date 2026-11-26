@@ -12,25 +12,37 @@
   --neoverse-material-solid-control: color-mix(
     in srgb,
     var(--neoverse-color-neutral-900),
-    var(--neoverse-color-neutral-800) 65%
+    var(--neoverse-color-neutral-800) 40%
   );
   --neoverse-material-solid-group: var(--neoverse-color-neutral-900);
   --neoverse-material-solid-raised: color-mix(
     in srgb,
     var(--neoverse-color-neutral-900),
-    var(--neoverse-color-neutral-800) 35%
+    var(--neoverse-color-neutral-800) 22%
   );
   --neoverse-material-solid-inset: color-mix(
     in srgb,
     var(--neoverse-color-neutral-950),
     var(--neoverse-color-neutral-900) 55%
   );
-  --neoverse-material-solid-overlay: var(--neoverse-color-neutral-800);
-  --neoverse-material-solid-selection: var(--neoverse-color-mint-950);
-  --neoverse-material-solid-selection-text: var(--neoverse-color-mint-200);
+  --neoverse-material-solid-overlay: color-mix(
+    in srgb,
+    var(--neoverse-color-neutral-900),
+    var(--neoverse-color-neutral-800) 30%
+  );
+  --neoverse-material-solid-selection: color-mix(
+    in srgb,
+    var(--neoverse-color-blue-800) 32%,
+    var(--neoverse-material-solid-raised)
+  );
+  --neoverse-material-solid-selection-text: var(--neoverse-color-text-primary);
   --neoverse-material-solid-primary: var(--neoverse-color-blue-300);
   --neoverse-material-solid-primary-text: var(--neoverse-color-neutral-950);
-  --neoverse-material-solid-divider: var(--neoverse-color-neutral-700);
+  --neoverse-material-solid-divider: color-mix(
+    in srgb,
+    var(--neoverse-color-neutral-700) 55%,
+    var(--neoverse-color-neutral-900)
+  );
   --neoverse-material-solid-field-edge: var(--neoverse-color-neutral-500);
   --neoverse-material-solid-focus: var(--neoverse-color-blue-300);
   --neoverse-material-solid-hover: rgb(255 255 255 / 8%);
@@ -209,6 +221,24 @@
   --neoverse-color-status-warning-foreground: var(--neoverse-color-neutral-950);
   --neoverse-color-status-danger: var(--neoverse-color-red-400);
   --neoverse-color-status-danger-foreground: var(--neoverse-color-neutral-950);
+  /* Solid status plates are soft tints, so the ink keeps the bright hue
+     instead of the saturated-fill foreground. */
+  --neoverse-material-solid-status-info: var(--neoverse-color-status-info);
+  --neoverse-material-solid-status-success: var(--neoverse-color-status-success);
+  --neoverse-material-solid-status-warning: var(--neoverse-color-status-warning);
+  --neoverse-material-solid-status-danger: var(--neoverse-color-status-danger);
+  /* Reset light-only status text and quiet label overrides so system-dark
+     never inherits light mode's dark ink aliases. */
+  --neoverse-effect-status-info-text: var(--neoverse-color-status-info);
+  --neoverse-effect-status-success-text: var(--neoverse-color-status-success);
+  --neoverse-effect-status-warning-text: var(--neoverse-color-status-warning);
+  --neoverse-effect-status-danger-text: var(--neoverse-color-status-danger);
+  --neoverse-effect-label-info-foreground: var(--neoverse-color-status-info);
+  --neoverse-effect-label-success-foreground: var(--neoverse-color-status-success);
+  --neoverse-effect-label-warning-foreground: var(--neoverse-color-status-warning);
+  --neoverse-effect-label-danger-foreground: var(--neoverse-color-status-danger);
+  --neoverse-prose-inline-code-shadow:
+    var(--neoverse-surface-inset-edge-active), var(--neoverse-surface-inset-active-highlight);
   /* Default controls keep the primary azure ring in both themes. Mint
      selection controls override this locally instead of retuning the theme. */
   --neoverse-color-focus-ring: var(--neoverse-color-accent-primary);

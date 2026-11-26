@@ -36,18 +36,52 @@ test.describe('modal and transient feedback', () => {
     });
 
     for (const theme of ['light', 'dark'] as const) {
-      test(`${adapter.name}: feedback stays compact, exposes its action and fits long notifications / ${theme}`, async ({
+      test(`${adapter.name}: feedback stays compact, exposes its action and top-right dismiss button, and fits long notifications / ${theme}`, async ({
         page,
       }) => {
+        const readDismissGeometry = (toast: Locator) =>
+          toast.evaluate((element) => {
+            const surface = element.querySelector<HTMLElement>('.ui-toast__surface');
+            const dismiss = element.querySelector<HTMLElement>('.ui-toast__dismiss');
+            if (!surface || !dismiss) throw new Error('Missing toast surface or dismiss button');
+            const message = element.querySelector<HTMLElement>('.ui-toast__message');
+            const action = element.querySelector<HTMLElement>('[data-toast-action]');
+            const toastRect = surface.getBoundingClientRect();
+            const dismissRect = dismiss.getBoundingClientRect();
+            const messageRect = message?.getBoundingClientRect() ?? null;
+            const actionRect = action?.getBoundingClientRect() ?? null;
+            const style = getComputedStyle(dismiss);
+            const alphaMatch =
+              style.backgroundColor.match(/\/\s*([\d.]+)\s*\)/) ??
+              style.backgroundColor.match(/^rgba\(.*,\s*([\d.]+)\s*\)/);
+            return {
+              hasIcon: dismiss.querySelector('svg') !== null,
+              width: dismissRect.width,
+              height: dismissRect.height,
+              radius: Number.parseFloat(style.borderTopLeftRadius),
+              alpha: alphaMatch?.[1] === undefined ? 1 : Number(alphaMatch[1]),
+              topOutset: toastRect.top - dismissRect.top,
+              rightOutset: dismissRect.right - toastRect.right,
+              messageRight: messageRect?.right ?? null,
+              actionRight: actionRect?.right ?? null,
+              dismissLeft: dismissRect.left,
+              toastHeight: toastRect.height,
+            };
+          });
+
         await page.goto(adapter.url(theme, 'status-feedback'));
         const fixture = page.locator(
           adapter.name === 'Vue' ? '#status-feedback-toast' : '[data-react-adapter="UiToast"]',
         );
         await fixture.locator('[data-toast-open="compact"]').click();
         const toast = page.locator('.ui-toast[role="status"]');
-        await expect(toast.getByRole('button')).toHaveCount(0);
-        await expect(toast).toHaveCSS('backdrop-filter', /blur\(18px\)/);
-        const { alpha, width, height } = await toast.evaluate((element) => {
+        const surface = toast.locator('.ui-toast__surface');
+        const compactDismissButton = toast.getByRole('button', { name: 'Dismiss notification' });
+        await expect(toast.getByRole('button')).toHaveCount(1);
+        await expect(compactDismissButton).toBeVisible();
+        await expect(surface).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+        await expect(compactDismissButton).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+        const { alpha, width, height } = await surface.evaluate((element) => {
           const { backgroundColor } = getComputedStyle(element);
           const match =
             backgroundColor.match(/\/\s*([\d.]+)\s*\)/) ??
@@ -62,27 +96,130 @@ test.describe('modal and transient feedback', () => {
         expect(alpha).toBeCloseTo(0.2);
         expect(width).toBeLessThan(230);
         expect(height).toBeLessThanOrEqual(42);
+        const compactDismiss = await readDismissGeometry(toast);
+        expect(compactDismiss.hasIcon).toBe(true);
+        expect(compactDismiss.alpha).toBeCloseTo(0.2);
+        expect(compactDismiss.width).toBeGreaterThanOrEqual(24);
+        expect(compactDismiss.height).toBeCloseTo(compactDismiss.width, 0);
+        expect(compactDismiss.radius).toBeGreaterThanOrEqual(compactDismiss.width / 2);
+        expect(compactDismiss.topOutset).toBeGreaterThan(0);
+        expect(compactDismiss.topOutset).toBeLessThan(compactDismiss.width / 2);
+        expect(compactDismiss.rightOutset).toBeGreaterThan(0);
+        expect(compactDismiss.rightOutset).toBeLessThan(compactDismiss.width / 2);
+        expect(compactDismiss.topOutset).toBeCloseTo(compactDismiss.rightOutset, 1);
+        expect(compactDismiss.messageRight ?? 0).toBeLessThanOrEqual(compactDismiss.dismissLeft);
+        await compactDismissButton.click();
+        await expect(toast).toBeHidden();
 
         await fixture.locator('[data-toast-open="action"]').click();
         const action = toast.locator('[data-toast-action]');
+        const actionDismissButton = toast.getByRole('button', { name: 'Dismiss notification' });
         await expect(action).toBeVisible();
-        await expect(toast.getByRole('button')).toHaveCount(1);
+        await expect(actionDismissButton).toBeVisible();
+        await expect(toast.getByRole('button')).toHaveCount(2);
+        const actionDismiss = await readDismissGeometry(toast);
+        expect(actionDismiss.hasIcon).toBe(true);
+        expect(actionDismiss.width).toBeCloseTo(compactDismiss.width, 0);
+        expect(actionDismiss.height).toBeCloseTo(compactDismiss.height, 0);
+        expect(actionDismiss.radius).toBeGreaterThanOrEqual(actionDismiss.width / 2);
+        expect(actionDismiss.topOutset).toBeGreaterThan(0);
+        expect(actionDismiss.topOutset).toBeLessThan(actionDismiss.width / 2);
+        expect(actionDismiss.rightOutset).toBeGreaterThan(0);
+        expect(actionDismiss.rightOutset).toBeLessThan(actionDismiss.width / 2);
+        expect(actionDismiss.topOutset).toBeCloseTo(actionDismiss.rightOutset, 1);
+        expect(actionDismiss.topOutset).toBeCloseTo(compactDismiss.topOutset, 1);
+        expect(actionDismiss.actionRight ?? 0).toBeLessThanOrEqual(actionDismiss.dismissLeft);
+        await actionDismissButton.click();
+        await expect(toast).toBeHidden();
+        await expect(fixture.locator('[data-toast-details]')).toBeHidden();
+
+        await fixture.locator('[data-toast-open="action"]').click();
         await action.click();
         await expect(fixture.locator('[data-toast-details]')).toBeVisible();
         await expect(toast).toBeHidden();
 
         await fixture.locator('[data-toast-open="notification"]').click();
-        await expect(toast.getByRole('button')).toBeVisible();
+        const notificationDismissButton = toast.getByRole('button', {
+          name: 'Dismiss notification',
+        });
+        await expect(notificationDismissButton).toBeVisible();
         const notification = await toast.evaluate((el) => {
           const { left, right, height: h } = el.getBoundingClientRect();
           return { left, right, height: h, viewport: document.documentElement.clientWidth };
         });
         expect(notification.height).toBeGreaterThan(height);
         expect(notification.left > 0 && notification.right < notification.viewport).toBe(true);
-        await toast.getByRole('button').click();
+        const notificationDismiss = await readDismissGeometry(toast);
+        expect(notificationDismiss.hasIcon).toBe(true);
+        expect(notificationDismiss.width).toBeCloseTo(compactDismiss.width, 0);
+        expect(notificationDismiss.height).toBeCloseTo(compactDismiss.height, 0);
+        expect(notificationDismiss.radius).toBeGreaterThanOrEqual(notificationDismiss.width / 2);
+        expect(notificationDismiss.topOutset).toBeGreaterThan(0);
+        expect(notificationDismiss.topOutset).toBeLessThan(notificationDismiss.width / 2);
+        expect(notificationDismiss.rightOutset).toBeGreaterThan(0);
+        expect(notificationDismiss.rightOutset).toBeLessThan(notificationDismiss.width / 2);
+        expect(notificationDismiss.topOutset).toBeCloseTo(notificationDismiss.rightOutset, 1);
+        expect(notificationDismiss.topOutset).toBeCloseTo(actionDismiss.topOutset, 1);
+        expect(notificationDismiss.messageRight ?? 0).toBeLessThanOrEqual(
+          notificationDismiss.dismissLeft,
+        );
+        await notificationDismissButton.click();
         await expect(toast).toBeHidden();
       });
     }
+
+    test(`${adapter.name}: system dark mode keeps toast info accent and action legible`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ colorScheme: 'dark' });
+      await page.goto(adapter.url('dark', 'status-feedback'));
+      await page.evaluate(() => {
+        document.documentElement.removeAttribute('data-theme');
+      });
+      const fixture = page.locator(
+        adapter.name === 'Vue' ? '#status-feedback-toast' : '[data-react-adapter="UiToast"]',
+      );
+      await fixture.locator('[data-toast-open="action"]').click();
+      const toast = page.locator('.ui-toast[role="status"]');
+      const action = toast.locator('[data-toast-action]');
+      await expect(action).toBeVisible();
+      const { actionLuminance, infoAccentLuminance, actionMatchesProseLink } = await toast.evaluate(
+        (element) => {
+          const resolveRgba = (color: string) => {
+            const context = new OffscreenCanvas(1, 1).getContext('2d');
+            if (!context) throw new Error('A 2D canvas context is required');
+            context.fillStyle = color;
+            context.fillRect(0, 0, 1, 1);
+            return Array.from(context.getImageData(0, 0, 1, 1).data);
+          };
+          const readLuminance = (color: string) => {
+            const [r = 0, g = 0, b = 0] = resolveRgba(color);
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          };
+          const actionEl = element.querySelector<HTMLElement>('[data-toast-action]');
+          if (!actionEl) throw new Error('Missing toast action');
+          const rootStyle = getComputedStyle(document.documentElement);
+          const infoText = rootStyle.getPropertyValue('--neoverse-effect-status-info-text').trim();
+          const proseLinkColor = rootStyle
+            .getPropertyValue('--neoverse-prose-link-foreground')
+            .trim();
+          const actionStyle = getComputedStyle(actionEl);
+          return {
+            actionLuminance: readLuminance(actionStyle.color),
+            infoAccentLuminance: readLuminance(infoText),
+            actionMatchesProseLink:
+              actionEl.classList.contains('ui-button') ||
+              (resolveRgba(actionStyle.color).join(',') === resolveRgba(proseLinkColor).join(',') &&
+                actionStyle.backgroundImage.includes('linear-gradient')),
+          };
+        },
+      );
+      expect(actionLuminance).toBeGreaterThan(120);
+      expect(infoAccentLuminance).toBeGreaterThan(120);
+      expect(actionMatchesProseLink).toBe(true);
+      await toast.getByRole('button', { name: 'Dismiss notification' }).click();
+      await expect(toast).toBeHidden();
+    });
   }
 });
 

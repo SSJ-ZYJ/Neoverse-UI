@@ -170,7 +170,7 @@ export const toastPreviewCopy = {
   ),
   notification: localized(
     'Your changes are saved. Review the preview before sharing it with your team.',
-    '修改已保存。分享给团队之前，请先检查预览。',
+    '修改已保存。分享给团队之前，请先检查桌面端与移动端预览，确认状态反馈无误。',
   ),
 };
 

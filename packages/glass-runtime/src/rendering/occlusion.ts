@@ -54,14 +54,15 @@ export const occlusionSamplePoints = (rect: {
   ];
 };
 
-const occluderRadius = (element: Element, view: Window): number => {
+const occluderRadius = (element: Element, view: Window, rect: DOMRect): number => {
   const style = view.getComputedStyle(element);
-  return Math.max(
+  const rawRadius = Math.max(
     parsePixels(style.borderTopLeftRadius, 0),
     parsePixels(style.borderTopRightRadius, 0),
     parsePixels(style.borderBottomRightRadius, 0),
     parsePixels(style.borderBottomLeftRadius, 0),
   );
+  return Math.min(rawRadius, rect.width / 2, rect.height / 2);
 };
 
 const intersectionArea = (rect: DOMRect, bounds: DOMRect): number => {
@@ -115,7 +116,7 @@ export const collectOccluders = (
       top: rect.top,
       width: rect.width,
       height: rect.height,
-      radius: occluderRadius(entry, view),
+      radius: occluderRadius(entry, view, rect),
       area: intersectionArea(rect, bounds),
       topmost: entry.getAttribute('data-neoverse-glass-occluder') === 'topmost',
     });

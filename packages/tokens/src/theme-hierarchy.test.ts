@@ -209,3 +209,18 @@ test('keeps sm and md shadows visibly separated from xs', async () => {
     expect(shadowReach(mdGroundingLayer)).toBeGreaterThan(shadowReach(smGroundingLayer));
   }
 });
+
+test('resets every light theme custom property in dark theme to prevent system-dark leaks', async () => {
+  const [lightSource, darkSource] = await Promise.all([
+    readTokenCss('themes/light.css'),
+    readTokenCss('themes/dark.css'),
+  ]);
+  const extractProperties = (source: string) =>
+    new Set([...source.matchAll(/^\s*(--neoverse-[\w-]+):/gm)].map((match) => match[1]));
+
+  const lightProperties = extractProperties(lightSource);
+  const darkProperties = extractProperties(darkSource);
+  const missingInDark = [...lightProperties].filter((property) => !darkProperties.has(property));
+
+  expect(missingInDark).toEqual([]);
+});

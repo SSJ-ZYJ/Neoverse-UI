@@ -378,7 +378,10 @@ Effective props are the session's overrides over the specimen's explicit initial
 Select and Checkbox suspend their value editors while the specimen is disabled;
 Select does the same while read-only. Neither clears the current value. The
 Tabs editor lists enabled tabs only; the preview retains its disabled tab so
-keyboard navigation still demonstrates skipping it.
+keyboard navigation still demonstrates skipping it. Variant-specific state
+editors appear only for the variant that owns them, so SegmentedControl lists
+its selected option, selected theme, or selected language one at a time instead
+of offering controls that cannot affect the current preview.
 
 ### Composition presets
 

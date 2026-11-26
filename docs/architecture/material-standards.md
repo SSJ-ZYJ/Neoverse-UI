@@ -33,6 +33,30 @@ when available and otherwise uses its render location. Optional Glass backends
 skip automatic Solid surfaces, including internal form controls and native
 Prose tables and disclosures.
 
+## Material runtime and switching
+
+The Playground, the frame route and the React fixture resolve material through
+one framework-neutral module. A stored `material` preference initializes the
+`data-neoverse-material` attribute in the pre-paint startup script, so the first
+paint already uses the selected material. A `?material=` value is a temporary
+preview resolved by the same policy and never writes a preference; a reload
+keeps the last interactive choice. Material stays independent of Theme, Locale,
+Stage background and Showcase surface, and the attribute remains the only live
+contract.
+
+The toolbar exposes Aurora Glass and Solid through the shared SegmentedControl
+on desktop and a cycle control on touch layouts. Shell chrome, Explorer,
+Inspector, Stage and Drawer follow the global attribute. Specimens that need
+optical comparison keep explicit presets, and the Inspector keeps a local
+`surface` override above the global mode. Switching does not reset the specimen
+session, form values, selection, focus, scroll position or Stage zoom.
+
+Switching uses the appearance snapshot (`material-fade`) instead of
+interpolating blur, refraction or shadows. Reduced motion and engines without
+the View Transition API swap immediately. Rapid requests settle on the last
+selection: a canceled snapshot paints the newest request, and no optical edge,
+overlay flash or layout jump survives the swap.
+
 ## Solid material
 
 Solid is an independent opaque material, not the reduced-transparency version
@@ -44,8 +68,14 @@ The [component matrix](../../contracts/component-matrix.json) records which
 roles each public component owns. Control and Inset keep functional focus and
 validation feedback; selected checkboxes, radios and switches use the paired
 Primary fill and foreground. Selection distinguishes transient feedback from
-the persistent active item. Status and placeholder fills use opaque theme
-colors, without sampled blur or a glow.
+the persistent active item. Selection plates use
+`--neoverse-color-blue-100` in Light and a soft azure mixed from the deep
+accent and the Raised surface in Dark; both carry the primary text role as ink.
+Selection indicators keep the accent. Status badges keep their semantic hue in
+Solid: bright status ink on the dark tint, deep status ink on the light tint.
+Neutral badge and Notice text stays secondary in both materials. No separate
+accent hue is introduced; status and placeholder fills use opaque theme colors,
+without sampled blur or a glow.
 
 Tabs without a `variant` use an automatic Group track and Selection indicator.
 `variant="glass"` explicitly preserves the Glass track and indicator;
@@ -144,6 +174,14 @@ Reduced transparency disables the renderer. The CSS fallback uses alpha-only
 gradient masks and backdrop brightness. The historical `backend: 'native'`
 option remains available for compatibility, but must not be used as the repair
 approach prohibited below.
+
+The renderer activates only when a drawn, explicit Glass surface exists. A page
+whose automatic surfaces all resolve to Solid owns no canvas, WebGL context,
+shader program or buffer, and keeps only the mutation and media observers.
+Adding a Glass surface activates one shared canvas on the next frame; removing
+the last one releases the context, the native SVG filters and cached maps unless
+a whole-page transition suspends the runtime first. `mount()`, `refresh()`,
+`suspend()`, `resume()` and `destroy()` keep their public contract.
 
 The canvas is fixed to the viewport and the rim is painted in viewport
 coordinates, so every scroll request has to reach it. The frame cap defers a
@@ -366,14 +404,17 @@ visible on a flat backdrop. It retains the Light-tier fill alpha, backdrop
 blur, and inset shadows without adding a border. Status variants retain their
 semantic tints.
 
-Toast uses the Standard tier in all three `presentation` modes. `compact`
-shows a semantic icon and a brief message in a pill. `action` uses a rounded
-bar with an inline action and is inferred if an action is supplied without an
-explicit presentation. `notification` wraps longer copy, moves any action
-below the message, and always shows a dismiss button. Compact and action
-toasts dismiss after four seconds by default; notification stays open by
-default. Setting `duration` to zero keeps any Toast open and shows its
-dismiss button.
+Toast uses the Standard tier in all three `presentation` modes and anchors a
+sibling Standard-tier circular dismiss badge (`--neoverse-toast-dismiss-*`)
+across the upper-right corner (`-size / 3` block-start and inline-end offset)
+with right-side content clearance. Keeping the body surface and dismiss badge as
+sibling material planes lets both run live backdrop blur and lets the shared
+edge renderer mask the toast corner rim cleanly beneath the circular button.
+`compact` shows a semantic icon and a brief message in a single-line pill,
+`action` uses a rounded card bar with an inline action beside the message, and
+`notification` wraps longer copy and moves any action below the message. Compact
+and action toasts auto-dismiss after four seconds by default unless dismissed
+earlier; `notification` and `duration` zero keep any Toast open.
 
 Disclosure panels use the shared directional inset edge roles in every state,
 together with the shared control shadow. The directional catches separate the

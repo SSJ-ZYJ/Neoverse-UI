@@ -116,6 +116,14 @@ test('exposes canonical component token namespaces', () => {
     );
   }
   expect(cssVariables.components.notice.info.background).toBe('--neoverse-notice-info-background');
+  expect(cssVariables.components.toast).toMatchObject({
+    dismissSize: '--neoverse-toast-dismiss-size',
+    dismissIconSize: '--neoverse-toast-dismiss-icon-size',
+    dismissBackground: '--neoverse-toast-dismiss-background',
+    dismissBorder: '--neoverse-toast-dismiss-border',
+    dismissShadow: '--neoverse-toast-dismiss-shadow',
+    dismissForeground: '--neoverse-toast-dismiss-foreground',
+  });
   expect(cssVariables.components.tooltip.accentTint).toBe('--neoverse-tooltip-accent-tint');
   expect(cssVariables.components.drawer).toEqual({
     width: '--neoverse-drawer-width',

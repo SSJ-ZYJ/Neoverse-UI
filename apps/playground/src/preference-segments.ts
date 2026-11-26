@@ -1,4 +1,25 @@
+import { glassMaterial } from '@neoverse-ui/tokens';
+import { materialModes } from './material-runtime';
 import { appCopy, type Locale, localize, localized } from './playground-content';
+
+export const materialNames = {
+  glass: localized(glassMaterial.name.en, glassMaterial.name.zh),
+  solid: localized('Solid', '实体'),
+} as const;
+
+/** Short labels for the toolbar plate; the accessible name keeps the full material name. */
+export function materialSegments(locale: Locale) {
+  const short = {
+    glass: localized('Glass', '玻璃'),
+    solid: localized('Solid', '实体'),
+  } as const;
+
+  return materialModes.map((value) => ({
+    value,
+    label: localize(short[value], locale),
+    ariaLabel: localize(materialNames[value], locale),
+  }));
+}
 
 export const themeGlyphPaths = {
   system: 'M3 4h18v13H3V4Zm4 16h10m-5-3v3',

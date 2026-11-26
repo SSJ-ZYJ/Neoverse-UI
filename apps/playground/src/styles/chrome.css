@@ -321,9 +321,15 @@ html[lang='en'] .playground-explorer__link .ui-navigation-item__label {
 }
 
 .playground-explorer__leaf {
-  color: var(--neoverse-color-text-secondary);
   font-size: var(--neoverse-font-size-xs);
   font-weight: var(--neoverse-font-weight-regular);
+}
+
+/* The active row receives its ink from the shared Navigation selection recipe;
+   the English secondary term follows it instead of keeping the muted tone. */
+.playground-explorer__link[aria-current] .playground-catalogue-label__secondary {
+  color: inherit;
+  opacity: 0.82;
 }
 
 .playground-explorer__specimens {

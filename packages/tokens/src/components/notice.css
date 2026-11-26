@@ -26,5 +26,11 @@
     --neoverse-toast-accent: var(--neoverse-color-text-muted);
     --neoverse-toast-background: var(--neoverse-material-glass-elevated-background);
     --neoverse-toast-foreground: var(--neoverse-color-text-primary);
+    --neoverse-toast-dismiss-size: var(--neoverse-space-6);
+    --neoverse-toast-dismiss-icon-size: var(--neoverse-icon-size-md);
+    --neoverse-toast-dismiss-background: var(--neoverse-material-glass-elevated-background);
+    --neoverse-toast-dismiss-border: var(--neoverse-material-glass-elevated-border);
+    --neoverse-toast-dismiss-shadow: var(--neoverse-shadow-float);
+    --neoverse-toast-dismiss-foreground: var(--neoverse-color-text-secondary);
   }
 }

@@ -95,7 +95,7 @@ const showcaseOptions = computed(() =>
         :aria-label="localize(copy.surfaceLabel, locale)"
         :model-value="props.surface"
         :options="showcaseOptions"
-        surface="glass-subtle"
+        surface="auto"
         @update:model-value="emit('surface', $event)"
       />
     </div>

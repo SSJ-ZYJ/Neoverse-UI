@@ -73,4 +73,46 @@ describe('business interaction adapters', () => {
     expect(close).toHaveBeenCalledOnce();
     wrapper.unmount();
   });
+
+  it('renders an accessible close button across all toast presentations and requests dismissal on click', async () => {
+    for (const presentation of ['compact', 'action', 'notification'] as const) {
+      const open = ref(true);
+      const wrapper = mount(
+        {
+          setup: () => () =>
+            h(
+              UiToast,
+              {
+                open: open.value,
+                presentation,
+                duration: presentation === 'notification' ? 0 : 4000,
+                message: 'Changes saved.',
+                dismissLabel: 'Dismiss notification',
+                'onUpdate:open': (value: boolean) => {
+                  open.value = value;
+                },
+              },
+              presentation === 'action'
+                ? { action: () => h('button', { type: 'button' }, 'View') }
+                : undefined,
+            ),
+        },
+        { attachTo: document.body },
+      );
+      await nextTick();
+      await nextTick();
+
+      const dismiss = document.querySelector<HTMLButtonElement>(
+        'button[aria-label="Dismiss notification"]',
+      );
+      expect(dismiss).not.toBeNull();
+      expect(dismiss?.querySelector('svg')).not.toBeNull();
+      expect(dismiss?.textContent?.trim()).toBe('');
+
+      dismiss?.click();
+      await nextTick();
+      expect(open.value).toBe(false);
+      wrapper.unmount();
+    }
+  });
 });

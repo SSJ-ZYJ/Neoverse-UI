@@ -194,6 +194,7 @@ class GlassRendererImpl implements GlassRenderer {
   private transparencyQuery: MediaQueryList | undefined;
   private systemSchemeQuery: MediaQueryList | undefined;
   private animationFrame: number | undefined;
+  private activationProbeQueued = false;
   private paintedEdges = false;
   private contextLost = false;
   private uncappedRefresh = false;
@@ -234,6 +235,10 @@ class GlassRendererImpl implements GlassRenderer {
     // Responsive colors are checked against the root tokens when we paint.
     // Geometry changes must not discard them or restart the frame clock.
     this.invalidateFrame();
+    if (!this.active) {
+      this.queueActivationProbe();
+      return;
+    }
     this.scheduleRefresh(false);
   };
   private readonly handleElementResize = (): void => {
@@ -276,6 +281,10 @@ class GlassRendererImpl implements GlassRenderer {
   };
   private readonly handleToggle = (): void => {
     this.invalidateScene();
+    if (!this.active) {
+      this.queueActivationProbe();
+      return;
+    }
     this.scheduleRefresh(true);
   };
   private readonly handleSystemSchemeChange = (): void => {
@@ -285,13 +294,17 @@ class GlassRendererImpl implements GlassRenderer {
   private readonly handleMutations = (records: MutationRecord[]): void => {
     if (records.some((record) => record.target === this.canvas)) this.syncChromaVisibility();
     if (records.every((record) => !this.isSceneMutation(record))) {
-      if (this.hasLiveDocumentEdgeMotion()) {
+      if (this.active && this.hasLiveDocumentEdgeMotion()) {
         this.scheduleRefresh(true);
       }
       return;
     }
 
     this.mutationRevision += 1;
+    if (!this.active) {
+      this.queueActivationProbe();
+      return;
+    }
     this.scheduleRefresh(true);
   };
 
@@ -304,10 +317,25 @@ class GlassRendererImpl implements GlassRenderer {
       target === this.colorProbe ||
       target === this.canvas ||
       target === this.chromaCanvas ||
+      (record.attributeName === glassRendererAttribute &&
+        element === this.ownerDocument?.documentElement) ||
       element?.closest('[data-neoverse-particle-capture]') ||
       (record.attributeName !== materialModeAttribute && element?.closest(motionStaticSelector))
     ) {
       return false;
+    }
+    if (record.type === 'childList') {
+      // The renderer's own canvases and probe appear and disappear with the
+      // optics; they never change the scene that needs an edge pass.
+      const owned = Array.from(record.addedNodes).concat(Array.from(record.removedNodes));
+      if (
+        owned.length > 0 &&
+        owned.every(
+          (node) => node === this.canvas || node === this.chromaCanvas || node === this.colorProbe,
+        )
+      ) {
+        return false;
+      }
     }
     if (record.type !== 'attributes') return true;
     const name = record.attributeName ?? '';
@@ -372,7 +400,7 @@ class GlassRendererImpl implements GlassRenderer {
     if (event.matches) {
       this.deactivate();
     } else if (this.mounted && !this.active && !this.contextLost) {
-      this.activate();
+      this.refresh(true);
     }
   };
   private readonly handleContextLoss = (event: Event): void => {
@@ -396,8 +424,9 @@ class GlassRendererImpl implements GlassRenderer {
     if (!this.mounted || !this.contextLost) return;
 
     this.discardLostContext();
+    this.observeMutations();
     if (this.transparencyQuery?.matches !== true) {
-      this.activate();
+      this.refresh(true);
     }
   };
 
@@ -431,10 +460,17 @@ class GlassRendererImpl implements GlassRenderer {
     }
     view?.addEventListener('scroll', this.handleScroll, { passive: true });
     view?.addEventListener('resize', this.handleViewportResize);
-    this.activate();
+    // Observation starts without optics: a page with no eligible Glass surface
+    // must not create a canvas, GL context, program or buffer.
+    this.removeStaleCanvas();
+    this.observeMutations();
+    if (this.suspended) this.activateIfNeeded();
+    else this.refresh(true);
   }
 
   public refresh(force = true): void {
+    if (!this.mounted) return;
+    if (!this.active && !this.activateIfNeeded()) return;
     if (this.active) {
       // The public contract stays forceful; pass false to let the frame cache deduplicate.
       this.render(force);
@@ -476,27 +512,83 @@ class GlassRendererImpl implements GlassRenderer {
     getWindow(this.ownerDocument)?.removeEventListener('scroll', this.handleScroll);
     getWindow(this.ownerDocument)?.removeEventListener('resize', this.handleViewportResize);
     this.deactivate();
+    this.disconnectMutationObserver();
     this.topLayer = undefined;
     if (this.ownerDocument !== undefined && activeRenderers.get(this.ownerDocument) === this) {
       activeRenderers.delete(this.ownerDocument);
     }
   }
 
-  private activate(): void {
+  /** Allocate optics only when a drawn, eligible Glass surface exists. */
+  private activateIfNeeded(): boolean {
+    if (!this.mounted || this.active || this.contextLost) return false;
+    if (this.transparencyQuery?.matches === true) return false;
+    if (!this.hasEffectiveGlass()) return false;
+    return this.activate();
+  }
+
+  private hasEffectiveGlass(): boolean {
+    if (this.ownerDocument === undefined) return false;
+    const view = getWindow(this.ownerDocument);
+    if (view === undefined) return false;
+    const styleCache = new Map<Element, CSSStyleDeclaration>();
+    const getStyle: StyleGetter = (element) => {
+      let cached = styleCache.get(element);
+      if (cached === undefined) {
+        cached = view.getComputedStyle(element);
+        styleCache.set(element, cached);
+      }
+      return cached;
+    };
+    const topLayerCache = new Map<Element, boolean>();
+    const topLayer = this.topLayer ?? createTopLayerHelpers(this.ownerDocument);
+    this.topLayer = topLayer;
+    const candidates = Array.from(this.ownerDocument.querySelectorAll<HTMLElement>(glassSelector));
+    return this.getGlassElements(candidates, getStyle, topLayerCache, topLayer).some((element) => {
+      const rect = element.getBoundingClientRect();
+      return rect.width > 0 && rect.height > 0;
+    });
+  }
+
+  /** Coalesce structural changes into one selector probe per task, without a frame loop. */
+  private queueActivationProbe(): void {
+    if (
+      !this.mounted ||
+      this.active ||
+      this.suspended ||
+      this.contextLost ||
+      this.activationProbeQueued
+    ) {
+      return;
+    }
+    this.activationProbeQueued = true;
+    const view = getWindow(this.ownerDocument);
+    const enqueue = view?.queueMicrotask ?? globalThis.queueMicrotask;
+    const run = (): void => {
+      this.activationProbeQueued = false;
+      // Paint through the shared frame queue so the probe never races a
+      // mutation batch that is about to request the same edge pass.
+      if (this.activateIfNeeded() && !this.suspended) this.scheduleRefresh(true);
+    };
+    if (typeof enqueue === 'function') enqueue(run);
+    else view?.setTimeout(run, 0);
+  }
+
+  private activate(): boolean {
     if (
       !this.mounted ||
       this.active ||
       this.ownerDocument === undefined ||
       this.ownerDocument.body === null
     ) {
-      return;
+      return false;
     }
 
     // A new GL context has no previous frame to reuse.
     this.invalidateScene();
     this.removeStaleCanvas();
     if (this.transparencyQuery?.matches === true) {
-      return;
+      return false;
     }
 
     const canvas = this.ownerDocument.createElement('canvas');
@@ -513,7 +605,7 @@ class GlassRendererImpl implements GlassRenderer {
 
     const gl = this.getContext(canvas);
     if (gl === undefined) {
-      return;
+      return false;
     }
 
     const program = createProgram(gl);
@@ -522,7 +614,7 @@ class GlassRendererImpl implements GlassRenderer {
       if (program !== undefined) {
         gl.deleteProgram(program);
       }
-      return;
+      return false;
     }
 
     const locations: ProgramLocations = {
@@ -578,11 +670,10 @@ class GlassRendererImpl implements GlassRenderer {
     gl.bufferData(gl.ARRAY_BUFFER, quadPositions, gl.STATIC_DRAW);
     gl.enable(gl.BLEND);
     gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-    this.observe();
+    this.observeElements();
     this.active = true;
-    // A fresh GL context has no previous frame to reuse; a suspended mount
-    // still defers its first paint until resume.
-    if (!this.suspended) this.refresh(true);
+    // A fresh GL context has no previous frame to reuse; the caller paints.
+    return true;
   }
 
   private removeStaleCanvas(): void {
@@ -686,13 +777,21 @@ class GlassRendererImpl implements GlassRenderer {
     }
   }
 
-  private disconnectObservers(): void {
+  private disconnectSurfaceObservers(): void {
     this.resizeObserver?.disconnect();
     this.resizeObserver = undefined;
     this.observedGlassElements.clear();
     this.observedTableCells.clear();
+  }
+
+  private disconnectMutationObserver(): void {
     this.mutationObserver?.disconnect();
     this.mutationObserver = undefined;
+  }
+
+  private disconnectObservers(): void {
+    this.disconnectSurfaceObservers();
+    this.disconnectMutationObserver();
   }
 
   private restoreRendererAttribute(): void {
@@ -729,12 +828,14 @@ class GlassRendererImpl implements GlassRenderer {
     this.contextLost = false;
   }
 
-  private deactivate(): void {
+  /** Remove every optical resource; structural observation stays installed. */
+  private releaseOptics(): void {
+    this.cancelScheduledRefresh();
+    this.paintedEdges = false;
     this.uncappedRefresh = false;
     this.wasMoving = false;
-    this.cancelScheduledRefresh();
     this.animatedElements.clear();
-    this.disconnectObservers();
+    this.disconnectSurfaceObservers();
 
     if (this.canvas !== undefined) {
       this.canvas.removeEventListener('webglcontextlost', this.handleContextLoss);
@@ -767,6 +868,10 @@ class GlassRendererImpl implements GlassRenderer {
     this.active = false;
   }
 
+  private deactivate(): void {
+    this.releaseOptics();
+  }
+
   private getContext(canvas: HTMLCanvasElement): GlassGl | undefined {
     try {
       const webgl2 = canvas.getContext('webgl2', {
@@ -789,16 +894,10 @@ class GlassRendererImpl implements GlassRenderer {
     }
   }
 
-  private observe(): void {
-    if (this.ownerDocument === undefined || this.canvas === undefined) return;
+  private observeMutations(): void {
+    if (this.ownerDocument === undefined) return;
 
-    const view = getWindow(this.ownerDocument);
-    const ResizeObserverConstructor = view?.ResizeObserver;
-    if (ResizeObserverConstructor !== undefined) {
-      this.resizeObserver = new ResizeObserverConstructor(this.handleElementResize);
-    }
-
-    const MutationObserverConstructor = view?.MutationObserver;
+    const MutationObserverConstructor = getWindow(this.ownerDocument)?.MutationObserver;
     const documentElement = this.ownerDocument.documentElement;
     if (MutationObserverConstructor !== undefined && documentElement !== null) {
       const mutationObserver = new MutationObserverConstructor(this.handleMutations);
@@ -809,6 +908,15 @@ class GlassRendererImpl implements GlassRenderer {
         attributeFilter: [...glassMutationAttributes],
       });
       this.mutationObserver = mutationObserver;
+    }
+  }
+
+  private observeElements(): void {
+    if (this.ownerDocument === undefined || this.canvas === undefined) return;
+
+    const ResizeObserverConstructor = getWindow(this.ownerDocument)?.ResizeObserver;
+    if (ResizeObserverConstructor !== undefined && this.resizeObserver === undefined) {
+      this.resizeObserver = new ResizeObserverConstructor(this.handleElementResize);
     }
   }
 
@@ -1044,7 +1152,12 @@ class GlassRendererImpl implements GlassRenderer {
         topLayerCache,
         topLayer,
       );
-      if (elements.length === 0 && !this.paintedEdges) return;
+      if (elements.length === 0) {
+        // The last effective Glass surface disappeared: remove the canvas and
+        // release the GL context instead of keeping an empty renderer alive.
+        this.releaseOptics();
+        return;
+      }
       const measuredRects = new Map(candidates.map(({ element, rect }) => [element, rect]));
       const visibleCandidates = candidates
         .filter(({ rect }) => intersectsViewport(rect, viewport))

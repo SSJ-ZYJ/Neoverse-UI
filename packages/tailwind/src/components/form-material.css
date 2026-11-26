@@ -6,11 +6,20 @@
         inset 0 0 0 var(--neoverse-border-width-thin) var(--neoverse-material-solid-field-edge),
         var(--neoverse-form-control-validation-shadow);
       --neoverse-color-focus-ring: var(--neoverse-material-solid-focus);
-      --neoverse-form-control-focus-background: var(--neoverse-material-solid-inset);
-      --neoverse-form-control-disabled-background: var(--neoverse-material-solid-inset);
-      --neoverse-form-control-readonly-background: var(--neoverse-material-solid-inset);
-      /* The shared hover state lays this wash over the opaque inset fill. */
-      --neoverse-form-control-hover-background: var(--neoverse-solid-hover-wash);
+    }
+
+    /* The token layer declares the field and choice aliases on these same
+       elements, so their fill and hover are painted as properties here instead
+       of re-declaring a variable that would lose to that layer. */
+    @media (hover: hover) {
+      :where(:scope, :scope *):is(.ui-input, .ui-textarea, .ui-select):not(
+          :disabled,
+          [aria-disabled='true'],
+          [readonly],
+          [aria-readonly='true']
+        ):hover {
+        background: var(--neoverse-solid-hover-wash) var(--neoverse-material-solid-inset);
+      }
     }
 
     :where(:scope, :scope *):is(
@@ -22,10 +31,7 @@
     }
 
     :where(:scope, :scope *).ui-choice__control {
-      --neoverse-choice-control-background: var(--neoverse-material-solid-inset);
-      --neoverse-choice-control-hover-background: var(--neoverse-solid-hover-wash)
-        var(--neoverse-material-solid-inset);
-      --neoverse-form-control-disabled-background: var(--neoverse-material-solid-inset);
+      background: var(--neoverse-material-solid-inset);
       --neoverse-choice-control-effective-shadow: 0 0 transparent;
       --neoverse-choice-control-active-shadow: 0 0 transparent;
       --neoverse-control-silhouette: var(--neoverse-material-solid-field-edge);
@@ -39,11 +45,16 @@
       backdrop-filter: none;
     }
 
+    @media (hover: hover) {
+      :where(:scope, :scope *).ui-choice:not([data-disabled='true'], [data-readonly='true']):hover
+        .ui-choice__control {
+        background: var(--neoverse-solid-hover-wash) var(--neoverse-material-solid-inset);
+      }
+    }
+
     @media (forced-colors: active) {
       :where(:scope, :scope *).ui-choice__control {
-        --neoverse-choice-control-background: Canvas;
-        --neoverse-choice-control-hover-background: Canvas;
-        --neoverse-form-control-disabled-background: Canvas;
+        background: Canvas;
         --neoverse-choice-control-active-background: Highlight;
         --neoverse-choice-control-active-foreground: HighlightText;
         --neoverse-choice-control-accent: Highlight;
@@ -51,6 +62,13 @@
         --neoverse-switch-thumb-active-background: HighlightText;
         --neoverse-control-silhouette: ButtonText;
         forced-color-adjust: none;
+      }
+
+      @media (hover: hover) {
+        :where(:scope, :scope *).ui-choice:not([data-disabled='true'], [data-readonly='true']):hover
+          .ui-choice__control {
+          background: Canvas;
+        }
       }
     }
 

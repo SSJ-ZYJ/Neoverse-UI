@@ -545,7 +545,8 @@
         :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
           .ui-overlay-panel,
           .ui-select__popover,
-          .ui-context-menu__submenu
+          .ui-context-menu__submenu,
+          .ui-toast__dismiss
         )
       ) {
       position: relative;
@@ -554,7 +555,13 @@
     /* Keep the environmental refraction field behind the material content.
        It should tint the surface, never wash out readable text or controls. */
     :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
-      > :not(.ui-navigation-item__indicator, .ui-tabs__indicator, .ui-pagination__indicator) {
+      > :not(
+        .ui-navigation-item__indicator,
+        .ui-tabs__indicator,
+        .ui-pagination__indicator,
+        .ui-toast__dismiss,
+        .ui-toast__dismiss-wash
+      ) {
       position: relative;
       z-index: 1;
     }

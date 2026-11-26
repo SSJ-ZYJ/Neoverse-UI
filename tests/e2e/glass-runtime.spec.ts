@@ -565,3 +565,61 @@ test('native and fallback popovers keep a narrow local rim without duplicate can
     expect(result.matchedGl).toBe(false);
   }
 });
+
+test('a page without explicit Glass keeps the renderer dormant and releases optics again', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const state = { contexts: 0 };
+    (window as Window & { __solidOptics?: typeof state }).__solidOptics = state;
+    const original = HTMLCanvasElement.prototype.getContext;
+    HTMLCanvasElement.prototype.getContext = function (
+      this: HTMLCanvasElement,
+      type: string,
+      ...args: unknown[]
+    ) {
+      if (String(type).startsWith('webgl')) state.contexts += 1;
+      return original.apply(this, [type, ...args] as never);
+    } as typeof HTMLCanvasElement.prototype.getContext;
+  });
+
+  await page.goto('/frame?theme=light&lang=en&fps=0&material=solid#forms-textarea', {
+    waitUntil: 'domcontentloaded',
+  });
+  await page.waitForFunction(() => '__neoverseGlassRenderer' in window);
+  const root = page.locator('html');
+  await expect(root).toHaveAttribute('data-neoverse-material', 'solid');
+  await expect(root).not.toHaveAttribute('data-neoverse-glass-renderer');
+  await expect(page.locator(canvasSelector)).toHaveCount(0);
+  // Automatic surfaces may carry their Glass class as a fallback; only an
+  // explicit preset in a Solid scope would legitimately need an optical edge.
+  await expect(
+    page.locator(
+      '.material-glass-subtle:not(.material-auto), .material-glass-elevated:not(.material-auto), .material-glass-immersive:not(.material-auto), [data-surface^="glass-"]',
+    ),
+  ).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      () => (window as Window & { __solidOptics?: { contexts: number } }).__solidOptics?.contexts,
+    ),
+  ).toBe(0);
+
+  await page.evaluate(() => {
+    const probe = document.createElement('article');
+    probe.dataset.solidProbe = '';
+    probe.className = 'material-glass-elevated';
+    probe.style.cssText = 'position:fixed;top:24px;left:24px;width:160px;height:120px';
+    document.body.append(probe);
+  });
+  await expect(page.locator(canvasSelector)).toHaveCount(1);
+  await expect(root).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
+  expect(
+    await page.evaluate(
+      () => (window as Window & { __solidOptics?: { contexts: number } }).__solidOptics?.contexts,
+    ),
+  ).toBe(1);
+
+  await page.evaluate(() => document.querySelector('[data-solid-probe]')?.remove());
+  await expect(page.locator(canvasSelector)).toHaveCount(0);
+  await expect(root).not.toHaveAttribute('data-neoverse-glass-renderer');
+});

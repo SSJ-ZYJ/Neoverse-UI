@@ -49,6 +49,17 @@ ancestors, and excludes native top-layer elements (`:popover-open`, `:modal`,
 leaving `overlay: auto`) from the document WebGL canvas while keeping them as
 occluders so they never paint a duplicate lagging edge behind local CSS rims.
 
+## On-demand optical allocation
+
+`mount()` installs observation only. It allocates the shared canvas, WebGL
+context, shader program and buffers when the first drawn, eligible Glass surface
+appears, so a page whose automatic surfaces all resolve to Solid keeps no optical
+resources. The renderer responds to a Glass surface that mounts later and
+releases the canvas, context, native SVG filters and cached maps after the last
+eligible surface disappears; `destroy()` always releases them. A suspended
+renderer still activates the canvas if the page needs one, but paints on
+`resume()` or an explicit `refresh()`.
+
 ## Pausing edge repaints for page transitions
 
 `suspend()` and `resume()` are an incremental, opt-in lightweight path for

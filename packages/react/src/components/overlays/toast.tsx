@@ -1,9 +1,12 @@
+import {
+  presenceAppearClassName,
+  presenceDataAttribute,
+  presenceVanishClassName,
+} from '@neoverse-ui/motion';
 import { bridgePortalMaterialScope } from '@neoverse-ui/overlay-runtime';
 import { getSurfaceClass } from '@neoverse-ui/tokens';
 import {
-  type FocusEvent,
   type HTMLAttributes,
-  type PointerEvent,
   type ReactNode,
   useCallback,
   useEffect,
@@ -13,7 +16,7 @@ import {
 } from 'react';
 import { createPortal } from 'react-dom';
 import type { NoticeVariant } from '../display/notice.js';
-import { UiPresence } from '../motion/presence.js';
+import { useUiPresence } from '../motion/presence.js';
 
 export interface UiToastProps extends Omit<HTMLAttributes<HTMLDivElement>, 'onChange'> {
   open: boolean;
@@ -39,18 +42,16 @@ export function UiToast({
   onOpenChange,
   className,
   children,
-  onPointerEnter,
-  onPointerLeave,
-  onFocus,
-  onBlur,
   ...rest
 }: UiToastProps) {
   const hasAction = action !== undefined && action !== null && typeof action !== 'boolean';
   const presentation = requestedPresentation ?? (hasAction ? 'action' : 'compact');
   const duration = requestedDuration ?? (presentation === 'notification' ? 0 : 4000);
   const [mounted, setMounted] = useState(false);
+  const presence = useUiPresence(open);
   const materialSource = useRef<HTMLSpanElement>(null);
   const host = useRef<HTMLDivElement>(null);
+  const frame = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const callback = useRef(onOpenChange);
   callback.current = onOpenChange;
@@ -70,6 +71,24 @@ export function UiToast({
     resume();
     return pause;
   }, [resume, pause]);
+  useEffect(() => {
+    const node = frame.current;
+    if (!presence.mounted || !node) return;
+    const handleFocusOut = (event: FocusEvent) => {
+      if (event.relatedTarget instanceof Node && node.contains(event.relatedTarget)) return;
+      resume();
+    };
+    node.addEventListener('pointerenter', pause);
+    node.addEventListener('pointerleave', resume);
+    node.addEventListener('focusin', pause);
+    node.addEventListener('focusout', handleFocusOut);
+    return () => {
+      node.removeEventListener('pointerenter', pause);
+      node.removeEventListener('pointerleave', resume);
+      node.removeEventListener('focusin', pause);
+      node.removeEventListener('focusout', handleFocusOut);
+    };
+  }, [presence.mounted, pause, resume]);
   useLayoutEffect(() => {
     // Keep the invocation scope while mounted so the exit animation never
     // repaints from Solid back to the Glass tier.
@@ -79,56 +98,61 @@ export function UiToast({
   }, [mounted]);
 
   if (!mounted) return null;
+  const motionClassName = [presenceAppearClassName, presence.leaving ? presenceVanishClassName : '']
+    .filter(Boolean)
+    .join(' ');
+  const motionProps = { [presenceDataAttribute]: 'rise' } as const;
   const portal = createPortal(
     <div ref={host} className="ui-toast-container">
-      <UiPresence
-        {...rest}
-        show={open}
-        variant="rise"
-        className={[
-          `ui-toast ${getSurfaceClass('auto', 'overlay')}`,
-          `ui-toast--${variant}`,
-          className,
-        ]
-          .filter(Boolean)
-          .join(' ')}
-        data-surface="auto"
-        data-presentation={presentation}
-        data-neoverse-glass-occluder="topmost"
-        data-neoverse-surface-overflow="visible"
-        data-neoverse-surface-hover="static"
-        role={variant === 'danger' ? 'alert' : 'status'}
-        onPointerEnter={(event: PointerEvent<HTMLDivElement>) => {
-          pause();
-          onPointerEnter?.(event);
-        }}
-        onPointerLeave={(event: PointerEvent<HTMLDivElement>) => {
-          resume();
-          onPointerLeave?.(event);
-        }}
-        onFocus={(event: FocusEvent<HTMLDivElement>) => {
-          pause();
-          onFocus?.(event);
-        }}
-        onBlur={(event: FocusEvent<HTMLDivElement>) => {
-          resume();
-          onBlur?.(event);
-        }}
-      >
-        <span className="ui-toast__indicator" aria-hidden="true" />
-        <div className="ui-toast__message">{children ?? message}</div>
-        {hasAction && <div className="ui-toast__action">{action}</div>}
-        {(presentation === 'notification' || duration <= 0) && (
+      {presence.mounted && (
+        <div
+          {...rest}
+          ref={frame}
+          className={['ui-toast', `ui-toast--${variant}`, className].filter(Boolean).join(' ')}
+          data-presentation={presentation}
+          role={variant === 'danger' ? 'alert' : 'status'}
+        >
+          <div
+            {...motionProps}
+            ref={presence.ref}
+            className={`ui-toast__surface ${getSurfaceClass('auto', 'overlay')} ${motionClassName}`}
+            data-surface="auto"
+            data-neoverse-glass-occluder="topmost"
+            data-neoverse-surface-overflow="visible"
+            data-neoverse-surface-hover="static"
+          >
+            <span className="ui-toast__indicator" aria-hidden="true" />
+            <div className="ui-toast__message">{children ?? message}</div>
+            {hasAction && <div className="ui-toast__action">{action}</div>}
+          </div>
           <button
-            className="ui-toast__dismiss"
+            {...motionProps}
+            className={`ui-toast__dismiss ${getSurfaceClass('auto', 'overlay')} ${motionClassName}`}
             type="button"
+            data-surface="auto"
+            data-neoverse-glass-occluder="topmost"
+            data-neoverse-surface-overflow="visible"
+            data-neoverse-surface-hover="static"
             aria-label={dismissLabel}
             onClick={() => onOpenChange(false)}
           >
-            <span aria-hidden="true">×</span>
+            <span className="ui-toast__dismiss-wash" aria-hidden="true" />
+            <svg
+              className="ui-toast__dismiss-icon"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="m6 6 12 12M18 6 6 18" />
+            </svg>
           </button>
-        )}
-      </UiPresence>
+        </div>
+      )}
     </div>,
     document.body,
   );

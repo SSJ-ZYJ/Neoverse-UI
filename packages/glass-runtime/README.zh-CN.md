@@ -3,7 +3,7 @@
 [English](README.md)
 
 <!-- Source: packages/glass-runtime/README.md -->
-<!-- Source-SHA256: e687eba17971c1816a83bdb454cf857d5f1dfe0d537a8ff91c1326b07b03aad5 -->
+<!-- Source-SHA256: aeb6f0eaf803f0305dc4262e85220319ca675746c238f0d29799cf1fc80f75b7 -->
 
 Neoverse-UI 的共享、可选、方向性极光玻璃（Aurora Glass）边缘增强。极光玻璃是唯一的共享玻璃材质；Light / 轻薄、Standard / 标准与 Immersive / 厚实层级共享同一名称。展示标签从 `@neoverse-ui/tokens` 的 `glassMaterial` 获取；详见[材质标准](../../docs/zh-CN/architecture/material-standards.md)。包与渲染器标识保持稳定。
 
@@ -16,6 +16,10 @@ WebGL 渲染器还识别共享的 Input、Textarea、Select、选择控件与 Di
 动画跟踪会重绘移动的边缘与遮挡物。仅改变背景位置与纯绘制属性的动效仍留在 CSS；非 Glass、非遮挡物后代上的纯视觉动效（transform、opacity、filter）以及 `::view-transition` 遮罩不会空转边缘重绘。会改变布局的 CSS/WAAPI 动画（包括会推挤相邻 Glass 控件的非 Glass 兄弟元素、`details::details-content` 展开以及 `neoverse-motion-start` 事件）会在整份文档范围内被跟踪，并且活跃动效会绕过被动的 60 fps 滚动与视口缩放帧率上限，使边缘紧贴每一次屏幕刷新。元素 `ResizeObserver` 回调会在绘制前同步重绘，动效结束时必定补绘一帧落定帧。
 
 表面几何通过方向基向量跟踪二维 CSS 变换（`rotate`、`scale`、`zoom`、`transform` 矩阵），而不再使用膨胀的轴对齐包围盒；同时支持百分比圆角与 CSS §4.5 等比收紧圆角，在 `filter: blur(...)` 过渡期间平滑衰减边缘不透明度，避免 `position: fixed` 表面被非包含块的 `overflow: hidden` 祖先错误裁剪，并将原生顶层元素（`:popover-open`、`:modal`、离场中的 `overlay: auto`）排除在文档 WebGL 画布之外但继续作为遮挡物保留，防止在局部 CSS 边缘背后画出延迟的双重边缘。
+
+## 按需分配光学资源
+
+`mount()` 只建立观察。首个可绘制且符合条件的 Glass 表面出现时才分配共享画布、WebGL 上下文、Shader Program 与 Buffer，因此自动表面全部解析为实体的页面不保留光学资源。后挂载的 Glass 表面会触发激活；最后一个符合条件的表面消失后释放画布、上下文、原生 SVG 滤镜与缓存映射，`destroy()` 始终释放。暂停中的渲染器仍会在页面需要时分配画布，但只在 `resume()` 或显式 `refresh()` 时绘制。
 
 ## 为页面过渡暂停边缘重绘
 

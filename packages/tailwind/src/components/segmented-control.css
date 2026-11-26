@@ -342,7 +342,7 @@
 
 @layer neoverse-material-mode {
   @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
-    :where(:scope, :scope *).ui-segmented-control.material-auto {
+    :where(:scope, :scope *).ui-segmented-control:is(.material-auto, [data-surface='none']) {
       --neoverse-control-segmented-active-background: none;
       --neoverse-control-segmented-active-fill: var(--neoverse-material-solid-selection);
       --neoverse-control-segmented-active-filter: none;
@@ -360,13 +360,14 @@
       --neoverse-control-segmented-active-foreground: var(--neoverse-material-solid-selection-text);
     }
 
-    .ui-segmented-control.material-auto .ui-segmented-control__option {
+    .ui-segmented-control:is(.material-auto, [data-surface='none']) .ui-segmented-control__option {
       --neoverse-control-ghost-hover-background: var(--neoverse-material-solid-hover);
       --neoverse-control-ghost-active-background: var(--neoverse-material-solid-press);
     }
 
     @media (forced-colors: active) {
-      .ui-segmented-control.material-auto .ui-segmented-control__slider {
+      .ui-segmented-control:is(.material-auto, [data-surface='none'])
+        .ui-segmented-control__slider {
         border-color: Highlight;
       }
     }

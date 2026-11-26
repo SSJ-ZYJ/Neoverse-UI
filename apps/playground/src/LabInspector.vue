@@ -63,6 +63,7 @@ const groupLabels = {
 const fieldGroups = computed(() => {
   const groups = new Map<SpecimenField['group'], SpecimenField[]>();
   for (const field of props.session?.fields ?? []) {
+    if (!field.visible) continue;
     const fields = groups.get(field.group);
     if (fields) fields.push(field);
     else groups.set(field.group, [field]);

@@ -24,7 +24,7 @@ export type {
   OverlayViewport,
   ResolveAnchoredPositionOptions,
 } from './anchored-overlay/types.js';
-export { bridgeDialogMaterialScope, bridgePortalMaterialScope } from './material-scope.js';
 export { ownsDocumentModalKeyboard } from './document-modal.js';
 export { createDrawerController, type DrawerController } from './drawer.js';
+export { bridgeDialogMaterialScope, bridgePortalMaterialScope } from './material-scope.js';
 export { acquireNativeScrollbarHiding } from './scrollbar/scrollbar-owner.js';

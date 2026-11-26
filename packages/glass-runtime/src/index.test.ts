@@ -332,13 +332,18 @@ describe('Glass renderer core', () => {
     renderer.mount();
 
     expect(staleCanvas.isConnected).toBe(false);
-    expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(1);
+    // A page without an eligible Glass surface owns no renderer canvas.
+    expect(document.querySelectorAll('[data-neoverse-glass-renderer-canvas]')).toHaveLength(0);
     expect(gl.drawArrays).toHaveBeenCalledTimes(0);
   });
 
   it('removes the canvas and renderer marker on destroy', () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });
+    const glass = document.createElement('article');
+    glass.className = 'material-glass-subtle';
+    setRect(glass, {});
+    document.body.append(glass);
     const renderer = createTestRenderer();
     renderer.mount();
 

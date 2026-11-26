@@ -1,5 +1,10 @@
+import { readMaterialFromSearch } from './material-runtime';
 import { appCopy, formatLocalized, isLocale, type Locale, localize } from './playground-content';
-import { renderWorkspaceStartupScript, workspaceStartupMarkup } from './playground-startup';
+import {
+  renderMaterialStartupScript,
+  renderWorkspaceStartupScript,
+  workspaceStartupMarkup,
+} from './playground-startup';
 import { defaultThemeMode, isFrameTheme, readThemeModeFromSearch } from './theme-runtime';
 
 const builtAssets = {
@@ -27,6 +32,7 @@ export const resolvePlaygroundDocument = (
   const locale: Locale = explicitLocale ?? 'en';
   const explicitTheme = readThemeModeFromSearch(url.search);
   const theme = explicitTheme ?? defaultThemeMode;
+  const explicitMaterial = readMaterialFromSearch(url.search);
   if (frame && !isFrameTheme(theme)) {
     return { error: localize(appCopy.frame.invalidTheme, locale) };
   }
@@ -44,7 +50,9 @@ export const resolvePlaygroundDocument = (
   const scrollbar = react ? '' : ' class="scrollbar-immersive"';
   const shell = !frame && !react;
   const workspace = react ? '' : ` data-playground-view="${frame ? 'frame' : 'shell'}"`;
-  const startupScript = shell ? renderWorkspaceStartupScript(explicitTheme, explicitLocale) : '';
+  const startupScript = shell
+    ? renderWorkspaceStartupScript(explicitTheme, explicitLocale, explicitMaterial)
+    : renderMaterialStartupScript(explicitMaterial);
   const workspaceLink = react
     ? ''
     : `<link rel="stylesheet" href="${assets.workspaceStylesheet}" />`;
