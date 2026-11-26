@@ -19,11 +19,14 @@ const glassClassNames = [
   'material-glass-elevated',
   'material-glass-immersive',
 ] as const;
+export const materialModeAttribute = 'data-neoverse-material';
+const materialModeSelector = `[${materialModeAttribute}='glass'], [${materialModeAttribute}='solid']`;
+export const glassPresetSelector = glassClassNames.map((name) => `.${name}`).join(', ');
 const insetGlassSelector =
   '.ui-input, .ui-textarea, .ui-select, .ui-choice__control, table.ui-table, .neoverse-prose table, .ui-disclosure, .neoverse-prose details';
 const elevatedFormGlassSelector = '.ui-select__popover';
 export const glassSelector = [
-  ...glassClassNames.map((className) => `.${className}`),
+  glassPresetSelector,
   insetGlassSelector,
   elevatedFormGlassSelector,
 ].join(', ');
@@ -48,6 +51,10 @@ export type GlassStyle = {
   carrier: Color;
 };
 
+const isSolidAutoSurface = (element: Element): boolean =>
+  element.classList.contains('material-auto') &&
+  element.closest(materialModeSelector)?.getAttribute(materialModeAttribute) === 'solid';
+
 const getExplicitVariant = (element: Element): GlassVariant | undefined => {
   const materialClassName = glassClassNames.find((className) =>
     element.classList.contains(className),
@@ -58,7 +65,7 @@ const getExplicitVariant = (element: Element): GlassVariant | undefined => {
   return undefined;
 };
 
-export const getVariant = (element: Element): GlassVariant | undefined => {
+const getVariant = (element: Element): GlassVariant | undefined => {
   const explicit = getExplicitVariant(element);
   if (explicit !== undefined) return explicit;
   if (element.matches(insetGlassSelector)) return 'subtle';
@@ -66,7 +73,12 @@ export const getVariant = (element: Element): GlassVariant | undefined => {
   return undefined;
 };
 
-export const inheritsParentGlassEdge = (element: Element): boolean => {
+export const canRenderGlassEdge = (element: Element): boolean =>
+  !isSolidAutoSurface(element) &&
+  getVariant(element) !== undefined &&
+  !inheritsParentGlassEdge(element);
+
+const inheritsParentGlassEdge = (element: Element): boolean => {
   // An independent Aurora Glass surface owns its own refractive silhouette, even
   // when the layout around it is also Aurora Glass. In particular, Playground's
   // Aurora Glass specimen cards and standalone segmented controls must keep the
@@ -77,7 +89,7 @@ export const inheritsParentGlassEdge = (element: Element): boolean => {
 
   let ancestor = element.parentElement;
   while (ancestor !== null) {
-    if (getExplicitVariant(ancestor) !== undefined) {
+    if (getExplicitVariant(ancestor) !== undefined && !isSolidAutoSurface(ancestor)) {
       return true;
     }
     ancestor = ancestor.parentElement;

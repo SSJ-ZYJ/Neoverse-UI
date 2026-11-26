@@ -23,6 +23,8 @@ React 的原生事件名称、`className`、`htmlFor` 和 ref 遵循 React 约�
 
 `ButtonVariant` 在两端共享：`primary` 为主要蓝色，`secondary` 为次要样式，`ghost` 无填充；`success` 为成功绿，`warning` 为警告琥珀色，`danger` 为危险红，`accent` 为强调紫。
 
+两端从 `@neoverse-ui/tokens` 重导出 `MaterialMode`、`SurfacePreset` 和 `ControlSurfacePreset`。门禁校验重导出指向同一个类型声明。Button、Card 与 ControlSurface 的默认 `surface="auto"` 在服务端和客户端保持一致；优先级和嵌套规则见[共享材质规范](material-standards.md#shared-material-selection)。
+
 ## 命名内容和根元素
 
 - `UiNavigationItem`：Vue 的 `#suffix`、`#decoration` 对应 React 的 `suffix`、`decoration`。后缀位于标签内部，装饰内容位于内置指示器之前；`trailing` 仍是独立位置。

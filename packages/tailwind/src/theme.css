@@ -1,5 +1,10 @@
+@layer theme, base, components, utilities, neoverse-glass-nesting, neoverse-material-mode;
+
 @import '@neoverse-ui/motion/css';
 @import './components.css';
+
+/* These public presets are also emitted by adapters through the Tokens map. */
+@source inline('material-glass-{subtle,elevated,immersive}');
 
 @theme inline {
   --color-surface-canvas: var(--neoverse-color-surface-canvas);
@@ -748,50 +753,6 @@
       )::after {
       display: none;
     }
-  }
-
-  /* Independent Aurora Glass surfaces keep their own material even when a parent
-     happens to be Aurora Glass (for example, specimen cards inside an Aurora Glass section).
-     Only an explicitly inherited nested grouping opts out of its own plane.
-     Never flatten unmarked cards or surfaces: they must be visible at rest,
-     before hover, and also in reduced-transparency mode. */
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-      .ui-button
-    ):not(.ui-segmented-control)[data-neoverse-glass-nesting='inherit'] {
-    background-color: var(--neoverse-color-transparent);
-    background-image: none;
-    border: var(--neoverse-border-width-none) var(--neoverse-border-style-solid)
-      var(--neoverse-color-transparent);
-    box-shadow: var(--neoverse-shadow-none);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-
-  /* A child that deliberately inherits the parent plane must never acquire
-     a separate material merely because the pointer enters it. The WebGL
-     hover selector otherwise outranks the resting inherit contract. */
-  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-      .ui-button
-    ):not(.ui-segmented-control)[data-neoverse-glass-nesting='inherit']:hover {
-    background-color: var(--neoverse-color-transparent);
-    border-color: var(--neoverse-color-transparent);
-    box-shadow: var(--neoverse-shadow-none);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-      .ui-button
-    ):not(.ui-segmented-control)[data-neoverse-glass-nesting='inherit']::before,
-  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive)
-    :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
-      .ui-button
-    ):not(.ui-segmented-control)[data-neoverse-glass-nesting='inherit']::after {
-    display: none;
   }
 }
 /* stylelint-enable property-no-vendor-prefix */

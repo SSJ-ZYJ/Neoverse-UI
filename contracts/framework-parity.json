@@ -129,7 +129,7 @@
       "name": "UiTabs",
       "vueType": "TabsProps",
       "reactType": "UiTabsProps",
-      "props": ["options", "ariaLabel", "defaultValue"],
+      "props": ["options", "ariaLabel", "defaultValue", "variant"],
       "aliases": {
         "value": ["modelValue", "value"]
       }
@@ -474,12 +474,20 @@
     {
       "name": "SurfacePreset",
       "vueType": "SurfacePreset",
-      "reactType": "SurfacePreset"
+      "reactType": "SurfacePreset",
+      "tokenType": "SurfacePreset"
     },
     {
       "name": "ControlSurfacePreset",
       "vueType": "ControlSurfacePreset",
-      "reactType": "ControlSurfacePreset"
+      "reactType": "ControlSurfacePreset",
+      "tokenType": "ControlSurfacePreset"
+    },
+    {
+      "name": "MaterialMode",
+      "vueType": "MaterialMode",
+      "reactType": "MaterialMode",
+      "tokenType": "MaterialMode"
     },
     {
       "name": "FormControlValidation",
@@ -505,6 +513,11 @@
       "name": "BadgeSize",
       "vueType": "BadgeSize",
       "reactType": "BadgeSize"
+    },
+    {
+      "name": "TabsVariant",
+      "vueType": "TabsVariant",
+      "reactType": "UiTabsVariant"
     },
     {
       "name": "AvatarShape",

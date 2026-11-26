@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { attachSegmentedControlSlider } from '@neoverse-ui/motion';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import type { ComponentPublicInstance } from 'vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, watch } from 'vue';
 import type { SegmentedControlProps, SegmentedControlVariant, SegmentOption } from '../../types';
-import { getSurfaceClass } from '../surfaces/surface';
 
 defineOptions({ inheritAttrs: false });
 

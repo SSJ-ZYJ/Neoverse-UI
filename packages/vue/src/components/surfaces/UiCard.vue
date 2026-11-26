@@ -1,16 +1,16 @@
 <script setup lang="ts">
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { computed, useAttrs } from 'vue';
 import type { CardProps } from '../../types';
-import { getSurfaceClass } from './surface';
 
 defineOptions({ inheritAttrs: false });
 
 const props = withDefaults(defineProps<CardProps>(), {
   as: 'div',
-  surface: 'glass-elevated',
+  surface: 'auto',
 });
 const attrs = useAttrs();
-const classes = computed(() => ['ui-card', getSurfaceClass(props.surface)]);
+const classes = computed(() => ['ui-card', getSurfaceClass(props.surface, 'panel')]);
 const forwardedAttrs = computed(() => {
   const { class: _class, style: _style, ...rest } = attrs;
   return rest;

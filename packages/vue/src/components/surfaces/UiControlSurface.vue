@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useAttrs, useSlots } from 'vue';
 import type { ControlSurfaceProps } from '../../types';
-import { getSurfaceClass } from './surface';
 
 defineOptions({ inheritAttrs: false });
 
@@ -204,10 +204,10 @@ onBeforeUnmount(() => {
   cancelAnimationFrame(frame);
   cancelAnimationFrame(measurementFrame);
 });
-const surface = computed(() => props.surface ?? 'glass-subtle');
+const surface = computed(() => props.surface ?? 'auto');
 const classes = computed(() => [
   'ui-control-surface',
-  getSurfaceClass(surface.value),
+  getSurfaceClass(surface.value, 'group'),
   `ui-control-surface--scale-${props.scale}`,
 ]);
 const forwardedAttrs = computed(() => {

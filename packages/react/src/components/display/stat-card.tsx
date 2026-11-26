@@ -1,6 +1,6 @@
+import type { SurfacePreset } from '@neoverse-ui/tokens';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { UiSurface } from '../surfaces/surface.js';
-import type { SurfacePreset } from '../surfaces/surface-presets.js';
 
 export interface UiStatCardProps extends Omit<HTMLAttributes<HTMLDivElement>, 'children'> {
   label: ReactNode;

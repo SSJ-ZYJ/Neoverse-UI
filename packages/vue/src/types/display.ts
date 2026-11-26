@@ -22,9 +22,13 @@ export interface TabOption {
   disabled?: boolean;
 }
 
+/** Visual treatment for tabs without changing selection behavior */
+export type TabsVariant = 'glass' | 'underline' | 'pill';
+
 export interface TabsProps {
   options: readonly TabOption[];
   ariaLabel: string;
+  variant?: TabsVariant;
   modelValue?: string;
   defaultValue?: string;
 }

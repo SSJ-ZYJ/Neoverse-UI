@@ -8,11 +8,11 @@ import {
   showAnchoredOverlay,
   stopOverlayTracking,
 } from '@neoverse-ui/overlay-runtime';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
 import type { ButtonSize, ButtonVariant, PopoverProps } from '../../types';
 import { buttonSizeClasses, buttonVariantClasses } from '../actions/classes';
 import { presence } from '../motion/presence';
-import { getSurfaceClass } from '../surfaces/surface';
 
 const props = withDefaults(defineProps<PopoverProps>(), {
   open: undefined,

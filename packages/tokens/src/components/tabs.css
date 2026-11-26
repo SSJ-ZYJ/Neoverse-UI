@@ -25,6 +25,10 @@
     --neoverse-tabs-selected-foreground: var(--neoverse-effect-choice-selected-foreground);
     --neoverse-tabs-selected-shadow: var(--neoverse-effect-choice-selected-shadow);
     --neoverse-tabs-selected-filter: var(--neoverse-effect-choice-selected-filter);
+    --neoverse-tabs-underline-track-border: var(--neoverse-color-border-default);
+    --neoverse-tabs-underline-marker-color: var(--neoverse-color-accent-primary);
+    --neoverse-tabs-underline-marker-width: var(--neoverse-border-width-strong);
+    --neoverse-tabs-pill-track-fill: var(--neoverse-color-surface-subtle);
     --neoverse-tabs-panel-padding-block: var(--neoverse-space-4);
   }
 }

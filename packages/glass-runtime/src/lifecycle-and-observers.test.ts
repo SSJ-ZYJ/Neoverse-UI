@@ -139,6 +139,36 @@ describe('Glass renderer lifecycle and observers', () => {
     }
   });
 
+  it('clears the last Glass edge when its auto surface becomes Solid', async () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const region = document.createElement('section');
+    const card = document.createElement('article');
+    card.className = 'material-auto material-glass-elevated';
+    setRect(card, {});
+    region.append(card);
+    document.body.append(region);
+    const frames = installFrameQueue();
+    const renderer = createTestRenderer();
+    renderer.mount();
+    expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    gl.drawArrays.mockClear();
+    gl.clear.mockClear();
+
+    region.dataset.neoverseMaterial = 'solid';
+    await vi.waitFor(() => {
+      frames.flush(1000);
+      expect(gl.clear).toHaveBeenCalled();
+    });
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+
+    card.dataset.neoverseMaterial = 'glass';
+    await vi.waitFor(() => {
+      frames.flush(1100);
+      expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('reacts to dynamic Glass edge ownership attributes through the mutation observer', async () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });

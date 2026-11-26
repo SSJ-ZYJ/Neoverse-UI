@@ -16,6 +16,12 @@ import EmptyStatePreview from '../previews/EmptyStatePreview.vue';
 import { shapeLabel, sizeLabel, sizeOptions, surfaceLabel, surfaceOptions } from './shared';
 
 const tabsLabel = localized('Member sections', '成员页面分区');
+/** Appearance choices shared by the Tabs gallery and Inspector */
+export const tabsVariantOptions = [
+  { value: 'glass', label: localized('Glass', '玻璃') },
+  { value: 'underline', label: localized('Underline', '下划线') },
+  { value: 'pill', label: localized('Pill', '胶囊') },
+] as const;
 const tabOptions = [
   { value: 'overview', label: localized('Overview', '概览'), disabled: false },
   { value: 'disabled', label: localized('Disabled', '未启用'), disabled: true },
@@ -32,9 +38,16 @@ const localizedTabs = { en: memberTabOptions('en'), zh: memberTabOptions('zh') }
 
 /** The editable Tabs specimen */
 export const tabs = defineSpecimen<TabsProps, { modelValue: TabValue }>()({
-  initialProps: {},
+  initialProps: { variant: 'glass' },
   initialState: () => ({ modelValue: 'overview' }),
   controls: {
+    props: {
+      variant: {
+        kind: 'select',
+        label: localized('Appearance', '外观'),
+        options: tabsVariantOptions,
+      },
+    },
     state: {
       modelValue: {
         kind: 'select',
@@ -43,10 +56,11 @@ export const tabs = defineSpecimen<TabsProps, { modelValue: TabValue }>()({
       },
     },
   },
-  render: ({ state, setState, locale }) =>
+  render: ({ props, state, setState, locale }) =>
     h(
       UiTabs,
       {
+        variant: props.variant ?? 'glass',
         modelValue: state.modelValue,
         'onUpdate:modelValue': (value: string) => {
           const option = enabledTabs.find((entry) => entry.value === value);

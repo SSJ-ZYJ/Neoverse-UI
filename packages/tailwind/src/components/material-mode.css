@@ -1,0 +1,61 @@
+@layer neoverse-glass-nesting {
+  /* Mark descendants, not the owner itself. A Solid auto owner passes through
+     any Glass ancestry it received instead of introducing a new Glass plane. */
+  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive) > * {
+    --neoverse-material-borrowed: none;
+  }
+
+  :is(.material-glass-subtle, .material-glass-elevated, .material-glass-immersive):not(
+    .ui-button,
+    .ui-segmented-control
+  )[data-neoverse-glass-nesting='inherit'] {
+    background: var(--neoverse-material-borrowed, revert-layer);
+    border: var(--neoverse-material-borrowed, revert-layer);
+    box-shadow: var(--neoverse-material-borrowed, revert-layer);
+    -webkit-backdrop-filter: var(--neoverse-material-borrowed, revert-layer);
+    backdrop-filter: var(--neoverse-material-borrowed, revert-layer);
+
+    &::before,
+    &::after {
+      content: var(--neoverse-material-borrowed, revert-layer);
+    }
+  }
+}
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    .material-auto > * {
+      --neoverse-material-borrowed: inherit;
+    }
+
+    .material-auto {
+      box-shadow: var(--neoverse-material-surface-solid-shadow);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    .material-auto:not(.ui-button--ghost) {
+      background-color: var(--neoverse-material-surface-solid-background);
+    }
+
+    /* Solid is opaque immediately. Keep control feedback and scale transitions. */
+    .material-auto.ui-button:not(.ui-button--ghost) {
+      transition-property: --neoverse-button-tone-color;
+    }
+
+    .material-auto:not(.ui-button) {
+      background-image: none;
+      border: 0;
+      transition: none;
+
+      &::before,
+      &::after {
+        content: none;
+      }
+    }
+
+    .material-auto.ui-control-surface {
+      transition: var(--neoverse-control-surface-scale-transition, none);
+    }
+  }
+}

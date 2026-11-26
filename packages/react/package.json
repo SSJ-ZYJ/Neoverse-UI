@@ -38,7 +38,8 @@
   "dependencies": {
     "@neoverse-ui/motion": "^0.2.2",
     "@neoverse-ui/overlay-runtime": "^0.3.1",
-    "@neoverse-ui/tailwind": "^0.3.1"
+    "@neoverse-ui/tailwind": "^0.3.1",
+    "@neoverse-ui/tokens": "^0.3.1"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",

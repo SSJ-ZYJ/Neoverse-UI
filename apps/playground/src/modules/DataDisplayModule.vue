@@ -12,6 +12,7 @@ import {
 } from '@neoverse-ui/vue';
 import { ref } from 'vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
+import { tabsVariantOptions } from '../lab-specimens/data-display';
 import { lazyComponent } from '../lazy-component';
 import MaterialBackdrop from '../MaterialBackdrop.vue';
 import { localize, localized } from '../playground-content';
@@ -21,7 +22,6 @@ import type { LabModuleProps } from './types';
 const DataDisplayVisualFixture = lazyComponent(() => import('./DataDisplayVisualFixture.vue'));
 
 const props = defineProps<LabModuleProps>();
-const selectedTab = ref('overview');
 const currentPage = ref(4);
 const avatarName = 'Shenshijun';
 const avatarFallback = 'SSJ';
@@ -126,22 +126,25 @@ const copy = {
       :description="
         localize(
           localized(
-            'Keyboard tabs with a labelled panel and an existing Glass surface.',
-            '键盘可操作的标签页，共享玻璃材质并关联内容面板。',
+            'Choose Glass for standalone tabs, Underline for page sections, or Pill for compact panels.',
+            '玻璃样式适合独立的标签组，下划线样式适合页面分区，胶囊样式适合紧凑面板。',
           ),
           props.locale,
         )
       "
     >
-      <UiTabs
-        v-model="selectedTab"
-        :options="tabOptions"
-        v-bind="{ ariaLabel: localize(localized('Member sections', '成员页面分区'), props.locale) }"
-        v-slot="{ value }"
-        data-tabs-sample
-      >
-        <p class="text-body-sm text-secondary" data-tabs-panel-state>{{ value }}</p>
-      </UiTabs>
+      <div v-for="{ value: variant, label } in tabsVariantOptions" :key="variant">
+        <p class="mb-2 text-body-sm text-secondary">{{ localize(label, props.locale) }}</p>
+        <UiTabs
+          :options="tabOptions"
+          :variant="variant"
+          v-bind="{ ariaLabel: localize(label, props.locale) }"
+          v-slot="{ value }"
+          :data-tabs-sample="variant"
+        >
+          <p class="text-body-sm text-secondary" data-tabs-panel-state>{{ value }}</p>
+        </UiTabs>
+      </div>
     </LabSpecimenSection>
     <LabSpecimenSection
       id="data-display-avatar"

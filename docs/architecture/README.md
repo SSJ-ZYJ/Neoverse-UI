@@ -12,7 +12,7 @@ The repository is a Bun workspace. Public-package dependencies use explicit SemV
 
 | Package / app | Maturity | Boundary |
 | --- | --- | --- |
-| `@neoverse-ui/tokens` | Stable | Framework-agnostic CSS Variables and token-name maps |
+| `@neoverse-ui/tokens` | Stable | Framework-agnostic CSS Variables, token-name maps, and surface preset contracts |
 | `@neoverse-ui/tailwind` | Stable | Tailwind v4 semantic theme and shared component selectors |
 | `@neoverse-ui/motion` | Stable | CSS motion aliases and reduced-motion policy |
 | `@neoverse-ui/overlay-runtime` | Consumer Validation | Framework-agnostic top-layer positioning, tracking, and dismiss runtime |
@@ -29,8 +29,8 @@ tokens -> tailwind
 tokens -> motion
 overlay-runtime -> vue
 overlay-runtime -> react
-tailwind + motion + overlay-runtime -> vue
-tailwind + motion + overlay-runtime -> react
+tokens + tailwind + motion + overlay-runtime -> vue
+tokens + tailwind + motion + overlay-runtime -> react
 tokens + tailwind + motion + overlay-runtime + vue + react -> playground
 glass-runtime -> playground (optional enhancement)
 ```
@@ -62,6 +62,12 @@ The TypeScript `cssVariables` map composes foundation domains from
 under `src/components/`. The CSS build emits `@neoverse-ui/tokens/css` in order:
 primitives, semantic roles, foundation layers, light mapping, component defaults,
 then the canonical dark mapping.
+
+Tokens defines the shared material modes, surface presets, class mapping, and
+semantic roles. Both adapters re-export the public types and emit the same
+unresolved surface markup on the server and client. Tailwind resolves `auto`
+within the rendered DOM; the optional edge runtime enhances effective Aurora
+Glass surfaces only. See [material selection](material-standards.md#shared-material-selection).
 
 ## Tailwind Foundation
 
@@ -140,6 +146,21 @@ The current source of `@neoverse-ui/react` provides the same components listed a
 React adapters share the same Tailwind component selectors, Surface presets, native interaction semantics, and accessibility expectations as Vue. Canonical Shared and Consumer Driven remain distinct maturity tracks even where both adapters now exist. `UiAction` supports `asChild` routing composition, `UiBreadcrumb` exposes a custom item renderer seam, and `UiDock` shares ControlSurface's navigation indicator while leaving navigation content and active state to the consumer. Native controls preserve refs and platform attributes. Form controls share the state and accessibility rules documented in [`form-control-contract.md`](./form-control-contract.md). Top-layer controls share the positioning and dismiss rules documented in [`overlay-contract.md`](./overlay-contract.md).
 
 Framework parity is declared in `contracts/framework-parity.json` and validated by `scripts/gates/check-framework-parity.ts`. The contract covers public components, shared option/item structures, and shared literal unions, including Consumer Driven adapters. Framework-native binding names are normalized explicitly—for example Vue `modelValue` maps to React `value`/`checked`, while Vue `readonly` maps to React `readOnly`. This parity does not promote maturity or replace real consumer evidence. The React Runtime Fixture is checked against `component-matrix.json` rather than a handwritten component list, so a newly runtime-validated adapter cannot silently miss browser coverage.
+
+### Tabs appearance
+
+`UiTabs` accepts the same `variant` values in Vue and React:
+
+| Value | Use |
+| --- | --- |
+| `glass` (default) | Aurora Glass track with a moving selection plate for standalone tab groups |
+| `underline` | Full-width baseline and a moving underline with rounded ends for page sections or dense content |
+| `pill` | Compact rounded track with a solid selection pill for cards and side panels |
+
+The underline variant uses the standard compact tab radius for hover feedback.
+
+Changing the variant changes only the presentation. The selected value,
+keyboard navigation, and tab-to-panel associations use the same contract.
 
 ## Adapter source layout
 

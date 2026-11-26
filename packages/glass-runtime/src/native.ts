@@ -1,7 +1,11 @@
+import {
+  canRenderGlassEdge,
+  glassPresetSelector,
+  materialModeAttribute,
+} from './rendering/style-resolution.js';
 import type { GlassRenderer } from './types.js';
 
 const svgNamespace = 'http://www.w3.org/2000/svg';
-const selector = '.material-glass-subtle, .material-glass-elevated, .material-glass-immersive';
 const internalSelector = '[data-neoverse-glass-native-defs], [data-neoverse-particle-capture]';
 let rendererSequence = 0;
 type SharedMap = { id: string; node: SVGFilterElement; refs: number };
@@ -53,7 +57,6 @@ export class NativeGlassRenderer implements GlassRenderer {
   private sequence = 0;
   constructor(
     private document: Document,
-    private eligible: (element: HTMLElement) => boolean,
     private claim: (renderer: GlassRenderer) => boolean,
     private release: (renderer: GlassRenderer) => void,
   ) {}
@@ -101,6 +104,7 @@ export class NativeGlassRenderer implements GlassRenderer {
           'hidden',
           'data-theme',
           'data-neoverse-glass-nesting',
+          materialModeAttribute,
           'data-surface',
         ],
       });
@@ -143,8 +147,8 @@ export class NativeGlassRenderer implements GlassRenderer {
     if (!view) return;
     this.document.documentElement.setAttribute('data-neoverse-glass-renderer', 'native');
     const seen = new Set<HTMLElement>();
-    for (const element of this.document.querySelectorAll<HTMLElement>(selector)) {
-      if (element.closest(internalSelector) || !this.eligible(element)) continue;
+    for (const element of this.document.querySelectorAll<HTMLElement>(glassPresetSelector)) {
+      if (element.closest(internalSelector) || !canRenderGlassEdge(element)) continue;
       let entry = this.owners.get(element);
       if (entry) {
         const current = element.style.getPropertyValue('backdrop-filter');

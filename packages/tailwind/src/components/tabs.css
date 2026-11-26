@@ -11,6 +11,37 @@
     border-radius: var(--neoverse-tabs-list-radius);
     padding: var(--neoverse-tabs-list-padding);
   }
+  .ui-tabs:where([data-variant='underline'], [data-variant='pill']) > .ui-tabs__list {
+    --neoverse-tabs-selected-background-image: none;
+    --neoverse-tabs-selected-hover-background-image: none;
+    --neoverse-tabs-selected-press-background-image: none;
+    --neoverse-tabs-selected-shadow: none;
+    --neoverse-tabs-selected-filter: none;
+  }
+  .ui-tabs:where([data-variant='underline']) > .ui-tabs__list {
+    --neoverse-tabs-selected-background-color: transparent;
+    --neoverse-tabs-selected-hover-background-color: transparent;
+    --neoverse-tabs-selected-press-background-color: transparent;
+    --neoverse-tabs-selected-foreground: var(--neoverse-color-text-primary);
+    --neoverse-tabs-selected-border: transparent;
+    --neoverse-tabs-list-radius: var(--neoverse-space-0);
+    display: flex;
+    border-block-end: var(--neoverse-border-width-thin) solid
+      var(--neoverse-tabs-underline-track-border);
+    padding-block-end: 0;
+  }
+  .ui-tabs:where([data-variant='pill']) > .ui-tabs__list {
+    --neoverse-tabs-list-radius: var(--neoverse-radius-pill);
+    --neoverse-tabs-tab-radius: var(--neoverse-radius-pill);
+    --neoverse-tabs-selected-background-color: var(--neoverse-effect-choice-selected-fill-opaque);
+    --neoverse-tabs-selected-hover-background-color: var(
+      --neoverse-effect-choice-selected-hover-fill-opaque
+    );
+    --neoverse-tabs-selected-press-background-color: var(
+      --neoverse-effect-choice-selected-press-fill-opaque
+    );
+    background-color: var(--neoverse-tabs-pill-track-fill);
+  }
   .ui-tabs__indicator {
     position: absolute;
     z-index: 0;
@@ -29,6 +60,16 @@
     transform: translateX(var(--neoverse-selection-offset, var(--neoverse-space-0)));
     opacity: 0;
     pointer-events: none;
+  }
+  :where(.ui-tabs[data-variant='underline'] > .ui-tabs__list) > .ui-tabs__indicator {
+    --neoverse-tabs-selected-background-color: var(--neoverse-tabs-underline-marker-color);
+    --neoverse-tabs-selected-hover-background-color: var(--neoverse-tabs-underline-marker-color);
+    --neoverse-tabs-selected-press-background-color: var(--neoverse-tabs-underline-marker-color);
+    inset-block: auto 0;
+    block-size: var(--neoverse-tabs-underline-marker-width);
+    border: 0;
+    border-radius: var(--neoverse-radius-pill);
+    forced-color-adjust: none;
   }
   .ui-tabs__indicator[data-ready='true'] {
     opacity: 1;
@@ -70,6 +111,19 @@
     -webkit-backdrop-filter: var(--neoverse-tabs-selected-filter);
     backdrop-filter: var(--neoverse-tabs-selected-filter);
   }
+  :where(.ui-tabs[data-variant='underline'] > .ui-tabs__list)
+    > .ui-tabs__indicator:not([data-ready='true'])
+    ~ .ui-tabs__tab--active::after {
+    position: absolute;
+    inset-inline: calc(-1 * var(--neoverse-border-width-thin));
+    inset-block-end: calc(-1 * var(--neoverse-border-width-thin));
+    block-size: var(--neoverse-tabs-underline-marker-width);
+    border-radius: var(--neoverse-radius-pill);
+    background-color: var(--neoverse-tabs-underline-marker-color);
+    content: '';
+    pointer-events: none;
+    forced-color-adjust: none;
+  }
   @media (hover: hover) {
     .ui-tabs__tab--active:hover:not(:active, :disabled) {
       background-image: var(--neoverse-tabs-selected-hover-background-image);
@@ -104,6 +158,9 @@
     outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
     outline-offset: var(--neoverse-focus-ring-offset);
   }
+  :where(.ui-tabs[data-variant='underline'] > .ui-tabs__list) > .ui-tabs__tab:focus-visible {
+    outline-offset: calc(-1 * var(--neoverse-focus-ring-width));
+  }
   .ui-tabs__tab:disabled {
     opacity: var(--neoverse-effect-disabled-content-opacity);
     cursor: not-allowed;
@@ -135,26 +192,28 @@
     }
   }
   @media (prefers-reduced-transparency: reduce) {
-    .ui-tabs__indicator,
-    .ui-tabs__tab--active {
-      background-color: var(--neoverse-effect-choice-selected-fill-opaque);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
+    .ui-tabs:where([data-variant='glass']) > .ui-tabs__list {
+      --neoverse-tabs-selected-background-color: var(--neoverse-effect-choice-selected-fill-opaque);
+      --neoverse-tabs-selected-hover-background-color: var(
+        --neoverse-effect-choice-selected-hover-fill-opaque
+      );
+      --neoverse-tabs-selected-press-background-color: var(
+        --neoverse-effect-choice-selected-press-fill-opaque
+      );
+      --neoverse-tabs-selected-filter: none;
     }
-    @media (hover: hover) {
-      .ui-tabs__tab--active:hover:not(:active, :disabled),
-      .ui-tabs__list:has(.ui-tabs__tab--active:hover:not(:active, :disabled))
-        .ui-tabs__indicator[data-ready='true'] {
-        background-color: var(--neoverse-effect-choice-selected-hover-fill-opaque);
-      }
+  }
+  @media (forced-colors: active) {
+    .ui-tabs:where([data-variant='underline']) > .ui-tabs__list {
+      --neoverse-tabs-underline-marker-color: Highlight;
     }
-    .ui-tabs__tab--active:active:not(:disabled),
-    .ui-tabs__list:has(.ui-tabs__tab--active:active:not(:disabled))
-      .ui-tabs__indicator[data-ready='true'] {
-      background-color: var(--neoverse-effect-choice-selected-press-fill-opaque);
+    .ui-tabs:where([data-variant='pill']) > .ui-tabs__list {
+      --neoverse-tabs-selected-border: Highlight;
     }
-    .ui-tabs__indicator[data-ready='true'] ~ .ui-tabs__tab--active {
-      background-color: transparent;
+    :where(.ui-tabs[data-variant='pill'] > .ui-tabs__list) > .ui-tabs__indicator {
+      forced-color-adjust: none;
+      background: transparent;
+      border-color: Highlight;
     }
   }
 }

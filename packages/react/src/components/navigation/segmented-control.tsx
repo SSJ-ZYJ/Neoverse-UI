@@ -1,4 +1,5 @@
 import { attachSegmentedControlSlider } from '@neoverse-ui/motion';
+import { surfaceClasses } from '@neoverse-ui/tokens';
 import {
   type CSSProperties,
   type HTMLAttributes,
@@ -7,7 +8,6 @@ import {
   useRef,
   useState,
 } from 'react';
-import { surfaceClasses } from '../surfaces/surface-presets.js';
 
 export interface SegmentOption {
   value: string;

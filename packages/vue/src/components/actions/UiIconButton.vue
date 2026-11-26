@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { computed, useAttrs } from 'vue';
 import type { ButtonSize, ButtonVariant, IconButtonProps } from '../../types';
 import { presence } from '../motion/presence';
-import { getSurfaceClass } from '../surfaces/surface';
 import {
   buttonBaseClasses,
   buttonVariantClasses,
@@ -60,7 +60,7 @@ const ariaBusy = computed<'true' | 'false' | undefined>(() => {
 const classes = computed(() => [
   buttonBaseClasses,
   'ui-icon-button',
-  getSurfaceClass(props.surface),
+  getSurfaceClass(props.surface, 'control'),
   buttonVariantClasses[props.variant as ButtonVariant] ?? buttonVariantClasses.primary,
   (props.stretch ? iconButtonStretchSizeClasses : iconButtonSizeClasses)[
     props.size as ButtonSize

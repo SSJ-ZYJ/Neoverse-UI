@@ -1,8 +1,8 @@
 <script setup lang="ts">
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { computed, useAttrs } from 'vue';
 import type { ButtonProps, ButtonSize, ButtonVariant } from '../../types';
 import { presence } from '../motion/presence';
-import { getSurfaceClass } from '../surfaces/surface';
 import {
   buttonBaseClasses,
   buttonSizeClasses,
@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<ButtonProps>(), {
   disabled: false,
   loading: false,
   stretch: false,
-  surface: 'glass-subtle',
+  surface: 'auto',
 });
 
 const attrs = useAttrs();
@@ -42,7 +42,7 @@ const ariaBusy = computed<'true' | 'false' | undefined>(() => {
 
 const classes = computed(() => [
   buttonBaseClasses,
-  getSurfaceClass(props.surface),
+  getSurfaceClass(props.surface, 'control'),
   buttonVariantClasses[props.variant as ButtonVariant] ?? buttonVariantClasses.primary,
   (props.stretch ? buttonStretchSizeClasses : buttonSizeClasses)[props.size as ButtonSize] ??
     buttonSizeClasses.md,

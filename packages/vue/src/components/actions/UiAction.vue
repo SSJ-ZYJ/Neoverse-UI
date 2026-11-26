@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { computed, useAttrs } from 'vue';
 import type { ActionProps, ActionScale, ActionSize, ButtonVariant } from '../../types';
-import { getSurfaceClass } from '../surfaces/surface';
 import {
   actionScaleClasses,
   actionSizeClasses,
@@ -47,7 +47,7 @@ const targetProps = computed(() => {
 const classes = computed(() => [
   buttonBaseClasses,
   'ui-action',
-  getSurfaceClass(props.surface),
+  getSurfaceClass(props.surface, 'control'),
   buttonVariantClasses[props.variant as ButtonVariant] ?? buttonVariantClasses.primary,
   actionSizeClasses[props.size as ActionSize] ?? actionSizeClasses.md,
   actionScaleClasses[props.scale as ActionScale] ?? actionScaleClasses.md,

@@ -316,3 +316,60 @@ test('the browser transparency preference removes blur but preserves only opted-
   await expect(surface).toHaveCSS('backdrop-filter', 'none');
   await expectNoPageOverflow(page);
 });
+
+test('Vue resolves automatic surface roles without changing theme or explicit presets', async ({
+  page,
+}) => {
+  await page.goto('/frame?theme=light&lang=en#materials', { waitUntil: 'domcontentloaded' });
+  const sample = (role: string) => page.locator(`[data-contract-material="${role}"]`);
+  await sample('card').scrollIntoViewIfNeeded();
+  await expect(sample('card')).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+  await expect(sample('button')).toHaveCSS('backdrop-filter', /blur\(12px\)/);
+  await expect(sample('group')).toHaveCSS('backdrop-filter', /blur\(12px\)/);
+  await expect(sample('borrow')).toHaveCSS('backdrop-filter', 'none');
+  const solidBackground = await sample('solid').evaluate(
+    (el) => getComputedStyle(el).backgroundColor,
+  );
+
+  const root = page.locator('html');
+  const resolved = await root.evaluate((element) => {
+    element.setAttribute('data-neoverse-material', 'solid');
+    const surfaces = element.querySelectorAll(
+      '[data-contract-material="card"], [data-contract-material="group"], [data-contract-material="button"]',
+    );
+    return Array.from(surfaces, (surface) => {
+      const style = getComputedStyle(surface);
+      return [style.backdropFilter, style.backgroundColor];
+    });
+  });
+  await expect(root).toHaveAttribute('data-theme', 'light');
+  expect(resolved).toEqual(Array.from({ length: 3 }, () => ['none', solidBackground]));
+  expect(solidBackground).toMatch(/^rgb\(\d+, \d+, \d+\)$/);
+  await expect(sample('card')).toHaveCSS('box-shadow', 'none');
+  expect(await sample('card').evaluate((el) => getComputedStyle(el, '::before').content)).toBe(
+    'none',
+  );
+  await expect(sample('borrow')).toHaveCSS('backdrop-filter', /blur\(12px\)/);
+  await expect(sample('nested-glass')).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+  await expect(sample('explicit-glass')).toHaveCSS('backdrop-filter', /blur\(24px\)/);
+  await expect(sample('none')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await expect(sample('none')).toHaveCSS('backdrop-filter', 'none');
+
+  await root.evaluate((el) => el.removeAttribute('data-neoverse-material'));
+  await expect(sample('card')).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+  await expect(sample('borrow')).toHaveCSS('backdrop-filter', 'none');
+  await expect(sample('solid')).toHaveCSS('backdrop-filter', 'none');
+});
+
+test('React uses the same Solid and explicit Glass material boundaries', async ({ page }) => {
+  await page.goto('/react-fixture?theme=dark&lang=en', { waitUntil: 'domcontentloaded' });
+  const sample = (role: string) => page.locator(`[data-contract-material="${role}"]`);
+  for (const role of ['card', 'button', 'group']) {
+    await expect(sample(role)).toHaveCSS('backdrop-filter', 'none');
+    await expect(sample(role)).toHaveCSS('background-color', /^rgb\(\d+, \d+, \d+\)$/);
+  }
+  await expect(sample('nested-glass')).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+  await expect(sample('explicit-glass')).toHaveCSS('backdrop-filter', /blur\(24px\)/);
+  await expect(sample('none')).toHaveCSS('backdrop-filter', 'none');
+  await expect(sample('none')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+});

@@ -4,7 +4,7 @@ import type { ComponentPublicInstance } from 'vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId } from 'vue';
 import type { TabsProps } from '../../types';
 
-const props = defineProps<TabsProps>();
+const props = withDefaults(defineProps<TabsProps>(), { variant: 'glass' });
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 const id = useId();
 const internalValue = ref(
@@ -76,12 +76,13 @@ function setRef(element: Element | ComponentPublicInstance | null, index: number
 </script>
 
 <template>
-  <div class="ui-tabs">
+  <div class="ui-tabs" :data-variant="variant">
     <div
       ref="track"
-      class="ui-tabs__list material-glass-subtle"
-      data-surface="glass-subtle"
-      data-neoverse-surface-hover="static"
+      class="ui-tabs__list"
+      :class="{ 'material-glass-subtle': variant === 'glass' }"
+      :data-surface="variant === 'glass' ? 'glass-subtle' : undefined"
+      :data-neoverse-surface-hover="variant === 'glass' ? 'static' : undefined"
       role="tablist"
       :aria-label="ariaLabel"
       aria-orientation="horizontal"

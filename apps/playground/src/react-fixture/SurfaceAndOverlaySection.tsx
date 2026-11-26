@@ -5,6 +5,7 @@ import {
   UiAvatar,
   UiButton,
   UiCard,
+  UiControlSurface,
   UiDialog,
   UiDrawer,
   UiDropdownMenu,
@@ -23,6 +24,12 @@ import {
 import { useState } from 'react';
 import { ContextMenuFixture } from './ContextMenuFixture';
 import type { FixtureCopy } from './fixture-copy';
+
+const tabOptions = [
+  { value: 'overview', label: 'Overview' },
+  { value: 'blocked', label: 'Blocked', disabled: true },
+  { value: 'activity', label: 'Activity' },
+] as const;
 
 export default function SurfaceAndOverlaySection({
   copy,
@@ -340,17 +347,24 @@ export default function SurfaceAndOverlaySection({
       </div>
       <UiTabs
         data-react-adapter="UiTabs"
-        options={[
-          { value: 'overview', label: 'Overview' },
-          { value: 'blocked', label: 'Blocked', disabled: true },
-          { value: 'activity', label: 'Activity' },
-        ]}
+        options={tabOptions}
         ariaLabel="Member sections"
         value={selectedTab}
         onValueChange={setSelectedTab}
       >
         {(value) => <span data-tabs-panel-state>{value}</span>}
       </UiTabs>
+      {(['underline', 'pill'] as const).map((variant) => (
+        <UiTabs
+          key={variant}
+          data-tabs-sample={variant}
+          variant={variant}
+          options={tabOptions}
+          ariaLabel={`Member sections (${variant})`}
+        >
+          {(value) => <span data-tabs-panel-state>{value}</span>}
+        </UiTabs>
+      ))}
       <div className="flex flex-wrap items-center gap-3">
         <UiAvatar name={avatarName} fallback={avatarFallback} size="sm" />
         <UiAvatar
@@ -407,6 +421,21 @@ export default function SurfaceAndOverlaySection({
           {copy.surface} · {copy.count} {count}
         </p>
       </UiCard>
+      <div className="flex flex-wrap items-center gap-3" data-neoverse-material="solid">
+        <UiCard data-contract-material="card">{copy.card}</UiCard>
+        <UiControlSurface data-contract-material="group" aria-label={copy.actions}>
+          <UiButton data-contract-material="button">{copy.button}</UiButton>
+        </UiControlSurface>
+        <UiCard data-neoverse-material="glass" data-contract-material="nested-glass">
+          {copy.surface}
+        </UiCard>
+        <UiCard surface="glass-immersive" data-contract-material="explicit-glass">
+          glass-immersive
+        </UiCard>
+        <UiCard surface="none" data-contract-material="none">
+          none
+        </UiCard>
+      </div>
     </UiSurface>
   );
 }

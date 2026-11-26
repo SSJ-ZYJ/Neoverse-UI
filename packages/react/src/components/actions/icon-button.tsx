@@ -1,3 +1,4 @@
+import { type ControlSurfacePreset, getSurfaceClass } from '@neoverse-ui/tokens';
 import type {
   ButtonHTMLAttributes,
   ComponentPropsWithRef,
@@ -6,8 +7,6 @@ import type {
   Ref,
 } from 'react';
 import { mergeClassNames } from '../../internal.js';
-import type { ControlSurfacePreset } from '../surfaces/control-surface.js';
-import { surfaceClasses } from '../surfaces/surface-presets.js';
 import type { ActionSize } from './action-size.js';
 import { type ButtonVariant, buttonVariantClasses } from './button-variants.js';
 import { loadingIndicatorClass } from './loading-indicator.js';
@@ -74,7 +73,7 @@ export function UiIconButton(props: UiIconButtonProps) {
     'ui-button ui-icon-button',
     buttonVariantClasses[variant],
     stretch ? iconButtonStretchSizeClasses[size] : iconButtonSizeClasses[size],
-    surfaceClasses[surface],
+    getSurfaceClass(surface, 'control'),
     className,
   );
   const ariaBusy = loading ? true : rest['aria-busy'];

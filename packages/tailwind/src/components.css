@@ -7,6 +7,7 @@
 @import './components/control-surface.css';
 @import './components/dock.css';
 @import './components/surface.css';
+@import './components/material-mode.css';
 @import './components/status-indicator.css';
 @import './components/notice.css';
 @import './components/empty-state.css';

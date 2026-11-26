@@ -1,7 +1,7 @@
 <script setup lang="ts">
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { computed, useAttrs } from 'vue';
-import type { SurfacePreset, SurfaceProps } from '../../types';
-import { getSurfaceClass } from './surface';
+import type { SurfaceProps } from '../../types';
 
 defineOptions({ inheritAttrs: false });
 
@@ -13,7 +13,7 @@ const props = withDefaults(defineProps<SurfaceProps>(), {
 });
 const attrs = useAttrs();
 
-const classes = computed(() => ['ui-surface', getSurfaceClass(props.surface as SurfacePreset)]);
+const classes = computed(() => ['ui-surface', getSurfaceClass(props.surface)]);
 const forwardedAttrs = computed(() => {
   const { class: _class, style: _style, ...rest } = attrs;
   return rest;

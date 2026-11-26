@@ -58,4 +58,14 @@ export type { MotionDurationToken, MotionEasingToken, MotionToken } from './foun
 export type { RadiusToken } from './foundation/radius.js';
 export type { ShadowToken } from './foundation/shadow.js';
 export type { SpaceToken } from './foundation/space.js';
+export {
+  type ControlSurfacePreset,
+  getSurfaceClass,
+  isGlassSurface,
+  type MaterialMode,
+  type MaterialSurfaceRole,
+  materialSurfacePresets,
+  type SurfacePreset,
+  surfaceClasses,
+} from './foundation/surface-presets.js';
 export type { TypographyRole } from './foundation/typography.js';

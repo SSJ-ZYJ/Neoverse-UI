@@ -321,6 +321,26 @@ test.describe('playground', () => {
     await expect(avatar).toBeFocused();
   });
 
+  test('Tabs keep the selected panel when the Inspector changes appearance', async ({
+    page,
+  }, testInfo) => {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/?theme=light&lang=en#data-display-tabs', { waitUntil: 'domcontentloaded' });
+    const live = page.locator('#data-display-tabs');
+    const panel = live.getByRole('tabpanel');
+    await live.getByRole('tab', { selected: true }).press('ArrowRight');
+    await expect(panel).toHaveText('activity');
+    const inspector = await showInspector(page, testInfo.project.name === 'mobile');
+    const indicator = live.locator('.ui-tabs__indicator');
+    await chooseOption(inspector, 'variant', 'Underline');
+    await expect(indicator).toHaveCSS('height', '2px');
+    await expect(panel).toHaveText('activity');
+
+    await inspector.getByRole('button', { name: 'Reset specimen' }).press('Enter');
+    await expect(indicator).toHaveCSS('backdrop-filter', /blur\(12px\)/);
+    await expect(panel).toHaveText('overview');
+  });
+
   test('Card surface edits keep the same card and restore its component default', async ({
     page,
   }, testInfo) => {

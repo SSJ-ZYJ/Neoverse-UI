@@ -1,6 +1,6 @@
+import { getSurfaceClass, type SurfacePreset } from '@neoverse-ui/tokens';
 import { createElement, type ElementType, type HTMLAttributes } from 'react';
 import { mergeClassNames } from '../../internal.js';
-import { type SurfacePreset, surfaceClasses } from './surface-presets.js';
 
 export interface UiSurfaceProps extends HTMLAttributes<HTMLElement> {
   as?: ElementType;
@@ -22,7 +22,7 @@ export function UiSurface({
     as,
     {
       ...rest,
-      className: mergeClassNames('ui-surface', surfaceClasses[surface], className),
+      className: mergeClassNames('ui-surface', getSurfaceClass(surface, 'panel'), className),
       'data-surface': surface,
       'data-neoverse-glass-nesting': glassNesting,
       'data-neoverse-surface-overflow': contentOverflow,

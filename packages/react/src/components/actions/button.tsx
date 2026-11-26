@@ -1,7 +1,6 @@
+import { type ControlSurfacePreset, getSurfaceClass } from '@neoverse-ui/tokens';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 import { mergeClassNames } from '../../internal.js';
-import type { ControlSurfacePreset } from '../surfaces/control-surface.js';
-import { surfaceClasses } from '../surfaces/surface-presets.js';
 import type { ActionSize } from './action-size.js';
 import { type ButtonVariant, buttonVariantClasses } from './button-variants.js';
 import { loadingIndicatorClass } from './loading-indicator.js';
@@ -36,7 +35,7 @@ export function UiButton({
   loading = false,
   disabled = false,
   stretch = false,
-  surface = 'glass-subtle',
+  surface = 'auto',
   type = 'button',
   leading,
   trailing,
@@ -55,7 +54,7 @@ export function UiButton({
         'ui-button',
         buttonVariantClasses[variant],
         stretch ? buttonStretchSizeClasses[size] : buttonSizeClasses[size],
-        surfaceClasses[surface],
+        getSurfaceClass(surface, 'control'),
         className,
       )}
     >

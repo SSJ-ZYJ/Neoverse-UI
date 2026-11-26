@@ -206,7 +206,7 @@ test('blue prose links reveal their underline on hover and keyboard focus', asyn
   for (const [theme, blue] of [
     ['light', 'rgb(3, 105, 161)'],
     ['dark', 'rgb(56, 189, 248)'],
-  ]) {
+  ] as const) {
     await page.goto(`/?theme=${theme}&lang=en&fps=0#foundation-typography`, {
       waitUntil: 'domcontentloaded',
     });

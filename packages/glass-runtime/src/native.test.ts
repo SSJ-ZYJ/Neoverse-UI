@@ -26,12 +26,7 @@ describe('native live-backdrop ownership', () => {
     );
     vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,map');
     release = vi.fn(() => undefined);
-    renderer = new NativeGlassRenderer(
-      document,
-      () => true,
-      () => true,
-      release,
-    );
+    renderer = new NativeGlassRenderer(document, () => true, release);
   });
   afterEach(() => {
     renderer.destroy();
@@ -88,6 +83,29 @@ describe('native live-backdrop ownership', () => {
     renderer.mount();
     expect(document.querySelectorAll('feDisplacementMap')).toHaveLength(0);
     expect(a.style.backdropFilter).toBe('blur(18px)');
+  });
+
+  it('removes auto filters in Solid while preserving explicit and nearer Glass owners', async () => {
+    const region = document.createElement('section');
+    const automatic = surface();
+    automatic.classList.add('material-auto');
+    const nested = surface();
+    nested.classList.add('material-auto');
+    nested.dataset.neoverseMaterial = 'glass';
+    const explicit = surface();
+    document.body.append(region);
+    region.append(automatic, nested, explicit);
+    renderer.mount();
+    expect(automatic.style.backdropFilter).toContain('url(');
+
+    region.dataset.neoverseMaterial = 'solid';
+    await vi.waitFor(() => expect(automatic.style.backdropFilter).toBe('blur(18px)'));
+    expect(automatic.hasAttribute('data-neoverse-glass-native-filter')).toBe(false);
+    expect(nested.style.backdropFilter).toContain('url(');
+    expect(explicit.style.backdropFilter).toContain('url(');
+
+    region.removeAttribute('data-neoverse-material');
+    await vi.waitFor(() => expect(automatic.style.backdropFilter).toContain('url('));
   });
 
   it('does not overwrite a caller edit made immediately before destroy', () => {

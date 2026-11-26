@@ -520,7 +520,7 @@ test('card keeps consumer root semantics and composes the shared surface', () =>
   const defaultCard = UiCard({
     children: 'Default card',
   });
-  expect(defaultCard.props['data-surface']).toBe('glass-elevated');
+  expect(defaultCard.props['data-surface']).toBe('auto');
   expect(defaultCard.props.className).toContain('material-glass-elevated');
 
   const article = UiCard<'article'>({

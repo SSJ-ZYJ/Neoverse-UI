@@ -1,10 +1,18 @@
 <script setup lang="ts">
+import { UiButton, UiCard, UiControlSurface, UiSurface } from '@neoverse-ui/vue';
 import LabSpecimenSection from '../LabSpecimenSection.vue';
-import { localize, moduleCopy } from '../playground-content';
+import { localize, localized, moduleCopy } from '../playground-content';
 import SurfaceModule from './SurfaceModule.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const materialCopy = {
+  title: localized('Material resolution', '材质解析'),
+  panel: localized('Panel', '表面'),
+  controls: localized('Grouped controls', '成组控件'),
+  button: localized('Continue', '继续'),
+  borrowed: localized('Borrow Glass ancestry', '借用上层极光玻璃'),
+} as const;
 </script>
 
 <template>
@@ -15,4 +23,41 @@ const props = defineProps<LabModuleProps>();
   >
     <SurfaceModule :locale="props.locale" />
   </LabSpecimenSection>
+  <section
+    id="materials-resolution"
+    class="grid gap-3 p-4 scroll-mt-24"
+    aria-labelledby="materials-resolution-title"
+  >
+    <h3 id="materials-resolution-title" class="text-subtitle font-heading text-primary">
+      {{ localize(materialCopy.title, props.locale) }}
+    </h3>
+    <div class="grid gap-3">
+      <div class="flex flex-wrap items-center gap-3">
+        <UiCard data-contract-material="card">
+          {{ localize(materialCopy.panel, props.locale) }}
+          <UiSurface surface="glass-subtle" glass-nesting="inherit" data-contract-material="borrow">
+            {{ localize(materialCopy.borrowed, props.locale) }}
+          </UiSurface>
+        </UiCard>
+        <UiControlSurface
+          data-contract-material="group"
+          :aria-label="localize(materialCopy.controls, props.locale)"
+        >
+          <UiButton data-contract-material="button">{{
+            localize(materialCopy.button, props.locale)
+          }}</UiButton>
+        </UiControlSurface>
+      </div>
+      <div class="flex flex-wrap gap-3" data-neoverse-material="solid">
+        <UiCard data-contract-material="solid">Solid</UiCard>
+        <UiCard data-neoverse-material="glass" data-contract-material="nested-glass"
+          >Aurora Glass</UiCard
+        >
+        <UiCard surface="glass-immersive" data-contract-material="explicit-glass"
+          >glass-immersive</UiCard
+        >
+        <UiCard surface="none" data-contract-material="none">none</UiCard>
+      </div>
+    </div>
+  </section>
 </template>

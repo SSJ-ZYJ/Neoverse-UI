@@ -1,3 +1,9 @@
+export {
+  getSurfaceClass,
+  isGlassSurface,
+  type MaterialMode,
+  surfaceClasses,
+} from '@neoverse-ui/tokens';
 export { updateButtonPointerGlow } from './components/actions/button-pointer-glow';
 export {
   actionSizeClasses,
@@ -50,7 +56,6 @@ export { default as UiDropdownMenu } from './components/overlays/UiDropdownMenu.
 export { default as UiPopover } from './components/overlays/UiPopover.vue';
 export { default as UiToast } from './components/overlays/UiToast.vue';
 export { default as UiTooltipSurface } from './components/overlays/UiTooltipSurface.vue';
-export { getSurfaceClass, isGlassSurface, surfaceClasses } from './components/surfaces/surface';
 export { default as UiCard } from './components/surfaces/UiCard.vue';
 export { default as UiControlSurface } from './components/surfaces/UiControlSurface.vue';
 export { default as UiScrollbar } from './components/surfaces/UiScrollbar.vue';

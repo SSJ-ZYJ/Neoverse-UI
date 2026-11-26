@@ -4,7 +4,7 @@ import { act, type ComponentPropsWithoutRef } from 'react';
 import { hydrateRoot, type Root } from 'react-dom/client';
 import { renderToString } from 'react-dom/server';
 import { UiControlSurface } from './components/surfaces/control-surface';
-import { UiDock } from './index';
+import { UiButton, UiCard, UiDock } from './index';
 
 const fixture = (
   <UiControlSurface navigationIndicator aria-label="Navigation">
@@ -125,6 +125,39 @@ test('control surface renders the shared indicator hidden until an item is measu
   expect(html).toContain('visibility:hidden');
   const plain = renderToString(<UiControlSurface aria-label="Navigation" />);
   expect(plain).not.toContain('ui-control-surface__indicator');
+});
+
+test('material scopes keep server-rendered controls intact through hydration', async () => {
+  const { browser, container, restore } = installBrowser();
+  let root: Root | undefined;
+  let clicks = 0;
+  const content = (
+    <UiCard as="article">
+      <UiControlSurface as="nav" aria-label="Tools">
+        <UiButton onClick={() => clicks++}>Apply</UiButton>
+      </UiControlSurface>
+    </UiCard>
+  );
+  const errors: unknown[] = [];
+  try {
+    container.innerHTML = renderToString(content);
+    const button = container.querySelector('button');
+    const surfaces = [...container.querySelectorAll('[data-surface="auto"]')];
+    expect(surfaces.map((surface) => surface.tagName)).toEqual(['ARTICLE', 'NAV', 'BUTTON']);
+    browser.document.documentElement.dataset.neoverseMaterial = 'solid';
+    await act(async () => {
+      root = hydrateRoot(container as unknown as Element, content, {
+        onRecoverableError: (error) => errors.push(error),
+      });
+    });
+    expect(container.querySelector('button')).toBe(button);
+    expect([...container.querySelectorAll('[data-surface="auto"]')]).toEqual(surfaces);
+    await act(async () => button?.click());
+    expect(clicks).toBe(1);
+    expect(errors).toEqual([]);
+  } finally {
+    await restore(root);
+  }
 });
 
 test('shared indicator flies on transform and commits the settled geometry', async () => {

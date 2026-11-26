@@ -62,7 +62,7 @@ describe('display components', () => {
     expect(card.classes()).toEqual(
       expect.arrayContaining(['ui-card', 'material-glass-elevated', 'max-w-container-sm']),
     );
-    expect(card.attributes('data-surface')).toBe('glass-elevated');
+    expect(card.attributes('data-surface')).toBe('auto');
 
     const bareCard = mount(UiCard, { props: { surface: 'none' } });
     expect(bareCard.attributes('data-surface')).toBe('none');

@@ -1,3 +1,4 @@
+export type { ControlSurfacePreset, MaterialMode, SurfacePreset } from '@neoverse-ui/tokens';
 export {
   type ActionClassNameOptions,
   type ActionScale,
@@ -88,7 +89,12 @@ export {
   UiStepFlow,
   type UiStepFlowProps,
 } from './components/navigation/step-flow.js';
-export { type UiTabOption, UiTabs, type UiTabsProps } from './components/navigation/tabs.js';
+export {
+  type UiTabOption,
+  UiTabs,
+  type UiTabsProps,
+  type UiTabsVariant,
+} from './components/navigation/tabs.js';
 export { UiContextMenu } from './components/overlays/context-menu.js';
 export {
   checkableState,
@@ -123,7 +129,6 @@ export {
 } from './components/overlays/tooltip-surface.js';
 export { UiCard, type UiCardProps } from './components/surfaces/card.js';
 export {
-  type ControlSurfacePreset,
   type ControlSurfaceScale,
   type SurfaceEdgeMode,
   type SurfaceHoverMode,
@@ -132,7 +137,6 @@ export {
 } from './components/surfaces/control-surface.js';
 export { UiScrollbar, type UiScrollbarProps } from './components/surfaces/scrollbar.js';
 export { UiSurface, type UiSurfaceProps } from './components/surfaces/surface.js';
-export type { SurfacePreset } from './components/surfaces/surface-presets.js';
 export { UiTerminalEcho, type UiTerminalEchoProps } from './components/terminal/terminal-echo.js';
 export {
   detectTerminalEnvironment,

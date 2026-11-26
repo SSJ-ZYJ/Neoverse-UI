@@ -195,7 +195,7 @@ describe('UiControlSurface', () => {
 
     expect(grouped.element.tagName).toBe('NAV');
     expect(grouped.attributes('aria-label')).toBe('Primary navigation');
-    expect(grouped.attributes('data-surface')).toBe('glass-subtle');
+    expect(grouped.attributes('data-surface')).toBe('auto');
     expect(grouped.find('.ui-control-surface__divider').exists()).toBe(true);
 
     const ungrouped = mount(UiControlSurface);

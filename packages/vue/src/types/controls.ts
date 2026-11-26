@@ -1,3 +1,4 @@
+import type { ControlSurfacePreset, SurfacePreset } from '@neoverse-ui/tokens';
 import type { Component } from 'vue';
 
 export type ButtonVariant =
@@ -11,20 +12,7 @@ export type ButtonVariant =
 export type ButtonSize = 'sm' | 'md' | 'lg';
 export type ButtonType = 'button' | 'submit' | 'reset';
 
-export type SurfacePreset =
-  | 'none'
-  | 'solid'
-  | 'subtle'
-  | 'elevated'
-  | 'inset'
-  | 'glass-subtle'
-  | 'glass-elevated'
-  | 'glass-immersive';
-
-export type ControlSurfacePreset = Extract<
-  SurfacePreset,
-  'none' | 'glass-subtle' | 'glass-elevated' | 'glass-immersive'
->;
+export type { ControlSurfacePreset, SurfacePreset } from '@neoverse-ui/tokens';
 export type GlassNestingMode = 'inherit' | 'local';
 export type SurfaceOverflowMode = 'clip' | 'visible';
 

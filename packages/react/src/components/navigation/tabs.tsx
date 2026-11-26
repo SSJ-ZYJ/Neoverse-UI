@@ -15,10 +15,14 @@ export interface UiTabOption {
   disabled?: boolean;
 }
 
+/** Visual treatment for tabs without changing selection behavior */
+export type UiTabsVariant = 'glass' | 'underline' | 'pill';
+
 export interface UiTabsProps
   extends Omit<HTMLAttributes<HTMLDivElement>, 'defaultValue' | 'children' | 'onChange'> {
   options: readonly UiTabOption[];
   ariaLabel: string;
+  variant?: UiTabsVariant;
   value?: string;
   defaultValue?: string;
   onValueChange?: (value: string) => void;
@@ -28,6 +32,7 @@ export interface UiTabsProps
 export function UiTabs({
   options,
   ariaLabel,
+  variant = 'glass',
   value,
   defaultValue,
   onValueChange,
@@ -35,6 +40,7 @@ export function UiTabs({
   className,
   ...rest
 }: UiTabsProps) {
+  const glass = variant === 'glass';
   const id = useId();
   const [internal, setInternal] = useState(
     defaultValue ?? options.find((item) => !item.disabled)?.value,
@@ -81,12 +87,16 @@ export function UiTabs({
   };
 
   return (
-    <div {...rest} className={['ui-tabs', className].filter(Boolean).join(' ')}>
+    <div
+      {...rest}
+      className={['ui-tabs', className].filter(Boolean).join(' ')}
+      data-variant={variant}
+    >
       <div
         ref={trackRef}
-        className="ui-tabs__list material-glass-subtle"
-        data-surface="glass-subtle"
-        data-neoverse-surface-hover="static"
+        className={glass ? 'ui-tabs__list material-glass-subtle' : 'ui-tabs__list'}
+        data-surface={glass ? 'glass-subtle' : undefined}
+        data-neoverse-surface-hover={glass ? 'static' : undefined}
         role="tablist"
         aria-label={ariaLabel}
         aria-orientation="horizontal"

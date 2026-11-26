@@ -25,6 +25,7 @@
       "runtime": "validated",
       "evidence": [
         ".agents/notes/archives/consumer-migration-2026-10-29.md",
+        "tests/e2e/materials.spec.ts",
         "tests/e2e/overlays.spec.ts"
       ]
     },
@@ -80,7 +81,8 @@
       "unit": "stable",
       "visual": "release",
       "consumer": "validated",
-      "runtime": "validated"
+      "runtime": "validated",
+      "evidence": ["tests/e2e/materials.spec.ts"]
     },
     {
       "name": "UiCheckbox",
@@ -280,6 +282,7 @@
       "evidence": [
         "packages/vue/src/portal-components.test.ts",
         "packages/react/src/portal-components.test.tsx",
+        "apps/playground/src/lab-specimens/data-display.ts",
         "tests/e2e/surfaces.spec.ts"
       ],
       "reactValidation": {
@@ -568,6 +571,7 @@
         "packages/react/src/navigation.test.tsx",
         "packages/vue/src/components.test.ts",
         "tests/e2e/navigation.spec.ts",
+        "tests/e2e/materials.spec.ts",
         "docs/architecture/framework-parity.md"
       ],
       "reactValidation": {

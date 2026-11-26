@@ -19,9 +19,9 @@ export const expectedFragments = [
   '-webkit-backdrop-filter:var(--neoverse-material-filter)',
   '@media (prefers-reduced-transparency:reduce)',
   'background-color:var(--neoverse-material-background-fallback)',
-  ':is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(.ui-button):not(.ui-segmented-control)[data-neoverse-glass-nesting=inherit]{background-color:var(--neoverse-color-transparent)',
-  'border:var(--neoverse-border-width-none) var(--neoverse-border-style-solid) var(--neoverse-color-transparent)',
-  'box-shadow:var(--neoverse-shadow-none)',
+  'background:var(--neoverse-material-borrowed,revert-layer)',
+  'background-color:var(--neoverse-material-surface-solid-background)',
+  'box-shadow:var(--neoverse-material-borrowed,revert-layer)',
   '-webkit-backdrop-filter:none',
   'backdrop-filter:none',
   'background-image:none',
@@ -52,7 +52,6 @@ export const forbiddenNestedGlassFragments = [
   /* Never restore implicit nested flattening: independent Glass components
      must retain their resting material when placed inside Glass layouts. */
   ':not([data-neoverse-glass-nesting=local])',
-  ':is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive) :is(.material-glass-subtle,.material-glass-elevated,.material-glass-immersive):not(.ui-button):not(.ui-segmented-control)[data-neoverse-glass-nesting=inherit]{background-color:var(--neoverse-color-surface-raised)',
 ];
 
 export const forbiddenWebglFragments = [

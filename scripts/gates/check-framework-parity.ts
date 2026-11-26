@@ -14,6 +14,7 @@ interface UnionContract {
   name: string;
   vueType: string;
   reactType: string;
+  tokenType?: string;
 }
 
 interface FrameworkParityContract {
@@ -40,10 +41,11 @@ const matrix = (await Bun.file(
   resolve(root, 'contracts/component-matrix.json'),
 ).json()) as ComponentMatrix;
 
-const vueTypesPath = resolve(root, 'packages/vue/src/types.ts');
+const tokensPath = resolve(root, 'packages/tokens/src/index.ts');
 const reactIndexPath = resolve(root, 'packages/react/src/index.tsx');
 const vueSourceDirectory = resolve(root, 'packages/vue/src');
-const vueIndex = await Bun.file(resolve(vueSourceDirectory, 'index.ts')).text();
+const vueIndexPath = resolve(vueSourceDirectory, 'index.ts');
+const vueIndex = await Bun.file(vueIndexPath).text();
 const vueComponentModules = new Map(
   Array.from(
     vueIndex.matchAll(
@@ -54,7 +56,7 @@ const vueComponentModules = new Map(
 );
 
 const program = ts.createProgram({
-  rootNames: [vueTypesPath, reactIndexPath],
+  rootNames: [tokensPath, vueIndexPath, reactIndexPath],
   options: {
     target: ts.ScriptTarget.ES2022,
     module: ts.ModuleKind.ESNext,
@@ -62,6 +64,7 @@ const program = ts.createProgram({
     jsx: ts.JsxEmit.ReactJSX,
     strict: true,
     skipLibCheck: true,
+    paths: { '@neoverse-ui/tokens': [tokensPath] },
     exactOptionalPropertyTypes: true,
   },
 });
@@ -76,7 +79,22 @@ function requireSourceFile(path: string, label: string): ts.SourceFile {
   return source;
 }
 
-requireSourceFile(vueTypesPath, 'Vue type');
+function exportedTypes(path: string): Map<string, ts.Symbol> {
+  const source = requireSourceFile(path, path);
+  const module = checker.getSymbolAtLocation(source);
+  if (module === undefined) throw new Error(`Cannot resolve module ${path}`);
+  return new Map(
+    checker
+      .getExportsOfModule(module)
+      .map((symbol) => [
+        symbol.name,
+        (symbol.flags & ts.SymbolFlags.Alias) !== 0 ? checker.getAliasedSymbol(symbol) : symbol,
+      ]),
+  );
+}
+
+const publicTypes = { vue: exportedTypes(vueIndexPath), react: exportedTypes(reactIndexPath) };
+const tokenTypes = exportedTypes(tokensPath);
 const vueSources = program
   .getSourceFiles()
   .filter((source) =>
@@ -118,6 +136,10 @@ function findDeclaration(
 }
 
 function getType(framework: 'vue' | 'react', name: string): ts.Type | undefined {
+  const exported = publicTypes[framework].get(name);
+  if (exported !== undefined) return checker.getDeclaredTypeOfSymbol(exported);
+
+  // Some contracts refer to internal adapter types, not package exports.
   const declaration = findDeclaration(framework, name);
   if (declaration === undefined) {
     errors.push(`${framework}: missing type declaration ${name}`);
@@ -230,6 +252,19 @@ function literalValues(type: ts.Type | undefined): string[] {
 }
 
 function validateLiteralUnion(contract: UnionContract): void {
+  if (contract.tokenType !== undefined) {
+    const shared = tokenTypes.get(contract.tokenType);
+    if (
+      shared === undefined ||
+      publicTypes.vue.get(contract.vueType) !== shared ||
+      publicTypes.react.get(contract.reactType) !== shared
+    ) {
+      errors.push(
+        `${contract.name}: both adapters must re-export ${contract.tokenType} from Tokens`,
+      );
+    }
+  }
+
   const vueValues = literalValues(getType('vue', contract.vueType));
   const reactValues = literalValues(getType('react', contract.reactType));
 

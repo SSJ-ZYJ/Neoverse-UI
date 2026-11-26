@@ -31,11 +31,11 @@ import {
 } from './occlusion.js';
 import { getEdgeScissors, getScissorRect } from './scissors.js';
 import {
+  canRenderGlassEdge,
   colorProperties,
   firstPropertyValue,
-  getVariant,
   glassSelector,
-  inheritsParentGlassEdge,
+  materialModeAttribute,
   readStyle,
   resolveColor,
 } from './style-resolution.js';
@@ -62,6 +62,7 @@ const glassMutationAttributes = [
   'hidden',
   'open',
   'data-theme',
+  materialModeAttribute,
   'data-presentation',
   'data-surface',
   glassRendererAttribute,
@@ -78,6 +79,7 @@ const glassMutationAttributes = [
 // cannot move or restyle an edge. Typewriters and scrollbar thumbs emit
 // thousands of style mutations per second from exactly that region.
 const sceneRelevantAttributes = new Set([
+  materialModeAttribute,
   'data-theme',
   'open',
   'data-presentation',
@@ -303,7 +305,7 @@ class GlassRendererImpl implements GlassRenderer {
       target === this.canvas ||
       target === this.chromaCanvas ||
       element?.closest('[data-neoverse-particle-capture]') ||
-      element?.closest(motionStaticSelector)
+      (record.attributeName !== materialModeAttribute && element?.closest(motionStaticSelector))
     ) {
       return false;
     }
@@ -1381,15 +1383,10 @@ class GlassRendererImpl implements GlassRenderer {
       if (element.matches(cssEdgePassSelector)) {
         continue;
       }
-      if (inheritsParentGlassEdge(element)) {
+      if (!canRenderGlassEdge(element)) {
         continue;
       }
       if (topLayer.isInTopLayer(element, getStyle, topLayerCache)) {
-        continue;
-      }
-
-      const variant = getVariant(element);
-      if (variant === undefined) {
         continue;
       }
 
@@ -1425,7 +1422,6 @@ export const createGlassRenderer = (options: GlassRendererOptions = {}): GlassRe
   if (options.backend === 'native' && document && supportsNativeRefraction(document)) {
     return new NativeGlassRenderer(
       document,
-      (element) => !inheritsParentGlassEdge(element),
       (renderer) => {
         const existing = activeRenderers.get(document);
         if (existing && existing !== renderer) return false;

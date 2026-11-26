@@ -1,3 +1,4 @@
+import type { SurfacePreset } from '@neoverse-ui/tokens';
 import { createElement, type HTMLAttributes, type ReactNode } from 'react';
 import { mergeClassNames } from '../../internal.js';
 import {
@@ -7,7 +8,6 @@ import {
   UiControlSurface,
   type UiControlSurfaceProps,
 } from '../surfaces/control-surface.js';
-import type { SurfacePreset } from '../surfaces/surface-presets.js';
 
 export interface UiDockProps extends Omit<HTMLAttributes<HTMLElement>, 'children'> {
   /** Native tag or React component that forwards the Dock's attributes and children */

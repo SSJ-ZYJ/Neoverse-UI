@@ -1,3 +1,4 @@
+import { type ControlSurfacePreset, getSurfaceClass } from '@neoverse-ui/tokens';
 import {
   type AnchorHTMLAttributes,
   type ButtonHTMLAttributes,
@@ -11,8 +12,6 @@ import {
   type ReactNode,
 } from 'react';
 import { mergeClassNames } from '../../internal.js';
-import type { ControlSurfacePreset } from '../surfaces/control-surface.js';
-import { surfaceClasses } from '../surfaces/surface-presets.js';
 import type { ActionSize } from './action-size.js';
 import { type ButtonVariant, buttonVariantClasses } from './button-variants.js';
 
@@ -50,7 +49,7 @@ export function uiActionClassName({
 }: ActionClassNameOptions = {}): string {
   return mergeClassNames(
     actionBaseClasses,
-    surfaceClasses[surface],
+    getSurfaceClass(surface, 'control'),
     buttonVariantClasses[variant],
     actionSizeClasses[size],
     actionScaleClasses[scale],

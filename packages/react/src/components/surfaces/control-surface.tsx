@@ -1,3 +1,4 @@
+import { getSurfaceClass, type SurfacePreset } from '@neoverse-ui/tokens';
 import {
   type CSSProperties,
   createElement,
@@ -9,12 +10,10 @@ import {
   useRef,
   useState,
 } from 'react';
-import { type SurfacePreset, surfaceClasses } from './surface-presets.js';
 
 export type ControlSurfaceScale = 'md' | 'lg';
 export type SurfaceHoverMode = 'auto' | 'static';
 export type SurfaceEdgeMode = 'auto' | 'local';
-export type ControlSurfacePreset = 'none' | 'glass-subtle' | 'glass-elevated' | 'glass-immersive';
 
 export interface UiControlSurfaceProps extends HTMLAttributes<HTMLElement> {
   as?: string | ElementType;
@@ -63,7 +62,7 @@ const indicatorTransitionDisabled = (element: HTMLElement): boolean =>
 
 export function UiControlSurface({
   as = 'div',
-  surface = 'glass-subtle',
+  surface = 'auto',
   scale = 'md',
   hoverMode = 'auto',
   edgeMode = 'auto',
@@ -210,7 +209,7 @@ export function UiControlSurface({
     as,
     {
       ...rest,
-      className: `ui-control-surface ${surfaceClasses[surface]} ui-control-surface--scale-${scale}${navigationIndicator ? ' ui-control-surface--shared-indicator' : ''} ${className}`,
+      className: `ui-control-surface ${getSurfaceClass(surface, 'group')} ui-control-surface--scale-${scale}${navigationIndicator ? ' ui-control-surface--shared-indicator' : ''} ${className}`,
       'data-surface': surface,
       'data-neoverse-navigation-indicator-ready': navigationIndicator && ready ? 'true' : undefined,
       'data-neoverse-surface-hover': hoverMode === 'static' ? 'static' : undefined,

@@ -80,7 +80,7 @@ describe('Presence', () => {
 });
 
 describe('UiButton', () => {
-  it('opts the shared button surface into the project Glass material', () => {
+  it('exposes a material-resolving Button without changing primary button semantics', () => {
     const wrapper = mount(UiButton, {
       props: { variant: 'primary' },
       slots: { default: 'Primary' },
@@ -94,7 +94,8 @@ describe('UiButton', () => {
         'material-glass-subtle',
       ]),
     );
-    expect(wrapper.attributes('data-surface')).toBe('glass-subtle');
+    expect(wrapper.attributes('data-surface')).toBe('auto');
+    expect(wrapper.attributes('type')).toBe('button');
   });
 
   it('can remove its material surface without losing button semantics', () => {

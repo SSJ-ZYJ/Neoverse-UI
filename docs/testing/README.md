@@ -51,7 +51,7 @@ running every theme, width, and language combination.
 | `terminal.spec.ts` | Transcript composition, suggestions, IME guard, tail following, reader intent |
 | `motion.spec.ts` | List reorder, entrance replay, page transitions, page dissolve, disclosure expansion and collapse, React presence exit, reduced motion, layout width on a language switch, theme reveal reversal and thumb color continuity |
 | `motion-hierarchy.spec.ts` | Promoted Motion section, right-hand Inspector category switching, distinct-scene zero-flash transitions |
-| `materials.spec.ts` | Aurora Glass previews render and stay readable across themes, the inset preset stays distinct without changing other presets, glass buttons change tint without losing blur on press, reduced transparency removes blur and canvas, and both adapters wire the three tier recipes |
+| `materials.spec.ts` | Aurora Glass previews across themes, inset and explicit tier behavior, button feedback, reduced transparency, and automatic Glass/Solid scope resolution in both adapters |
 | `glass-runtime.spec.ts` | One shared noninteractive renderer canvas, fixed placement, theme stability, context loss/restore, runtime reduced transparency, forced colors and adapter lifecycle |
 | `layout.spec.ts` | Control size baseline in both adapters, badge type scale, 24px minimum target, no implicit specimen magnification, table caption placement and corner consistency across previews and composition scenes |
 | `contrast.spec.ts` | WCAG contrast floors for the primary, secondary and muted text roles in both themes |

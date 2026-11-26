@@ -57,7 +57,7 @@ test.describe('surfaces', () => {
         const selector =
           adapter === 'Vue'
             ? component === 'UiTabs'
-              ? '#data-display-tabs'
+              ? '#data-display-tabs [data-tabs-sample="glass"]'
               : '#data-display-pagination'
             : `[data-react-adapter="${component}"]`;
         const indicator = page.locator(selector).locator(indicatorClass);
@@ -76,7 +76,9 @@ test.describe('surfaces', () => {
             : `/react-fixture?theme=${theme}&lang=en`,
         );
         const tabs = page.locator(
-          adapter === 'Vue' ? '#data-display-tabs .ui-tabs' : '[data-react-adapter="UiTabs"]',
+          adapter === 'Vue'
+            ? '#data-display-tabs [data-tabs-sample="glass"]'
+            : '[data-react-adapter="UiTabs"]',
         );
         const indicator = tabs.locator('.ui-tabs__indicator');
         await expect(indicator).toHaveAttribute('data-ready', 'true');
@@ -131,6 +133,55 @@ test.describe('surfaces', () => {
             ),
           )
           .toBeGreaterThan(initialOffset);
+      });
+      test(`${adapter}: tabs keep a visible underline or pill on the selected section / ${theme}`, async ({
+        page,
+      }) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.goto(
+          adapter === 'Vue'
+            ? `/frame?theme=${theme}&lang=en#data-display-tabs`
+            : `/react-fixture?theme=${theme}&lang=en`,
+        );
+        for (const variant of ['underline', 'pill'] as const) {
+          const tabs = page.locator(`[data-tabs-sample="${variant}"]`);
+          const list = tabs.getByRole('tablist');
+          const indicator = list.locator('.ui-tabs__indicator');
+          await expect(list).toHaveCSS('backdrop-filter', 'none');
+          await expect(indicator).toHaveCSS('backdrop-filter', 'none');
+          await expect(indicator).toHaveCSS('opacity', '1');
+          if (variant === 'underline') {
+            await expect(list).toHaveCSS('border-bottom-style', 'solid');
+            await expect(indicator).toHaveCSS('height', '2px');
+            const inactive = list.getByRole('tab', { selected: false }).last();
+            if (await page.evaluate(() => matchMedia('(hover: hover)').matches)) {
+              const restingFill = await inactive.evaluate((tab) => {
+                return getComputedStyle(tab).backgroundColor;
+              });
+              await inactive.hover();
+              await expect(inactive).not.toHaveCSS('background-color', restingFill);
+            }
+            await expect(inactive).not.toHaveCSS('border-radius', '0px');
+          }
+          await expect(indicator).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+          await expect(indicator).not.toHaveCSS('border-radius', '0px');
+          await list.getByRole('tab', { selected: true }).focus();
+          await page.keyboard.press('ArrowRight');
+          const active = list.getByRole('tab', { selected: true });
+          await expect(active).toBeFocused();
+          await expect(tabs.getByRole('tabpanel')).toHaveText('activity');
+          await expect(async () => {
+            const [marker, tab] = await Promise.all([
+              indicator.boundingBox(),
+              active.boundingBox(),
+            ]);
+            if (!marker || !tab) throw new Error('Selected tab and marker must be visible');
+            expect(Math.abs(marker.x - tab.x)).toBeLessThanOrEqual(1);
+            expect(Math.abs(marker.width - tab.width)).toBeLessThanOrEqual(1);
+            const bottomOffset = marker.y + marker.height - (tab.y + tab.height);
+            expect(Math.abs(bottomOffset)).toBeLessThanOrEqual(1);
+          }).toPass({ timeout: 2_000 });
+        }
       });
       test(`${adapter}: pagination moves between pages without leaving the valid range / ${theme}`, async ({
         page,

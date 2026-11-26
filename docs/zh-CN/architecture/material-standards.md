@@ -1,15 +1,23 @@
-# 极光玻璃材质与交互标准（摘要）
+# 共享材质与交互标准（摘要）
 
 Status: adopted
 
 [English](../../architecture/material-standards.md)
 
 <!-- Source: docs/architecture/material-standards.md -->
-<!-- Source-SHA256: 2a728a5415c8efbd10f5b6254a20c4ed92caf4190b9440ca867ae3aa72e8d2b9 -->
+<!-- Source-SHA256: 4914b9fe82dc7f75bfa6bdbc0c1c6294a48f05377346d8ede542cef0abf4e897 -->
 
 本文是[英文材质标准](../../architecture/material-standards.md)的中文摘要，覆盖消费项目最常用的材质、层级、嵌套与修复边界。具体光学数值、逐组件审计与历史验收记录以英文原文为准。
 
-## 一种材质，三个层级
+## 共享材质解析
+
+`@neoverse-ui/tokens` 统一定义材质模式、表面预设和语义角色。`data-neoverse-material="glass"` 或 `data-neoverse-material="solid"` 可设在文档根、子树或表面自身；取最近的有效值，与 `data-theme` 独立。未设置有效值时使用极光玻璃。
+
+显式 `surface` 优先，`none` 不绘制表面底板。Button、Card 与 ControlSurface 默认使用 `auto`，在极光玻璃模式下分别解析为 `glass-subtle`、`glass-elevated` 与 `glass-subtle`。不透明材质复用现有的不透明背景变量，不施加背景模糊或绘制玻璃光学边缘。Ghost 按钮保持无独立底板，其他组件的默认预设不变。
+
+两套适配器在服务端和客户端输出一致的预设标记，由 CSS 解析实际材质。作用域切换后，WebGL 与 Native 渲染器停止为不透明表面绘制玻璃边缘。
+
+## 极光玻璃的三个层级
 
 极光玻璃（Aurora Glass）是唯一的共享玻璃材质。Light / 轻薄、Standard / 标准与 Immersive / 厚实是它的层级，不是独立样式。
 
