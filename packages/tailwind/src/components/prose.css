@@ -308,3 +308,24 @@
     }
   }
 }
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    :where(:scope, :scope *):is(.neoverse-prose blockquote, .neoverse-prose pre) {
+      background: var(--neoverse-material-solid-inset);
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    :where(:scope, :scope *):is(.neoverse-prose :not(pre) > code, .neoverse-prose kbd) {
+      background: var(--neoverse-material-solid-group);
+      box-shadow: none;
+    }
+
+    :where(:scope, :scope *):is(.neoverse-prose mark) {
+      color: var(--neoverse-material-solid-selection-text);
+      background: var(--neoverse-material-solid-selection);
+    }
+  }
+}

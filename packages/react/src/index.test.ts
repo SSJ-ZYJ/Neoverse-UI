@@ -66,7 +66,7 @@ test('form controls preserve native props and compose canonical classes', () => 
   );
   expect(textareaHtml).toContain('<span class="ui-textarea-shell consumer-notes"');
   expect(textareaHtml).toContain('data-caret="native"');
-  expect(textareaHtml).toContain('<textarea name="notes" rows="4" class="ui-textarea"');
+  expect(textareaHtml).toContain('<textarea name="notes" rows="4" class="ui-textarea ');
 
   const selectHtml = renderToStaticMarkup(
     createElement(UiSelect, {

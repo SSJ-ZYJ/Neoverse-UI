@@ -17,7 +17,7 @@ export function UiStatCard({
   unit,
   trend,
   footnote,
-  surface = 'glass-elevated',
+  surface = 'auto',
   className = '',
   ...rest
 }: UiStatCardProps) {

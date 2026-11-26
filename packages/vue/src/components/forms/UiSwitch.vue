@@ -30,6 +30,7 @@ const forwardedAttrs = computed(() => {
     type: _type,
     role: _role,
     'aria-invalid': _ariaInvalid,
+    'data-neoverse-material': _material,
     ...rest
   } = attrs;
   return rest;
@@ -54,6 +55,7 @@ function onChange(event: Event) {
     class="ui-choice ui-switch"
     :class="attrs.class"
     :style="attrs.style"
+    :data-neoverse-material="attrs['data-neoverse-material']"
     :data-validation="props.validation"
     :data-disabled="props.disabled || undefined"
     :data-readonly="props.readonly || undefined"

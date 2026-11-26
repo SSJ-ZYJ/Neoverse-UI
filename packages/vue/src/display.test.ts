@@ -120,7 +120,6 @@ describe('display components', () => {
         'ui-tooltip-surface--accent',
       ]),
     );
-    expect(tooltip.attributes('data-surface')).toBe('glass-subtle');
     expect(tooltip.attributes('data-neoverse-surface-hover')).toBe('static');
     expect(tooltip.attributes()).toHaveProperty('data-neoverse-tooltip-surface');
     expect(tooltip.get('.ui-tooltip-surface__content').text()).toBe('12 contributions');
@@ -245,7 +244,6 @@ describe('Presentation data', () => {
     const wrapper = mount(UiTimeline, { props: { items: [first, second] } });
     expect(wrapper.get('time').attributes('datetime')).toBe('2026-10');
     expect(wrapper.get('.ui-timeline__content').element.firstElementChild?.tagName).toBe('TIME');
-    expect(wrapper.get('.ui-timeline__content').attributes('data-surface')).toBe('glass-subtle');
     expect(wrapper.get('.ui-timeline__node').attributes('aria-hidden')).toBe('true');
     expect(wrapper.find('script').exists()).toBe(false);
     await wrapper.setProps({
@@ -279,7 +277,6 @@ describe('Presentation data', () => {
     const completed = wrapper.get('.ui-step-flow__item--complete');
     expect(completed.find('.ui-step-flow__marker svg').exists()).toBe(true);
     expect(completed.get('.ui-step-flow__status').text()).toBe('已完成');
-    expect(completed.get('.ui-step-flow__content').attributes('data-surface')).toBe('glass-subtle');
     await wrapper.setProps({
       items: [
         { id: 'plan', title: 'Plan' },

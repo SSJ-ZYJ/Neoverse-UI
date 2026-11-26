@@ -13,6 +13,7 @@
   "components": [
     {
       "name": "UiButton",
+      "material": ["control"],
       "track": "canonical-shared",
       "maturity": "stable",
       "tokens": "stable",
@@ -31,6 +32,7 @@
     },
     {
       "name": "UiIconButton",
+      "material": ["control"],
       "track": "canonical-shared",
       "maturity": "stable",
       "tokens": "stable",
@@ -45,6 +47,7 @@
     },
     {
       "name": "UiAction",
+      "material": ["control"],
       "track": "canonical-shared",
       "maturity": "stable",
       "tokens": "stable",
@@ -59,6 +62,7 @@
     },
     {
       "name": "UiSurface",
+      "material": ["raised", "inherited"],
       "track": "canonical-shared",
       "maturity": "stable",
       "tokens": "stable",
@@ -72,6 +76,7 @@
     },
     {
       "name": "UiCard",
+      "material": ["raised"],
       "track": "canonical-shared",
       "maturity": "stable",
       "tokens": "stable",
@@ -86,6 +91,7 @@
     },
     {
       "name": "UiCheckbox",
+      "material": ["inset", "selection"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -108,6 +114,7 @@
     },
     {
       "name": "UiRadioGroup",
+      "material": ["inset", "selection"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -130,6 +137,7 @@
     },
     {
       "name": "UiSwitch",
+      "material": ["inset", "selection"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -152,6 +160,7 @@
     },
     {
       "name": "UiField",
+      "material": ["inherited"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -177,6 +186,7 @@
     },
     {
       "name": "UiInput",
+      "material": ["inset"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -202,6 +212,7 @@
     },
     {
       "name": "UiTextarea",
+      "material": ["inset"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -225,6 +236,7 @@
     },
     {
       "name": "UiSelect",
+      "material": ["inset", "overlay", "selection"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -249,6 +261,7 @@
     },
     {
       "name": "UiTable",
+      "material": ["raised", "group", "inset", "selection"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -272,6 +285,7 @@
     },
     {
       "name": "UiTabs",
+      "material": ["group", "selection"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -296,6 +310,7 @@
     },
     {
       "name": "UiAvatar",
+      "material": ["group"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -319,6 +334,7 @@
     },
     {
       "name": "UiPagination",
+      "material": ["selection"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -342,6 +358,7 @@
     },
     {
       "name": "UiEmptyState",
+      "material": ["raised", "inherited"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -366,6 +383,7 @@
     },
     {
       "name": "UiDisclosure",
+      "material": ["inset"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -388,6 +406,7 @@
     },
     {
       "name": "UiPresence",
+      "material": ["inherited"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -412,6 +431,7 @@
     },
     {
       "name": "UiPopover",
+      "material": ["control", "overlay"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -440,6 +460,7 @@
     },
     {
       "name": "UiDialog",
+      "material": ["overlay"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -465,6 +486,7 @@
     },
     {
       "name": "UiDrawer",
+      "material": ["overlay"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -489,6 +511,7 @@
     },
     {
       "name": "UiDropdownMenu",
+      "material": ["control", "overlay", "selection"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -513,6 +536,7 @@
     },
     {
       "name": "UiContextMenu",
+      "material": ["overlay", "selection"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -537,6 +561,7 @@
     },
     {
       "name": "UiBreadcrumb",
+      "material": ["inherited"],
       "track": "consumer-driven",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -560,6 +585,7 @@
     },
     {
       "name": "UiControlSurface",
+      "material": ["group"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -586,6 +612,7 @@
     },
     {
       "name": "UiDock",
+      "material": ["raised", "group"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -606,6 +633,7 @@
     },
     {
       "name": "UiNavigationItem",
+      "material": ["selection"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -629,6 +657,7 @@
     },
     {
       "name": "UiSegmentedControl",
+      "material": ["group", "selection"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -654,6 +683,7 @@
     },
     {
       "name": "UiBadge",
+      "material": ["status"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -677,6 +707,7 @@
     },
     {
       "name": "UiStatusIndicator",
+      "material": ["status", "inherited"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -700,6 +731,7 @@
     },
     {
       "name": "UiNotice",
+      "material": ["status"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -714,6 +746,7 @@
     },
     {
       "name": "UiToast",
+      "material": ["overlay", "status"],
       "track": "canonical-shared",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -737,6 +770,7 @@
     },
     {
       "name": "UiTooltipSurface",
+      "material": ["overlay", "selection"],
       "track": "consumer-driven",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -762,6 +796,7 @@
     },
     {
       "name": "UiSkeleton",
+      "material": ["placeholder"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -785,6 +820,7 @@
     },
     {
       "name": "UiTerminalPrompt",
+      "material": ["inherited"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -808,6 +844,7 @@
     },
     {
       "name": "UiTerminalEcho",
+      "material": ["inherited"],
       "track": "consumer-driven",
       "maturity": "consumer-validation",
       "tokens": "stable",
@@ -836,6 +873,7 @@
     },
     {
       "name": "UiTerminalSurface",
+      "material": ["raised", "group", "inset"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -862,6 +900,7 @@
     },
     {
       "name": "UiTerminalLine",
+      "material": ["inherited"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -885,6 +924,7 @@
     },
     {
       "name": "UiTerminalTranscript",
+      "material": ["inherited"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -908,6 +948,7 @@
     },
     {
       "name": "UiStatCard",
+      "material": ["raised"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -931,6 +972,7 @@
     },
     {
       "name": "UiTimeline",
+      "material": ["group"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -954,6 +996,7 @@
     },
     {
       "name": "UiStepFlow",
+      "material": ["group", "selection"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",
@@ -977,6 +1020,7 @@
     },
     {
       "name": "UiScrollbar",
+      "material": ["inherited"],
       "track": "consumer-driven",
       "maturity": "stable",
       "tokens": "stable",

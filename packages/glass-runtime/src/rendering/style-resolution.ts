@@ -22,8 +22,9 @@ const glassClassNames = [
 export const materialModeAttribute = 'data-neoverse-material';
 const materialModeSelector = `[${materialModeAttribute}='glass'], [${materialModeAttribute}='solid']`;
 export const glassPresetSelector = glassClassNames.map((name) => `.${name}`).join(', ');
-const insetGlassSelector =
-  '.ui-input, .ui-textarea, .ui-select, .ui-choice__control, table.ui-table, .neoverse-prose table, .ui-disclosure, .neoverse-prose details';
+const implicitAutoGlassSelector =
+  '.ui-choice__control, .neoverse-prose table, .ui-disclosure, .neoverse-prose details';
+const insetGlassSelector = `.ui-input, .ui-textarea, .ui-select, table.ui-table, ${implicitAutoGlassSelector}`;
 const elevatedFormGlassSelector = '.ui-select__popover';
 export const glassSelector = [
   glassPresetSelector,
@@ -52,7 +53,8 @@ export type GlassStyle = {
 };
 
 const isSolidAutoSurface = (element: Element): boolean =>
-  element.classList.contains('material-auto') &&
+  (element.classList.contains('material-auto') ||
+    (!element.matches(glassPresetSelector) && element.matches(implicitAutoGlassSelector))) &&
   element.closest(materialModeSelector)?.getAttribute(materialModeAttribute) === 'solid';
 
 const getExplicitVariant = (element: Element): GlassVariant | undefined => {

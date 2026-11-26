@@ -12,6 +12,7 @@ import {
   UiSegmentedControl,
   UiSelect,
   UiTable,
+  UiTabs,
 } from '@neoverse-ui/vue';
 import { computed, ref } from 'vue';
 import LabIcon from '../LabIcon.vue';
@@ -110,6 +111,13 @@ function reset() {
         :aria-label="text('title')"
         class="justify-self-start"
         data-core-role="segmented"
+      />
+      <UiTabs :options="segments" v-bind="{ ariaLabel: text('dock') }" data-core-role="tabs" />
+      <UiTabs
+        :options="segments"
+        v-bind="{ ariaLabel: text('dock') }"
+        variant="glass"
+        data-core-role="explicit-glass-tabs"
       />
       <UiControlSurface class="flex-wrap" :aria-label="text('actions')" data-core-role="group">
         <UiButton size="sm" data-core-role="primary" @click="dialogOpen = true">{{

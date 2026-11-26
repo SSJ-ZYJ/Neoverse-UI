@@ -342,7 +342,7 @@
 
 @layer neoverse-material-mode {
   @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
-    .ui-segmented-control.material-auto {
+    :where(:scope, :scope *).ui-segmented-control.material-auto {
       --neoverse-control-segmented-active-background: none;
       --neoverse-control-segmented-active-fill: var(--neoverse-material-solid-selection);
       --neoverse-control-segmented-active-filter: none;

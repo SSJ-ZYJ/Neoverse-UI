@@ -3,7 +3,7 @@ import type { StatCardProps } from '../../types';
 import UiSurface from '../surfaces/UiSurface.vue';
 
 const props = withDefaults(defineProps<StatCardProps>(), {
-  surface: 'glass-elevated',
+  surface: 'auto',
 });
 </script>
 

@@ -24,7 +24,7 @@ export function UiEmptyState({
       {...rest}
       as="section"
       className={['ui-empty-state', className].filter(Boolean).join(' ')}
-      surface={variant === 'default' ? 'glass-elevated' : variant === 'subtle' ? 'subtle' : 'none'}
+      surface={variant === 'default' ? 'auto' : variant === 'subtle' ? 'subtle' : 'none'}
       data-empty-state-variant={variant}
       aria-labelledby={`${id}-title`}
       aria-describedby={description ? `${id}-description` : undefined}

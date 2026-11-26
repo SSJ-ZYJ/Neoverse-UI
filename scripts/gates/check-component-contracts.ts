@@ -12,6 +12,7 @@ type RuntimeStatus = 'validated' | 'pending' | 'not-applicable';
 
 interface ComponentContract {
   name: string;
+  material: string[];
   track: Track;
   maturity: Maturity;
   tokens: LayerStatus;
@@ -72,6 +73,17 @@ const consumerStatuses = new Set<ConsumerStatus>(['validated', 'pending', 'none'
 const runtimeStatuses = new Set<RuntimeStatus>(['validated', 'pending', 'not-applicable']);
 const tracks = new Set<Track>(['canonical-shared', 'consumer-driven']);
 const maturities = new Set<Maturity>(['stable', 'consumer-validation', 'partial']);
+const materialRoles: Record<string, true> = {
+  control: true,
+  group: true,
+  raised: true,
+  inset: true,
+  overlay: true,
+  selection: true,
+  status: true,
+  placeholder: true,
+  inherited: true,
+};
 
 const addMatches = (source: string, pattern: RegExp, target: Set<string>): void => {
   for (const match of source.matchAll(pattern)) {
@@ -129,6 +141,15 @@ for (const component of matrix.components) {
     errors.push(`Duplicate component matrix entry: ${component.name}`);
   }
   seen.add(component.name);
+
+  if (
+    !Array.isArray(component.material) ||
+    component.material.length === 0 ||
+    component.material.some((role) => !Object.hasOwn(materialRoles, role)) ||
+    new Set(component.material).size !== component.material.length
+  ) {
+    errors.push(`${component.name}: declare distinct shared material responsibilities`);
+  }
 
   if (!tracks.has(component.track)) {
     errors.push(`${component.name}: invalid track ${component.track}`);

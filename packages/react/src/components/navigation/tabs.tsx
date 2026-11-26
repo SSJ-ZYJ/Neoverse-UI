@@ -1,4 +1,5 @@
 import { attachSelectionIndicator } from '@neoverse-ui/motion';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import {
   type HTMLAttributes,
   type KeyboardEvent,
@@ -32,7 +33,7 @@ export interface UiTabsProps
 export function UiTabs({
   options,
   ariaLabel,
-  variant = 'glass',
+  variant,
   value,
   defaultValue,
   onValueChange,
@@ -40,7 +41,9 @@ export function UiTabs({
   className,
   ...rest
 }: UiTabsProps) {
-  const glass = variant === 'glass';
+  const presentation = variant ?? 'glass';
+  const surface =
+    presentation === 'glass' ? (variant === undefined ? 'auto' : 'glass-subtle') : undefined;
   const id = useId();
   const [internal, setInternal] = useState(
     defaultValue ?? options.find((item) => !item.disabled)?.value,
@@ -90,13 +93,13 @@ export function UiTabs({
     <div
       {...rest}
       className={['ui-tabs', className].filter(Boolean).join(' ')}
-      data-variant={variant}
+      data-variant={presentation}
     >
       <div
         ref={trackRef}
-        className={glass ? 'ui-tabs__list material-glass-subtle' : 'ui-tabs__list'}
-        data-surface={glass ? 'glass-subtle' : undefined}
-        data-neoverse-surface-hover={glass ? 'static' : undefined}
+        className={surface ? `ui-tabs__list ${getSurfaceClass(surface, 'group')}` : 'ui-tabs__list'}
+        data-surface={surface}
+        data-neoverse-surface-hover={surface ? 'static' : undefined}
         role="tablist"
         aria-label={ariaLabel}
         aria-orientation="horizontal"

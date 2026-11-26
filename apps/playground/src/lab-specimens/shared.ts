@@ -40,7 +40,10 @@ export const validationOptions = [
   { value: 'success', label: localized('Success', '成功') },
 ] as const;
 
+const automaticSurfaceOption = { value: 'auto', label: localized('Automatic', '自动') } as const;
+
 export const glassOptions = [
+  automaticSurfaceOption,
   { value: 'none', label: localized('None', '无') },
   { value: 'glass-subtle', label: tokenCopy.glassVariants.subtle },
   { value: 'glass-elevated', label: tokenCopy.glassVariants.elevated },
@@ -49,6 +52,7 @@ export const glassOptions = [
 
 /** Every public surface preset, in the order the material standards introduce them. */
 export const surfaceOptions = [
+  automaticSurfaceOption,
   { value: 'none', label: localized('None', '无') },
   { value: 'solid', label: localized('Solid', '不透明') },
   { value: 'subtle', label: localized('Subtle', '轻微') },

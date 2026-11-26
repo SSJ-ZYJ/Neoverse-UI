@@ -3,6 +3,7 @@ import {
   markPointerModality,
   type OverlayPlacement,
 } from '@neoverse-ui/overlay-runtime';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { type ComponentPropsWithRef, type ReactNode, useEffect } from 'react';
 import { mergeClassNames } from '../../internal.js';
 import type { ActionSize } from '../actions/action-size.js';
@@ -60,7 +61,8 @@ export function UiPopover({
     <span {...props} className={mergeClassNames('ui-popover', className)}>
       <button
         ref={controller.triggerRef}
-        className={`ui-popover__trigger ui-button material-glass-subtle ${buttonVariantClasses[triggerVariant]} ${buttonSizeClasses[triggerSize]}`}
+        className={`ui-popover__trigger ui-button ${getSurfaceClass('auto', 'control')} ${buttonVariantClasses[triggerVariant]} ${buttonSizeClasses[triggerSize]}`}
+        data-surface="auto"
         type="button"
         disabled={disabled}
         aria-expanded={controller.expandedOpen}
@@ -79,7 +81,8 @@ export function UiPopover({
       <div
         ref={controller.panelRef}
         id={controller.panelId}
-        className="ui-overlay-panel ui-popover__content material-glass-elevated nv-presence"
+        className={`ui-overlay-panel ui-popover__content ${getSurfaceClass('auto', 'overlay')} nv-presence`}
+        data-surface="auto"
         popover="auto"
         role="dialog"
         aria-label={ariaLabel}

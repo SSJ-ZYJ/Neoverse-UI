@@ -60,7 +60,7 @@ export function UiIconButton(props: UiIconButtonProps) {
     disabled = false,
     loading = false,
     stretch = false,
-    surface = 'glass-subtle',
+    surface = 'auto',
     type = 'button',
     children,
     className,

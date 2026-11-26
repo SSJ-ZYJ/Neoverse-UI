@@ -1,4 +1,9 @@
-import { createDrawerController, type DrawerController } from '@neoverse-ui/overlay-runtime';
+import {
+  bridgePortalMaterialScope,
+  createDrawerController,
+  type DrawerController,
+} from '@neoverse-ui/overlay-runtime';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import {
   type ComponentPropsWithRef,
   type CSSProperties,
@@ -40,6 +45,7 @@ export function UiDrawer({
 }: UiDrawerProps) {
   const element = useRef<HTMLDialogElement>(null);
   const backdrop = useRef<HTMLDivElement>(null);
+  const materialSource = useRef<HTMLSpanElement>(null);
   const controller = useRef<DrawerController>(null);
   const [mounted, setMounted] = useState(false);
   const ready = !modal || mounted;
@@ -65,6 +71,14 @@ export function UiDrawer({
   }, [modal, ready]);
 
   useLayoutEffect(() => {
+    const panel = element.current;
+    const host = panel?.parentElement;
+    if (modal && ready && materialSource.current && host && panel) {
+      return bridgePortalMaterialScope(materialSource.current, host, panel);
+    }
+  }, [modal, ready]);
+
+  useLayoutEffect(() => {
     if (!ready) return;
     controller.current?.sync({
       open,
@@ -81,12 +95,15 @@ export function UiDrawer({
       {...rest}
       ref={setElement}
       tabIndex={tabIndex ?? (modal ? -1 : undefined)}
-      className={mergeClassNames('ui-drawer material-glass-subtle', className)}
+      className={mergeClassNames(
+        `ui-drawer ${getSurfaceClass('auto', 'compactOverlay')}`,
+        className,
+      )}
       aria-modal={modal || undefined}
       closedby="none"
       data-side={side}
       data-modal={modal ? 'true' : 'false'}
-      data-surface="glass-subtle"
+      data-surface="auto"
       data-neoverse-glass-edge-stroke=""
       data-neoverse-surface-hover="static"
       data-neoverse-glass-occluder={modal ? 'topmost' : undefined}
@@ -97,7 +114,7 @@ export function UiDrawer({
   );
   if (!modal) return panel;
 
-  return createPortal(
+  const portal = createPortal(
     <div
       className="ui-drawer__host"
       data-open={open ? 'true' : 'false'}
@@ -111,5 +128,11 @@ export function UiDrawer({
       {panel}
     </div>,
     document.body,
+  );
+  return (
+    <>
+      <span hidden ref={materialSource} />
+      {portal}
+    </>
   );
 }

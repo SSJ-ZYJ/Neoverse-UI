@@ -1,10 +1,19 @@
 <script setup lang="ts">
 import { attachSelectionIndicator } from '@neoverse-ui/motion';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import type { ComponentPublicInstance } from 'vue';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useId } from 'vue';
 import type { TabsProps } from '../../types';
 
-const props = withDefaults(defineProps<TabsProps>(), { variant: 'glass' });
+const props = defineProps<TabsProps>();
+const presentation = computed(() => props.variant ?? 'glass');
+const surface = computed(() =>
+  presentation.value === 'glass'
+    ? props.variant === undefined
+      ? 'auto'
+      : 'glass-subtle'
+    : undefined,
+);
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>();
 const id = useId();
 const internalValue = ref(
@@ -76,13 +85,13 @@ function setRef(element: Element | ComponentPublicInstance | null, index: number
 </script>
 
 <template>
-  <div class="ui-tabs" :data-variant="variant">
+  <div class="ui-tabs" :data-variant="presentation">
     <div
       ref="track"
       class="ui-tabs__list"
-      :class="{ 'material-glass-subtle': variant === 'glass' }"
-      :data-surface="variant === 'glass' ? 'glass-subtle' : undefined"
-      :data-neoverse-surface-hover="variant === 'glass' ? 'static' : undefined"
+      :class="surface && getSurfaceClass(surface, 'group')"
+      :data-surface="surface"
+      :data-neoverse-surface-hover="surface ? 'static' : undefined"
       role="tablist"
       :aria-label="ariaLabel"
       aria-orientation="horizontal"

@@ -18,6 +18,23 @@ const props = defineProps<LabModuleProps>();
         <li>{{ localize(proseCopy.proseItemTwo, props.locale) }}</li>
       </ul>
       <p><code>.neoverse-prose</code>+<code>max-w-reading</code></p>
+      <pre><code>data-neoverse-material="solid"</code></pre>
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">{{ localize(proseCopy.materialHeading, props.locale) }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>{{ localize(proseCopy.materialExample, props.locale) }}</td>
+          </tr>
+        </tbody>
+      </table>
+      <details>
+        <summary>{{ localize(proseCopy.keyboardHeading, props.locale) }}</summary>
+        <p><kbd>Enter</kbd> · <kbd>Space</kbd></p>
+      </details>
       <p>
         <a href="#composition-reading">{{ localize(proseCopy.proseLink, props.locale) }}</a>
       </p>

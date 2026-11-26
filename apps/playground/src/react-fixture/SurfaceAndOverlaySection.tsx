@@ -354,7 +354,7 @@ export default function SurfaceAndOverlaySection({
       >
         {(value) => <span data-tabs-panel-state>{value}</span>}
       </UiTabs>
-      {(['underline', 'pill'] as const).map((variant) => (
+      {(['glass', 'underline', 'pill'] as const).map((variant) => (
         <UiTabs
           key={variant}
           data-tabs-sample={variant}

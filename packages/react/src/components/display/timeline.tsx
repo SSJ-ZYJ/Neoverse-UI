@@ -1,5 +1,7 @@
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import type { HTMLAttributes, ReactNode } from 'react';
-import { UiSurface } from '../surfaces/surface.js';
+
+const groupMaterial = getSurfaceClass('auto', 'group');
 
 export interface TimelineItem {
   id: string;
@@ -30,13 +32,12 @@ export function UiTimeline({
     >
       {items.map((item, index) => (
         <li key={item.id} className="ui-timeline__item">
-          <UiSurface
-            as="span"
-            surface="glass-subtle"
-            className="ui-timeline__node"
+          <span
+            data-surface="auto"
+            className={`ui-surface ui-timeline__node ${groupMaterial}`}
             aria-hidden="true"
           />
-          <UiSurface surface="glass-subtle" className="ui-timeline__content">
+          <div data-surface="auto" className={`ui-surface ui-timeline__content ${groupMaterial}`}>
             {renderItem ? (
               renderItem({ item, index })
             ) : (
@@ -52,7 +53,7 @@ export function UiTimeline({
                 ) : null}
               </>
             )}
-          </UiSurface>
+          </div>
         </li>
       ))}
     </ol>

@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import type { StepFlowProps } from '../../types';
 import UiBadge from '../display/UiBadge.vue';
-import UiSurface from '../surfaces/UiSurface.vue';
+
+const groupMaterial = getSurfaceClass('auto', 'group');
 
 const props = defineProps<StepFlowProps>();
 </script>
@@ -15,7 +17,12 @@ const props = defineProps<StepFlowProps>();
       :class="item.status ? `ui-step-flow__item--${item.status}` : undefined"
       :aria-current="item.status === 'current' ? 'step' : undefined"
     >
-      <UiSurface as="span" surface="glass-subtle" class="ui-step-flow__marker" aria-hidden="true">
+      <span
+        class="ui-surface ui-step-flow__marker"
+        :class="groupMaterial"
+        data-surface="auto"
+        aria-hidden="true"
+      >
         <svg
           v-if="item.status === 'complete'"
           class="ui-step-flow__status-icon"
@@ -31,8 +38,8 @@ const props = defineProps<StepFlowProps>();
           <path d="m5 12 4 4L19 6" />
         </svg>
         <template v-else>{{ index + 1 }}</template>
-      </UiSurface>
-      <UiSurface surface="glass-subtle" class="ui-step-flow__content">
+      </span>
+      <div class="ui-surface ui-step-flow__content" :class="groupMaterial" data-surface="auto">
         <slot name="item" :item="item" :index="index">
           <p class="ui-step-flow__title">{{ item.title }}</p>
           <p v-if="item.description !== undefined" class="ui-step-flow__description">
@@ -47,7 +54,7 @@ const props = defineProps<StepFlowProps>();
             <template v-else>{{ item.statusLabel }}</template>
           </slot>
         </span>
-      </UiSurface>
+      </div>
     </li>
   </ol>
 </template>

@@ -151,9 +151,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <span v-if="mounted" ref="materialSource" class="ui-dialog-material-source" hidden />
+  <span v-if="mounted" ref="materialSource" hidden />
   <Teleport v-if="mounted" to="body">
-    <div class="ui-dialog-portal">
+    <div class="ui-overlay-portal">
       <div
         class="ui-dialog__backdrop"
         :data-open="props.open ? 'true' : undefined"

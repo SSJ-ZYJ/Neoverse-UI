@@ -1,9 +1,16 @@
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { type ComponentPropsWithRef, useRef } from 'react';
 import { mergeClassNames } from '../../internal.js';
 import { useTextareaCaret } from '../motion/caret-motion.js';
-import { type FormControlValidation, resolveAriaInvalid } from './form-control.js';
+import {
+  type FormControlMaterialScope,
+  type FormControlValidation,
+  resolveAriaInvalid,
+} from './form-control.js';
 
-export interface UiTextareaProps extends ComponentPropsWithRef<'textarea'> {
+export interface UiTextareaProps
+  extends ComponentPropsWithRef<'textarea'>,
+    FormControlMaterialScope {
   validation?: FormControlValidation;
 }
 
@@ -13,6 +20,7 @@ export function UiTextarea({
   style,
   ref: forwardedRef,
   'aria-invalid': ariaInvalid,
+  'data-neoverse-material': material,
   ...props
 }: UiTextareaProps) {
   const control = useRef<HTMLTextAreaElement | null>(null);
@@ -22,6 +30,7 @@ export function UiTextarea({
       className={mergeClassNames('ui-textarea-shell', className)}
       style={style}
       data-caret={caret.showsCaret ? 'overlay' : 'native'}
+      data-neoverse-material={material}
     >
       <textarea
         {...props}
@@ -30,7 +39,7 @@ export function UiTextarea({
           if (typeof forwardedRef === 'function') forwardedRef(node);
           else if (forwardedRef) forwardedRef.current = node;
         }}
-        className="ui-textarea"
+        className={`ui-textarea ${getSurfaceClass('auto', 'field')}`}
         data-validation={validation}
         aria-invalid={resolveAriaInvalid(ariaInvalid, validation)}
         {...caret.eventProps}

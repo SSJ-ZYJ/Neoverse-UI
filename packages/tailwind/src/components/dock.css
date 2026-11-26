@@ -42,7 +42,7 @@
 
 @layer neoverse-material-mode {
   @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
-    .ui-dock.material-auto {
+    :where(:scope, :scope *).ui-dock.material-auto {
       border-color: var(--neoverse-material-solid-divider);
 
       & > .ui-control-surface__group--trailing {
@@ -52,7 +52,7 @@
     }
 
     @media (hover: hover) {
-      .ui-dock.material-auto:not([data-neoverse-surface-hover='static']) {
+      :where(:scope, :scope *).ui-dock.material-auto:not([data-neoverse-surface-hover='static']) {
         @media (prefers-reduced-motion: no-preference) {
           transition:
             var(--neoverse-control-surface-scale-transition),
@@ -62,36 +62,6 @@
 
         &:hover {
           --neoverse-solid-plate-shadow: var(--neoverse-material-solid-overlay-shadow);
-        }
-      }
-    }
-
-    @scope (.ui-dock) to (.ui-dock) {
-      :scope.material-auto > .ui-control-surface__group--primary .ui-navigation-item {
-        --neoverse-control-ghost-hover-background: var(--neoverse-material-solid-hover);
-        --neoverse-control-ghost-active-background: var(--neoverse-material-solid-press);
-
-        &.ui-navigation-item--active.ui-button--ghost {
-          color: var(--neoverse-material-solid-selection-text);
-          background-color: var(--neoverse-material-solid-selection);
-          border-color: transparent;
-          box-shadow: none;
-          -webkit-backdrop-filter: none;
-          backdrop-filter: none;
-          background-image: linear-gradient(
-            var(--neoverse-button-tone-color),
-            var(--neoverse-button-tone-color)
-          );
-
-          @media (hover: hover) {
-            &:hover:not(:active, :disabled, [aria-disabled='true']) {
-              --neoverse-button-tone-color: var(--neoverse-material-solid-hover);
-            }
-          }
-
-          &:active:not(:disabled, [aria-disabled='true']) {
-            --neoverse-button-tone-color: var(--neoverse-material-solid-press);
-          }
         }
       }
     }

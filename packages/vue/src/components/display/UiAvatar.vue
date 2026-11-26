@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { computed, ref } from 'vue';
 import type { AvatarProps } from '../../types';
 
@@ -24,11 +25,11 @@ const initials = computed(() => {
 
 <template>
   <span
-    class="ui-avatar material-glass-subtle"
-    :class="[`ui-avatar--${size}`, `ui-avatar--${shape}`]"
+    class="ui-avatar"
+    :class="[getSurfaceClass('auto', 'group'), `ui-avatar--${size}`, `ui-avatar--${shape}`]"
     role="img"
     :aria-label="name"
-    data-surface="glass-subtle"
+    data-surface="auto"
   >
     <img
       v-if="hasImage"

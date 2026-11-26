@@ -29,6 +29,7 @@ const forwardedAttrs = computed(() => {
     checked: _checked,
     type: _type,
     'aria-invalid': _ariaInvalid,
+    'data-neoverse-material': _material,
     ...rest
   } = attrs;
   return rest;
@@ -52,6 +53,7 @@ function onChange(event: Event) {
     class="ui-choice ui-checkbox"
     :class="attrs.class"
     :style="attrs.style"
+    :data-neoverse-material="attrs['data-neoverse-material']"
     :data-validation="props.validation"
     :data-disabled="props.disabled || undefined"
     :data-readonly="props.readonly || undefined"
@@ -71,7 +73,8 @@ function onChange(event: Event) {
     >
     <span class="ui-choice__control" aria-hidden="true">
       <svg class="ui-choice__indicator" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="m5 12 4 4L19 6" />
+        <path class="ui-checkbox__mixed-mark" d="M5 12h14" />
+        <path class="ui-checkbox__check-mark" d="m5 12 4 4L19 6" />
       </svg>
     </span>
     <span :id="labelId" class="ui-choice__content"><slot /></span>

@@ -31,7 +31,7 @@ const emit = defineEmits<{
 const triggerClasses = computed(() => [
   'ui-dropdown-menu__trigger',
   'ui-button',
-  getSurfaceClass('glass-subtle'),
+  getSurfaceClass('auto', 'control'),
   buttonVariantClasses[props.triggerVariant as ButtonVariant] ?? buttonVariantClasses.secondary,
   buttonSizeClasses[props.triggerSize as ButtonSize] ?? buttonSizeClasses.md,
 ]);
@@ -211,6 +211,7 @@ onBeforeUnmount(() => {
     <button
       ref="triggerRef"
       :class="triggerClasses"
+      data-surface="auto"
       type="button"
       aria-haspopup="menu"
       :aria-expanded="expandedOpen"
@@ -227,7 +228,9 @@ onBeforeUnmount(() => {
     <div
       ref="panelRef"
       :id="panelId"
-      class="ui-overlay-panel ui-dropdown-menu__panel material-glass-elevated nv-presence"
+      class="ui-overlay-panel ui-dropdown-menu__panel nv-presence"
+      :class="getSurfaceClass('auto', 'overlay')"
+      data-surface="auto"
       popover="auto"
       role="menu"
       :aria-label="props.ariaLabel"

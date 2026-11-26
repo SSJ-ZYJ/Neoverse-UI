@@ -162,7 +162,13 @@
   }
 
   .ui-drawer__host[data-open='true'] > .ui-drawer__backdrop::before {
-    background-color: var(--neoverse-color-overlay-scrim);
+    background-color: var(--neoverse-drawer-scrim, var(--neoverse-color-overlay-scrim));
+  }
+
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    .ui-drawer__backdrop {
+      --neoverse-drawer-scrim: var(--neoverse-material-solid-scrim);
+    }
   }
 
   @starting-style {
@@ -195,25 +201,24 @@
         var(--neoverse-motion-spatial-easing);
     }
   }
+
+  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+    .ui-drawer.material-glass-subtle {
+      background-color: var(--neoverse-material-glass-subtle-background-fallback);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    .ui-drawer.material-glass-subtle::before {
+      display: none;
+    }
+  }
 }
 
 /* The shared Glass utility establishes relative positioning for its edge.
    A modal panel instead stays anchored to its viewport-sized host. */
 .ui-drawer__host > dialog.ui-drawer {
   position: absolute;
-}
-
-/* Override the Glass utility even while its renderer state is still active. */
-@media (prefers-reduced-transparency: reduce), (forced-colors: active) {
-  .ui-drawer.material-glass-subtle {
-    background-color: var(--neoverse-material-glass-subtle-background-fallback);
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-
-  .ui-drawer.material-glass-subtle::before {
-    display: none;
-  }
 }
 
 @media (forced-colors: active) {

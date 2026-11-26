@@ -104,5 +104,11 @@ A new public component must be added to the matrix in the same change that expor
 
 `bun run check:contracts` validates matrix schema invariants, public Vue/React export coverage, Canonical Shared parity, React runtime fixture markers, Stable maturity requirements, unit-test evidence for every `Stable` unit column, and the presence of a documentation row for every registered component. Unit evidence is the component name appearing in a Vue or React test file; it guards existence, not assertion depth.
 
+Each machine-readable row also records its `material` responsibilities.
+`inherited` means the component adds no independent plate in that presentation.
+The roles are checked without promoting maturity or changing release/consumer
+evidence. See [Material standards](material-standards.md#solid-material) for
+role behavior, Prose and the Design Lab comparison route.
+
 
 Material tiers, customization, component audit and hover/press policy: [Material standards](material-standards.md).

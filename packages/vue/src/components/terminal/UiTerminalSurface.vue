@@ -14,7 +14,7 @@ defineOptions({ inheritAttrs: false });
 
 const props = withDefaults(defineProps<TerminalSurfaceProps>(), {
   density: 'compact',
-  surface: 'glass-elevated',
+  surface: 'auto',
   titlebar: 'default',
   maximized: false,
   closeLabel: 'Close window',

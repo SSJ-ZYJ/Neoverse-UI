@@ -413,7 +413,7 @@
 
 @layer neoverse-material-mode {
   @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
-    .material-auto:is(.ui-button--primary, .ui-button--secondary) {
+    :where(:scope, :scope *).material-auto:is(.ui-button--primary, .ui-button--secondary) {
       --neoverse-button-tone-color: transparent;
       --neoverse-button-hover-tone: var(--neoverse-material-solid-hover);
       --neoverse-button-press-tone: var(--neoverse-material-solid-press);
@@ -430,21 +430,19 @@
       }
     }
 
-    .material-auto.ui-button--primary {
+    :where(:scope, :scope *).material-auto.ui-button--primary {
       --neoverse-solid-plate-fill: var(--neoverse-material-solid-primary);
       --neoverse-button-hover-tone: var(--neoverse-material-solid-primary-hover);
       --neoverse-button-press-tone: var(--neoverse-material-solid-primary-press);
       color: var(--neoverse-material-solid-primary-text);
     }
 
-    .material-auto.ui-button--ghost {
+    :where(:scope, :scope *).material-auto.ui-button--ghost {
       background-color: var(--neoverse-quiet-control-feedback);
-      --neoverse-control-ghost-hover-background: var(--neoverse-material-solid-hover);
-      --neoverse-control-ghost-active-background: var(--neoverse-material-solid-press);
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .material-auto.ui-button {
+      :where(:scope, :scope *).material-auto.ui-button {
         transition: none;
       }
     }

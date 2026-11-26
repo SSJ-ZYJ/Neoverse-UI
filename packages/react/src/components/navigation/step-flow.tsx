@@ -1,6 +1,8 @@
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import type { HTMLAttributes, ReactNode } from 'react';
 import { UiBadge } from '../display/badge.js';
-import { UiSurface } from '../surfaces/surface.js';
+
+const groupMaterial = getSurfaceClass('auto', 'group');
 
 export type StepFlowStatus = 'pending' | 'current' | 'complete';
 export interface StepFlowItem {
@@ -37,10 +39,9 @@ export function UiStepFlow({
           className={`ui-step-flow__item${item.status ? ` ui-step-flow__item--${item.status}` : ''}`}
           aria-current={item.status === 'current' ? 'step' : undefined}
         >
-          <UiSurface
-            as="span"
-            surface="glass-subtle"
-            className="ui-step-flow__marker"
+          <span
+            data-surface="auto"
+            className={`ui-surface ui-step-flow__marker ${groupMaterial}`}
             aria-hidden="true"
           >
             {item.status === 'complete' ? (
@@ -60,8 +61,8 @@ export function UiStepFlow({
             ) : (
               index + 1
             )}
-          </UiSurface>
-          <UiSurface surface="glass-subtle" className="ui-step-flow__content">
+          </span>
+          <div data-surface="auto" className={`ui-surface ui-step-flow__content ${groupMaterial}`}>
             {renderItem ? (
               renderItem({ item, index })
             ) : (
@@ -83,7 +84,7 @@ export function UiStepFlow({
                 )}
               </span>
             ) : null}
-          </UiSurface>
+          </div>
         </li>
       ))}
     </ol>

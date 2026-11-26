@@ -22,7 +22,7 @@ import {
   localized,
 } from './playground-content';
 import type { ShowcaseSurface } from './showcase-surface';
-import { type StageBackground, stageBackgrounds } from './stage-background';
+import { readStageMaterial, type StageBackground, stageBackgrounds } from './stage-background';
 import {
   createStageTransform,
   maxStageZoom,
@@ -46,6 +46,7 @@ const emit = defineEmits<{
   background: [value: string];
   surface: [value: string];
 }>();
+const material = readStageMaterial(window.location.search);
 const FocusedSpecimen = () => {
   const preview = props.specimen?.preview;
   return typeof preview === 'function'
@@ -211,6 +212,7 @@ const overviewSummary = computed(() =>
       tabindex="-1"
       aria-labelledby="stage-title"
       data-design-lab-region="specimen"
+      :data-neoverse-material="material"
       class="playground-stage__specimen"
     >
       <header class="playground-stage__heading">
@@ -278,6 +280,7 @@ const overviewSummary = computed(() =>
       </header>
       <div
         data-design-lab-region="module"
+        :data-neoverse-material="material"
         class="grid min-w-0 gap-grid"
         :aria-busy="previewPending || undefined"
       >

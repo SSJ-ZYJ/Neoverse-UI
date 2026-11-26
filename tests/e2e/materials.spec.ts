@@ -374,6 +374,148 @@ test('React uses the same Solid and explicit Glass material boundaries', async (
   await expect(sample('none')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
 });
 
+test('automatic and explicit Glass tabs keep distinct material behavior in both adapters', async ({
+  page,
+}) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  for (const [url, automatic, explicit] of [
+    [
+      '/frame?theme=light&lang=en#materials-core',
+      '[data-core-material="solid"] [data-core-role="tabs"]',
+      '[data-core-material="solid"] [data-core-role="explicit-glass-tabs"]',
+    ],
+    [
+      '/react-fixture?theme=light&lang=en',
+      '[data-react-adapter="UiTabs"]',
+      '[data-tabs-sample="glass"]',
+    ],
+  ] as const) {
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+    const picked = page.locator(automatic).getByRole('tablist');
+    const explicitGlass = page.locator(explicit).getByRole('tablist');
+    await page.locator('html').evaluate((element) => {
+      element.setAttribute('data-neoverse-material', 'solid');
+    });
+    await expect(picked).toHaveCSS('backdrop-filter', 'none');
+    await expect(picked.locator('.ui-tabs__indicator')).toHaveCSS('backdrop-filter', 'none');
+    await expect(explicitGlass).toHaveCSS('backdrop-filter', /blur\(/);
+    const first = picked.getByRole('tab').first();
+    await first.press('ArrowRight');
+    await expect(first).toHaveAttribute('aria-selected', 'false');
+    await expect(picked.getByRole('tab', { selected: true })).toBeFocused();
+  }
+});
+
+test('status and loading planes in Solid stay legible without optical depth', async ({ page }) => {
+  for (const theme of themes) {
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto(`/react-fixture?theme=${theme}&lang=en&material=solid&contract-fixtures=1`, {
+      waitUntil: 'domcontentloaded',
+    });
+    const selector = (name: string) => `[data-react-adapter="Ui${name}"]`;
+    for (const name of ['Avatar', 'Badge', 'Skeleton', 'StatCard']) {
+      const plate = page.locator(selector(name));
+      await expect(plate).toHaveCSS('backdrop-filter', 'none');
+      await expect(plate).not.toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+    }
+    const [badge] = await page.evaluate(measureContrast, [selector('Badge')]);
+    expect(badge?.ratio).toBeGreaterThanOrEqual(4.5);
+    await expect(page.locator(selector('StatCard'))).not.toHaveCSS('box-shadow', 'none');
+    await expect(page.locator(selector('Badge'))).toHaveCSS('box-shadow', 'none');
+    const marks = await page
+      .locator('[data-contract-form] .ui-choice__native:checked + .ui-choice__control')
+      .evaluateAll((elements) => {
+        const canvas = document.createElement('canvas').getContext('2d', {
+          willReadFrequently: true,
+        });
+        if (!canvas) throw new Error('Cannot resolve the selection paint without a canvas');
+        const alpha = (value: string) => {
+          canvas.clearRect(0, 0, 1, 1);
+          canvas.fillStyle = value;
+          canvas.fillRect(0, 0, 1, 1);
+          return canvas.getImageData(0, 0, 1, 1).data[3];
+        };
+        return elements.map((element) => ({
+          fill: getComputedStyle(element, '::after').backgroundColor,
+          rest: getComputedStyle(element).backgroundColor,
+          fillAlpha: alpha(getComputedStyle(element, '::after').backgroundColor),
+        }));
+      });
+    expect(marks.length).toBeGreaterThanOrEqual(3);
+    for (const mark of marks) {
+      expect(mark.fillAlpha).toBe(255);
+      expect(mark.fill).not.toBe(mark.rest);
+    }
+  }
+});
+
+test('Prose uses Solid reading planes and retains native disclosure behavior', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/frame?theme=light&lang=en#foundation-prose', {
+    waitUntil: 'domcontentloaded',
+  });
+  const prose = page.locator('[data-foundation-prose]');
+  const quote = prose.locator('blockquote');
+  await expect(quote).toHaveCSS('backdrop-filter', /blur\(/);
+  await prose.evaluate((element) => element.setAttribute('data-neoverse-material', 'solid'));
+  for (const tag of ['blockquote', 'pre', 'table', 'details']) {
+    await expect(prose.locator(tag)).toHaveCSS('backdrop-filter', 'none');
+  }
+  const table = prose.getByRole('table');
+  const body = table.getByRole('cell');
+  const bodyFill = await body.evaluate((element) => getComputedStyle(element).backgroundColor);
+  await expect(table.getByRole('columnheader')).not.toHaveCSS('background-color', bodyFill);
+  await prose.locator('summary').press('Enter');
+  await expect(prose.locator('kbd').first()).toBeVisible();
+  await quote.evaluate((element) => element.setAttribute('data-neoverse-material', 'glass'));
+  await expect(quote).toHaveCSS('backdrop-filter', /blur\(/);
+});
+
+test('Solid tooltip paints its body and pointer with the same color', async ({ page }) => {
+  await page.goto('/react-fixture?theme=dark&lang=en&material=solid', {
+    waitUntil: 'domcontentloaded',
+  });
+  const tooltip = page.locator('[data-react-adapter="UiTooltipSurface"]');
+  await expect(tooltip).toBeVisible();
+  await expect(tooltip).toHaveCSS('backdrop-filter', 'none');
+  const pointer = await tooltip.evaluate((element) => {
+    const body = getComputedStyle(element);
+    const arrow = getComputedStyle(element, '::after');
+    return {
+      body: body.backgroundColor,
+      arrow: arrow.backgroundColor,
+      height: Number.parseFloat(arrow.height),
+      filter: arrow.backdropFilter,
+    };
+  });
+  expect(pointer.height).toBeGreaterThan(0);
+  expect(pointer.body).not.toBe('rgba(0, 0, 0, 0)');
+  expect(pointer.arrow).toBe(pointer.body);
+  expect(pointer.filter).toBe('none');
+});
+
+test('Solid form selection remains visible in forced colors', {
+  tag: '@chromium-materials',
+}, async ({ page }) => {
+  await page.emulateMedia({ forcedColors: 'active', reducedMotion: 'reduce' });
+  await page.goto('/react-fixture?theme=light&lang=en&material=solid&contract-fixtures=1', {
+    waitUntil: 'domcontentloaded',
+  });
+  const form = page.locator('[data-contract-form]');
+  const checkbox = form.locator('[data-contract-checkbox]');
+  const plate = form.locator('[data-contract-checkbox] + .ui-choice__control');
+  await checkbox.focus();
+  await expect(plate).toHaveCSS('outline-style', 'solid');
+  const paints = await plate.evaluate((element) => [
+    getComputedStyle(element).backgroundColor,
+    getComputedStyle(element, '::after').backgroundColor,
+  ]);
+  expect(paints[0]).not.toBe(paints[1]);
+  await expect(checkbox).toBeChecked();
+  await checkbox.press('Space');
+  await expect(checkbox).not.toBeChecked();
+});
+
 for (const theme of themes) {
   test(`core material planes and focus stay consistent in ${theme}`, async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' });

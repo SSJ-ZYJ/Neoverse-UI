@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { syncCaretFlight } from '@neoverse-ui/motion';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { computed, onBeforeUnmount, ref, useAttrs, watch } from 'vue';
 import type { TextareaProps } from '../../types';
 import { deferPointerFocus, watchCaretSelection } from '../motion/caret-motion';
@@ -40,6 +41,7 @@ const forwardedAttrs = computed(() => {
     style: _style,
     value: _value,
     'aria-invalid': _ariaInvalid,
+    'data-neoverse-material': _material,
     ...rest
   } = attrs;
   return rest;
@@ -157,12 +159,14 @@ function onBlur(event: FocusEvent) {
     :class="attrs.class"
     :style="attrs.style"
     :data-caret="showsCaret ? 'overlay' : 'native'"
+    :data-neoverse-material="attrs['data-neoverse-material']"
   >
     <textarea
       ref="textareaElement"
       v-model="value"
       v-bind="forwardedAttrs"
       class="ui-textarea"
+      :class="getSurfaceClass('auto', 'field')"
       :disabled="props.disabled"
       :readonly="props.readonly"
       :data-validation="props.validation"

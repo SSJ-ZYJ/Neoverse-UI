@@ -169,6 +169,39 @@ describe('Glass renderer lifecycle and observers', () => {
     });
   });
 
+  it('stops drawing internal form and prose edges under a Solid boundary', async () => {
+    const gl = createFakeGl();
+    installCanvasContext({ webgl2: gl });
+    const region = document.createElement('section');
+    region.className = 'neoverse-prose';
+    const details = document.createElement('details');
+    const choice = document.createElement('span');
+    choice.className = 'ui-choice__control';
+    setRect(details, { top: 50 });
+    setRect(choice, { top: 100 });
+    region.append(details, choice);
+    document.body.append(region);
+    const frames = installFrameQueue();
+    const renderer = createTestRenderer();
+    renderer.mount();
+    expect(gl.drawArrays).toHaveBeenCalledTimes(2);
+    gl.drawArrays.mockClear();
+    gl.clear.mockClear();
+
+    region.dataset.neoverseMaterial = 'solid';
+    await vi.waitFor(() => {
+      frames.flush(1000);
+      expect(gl.clear).toHaveBeenCalled();
+    });
+    expect(gl.drawArrays).not.toHaveBeenCalled();
+
+    details.dataset.neoverseMaterial = 'glass';
+    await vi.waitFor(() => {
+      frames.flush(1100);
+      expect(gl.drawArrays).toHaveBeenCalledTimes(1);
+    });
+  });
+
   it('reacts to dynamic Glass edge ownership attributes through the mutation observer', async () => {
     const gl = createFakeGl();
     installCanvasContext({ webgl2: gl });

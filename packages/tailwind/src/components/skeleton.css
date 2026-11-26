@@ -89,3 +89,14 @@
     }
   }
 }
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    :where(:scope, :scope *):is(.ui-skeleton, .skeleton-surface) {
+      --neoverse-skeleton-highlight: var(--neoverse-material-solid-hover);
+      background-color: var(--neoverse-material-solid-divider);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+  }
+}

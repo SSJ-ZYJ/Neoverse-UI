@@ -23,7 +23,7 @@ export const terminal = withPreload(
       titlebar: 'auto',
       hostIcon: 'auto',
       density: 'compact',
-      surface: 'glass-elevated',
+      surface: 'auto',
       maximized: false,
     },
     initialState: () => ({}),
@@ -77,6 +77,7 @@ export const terminal = withPreload(
           kind: 'select',
           label: localized('Surface', '表面材质'),
           options: [
+            { value: 'auto', label: localized('Automatic', '自动') },
             { value: 'glass-subtle', label: localized('Light glass', '轻量极光玻璃') },
             { value: 'glass-elevated', label: localized('Standard glass', '标准极光玻璃') },
             { value: 'glass-immersive', label: localized('Immersive glass', '沉浸极光玻璃') },

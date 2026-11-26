@@ -77,7 +77,7 @@ export const button = defineSpecimen<ButtonProps & PreviewCorners, { clicks: num
   initialProps: {
     variant: 'primary',
     size: 'md',
-    surface: 'glass-subtle',
+    surface: 'auto',
     disabled: false,
     loading: false,
   },
@@ -158,7 +158,7 @@ export const segmented = defineSpecimen<
     language: (typeof languageCodes)[number];
   }
 >()({
-  initialProps: { shape: 'pill', variant: 'text', surface: 'glass-subtle', disabled: false },
+  initialProps: { shape: 'pill', variant: 'text', surface: 'auto', disabled: false },
   initialState: () => ({ modelValue: 'overview', theme: 'light', language: 'en' }),
   controls: {
     props: {
@@ -225,7 +225,7 @@ export const iconButton = defineSpecimen<IconButtonProps & PreviewCorners, { cli
   initialProps: {
     variant: 'primary',
     size: 'md',
-    surface: 'glass-subtle',
+    surface: 'auto',
     disabled: false,
     loading: false,
   },
@@ -272,7 +272,7 @@ const actionLabels = {
 } as const;
 /** The editable Action specimen */
 export const action = defineSpecimen<ActionProps & PreviewCorners>()({
-  initialProps: { variant: 'primary', size: 'md', surface: 'glass-subtle' },
+  initialProps: { variant: 'primary', size: 'md', surface: 'auto' },
   initialState: () => ({}),
   controls: {
     props: {
@@ -351,7 +351,7 @@ export const controlSurface = defineSpecimen<
   ControlSurfaceProps,
   { active: ControlSurfaceDestination }
 >()({
-  initialProps: { surface: 'glass-subtle', scale: 'md', navigationIndicator: true },
+  initialProps: { surface: 'auto', scale: 'md', navigationIndicator: true },
   initialState: () => ({ active: 'overview' }),
   controls: {
     props: {

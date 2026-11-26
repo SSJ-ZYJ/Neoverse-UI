@@ -38,6 +38,11 @@ for (const directory of ['packages/vue/src', 'packages/react/src']) {
     if (/blur\(\s*\d|(?:rgb|hsl)a?\([^)]*\/\s*\d|opacity\s*:\s*0\.\d/.test(source)) {
       errors.push(`${path}: adapter must consume shared optical roles`);
     }
+    if (/^packages\/(?:vue|react)\/src\/components\b/.test(path.replaceAll('\\', '/'))) {
+      if (/\bmaterial-glass-(?:subtle|elevated|immersive)\b/.test(source)) {
+        errors.push(`${path}: compose Glass utilities with getSurfaceClass, not literal classes`);
+      }
+    }
   }
 }
 

@@ -58,6 +58,32 @@ async function expectSubmenuAtRest(page: Page): Promise<void> {
 
 test.describe('context menu', () => {
   for (const adapter of adapters) {
+    test(`${adapter.name}: an open context menu and submenu follow their invocation material`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto(adapter.url('light', 'overlays'));
+      const trigger = page.locator('[data-context-menu-keyboard]');
+      const scope = trigger.locator('xpath=..');
+      const setMaterial = (mode: string) =>
+        scope.evaluate(
+          (element, mode) => element.setAttribute('data-neoverse-material', mode),
+          mode,
+        );
+      await setMaterial('solid');
+      await trigger.press('Enter');
+      const panel = page.locator('.ui-context-menu');
+      const submenu = page.locator('.ui-context-menu__submenu');
+      await expect(panel).toBeVisible();
+      await panel.locator('[data-entry-id="theme"]').press('ArrowRight');
+      await expect(submenu).toBeVisible();
+      await expect(panel).toHaveCSS('backdrop-filter', 'none');
+      await expect(submenu).toHaveCSS('backdrop-filter', 'none');
+      await setMaterial('glass');
+      await expect(panel).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+      await expect(submenu).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+    });
+
     test(`${adapter.name}: keyboard opening anchors the menu to the invoking button`, async ({
       page,
     }) => {

@@ -31,7 +31,7 @@ export function UiTerminalSurface({
   title,
   ariaLabel,
   density = 'compact',
-  surface = 'glass-elevated',
+  surface = 'auto',
   titlebar = 'default',
   maximized = false,
   closeLabel = 'Close window',

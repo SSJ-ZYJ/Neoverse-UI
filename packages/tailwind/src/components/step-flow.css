@@ -158,3 +158,13 @@
     }
   }
 }
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    .ui-step-flow__item--current > .ui-step-flow__marker {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-selection);
+      color: var(--neoverse-material-solid-selection-text);
+      outline-color: var(--neoverse-material-solid-focus);
+    }
+  }
+}

@@ -212,14 +212,14 @@
 
 @layer neoverse-material-mode {
   @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
-    .ui-table.material-auto {
+    :where(:scope, :scope *):is(.ui-table.material-auto, .neoverse-prose table) {
       /* Without a backdrop filter, the caption still anchors to the table grid. */
       position: relative;
 
       /* The cells own the painted grid, including Glass catches on the last row. */
       & > :is(thead, tbody, tfoot) > tr > :is(th, td),
       & > tr > :is(th, td) {
-        background: var(--neoverse-solid-plate-fill);
+        background: var(--neoverse-material-solid-raised);
         border-color: var(--neoverse-material-solid-divider);
         box-shadow: none;
       }
@@ -233,7 +233,7 @@
       }
 
       @media (hover: hover) {
-        &.ui-table--hoverable > tbody > tr:hover > :is(th, td) {
+        &:is(.ui-table--hoverable, .neoverse-prose table) > tbody > tr:hover > :is(th, td) {
           color: var(--neoverse-table-hover-foreground);
           background: var(--neoverse-material-solid-group);
         }
@@ -243,6 +243,12 @@
         color: var(--neoverse-material-solid-selection-text);
         background: var(--neoverse-material-solid-selection);
       }
+    }
+
+    :where(:scope, :scope *):is(.neoverse-prose table:not(.ui-table)) {
+      box-shadow: var(--neoverse-material-solid-raised-shadow);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
     }
   }
 }

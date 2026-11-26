@@ -214,3 +214,30 @@
     }
   }
 }
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    :where(:scope, :scope *).ui-navigation-item--active.ui-button--ghost:is(
+        .material-auto,
+        [data-surface='none']
+      ) {
+      color: var(--neoverse-material-solid-selection-text);
+      background-color: var(--neoverse-material-solid-selection);
+      border-color: transparent;
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background-image: none;
+
+      @media (hover: hover) {
+        &:hover:not(:active, :disabled, [aria-disabled='true']) {
+          background-image: var(--neoverse-solid-hover-wash);
+        }
+      }
+
+      &:active:not(:disabled, [aria-disabled='true']) {
+        background-image: var(--neoverse-solid-press-wash);
+      }
+    }
+  }
+}

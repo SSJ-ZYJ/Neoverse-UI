@@ -7,7 +7,9 @@ test.describe('terminal', () => {
     const transcript = terminal.locator('.ui-terminal-transcript');
     const input = terminal.locator('.ui-terminal-prompt__editor');
 
-    await expect(terminal).toHaveAttribute('data-surface', 'glass-elevated');
+    await expect(terminal).toHaveCSS('backdrop-filter', /blur\(18px\)/);
+    await terminal.evaluate((element) => element.setAttribute('data-neoverse-material', 'solid'));
+    await expect(terminal).toHaveCSS('backdrop-filter', 'none');
     await expect(transcript).toHaveAttribute('aria-label', 'Terminal history');
     await expect(transcript.locator('[role="log"]')).toHaveAttribute('aria-live', 'polite');
     await expect(terminal.locator('.ui-input')).toHaveCount(0);

@@ -23,12 +23,15 @@ and `glass-*` presets keep their existing paint. In particular, `inset` still
 samples the Light tier; it is not the automatic Solid Inset recipe.
 
 Both frameworks emit the same unresolved role. Tailwind resolves paint in the
-`neoverse-material-mode` layer with `@scope`. Select places its material
-attribute on the shell shared by the trigger and panel; the browser's top
-layer does not alter that DOM scope.
-Dialog retains its document-level portal; the portal mirrors the CSS-resolved
-invocation scope for the panel and scrim while open. Optional Glass backends
-skip automatic Solid surfaces, including when the scope changes.
+`neoverse-material-mode` layer with `@scope`. Rules that can paint the scope root
+match both `:scope` and its descendants. Moving a node to the browser's top layer
+does not change its DOM scope. A shared bridge mirrors the invocation scope to
+portaled Dialog and modal Drawer panels and scrims, Toast containers, and
+ContextMenu columns while mounted, so an exit transition keeps the paint it
+started with. ContextMenu uses its supplied invoking element
+when available and otherwise uses its render location. Optional Glass backends
+skip automatic Solid surfaces, including internal form controls and native
+Prose tables and disclosures.
 
 ## Solid material
 
@@ -37,27 +40,30 @@ of Aurora Glass. `cssVariables.material.solid` exposes the theme-owned
 palette and effects. Set the Canvas role on an application-owned background;
 choosing a material scope does not repaint a consumer's page.
 
-| Role | Automatic owners | Solid treatment |
-| --- | --- | --- |
-| Canvas | Application backdrop | Pale blue neutral in Light; near-black neutral in Dark |
-| Control | Button | Blue Primary with matching text contrast; neutral Secondary; Ghost paints only feedback |
-| Group | ControlSurface, SegmentedControl | Quiet neutral base, unchanged by SegmentedControl hover |
-| Raised | Card, Dock, Table | Compact neutral elevation without Card hover lift |
-| Inset | Input, Select trigger | Opaque recessed field with a functional boundary, focus and validation feedback |
-| Overlay | Select panel, Dialog | Opaque floating panel with a stronger shadow; Dialog adds a separate scrim |
-| Selection | SegmentedControl thumb, Dock navigation, Select option, selected Table row | Light blue or dark mint fill with paired foreground and independent transient feedback |
+The [component matrix](../../contracts/component-matrix.json) records which
+roles each public component owns. Control and Inset keep functional focus and
+validation feedback; selected checkboxes, radios and switches use the paired
+Primary fill and foreground. Selection distinguishes transient feedback from
+the persistent active item. Status and placeholder fills use opaque theme
+colors, without sampled blur or a glow.
 
-Table uses a Group header, Raised body, Inset stripe, and shared dividers.
-SegmentedControl and Dock retain their existing slider and shared-indicator
-motion, and fields and overlays retain native interaction and focus restoration.
-Automatic Solid does not use backdrop blur, optical edge rendering, or
-decorative gradients. Reduced motion and forced colors keep state discernible.
+Tabs without a `variant` use an automatic Group track and Selection indicator.
+`variant="glass"` explicitly preserves the Glass track and indicator;
+`underline` still paints only its marker and `pill` follows the local mode.
+An Overlay adds a separate scrim only for modal presentation. Tooltip pointers
+use their body's fill. A scope on a multi-element form component belongs to
+the shell that owns the native input and its painted siblings.
 
-Drawer and Tabs retain their current public presets and variants. When adopting
-Solid, apply Overlay to a Drawer panel and a separate scrim only in modal
-presentation; keep placement, modality and dismissal independent. For Tabs,
-map Group to the owning tablist plate and Selection to the indicator or active
-plate without changing the meaning of the existing `glass` or other variants.
+TerminalSurface owns the outer plate; its internal header and body use Group
+and Inset in automatic Solid. Prompt, Echo, Line and Transcript retain their
+terminal colors and do not add another plate. Prose reuses the same table and
+disclosure recipes as their component counterparts. Quotes and code blocks use
+Inset; inline code and keyboard tokens use Group.
+
+Use `?material=glass` and `?material=solid` on an existing Design Lab or React
+fixture route, together with `?theme=light` or `?theme=dark`, to inspect a
+specimen. The query scopes the preview only; it does not set a preference or
+replace explicit surface presets.
 
 ## Aurora Glass tiers
 

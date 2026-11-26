@@ -179,6 +179,42 @@ test.describe('forms', () => {
       await expect(trigger).toHaveAttribute('aria-expanded', 'false');
     });
 
+    test(`${adapter.name}: choice plates follow the nearest material without losing keyboard state`, async ({
+      page,
+    }) => {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.goto(adapter.url('light'));
+      const form = page.locator('[data-contract-form]');
+      const checkbox = form.locator('[data-contract-checkbox]');
+      const plate = form.locator('[data-contract-checkbox] + .ui-choice__control');
+      await expect(plate).toHaveCSS('backdrop-filter', /blur\(/);
+      await form.evaluate((element) => element.setAttribute('data-neoverse-material', 'solid'));
+      await expect(plate).toHaveCSS('backdrop-filter', 'none');
+      await expect(plate.locator('xpath=..')).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+      const selectedOpacity = () =>
+        plate.evaluate((element) => getComputedStyle(element, '::after').opacity);
+      await expect.poll(selectedOpacity).toBe('1');
+      await checkbox.press('Space');
+      await expect(checkbox).not.toBeChecked();
+      await expect.poll(selectedOpacity).toBe('0');
+      await checkbox.evaluate((element: HTMLInputElement) => {
+        element.indeterminate = true;
+      });
+      await expect.poll(selectedOpacity).toBe('1');
+      await expect(plate.locator('.ui-checkbox__mixed-mark')).not.toHaveCSS('display', 'none');
+      await expect(plate.locator('.ui-checkbox__check-mark')).toHaveCSS('display', 'none');
+      await plate
+        .locator('xpath=..')
+        .evaluate((element) => element.setAttribute('data-neoverse-material', 'glass'));
+      await expect(plate).toHaveCSS('backdrop-filter', /blur\(/);
+      await expect(plate.locator('.ui-checkbox__mixed-mark')).not.toHaveCSS('display', 'none');
+      await checkbox.evaluate((element: HTMLInputElement) => {
+        element.indeterminate = false;
+      });
+      await expect.poll(selectedOpacity).toBe('0');
+      await expect(checkbox).not.toBeChecked();
+    });
+
     test(`${adapter.name}: choice labels activate the native control`, async ({ page }) => {
       await page.goto(adapter.url('light'));
       const form = page.locator('[data-contract-form]');

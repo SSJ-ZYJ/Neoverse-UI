@@ -26,6 +26,7 @@ export const materialSurfacePresets = {
   group: { glass: 'glass-subtle', solid: 'solid', solidRole: 'group' },
   field: { glass: 'none', solid: 'solid', solidRole: 'inset' },
   overlay: { glass: 'glass-elevated', solid: 'solid', solidRole: 'overlay' },
+  compactOverlay: { glass: 'glass-subtle', solid: 'solid', solidRole: 'overlay' },
   table: { glass: 'none', solid: 'solid', solidRole: 'raised' },
 } as const satisfies Record<
   string,
@@ -57,6 +58,7 @@ const autoSurfaceClasses = {
   group: autoSurfaceClass('group'),
   field: autoSurfaceClass('field'),
   overlay: autoSurfaceClass('overlay'),
+  compactOverlay: autoSurfaceClass('compactOverlay'),
   table: autoSurfaceClass('table'),
 } as const satisfies Record<MaterialSurfaceRole, string>;
 

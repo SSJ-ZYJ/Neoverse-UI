@@ -36,7 +36,7 @@ const props = withDefaults(
     titlebar: 'auto',
     hostIcon: 'auto',
     density: 'compact',
-    surface: 'glass-elevated',
+    surface: 'auto',
     maximized: false,
     inlineControls: true,
   },

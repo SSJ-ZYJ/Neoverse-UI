@@ -1,6 +1,8 @@
 <script setup lang="ts">
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import type { TimelineItem, TimelineProps } from '../../types';
-import UiSurface from '../surfaces/UiSurface.vue';
+
+const groupMaterial = getSurfaceClass('auto', 'group');
 
 const props = defineProps<TimelineProps>();
 
@@ -12,8 +14,13 @@ defineSlots<{
 <template>
   <ol class="ui-timeline" :aria-label="props.ariaLabel">
     <li v-for="(item, index) in props.items" :key="item.id" class="ui-timeline__item">
-      <UiSurface as="span" surface="glass-subtle" class="ui-timeline__node" aria-hidden="true" />
-      <UiSurface surface="glass-subtle" class="ui-timeline__content">
+      <span
+        class="ui-surface ui-timeline__node"
+        :class="groupMaterial"
+        data-surface="auto"
+        aria-hidden="true"
+      />
+      <div class="ui-surface ui-timeline__content" :class="groupMaterial" data-surface="auto">
         <slot name="item" :item="item" :index="index">
           <time v-if="item.time" class="ui-timeline__time" :datetime="item.dateTime || undefined">
             {{ item.time }}
@@ -23,7 +30,7 @@ defineSlots<{
             {{ item.description }}
           </p>
         </slot>
-      </UiSurface>
+      </div>
     </li>
   </ol>
 </template>

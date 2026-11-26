@@ -1,8 +1,14 @@
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 import { mergeClassNames } from '../../internal.js';
-import { type FormControlValidation, resolveAriaInvalid } from './form-control.js';
+import {
+  type FormControlMaterialScope,
+  type FormControlValidation,
+  resolveAriaInvalid,
+} from './form-control.js';
 
-export interface UiCheckboxProps extends Omit<ComponentPropsWithRef<'input'>, 'type' | 'children'> {
+export interface UiCheckboxProps
+  extends Omit<ComponentPropsWithRef<'input'>, 'type' | 'children'>,
+    FormControlMaterialScope {
   validation?: FormControlValidation;
   children?: ReactNode;
   onCheckedChange?: (checked: boolean) => void;
@@ -18,6 +24,7 @@ export function UiCheckbox({
   onChange,
   onCheckedChange,
   'aria-invalid': ariaInvalid,
+  'data-neoverse-material': material,
   ...props
 }: UiCheckboxProps) {
   return (
@@ -26,6 +33,7 @@ export function UiCheckbox({
       data-validation={validation}
       data-disabled={disabled || undefined}
       data-readonly={readOnly || undefined}
+      data-neoverse-material={material}
     >
       <input
         {...props}
@@ -46,7 +54,8 @@ export function UiCheckbox({
       />
       <span className="ui-choice__control" aria-hidden="true">
         <svg className="ui-choice__indicator" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="m5 12 4 4L19 6" />
+          <path className="ui-checkbox__mixed-mark" d="M5 12h14" />
+          <path className="ui-checkbox__check-mark" d="m5 12 4 4L19 6" />
         </svg>
       </span>
       <span className="ui-choice__content">{children}</span>

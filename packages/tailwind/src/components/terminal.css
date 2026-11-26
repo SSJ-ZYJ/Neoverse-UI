@@ -483,3 +483,22 @@
     }
   }
 }
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    .ui-terminal-surface.material-auto > .ui-terminal-surface__header {
+      background: var(--neoverse-material-solid-group);
+    }
+
+    .ui-terminal-surface.material-auto > .ui-terminal-surface__body {
+      background: var(--neoverse-material-solid-inset);
+    }
+
+    @media (forced-colors: active) {
+      .ui-terminal-surface.material-auto
+        > :is(.ui-terminal-surface__header, .ui-terminal-surface__body) {
+        background: Canvas;
+      }
+    }
+  }
+}

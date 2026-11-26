@@ -6,10 +6,12 @@ import { labModules, type ModuleId, resolveLabHash, type SpecimenId } from './la
 import { preloadComponent } from './lazy-component';
 import { appearanceControls, applyPlaygroundLocale } from './playground-appearance';
 import { localize } from './playground-content';
+import { readStageMaterial } from './stage-background';
 import { applyThemeMode } from './theme-runtime';
 
 const defaultModule: ModuleId = labModules[0].id;
 const locale = frameLocale;
+const material = readStageMaterial(window.location.search);
 const initialRoute = routeFromHash();
 const activeModuleId = ref<ModuleId>(initialRoute?.moduleId ?? defaultModule);
 const activeSpecimenId = ref<SpecimenId | null>(initialRoute?.specimenId ?? null);
@@ -93,6 +95,7 @@ onBeforeUnmount(() => {
 <template>
   <main
     data-design-lab-region="module"
+    :data-neoverse-material="material"
     class="mx-auto flex max-w-content flex-col gap-grid px-page-inline py-3"
   >
     <LabSection

@@ -176,3 +176,32 @@
     }
   }
 }
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    :where(:scope, :scope *):is(.ui-disclosure, .neoverse-prose details) {
+      background: var(--neoverse-material-solid-inset);
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    :where(:scope, :scope *):is(.ui-disclosure__summary, .neoverse-prose summary) {
+      --neoverse-color-focus-ring: var(--neoverse-material-solid-focus);
+
+      @media (hover: hover) {
+        &:hover:not(:active) {
+          background: var(--neoverse-material-solid-hover);
+        }
+      }
+
+      &:active {
+        background: var(--neoverse-material-solid-press);
+      }
+    }
+
+    :is(.ui-disclosure, .neoverse-prose details)[open] > summary:not(:hover, :active) {
+      background: var(--neoverse-material-solid-group);
+    }
+  }
+}

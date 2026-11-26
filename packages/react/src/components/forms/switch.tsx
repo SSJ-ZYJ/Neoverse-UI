@@ -1,8 +1,14 @@
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 import { mergeClassNames } from '../../internal.js';
-import { type FormControlValidation, resolveAriaInvalid } from './form-control.js';
+import {
+  type FormControlMaterialScope,
+  type FormControlValidation,
+  resolveAriaInvalid,
+} from './form-control.js';
 
-export interface UiSwitchProps extends Omit<ComponentPropsWithRef<'input'>, 'type' | 'children'> {
+export interface UiSwitchProps
+  extends Omit<ComponentPropsWithRef<'input'>, 'type' | 'children'>,
+    FormControlMaterialScope {
   validation?: FormControlValidation;
   children?: ReactNode;
   onCheckedChange?: (checked: boolean) => void;
@@ -18,6 +24,7 @@ export function UiSwitch({
   onChange,
   onCheckedChange,
   'aria-invalid': ariaInvalid,
+  'data-neoverse-material': material,
   ...props
 }: UiSwitchProps) {
   return (
@@ -26,6 +33,7 @@ export function UiSwitch({
       data-validation={validation}
       data-disabled={disabled || undefined}
       data-readonly={readOnly || undefined}
+      data-neoverse-material={material}
     >
       <input
         {...props}

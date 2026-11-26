@@ -217,3 +217,35 @@
     }
   }
 }
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    :where(:scope, :scope *):is(.ui-tabs[data-variant='pill'] > .ui-tabs__list) {
+      background-color: var(--neoverse-material-solid-group);
+    }
+
+    :where(:scope, :scope *):is(
+        .ui-tabs > .ui-tabs__list.material-auto,
+        .ui-tabs[data-variant='pill'] > .ui-tabs__list
+      ) {
+      --neoverse-tabs-selected-foreground: var(--neoverse-material-solid-selection-text);
+      --neoverse-tabs-selected-border: transparent;
+      --neoverse-tabs-selected-background-image: none;
+      --neoverse-tabs-selected-background-color: var(--neoverse-material-solid-selection);
+      --neoverse-tabs-selected-hover-background-color: var(--neoverse-material-solid-selection);
+      --neoverse-tabs-selected-press-background-color: var(--neoverse-material-solid-selection);
+      --neoverse-tabs-selected-hover-background-image: var(--neoverse-solid-hover-wash);
+      --neoverse-tabs-selected-press-background-image: var(--neoverse-solid-press-wash);
+      --neoverse-tabs-selected-shadow: none;
+      --neoverse-tabs-selected-filter: none;
+    }
+
+    @media (forced-colors: active) {
+      .ui-tabs > .ui-tabs__list.material-auto > .ui-tabs__indicator {
+        forced-color-adjust: none;
+        background: transparent;
+        border-color: Highlight;
+      }
+    }
+  }
+}

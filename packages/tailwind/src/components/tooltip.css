@@ -186,6 +186,22 @@
   }
 }
 
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    :where(:scope, :scope *).ui-tooltip-surface.material-auto {
+      &.ui-tooltip-surface--accent {
+        --neoverse-solid-plate-fill: var(--neoverse-material-solid-selection);
+        color: var(--neoverse-material-solid-selection-text);
+      }
+
+      &::after {
+        background: inherit;
+        filter: none;
+      }
+    }
+  }
+}
+
 @layer neoverse.motion {
   /* Root opacity/filter would isolate the sampled plate during entrance,
      making backdrop blur pop in only after the animation ends. Animate the

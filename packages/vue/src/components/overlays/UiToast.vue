@@ -1,7 +1,20 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, useSlots, watch } from 'vue';
+import { bridgePortalMaterialScope } from '@neoverse-ui/overlay-runtime';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
+import {
+  computed,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useSlots,
+  useTemplateRef,
+  watch,
+  watchPostEffect,
+} from 'vue';
 import type { ToastProps } from '../../types';
 import UiPresence from '../motion/UiPresence.vue';
+
+defineOptions({ inheritAttrs: false });
 
 const props = withDefaults(defineProps<ToastProps>(), {
   open: false,
@@ -9,6 +22,8 @@ const props = withDefaults(defineProps<ToastProps>(), {
 });
 const emit = defineEmits<{ 'update:open': [value: boolean] }>();
 const mounted = ref(false);
+const materialSource = useTemplateRef<HTMLSpanElement>('materialSource');
+const host = useTemplateRef<HTMLDivElement>('host');
 const slots = useSlots();
 const presentation = () => props.presentation ?? (slots.action ? 'action' : 'compact');
 const duration = computed(() => props.duration ?? (presentation() === 'notification' ? 0 : 4000));
@@ -30,6 +45,11 @@ watch(
   () => [props.open, duration.value],
   () => resume(),
 );
+watchPostEffect((onCleanup) => {
+  if (!materialSource.value || !host.value) return;
+  const disconnect = bridgePortalMaterialScope(materialSource.value, host.value);
+  if (disconnect) onCleanup(disconnect);
+});
 onMounted(() => {
   mounted.value = true;
   resume();
@@ -38,14 +58,16 @@ onBeforeUnmount(pause);
 </script>
 
 <template>
+  <span v-if="mounted" ref="materialSource" hidden />
   <Teleport v-if="mounted" to="body">
-    <div class="ui-toast-container">
+    <div ref="host" class="ui-toast-container">
       <UiPresence
+        v-bind="$attrs"
         :show="open"
         variant="rise"
-        class="ui-toast material-glass-elevated"
-        :class="`ui-toast--${variant}`"
-        data-surface="glass-elevated"
+        class="ui-toast"
+        :class="[getSurfaceClass('auto', 'overlay'), `ui-toast--${variant}`]"
+        data-surface="auto"
         :data-presentation="presentation()"
         data-neoverse-glass-occluder="topmost"
         data-neoverse-surface-overflow="visible"

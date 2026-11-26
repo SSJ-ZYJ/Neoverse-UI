@@ -1,4 +1,5 @@
 import type { Locale } from './playground-content';
+import { readStageMaterial } from './stage-background';
 import { applyThemeMode, resolveInitialThemeMode } from './theme-runtime';
 
 const locale: Locale =
@@ -17,6 +18,8 @@ const root = document.getElementById('react-root');
 if (root === null) {
   throw new Error('React fixture root is missing.');
 }
+const material = readStageMaterial(window.location.search);
+if (material) root.dataset.neoverseMaterial = material;
 
 void Promise.all([import('react-dom/client'), import('./react-fixture/ReactFixtureApp')]).then(
   ([{ createRoot }, { default: ReactFixtureApp }]) => {

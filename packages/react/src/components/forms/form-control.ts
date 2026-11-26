@@ -1,6 +1,11 @@
 export type FormControlValidation = 'none' | 'error' | 'warning' | 'success';
 export type FormControlValue = string | number;
 
+/** The scope belongs to the shell when it owns paint beside the native control. */
+export interface FormControlMaterialScope {
+  'data-neoverse-material'?: string;
+}
+
 /**
  * Resolve `aria-invalid` from an explicit value or the validation state.
  *

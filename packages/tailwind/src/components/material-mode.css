@@ -24,7 +24,58 @@
 
 @layer neoverse-material-mode {
   @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
-    :where(.material-auto) {
+    /* Each consumer receives the wash directly: an inherited value would leak
+       past a nested Glass boundary. */
+    :where(:scope, :scope *):where(
+        .ui-tabs__list,
+        .ui-pagination__pages,
+        .ui-navigation-item,
+        .ui-input,
+        .ui-select,
+        .ui-textarea,
+        .ui-choice__control
+      ) {
+      --neoverse-solid-hover-wash: linear-gradient(
+        var(--neoverse-material-solid-hover),
+        var(--neoverse-material-solid-hover)
+      );
+      --neoverse-solid-press-wash: linear-gradient(
+        var(--neoverse-material-solid-press),
+        var(--neoverse-material-solid-press)
+      );
+    }
+
+    :where(:scope, :scope *):is(.ui-badge, .ui-notice) {
+      --neoverse-solid-status-tone: var(--neoverse-material-solid-group);
+      background: color-mix(
+        in srgb,
+        var(--neoverse-solid-status-tone) var(--neoverse-effect-alpha-soft),
+        var(--neoverse-material-solid-group)
+      );
+      border-color: transparent;
+      color: var(--neoverse-color-text-primary);
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    :where(:scope, :scope *):is(.ui-badge--info, .ui-notice--info) {
+      --neoverse-solid-status-tone: var(--neoverse-color-status-info);
+    }
+
+    :where(:scope, :scope *):is(.ui-badge--success, .ui-notice--success) {
+      --neoverse-solid-status-tone: var(--neoverse-color-status-success);
+    }
+
+    :where(:scope, :scope *):is(.ui-badge--warning, .ui-notice--warning) {
+      --neoverse-solid-status-tone: var(--neoverse-color-status-warning);
+    }
+
+    :where(:scope, :scope *):is(.ui-badge--danger, .ui-notice--danger) {
+      --neoverse-solid-status-tone: var(--neoverse-color-status-danger);
+    }
+
+    :where(:scope, :scope *):where(.material-auto) {
       --neoverse-solid-plate-shadow: none;
       background-color: var(--neoverse-solid-plate-fill);
       box-shadow: var(--neoverse-solid-plate-shadow);
@@ -32,33 +83,38 @@
       backdrop-filter: none;
     }
 
-    :where(.material-auto.material-solid-control) {
+    :where(:scope, :scope *):where(.material-auto.material-solid-control) {
       --neoverse-solid-plate-fill: var(--neoverse-material-solid-control);
     }
 
-    :where(.material-auto.material-solid-raised) {
+    :where(:scope, :scope *):where(.material-auto.material-solid-raised) {
       --neoverse-solid-plate-fill: var(--neoverse-material-solid-raised);
       --neoverse-solid-plate-shadow: var(--neoverse-material-solid-raised-shadow);
     }
 
-    :where(.material-auto.material-solid-group) {
+    :where(:scope, :scope *):where(.material-auto.material-solid-group) {
       --neoverse-solid-plate-fill: var(--neoverse-material-solid-group);
     }
 
-    :where(.material-auto.material-solid-inset) {
+    :where(:scope, :scope *):where(.material-auto.material-solid-inset) {
       --neoverse-solid-plate-fill: var(--neoverse-material-solid-inset);
     }
 
-    :where(.material-auto.material-solid-overlay) {
+    :where(:scope, :scope *):where(.material-auto.material-solid-overlay) {
       --neoverse-solid-plate-fill: var(--neoverse-material-solid-overlay);
       --neoverse-solid-plate-shadow: var(--neoverse-material-solid-overlay-shadow);
     }
 
-    :where(.material-auto:is(.material-glass-subtle, .material-glass-elevated)) > * {
+    :where(:scope, :scope *):where(
+        .material-auto:is(.material-glass-subtle, .material-glass-elevated)
+      )
+      > * {
       --neoverse-material-borrowed: inherit;
     }
 
-    :where(.material-auto:is(.material-glass-subtle, .material-glass-elevated):not(.ui-button)) {
+    :where(:scope, :scope *):where(
+        .material-auto:is(.material-glass-subtle, .material-glass-elevated):not(.ui-button)
+      ) {
       border-color: transparent;
       background-image: none;
       --neoverse-material-transition: none;
@@ -69,7 +125,7 @@
     }
 
     /* Keep the coarse-pointer hit target (::before); only the Glass rim is removed. */
-    :where(.material-auto.ui-button) {
+    :where(:scope, :scope *):where(.material-auto.ui-button) {
       transition-property: --neoverse-button-tone-color;
 
       &::after {
@@ -77,7 +133,7 @@
       }
     }
 
-    :where(.material-auto.ui-control-surface) {
+    :where(:scope, :scope *):where(.material-auto.ui-control-surface) {
       transition: var(--neoverse-control-surface-scale-transition, none);
     }
   }

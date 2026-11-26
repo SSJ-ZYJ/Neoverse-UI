@@ -20,7 +20,7 @@ const props = withDefaults(defineProps<ActionProps>(), {
   type: 'button',
   disabled: false,
   stretch: false,
-  surface: 'glass-subtle',
+  surface: 'auto',
 });
 
 const attrs = useAttrs();

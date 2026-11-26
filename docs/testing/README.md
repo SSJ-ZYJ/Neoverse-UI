@@ -51,7 +51,7 @@ running every theme, width, and language combination.
 | `terminal.spec.ts` | Transcript composition, suggestions, IME guard, tail following, reader intent |
 | `motion.spec.ts` | List reorder, entrance replay, page transitions, page dissolve, disclosure expansion and collapse, React presence exit, reduced motion, layout width on a language switch, theme reveal reversal and thumb color continuity |
 | `motion-hierarchy.spec.ts` | Promoted Motion section, right-hand Inspector category switching, distinct-scene zero-flash transitions |
-| `materials.spec.ts` | Aurora Glass tier paint and reduced transparency, Solid opacity and text contrast, mixed scopes, dynamic Dialog scope, and shared Vue/React focus behavior |
+| `materials.spec.ts` | Aurora Glass tier paint and reduced transparency, Solid opacity and contrast, mixed scopes, navigation variants, status paint, Prose and shared Vue/React focus behavior |
 | `glass-runtime.spec.ts` | One shared noninteractive renderer canvas, fixed placement, theme stability, context loss/restore, runtime reduced transparency, forced colors and adapter lifecycle |
 | `layout.spec.ts` | Control size baseline in both adapters, badge type scale, 24px minimum target, no implicit specimen magnification, table caption placement and corner consistency across previews and composition scenes |
 | `contrast.spec.ts` | WCAG contrast floors for the primary, secondary and muted text roles in both themes |

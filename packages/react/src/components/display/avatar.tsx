@@ -1,3 +1,4 @@
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { type HTMLAttributes, type ReactNode, useState } from 'react';
 
 export type UiAvatarShape = 'circle' | 'rounded';
@@ -48,7 +49,7 @@ export function UiAvatar({
       {...rest}
       className={[
         'ui-avatar',
-        'material-glass-subtle',
+        getSurfaceClass('auto', 'group'),
         `ui-avatar--${size}`,
         `ui-avatar--${shape}`,
         className,
@@ -57,7 +58,7 @@ export function UiAvatar({
         .join(' ')}
       role="img"
       aria-label={name}
-      data-surface="glass-subtle"
+      data-surface="auto"
     >
       {src && failedSource !== src ? (
         <img

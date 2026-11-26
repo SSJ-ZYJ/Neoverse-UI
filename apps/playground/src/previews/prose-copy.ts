@@ -22,5 +22,8 @@ export const proseCopy = {
     'Use max-w-reading-wide only when content density needs more room.',
     '仅在内容密度需要更大空间时使用 max-w-reading-wide。',
   ),
+  materialHeading: localized('Material scope', '材质作用域'),
+  materialExample: localized('Glass or Solid', '极光玻璃或实体'),
+  keyboardHeading: localized('Keyboard controls', '键盘操作'),
   proseLink: localized('Inspect the reading composition', '查看正文阅读组合'),
 } as const;

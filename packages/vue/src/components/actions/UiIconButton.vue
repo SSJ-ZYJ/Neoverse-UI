@@ -21,7 +21,7 @@ const props = withDefaults(defineProps<IconButtonProps>(), {
   disabled: false,
   loading: false,
   stretch: false,
-  surface: 'glass-subtle',
+  surface: 'auto',
 });
 
 const attrs = useAttrs();

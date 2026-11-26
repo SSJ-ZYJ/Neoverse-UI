@@ -165,3 +165,32 @@
     }
   }
 }
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    :where(:scope, :scope *).ui-pagination__pages {
+      --neoverse-pagination-current-foreground: var(--neoverse-material-solid-selection-text);
+      --neoverse-pagination-current-border: transparent;
+      --neoverse-pagination-current-background-image: none;
+      --neoverse-pagination-current-background-color: var(--neoverse-material-solid-selection);
+      --neoverse-pagination-current-hover-background-color: var(
+        --neoverse-material-solid-selection
+      );
+      --neoverse-pagination-current-press-background-color: var(
+        --neoverse-material-solid-selection
+      );
+      --neoverse-pagination-current-hover-background-image: var(--neoverse-solid-hover-wash);
+      --neoverse-pagination-current-press-background-image: var(--neoverse-solid-press-wash);
+      --neoverse-pagination-current-shadow: none;
+      --neoverse-pagination-current-filter: none;
+    }
+
+    @media (forced-colors: active) {
+      .ui-pagination__indicator {
+        forced-color-adjust: none;
+        background: transparent;
+        border-color: Highlight;
+      }
+    }
+  }
+}

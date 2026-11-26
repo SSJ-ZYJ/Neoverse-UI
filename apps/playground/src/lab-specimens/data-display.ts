@@ -37,15 +37,18 @@ function memberTabOptions(locale: Locale): TabsProps['options'] {
 const localizedTabs = { en: memberTabOptions('en'), zh: memberTabOptions('zh') };
 
 /** The editable Tabs specimen */
-export const tabs = defineSpecimen<TabsProps, { modelValue: TabValue }>()({
-  initialProps: { variant: 'glass' },
+export const tabs = defineSpecimen<
+  { variant?: NonNullable<TabsProps['variant']> | 'auto' },
+  { modelValue: TabValue }
+>()({
+  initialProps: { variant: 'auto' },
   initialState: () => ({ modelValue: 'overview' }),
   controls: {
     props: {
       variant: {
         kind: 'select',
         label: localized('Appearance', '外观'),
-        options: tabsVariantOptions,
+        options: [{ value: 'auto', label: localized('Automatic', '自动') }, ...tabsVariantOptions],
       },
     },
     state: {
@@ -60,7 +63,7 @@ export const tabs = defineSpecimen<TabsProps, { modelValue: TabValue }>()({
     h(
       UiTabs,
       {
-        variant: props.variant ?? 'glass',
+        ...(props.variant && props.variant !== 'auto' ? { variant: props.variant } : {}),
         modelValue: state.modelValue,
         'onUpdate:modelValue': (value: string) => {
           const option = enabledTabs.find((entry) => entry.value === value);
@@ -239,7 +242,7 @@ export const emptyState = defineSpecimen<
 
 /** The editable StatCard specimen */
 export const statCard = defineSpecimen<StatCardProps>()({
-  initialProps: { surface: 'glass-elevated' },
+  initialProps: { surface: 'auto' },
   initialState: () => ({}),
   controls: {
     props: {

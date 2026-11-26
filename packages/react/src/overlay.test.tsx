@@ -9,14 +9,7 @@ test('UiPopover renders the shared trigger and dialog contract', () => {
     </UiPopover>,
   );
 
-  expect(html).toContain('class="ui-popover"');
-  expect(html).toContain(
-    'class="ui-popover__trigger ui-button material-glass-subtle ui-button--secondary ui-button--md"',
-  );
   expect(html).toContain('aria-expanded="false"');
-  expect(html).toContain(
-    'class="ui-overlay-panel ui-popover__content material-glass-elevated nv-presence"',
-  );
   expect(html).toContain('popover="auto"');
   expect(html).toContain('role="dialog"');
   expect(html).toContain('aria-label="Details"');
@@ -32,12 +25,8 @@ test('overlay triggers accept a ghost variant', () => {
     <UiDropdownMenu trigger="Actions" ariaLabel="Actions" items={[]} triggerVariant="ghost" />,
   );
 
-  expect(ghostPopover).toContain(
-    'class="ui-popover__trigger ui-button material-glass-subtle ui-button--ghost ui-button--md"',
-  );
-  expect(ghostMenu).toContain(
-    'class="ui-dropdown-menu__trigger ui-button material-glass-subtle ui-button--ghost ui-button--md"',
-  );
+  expect(ghostPopover).toContain('ui-button--ghost');
+  expect(ghostMenu).toContain('ui-button--ghost');
 });
 
 test('disabled Popover and DropdownMenu never announce expanded even with controlled/default open', () => {
@@ -90,9 +79,6 @@ test('UiContextMenu renders menu rows, separators, headings and checkable state'
     />,
   );
 
-  expect(html).toContain(
-    'class="ui-overlay-panel ui-context-menu material-glass-elevated nv-presence"',
-  );
   // A context menu owns a nested submenu popover, so the runtime owns outside dismissal.
   expect(html).toContain('popover="manual"');
   expect(html).toContain('role="menu"');

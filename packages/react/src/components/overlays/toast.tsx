@@ -1,3 +1,5 @@
+import { bridgePortalMaterialScope } from '@neoverse-ui/overlay-runtime';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import {
   type FocusEvent,
   type HTMLAttributes,
@@ -5,6 +7,7 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -46,6 +49,8 @@ export function UiToast({
   const presentation = requestedPresentation ?? (hasAction ? 'action' : 'compact');
   const duration = requestedDuration ?? (presentation === 'notification' ? 0 : 4000);
   const [mounted, setMounted] = useState(false);
+  const materialSource = useRef<HTMLSpanElement>(null);
+  const host = useRef<HTMLDivElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
   const callback = useRef(onOpenChange);
   callback.current = onOpenChange;
@@ -65,18 +70,29 @@ export function UiToast({
     resume();
     return pause;
   }, [resume, pause]);
+  useLayoutEffect(() => {
+    // Keep the invocation scope while mounted so the exit animation never
+    // repaints from Solid back to the Glass tier.
+    if (mounted && materialSource.current && host.current) {
+      return bridgePortalMaterialScope(materialSource.current, host.current);
+    }
+  }, [mounted]);
 
   if (!mounted) return null;
-  return createPortal(
-    <div className="ui-toast-container">
+  const portal = createPortal(
+    <div ref={host} className="ui-toast-container">
       <UiPresence
         {...rest}
         show={open}
         variant="rise"
-        className={['ui-toast material-glass-elevated', `ui-toast--${variant}`, className]
+        className={[
+          `ui-toast ${getSurfaceClass('auto', 'overlay')}`,
+          `ui-toast--${variant}`,
+          className,
+        ]
           .filter(Boolean)
           .join(' ')}
-        data-surface="glass-elevated"
+        data-surface="auto"
         data-presentation={presentation}
         data-neoverse-glass-occluder="topmost"
         data-neoverse-surface-overflow="visible"
@@ -115,5 +131,11 @@ export function UiToast({
       </UiPresence>
     </div>,
     document.body,
+  );
+  return (
+    <>
+      <span hidden ref={materialSource} />
+      {portal}
+    </>
   );
 }

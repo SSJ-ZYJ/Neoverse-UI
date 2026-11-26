@@ -136,3 +136,19 @@
     }
   }
 }
+
+@layer neoverse-material-mode {
+  @scope ([data-neoverse-material='solid']) to ([data-neoverse-material='glass']) {
+    .ui-status-indicator__dot {
+      box-shadow: none;
+    }
+
+    .ui-status-indicator--loading .ui-status-indicator__dot {
+      background-color: var(--neoverse-material-solid-field-edge);
+    }
+
+    .ui-status-indicator--pulse .ui-status-indicator__dot::after {
+      box-shadow: none;
+    }
+  }
+}

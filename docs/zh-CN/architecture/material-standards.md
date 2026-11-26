@@ -5,7 +5,7 @@ Status: adopted
 [English](../../architecture/material-standards.md)
 
 <!-- Source: docs/architecture/material-standards.md -->
-<!-- Source-SHA256: 7360575ba8d8dfa4ba160f7757f566456e1dc8c7f3ac59d06baa11052f5bc03e -->
+<!-- Source-SHA256: 3d6d806127c12219e902e08a043a60425da5dc77446ec322297fcd3861c21932 -->
 
 本文是[英文材质标准](../../architecture/material-standards.md)的中文摘要，覆盖消费项目最常用的材质、层级、嵌套与修复边界。具体光学数值、逐组件审计与历史验收记录以英文原文为准。
 
@@ -13,19 +13,20 @@ Status: adopted
 
 `@neoverse-ui/tokens` 统一定义材质模式、表面预设和语义角色。`data-neoverse-material="glass"` 或 `data-neoverse-material="solid"` 可设在文档根、子树或表面自身；取最近的有效值，与 `data-theme` 独立。未设置有效值时使用极光玻璃。
 
-显式 `surface` 优先，`none` 不绘制表面底板，`inset` 仍保留轻薄层级采样。Button、Card、ControlSurface、SegmentedControl 和 Dock 默认使用 `auto`；Input、Select、Dialog 和 Table 自动采用各自的语义配方，不增加属性。
+显式 `surface` 优先，`none` 不绘制独立底板，`inset` 仍保留轻薄层级采样。各公开组件的材质职责在[组件矩阵](../../../contracts/component-matrix.json)中维护。
 
-两套适配器输出一致的角色标记，由 CSS 解析材质。Select 的材质属性设在触发器与浮层的共同外壳上，进入浏览器顶层也不改变该作用域。Dialog 打开期间将调用位置的材质同步给传送后的面板及遮罩。作用域切换后，WebGL 与 Native 不再为自动实体表面绘制玻璃边缘。
+两套适配器输出同一套角色标记，由 CSS 解析。浏览器顶层不改变 DOM 作用域；Dialog、模态 Drawer、Toast 和 ContextMenu 的异地挂载部分在挂载期间由共享桥接同步材质，退出动画不会改回另一种材质。ContextMenu 优先使用传入的调用元素，未提供时使用组件的渲染位置。Glass Runtime 不为自动实体表面绘制光学边缘，包括内部选择控件及 Prose 表格和折叠块。
 
 ## 实体材质
 
 实体材质不等同于极光玻璃的减少透明度模式。`cssVariables.material.solid` 提供 Canvas、Control、Group、Raised、Inset、Overlay 和 Selection 角色。浅色使用淡蓝中性色阶，深色使用近黑至蓝灰色阶；主按钮使用蓝色，选中底板在浅色使用浅蓝、深色使用薄荷绿，并分别搭配可读文字色。应用自行选择是否在页面背景使用 Canvas。
 
-- Button 分为蓝色主按钮、中性次按钮和无独立底板的 Ghost；Card 用底色与轻量阴影分层，不在悬停时抬升。
-- ControlSurface 与 SegmentedControl 使用中性分组底板。分段底板不随悬停改变，选中滑块保留拖拽和切换动效。
-- Input 与 Select 触发器采用不透明的内嵌面，并保留焦点和校验反馈；Select 面板与 Dialog 使用实体浮层，Dialog 另有遮罩。
-- Dock 保留共享指示器动效；Table 区分表头、正文、条纹、分隔线与交互状态。
-- Drawer、Tabs 仍保留现有公开预设和变体。适配时为 Drawer 面板采用 Overlay，仅在模态下加遮罩；为 Tabs 使用 Group 底板和 Selection 指示或选中底板，不重定义现有变体。
+- 控件保留焦点和校验反馈；复选框、单选和开关的选中底板复用主色及配对前景。分段滑块、导航指示器和分页保留原有动效。
+- Tabs 省略 `variant` 时采用自动材质；显式 `variant="glass"` 保留极光玻璃。`underline` 仍只绘制指示线，`pill` 跟随作用域。
+- 浮层采用 Overlay，模态浮层另绘遮罩。提示框箭头与主体同色。状态面和占位面使用不透明色阶，不依赖模糊或光晕。
+- 终端的外壳、标题栏和正文采用分组色阶，提示符、回显、行和记录不叠加底板。Prose 的表格与折叠块共享组件配方；引用和代码块使用 Inset，行内代码和按键使用 Group。
+
+在 Design Lab 或 React 示例的原有地址上加 `?material=glass` 或 `?material=solid`，并与 `theme=light` 或 `theme=dark` 组合查看。该参数只作用于预览，不持久化偏好，也不覆盖显式预设。
 
 ## 极光玻璃的三个层级
 

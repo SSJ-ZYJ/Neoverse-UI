@@ -44,7 +44,7 @@ export function uiActionClassName({
   size = 'md',
   scale = 'md',
   stretch = false,
-  surface = 'glass-subtle',
+  surface = 'auto',
   className,
 }: ActionClassNameOptions = {}): string {
   return mergeClassNames(
@@ -98,7 +98,7 @@ export function UiAction({
   scale = 'md',
   disabled = false,
   stretch = false,
-  surface = 'glass-subtle',
+  surface = 'auto',
   type = 'button',
   leading,
   trailing,

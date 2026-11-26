@@ -5,6 +5,7 @@ import {
   markPointerModality,
   type OverlayPlacement,
 } from '@neoverse-ui/overlay-runtime';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import {
   type ComponentPropsWithRef,
   type KeyboardEvent,
@@ -148,7 +149,8 @@ export function UiDropdownMenu({
     <span {...props} className={mergeClassNames('ui-dropdown-menu', className)}>
       <button
         ref={controller.triggerRef}
-        className={`ui-dropdown-menu__trigger ui-button material-glass-subtle ${buttonVariantClasses[triggerVariant]} ${buttonSizeClasses[triggerSize]}`}
+        className={`ui-dropdown-menu__trigger ui-button ${getSurfaceClass('auto', 'control')} ${buttonVariantClasses[triggerVariant]} ${buttonSizeClasses[triggerSize]}`}
+        data-surface="auto"
         type="button"
         aria-haspopup="menu"
         aria-expanded={controller.expandedOpen}
@@ -178,7 +180,8 @@ export function UiDropdownMenu({
       <div
         ref={controller.panelRef}
         id={controller.panelId}
-        className="ui-overlay-panel ui-dropdown-menu__panel material-glass-elevated nv-presence"
+        className={`ui-overlay-panel ui-dropdown-menu__panel ${getSurfaceClass('auto', 'overlay')} nv-presence`}
+        data-surface="auto"
         popover="auto"
         role="menu"
         aria-label={ariaLabel}

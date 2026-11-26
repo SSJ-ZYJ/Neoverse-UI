@@ -1,5 +1,6 @@
 import {
   type AnchoredOverlayOptions,
+  bridgePortalMaterialScope,
   focusElement,
   hideAnchoredOverlay,
   installFocusModality,
@@ -132,6 +133,14 @@ export function useContextMenu({
   useEffect(() => {
     installFocusModality(document);
   }, []);
+
+  useEffect(() => {
+    if (submenuState === null) return;
+    const panel = panelRef.current;
+    const submenu = submenuRef.current;
+    if (panel === null || submenu === null) return;
+    return bridgePortalMaterialScope(panel, submenu);
+  }, [submenuState]);
 
   useEffect(() => {
     if (openSubmenu === null) return;

@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { presenceAppearClassName } from '@neoverse-ui/motion';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { computed, useAttrs } from 'vue';
-import type { TooltipSurfaceProps, TooltipSurfaceVariant } from '../../types';
+import type { TooltipSurfaceProps } from '../../types';
 import { presence } from '../motion/presence';
 
 defineOptions({ inheritAttrs: false });
@@ -14,8 +15,8 @@ const attrs = useAttrs();
 const classes = computed(() => [
   'ui-tooltip-surface',
   presenceAppearClassName,
-  'material-glass-subtle',
-  `ui-tooltip-surface--${props.variant as TooltipSurfaceVariant}`,
+  getSurfaceClass('auto', 'compactOverlay'),
+  `ui-tooltip-surface--${props.variant}`,
 ]);
 const forwardedAttrs = computed(() => {
   const { class: _class, style: _style, ...rest } = attrs;
@@ -29,7 +30,7 @@ const forwardedAttrs = computed(() => {
     v-bind="{ ...forwardedAttrs, ...presence('veil') }"
     :class="[classes, attrs.class]"
     :style="attrs.style"
-    data-surface="glass-subtle"
+    data-surface="auto"
     data-neoverse-surface-hover="static"
     data-neoverse-surface-overflow="visible"
     data-neoverse-tooltip-surface

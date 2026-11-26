@@ -1,4 +1,16 @@
 @layer components {
+  :where(:root, [data-neoverse-material='glass']) {
+    --neoverse-portal-material-mode: glass;
+  }
+
+  :where([data-neoverse-material='solid']) {
+    --neoverse-portal-material-mode: solid;
+  }
+
+  .ui-overlay-portal {
+    display: contents;
+  }
+
   .ui-popover,
   .ui-dropdown-menu {
     position: relative;

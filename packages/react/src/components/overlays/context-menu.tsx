@@ -1,4 +1,6 @@
-import { isKeyboardModality } from '@neoverse-ui/overlay-runtime';
+import { bridgePortalMaterialScope, isKeyboardModality } from '@neoverse-ui/overlay-runtime';
+import { getSurfaceClass } from '@neoverse-ui/tokens';
+import { useLayoutEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { mergeClassNames } from '../../internal.js';
 import {
@@ -8,6 +10,8 @@ import {
   type UiContextMenuProps,
 } from './context-menu-types.js';
 import { useContextMenu } from './use-context-menu.js';
+
+const panelMaterial = getSurfaceClass('auto', 'overlay');
 
 export function UiContextMenu({
   entries,
@@ -43,6 +47,14 @@ export function UiContextMenu({
     onOpenChange,
     onSelect,
   });
+  const materialSource = useRef<HTMLSpanElement>(null);
+  const materialHost = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const source = focusReturn ?? materialSource.current;
+    if (portalHost && source && materialHost.current) {
+      return bridgePortalMaterialScope(source, materialHost.current);
+    }
+  }, [focusReturn, portalHost]);
 
   const panel = (
     <div
@@ -50,10 +62,11 @@ export function UiContextMenu({
       ref={panelRef}
       id={panelId}
       className={mergeClassNames(
-        'ui-overlay-panel ui-context-menu material-glass-elevated nv-presence',
+        `ui-overlay-panel ui-context-menu ${panelMaterial} nv-presence`,
         className,
       )}
       popover="manual"
+      data-surface="auto"
       role="menu"
       aria-label={ariaLabel}
       data-neoverse-motion="pop"
@@ -137,7 +150,8 @@ export function UiContextMenu({
           <div
             id={submenuId}
             ref={submenuRef}
-            className="ui-overlay-panel ui-context-menu__submenu material-glass-elevated nv-presence"
+            className={`ui-overlay-panel ui-context-menu__submenu ${panelMaterial} nv-presence`}
+            data-surface="auto"
             popover="manual"
             role="menu"
             aria-label={typeof submenuContent.label === 'string' ? submenuContent.label : undefined}
@@ -172,7 +186,15 @@ export function UiContextMenu({
 
   return (
     <>
-      {portalHost === null ? panel : createPortal(panel, portalHost)}
+      <span hidden ref={materialSource} />
+      {portalHost === null
+        ? panel
+        : createPortal(
+            <div ref={materialHost} className="ui-overlay-portal">
+              {panel}
+            </div>,
+            portalHost,
+          )}
       {submenu}
     </>
   );

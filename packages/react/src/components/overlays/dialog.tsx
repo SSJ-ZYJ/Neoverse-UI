@@ -137,10 +137,10 @@ export function UiDialog({
 
   return (
     <>
-      {mounted && <span hidden ref={materialSource} className="ui-dialog-material-source" />}
+      {mounted && <span hidden ref={materialSource} />}
       {mounted &&
         createPortal(
-          <div className="ui-dialog-portal">
+          <div className="ui-overlay-portal">
             <div
               className="ui-dialog__backdrop"
               data-open={open ? 'true' : undefined}
