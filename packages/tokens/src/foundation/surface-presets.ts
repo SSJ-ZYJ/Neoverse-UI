@@ -27,16 +27,29 @@ const explicitSurfaces = {
   'glass-subtle': 'material-glass-subtle',
   'glass-elevated': 'material-glass-elevated',
   'glass-immersive': 'material-glass-immersive',
-} as const satisfies Record<'none' | 'solid' | 'subtle' | 'elevated' | 'inset' | `glass-${GlassTier}`, string>;
+} as const satisfies Record<
+  'none' | 'solid' | 'subtle' | 'elevated' | 'inset' | `glass-${GlassTier}`,
+  string
+>;
 
 /** Select automatic paint, no paint, or an explicit surface treatment */
 export type SurfacePreset = 'auto' | 'frosted' | keyof typeof explicitSurfaces;
 
 /** Select a compatible surface treatment for a compact control */
-export type ControlSurfacePreset = Extract<SurfacePreset, 'auto' | 'none' | 'frosted' | `glass-${GlassTier}`>;
+export type ControlSurfacePreset = Extract<
+  SurfacePreset,
+  'auto' | 'none' | 'frosted' | `glass-${GlassTier}`
+>;
 
 /** Describe a surface's responsibility without specifying its paint */
-export type SurfaceRole = 'control' | 'panel' | 'group' | 'field' | 'overlay' | 'compactOverlay' | 'table';
+export type SurfaceRole =
+  | 'control'
+  | 'panel'
+  | 'group'
+  | 'field'
+  | 'overlay'
+  | 'compactOverlay'
+  | 'table';
 
 const roleClasses = {
   control: 'material-role-control',

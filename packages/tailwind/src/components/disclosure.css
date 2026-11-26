@@ -28,7 +28,7 @@
       background-color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
       box-shadow var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
   }
-  @scope (.material-glass-default) {
+  @scope (.material-glass-scope) {
     :where(.ui-disclosure, .neoverse-prose details) {
       --neoverse-disclosure-recipe-filter: var(--neoverse-disclosure-filter);
       --neoverse-glass-tier: subtle;
@@ -207,6 +207,67 @@
 
     :is(.ui-disclosure, .neoverse-prose details)[open] > summary:not(:hover, :active) {
       background: var(--neoverse-material-solid-group);
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *):is(.ui-disclosure, .neoverse-prose details) {
+      background: var(--neoverse-material-frosted-field-fallback);
+      border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+        var(--neoverse-frosted-nested-border, var(--neoverse-material-frosted-border));
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+
+      @supports (backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1)) {
+        background: var(
+          --neoverse-frosted-nested-field-fill,
+          var(--neoverse-material-frosted-field-fill)
+        );
+        -webkit-backdrop-filter: var(
+          --neoverse-frosted-nested-filter,
+          var(--neoverse-material-frosted-field-filter)
+        );
+        backdrop-filter: var(
+          --neoverse-frosted-nested-filter,
+          var(--neoverse-material-frosted-field-filter)
+        );
+      }
+    }
+
+    :where(:scope, :scope *):is(.ui-disclosure__summary, .neoverse-prose summary) {
+      --neoverse-color-focus-ring: var(--neoverse-material-frosted-focus);
+
+      @media (hover: hover) {
+        &:hover:not(:active) {
+          background: var(--neoverse-material-frosted-hover);
+        }
+      }
+
+      &:active {
+        background: var(--neoverse-material-frosted-press);
+      }
+    }
+
+    :is(.ui-disclosure, .neoverse-prose details)[open] > summary:not(:hover, :active) {
+      background: var(--neoverse-material-frosted-group-nested-fill);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      :where(:scope, :scope *):is(.ui-disclosure, .neoverse-prose details) {
+        background: var(--neoverse-material-frosted-field-fallback);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+    }
+
+    @media (forced-colors: active) {
+      :where(:scope, :scope *):is(.ui-disclosure, .neoverse-prose details) {
+        background: Canvas;
+        border-color: ButtonText;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
     }
   }
 }

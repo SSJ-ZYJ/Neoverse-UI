@@ -7,10 +7,18 @@ import {
   coreMaterialModes,
 } from '../lab-specimens/materials';
 import { localize, localized, moduleCopy } from '../playground-content';
+import MaterialFoundationMatrix from './MaterialFoundationMatrix.vue';
 import SurfaceModule from './SurfaceModule.vue';
 import type { LabModuleProps } from './types';
 
 const props = defineProps<LabModuleProps>();
+const foundationCopy = {
+  title: localized('Material foundation matrix', '材质基础验证矩阵'),
+  description: localized(
+    'Verify Solid, Frosted, and Aurora Glass across all surface roles, five backdrop types, nesting ownership, and interactive states.',
+    '在全部表面角色、五类背景、嵌套所有权与交互状态下对照验证实体、磨砂与极光玻璃。',
+  ),
+} as const;
 const materialCopy = {
   title: localized('Material resolution', '材质解析'),
   panel: localized('Panel', '表面'),
@@ -51,6 +59,13 @@ const materialCopy = {
         }}</a>
       </div>
     </div>
+  </LabSpecimenSection>
+  <LabSpecimenSection
+    id="materials-foundation"
+    :title="localize(foundationCopy.title, props.locale)"
+    :description="localize(foundationCopy.description, props.locale)"
+  >
+    <MaterialFoundationMatrix :locale="props.locale" />
   </LabSpecimenSection>
   <section
     id="materials-resolution"

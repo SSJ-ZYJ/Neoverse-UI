@@ -219,7 +219,7 @@
 }
 
 @layer neoverse-material-mode {
-  @scope (.material-static-scope) {
+  @scope (.material-solid-scope) {
     :where(:scope, :scope *):is(.ui-tabs[data-variant='pill'] > .ui-tabs__list) {
       background-color: var(--neoverse-material-solid-group);
     }
@@ -238,6 +238,64 @@
       --neoverse-tabs-selected-press-background-image: var(--neoverse-solid-press-wash);
       --neoverse-tabs-selected-shadow: none;
       --neoverse-tabs-selected-filter: none;
+    }
+
+    @media (forced-colors: active) {
+      .ui-tabs > .ui-tabs__list.material-recipe-auto > .ui-tabs__indicator {
+        forced-color-adjust: none;
+        background: transparent;
+        border-color: Highlight;
+      }
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *):is(.ui-tabs[data-variant='pill'] > .ui-tabs__list) {
+      background-color: var(--neoverse-material-frosted-group-fallback);
+
+      @supports (backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1)) {
+        background-color: var(
+          --neoverse-frosted-nested-group-fill,
+          var(--neoverse-material-frosted-group-fill)
+        );
+      }
+    }
+
+    :where(:scope, :scope *):is(
+        .ui-tabs > .ui-tabs__list.material-recipe-auto,
+        .ui-tabs[data-variant='pill'] > .ui-tabs__list
+      ) {
+      --neoverse-tabs-selected-foreground: var(--neoverse-material-frosted-selection-text);
+      --neoverse-tabs-selected-border: var(--neoverse-material-frosted-border-subtle);
+      --neoverse-tabs-selected-background-image: none;
+      --neoverse-tabs-selected-background-color: var(--neoverse-material-frosted-selection);
+      --neoverse-tabs-selected-hover-background-color: var(--neoverse-material-frosted-selection);
+      --neoverse-tabs-selected-press-background-color: var(--neoverse-material-frosted-selection);
+      --neoverse-tabs-selected-hover-background-image: var(--neoverse-frosted-hover-wash);
+      --neoverse-tabs-selected-press-background-image: var(--neoverse-frosted-press-wash);
+      --neoverse-tabs-selected-shadow: none;
+      --neoverse-tabs-selected-filter: none;
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      :where(:scope, :scope *):is(.ui-tabs[data-variant='pill'] > .ui-tabs__list) {
+        background-color: var(--neoverse-material-frosted-group-fallback);
+      }
+
+      :where(:scope, :scope *):is(
+          .ui-tabs > .ui-tabs__list.material-recipe-auto,
+          .ui-tabs[data-variant='pill'] > .ui-tabs__list
+        ) {
+        --neoverse-tabs-selected-background-color: var(
+          --neoverse-material-frosted-selection-fallback
+        );
+        --neoverse-tabs-selected-hover-background-color: var(
+          --neoverse-material-frosted-selection-fallback
+        );
+        --neoverse-tabs-selected-press-background-color: var(
+          --neoverse-material-frosted-selection-fallback
+        );
+      }
     }
 
     @media (forced-colors: active) {

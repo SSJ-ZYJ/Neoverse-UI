@@ -1,0 +1,125 @@
+.playground-foundation-grid {
+  display: grid;
+  min-width: 0;
+  gap: var(--neoverse-space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 17.5rem), 1fr));
+}
+
+.playground-foundation-nesting-grid {
+  display: grid;
+  min-width: 0;
+  gap: var(--neoverse-space-3);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+}
+
+.playground-foundation-stage {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--neoverse-radius-card);
+  padding: var(--neoverse-space-4);
+  box-shadow: var(--neoverse-shadow-inset);
+}
+
+.playground-foundation-stage--solid {
+  background: var(--neoverse-material-solid-canvas);
+}
+
+.playground-foundation-stage--texture {
+  background:
+    repeating-linear-gradient(
+      45deg,
+      transparent 0 10px,
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 16%, transparent) 10px 12px
+    ),
+    repeating-linear-gradient(
+      -45deg,
+      transparent 0 18px,
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 18%, transparent) 18px 20px
+    ),
+    radial-gradient(
+      circle at 18% 24%,
+      color-mix(in srgb, var(--neoverse-color-accent-tertiary) 32%, transparent),
+      transparent 48%
+    ),
+    var(--neoverse-color-surface-canvas);
+}
+
+.playground-foundation-stage--image {
+  background: var(--neoverse-color-surface-canvas);
+}
+
+.playground-foundation-artwork {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.playground-foundation-stage--text {
+  background: var(--neoverse-color-surface-canvas);
+}
+
+.playground-foundation-text-underlay {
+  position: absolute;
+  inset: 2.25rem var(--neoverse-space-2) var(--neoverse-space-2);
+  overflow: hidden;
+  pointer-events: none;
+  user-select: none;
+  font-family: var(--neoverse-typography-title-font-family);
+  font-size: var(--neoverse-font-size-lg);
+  font-weight: var(--neoverse-font-weight-semibold);
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--neoverse-color-text-primary) 42%, transparent);
+}
+
+.playground-foundation-stage--animated {
+  background:
+    radial-gradient(
+      circle at 20% 30%,
+      color-mix(in srgb, var(--neoverse-color-accent-primary) 44%, transparent),
+      transparent 45%
+    ),
+    radial-gradient(
+      circle at 80% 70%,
+      color-mix(in srgb, var(--neoverse-color-accent-secondary) 44%, transparent),
+      transparent 48%
+    ),
+    radial-gradient(
+      circle at 50% 50%,
+      color-mix(in srgb, var(--neoverse-color-accent-tertiary) 36%, transparent),
+      transparent 55%
+    ),
+    var(--neoverse-color-surface-canvas);
+  background-size: 160% 160%;
+  animation: playground-foundation-drift 14s ease-in-out infinite alternate;
+}
+
+@keyframes playground-foundation-drift {
+  0% {
+    background-position: 0% 20%;
+  }
+
+  100% {
+    background-position: 100% 80%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .playground-foundation-stage--animated {
+    animation: none;
+  }
+}
+
+.playground-foundation-scroll-box {
+  position: relative;
+  max-height: 9rem;
+  overflow-y: auto;
+  border-radius: var(--neoverse-radius-card);
+  padding: var(--neoverse-space-3);
+  background:
+    var(--neoverse-playground-stage-optical-field), var(--neoverse-playground-stage-underlay),
+    var(--neoverse-color-surface-canvas);
+  background-size: var(--neoverse-playground-stage-optical-size);
+}

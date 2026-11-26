@@ -152,4 +152,10 @@
       background: var(--neoverse-material-solid-press);
     }
   }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *).ui-breadcrumb__link:active::after {
+      background: var(--neoverse-material-frosted-press);
+    }
+  }
 }

@@ -22,22 +22,41 @@ The closest recognized value wins; unknown values are transparent to resolution.
 If none is present, the document uses Glass. This resolves in CSS before hydration.
 
 An explicit `surface` selection wins over the scope and does not change the
-scope for descendants. `none` adds no plate. `frosted` selects the experimental
-Frosted recipe. Existing explicit `solid`, `subtle`, `elevated`, `inset` and
-`glass-*` continue to name their treatments. `inset` remains a Light-tier
-sample rather than the Solid Inset role.
+scope for descendants. `none` adds no plate. `frosted` selects the Frosted
+recipe for the element's surface role. Existing explicit `solid`, `subtle`,
+`elevated`, `inset` and `glass-*` continue to name their treatments. `inset`
+remains a Light-tier sample rather than the Solid Inset role.
 
 Vue and React emit the same class for an unresolved role. Tailwind matches
-recipes within valid scope boundaries; only optical recipes advertise a tier
-to the optional renderer. Native top-layer promotion preserves DOM ancestry.
-Dialog, modal Drawer, Toast and ContextMenu mirror the resolved invocation
-scope to their portal hosts, including while the exit remains mounted.
+recipes through symmetrical `@scope` boundaries (`solid`, `frosted`, `glass`);
+only optical Glass recipes advertise a tier to the optional renderer. Native
+top-layer promotion preserves DOM ancestry. Dialog, modal Drawer, Toast and
+ContextMenu mirror the resolved invocation scope to their portal hosts,
+including while the exit remains mounted.
 
 Migrate from `MaterialMode` to `Material`, and from `MaterialSurfaceRole` to
 `SurfaceRole`. Do not inspect `surfaceClasses` or `materialSurfacePresets`;
 use `getSurfaceClass(selection, role)` for custom surface markup. Replace
 selectors depending on automatic `material-auto`, `material-solid-*` or
 `material-glass-*` classes with the role marker and the material scope.
+
+## Three-material design system
+
+Solid, Frosted, and Aurora Glass are equal first-class materials sharing brand
+colors, typography, corner radii, spacing, component density, interaction
+semantics, and motion roles while expressing three independent surface languages:
+
+| Material | Core character | Rendering mechanism | Glass Runtime |
+| --- | --- | --- | --- |
+| Solid | Opaque, crisp, low backdrop dependency, tonal elevation | Native CSS | Never |
+| Frosted | Translucent, soft, diffused matte depth, restrained edge | Native CSS `backdrop-filter` | Never |
+| Aurora Glass | Optical transparency, specular edge catches, multi-tier depth | CSS + optional Glass Runtime | Eligible Glass surfaces only |
+
+Concrete foundation values live in `packages/tokens/src/material.css` (Aurora Glass),
+`packages/tokens/src/material-solid.css` (Solid status plate compositions),
+`packages/tokens/src/material-frosted.css` (Frosted scales and per-role recipes),
+and `packages/tokens/src/themes/{light,dark}.css` (theme palettes). Glass optical
+parameters never leak into Solid or Frosted token contracts.
 
 ## Material runtime and switching
 
@@ -50,7 +69,7 @@ keeps the last interactive choice. Material stays independent of Theme, Locale,
 Stage background and Showcase surface, and the attribute remains the only live
 contract.
 
-The toolbar exposes Glass, Solid, and experimental Frosted through the shared
+The toolbar exposes Glass, Solid, and Frosted through the shared
 SegmentedControl or a touch cycle control. Shell chrome follows the global
 scope. Explicit presets remain available for optical comparison. Switching
 does not reset the specimen session, form values, selection, focus, scroll or zoom.
@@ -61,18 +80,57 @@ the View Transition API swap immediately. Rapid requests settle on the last
 selection: a canceled snapshot paints the newest request, and no optical edge,
 overlay flash or layout jump survives the swap.
 
-## Frosted foundation preview
+## Frosted material
 
-Frosted uses a theme-owned fill and low blur with an opaque fallback. It has no
-Glass Tier, directional rim, or optional edge backend. The basic recipe is
-available for scope and integration testing, not a validated visual system.
+Frosted is an independent translucent material built on native CSS
+`backdrop-filter`, higher surface opacity, restrained saturation, soft 1px matte
+borders, and calm ambient shadows. It is neither blurred Solid nor Aurora Glass
+without refraction: it uses no Glass Tier, no directional optical rim, no
+chromatic dispersion, and no JavaScript runtime or backdrop capture.
+
+`cssVariables.material.frosted` exposes the theme-owned base palette, matte
+borders, shadows, interaction washes, selection and primary fills, scrim, and
+per-role blur/saturation/opacity scales:
+
+| Surface Role | Standalone Blur | Saturation | Fill Opacity | Nested Behavior |
+| --- | --- | --- | --- | --- |
+| `panel` | 16px | 118% | 76% | Skips blur (`none`), steps to `panel-nested-fill` and softer shadow |
+| `overlay` | 20px | 124% | 82% (`dialog`: 86%) | Always samples independently (floating spatial plane) |
+| `compactOverlay` | 14px | 118% | 84% | Always samples independently |
+| `group` | 12px | 112% | 68% | Skips blur (`none`), steps to `group-nested-fill` |
+| `control` | 10px | 112% | 74% | Skips blur (`none`), steps to `control-nested-fill`; ghost controls stay transparent |
+| `table` | 14px | 118% | 78% | Samples once on `<table>`; cells never own individual backdrop filters |
+| `field` | 8px | 112% | 80% | Skips blur (`none`), steps to `field-nested-fill` |
+
+Compact non-sampling components in Frosted (`UiBadge`, `UiChoice` controls,
+`UiSkeleton`, segmented/tab/pagination active indicators, inline `code`/`kbd`)
+always keep `backdrop-filter: none` so dense UI never allocates excessive
+compositing layers. `UiNotice` samples only when standalone.
+
+### Frosted capability detection and degradation
+
+Frosted paints a 100% opaque theme-owned fallback fill
+(`--neoverse-material-frosted-base*`) first, and upgrades to translucent fills
+and `backdrop-filter` only behind
+`@supports ((backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1))) and (color: color-mix(in srgb, Canvas, CanvasText))`.
+Under `prefers-reduced-transparency: reduce`, Frosted reverts cleanly to those
+opaque base fills with `backdrop-filter: none` while preserving the user's
+stored `material` preference and interactive state. Under `forced-colors: active`,
+system `Canvas`, `CanvasText`, `ButtonText`, and `Highlight` colors take over
+with zero blur or shadows. Capability checks never sniff User-Agent strings.
 
 ## Solid material
 
 Solid is an independent opaque material, not the reduced-transparency version
-of Aurora Glass. `cssVariables.material.solid` exposes the theme-owned
-palette and effects. Set the Canvas role on an application-owned background;
-choosing a material scope does not repaint a consumer's page.
+of Aurora Glass. `cssVariables.material.solid` exposes the theme-owned palette,
+nested panel stepping (`raised-nested`, `nested-shadow`), grouped control
+elevation (`control-in-group`), disabled plate, filled semantic button tones
+(`primary`, `danger`, `success`, `warning`, `accent`), and status plates.
+Standalone controls step cleanly off panels without relying on dense monochrome
+borders; controls inside a `group` lift onto a dedicated plate; nested panels
+step down calmly to separate hierarchy. Set the Canvas role on an
+application-owned background; choosing a material scope does not repaint a
+consumer's page.
 
 The [component matrix](../../contracts/component-matrix.json) records which
 roles each public component owns. Control and Inset keep functional focus and
@@ -100,10 +158,35 @@ terminal colors and do not add another plate. Prose reuses the same table and
 disclosure recipes as their component counterparts. Quotes and code blocks use
 Inset; inline code and keyboard tokens use Group.
 
-Use `?material=glass` and `?material=solid` on an existing Design Lab or React
-fixture route, together with `?theme=light` or `?theme=dark`, to inspect a
-specimen. The query scopes the preview only; it does not set a preference or
-replace explicit surface presets.
+Use `?material=glass`, `?material=frosted`, and `?material=solid` on an existing
+Design Lab or React fixture route, together with `?theme=light` or `?theme=dark`,
+to inspect a specimen. The query scopes the preview only; it does not set a
+preference or replace explicit surface presets.
+
+## Surface nesting and backdrop ownership
+
+Material scope inheritance (`data-neoverse-material`) and backdrop-sampling
+ownership are separate mechanisms:
+
+- Any of `solid`, `frosted`, and `glass` can nest arbitrarily inside any other
+  material scope. Symmetrical `@scope` boundaries prevent token, filter, shadow,
+  and pseudo-element leakage across material transitions.
+- Inside **Solid**, nested `panel` surfaces step to `raised-nested` with a
+  softer `nested-shadow`, and `control` surfaces inside `group` lift to
+  `control-in-group`.
+- Inside **Frosted**, descendants of a Frosted backdrop-owning plane (`panel`,
+  `group`, `overlay`, `compactOverlay`) inherit `--neoverse-frosted-nested-filter: none`
+  and stepped nested fills so same-material nesting never double-blurs or
+  multiplies compositing layers. Floating `overlay` and `compactOverlay` planes,
+  nested material scope roots (`[data-neoverse-material]`), and explicit Glass
+  surfaces reset those nested tokens so they keep independent sampling.
+- Inside **Aurora Glass**, independent surfaces default to `glassNesting="local"`
+  and keep their own optical tier; layouts that deliberately borrow a parent
+  plane opt in with `glassNesting="inherit"` (which also works in Solid and
+  Frosted scopes).
+- Component-specific WebGL edge/shadow overrides (inputs, choices, tables) stay
+  scoped strictly inside Glass boundaries so activating the optional Glass
+  renderer for one explicit Glass surface never alters Solid or Frosted siblings.
 
 ## Aurora Glass tiers
 

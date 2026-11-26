@@ -14,8 +14,8 @@
       "reason": "2026-11-23: Shared form-control selectors include the flowing choice-state fill and mirrored input/textarea caret overlays; remove when selectors are generated from Tokens."
     },
     "packages/tailwind/src/theme.css": {
-      "ceiling": 836,
-      "reason": "2026-11-22: Tailwind v4 theme mapping; remove when the theme is generated from Tokens."
+      "ceiling": 860,
+      "reason": "2026-11-26: Tailwind v4 theme mapping and @scope (.material-scopes) Glass utilities formatted by Biome; remove when the theme is generated from Tokens."
     },
     "packages/tokens/src/fonts.css": {
       "ceiling": 1512,

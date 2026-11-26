@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import {
-  type SurfacePreset,
   getSurfaceClass,
+  type SurfacePreset,
   UiButton,
   UiIconButton,
   UiSurface,
@@ -18,6 +18,7 @@ const presets: readonly SurfacePreset[] = [
   'subtle',
   'elevated',
   'inset',
+  'frosted',
   'glass-subtle',
   'glass-elevated',
   'glass-immersive',

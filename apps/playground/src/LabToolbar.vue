@@ -37,7 +37,6 @@ const nextMaterial = computed(
 const cycleLabel = localized('Cycle theme', '切换主题');
 const cycleMaterialLabel = localized('Cycle material', '切换材质');
 const nextMaterialLabel = localized('Next', '下一项');
-const experimentalMaterialLabel = localized('Exp.', '实验');
 const materialCycleDescription = computed(
   () =>
     `${localize(cycleMaterialLabel, props.locale)}: ${localize(materialNames[props.material], props.locale)}. ${localize(nextMaterialLabel, props.locale)}: ${localize(materialNames[nextMaterial.value], props.locale)}`,
@@ -126,10 +125,7 @@ function selectTheme(value: string): void {
         :title="materialCycleDescription"
         @click="cycleMaterial"
       >
-        <span v-if="material === 'frosted'" class="text-caption">
-          {{ localize(experimentalMaterialLabel, locale) }}
-        </span>
-        <LabIcon v-else name="material" />
+        <LabIcon name="material" />
       </UiIconButton>
       <UiSegmentedControl
         data-playground-theme-control="segments"

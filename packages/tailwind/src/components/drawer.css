@@ -178,6 +178,12 @@
     }
   }
 
+  @scope (.material-frosted-scope) {
+    .ui-drawer__backdrop {
+      --neoverse-drawer-scrim: var(--neoverse-material-frosted-scrim);
+    }
+  }
+
   @starting-style {
     .ui-drawer__host[data-open='true'] > .ui-drawer,
     .ui-drawer__host[data-open='true'] > .ui-drawer__backdrop::before {
@@ -199,21 +205,21 @@
 
 @layer utilities {
   @scope (.material-scopes) {
-  dialog.ui-drawer.material-recipe-glass-subtle {
-    overflow: auto;
-  }
-
-  @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
-    .ui-drawer.material-recipe-glass-subtle {
-      background-color: var(--neoverse-material-glass-subtle-background-fallback);
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
+    dialog.ui-drawer.material-recipe-glass-subtle {
+      overflow: auto;
     }
 
-    .ui-drawer.material-recipe-glass-subtle::before {
-      display: none;
+    @media (prefers-reduced-transparency: reduce), (forced-colors: active) {
+      .ui-drawer.material-recipe-glass-subtle {
+        background-color: var(--neoverse-material-glass-subtle-background-fallback);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+
+      .ui-drawer.material-recipe-glass-subtle::before {
+        display: none;
+      }
     }
-  }
   }
 }
 

@@ -90,7 +90,9 @@ export function installGlassTierStyles(): HTMLStyleElement {
   ];
   const elevated = ['.material-role-panel', '.ui-select__popover'];
   const nonoptical = ['solid', 'frosted'].flatMap((material) =>
-    [...subtle, ...elevated].map((selector) => `[data-neoverse-material='${material}'] ${selector}`),
+    [...subtle, ...elevated].map(
+      (selector) => `[data-neoverse-material='${material}'] ${selector}`,
+    ),
   );
   const style = document.createElement('style');
   style.textContent = `

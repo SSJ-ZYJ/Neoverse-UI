@@ -69,7 +69,16 @@ function refresh() {
       element.textContent?.trim().slice(0, 32) ||
       element.tagName.toLowerCase();
     const surface = element.dataset.surface ?? 'auto';
+    const scopeMaterial = elementStyle.getPropertyValue('--neoverse-scope-material').trim();
     const tier = glassTier(element, elementStyle);
+    const isFrosted =
+      !tier &&
+      (element.classList.contains('material-frosted') ||
+        (surface === 'auto' && scopeMaterial === 'frosted'));
+    const isSolid =
+      !tier &&
+      !isFrosted &&
+      (surface === 'solid' || (surface === 'auto' && scopeMaterial === 'solid'));
     const borrowsGlass = element.dataset.neoverseGlassNesting === 'inherit';
     const none = surface === 'none' || element.classList.contains('ui-button--ghost');
     const hasGlassParent = (borrowsGlass || none) && hasGlassAncestor(element);
@@ -95,6 +104,22 @@ function refresh() {
         props.locale === 'zh'
           ? `共享语义效果（不独立采样${glassMaterial.name.zh}）`
           : `Shared semantic effect (no independent ${glassMaterial.name.en} sampling)`;
+    } else if (isFrosted) {
+      const filter = style.backdropFilter;
+      const blur = filter.match(/blur\(([^)]+)\)/)?.[1] ?? '0px';
+      const alpha = Number(
+        style.backgroundColor.match(/\/\s*([\d.]+)\s*\)/)?.[1] ??
+          style.backgroundColor.match(/rgba\([^)]*,\s*([\d.]+)\)/)?.[1] ??
+          1,
+      );
+      const fallback = filter === 'none' && alpha >= 0.99;
+      const nested = filter === 'none' && !fallback;
+      detail =
+        props.locale === 'zh'
+          ? `磨砂 · ${blur} / ${Math.round(alpha * 100)}%${fallback ? ' · 不透明回退' : nested ? ' · 嵌套不重复模糊' : ''}`
+          : `Frosted · ${blur} / ${Math.round(alpha * 100)}%${fallback ? ' · Opaque fallback' : nested ? ' · Nested (no double blur)' : ''}`;
+    } else if (isSolid) {
+      detail = props.locale === 'zh' ? '实体 · 不透明表面' : 'Solid · Opaque surface';
     } else if (tier) {
       const preset = tiers[tier];
       const filter = style.backdropFilter;

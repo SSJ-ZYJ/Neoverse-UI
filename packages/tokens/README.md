@@ -16,6 +16,14 @@ Use the generated CSS variables with:
 
 TypeScript consumers can import the public token-name maps from `@neoverse-ui/tokens`.
 
+## Materials
+
+Neoverse-UI provides three equal, independent material families:
+
+- **Solid** (`cssVariables.material.solid`): opaque tonal surfaces, nested panel stepping, grouped controls, filled semantic actions, and status plates using native CSS.
+- **Frosted** (`cssVariables.material.frosted`): translucent surfaces with role-based `backdrop-filter` blur/saturation/opacity scales, soft matte edges, nested blur suppression, and 100% opaque theme-owned fallbacks using native CSS only.
+- **Aurora Glass** (`cssVariables.material.glass` / `glassMaterial`): optical translucent glass with Light (`glass-subtle`), Standard (`glass-elevated`), and Immersive (`glass-immersive`) tiers.
+
 ## Aurora Glass
 
 Aurora Glass is the single shared glass material. Light, Standard, and

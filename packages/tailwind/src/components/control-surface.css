@@ -206,26 +206,28 @@
     background: var(--neoverse-control-surface-divider-color);
   }
 
-  @media (prefers-reduced-transparency: reduce) {
-    .ui-control-surface:not([data-surface='none']) {
-      background-color: var(--neoverse-material-glass-base-tint);
+  @scope (.material-glass-scope) {
+    @media (prefers-reduced-transparency: reduce) {
+      .ui-control-surface:not([data-surface='none'], .material-frosted) {
+        background-color: var(--neoverse-material-glass-base-tint);
+      }
     }
   }
 }
 
 @layer utilities {
   @scope (.material-scopes) {
-  @media (prefers-reduced-motion: no-preference) {
-    /* Compose scale with the transition in the shared Glass utility layer. */
-    .ui-control-surface:is(
-        .material-recipe-glass-subtle,
-        .material-recipe-glass-elevated,
-        .material-recipe-glass-immersive
-      ):not(.ui-button) {
-      transition:
-        var(--neoverse-material-transition), var(--neoverse-control-surface-scale-transition);
+    @media (prefers-reduced-motion: no-preference) {
+      /* Compose scale with the transition in the shared Glass utility layer. */
+      .ui-control-surface:is(
+          .material-recipe-glass-subtle,
+          .material-recipe-glass-elevated,
+          .material-recipe-glass-immersive
+        ):not(.ui-button) {
+        transition:
+          var(--neoverse-material-transition), var(--neoverse-control-surface-scale-transition);
+      }
     }
-  }
   }
 }
 
@@ -233,6 +235,13 @@
   @scope (.material-solid-scope) {
     .ui-control-surface.material-recipe-auto > .ui-control-surface__divider {
       background-color: var(--neoverse-material-solid-divider);
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    .ui-control-surface.material-recipe-frosted-group > .ui-control-surface__divider,
+    .ui-control-surface.material-recipe-frosted-panel > .ui-control-surface__divider {
+      background-color: var(--neoverse-material-frosted-divider);
     }
   }
 }

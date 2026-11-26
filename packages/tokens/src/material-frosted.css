@@ -1,0 +1,230 @@
+/* Frosted material foundation tokens. Frosted uses native CSS backdrop-filter,
+   higher surface opacity, restrained saturation and soft non-optical edges with
+   truly opaque theme-owned fallbacks. Glass optical parameters never enter here. */
+@layer neoverse.tokens {
+  :root {
+    --neoverse-material-frosted-blur-field: 8px;
+    --neoverse-material-frosted-blur-control: 10px;
+    --neoverse-material-frosted-blur-group: 12px;
+    --neoverse-material-frosted-blur-table: 14px;
+    --neoverse-material-frosted-blur-compact-overlay: 14px;
+    --neoverse-material-frosted-blur-panel: 16px;
+    --neoverse-material-frosted-blur-overlay: 20px;
+
+    --neoverse-material-frosted-saturation-subtle: 112%;
+    --neoverse-material-frosted-saturation-standard: 118%;
+    --neoverse-material-frosted-saturation-elevated: 124%;
+
+    --neoverse-material-frosted-opacity-group: 68%;
+    --neoverse-material-frosted-opacity-control: 74%;
+    --neoverse-material-frosted-opacity-panel: 76%;
+    --neoverse-material-frosted-opacity-table: 78%;
+    --neoverse-material-frosted-opacity-field: 80%;
+    --neoverse-material-frosted-opacity-overlay: 82%;
+    --neoverse-material-frosted-opacity-compact-overlay: 84%;
+    --neoverse-material-frosted-opacity-dialog: 86%;
+  }
+
+  /* Compose per-role Frosted fills and filters at material owners so subtree
+     token overrides remain live without duplicating base tokens. */
+  :root,
+  :where(
+    [data-neoverse-material='frosted'],
+    .material-frosted,
+    .material-role-control,
+    .material-role-panel,
+    .material-role-group,
+    .material-role-field,
+    .material-role-overlay,
+    .material-role-compact-overlay,
+    .material-role-table,
+    .ui-badge,
+    .ui-notice,
+    .ui-skeleton,
+    .skeleton-surface,
+    .ui-disclosure,
+    .neoverse-prose details,
+    .neoverse-prose table,
+    .neoverse-prose blockquote,
+    .neoverse-prose pre
+  ) {
+    --neoverse-material-frosted-control-fallback: var(--neoverse-material-frosted-base-elevated);
+    --neoverse-material-frosted-control-fill: color-mix(
+      in srgb,
+      var(--neoverse-material-frosted-control-fallback)
+        var(--neoverse-material-frosted-opacity-control),
+      transparent
+    );
+    --neoverse-material-frosted-control-filter: blur(var(--neoverse-material-frosted-blur-control))
+      saturate(var(--neoverse-material-frosted-saturation-subtle));
+
+    --neoverse-material-frosted-panel-fallback: var(--neoverse-material-frosted-base);
+    --neoverse-material-frosted-panel-fill: color-mix(
+      in srgb,
+      var(--neoverse-material-frosted-panel-fallback) var(--neoverse-material-frosted-opacity-panel),
+      transparent
+    );
+    --neoverse-material-frosted-panel-filter: blur(var(--neoverse-material-frosted-blur-panel))
+      saturate(var(--neoverse-material-frosted-saturation-standard));
+
+    --neoverse-material-frosted-group-fallback: var(--neoverse-material-frosted-base-recessed);
+    --neoverse-material-frosted-group-fill: color-mix(
+      in srgb,
+      var(--neoverse-material-frosted-group-fallback) var(--neoverse-material-frosted-opacity-group),
+      transparent
+    );
+    --neoverse-material-frosted-group-filter: blur(var(--neoverse-material-frosted-blur-group))
+      saturate(var(--neoverse-material-frosted-saturation-subtle));
+
+    --neoverse-material-frosted-field-fallback: var(--neoverse-material-frosted-base-inset);
+    --neoverse-material-frosted-field-fill: color-mix(
+      in srgb,
+      var(--neoverse-material-frosted-field-fallback) var(--neoverse-material-frosted-opacity-field),
+      transparent
+    );
+    --neoverse-material-frosted-field-filter: blur(var(--neoverse-material-frosted-blur-field))
+      saturate(var(--neoverse-material-frosted-saturation-subtle));
+
+    --neoverse-material-frosted-overlay-fallback: var(--neoverse-material-frosted-base-elevated);
+    --neoverse-material-frosted-overlay-fill: color-mix(
+      in srgb,
+      var(--neoverse-material-frosted-overlay-fallback)
+        var(--neoverse-material-frosted-opacity-overlay),
+      transparent
+    );
+    --neoverse-material-frosted-overlay-filter: blur(var(--neoverse-material-frosted-blur-overlay))
+      saturate(var(--neoverse-material-frosted-saturation-elevated));
+
+    --neoverse-material-frosted-dialog-fill: color-mix(
+      in srgb,
+      var(--neoverse-material-frosted-overlay-fallback)
+        var(--neoverse-material-frosted-opacity-dialog),
+      transparent
+    );
+
+    --neoverse-material-frosted-compact-overlay-fallback: var(
+      --neoverse-material-frosted-base-elevated
+    );
+    --neoverse-material-frosted-compact-overlay-fill: color-mix(
+      in srgb,
+      var(--neoverse-material-frosted-compact-overlay-fallback)
+        var(--neoverse-material-frosted-opacity-compact-overlay),
+      transparent
+    );
+    --neoverse-material-frosted-compact-overlay-filter: blur(
+        var(--neoverse-material-frosted-blur-compact-overlay)
+      )
+      saturate(var(--neoverse-material-frosted-saturation-standard));
+
+    --neoverse-material-frosted-table-fallback: var(--neoverse-material-frosted-base);
+    --neoverse-material-frosted-table-fill: color-mix(
+      in srgb,
+      var(--neoverse-material-frosted-table-fallback) var(--neoverse-material-frosted-opacity-table),
+      transparent
+    );
+    --neoverse-material-frosted-table-header-fill: color-mix(
+      in srgb,
+      var(--neoverse-material-frosted-base-recessed) var(--neoverse-material-frosted-opacity-table),
+      transparent
+    );
+    --neoverse-material-frosted-table-stripe-fill: color-mix(
+      in srgb,
+      var(--neoverse-material-frosted-base-inset) var(--neoverse-material-frosted-opacity-table),
+      transparent
+    );
+    --neoverse-material-frosted-table-filter: blur(var(--neoverse-material-frosted-blur-table))
+      saturate(var(--neoverse-material-frosted-saturation-standard));
+
+    --neoverse-material-frosted-primary: color-mix(
+      in srgb,
+      var(--neoverse-material-frosted-primary-fallback) 90%,
+      transparent
+    );
+    --neoverse-material-frosted-danger: color-mix(
+      in srgb,
+      var(--neoverse-material-solid-danger) 88%,
+      transparent
+    );
+    --neoverse-material-frosted-success: color-mix(
+      in srgb,
+      var(--neoverse-material-solid-success) 88%,
+      transparent
+    );
+    --neoverse-material-frosted-warning: color-mix(
+      in srgb,
+      var(--neoverse-material-solid-warning) 90%,
+      transparent
+    );
+    --neoverse-material-frosted-accent: color-mix(
+      in srgb,
+      var(--neoverse-material-solid-accent) 88%,
+      transparent
+    );
+
+    --neoverse-material-frosted-status-plate-neutral: color-mix(
+      in srgb,
+      var(--neoverse-material-frosted-base-recessed) 78%,
+      transparent
+    );
+    --neoverse-material-frosted-status-plate-info: color-mix(
+      in srgb,
+      var(--neoverse-color-status-info) 20%,
+      var(--neoverse-material-frosted-panel-fill)
+    );
+    --neoverse-material-frosted-status-plate-success: color-mix(
+      in srgb,
+      var(--neoverse-color-status-success) 20%,
+      var(--neoverse-material-frosted-panel-fill)
+    );
+    --neoverse-material-frosted-status-plate-warning: color-mix(
+      in srgb,
+      var(--neoverse-color-status-warning) 22%,
+      var(--neoverse-material-frosted-panel-fill)
+    );
+    --neoverse-material-frosted-status-plate-danger: color-mix(
+      in srgb,
+      var(--neoverse-color-status-danger) 20%,
+      var(--neoverse-material-frosted-panel-fill)
+    );
+
+    --neoverse-material-frosted-status-plate-neutral-fallback: var(
+      --neoverse-material-frosted-base-recessed
+    );
+    --neoverse-material-frosted-status-plate-info-fallback: color-mix(
+      in srgb,
+      var(--neoverse-color-status-info) 20%,
+      var(--neoverse-material-frosted-base)
+    );
+    --neoverse-material-frosted-status-plate-success-fallback: color-mix(
+      in srgb,
+      var(--neoverse-color-status-success) 20%,
+      var(--neoverse-material-frosted-base)
+    );
+    --neoverse-material-frosted-status-plate-warning-fallback: color-mix(
+      in srgb,
+      var(--neoverse-color-status-warning) 22%,
+      var(--neoverse-material-frosted-base)
+    );
+    --neoverse-material-frosted-status-plate-danger-fallback: color-mix(
+      in srgb,
+      var(--neoverse-color-status-danger) 20%,
+      var(--neoverse-material-frosted-base)
+    );
+
+    --neoverse-material-frosted-skeleton-fill: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) 14%,
+      var(--neoverse-material-frosted-group-nested-fill)
+    );
+    --neoverse-material-frosted-skeleton-fallback: color-mix(
+      in srgb,
+      var(--neoverse-color-text-secondary) 16%,
+      var(--neoverse-material-frosted-base-recessed)
+    );
+    --neoverse-material-frosted-disabled-fill: color-mix(
+      in srgb,
+      var(--neoverse-material-frosted-base-recessed) 60%,
+      transparent
+    );
+  }
+}

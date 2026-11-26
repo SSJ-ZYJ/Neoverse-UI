@@ -62,7 +62,7 @@ test.describe('material switching', () => {
         }
         return;
       }
-      for (const name of ['Frosted (experimental foundation preview)', 'Aurora Glass', 'Solid']) {
+      for (const name of ['Frosted', 'Aurora Glass', 'Solid']) {
         const option = [...host.querySelectorAll('[role="radio"]')].find(
           (radio) => radio.getAttribute('aria-label') === name,
         );

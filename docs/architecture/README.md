@@ -44,7 +44,8 @@ Vue and React are intended to share Token names, Tailwind foundation, Material v
 ```text
 packages/tokens/src/
   primitives.css  semantic.css  geometry.css  typography.css
-  material.css    layout.css    motion.css
+  material.css    material-solid.css          material-frosted.css
+  layout.css      motion.css
   components/
     shared-control.css   button.css          action.css
     breadcrumb.css       navigation-item.css control-surface.css
@@ -304,10 +305,13 @@ rendered scale when they position, so a Select still opens against its trigger.
 Every entry in `labSpecimens` declares a `FocusedPreview`: either a localized renderer for a read-only Inspector or a `SpecimenDefinition` that opens one editable `SpecimenSession`. A read-only preview can still support native interactions without exposing a session to the Inspector. Every component specimen whose public API exposes an appearance variant has an editable session: Button, IconButton, Action, SegmentedControl, NavigationItem, ControlSurface, Dock, Badge, StatusIndicator, Skeleton, Notice, Toast, TooltipSurface, Avatar, Table, Disclosure, EmptyState, StatCard, Surface (including the three Aurora Glass tiers), Card, Input, Textarea, Select, Checkbox, RadioGroup, Switch, Field and Tabs. Data-only specimens (Breadcrumb, Pagination, Timeline, StepFlow) and the four overlay specimens stay read-only; overlays own focus, placement and light dismiss, which an Inspector value cannot reproduce. To add a specimen, register its explicit renderer on the catalogue entry and retain its stable QA anchor in the owning module. Interactive definitions live in the `lab-specimens/` family files and are re-exported through `lab-interactive-specimens.ts`; they provide typed initial props, an initial state factory, and editable controls. The session rejects undeclared edits, invalid values, and edits to temporarily disabled fields.
 
 The Stage provides a shared backdrop for module galleries and focused
-specimens. Materials also uses a local comparison scene: the module and its
-editable Core material comparison specimen render the same components under
-adjacent Glass and Solid scopes. The Lab theme and theme-isolated `/frame`
-links expose the Light and Dark palettes without a second theme resolver.
+specimens. Materials also uses local comparison scenes: the module and its
+editable Core material comparison specimen render the same workspace under
+adjacent Solid, Frosted, and Aurora Glass scopes, and the Material foundation
+matrix (`#materials-foundation`) exercises all seven surface roles, five
+backdrop types, same-material and 3×3 mixed-material nesting, and interactive
+states. The Lab theme and theme-isolated `/frame` links expose the Light and
+Dark palettes without a second theme resolver.
 
 Module URLs and `/frame` render the full QA galleries, including fixed state matrices and optical fixtures. The Inspector opens the isolated gallery at the specimen anchor without transferring local edits. `/react-fixture` remains the React contract host. Neither isolated entry mounts the shell.
 

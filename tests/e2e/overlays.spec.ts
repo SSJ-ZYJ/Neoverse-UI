@@ -35,9 +35,13 @@ test.describe('modal and transient feedback', () => {
       await expect(trigger).toBeFocused();
     });
 
-    test(`${adapter.name}: a portaled modal keeps its invocation paint through exit`, async ({ page }) => {
+    test(`${adapter.name}: a portaled modal keeps its invocation paint through exit`, async ({
+      page,
+    }) => {
       await page.goto(adapter.url('light', 'overlays'));
-      const source = page.locator(adapter.name === 'Vue' ? '#overlays-dialog' : '[data-react-adapter="UiDialog"]');
+      const source = page.locator(
+        adapter.name === 'Vue' ? '#overlays-dialog' : '[data-react-adapter="UiDialog"]',
+      );
       await source.evaluate((element) => element.setAttribute('data-neoverse-material', 'frosted'));
       const trigger = source.locator('[data-dialog-open]');
       await trigger.press('Enter');
@@ -45,11 +49,15 @@ test.describe('modal and transient feedback', () => {
       const scrim = page.locator('.ui-dialog__backdrop[data-open="true"]');
       await expect(dialog).toHaveCSS('backdrop-filter', /blur\(12px\)/);
       await expect(scrim).toHaveCSS('opacity', '1');
-      const frostedScrim = await scrim.evaluate((element) => getComputedStyle(element).backgroundColor);
+      const frostedScrim = await scrim.evaluate(
+        (element) => getComputedStyle(element).backgroundColor,
+      );
       await source.evaluate((element) => element.setAttribute('data-neoverse-material', 'solid'));
       await expect(dialog).toHaveCSS('backdrop-filter', 'none');
       await expect(scrim).not.toHaveCSS('background-color', frostedScrim);
-      const scrimFill = await scrim.evaluate((element) => getComputedStyle(element).backgroundColor);
+      const scrimFill = await scrim.evaluate(
+        (element) => getComputedStyle(element).backgroundColor,
+      );
       await scrim.evaluate((element) => {
         const observer = new MutationObserver(() => {
           if (element.hasAttribute('data-open')) return;
@@ -59,7 +67,10 @@ test.describe('modal and transient feedback', () => {
         observer.observe(element, { attributeFilter: ['data-open'] });
       });
       await page.keyboard.press('Escape');
-      await expect(page.locator('.ui-dialog__backdrop[data-test-exit-fill]')).toHaveAttribute('data-test-exit-fill', scrimFill);
+      await expect(page.locator('.ui-dialog__backdrop[data-test-exit-fill]')).toHaveAttribute(
+        'data-test-exit-fill',
+        scrimFill,
+      );
       await expect(dialog).toBeHidden();
       await expect(trigger).toBeFocused();
     });

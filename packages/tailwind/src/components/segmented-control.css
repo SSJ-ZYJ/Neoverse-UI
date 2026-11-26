@@ -314,38 +314,38 @@
 
 @layer utilities {
   @scope (.material-scopes) {
-  /* Tier optics sample the backdrop, edge refraction and bloom for the well,
+    /* Tier optics sample the backdrop, edge refraction and bloom for the well,
      while the recessed tint and inset cavity shadow carve the track behind
      the embedded thumb. */
-  .ui-segmented-control:is(
-    .material-recipe-glass-subtle,
-    .material-recipe-glass-elevated,
-    .material-recipe-glass-immersive
-  )[data-surface] {
-    --neoverse-material-shadow: var(--neoverse-control-segmented-shadow);
-    border-color: var(--neoverse-control-segmented-border);
-    background-image: var(--neoverse-control-segmented-background-image);
-    box-shadow: var(--neoverse-material-bloom), var(--neoverse-control-segmented-shadow);
-  }
+    .ui-segmented-control:is(
+        .material-recipe-glass-subtle,
+        .material-recipe-glass-elevated,
+        .material-recipe-glass-immersive
+      )[data-surface] {
+      --neoverse-material-shadow: var(--neoverse-control-segmented-shadow);
+      border-color: var(--neoverse-control-segmented-border);
+      background-image: var(--neoverse-control-segmented-background-image);
+      box-shadow: var(--neoverse-material-bloom), var(--neoverse-control-segmented-shadow);
+    }
   }
 }
 
 @layer utilities {
   @scope (.material-scopes) {
-  @media (pointer: coarse) {
-    .ui-segmented-control:is(
-        .material-recipe-glass-subtle,
-        .material-recipe-glass-elevated,
-        .material-recipe-glass-immersive
-      ) {
-      overflow: visible;
+    @media (pointer: coarse) {
+      .ui-segmented-control:is(
+          .material-recipe-glass-subtle,
+          .material-recipe-glass-elevated,
+          .material-recipe-glass-immersive
+        ) {
+        overflow: visible;
+      }
     }
-  }
   }
 }
 
 @layer neoverse-material-mode {
-  @scope (.material-static-scope) {
+  @scope (.material-solid-scope) {
     :where(:scope, :scope *).ui-segmented-control:is(.material-recipe-auto, [data-surface='none']) {
       --neoverse-control-segmented-active-background: none;
       --neoverse-control-segmented-active-fill: var(--neoverse-material-solid-selection);
@@ -364,9 +364,51 @@
       --neoverse-control-segmented-active-foreground: var(--neoverse-material-solid-selection-text);
     }
 
-    .ui-segmented-control:is(.material-recipe-auto, [data-surface='none']) .ui-segmented-control__option {
+    .ui-segmented-control:is(.material-recipe-auto, [data-surface='none'])
+      .ui-segmented-control__option {
       --neoverse-control-ghost-hover-background: var(--neoverse-material-solid-hover);
       --neoverse-control-ghost-active-background: var(--neoverse-material-solid-press);
+    }
+
+    @media (forced-colors: active) {
+      .ui-segmented-control:is(.material-recipe-auto, [data-surface='none'])
+        .ui-segmented-control__slider {
+        border-color: Highlight;
+      }
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *).ui-segmented-control:is(.material-recipe-auto, [data-surface='none']) {
+      --neoverse-control-segmented-active-background: none;
+      --neoverse-control-segmented-active-fill: var(--neoverse-material-frosted-selection);
+      --neoverse-control-segmented-active-filter: none;
+      --neoverse-control-segmented-active-border: var(--neoverse-material-frosted-border-subtle);
+      --neoverse-control-segmented-active-shadow: none;
+      --neoverse-control-segmented-active-hover-background: none;
+      --neoverse-control-segmented-active-hover-fill: var(--neoverse-material-frosted-selection);
+      --neoverse-control-segmented-active-hover-wash: var(--neoverse-material-frosted-hover);
+      --neoverse-control-segmented-active-press-background: none;
+      --neoverse-control-segmented-active-press-fill: var(--neoverse-material-frosted-selection);
+      --neoverse-control-segmented-active-press-wash: var(--neoverse-material-frosted-press);
+      --neoverse-effect-choice-selected-fill-opaque: var(
+        --neoverse-material-frosted-selection-fallback
+      );
+      --neoverse-effect-choice-selected-hover-fill-opaque: var(
+        --neoverse-material-frosted-selection-fallback
+      );
+      --neoverse-effect-choice-selected-press-fill-opaque: var(
+        --neoverse-material-frosted-selection-fallback
+      );
+      --neoverse-control-segmented-active-foreground: var(
+        --neoverse-material-frosted-selection-text
+      );
+    }
+
+    .ui-segmented-control:is(.material-recipe-auto, [data-surface='none'])
+      .ui-segmented-control__option {
+      --neoverse-control-ghost-hover-background: var(--neoverse-material-frosted-hover);
+      --neoverse-control-ghost-active-background: var(--neoverse-material-frosted-press);
     }
 
     @media (forced-colors: active) {

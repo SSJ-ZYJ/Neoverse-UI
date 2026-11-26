@@ -6,6 +6,8 @@ const sourceFiles = [
   'fonts.css',
   'primitives.css',
   'material.css',
+  'material-solid.css',
+  'material-frosted.css',
   'motion.css',
   'typography.css',
   'geometry.css',

@@ -1,0 +1,179 @@
+@layer neoverse-material-mode {
+  @scope (.material-solid-scope) {
+    :where(:scope, :scope *).material-recipe-auto.ui-button:not(.ui-button--ghost) {
+      background-image: linear-gradient(
+        var(--neoverse-button-tone-color),
+        var(--neoverse-button-tone-color)
+      );
+      background-origin: border-box;
+      background-clip: border-box;
+    }
+
+    :where(:scope, :scope *).material-recipe-auto:is(
+        .ui-button--primary,
+        .ui-button--secondary,
+        .ui-button--danger,
+        .ui-button--success,
+        .ui-button--warning,
+        .ui-button--accent
+      ) {
+      --neoverse-button-tone-color: transparent;
+      --neoverse-button-hover-tone: var(--neoverse-material-solid-hover);
+      --neoverse-button-press-tone: var(--neoverse-material-solid-press);
+
+      @media (hover: hover) {
+        &:hover:not(:active, :disabled, [aria-disabled='true']) {
+          --neoverse-button-tone-color: var(--neoverse-button-hover-tone);
+        }
+      }
+
+      &:active:not(:disabled, [aria-disabled='true']) {
+        --neoverse-button-tone-color: var(--neoverse-button-press-tone);
+        transition: none;
+      }
+
+      &:is(:disabled, [aria-disabled='true']) {
+        --neoverse-solid-plate-fill: var(--neoverse-material-solid-disabled);
+        --neoverse-solid-plate-shadow: none;
+      }
+    }
+
+    :where(:scope, :scope *).material-recipe-auto.ui-button--primary {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-primary);
+      --neoverse-button-hover-tone: var(--neoverse-material-solid-primary-hover);
+      --neoverse-button-press-tone: var(--neoverse-material-solid-primary-press);
+      color: var(--neoverse-material-solid-primary-text);
+    }
+
+    :where(:scope, :scope *).material-recipe-auto.ui-button--danger {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-danger);
+      --neoverse-button-hover-tone: var(--neoverse-material-solid-primary-hover);
+      --neoverse-button-press-tone: var(--neoverse-material-solid-primary-press);
+      color: var(--neoverse-material-solid-danger-text);
+    }
+
+    :where(:scope, :scope *).material-recipe-auto.ui-button--success {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-success);
+      --neoverse-button-hover-tone: var(--neoverse-material-solid-primary-hover);
+      --neoverse-button-press-tone: var(--neoverse-material-solid-primary-press);
+      color: var(--neoverse-material-solid-success-text);
+    }
+
+    :where(:scope, :scope *).material-recipe-auto.ui-button--warning {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-warning);
+      --neoverse-button-hover-tone: var(--neoverse-material-solid-primary-hover);
+      --neoverse-button-press-tone: var(--neoverse-material-solid-primary-press);
+      color: var(--neoverse-material-solid-warning-text);
+    }
+
+    :where(:scope, :scope *).material-recipe-auto.ui-button--accent {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-accent);
+      --neoverse-button-hover-tone: var(--neoverse-material-solid-primary-hover);
+      --neoverse-button-press-tone: var(--neoverse-material-solid-primary-press);
+      color: var(--neoverse-material-solid-accent-text);
+    }
+
+    :where(:scope, :scope *).material-recipe-auto.ui-button--ghost {
+      background-color: var(--neoverse-quiet-control-feedback);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      :where(:scope, :scope *).material-recipe-auto.ui-button {
+        transition: none;
+      }
+    }
+  }
+
+  @scope (.material-scopes) {
+    .material-recipe-frosted-control.ui-button {
+      --neoverse-button-tone-color: transparent;
+      --neoverse-button-hover-tone: var(--neoverse-material-frosted-hover);
+      --neoverse-button-press-tone: var(--neoverse-material-frosted-press);
+      background-image: linear-gradient(
+        var(--neoverse-button-tone-color),
+        var(--neoverse-button-tone-color)
+      );
+      background-origin: border-box;
+      background-clip: border-box;
+
+      @media (hover: hover) {
+        &:hover:not(:active, :disabled, [aria-disabled='true']) {
+          --neoverse-button-tone-color: var(--neoverse-button-hover-tone);
+        }
+      }
+
+      &:active:not(:disabled, [aria-disabled='true']) {
+        --neoverse-button-tone-color: var(--neoverse-button-press-tone);
+        transition: none;
+      }
+
+      &:is(:disabled, [aria-disabled='true']) {
+        --neoverse-frosted-plate-fill: var(--neoverse-material-frosted-disabled-fill);
+        --neoverse-frosted-plate-fallback: var(--neoverse-material-frosted-group-fallback);
+        --neoverse-frosted-plate-shadow: none;
+      }
+
+      &.ui-button--primary {
+        --neoverse-frosted-plate-fill: var(--neoverse-material-frosted-primary);
+        --neoverse-frosted-plate-fallback: var(--neoverse-material-frosted-primary-fallback);
+        --neoverse-frosted-plate-border: transparent;
+        --neoverse-frosted-plate-shadow: var(--neoverse-material-solid-control-shadow);
+        --neoverse-button-hover-tone: var(--neoverse-material-frosted-primary-hover);
+        --neoverse-button-press-tone: var(--neoverse-material-frosted-primary-press);
+        color: var(--neoverse-material-frosted-primary-text);
+      }
+
+      &.ui-button--danger {
+        --neoverse-frosted-plate-fill: var(--neoverse-material-frosted-danger);
+        --neoverse-frosted-plate-fallback: var(--neoverse-material-solid-danger);
+        --neoverse-frosted-plate-border: transparent;
+        --neoverse-frosted-plate-shadow: var(--neoverse-material-solid-control-shadow);
+        --neoverse-button-hover-tone: var(--neoverse-material-frosted-primary-hover);
+        --neoverse-button-press-tone: var(--neoverse-material-frosted-primary-press);
+        color: var(--neoverse-material-solid-danger-text);
+      }
+
+      &.ui-button--success {
+        --neoverse-frosted-plate-fill: var(--neoverse-material-frosted-success);
+        --neoverse-frosted-plate-fallback: var(--neoverse-material-solid-success);
+        --neoverse-frosted-plate-border: transparent;
+        --neoverse-frosted-plate-shadow: var(--neoverse-material-solid-control-shadow);
+        --neoverse-button-hover-tone: var(--neoverse-material-frosted-primary-hover);
+        --neoverse-button-press-tone: var(--neoverse-material-frosted-primary-press);
+        color: var(--neoverse-material-solid-success-text);
+      }
+
+      &.ui-button--warning {
+        --neoverse-frosted-plate-fill: var(--neoverse-material-frosted-warning);
+        --neoverse-frosted-plate-fallback: var(--neoverse-material-solid-warning);
+        --neoverse-frosted-plate-border: transparent;
+        --neoverse-frosted-plate-shadow: var(--neoverse-material-solid-control-shadow);
+        --neoverse-button-hover-tone: var(--neoverse-material-frosted-primary-hover);
+        --neoverse-button-press-tone: var(--neoverse-material-frosted-primary-press);
+        color: var(--neoverse-material-solid-warning-text);
+      }
+
+      &.ui-button--accent {
+        --neoverse-frosted-plate-fill: var(--neoverse-material-frosted-accent);
+        --neoverse-frosted-plate-fallback: var(--neoverse-material-solid-accent);
+        --neoverse-frosted-plate-border: transparent;
+        --neoverse-frosted-plate-shadow: var(--neoverse-material-solid-control-shadow);
+        --neoverse-button-hover-tone: var(--neoverse-material-frosted-primary-hover);
+        --neoverse-button-press-tone: var(--neoverse-material-frosted-primary-press);
+        color: var(--neoverse-material-solid-accent-text);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .material-recipe-frosted-control.ui-button {
+        transition: none;
+      }
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *).material-recipe-auto.ui-button--ghost {
+      background-color: var(--neoverse-quiet-control-feedback);
+    }
+  }
+}

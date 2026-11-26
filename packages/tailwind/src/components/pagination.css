@@ -167,7 +167,7 @@
 }
 
 @layer neoverse-material-mode {
-  @scope (.material-static-scope) {
+  @scope (.material-solid-scope) {
     :where(:scope, :scope *).ui-pagination__pages {
       --neoverse-pagination-current-foreground: var(--neoverse-material-solid-selection-text);
       --neoverse-pagination-current-border: transparent;
@@ -183,6 +183,47 @@
       --neoverse-pagination-current-press-background-image: var(--neoverse-solid-press-wash);
       --neoverse-pagination-current-shadow: none;
       --neoverse-pagination-current-filter: none;
+    }
+
+    @media (forced-colors: active) {
+      .ui-pagination__indicator {
+        forced-color-adjust: none;
+        background: transparent;
+        border-color: Highlight;
+      }
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *).ui-pagination__pages {
+      --neoverse-pagination-current-foreground: var(--neoverse-material-frosted-selection-text);
+      --neoverse-pagination-current-border: var(--neoverse-material-frosted-border-subtle);
+      --neoverse-pagination-current-background-image: none;
+      --neoverse-pagination-current-background-color: var(--neoverse-material-frosted-selection);
+      --neoverse-pagination-current-hover-background-color: var(
+        --neoverse-material-frosted-selection
+      );
+      --neoverse-pagination-current-press-background-color: var(
+        --neoverse-material-frosted-selection
+      );
+      --neoverse-pagination-current-hover-background-image: var(--neoverse-frosted-hover-wash);
+      --neoverse-pagination-current-press-background-image: var(--neoverse-frosted-press-wash);
+      --neoverse-pagination-current-shadow: none;
+      --neoverse-pagination-current-filter: none;
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      :where(:scope, :scope *).ui-pagination__pages {
+        --neoverse-pagination-current-background-color: var(
+          --neoverse-material-frosted-selection-fallback
+        );
+        --neoverse-pagination-current-hover-background-color: var(
+          --neoverse-material-frosted-selection-fallback
+        );
+        --neoverse-pagination-current-press-background-color: var(
+          --neoverse-material-frosted-selection-fallback
+        );
+      }
     }
 
     @media (forced-colors: active) {

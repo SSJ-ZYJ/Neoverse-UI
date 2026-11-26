@@ -151,4 +151,18 @@
       box-shadow: none;
     }
   }
+
+  @scope (.material-frosted-scope) {
+    .ui-status-indicator__dot {
+      box-shadow: none;
+    }
+
+    .ui-status-indicator--loading .ui-status-indicator__dot {
+      background-color: var(--neoverse-material-frosted-border-strong);
+    }
+
+    .ui-status-indicator--pulse .ui-status-indicator__dot::after {
+      box-shadow: none;
+    }
+  }
 }

@@ -52,7 +52,7 @@ running every theme, width, and language combination.
 | `motion.spec.ts` | List reorder, entrance replay, page transitions, page dissolve, disclosure expansion and collapse, React presence exit, reduced motion, layout width on a language switch, theme reveal reversal and thumb color continuity |
 | `motion-hierarchy.spec.ts` | Promoted Motion section, right-hand Inspector category switching, distinct-scene zero-flash transitions |
 | `materials.spec.ts` | Solid opacity and contrast, Glass tier paint and reduced transparency, adapter/portal paint, Prose and focus |
-| `material-scopes.spec.ts` | All nine parent/child material combinations, unknown and removed boundaries, React/Vue paint, Frosted reduced transparency and forced colors |
+| `material-scopes.spec.ts` | All nine parent/child material combinations, unknown and removed boundaries, all seven Surface Roles across Solid/Frosted/Glass in Light and Dark, Frosted non-optical isolation and nested blur suppression, contrast, reduced transparency state preservation, forced colors, and scroll stability |
 | `glass-runtime.spec.ts` | One shared noninteractive renderer canvas, fixed placement, theme stability, context loss/restore, on-demand allocation (a pure Solid page keeps zero optical resources and releases them), runtime reduced transparency, forced colors and adapter lifecycle |
 | `layout.spec.ts` | Control size baseline in both adapters, badge type scale, 24px minimum target, no implicit specimen magnification, table caption placement and corner consistency across previews and composition scenes |
 | `contrast.spec.ts` | WCAG contrast floors for the primary, secondary and muted text roles in both themes |

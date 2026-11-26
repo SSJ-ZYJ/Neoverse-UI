@@ -148,4 +148,10 @@ dialog.ui-dialog {
       --neoverse-dialog-scrim: var(--neoverse-material-solid-scrim);
     }
   }
+
+  @scope (.material-frosted-scope) {
+    .ui-dialog__backdrop {
+      --neoverse-dialog-scrim: var(--neoverse-material-frosted-scrim);
+    }
+  }
 }

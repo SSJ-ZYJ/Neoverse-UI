@@ -1,10 +1,16 @@
 import { glassMaterial, type Material, materials } from '@neoverse-ui/tokens';
-import { appCopy, type Locale, type LocalizedText, localize, localized } from './playground-content';
+import {
+  appCopy,
+  type Locale,
+  type LocalizedText,
+  localize,
+  localized,
+} from './playground-content';
 
 export const materialNames = {
   glass: localized(glassMaterial.name.en, glassMaterial.name.zh),
   solid: localized('Solid', '实体'),
-  frosted: localized('Frosted (experimental foundation preview)', '磨砂（实验性基础预览）'),
+  frosted: localized('Frosted', '磨砂'),
 } as const satisfies Record<Material, LocalizedText>;
 
 /** Short labels for the toolbar plate; the accessible name keeps the full material name. */
@@ -12,7 +18,7 @@ export function materialSegments(locale: Locale) {
   const short = {
     glass: localized('Glass', '玻璃'),
     solid: localized('Solid', '实体'),
-    frosted: localized('Frosted (exp.)', '磨砂（实验）'),
+    frosted: localized('Frosted', '磨砂'),
   } as const;
 
   return materials.map((value) => ({

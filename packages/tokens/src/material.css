@@ -1,13 +1,5 @@
 @layer neoverse.tokens {
   :root {
-    --neoverse-material-frosted-fallback: var(--neoverse-color-surface-raised);
-    --neoverse-material-frosted-fill: color-mix(
-      in srgb,
-      var(--neoverse-material-frosted-fallback) 85%,
-      transparent
-    );
-    --neoverse-material-frosted-filter: blur(var(--neoverse-material-blur-sm));
-    --neoverse-material-frosted-shadow: var(--neoverse-shadow-card);
     --neoverse-material-transparency-opaque: 100%;
     --neoverse-material-transparency-subtle: 15%;
     --neoverse-material-transparency-elevated: 20%;

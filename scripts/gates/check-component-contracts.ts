@@ -71,7 +71,10 @@ const errors: string[] = [];
 const materialMaturity = matrix.materialMaturity ?? {};
 if (
   Object.keys(materialMaturity).length !== materials.length ||
-  materials.some((material) => materialMaturity[material] !== (material === 'frosted' ? 'experimental' : 'existing'))
+  materials.some(
+    (material) =>
+      materialMaturity[material] !== (material === 'frosted' ? 'experimental' : 'existing'),
+  )
 ) {
   errors.push('Component matrix must record the availability of every material.');
 }

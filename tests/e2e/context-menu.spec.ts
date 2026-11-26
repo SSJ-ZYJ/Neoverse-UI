@@ -100,11 +100,15 @@ test.describe('context menu', () => {
       // A point-anchored menu uses the button's bounds at keyboard activation.
       const invocation = await trigger.evaluateHandle((button) => {
         const origin = { left: 0, bottom: 0 };
-        button.addEventListener('click', () => {
-          const rect = button.getBoundingClientRect();
-          origin.left = rect.left;
-          origin.bottom = rect.bottom;
-        }, { capture: true, once: true });
+        button.addEventListener(
+          'click',
+          () => {
+            const rect = button.getBoundingClientRect();
+            origin.left = rect.left;
+            origin.bottom = rect.bottom;
+          },
+          { capture: true, once: true },
+        );
         return origin;
       });
       await trigger.press('Enter');

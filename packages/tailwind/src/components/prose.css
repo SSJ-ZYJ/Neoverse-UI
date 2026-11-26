@@ -315,7 +315,7 @@
 }
 
 @layer neoverse-material-mode {
-  @scope (.material-static-scope) {
+  @scope (.material-solid-scope) {
     :where(:scope, :scope *):is(.neoverse-prose blockquote, .neoverse-prose pre) {
       background: var(--neoverse-material-solid-inset);
       box-shadow: none;
@@ -331,6 +331,64 @@
     :where(:scope, :scope *):is(.neoverse-prose mark) {
       color: var(--neoverse-material-solid-selection-text);
       background: var(--neoverse-material-solid-selection);
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *):is(.neoverse-prose blockquote, .neoverse-prose pre) {
+      background: var(--neoverse-material-frosted-field-fallback);
+      border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+        var(--neoverse-frosted-nested-border, var(--neoverse-material-frosted-border));
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+
+      @supports (backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1)) {
+        background: var(
+          --neoverse-frosted-nested-field-fill,
+          var(--neoverse-material-frosted-field-fill)
+        );
+        -webkit-backdrop-filter: var(
+          --neoverse-frosted-nested-filter,
+          var(--neoverse-material-frosted-field-filter)
+        );
+        backdrop-filter: var(
+          --neoverse-frosted-nested-filter,
+          var(--neoverse-material-frosted-field-filter)
+        );
+      }
+    }
+
+    :where(:scope, :scope *):is(.neoverse-prose :not(pre) > code, .neoverse-prose kbd) {
+      background: var(--neoverse-material-frosted-group-fallback);
+      border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+        var(--neoverse-material-frosted-border-subtle);
+      box-shadow: none;
+
+      @supports (backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1)) {
+        background: var(--neoverse-material-frosted-group-nested-fill);
+      }
+    }
+
+    :where(:scope, :scope *):is(.neoverse-prose mark) {
+      color: var(--neoverse-material-frosted-selection-text);
+      background: var(--neoverse-material-frosted-selection);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      :where(:scope, :scope *):is(.neoverse-prose blockquote, .neoverse-prose pre) {
+        background: var(--neoverse-material-frosted-field-fallback);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+
+      :where(:scope, :scope *):is(.neoverse-prose :not(pre) > code, .neoverse-prose kbd) {
+        background: var(--neoverse-material-frosted-group-fallback);
+      }
+
+      :where(:scope, :scope *):is(.neoverse-prose mark) {
+        background: var(--neoverse-material-frosted-selection-fallback);
+      }
     }
   }
 }

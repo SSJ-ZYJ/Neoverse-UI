@@ -1,15 +1,21 @@
 @layer neoverse-glass-nesting {
   @scope (.material-scope-edges) {
-    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive) > * {
+    :is(
+        .material-recipe-glass-subtle,
+        .material-recipe-glass-elevated,
+        .material-recipe-glass-immersive
+      )
+      > * {
       --neoverse-material-borrowed: none;
     }
   }
 
   @scope (.material-scopes) {
-    :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive):not(
-      .ui-button,
-      .ui-segmented-control
-    )[data-neoverse-glass-nesting='inherit'] {
+    :is(
+        .material-recipe-glass-subtle,
+        .material-recipe-glass-elevated,
+        .material-recipe-glass-immersive
+      ):not(.ui-button, .ui-segmented-control)[data-neoverse-glass-nesting='inherit'] {
       background: var(--neoverse-material-borrowed, revert-layer);
       border: var(--neoverse-material-borrowed, revert-layer);
       box-shadow: var(--neoverse-material-borrowed, revert-layer);
@@ -24,169 +30,46 @@
   }
 }
 
-@layer neoverse-material-mode {
-  @scope (.material-static-scope) {
-    /* Set feedback values on their owners so nested Glass never inherits them. */
-    :where(:scope, :scope *):where(
-        .ui-tabs__list,
-        .ui-pagination__pages,
-        .ui-navigation-item,
-        .ui-input,
-        .ui-select,
-        .ui-textarea,
-        .ui-choice__control
-      ) {
-      --neoverse-solid-hover-wash: linear-gradient(
-        var(--neoverse-material-solid-hover),
-        var(--neoverse-material-solid-hover)
-      );
-      --neoverse-solid-press-wash: linear-gradient(
-        var(--neoverse-material-solid-press),
-        var(--neoverse-material-solid-press)
-      );
-    }
-
-    :where(:scope, :scope *):is(.ui-badge, .ui-notice) {
-      --neoverse-solid-status-tone: var(--neoverse-material-solid-group);
-      background: color-mix(
-        in srgb,
-        var(--neoverse-solid-status-tone) var(--neoverse-effect-alpha-soft),
-        var(--neoverse-material-solid-group)
-      );
-      border-color: transparent;
-      /* Keep the Glass foreground hierarchy: neutral status text is secondary;
-         Badge variants below carry their own semantic ink. */
-      color: var(--neoverse-color-text-secondary);
-      box-shadow: none;
-      -webkit-backdrop-filter: none;
-      backdrop-filter: none;
-    }
-
-    :where(:scope, :scope *):is(.ui-badge--info, .ui-notice--info) {
-      --neoverse-solid-status-tone: var(--neoverse-color-status-info);
-    }
-
-    :where(:scope, :scope *):is(.ui-badge--success, .ui-notice--success) {
-      --neoverse-solid-status-tone: var(--neoverse-color-status-success);
-    }
-
-    :where(:scope, :scope *):is(.ui-badge--warning, .ui-notice--warning) {
-      --neoverse-solid-status-tone: var(--neoverse-color-status-warning);
-    }
-
-    :where(:scope, :scope *):is(.ui-badge--danger, .ui-notice--danger) {
-      --neoverse-solid-status-tone: var(--neoverse-color-status-danger);
-    }
-
-    :where(:scope, :scope *).ui-badge--info {
-      color: var(--neoverse-material-solid-status-info);
-    }
-
-    :where(:scope, :scope *).ui-badge--success {
-      color: var(--neoverse-material-solid-status-success);
-    }
-
-    :where(:scope, :scope *).ui-badge--warning {
-      color: var(--neoverse-material-solid-status-warning);
-    }
-
-    :where(:scope, :scope *).ui-badge--danger {
-      color: var(--neoverse-material-solid-status-danger);
-    }
-  }
-
-  @scope (.material-solid-scope) {
-    :where(.material-recipe-auto) {
-      --neoverse-solid-plate-shadow: none;
-      background-color: var(--neoverse-solid-plate-fill);
-      box-shadow: var(--neoverse-solid-plate-shadow);
-    }
-
-    :where(.material-recipe-auto.material-role-control) {
-      --neoverse-solid-plate-fill: var(--neoverse-material-solid-control);
-    }
-
-    :where(.material-recipe-auto:is(.material-role-panel, .material-role-table)) {
-      --neoverse-solid-plate-fill: var(--neoverse-material-solid-raised);
-      --neoverse-solid-plate-shadow: var(--neoverse-material-solid-raised-shadow);
-    }
-
-    :where(.material-recipe-auto.material-role-group) {
-      --neoverse-solid-plate-fill: var(--neoverse-material-solid-group);
-    }
-
-    :where(.material-recipe-auto.material-role-field) {
-      --neoverse-solid-plate-fill: var(--neoverse-material-solid-inset);
-    }
-
-    :where(.material-recipe-auto:is(.material-role-overlay, .material-role-compact-overlay)) {
-      --neoverse-solid-plate-fill: var(--neoverse-material-solid-overlay);
-      --neoverse-solid-plate-shadow: var(--neoverse-material-solid-overlay-shadow);
-    }
-  }
-}
-
 @layer components {
   /* A candidate must never inherit the runtime tier of an enclosing surface. */
   :where(
-    .material-recipe-auto, .material-frosted, .ui-input, .ui-select, .ui-textarea,
-    .ui-choice__control, .ui-select__popover, .ui-table, .neoverse-prose table,
-    .ui-disclosure, .neoverse-prose details
+    .material-recipe-auto,
+    .material-frosted,
+    .ui-input,
+    .ui-select,
+    .ui-textarea,
+    .ui-choice__control,
+    .ui-select__popover,
+    .ui-table,
+    .neoverse-prose table,
+    .ui-disclosure,
+    .neoverse-prose details
   ) {
     --neoverse-glass-tier: initial;
   }
 
-  :where(.material-recipe-auto, .material-frosted):not(.ui-button, .material-role-field, .material-role-table) {
+  :where(.material-recipe-auto, .material-frosted):not(
+    .ui-button,
+    .material-role-field,
+    .material-role-table
+  ) {
     border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid) transparent;
     isolation: isolate;
   }
 
   :where(.material-recipe-auto, .material-frosted):not(
-    .ui-button, .ui-overlay-panel, .material-role-field, .material-role-table,
+    .ui-button,
+    .ui-overlay-panel,
+    .material-role-field,
+    .material-role-table,
     [data-neoverse-surface-overflow='visible']
   ) {
     overflow: hidden;
   }
 
-  @scope (.material-glass-default) {
-    :where(
-      .ui-input, .ui-select, .ui-textarea, .ui-choice__control
-    ):not(.material-frosted) {
+  @scope (.material-glass-scope) {
+    :where(.ui-input, .ui-select, .ui-textarea, .ui-choice__control):not(.material-frosted) {
       --neoverse-glass-tier: subtle;
-    }
-  }
-}
-
-@layer neoverse-material-mode {
-  @scope (.material-scopes) {
-    .material-recipe-frosted {
-      background-color: var(--neoverse-material-frosted-fallback);
-      box-shadow: var(--neoverse-material-frosted-shadow);
-    }
-
-      @supports ((backdrop-filter: none) or (-webkit-backdrop-filter: none)) {
-        .material-recipe-frosted {
-          background-color: var(--neoverse-material-frosted-fill);
-          -webkit-backdrop-filter: var(--neoverse-material-frosted-filter);
-          backdrop-filter: var(--neoverse-material-frosted-filter);
-        }
-      }
-
-    @media (prefers-reduced-transparency: reduce) {
-      .material-recipe-frosted {
-        background-color: var(--neoverse-material-frosted-fallback);
-        -webkit-backdrop-filter: none;
-        backdrop-filter: none;
-      }
-    }
-
-    @media (forced-colors: active) {
-      .material-recipe-frosted {
-        background-color: Canvas;
-        border-color: ButtonText;
-        -webkit-backdrop-filter: none;
-        backdrop-filter: none;
-      }
     }
   }
 }

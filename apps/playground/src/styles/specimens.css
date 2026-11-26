@@ -105,7 +105,8 @@
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
 }
 
-.playground-core-material[data-neoverse-material='glass'] {
+.playground-core-material[data-neoverse-material='glass'],
+.playground-core-material[data-neoverse-material='frosted'] {
   background:
     var(--neoverse-playground-stage-optical-field), var(--neoverse-playground-stage-underlay),
     var(--neoverse-color-surface-canvas);

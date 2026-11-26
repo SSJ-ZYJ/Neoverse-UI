@@ -52,7 +52,9 @@
     }
 
     @media (hover: hover) {
-      :where(:scope, :scope *).ui-dock.material-recipe-auto:not([data-neoverse-surface-hover='static']) {
+      :where(:scope, :scope *).ui-dock.material-recipe-auto:not(
+          [data-neoverse-surface-hover='static']
+        ) {
         @media (prefers-reduced-motion: no-preference) {
           transition:
             var(--neoverse-control-surface-scale-transition),
@@ -62,6 +64,34 @@
 
         &:hover {
           --neoverse-solid-plate-shadow: var(--neoverse-material-solid-overlay-shadow);
+        }
+      }
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *).ui-dock.material-recipe-auto {
+      & > .ui-control-surface__group--trailing {
+        --neoverse-control-surface-trailing-background: var(
+          --neoverse-material-frosted-group-nested-fill
+        );
+        --neoverse-control-surface-trailing-shadow: none;
+      }
+    }
+
+    @media (hover: hover) {
+      :where(:scope, :scope *).ui-dock.material-recipe-auto:not(
+          [data-neoverse-surface-hover='static']
+        ) {
+        @media (prefers-reduced-motion: no-preference) {
+          transition:
+            var(--neoverse-control-surface-scale-transition),
+            box-shadow var(--neoverse-motion-duration-standard)
+            var(--neoverse-motion-easing-emphasized);
+        }
+
+        &:hover {
+          --neoverse-frosted-plate-shadow: var(--neoverse-material-frosted-overlay-shadow);
         }
       }
     }

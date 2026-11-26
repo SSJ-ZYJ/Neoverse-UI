@@ -20,7 +20,8 @@ const glassClassNames = [
   'material-glass-immersive',
 ] as const;
 export const materialModeAttribute = 'data-neoverse-material';
-const glassPlaneRoleSelector = '.material-role-control, .material-role-panel, .material-role-group, .material-role-overlay, .material-role-compact-overlay';
+const glassPlaneRoleSelector =
+  '.material-role-control, .material-role-panel, .material-role-group, .material-role-overlay, .material-role-compact-overlay';
 const automaticGlassSelector = [
   glassPlaneRoleSelector,
   '.material-role-field',

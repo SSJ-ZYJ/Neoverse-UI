@@ -54,7 +54,7 @@
     font-size: var(--neoverse-table-font-size);
     line-height: var(--neoverse-table-line-height);
   }
-  @scope (.material-glass-default) {
+  @scope (.material-glass-scope) {
     :where(.ui-table, .neoverse-prose table) {
       --neoverse-table-recipe-filter: var(--neoverse-table-filter);
       --neoverse-glass-tier: subtle;
@@ -107,35 +107,37 @@
   /* The shared canvas paints the table perimeter above the cell fills. Keep
      the local inset catch for the CSS edge path only; otherwise the final row
      repeats a mint line below the renderer's rim. */
-  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-    :where(.ui-table, .neoverse-prose table):not([data-neoverse-glass-edge-pass='css']):not(
-      :is(:popover-open, :modal) *
-    ) {
-    box-shadow: var(--neoverse-shadow-float), var(--neoverse-material-glass-subtle-bloom);
-  }
+  @scope (.material-glass-scope) {
+    :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
+      :where(.ui-table, .neoverse-prose table):not([data-neoverse-glass-edge-pass='css']):not(
+        :is(:popover-open, :modal) *
+      ) {
+      box-shadow: var(--neoverse-shadow-float), var(--neoverse-material-glass-subtle-bloom);
+    }
 
-  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-    :where(.ui-table, .neoverse-prose table):not([data-neoverse-glass-edge-pass='css']):not(
-      :is(:popover-open, :modal) *
-    ):not(:has(> tfoot))
-    > tbody:last-of-type
-    > tr:last-child
-    > :where(th, td),
-  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-    :where(.ui-table, .neoverse-prose table):not([data-neoverse-glass-edge-pass='css']):not(
-      :is(:popover-open, :modal) *
-    )
-    > tfoot:last-of-type
-    > tr:last-child
-    > :where(th, td),
-  :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
-    :where(.ui-table, .neoverse-prose table):not([data-neoverse-glass-edge-pass='css']):not(
-      :is(:popover-open, :modal) *
-    ):not(:has(> :is(tbody, tfoot)))
-    > thead:last-of-type
-    > tr:last-child
-    > :where(th, td) {
-    box-shadow: var(--neoverse-table-cell-current-shadow);
+    :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
+      :where(.ui-table, .neoverse-prose table):not([data-neoverse-glass-edge-pass='css']):not(
+        :is(:popover-open, :modal) *
+      ):not(:has(> tfoot))
+      > tbody:last-of-type
+      > tr:last-child
+      > :where(th, td),
+    :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
+      :where(.ui-table, .neoverse-prose table):not([data-neoverse-glass-edge-pass='css']):not(
+        :is(:popover-open, :modal) *
+      )
+      > tfoot:last-of-type
+      > tr:last-child
+      > :where(th, td),
+    :is([data-neoverse-glass-renderer='webgl'], [data-neoverse-glass-renderer='native'])
+      :where(.ui-table, .neoverse-prose table):not([data-neoverse-glass-edge-pass='css']):not(
+        :is(:popover-open, :modal) *
+      ):not(:has(> :is(tbody, tfoot)))
+      > thead:last-of-type
+      > tr:last-child
+      > :where(th, td) {
+      box-shadow: var(--neoverse-table-cell-current-shadow);
+    }
   }
 
   :where(.ui-table, .neoverse-prose table) :where(th, td):not(:last-child) {
@@ -254,6 +256,112 @@
 
     :where(:scope, :scope *):is(.neoverse-prose table:not(.ui-table)) {
       box-shadow: var(--neoverse-material-solid-raised-shadow);
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *):is(.ui-table.material-recipe-auto, .neoverse-prose table) {
+      position: relative;
+      box-shadow: var(
+        --neoverse-frosted-nested-panel-shadow,
+        var(--neoverse-material-frosted-panel-shadow)
+      );
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+
+      & > :is(thead, tbody, tfoot) > tr > :is(th, td),
+      & > tr > :is(th, td) {
+        background: var(--neoverse-material-frosted-table-fallback);
+        border-color: var(--neoverse-material-frosted-divider);
+        box-shadow: none;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+
+      & > thead > tr > :is(th, td) {
+        background: var(--neoverse-material-frosted-group-fallback);
+      }
+
+      &.ui-table--striped > tbody > tr:nth-child(even) > :is(th, td) {
+        background: var(--neoverse-material-frosted-field-fallback);
+      }
+
+      @supports (backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1)) {
+        -webkit-backdrop-filter: var(
+          --neoverse-frosted-nested-filter,
+          var(--neoverse-material-frosted-table-filter)
+        );
+        backdrop-filter: var(
+          --neoverse-frosted-nested-filter,
+          var(--neoverse-material-frosted-table-filter)
+        );
+
+        & > :is(thead, tbody, tfoot) > tr > :is(th, td),
+        & > tr > :is(th, td) {
+          background: var(
+            --neoverse-frosted-nested-table-fill,
+            var(--neoverse-material-frosted-table-fill)
+          );
+        }
+
+        & > thead > tr > :is(th, td) {
+          background: var(--neoverse-material-frosted-table-header-fill);
+        }
+
+        &.ui-table--striped > tbody > tr:nth-child(even) > :is(th, td) {
+          background: var(--neoverse-material-frosted-table-stripe-fill);
+        }
+      }
+
+      @media (hover: hover) {
+        &:is(.ui-table--hoverable, .neoverse-prose table) > tbody > tr:hover > :is(th, td) {
+          color: var(--neoverse-table-hover-foreground);
+          background: var(--neoverse-material-frosted-table-hover-fill);
+        }
+      }
+
+      & > tbody > tr[aria-selected='true'] > :is(th, td) {
+        color: var(--neoverse-material-frosted-selection-text);
+        background: var(--neoverse-material-frosted-selection);
+      }
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      :where(:scope, :scope *):is(.ui-table.material-recipe-auto, .neoverse-prose table) {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+
+        & > :is(thead, tbody, tfoot) > tr > :is(th, td),
+        & > tr > :is(th, td) {
+          background: var(--neoverse-material-frosted-table-fallback);
+        }
+
+        & > thead > tr > :is(th, td) {
+          background: var(--neoverse-material-frosted-group-fallback);
+        }
+
+        &.ui-table--striped > tbody > tr:nth-child(even) > :is(th, td) {
+          background: var(--neoverse-material-frosted-field-fallback);
+        }
+
+        & > tbody > tr[aria-selected='true'] > :is(th, td) {
+          background: var(--neoverse-material-frosted-selection-fallback);
+        }
+      }
+    }
+
+    @media (forced-colors: active) {
+      :where(:scope, :scope *):is(.ui-table.material-recipe-auto, .neoverse-prose table) {
+        box-shadow: none;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+
+        & > :is(thead, tbody, tfoot) > tr > :is(th, td),
+        & > tr > :is(th, td) {
+          background: Canvas;
+          border-color: CanvasText;
+        }
+      }
     }
   }
 }

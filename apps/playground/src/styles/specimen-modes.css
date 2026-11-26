@@ -66,6 +66,35 @@
 
 .playground-reduced-transparency-preview
   :is(
+    .material-frosted,
+    [data-neoverse-material='frosted']
+      :is(
+        .material-role-control,
+        .material-role-panel,
+        .material-role-group,
+        .material-role-field,
+        .material-role-overlay,
+        .material-role-compact-overlay
+      )
+  ):not(.ui-button--ghost) {
+  background-color: var(--neoverse-frosted-plate-fallback);
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.playground-reduced-transparency-preview
+  [data-neoverse-material='frosted']
+  :is(.ui-badge, .ui-notice) {
+  background: var(
+    --neoverse-frosted-status-fallback,
+    var(--neoverse-material-frosted-status-plate-neutral-fallback)
+  );
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.playground-reduced-transparency-preview
+  :is(
     .ui-segmented-control__slider,
     .ui-tabs__indicator,
     .ui-tabs__tab--active,

@@ -19,7 +19,7 @@ import LabIcon from '../LabIcon.vue';
 import { type Locale, localize, localized } from '../playground-content';
 import { resolvedTheme } from '../theme-state';
 
-const props = defineProps<{ mode: Extract<Material, 'glass' | 'solid'>; locale: Locale }>();
+const props = defineProps<{ mode: Material; locale: Locale }>();
 const copy = {
   title: localized('Release workspace', '发布工作区'),
   name: localized('Project name', '项目名称'),
@@ -48,12 +48,19 @@ const copy = {
   close: localized('Close', '关闭'),
 } as const;
 const appearance = {
+  solid: { light: localized('Solid Light', '浅色实体'), dark: localized('Solid Dark', '深色实体') },
+  frosted: {
+    light: localized('Frosted Light', '浅色磨砂'),
+    dark: localized('Frosted Dark', '深色磨砂'),
+  },
   glass: {
     light: localized('Glass Light', '浅色极光玻璃'),
     dark: localized('Glass Dark', '深色极光玻璃'),
   },
-  solid: { light: localized('Solid Light', '浅色实体'), dark: localized('Solid Dark', '深色实体') },
-} as const;
+} as const satisfies Record<
+  Material,
+  { light: ReturnType<typeof localized>; dark: ReturnType<typeof localized> }
+>;
 const text = (key: keyof typeof copy) => localize(copy[key], props.locale);
 const segments = computed(() => [
   { value: 'overview', label: text('overview') },

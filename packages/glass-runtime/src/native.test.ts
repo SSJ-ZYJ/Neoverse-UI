@@ -86,45 +86,48 @@ describe('native live-backdrop ownership', () => {
     expect(a.style.backdropFilter).toBe('blur(18px)');
   });
 
-  it.each(['solid', 'frosted'])('opts out under %s but keeps explicit and nearer Glass owners', async (material) => {
-    const tierStyles = installGlassTierStyles();
-    try {
-      const region = document.createElement('section');
-      region.dataset.neoverseMaterial = material;
-      const automatic = surface();
-      automatic.className = 'material-role-panel';
-      document.body.append(region);
-      region.append(automatic);
-      renderer.mount();
-      expect(automatic.style.backdropFilter).toBe('blur(18px)');
-      expect(document.querySelector('[data-neoverse-glass-native-defs]')).toBeNull();
-      expect(document.documentElement.hasAttribute('data-neoverse-glass-renderer')).toBe(false);
-
-      const nested = surface();
-      nested.className = 'ui-input';
-      nested.dataset.neoverseMaterial = 'glass';
-      const explicit = surface();
-      region.append(nested, explicit);
-      await vi.waitFor(() => expect(nested.style.backdropFilter).toContain('url('));
-      expect(automatic.style.backdropFilter).toBe('blur(18px)');
-      expect(explicit.style.backdropFilter).toContain('url(');
-
-      region.removeAttribute('data-neoverse-material');
-      await vi.waitFor(() => expect(automatic.style.backdropFilter).toContain('url('));
-      nested.remove();
-      explicit.remove();
-      region.dataset.neoverseMaterial = material;
-      await vi.waitFor(() => {
+  it.each(['solid', 'frosted'])(
+    'opts out under %s but keeps explicit and nearer Glass owners',
+    async (material) => {
+      const tierStyles = installGlassTierStyles();
+      try {
+        const region = document.createElement('section');
+        region.dataset.neoverseMaterial = material;
+        const automatic = surface();
+        automatic.className = 'material-role-panel';
+        document.body.append(region);
+        region.append(automatic);
+        renderer.mount();
+        expect(automatic.style.backdropFilter).toBe('blur(18px)');
         expect(document.querySelector('[data-neoverse-glass-native-defs]')).toBeNull();
         expect(document.documentElement.hasAttribute('data-neoverse-glass-renderer')).toBe(false);
-      });
-      expect(automatic.style.backdropFilter).toBe('blur(18px)');
-      expect(nested.style.backdropFilter).toBe('blur(18px)');
-      expect(explicit.style.backdropFilter).toBe('blur(18px)');
-    } finally {
-      tierStyles.remove();
-    }
-  });
+
+        const nested = surface();
+        nested.className = 'ui-input';
+        nested.dataset.neoverseMaterial = 'glass';
+        const explicit = surface();
+        region.append(nested, explicit);
+        await vi.waitFor(() => expect(nested.style.backdropFilter).toContain('url('));
+        expect(automatic.style.backdropFilter).toBe('blur(18px)');
+        expect(explicit.style.backdropFilter).toContain('url(');
+
+        region.removeAttribute('data-neoverse-material');
+        await vi.waitFor(() => expect(automatic.style.backdropFilter).toContain('url('));
+        nested.remove();
+        explicit.remove();
+        region.dataset.neoverseMaterial = material;
+        await vi.waitFor(() => {
+          expect(document.querySelector('[data-neoverse-glass-native-defs]')).toBeNull();
+          expect(document.documentElement.hasAttribute('data-neoverse-glass-renderer')).toBe(false);
+        });
+        expect(automatic.style.backdropFilter).toBe('blur(18px)');
+        expect(nested.style.backdropFilter).toBe('blur(18px)');
+        expect(explicit.style.backdropFilter).toBe('blur(18px)');
+      } finally {
+        tierStyles.remove();
+      }
+    },
+  );
 
   it('does not overwrite a caller edit made immediately before destroy', () => {
     const a = surface();

@@ -9,49 +9,89 @@
   color-scheme: dark;
 
   --neoverse-material-solid-canvas: var(--neoverse-color-neutral-950);
-  --neoverse-material-solid-control: color-mix(
-    in srgb,
-    var(--neoverse-color-neutral-900),
-    var(--neoverse-color-neutral-800) 40%
-  );
+  --neoverse-material-solid-control: #1a283d;
+  --neoverse-material-solid-control-in-group: #1f3047;
   --neoverse-material-solid-group: var(--neoverse-color-neutral-900);
-  --neoverse-material-solid-raised: color-mix(
-    in srgb,
-    var(--neoverse-color-neutral-900),
-    var(--neoverse-color-neutral-800) 22%
-  );
-  --neoverse-material-solid-inset: color-mix(
-    in srgb,
-    var(--neoverse-color-neutral-950),
-    var(--neoverse-color-neutral-900) 55%
-  );
-  --neoverse-material-solid-overlay: color-mix(
-    in srgb,
-    var(--neoverse-color-neutral-900),
-    var(--neoverse-color-neutral-800) 30%
-  );
-  --neoverse-material-solid-selection: color-mix(
-    in srgb,
-    var(--neoverse-color-blue-800) 32%,
-    var(--neoverse-material-solid-raised)
-  );
+  --neoverse-material-solid-raised: #142034;
+  --neoverse-material-solid-raised-nested: #1a283e;
+  --neoverse-material-solid-inset: #0a1220;
+  --neoverse-material-solid-overlay: #16243a;
+  --neoverse-material-solid-compact-overlay: #192942;
+  --neoverse-material-solid-disabled: #0c1423;
+  --neoverse-material-solid-selection: #123352;
   --neoverse-material-solid-selection-text: var(--neoverse-color-text-primary);
   --neoverse-material-solid-primary: var(--neoverse-color-blue-300);
   --neoverse-material-solid-primary-text: var(--neoverse-color-neutral-950);
-  --neoverse-material-solid-divider: color-mix(
-    in srgb,
-    var(--neoverse-color-neutral-700) 55%,
-    var(--neoverse-color-neutral-900)
-  );
+  --neoverse-material-solid-danger: var(--neoverse-color-red-400);
+  --neoverse-material-solid-danger-text: var(--neoverse-color-neutral-950);
+  --neoverse-material-solid-success: var(--neoverse-color-green-400);
+  --neoverse-material-solid-success-text: var(--neoverse-color-neutral-950);
+  --neoverse-material-solid-warning: var(--neoverse-color-amber-400);
+  --neoverse-material-solid-warning-text: var(--neoverse-color-neutral-950);
+  --neoverse-material-solid-accent: var(--neoverse-color-accent-tertiary-filled);
+  --neoverse-material-solid-accent-text: var(--neoverse-color-neutral-950);
+  --neoverse-material-solid-divider: #263649;
   --neoverse-material-solid-field-edge: var(--neoverse-color-neutral-500);
   --neoverse-material-solid-focus: var(--neoverse-color-blue-300);
   --neoverse-material-solid-hover: rgb(255 255 255 / 8%);
   --neoverse-material-solid-press: rgb(255 255 255 / 15%);
   --neoverse-material-solid-primary-hover: rgb(255 255 255 / 13%);
   --neoverse-material-solid-primary-press: rgb(0 0 0 / 12%);
-  --neoverse-material-solid-raised-shadow: 0 3px 14px -4px rgb(0 0 0 / 48%);
-  --neoverse-material-solid-overlay-shadow: 0 16px 38px -10px rgb(0 0 0 / 65%);
+  --neoverse-material-solid-control-shadow:
+    inset 0 1px 0 rgb(219 234 254 / 7%), 0 1px 2px rgb(0 0 0 / 32%);
+  --neoverse-material-solid-raised-shadow:
+    inset 0 1px 0 rgb(219 234 254 / 6%), 0 3px 14px -4px rgb(0 0 0 / 50%);
+  --neoverse-material-solid-nested-shadow:
+    inset 0 1px 0 rgb(219 234 254 / 5%), 0 1px 4px -1px rgb(0 0 0 / 36%);
+  --neoverse-material-solid-overlay-shadow:
+    inset 0 1px 0 rgb(219 234 254 / 8%), 0 16px 38px -10px rgb(0 0 0 / 68%);
+  --neoverse-material-solid-compact-overlay-shadow:
+    inset 0 1px 0 rgb(219 234 254 / 8%), 0 8px 22px -6px rgb(0 0 0 / 56%);
   --neoverse-material-solid-scrim: rgb(0 0 0 / 60%);
+
+  --neoverse-material-frosted-base: #122034;
+  --neoverse-material-frosted-base-elevated: #17273f;
+  --neoverse-material-frosted-base-recessed: var(--neoverse-color-neutral-900);
+  --neoverse-material-frosted-base-inset: #0b1321;
+  --neoverse-material-frosted-border: rgb(219 234 254 / 13%);
+  --neoverse-material-frosted-border-subtle: rgb(219 234 254 / 9%);
+  --neoverse-material-frosted-border-strong: rgb(219 234 254 / 20%);
+  --neoverse-material-frosted-divider: rgb(219 234 254 / 13%);
+  --neoverse-material-frosted-control-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 8%), 0 1px 3px rgb(0 0 0 / 28%);
+  --neoverse-material-frosted-panel-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 9%), 0 10px 28px -10px rgb(0 0 0 / 48%),
+    0 2px 6px rgb(0 0 0 / 22%);
+  --neoverse-material-frosted-panel-nested-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 6%), 0 1px 4px rgb(0 0 0 / 28%);
+  --neoverse-material-frosted-group-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 6%), 0 3px 10px -4px rgb(0 0 0 / 34%);
+  --neoverse-material-frosted-overlay-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 10%), 0 18px 42px -12px rgb(0 0 0 / 62%),
+    0 4px 12px -4px rgb(0 0 0 / 32%);
+  --neoverse-material-frosted-compact-overlay-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 9%), 0 10px 24px -8px rgb(0 0 0 / 54%),
+    0 2px 6px -2px rgb(0 0 0 / 26%);
+  --neoverse-material-frosted-panel-nested-fill: rgb(219 234 254 / 6%);
+  --neoverse-material-frosted-group-nested-fill: rgb(219 234 254 / 7%);
+  --neoverse-material-frosted-control-nested-fill: rgb(219 234 254 / 10%);
+  --neoverse-material-frosted-field-nested-fill: rgb(5 11 20 / 36%);
+  --neoverse-material-frosted-table-nested-fill: rgb(219 234 254 / 5%);
+  --neoverse-material-frosted-hover: rgb(219 234 254 / 8%);
+  --neoverse-material-frosted-press: rgb(219 234 254 / 15%);
+  --neoverse-material-frosted-primary-fallback: var(--neoverse-color-blue-300);
+  --neoverse-material-frosted-primary-text: var(--neoverse-color-neutral-950);
+  --neoverse-material-frosted-primary-hover: rgb(255 255 255 / 14%);
+  --neoverse-material-frosted-primary-press: rgb(0 0 0 / 12%);
+  --neoverse-material-frosted-selection: rgb(14 78 130 / 64%);
+  --neoverse-material-frosted-selection-fallback: #10395c;
+  --neoverse-material-frosted-selection-text: var(--neoverse-color-text-primary);
+  --neoverse-material-frosted-focus: var(--neoverse-color-blue-300);
+  --neoverse-material-frosted-scrim: rgb(4 10 18 / 52%);
+  --neoverse-material-frosted-status-info: var(--neoverse-color-status-info);
+  --neoverse-material-frosted-status-success: var(--neoverse-color-status-success);
+  --neoverse-material-frosted-status-warning: var(--neoverse-color-status-warning);
+  --neoverse-material-frosted-status-danger: var(--neoverse-color-status-danger);
 
   /* Disclosure uses the same directional Aurora Glass catches as every other
      dark inset surface. The generic inset outline turns its boundary into a

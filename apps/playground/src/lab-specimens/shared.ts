@@ -45,6 +45,7 @@ const automaticSurfaceOption = { value: 'auto', label: localized('Automatic', '�
 export const glassOptions = [
   automaticSurfaceOption,
   { value: 'none', label: localized('None', '无') },
+  { value: 'frosted', label: localized('Frosted', '磨砂') },
   { value: 'glass-subtle', label: tokenCopy.glassVariants.subtle },
   { value: 'glass-elevated', label: tokenCopy.glassVariants.elevated },
   { value: 'glass-immersive', label: tokenCopy.glassVariants.immersive },
@@ -58,6 +59,7 @@ export const surfaceOptions = [
   { value: 'subtle', label: localized('Subtle', '轻微') },
   { value: 'elevated', label: localized('Elevated', '抬升') },
   { value: 'inset', label: localized('Inset', '内嵌') },
+  { value: 'frosted', label: localized('Frosted', '磨砂') },
   { value: 'glass-subtle', label: tokenCopy.glassVariants.subtle },
   { value: 'glass-elevated', label: tokenCopy.glassVariants.elevated },
   { value: 'glass-immersive', label: tokenCopy.glassVariants.immersive },

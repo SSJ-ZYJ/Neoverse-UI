@@ -1,104 +1,127 @@
 @layer components {
   @scope (.material-scopes) {
-  /* Skeleton surfaces use a neutral base and a directional sheen. The variant
+    /* Skeleton surfaces use a neutral base and a directional sheen. The variant
      classes only control geometry and effect. */
-  .ui-skeleton,
-  .skeleton-surface {
-    position: relative;
-    display: block;
-    width: 100%;
-    min-height: var(--neoverse-skeleton-text-min-height);
-    overflow: hidden;
-    background: var(--neoverse-skeleton-fill);
-    -webkit-backdrop-filter: var(--neoverse-skeleton-backdrop-filter);
-    backdrop-filter: var(--neoverse-skeleton-backdrop-filter);
-  }
+    .ui-skeleton,
+    .skeleton-surface {
+      position: relative;
+      display: block;
+      width: 100%;
+      min-height: var(--neoverse-skeleton-text-min-height);
+      overflow: hidden;
+      background: var(--neoverse-skeleton-fill);
+      -webkit-backdrop-filter: var(--neoverse-skeleton-backdrop-filter);
+      backdrop-filter: var(--neoverse-skeleton-backdrop-filter);
+    }
 
-  .ui-skeleton--text {
-    min-height: var(--neoverse-skeleton-text-min-height);
-    border-radius: var(--neoverse-radius-control-inner);
-  }
+    .ui-skeleton--text {
+      min-height: var(--neoverse-skeleton-text-min-height);
+      border-radius: var(--neoverse-radius-control-inner);
+    }
 
-  /* Aurora Glass ancestors already filter the backdrop. Dense grids must not create
+    /* Aurora Glass ancestors already filter the backdrop. Dense grids must not create
      one extra backdrop surface per placeholder. Keep the shared tint intact. */
-  :is(.material-recipe-glass-subtle, .material-recipe-glass-elevated, .material-recipe-glass-immersive)
-    :is(.ui-skeleton, .skeleton-surface) {
-    -webkit-backdrop-filter: none;
-    backdrop-filter: none;
-  }
-
-  .ui-skeleton--title {
-    min-height: var(--neoverse-skeleton-title-min-height);
-    border-radius: var(--neoverse-radius-xs);
-  }
-
-  .ui-skeleton--avatar,
-  .ui-skeleton--circle {
-    min-height: 0;
-    aspect-ratio: 1;
-    border-radius: var(--neoverse-radius-pill);
-  }
-
-  .ui-skeleton--rect {
-    /* A custom rectangle height may be smaller than a text line. */
-    height: var(--neoverse-skeleton-text-min-height);
-    min-height: 0;
-    border-radius: var(--ui-skeleton-radius, var(--neoverse-radius-xs));
-  }
-
-  .ui-skeleton--shimmer::after,
-  .skeleton-surface--shimmer::after {
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      100deg,
-      transparent 24%,
-      var(--neoverse-skeleton-highlight) 50%,
-      transparent 76%
-    );
-    content: '';
-    pointer-events: none;
-    transform: translateX(-100%);
-    animation: ui-skeleton-shimmer var(--neoverse-skeleton-shimmer-duration)
-      var(--neoverse-skeleton-shimmer-easing) infinite;
-  }
-
-  .ui-skeleton--pulse,
-  .skeleton-surface--pulse {
-    animation: ui-skeleton-pulse var(--neoverse-skeleton-shimmer-duration)
-      var(--neoverse-motion-easing-standard) infinite;
-  }
-
-  @keyframes ui-skeleton-shimmer {
-    to {
-      transform: translateX(100%);
+    :is(
+        .material-recipe-glass-subtle,
+        .material-recipe-glass-elevated,
+        .material-recipe-glass-immersive
+      )
+      :is(.ui-skeleton, .skeleton-surface) {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
     }
-  }
 
-  @keyframes ui-skeleton-pulse {
-    50% {
-      opacity: var(--neoverse-skeleton-pulse-mid-opacity);
+    .ui-skeleton--title {
+      min-height: var(--neoverse-skeleton-title-min-height);
+      border-radius: var(--neoverse-radius-xs);
     }
-  }
 
-  @media (prefers-reduced-motion: reduce) {
+    .ui-skeleton--avatar,
+    .ui-skeleton--circle {
+      min-height: 0;
+      aspect-ratio: 1;
+      border-radius: var(--neoverse-radius-pill);
+    }
+
+    .ui-skeleton--rect {
+      /* A custom rectangle height may be smaller than a text line. */
+      height: var(--neoverse-skeleton-text-min-height);
+      min-height: 0;
+      border-radius: var(--ui-skeleton-radius, var(--neoverse-radius-xs));
+    }
+
     .ui-skeleton--shimmer::after,
-    .skeleton-surface--shimmer::after,
+    .skeleton-surface--shimmer::after {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        100deg,
+        transparent 24%,
+        var(--neoverse-skeleton-highlight) 50%,
+        transparent 76%
+      );
+      content: '';
+      pointer-events: none;
+      transform: translateX(-100%);
+      animation: ui-skeleton-shimmer var(--neoverse-skeleton-shimmer-duration)
+        var(--neoverse-skeleton-shimmer-easing) infinite;
+    }
+
     .ui-skeleton--pulse,
     .skeleton-surface--pulse {
-      animation: none;
+      animation: ui-skeleton-pulse var(--neoverse-skeleton-shimmer-duration)
+        var(--neoverse-motion-easing-standard) infinite;
     }
-  }
+
+    @keyframes ui-skeleton-shimmer {
+      to {
+        transform: translateX(100%);
+      }
+    }
+
+    @keyframes ui-skeleton-pulse {
+      50% {
+        opacity: var(--neoverse-skeleton-pulse-mid-opacity);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .ui-skeleton--shimmer::after,
+      .skeleton-surface--shimmer::after,
+      .ui-skeleton--pulse,
+      .skeleton-surface--pulse {
+        animation: none;
+      }
+    }
   }
 }
 
 @layer neoverse-material-mode {
-  @scope (.material-static-scope) {
+  @scope (.material-solid-scope) {
     :where(:scope, :scope *):is(.ui-skeleton, .skeleton-surface) {
       --neoverse-skeleton-highlight: var(--neoverse-material-solid-hover);
       background-color: var(--neoverse-material-solid-divider);
       -webkit-backdrop-filter: none;
       backdrop-filter: none;
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *):is(.ui-skeleton, .skeleton-surface) {
+      --neoverse-skeleton-highlight: var(--neoverse-material-frosted-hover);
+      background: var(--neoverse-material-frosted-skeleton-fallback);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+
+      @supports (backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1)) {
+        background: var(--neoverse-material-frosted-skeleton-fill);
+      }
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      :where(:scope, :scope *):is(.ui-skeleton, .skeleton-surface) {
+        background: var(--neoverse-material-frosted-skeleton-fallback);
+      }
     }
   }
 }

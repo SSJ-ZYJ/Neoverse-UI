@@ -1,0 +1,28 @@
+/* Solid material theme-invariant compositions. Theme-owned palette and shadow
+   values live in themes/light.css and themes/dark.css. */
+@layer neoverse.tokens {
+  :root,
+  :where([data-neoverse-material='solid'], .ui-badge, .ui-notice) {
+    --neoverse-material-solid-status-plate-neutral: var(--neoverse-material-solid-group);
+    --neoverse-material-solid-status-plate-info: color-mix(
+      in srgb,
+      var(--neoverse-color-status-info) var(--neoverse-effect-alpha-soft),
+      var(--neoverse-material-solid-group)
+    );
+    --neoverse-material-solid-status-plate-success: color-mix(
+      in srgb,
+      var(--neoverse-color-status-success) var(--neoverse-effect-alpha-soft),
+      var(--neoverse-material-solid-group)
+    );
+    --neoverse-material-solid-status-plate-warning: color-mix(
+      in srgb,
+      var(--neoverse-color-status-warning) var(--neoverse-effect-alpha-soft),
+      var(--neoverse-material-solid-group)
+    );
+    --neoverse-material-solid-status-plate-danger: color-mix(
+      in srgb,
+      var(--neoverse-color-status-danger) var(--neoverse-effect-alpha-soft),
+      var(--neoverse-material-solid-group)
+    );
+  }
+}

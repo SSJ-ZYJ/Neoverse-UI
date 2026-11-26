@@ -239,17 +239,17 @@
 
 @layer utilities {
   @scope (.material-scopes) {
-  .ui-toast.material-recipe-glass-elevated,
-  .ui-toast__surface.material-recipe-glass-elevated {
-    --neoverse-material-background: var(--neoverse-toast-background);
-  }
+    .ui-toast.material-recipe-glass-elevated,
+    .ui-toast__surface.material-recipe-glass-elevated {
+      --neoverse-material-background: var(--neoverse-toast-background);
+    }
 
-  .ui-toast__dismiss.material-recipe-glass-elevated {
-    position: absolute;
-    --neoverse-material-background: var(--neoverse-toast-dismiss-background);
-    --neoverse-material-border: var(--neoverse-toast-dismiss-border);
-    --neoverse-material-shadow: var(--neoverse-toast-dismiss-shadow);
-  }
+    .ui-toast__dismiss.material-recipe-glass-elevated {
+      position: absolute;
+      --neoverse-material-background: var(--neoverse-toast-dismiss-background);
+      --neoverse-material-border: var(--neoverse-toast-dismiss-border);
+      --neoverse-material-shadow: var(--neoverse-toast-dismiss-shadow);
+    }
   }
 }
 
@@ -258,6 +258,13 @@
     :where(:scope, :scope *).ui-toast__dismiss.material-recipe-auto {
       border-color: var(--neoverse-material-solid-divider);
       --neoverse-solid-plate-shadow: var(--neoverse-material-solid-raised-shadow);
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *).ui-toast__dismiss.material-recipe-auto {
+      border-color: var(--neoverse-material-frosted-border-strong);
+      --neoverse-frosted-plate-shadow: var(--neoverse-material-frosted-compact-overlay-shadow);
     }
   }
 }

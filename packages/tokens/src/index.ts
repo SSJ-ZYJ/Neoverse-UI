@@ -61,8 +61,8 @@ export type { SpaceToken } from './foundation/space.js';
 export {
   type ControlSurfacePreset,
   defaultMaterial,
-  getSurfaceClass,
   type GlassTier,
+  getSurfaceClass,
   isGlassSurface,
   isMaterial,
   type Material,

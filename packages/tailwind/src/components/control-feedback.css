@@ -96,4 +96,48 @@
       color: var(--neoverse-material-solid-selection-text);
     }
   }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *):where(
+        .ui-button:is(.material-recipe-auto.ui-button--ghost, [data-surface='none']),
+        .ui-tabs__tab,
+        .ui-pagination__button,
+        .ui-breadcrumb__link,
+        .ui-input-number__step,
+        .ui-toast__dismiss,
+        .ui-dropdown-menu__item,
+        .ui-context-menu__item,
+        .ui-select__option
+      ) {
+      --neoverse-control-ghost-hover-background: var(--neoverse-material-frosted-hover);
+      --neoverse-control-ghost-active-background: var(--neoverse-material-frosted-press);
+      --neoverse-color-focus-ring: var(--neoverse-material-frosted-focus);
+    }
+
+    :where(:scope, :scope *).ui-breadcrumb__link {
+      --neoverse-breadcrumb-focus-color: var(--neoverse-material-frosted-focus);
+      --neoverse-breadcrumb-link-plate-background: var(--neoverse-material-frosted-hover);
+    }
+
+    :where(:scope, :scope *):where(.ui-dropdown-menu__item, .ui-context-menu__item) {
+      --neoverse-overlay-item-active-background: var(--neoverse-material-frosted-selection);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      :where(:scope, :scope *):where(.ui-dropdown-menu__item, .ui-context-menu__item) {
+        --neoverse-overlay-item-active-background: var(
+          --neoverse-material-frosted-selection-fallback
+        );
+      }
+    }
+
+    :where(:scope, :scope *):where(
+        .ui-dropdown-menu__item,
+        .ui-context-menu__item
+      ):focus-visible:not([data-neoverse-focus-origin='pointer']) {
+      --neoverse-context-menu-shortcut-foreground: var(--neoverse-material-frosted-selection-text);
+      --neoverse-context-menu-check-foreground: var(--neoverse-material-frosted-selection-text);
+      color: var(--neoverse-material-frosted-selection-text);
+    }
+  }
 }

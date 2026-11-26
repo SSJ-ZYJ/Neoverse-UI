@@ -10,19 +10,31 @@
   color-scheme: light;
 
   --neoverse-material-solid-canvas: var(--neoverse-color-neutral-50);
-  --neoverse-material-solid-control: var(--neoverse-color-white);
+  --neoverse-material-solid-control: #eef5fa;
+  --neoverse-material-solid-control-in-group: var(--neoverse-color-white);
   --neoverse-material-solid-group: var(--neoverse-color-neutral-100);
   --neoverse-material-solid-raised: var(--neoverse-color-white);
+  --neoverse-material-solid-raised-nested: var(--neoverse-color-neutral-50);
   --neoverse-material-solid-inset: color-mix(
     in srgb,
     var(--neoverse-color-neutral-100) 65%,
     var(--neoverse-color-white)
   );
   --neoverse-material-solid-overlay: var(--neoverse-color-white);
+  --neoverse-material-solid-compact-overlay: var(--neoverse-color-white);
+  --neoverse-material-solid-disabled: var(--neoverse-color-neutral-100);
   --neoverse-material-solid-selection: var(--neoverse-color-blue-100);
   --neoverse-material-solid-selection-text: var(--neoverse-color-text-primary);
   --neoverse-material-solid-primary: var(--neoverse-color-blue-700);
   --neoverse-material-solid-primary-text: var(--neoverse-color-white);
+  --neoverse-material-solid-danger: var(--neoverse-color-red-700);
+  --neoverse-material-solid-danger-text: var(--neoverse-color-white);
+  --neoverse-material-solid-success: var(--neoverse-color-mint-700);
+  --neoverse-material-solid-success-text: var(--neoverse-color-white);
+  --neoverse-material-solid-warning: var(--neoverse-color-amber-300);
+  --neoverse-material-solid-warning-text: var(--neoverse-color-amber-950);
+  --neoverse-material-solid-accent: #5b4cc4;
+  --neoverse-material-solid-accent-text: var(--neoverse-color-white);
   --neoverse-material-solid-divider: var(--neoverse-color-neutral-200);
   --neoverse-material-solid-field-edge: var(--neoverse-color-neutral-500);
   --neoverse-material-solid-focus: var(--neoverse-color-blue-700);
@@ -30,9 +42,58 @@
   --neoverse-material-solid-press: rgb(15 23 42 / 14%);
   --neoverse-material-solid-primary-hover: rgb(255 255 255 / 9%);
   --neoverse-material-solid-primary-press: rgb(0 0 0 / 16%);
+  --neoverse-material-solid-control-shadow:
+    0 1px 2px rgb(15 23 42 / 9%), 0 1px 1px rgb(15 23 42 / 5%);
   --neoverse-material-solid-raised-shadow: 0 2px 10px -3px rgb(15 23 42 / 17%);
+  --neoverse-material-solid-nested-shadow: 0 1px 3px -1px rgb(15 23 42 / 10%);
   --neoverse-material-solid-overlay-shadow: 0 12px 32px -10px rgb(15 23 42 / 30%);
+  --neoverse-material-solid-compact-overlay-shadow:
+    0 6px 18px -6px rgb(15 23 42 / 22%), 0 2px 6px -2px rgb(15 23 42 / 10%);
   --neoverse-material-solid-scrim: rgb(15 23 42 / 38%);
+
+  --neoverse-material-frosted-base: #f5fafe;
+  --neoverse-material-frosted-base-elevated: var(--neoverse-color-white);
+  --neoverse-material-frosted-base-recessed: var(--neoverse-color-neutral-100);
+  --neoverse-material-frosted-base-inset: #f0f6fa;
+  --neoverse-material-frosted-border: rgb(15 23 42 / 10%);
+  --neoverse-material-frosted-border-subtle: rgb(15 23 42 / 7%);
+  --neoverse-material-frosted-border-strong: rgb(15 23 42 / 18%);
+  --neoverse-material-frosted-divider: rgb(15 23 42 / 10%);
+  --neoverse-material-frosted-control-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 72%), 0 1px 2px rgb(15 23 42 / 8%);
+  --neoverse-material-frosted-panel-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 78%), 0 8px 24px -10px rgb(15 23 42 / 14%),
+    0 1px 3px rgb(15 23 42 / 6%);
+  --neoverse-material-frosted-panel-nested-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 55%), 0 1px 3px rgb(15 23 42 / 6%);
+  --neoverse-material-frosted-group-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 55%), 0 2px 8px -4px rgb(15 23 42 / 10%);
+  --neoverse-material-frosted-overlay-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 82%), 0 16px 38px -12px rgb(15 23 42 / 22%),
+    0 4px 12px -4px rgb(15 23 42 / 10%);
+  --neoverse-material-frosted-compact-overlay-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 80%), 0 8px 20px -8px rgb(15 23 42 / 18%),
+    0 2px 6px -2px rgb(15 23 42 / 8%);
+  --neoverse-material-frosted-panel-nested-fill: rgb(255 255 255 / 44%);
+  --neoverse-material-frosted-group-nested-fill: rgb(15 23 42 / 5%);
+  --neoverse-material-frosted-control-nested-fill: rgb(255 255 255 / 62%);
+  --neoverse-material-frosted-field-nested-fill: rgb(255 255 255 / 56%);
+  --neoverse-material-frosted-table-nested-fill: rgb(255 255 255 / 42%);
+  --neoverse-material-frosted-hover: rgb(15 23 42 / 6%);
+  --neoverse-material-frosted-press: rgb(15 23 42 / 12%);
+  --neoverse-material-frosted-primary-fallback: var(--neoverse-color-blue-700);
+  --neoverse-material-frosted-primary-text: var(--neoverse-color-white);
+  --neoverse-material-frosted-primary-hover: rgb(255 255 255 / 11%);
+  --neoverse-material-frosted-primary-press: rgb(0 0 0 / 15%);
+  --neoverse-material-frosted-selection: rgb(186 230 253 / 76%);
+  --neoverse-material-frosted-selection-fallback: var(--neoverse-color-blue-100);
+  --neoverse-material-frosted-selection-text: var(--neoverse-color-text-primary);
+  --neoverse-material-frosted-focus: var(--neoverse-color-blue-600);
+  --neoverse-material-frosted-scrim: rgb(15 23 42 / 26%);
+  --neoverse-material-frosted-status-info: var(--neoverse-color-status-info-foreground);
+  --neoverse-material-frosted-status-success: var(--neoverse-color-status-success-foreground);
+  --neoverse-material-frosted-status-warning: var(--neoverse-color-status-warning-foreground);
+  --neoverse-material-frosted-status-danger: var(--neoverse-color-status-danger-foreground);
 
   --neoverse-effect-grouped-inset-field: var(--neoverse-effect-grouped-inset-field-light);
   --neoverse-effect-grouped-inset-border: var(--neoverse-effect-grouped-inset-border-light);

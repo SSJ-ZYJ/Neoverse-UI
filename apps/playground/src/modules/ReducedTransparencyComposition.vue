@@ -17,7 +17,7 @@ const options = computed<readonly SegmentOption[]>(() => [
 
 <template>
   <div
-    class="playground-reduced-transparency-preview grid gap-grid md:grid-cols-2"
+    class="playground-reduced-transparency-preview grid gap-grid md:grid-cols-3"
     data-composition-mode="accessibility"
     data-neoverse-material="glass"
   >
@@ -42,6 +42,30 @@ const options = computed<readonly SegmentOption[]>(() => [
         </UiButton>
       </div>
     </UiCard>
+
+    <div data-neoverse-material="frosted" class="grid">
+      <UiCard class="grid gap-3" data-accessibility-surface="frosted">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div class="grid gap-1">
+            <p class="text-label-lg font-label text-primary">
+              {{ localize(copy.cardTitle, props.locale) }}
+            </p>
+            <p class="text-body-sm text-secondary">
+              {{ localize(copy.cardBody, props.locale) }}
+            </p>
+          </div>
+          <UiBadge variant="info">
+            {{ localize(copy.fallbackBadge, props.locale) }}
+          </UiBadge>
+        </div>
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <span class="text-caption text-muted">frosted</span>
+          <UiButton variant="primary" size="sm">
+            {{ localize(copy.apply, props.locale) }}
+          </UiButton>
+        </div>
+      </UiCard>
+    </div>
 
     <UiSurface
       surface="glass-immersive"

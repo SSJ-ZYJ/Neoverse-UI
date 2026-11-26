@@ -3,7 +3,7 @@
 [English](README.md)
 
 <!-- Source: packages/tokens/README.md -->
-<!-- Source-SHA256: 048da0f1d635b78ea02791fb6cdd54216f8548f729616d168c55f36de6427e93 -->
+<!-- Source-SHA256: 93968addf8eda40848d6ef0b9a35e088edb1c63a18f1e180f410a07cfc277f58 -->
 
 Neoverse-UI 的设计变量、CSS 变量与变量名称映射。
 
@@ -18,6 +18,14 @@ bun add @neoverse-ui/tokens
 ```
 
 TypeScript 消费项目可以从 `@neoverse-ui/tokens` 导入公开的变量名称映射。
+
+## 材质家族
+
+Neoverse-UI 提供三种地位平等且独立的材质：
+
+- **不透明材质（Solid）**（`cssVariables.material.solid`）：基于原生 CSS 的不透明色阶、嵌套面板分层、分组控件抬升、语义按钮与状态底板。
+- **磨砂材质（Frosted）**（`cssVariables.material.frosted`）：基于原生 CSS `backdrop-filter` 的按角色模糊/饱和度/不透明度尺度、柔和哑光边缘、嵌套去重模糊与完全不透明回退色。
+- **极光玻璃（Aurora Glass）**（`cssVariables.material.glass` / `glassMaterial`）：包含轻薄（`glass-subtle`）、标准（`glass-elevated`）与厚实（`glass-immersive`）三个层级的光学玻璃材质。
 
 ## 极光玻璃
 

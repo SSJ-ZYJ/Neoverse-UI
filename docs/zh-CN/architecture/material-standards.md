@@ -5,7 +5,7 @@ Status: adopted
 [English](../../architecture/material-standards.md)
 
 <!-- Source: docs/architecture/material-standards.md -->
-<!-- Source-SHA256: 7c7863e28c97bc1a36fe8c583e5db0f59fe83d0ae480b377ddb5f055f9ce3a79 -->
+<!-- Source-SHA256: 61ea44b5729838b747f13a9673d895464d695dda4229f94685cbb8d3a235d635 -->
 
 本文是[英文材质标准](../../architecture/material-standards.md)的中文摘要，覆盖消费项目最常用的材质、层级、嵌套与修复边界。具体光学数值、逐组件审计与历史验收记录以英文原文为准。
 
@@ -13,34 +13,69 @@ Status: adopted
 
 `@neoverse-ui/tokens` 定义 `Material`（材质）、`SurfaceRole`（表面角色）与 `GlassTier`（极光玻璃光学层级）。表面角色表达组件职责；表面配方决定该角色在给定材质中的绘制。Theme 独立控制主题颜色。
 
-在文档根、子树或表面自身设置 `data-neoverse-material`，取最近的有效值：`solid`、`frosted` 或 `glass`。未知值不阻断父级作用域，无有效值时默认极光玻璃。CSS 在框架挂载前解析作用域。显式 `surface` 只覆盖当前表面，不影响后代作用域；`none` 不绘制底板，`frosted` 选择实验性基础配方，原有 `inset` 仍保留轻薄层级采样。
+在文档根、子树或表面自身设置 `data-neoverse-material`，取最近的有效值：`solid`、`frosted` 或 `glass`。未知值不阻断父级作用域，无有效值时默认极光玻璃。CSS 在框架挂载前解析作用域。显式 `surface` 只覆盖当前表面，不影响后代作用域；`none` 不绘制底板，`frosted` 为当前表面角色选择磨砂配方，原有 `inset` 仍保留轻薄层级采样。
 
-两套适配器输出相同的自动表面角色，不再附加具体材质类。浏览器顶层不改变 DOM 作用域；Dialog、模态 Drawer、Toast 与 ContextMenu 的 Portal 在退出动画挂载期间仍同步调用位置的作用域。Glass Runtime 只增强具备光学资格的表面。
+两套适配器输出相同的自动表面角色，不再附加具体材质类。Tailwind 通过对称的 `@scope` 边界（`solid`、`frosted`、`glass`）匹配配方；只有具备光学资格的极光玻璃表面会向可选渲染器宣告层级。浏览器顶层不改变 DOM 作用域；Dialog、模态 Drawer、Toast 与 ContextMenu 的 Portal 在退出动画挂载期间仍同步调用位置的作用域。
 
 迁移时以 `Material` 替换 `MaterialMode`，以 `SurfaceRole` 替换 `MaterialSurfaceRole`；使用 `getSurfaceClass(selection, role)` 替代旧的预设映射。不要再用自动标记上的 `material-auto`、`material-solid-*` 或 `material-glass-*` 推断材质。
 
+## 三材质设计规范
+
+不透明材质（Solid）、磨砂材质（Frosted）与极光玻璃（Aurora Glass）地位平等，共享品牌色、排版、圆角、间距、组件密度、交互语义与动效角色，同时各自保持独立的表面语言：
+
+| 材质 | 核心特征 | 渲染机制 | Glass Runtime |
+| --- | --- | --- | --- |
+| 不透明材质（Solid） | 实体、清晰、低背景依赖、色阶与轻阴影分层 | 原生 CSS | 不启用 |
+| 磨砂材质（Frosted） | 半透明、柔和漫反射、克制边缘与空间层次 | 原生 CSS `backdrop-filter` | 不启用 |
+| 极光玻璃（Aurora Glass） | 光学透明感、方向性边缘高光、三层级深度 | CSS + 可选 Glass Runtime | 仅合格极光玻璃表面 |
+
+基础数值由 `packages/tokens/src/material.css`（极光玻璃）、`packages/tokens/src/material-solid.css`（不透明状态底板）、`packages/tokens/src/material-frosted.css`（磨砂尺度与各角色配方）及 `packages/tokens/src/themes/{light,dark}.css` 定义。极光玻璃的光学参数不进入其他两种材质的样式变量。
+
 ## 材质运行时与切换
 
-Playground、Frame 路由与 React 示例共用一个框架无关的材质模块。保存的 `material` 偏好在首绘启动脚本中写入 `data-neoverse-material`，首帧即使用所选材质。`?material=` 只是同一策略下的临时预览，不写入偏好；刷新保留最后一次交互选择。材质与 Theme、Locale、舞台背景和展示表面相互独立，属性仍是唯一生效契约。
+Playground、Frame 路由与 React 测试页面共用一个框架无关的材质模块。保存的 `material` 偏好在首绘启动脚本中写入 `data-neoverse-material`，首帧即使用所选材质。`?material=` 只是同一策略下的临时预览，不写入偏好；刷新保留最后一次交互选择。材质与 Theme、Locale、舞台背景和展示表面相互独立，属性仍是唯一生效规范。
 
-工具栏在桌面用分段控件、在触屏用循环按钮提供极光玻璃、实体与实验性磨砂。显式表面仍优先于全局材质；切换不重置样板会话、表单值、选中项、焦点、滚动位置与 Stage 缩放。
+工具栏在桌面用分段控件、在触屏用循环按钮提供极光玻璃、实体与磨砂三种平级选项。显式表面仍优先于全局材质；切换不重置样例会话、表单值、选中项、焦点、滚动位置与 Stage 缩放。
 
 切换使用外观快照（`material-fade`），不逐帧插值模糊、折射或阴影。减少动效与不支持 View Transition API 的浏览器立即切换。连续快速请求以最后一次为准：被取消的快照只绘制最新选择，切换结束后不残留光学边缘、浮层闪烁或布局跳变。
 
-## 磨砂基础预览
+## 磨砂材质
 
-磨砂使用主题底色和低强度背景模糊，并提供不透明回退。它没有极光玻璃层级、方向性边缘或光学运行时。此配方仅用于架构与集成验证，尚未通过视觉验收。
+磨砂材质是独立的半透明表面方案，基于原生 CSS `backdrop-filter`、较高表面不透明度、克制的饱和度、1px 柔和哑光边缘与平静的环境阴影。它不是简单叠加模糊的实体材质，也不是关闭折射后的极光玻璃：不使用极光玻璃层级、方向性光学边缘、色散或任何 JavaScript 运行时。
+
+`cssVariables.material.frosted` 提供主题底色、哑光边框、阴影、交互洗色、选中与主色底板、遮罩以及各角色的模糊/饱和度/不透明度尺度：
+
+| 表面角色 | 独立模糊 | 饱和度 | 填充不透明度 | 嵌套行为 |
+| --- | --- | --- | --- | --- |
+| `panel` | 16px | 118% | 76% | 跳过模糊（`none`），切换为 `panel-nested-fill` 与更轻阴影 |
+| `overlay` | 20px | 124% | 82%（`dialog` 为 86%） | 始终独立采样（独立浮层空间） |
+| `compactOverlay` | 14px | 118% | 84% | 始终独立采样 |
+| `group` | 12px | 112% | 68% | 跳过模糊（`none`），切换为 `group-nested-fill` |
+| `control` | 10px | 112% | 74% | 跳过模糊（`none`），切换为 `control-nested-fill`；无填充按钮保持透明 |
+| `table` | 14px | 118% | 78% | 仅在 `<table>` 采样一次，单元格不单独执行背景模糊 |
+| `field` | 8px | 112% | 80% | 跳过模糊（`none`），切换为 `field-nested-fill` |
+
+紧凑控件（`UiBadge`、`UiChoice`、`UiSkeleton`、分段/标签/分页选中指示块、行内 `code`/`kbd`）始终保持 `backdrop-filter: none`，避免密集界面生成多余合成层；`UiNotice` 仅在独立放置时采样背景。
+
+磨砂配方默认先绘制完全不透明的主题回退色（`--neoverse-material-frosted-base*`），仅在 `@supports` 确认支持 `backdrop-filter` 与 `color-mix()` 后才启用半透明填充与背景模糊。开启 `prefers-reduced-transparency: reduce` 时平滑退回完全不透明底色并关闭模糊，且不修改保存的材质偏好，也不重置输入状态；开启 `forced-colors: active` 时完全交由系统配色呈现。所有降级均通过 CSS 能力检测完成，不依赖 User-Agent 判断。
 
 ## 实体材质
 
-实体材质不等同于极光玻璃的减少透明度模式。`cssVariables.material.solid` 提供 Canvas、Control、Group、Raised、Inset、Overlay 和 Selection 角色。浅色使用淡蓝中性色阶，深色使用近黑至蓝灰色阶；主按钮使用蓝色，选中底板在浅色使用浅蓝、深色使用深蔚蓝与 Raised 面混合的柔和蔚蓝，两种材质均以主文字色作为选中文字；选中指示线保留强调色。状态徽章在实体模式下保留语义色相：深色底用明亮状态色，浅色底用深色状态色；中性徽章与 Notice 文字在两种材质下都使用次要文字色，并在两种模式下保持可读。应用自行选择是否在页面背景使用 Canvas。
+实体材质不等同于极光玻璃的减少透明度模式。`cssVariables.material.solid` 提供 Canvas、Control、Group、Raised、嵌套面板阶梯（`raised-nested`、`nested-shadow`）、分组内控件抬升（`control-in-group`）、Inset、Overlay、Compact Overlay、禁用底板、主/语义按钮填充色与 Selection 角色。浅色使用淡蓝中性色阶，深色使用近黑至蓝灰色阶；主按钮使用蓝色，选中底板在浅色使用浅蓝、深色使用深蔚蓝与 Raised 面混合的柔和蔚蓝，两种材质均以主文字色作为选中文字；选中指示线保留强调色。状态徽章在实体模式下保留语义色相：深色底用明亮状态色，浅色底用深色状态色；中性徽章与 Notice 文字在两种材质下都使用次要文字色，并在两种模式下保持可读。应用自行选择是否在页面背景使用 Canvas。
 
 - 控件保留焦点和校验反馈；复选框、单选和开关的选中底板复用主色及配对前景。分段滑块、导航指示器和分页保留原有动效。
 - Tabs 省略 `variant` 时采用自动材质；显式 `variant="glass"` 保留极光玻璃。`underline` 仍只绘制指示线，`pill` 跟随作用域。
 - 浮层采用 Overlay，模态浮层另绘遮罩。提示框箭头与主体同色。状态面和占位面使用不透明色阶，不依赖模糊或光晕。
 - 终端的外壳、标题栏和正文采用分组色阶，提示符、回显、行和记录不叠加底板。Prose 的表格与折叠块共享组件配方；引用和代码块使用 Inset，行内代码和按键使用 Group。
 
-在 Design Lab 或 React 示例的原有地址上加 `?material=glass` 或 `?material=solid`，并与 `theme=light` 或 `theme=dark` 组合查看。该参数只作用于预览，不持久化偏好，也不覆盖显式预设。
+在 Design Lab 或 React 测试页面的原有地址上加 `?material=glass`、`?material=frosted` 或 `?material=solid`，并与 `theme=light` 或 `theme=dark` 组合查看。该参数只作用于预览，不持久化偏好，也不覆盖显式预设。
+
+## 嵌套材质与背景采样所有权
+
+- 三种材质支持任意父子嵌套与局部覆盖，对称 `@scope` 边界防止样式变量、滤镜、阴影与伪元素跨材质泄漏。
+- 实体材质中，嵌套面板切换至 `raised-nested` 与更轻阴影，位于 `group` 内的控件抬升至 `control-in-group`。
+- 磨砂材质中，磨砂采样平面（`panel`、`group`、`overlay`、`compactOverlay`）的后代自动跳过二次背景模糊并切换至嵌套色阶，避免双重模糊浑浊与合成层膨胀；独立浮层（`overlay`、`compactOverlay`）、新的材质作用域边界（`[data-neoverse-material]`）与显式极光玻璃表面会重置嵌套变量，保持独立采样。
+- 极光玻璃的 WebGL 表单/表格阴影覆写严格限定在极光玻璃作用域内，同一页面混用显式极光玻璃表面时不会影响实体或磨砂控件。
 
 ## 极光玻璃的三个层级
 

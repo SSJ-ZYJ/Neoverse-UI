@@ -602,8 +602,15 @@ test('Solid and Frosted stay dormant until an explicit Glass surface is drawn', 
     ),
   ).toBe(0);
   await root.evaluate((element) => element.setAttribute('data-neoverse-material', 'frosted'));
-  await expect(page.locator('#forms-notes')).toHaveCSS('backdrop-filter', /blur\(12px\)/);
+  // The outer section owns the Frosted panel blur; the nested textarea skips double-blur.
+  await expect(page.locator('#forms-textarea')).toHaveCSS('backdrop-filter', /blur\(16px\)/);
+  await expect(page.locator('#forms-notes')).toHaveCSS('backdrop-filter', 'none');
   await expect(page.locator(canvasSelector)).toHaveCount(0);
+  expect(
+    await page.evaluate(
+      () => (window as Window & { __solidOptics?: { contexts: number } }).__solidOptics?.contexts,
+    ),
+  ).toBe(0);
 
   await page.evaluate(() => {
     const probe = document.createElement('article');
@@ -614,6 +621,11 @@ test('Solid and Frosted stay dormant until an explicit Glass surface is drawn', 
   });
   await expect(page.locator(canvasSelector)).toHaveCount(1);
   await expect(root).toHaveAttribute('data-neoverse-glass-renderer', 'webgl');
+  // Mounting an explicit Glass card must not leak WebGL form shadows onto Frosted fields.
+  const frostedShadow = await page
+    .locator('#forms-notes')
+    .evaluate((element) => getComputedStyle(element).boxShadow);
+  expect(frostedShadow).not.toContain('rgba(71, 105, 126');
   expect(
     await page.evaluate(
       () => (window as Window & { __solidOptics?: { contexts: number } }).__solidOptics?.contexts,

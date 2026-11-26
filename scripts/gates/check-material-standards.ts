@@ -38,7 +38,9 @@ for (const directory of ['packages/vue/src', 'packages/react/src']) {
     if (/blur\(\s*\d|(?:rgb|hsl)a?\([^)]*\/\s*\d|opacity\s*:\s*0\.\d/.test(source)) {
       errors.push(`${path}: adapter must consume shared optical roles`);
     }
-    if (/\bmaterial-auto\b|\bmaterial-solid-(?:control|raised|group|inset|overlay)\b/.test(source)) {
+    if (
+      /\bmaterial-auto\b|\bmaterial-solid-(?:control|raised|group|inset|overlay)\b/.test(source)
+    ) {
       errors.push(`${path}: emit a surface role instead of legacy automatic material classes`);
     }
     if (/^packages\/(?:vue|react)\/src\/components\b/.test(path.replaceAll('\\', '/'))) {

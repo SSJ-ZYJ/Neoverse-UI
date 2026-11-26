@@ -1,4 +1,5 @@
 @import './components/button.css';
+@import './components/button-material.css';
 @import './components/control-feedback.css';
 @import './components/action.css';
 @import './components/loading.css';
@@ -8,6 +9,8 @@
 @import './components/dock.css';
 @import './components/surface.css';
 @import './components/material-mode.css';
+@import './components/material-solid.css';
+@import './components/material-frosted.css';
 @import './components/status-indicator.css';
 @import './components/notice.css';
 @import './components/empty-state.css';

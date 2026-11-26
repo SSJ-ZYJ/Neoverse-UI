@@ -247,4 +247,63 @@
       }
     }
   }
+
+  @scope (.material-frosted-scope) {
+    @media (forced-colors: none) {
+      @supports not selector(::-webkit-scrollbar) {
+        :where(:scope, :scope *):is(.scrollbar-immersive, .scrollbar-immersive *) {
+          scrollbar-color: var(--neoverse-material-frosted-border-strong) transparent;
+        }
+      }
+
+      :where(:scope, :scope *):is(
+          .scrollbar-immersive,
+          .scrollbar-immersive *
+        )::-webkit-scrollbar-thumb {
+        background: var(--neoverse-material-frosted-border-strong);
+        background-clip: padding-box;
+        box-shadow: none;
+      }
+
+      .ui-scrollbar__thumb {
+        background: var(--neoverse-material-frosted-border-strong);
+        background-clip: padding-box;
+        box-shadow: none;
+      }
+
+      @media (hover: hover) {
+        :where(:scope, :scope *):is(
+            .scrollbar-immersive,
+            .scrollbar-immersive *
+          )::-webkit-scrollbar-thumb:hover {
+          background-color: var(--neoverse-color-text-secondary);
+        }
+
+        .ui-scrollbar:hover:not(.ui-scrollbar--dragging) .ui-scrollbar__thumb {
+          background-color: var(--neoverse-color-text-secondary);
+        }
+      }
+
+      :where(:scope, :scope *):is(
+          .scrollbar-immersive,
+          .scrollbar-immersive *
+        )::-webkit-scrollbar-thumb:active {
+        background-color: var(--neoverse-color-text-primary);
+      }
+
+      .ui-scrollbar--dragging .ui-scrollbar__thumb {
+        background-color: var(--neoverse-color-text-primary);
+      }
+
+      .ui-scrollbar--dragging {
+        background: var(--neoverse-material-frosted-hover);
+      }
+
+      @media (hover: hover) {
+        .ui-scrollbar:hover {
+          background: var(--neoverse-material-frosted-hover);
+        }
+      }
+    }
+  }
 }

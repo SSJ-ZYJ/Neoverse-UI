@@ -501,4 +501,33 @@
       }
     }
   }
+
+  @scope (.material-frosted-scope) {
+    .ui-terminal-surface.material-recipe-auto > .ui-terminal-surface__header {
+      background: var(--neoverse-material-frosted-group-nested-fill);
+      border-block-end: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+        var(--neoverse-material-frosted-divider);
+    }
+
+    .ui-terminal-surface.material-recipe-auto > .ui-terminal-surface__body {
+      background: var(--neoverse-material-frosted-field-nested-fill);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      .ui-terminal-surface.material-recipe-auto > .ui-terminal-surface__header {
+        background: var(--neoverse-material-frosted-group-fallback);
+      }
+
+      .ui-terminal-surface.material-recipe-auto > .ui-terminal-surface__body {
+        background: var(--neoverse-material-frosted-field-fallback);
+      }
+    }
+
+    @media (forced-colors: active) {
+      .ui-terminal-surface.material-recipe-auto
+        > :is(.ui-terminal-surface__header, .ui-terminal-surface__body) {
+        background: Canvas;
+      }
+    }
+  }
 }

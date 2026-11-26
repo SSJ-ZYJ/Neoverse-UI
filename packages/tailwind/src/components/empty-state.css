@@ -124,4 +124,23 @@
       color: var(--neoverse-material-solid-selection-text);
     }
   }
+
+  @scope (.material-frosted-scope) {
+    .ui-empty-state:is([data-empty-state-variant='default'], [data-empty-state-variant='outlined'])
+      > .ui-empty-state__icon {
+      background-color: var(--neoverse-material-frosted-selection);
+      border-color: var(--neoverse-material-frosted-border-subtle);
+      color: var(--neoverse-material-frosted-selection-text);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      .ui-empty-state:is(
+          [data-empty-state-variant='default'],
+          [data-empty-state-variant='outlined']
+        )
+        > .ui-empty-state__icon {
+        background-color: var(--neoverse-material-frosted-selection-fallback);
+      }
+    }
+  }
 }

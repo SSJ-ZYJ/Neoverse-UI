@@ -12,22 +12,27 @@ export const CoreMaterialPreview = lazyComponent(
 );
 
 const materialChoices = [
-  { value: 'both', label: localized('Compare both', '并排对照') },
-  { value: 'glass', label: localized('Aurora Glass', '极光玻璃') },
+  { value: 'all', label: localized('Compare all three', '三材质并排对照') },
   { value: 'solid', label: localized('Solid', '实体') },
+  { value: 'frosted', label: localized('Frosted', '磨砂') },
+  { value: 'glass', label: localized('Aurora Glass', '极光玻璃') },
 ] as const;
-export const coreMaterialModes = ['glass', 'solid'] as const satisfies readonly Material[];
+export const coreMaterialModes = [
+  'solid',
+  'frosted',
+  'glass',
+] as const satisfies readonly Material[];
 export const coreMaterialCopy = {
   label: localized('Core material comparison', '核心材质对照'),
   description: localized(
-    'One workspace in both materials. Switch the Lab theme to compare the light and dark palettes.',
-    '同一工作区采用两种材质。切换实验室主题可对照浅色和深色色阶。',
+    'One workspace in Solid, Frosted, and Aurora Glass. Switch the Lab theme to compare light and dark palettes.',
+    '同一工作区采用实体、磨砂与极光玻璃三种材质。切换实验室主题可对照浅色与深色色阶。',
   ),
 };
 
 export const coreMaterials = withPreload(
   defineSpecimen<{ mode: (typeof materialChoices)[number]['value'] }>()({
-    initialProps: { mode: 'both' },
+    initialProps: { mode: 'all' },
     initialState: () => ({}),
     controls: {
       props: { mode: { kind: 'select', label: coreMaterialCopy.label, options: materialChoices } },
@@ -39,11 +44,11 @@ export const coreMaterials = withPreload(
         {
           class: [
             'grid w-full min-w-0 gap-3',
-            props.mode === 'both' && 'playground-core-material-grid',
+            props.mode === 'all' && 'playground-core-material-grid',
           ],
         },
         coreMaterialModes
-          .filter((mode) => props.mode === 'both' || props.mode === mode)
+          .filter((mode) => props.mode === 'all' || props.mode === mode)
           .map((mode) => h(CoreMaterialPreview, { key: mode, mode, locale })),
       ),
   }),

@@ -216,7 +216,7 @@
 }
 
 @layer neoverse-material-mode {
-  @scope (.material-static-scope) {
+  @scope (.material-solid-scope) {
     :where(:scope, :scope *).ui-navigation-item--active.ui-button--ghost:is(
         .material-recipe-auto,
         [data-surface='none']
@@ -237,6 +237,44 @@
 
       &:active:not(:disabled, [aria-disabled='true']) {
         background-image: var(--neoverse-solid-press-wash);
+      }
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *).ui-navigation-item--active.ui-button--ghost:is(
+        .material-recipe-auto,
+        [data-surface='none']
+      ) {
+      color: var(--neoverse-material-frosted-selection-text);
+      background-color: var(--neoverse-material-frosted-selection-fallback);
+      border-color: var(--neoverse-material-frosted-border-subtle);
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background-image: none;
+
+      @supports (backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1)) {
+        background-color: var(--neoverse-material-frosted-selection);
+      }
+
+      @media (hover: hover) {
+        &:hover:not(:active, :disabled, [aria-disabled='true']) {
+          background-image: var(--neoverse-frosted-hover-wash);
+        }
+      }
+
+      &:active:not(:disabled, [aria-disabled='true']) {
+        background-image: var(--neoverse-frosted-press-wash);
+      }
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      :where(:scope, :scope *).ui-navigation-item--active.ui-button--ghost:is(
+          .material-recipe-auto,
+          [data-surface='none']
+        ) {
+        background-color: var(--neoverse-material-frosted-selection-fallback);
       }
     }
   }

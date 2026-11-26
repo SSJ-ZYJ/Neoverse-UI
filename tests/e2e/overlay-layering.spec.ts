@@ -13,8 +13,16 @@ test.describe('overlay layering', () => {
         const transitions = await drawer.evaluateHandle((panel) => {
           const completed: string[] = [];
           panel.addEventListener('transitionend', (event) => {
-            if (event.target !== panel || event.propertyName !== 'translate') return;
-            completed.push(panel.parentElement?.getAttribute('data-open') === 'true' ? 'enter' : 'exit');
+            if (
+              !(event instanceof TransitionEvent) ||
+              event.target !== panel ||
+              event.propertyName !== 'translate'
+            ) {
+              return;
+            }
+            completed.push(
+              panel.parentElement?.getAttribute('data-open') === 'true' ? 'enter' : 'exit',
+            );
           });
           return completed;
         });

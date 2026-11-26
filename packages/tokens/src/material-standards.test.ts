@@ -1,6 +1,16 @@
 import { expect, test } from 'bun:test';
+import { readBuiltTokenCss } from './css-helpers.test-support.js';
+import { cssVariables } from './index.js';
 
 const source = (name: string) => Bun.file(new URL(name, import.meta.url)).text();
+
+const collectValues = (record: unknown): string[] => {
+  if (typeof record === 'string') return [record];
+  if (record !== null && typeof record === 'object') {
+    return Object.values(record).flatMap((entry) => collectValues(entry));
+  }
+  return [];
+};
 
 test('publishes three monotonic tiers with exactly one background alpha', async () => {
   const material = (await source('material.css')).replace(/\s+/g, ' ');
@@ -118,4 +128,48 @@ test('reduced transparency keeps the opted-in stroke ahead of the fallback shado
   expect(reduced).toMatch(
     /:not\(\s*\.ui-button\s*\)\[data-neoverse-glass-edge-stroke\]\s*\{\s*box-shadow:\s*var\(--neoverse-material-edge-stroke\),\s*var\(--neoverse-material-edge-highlight\)/,
   );
+});
+
+test('exposes complete Solid and Frosted token contracts without Glass optical leakage', async () => {
+  const built = await readBuiltTokenCss();
+  const definedTokens = new Set(
+    [...built.matchAll(/(--neoverse-[\w-]+)\s*:/g)].map((match) => match[1]),
+  );
+
+  const solidTokens = collectValues(cssVariables.material.solid);
+  const frostedTokens = collectValues(cssVariables.material.frosted);
+  expect(solidTokens.length).toBeGreaterThanOrEqual(35);
+  expect(frostedTokens.length).toBeGreaterThanOrEqual(65);
+
+  for (const token of [...solidTokens, ...frostedTokens]) {
+    expect(definedTokens.has(token), `Built tokens.css must define ${token}`).toBe(true);
+    expect(token).not.toMatch(/refraction|bloom|seam-glow|inner-glow|edge-filter|glass-tier/);
+  }
+
+  for (const file of ['material-solid.css', 'material-frosted.css']) {
+    const css = await source(file);
+    const references = [...css.matchAll(/var\((--neoverse-[\w-]+)\)/g)].map((match) => match[1]);
+    const unresolved = [...new Set(references.filter((name) => !definedTokens.has(name)))];
+    expect(unresolved, `Unresolved token references in ${file}`).toEqual([]);
+  }
+});
+
+test('keeps Frosted opaque fallbacks free of transparency in both themes', async () => {
+  for (const theme of ['light', 'dark']) {
+    const css = await source(`themes/${theme}.css`);
+    for (const token of [
+      '--neoverse-material-frosted-base',
+      '--neoverse-material-frosted-base-elevated',
+      '--neoverse-material-frosted-base-recessed',
+      '--neoverse-material-frosted-base-inset',
+      '--neoverse-material-frosted-primary-fallback',
+      '--neoverse-material-frosted-selection-fallback',
+    ]) {
+      const value = css.match(new RegExp(`${token}:\\s*([^;]+);`))?.[1]?.trim();
+      expect(value, `${theme} must define ${token}`).toBeDefined();
+      expect(value, `${theme} ${token} must be opaque`).not.toMatch(
+        /transparent|\/|rgba|surface-raised/,
+      );
+    }
+  }
 });

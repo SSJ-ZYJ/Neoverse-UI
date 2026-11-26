@@ -167,4 +167,13 @@
       outline-color: var(--neoverse-material-solid-focus);
     }
   }
+
+  @scope (.material-frosted-scope) {
+    .ui-step-flow__item--current > .ui-step-flow__marker {
+      --neoverse-frosted-plate-fill: var(--neoverse-material-frosted-selection);
+      --neoverse-frosted-plate-fallback: var(--neoverse-material-frosted-selection-fallback);
+      color: var(--neoverse-material-frosted-selection-text);
+      outline-color: var(--neoverse-material-frosted-focus);
+    }
+  }
 }

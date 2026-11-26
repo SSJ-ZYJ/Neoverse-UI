@@ -1,7 +1,7 @@
 export {
+  type GlassTier,
   getSurfaceClass,
   isGlassSurface,
-  type GlassTier,
   type Material,
   type SurfaceRole,
 } from '@neoverse-ui/tokens';
