@@ -1,6 +1,7 @@
 @layer components {
   .ui-breadcrumb {
     min-width: 0;
+    max-width: 100%;
     /* The padded link box is the hover surface, and hit testing stops at this
        container's box even though `overflow-clip-margin` lets the plate paint
        past it. The container therefore carries the same insets on both axes,

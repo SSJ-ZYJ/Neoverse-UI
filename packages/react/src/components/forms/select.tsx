@@ -84,6 +84,7 @@ export function UiSelect({
   // press itself commits an option. The click belonging to that gesture is
   // ignored, while a click dispatched without a pointer pair still selects.
   const pointerCommitAt = useRef(Number.NEGATIVE_INFINITY);
+  const restoreTriggerFocus = useRef(false);
   useEffect(() => {
     installFocusModality(document);
     return () => {
@@ -165,6 +166,7 @@ export function UiSelect({
     if (option.disabled || disabled || readOnly) return;
     onValueChange?.(option.value);
     const details = element.closest('details');
+    restoreTriggerFocus.current = details?.open === true;
     if (details !== null) {
       details.open = false;
       closeSelectPopover(details);
@@ -189,8 +191,19 @@ export function UiSelect({
           return;
         }
         setOpen(details.open);
-        if (details.open) openSelectPopover(details);
-        else closeSelectPopover(details);
+        if (details.open) {
+          openSelectPopover(details);
+        } else {
+          closeSelectPopover(details);
+          // Closing the popover lets the engine move focus to the surrounding
+          // dialog after the commit. Restore the trigger once it has settled.
+          if (restoreTriggerFocus.current) {
+            restoreTriggerFocus.current = false;
+            focusElement(details.querySelector<HTMLElement>('.ui-select'), {
+              preventScroll: true,
+            });
+          }
+        }
       }}
     >
       <summary

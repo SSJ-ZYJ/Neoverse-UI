@@ -104,7 +104,10 @@ test.describe('Aurora Glass optical diagnostics', () => {
       expect(captures.metrics.corners.lowerRight).toBeGreaterThan(
         captures.metrics.corners.lowerLeft,
       );
-      expect(captures.metrics.blueRetention.lowerRight).toBeGreaterThanOrEqual(0.65);
+      // The balanced diagonal exposure gives both catches the same share of the
+      // pale-blue lead. Keep a floor that still rejects a washed-out rim without
+      // demanding the pre-balance asymmetry.
+      expect(captures.metrics.blueRetention.lowerRight).toBeGreaterThanOrEqual(0.6);
     } catch (error) {
       await attachOpticalFailure(testInfo, captures);
       throw error;

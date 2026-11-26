@@ -151,7 +151,7 @@ test.describe('playground', () => {
     await page.goto('/?lang=en#card', { waitUntil: 'domcontentloaded' });
     const comparison = page.locator('#card-card');
     for (const [example, surface] of [
-      ['default', 'glass-elevated'],
+      ['default', 'auto'],
       ['elevated', 'elevated'],
       ['transparent', 'none'],
     ] as const) {
@@ -160,6 +160,9 @@ test.describe('playground', () => {
       await expect(card.getByRole('heading', { name: 'Reference card' })).toBeVisible();
       await expect(card.getByRole('button', { name: 'Continue' })).toBeVisible();
     }
+    await expect(comparison.locator('[data-specimen-card-surface="default"] .ui-card')).toHaveClass(
+      /material-glass-elevated/,
+    );
     await expect(
       comparison.locator('[data-surface="subtle"] > [data-surface="none"].ui-card'),
     ).toBeVisible();

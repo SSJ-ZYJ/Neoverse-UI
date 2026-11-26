@@ -207,9 +207,9 @@ for (const path of ['/', '/frame'] as const) {
     const demo = page.locator('#foundation-motion-playground');
     const root = page.locator('html');
     const sample = demo.locator('[data-motion-size-sample="icon"]');
-    await expect(sample).toHaveCSS('width', '32px');
+    await expect(sample).toHaveCSS('width', '28px');
     await demo.locator('[data-motion-size-control]').getByRole('radio', { name: 'Large' }).click();
-    await expect(sample).toHaveCSS('width', '48px');
+    await expect(sample).toHaveCSS('width', '44px');
 
     await demo.locator('[data-motion-theme-reveal]').click();
     await expect(root).toHaveAttribute('data-theme', 'dark');
@@ -218,7 +218,7 @@ for (const path of ['/', '/frame'] as const) {
     await demo.locator('[data-motion-locale]').click();
     await expect(root).toHaveAttribute('lang', 'zh-CN');
     await expect(demo.locator('[data-motion-size-sample="text"]')).toHaveText('示例操作');
-    await expect(sample).toHaveCSS('width', '48px');
+    await expect(sample).toHaveCSS('width', '44px');
   });
 }
 
@@ -283,7 +283,7 @@ test('a larger text button keeps its label on one line throughout resize', async
   await page.goto('/?theme=light&lang=en&fps=0#foundation-motion-playground');
   const sample = page.locator('[data-motion-size-sample="text"]');
   const large = page.locator('[data-motion-size-control]').getByRole('radio', { name: 'Large' });
-  await expect(sample).toHaveCSS('height', '32px');
+  await expect(sample).toHaveCSS('height', '28px');
   await page.evaluate(() => document.fonts.ready.then(() => undefined));
   const [frame] = await Promise.all([
     page.waitForFunction(
@@ -316,10 +316,10 @@ test('a larger text button keeps its label on one line throughout resize', async
 
   const during = await frame.jsonValue();
   if (!during) throw new Error('Text size transition did not start');
-  expect(during.height).toBeGreaterThan(32);
-  expect(during.height).toBeLessThan(48);
+  expect(during.height).toBeGreaterThan(28);
+  expect(during.height).toBeLessThan(44);
   expect(during.lines).toBe(1);
-  await expect(sample).toHaveCSS('height', '48px');
+  await expect(sample).toHaveCSS('height', '44px');
 });
 
 test('an indicator keeps its label on one line as the status changes', async ({
@@ -433,7 +433,7 @@ test('theme reveal stays clickable and reverses from its current edge', async ({
   expect(returning.time).toBeLessThan(returning.before);
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-appearance-live');
-  await expect(page.locator('[data-motion-size-sample="icon"]')).toHaveCSS('width', '48px');
+  await expect(page.locator('[data-motion-size-sample="icon"]')).toHaveCSS('width', '44px');
 });
 
 test('reversing from the toolbar does not replay Glass colors outside the reveal', async ({

@@ -349,7 +349,7 @@ test.describe('playground', () => {
     await page.goto('/?theme=dark&lang=en#card-card', { waitUntil: 'domcontentloaded' });
     const live = page.locator('#card-card');
     const card = live.locator('article');
-    await expect(card).toHaveAttribute('data-surface', 'glass-elevated');
+    await expect(card).toHaveAttribute('data-surface', 'auto');
     await expect(card).toHaveCSS('backdrop-filter', /blur\(/);
     await expect(live.locator('.playground-stage__specimen-content')).toHaveCSS(
       'animation-name',
@@ -380,7 +380,7 @@ test.describe('playground', () => {
     expect(await measureCard()).toEqual(initialGeometry);
     expect(await content.evaluate((node, before) => node === before, initialContent)).toBe(true);
     await chooseOption(inspector, 'surface', 'Component default');
-    await expect(card).toHaveAttribute('data-surface', 'glass-elevated');
+    await expect(card).toHaveAttribute('data-surface', 'auto');
     if (mobile) await page.keyboard.press('Escape');
 
     const client = await page.context().newCDPSession(page);

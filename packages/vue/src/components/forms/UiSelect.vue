@@ -112,6 +112,12 @@ function onToggle(event: Event) {
   }
 
   closePopover();
+  // Closing the popover lets the engine move focus to the surrounding dialog
+  // after the commit. Restore the trigger once the closed state has settled.
+  if (restoreTriggerFocus) {
+    restoreTriggerFocus = false;
+    focusTrigger();
+  }
 }
 
 function onTriggerClick(event: MouseEvent) {
@@ -161,6 +167,7 @@ function clearTriggerFocusOrigin(event: FocusEvent) {
 function selectOption(option: SelectOption) {
   if (blocked.value || option.disabled) return;
   emit('update:modelValue', option.value);
+  restoreTriggerFocus = detailsRef.value?.open === true;
   if (detailsRef.value) detailsRef.value.open = false;
   open.value = false;
   closePopover();
@@ -172,6 +179,7 @@ function selectOption(option: SelectOption) {
 // gesture is then ignored, while a click dispatched without a pointer pair
 // (assistive technology) still selects.
 let pointerCommitAt = Number.NEGATIVE_INFINITY;
+let restoreTriggerFocus = false;
 function onOptionPointerDown(option: SelectOption, event: PointerEvent) {
   markTriggerPointerFocus();
   if (!event.isPrimary || event.button !== 0) return;
