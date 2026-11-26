@@ -89,6 +89,13 @@
     translate: var(--neoverse-drawer-shift);
   }
 
+  @media (prefers-reduced-motion: no-preference) {
+    .ui-drawer__host > .ui-drawer {
+      transition: translate var(--neoverse-motion-spatial-duration)
+        var(--neoverse-motion-spatial-easing);
+    }
+  }
+
   .ui-drawer__host[data-open='true'] > :is(.ui-drawer, .ui-drawer__backdrop) {
     pointer-events: auto;
   }
@@ -194,13 +201,6 @@
   @scope (.material-scopes) {
   dialog.ui-drawer.material-recipe-glass-subtle {
     overflow: auto;
-  }
-
-  @media (prefers-reduced-motion: no-preference) {
-    .ui-drawer__host > dialog.ui-drawer {
-      transition: translate var(--neoverse-motion-spatial-duration)
-        var(--neoverse-motion-spatial-easing);
-    }
   }
 
   @media (prefers-reduced-transparency: reduce), (forced-colors: active) {

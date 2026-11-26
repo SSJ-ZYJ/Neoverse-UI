@@ -488,7 +488,11 @@
       var(--neoverse-motion-easing-emphasized),
       border-color var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-emphasized),
       box-shadow var(--neoverse-motion-duration-standard) var(--neoverse-motion-easing-emphasized);
-    transition: var(--neoverse-material-transition);
+
+    /* The modal Drawer owns its slide independently of material paint. */
+    &:not(:where(.ui-drawer[data-modal='true'])) {
+      transition: var(--neoverse-material-transition);
+    }
   }
 
   /* Opted-in surfaces paint the stroke ahead of the material highlights, so an

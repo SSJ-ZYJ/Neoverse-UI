@@ -169,7 +169,7 @@
     height: var(--neoverse-icon-button-icon-size);
   }
 
-  .ui-button > * {
+  .ui-button > :not(:where(.ui-navigation-item__indicator)) {
     position: relative;
     z-index: 1;
   }

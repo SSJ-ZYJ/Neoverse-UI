@@ -451,12 +451,32 @@ test.describe('navigation', () => {
     const indicator = item.locator('.ui-navigation-item__indicator');
     const length = (axis: 'width' | 'height') =>
       indicator.evaluate((element, axis) => element.getBoundingClientRect()[axis], axis);
+    const readAlignment = () =>
+      indicator.evaluate((element) => {
+        const marker = element.getBoundingClientRect();
+        const item = element.closest('.ui-navigation-item')?.getBoundingClientRect();
+        if (!item) throw new Error('Missing navigation item');
+        return {
+          fromCenterX: marker.left + marker.width / 2 - (item.left + item.width / 2),
+          fromCenterY: marker.top + marker.height / 2 - (item.top + item.height / 2),
+          fromBottom: item.bottom - marker.bottom,
+          fromStart: marker.left - item.left,
+        };
+      });
 
     const bottom = await length('width');
+    const bottomAlignment = await readAlignment();
+    expect(Math.abs(bottomAlignment.fromCenterX)).toBeLessThan(0.5);
+    expect(bottomAlignment.fromBottom).toBeGreaterThanOrEqual(0);
+    expect(bottomAlignment.fromBottom).toBeLessThan(bottom);
     const inspector = await showInspector(page, testInfo.project.name === 'mobile');
     await chooseOption(inspector, 'indicatorPlacement', 'Start');
     await expect(item).toHaveClass(/ui-navigation-item--indicator-start/);
     expect(await length('height')).toBeCloseTo(bottom, 1);
+    const startAlignment = await readAlignment();
+    expect(Math.abs(startAlignment.fromCenterY)).toBeLessThan(0.5);
+    expect(startAlignment.fromStart).toBeGreaterThanOrEqual(0);
+    expect(startAlignment.fromStart).toBeLessThan(bottom);
 
     await inspector.getByRole('switch', { name: 'Compact' }).press('Space');
     await chooseOption(inspector, 'indicatorPlacement', 'Bottom');

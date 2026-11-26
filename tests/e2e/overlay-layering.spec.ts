@@ -2,6 +2,34 @@ import { adapters, disablePopoverApi, expect, test } from '../support/e2e';
 
 test.describe('overlay layering', () => {
   for (const adapter of adapters) {
+    for (const material of ['glass', 'solid', 'frosted'] as const) {
+      test(`${adapter.name}: a ${material} drawer slides in and out`, async ({ page }) => {
+        await page.emulateMedia({ reducedMotion: 'no-preference' });
+        const url = new URL(adapter.url('light', 'overlays'), 'http://localhost');
+        url.searchParams.set('material', material);
+        await page.goto(`${url.pathname}${url.search}${url.hash}`);
+        const trigger = page.locator('[data-drawer-open]');
+        const drawer = page.locator('[data-drawer-panel]');
+        const transitions = await drawer.evaluateHandle((panel) => {
+          const completed: string[] = [];
+          panel.addEventListener('transitionend', (event) => {
+            if (event.target !== panel || event.propertyName !== 'translate') return;
+            completed.push(panel.parentElement?.getAttribute('data-open') === 'true' ? 'enter' : 'exit');
+          });
+          return completed;
+        });
+
+        await trigger.press('Enter');
+        await expect.poll(() => transitions.jsonValue()).toEqual(['enter']);
+        await expect(drawer).toBeVisible();
+        await page.keyboard.press('Escape');
+        await expect.poll(() => transitions.jsonValue()).toEqual(['enter', 'exit']);
+        await expect(drawer).toBeHidden();
+        await expect(trigger).toBeFocused();
+        await transitions.dispose();
+      });
+    }
+
     test(`${adapter.name}: a drawer covers page overlays but leaves a higher toolbar usable`, async ({
       page,
     }) => {
