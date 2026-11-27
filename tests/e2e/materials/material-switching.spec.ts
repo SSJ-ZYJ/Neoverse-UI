@@ -169,4 +169,80 @@ test.describe('material switching', () => {
       expect(solid.badgeInfo).not.toBe(solid.badgeSuccess);
     }
   });
+
+  test('all six directed material switches preserve the DOM instance and Glass canvas lifecycle', async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name === 'mobile',
+      'Directed pairwise selection uses the desktop segmented control.',
+    );
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/?theme=light&lang=en&fps=0#forms-input', { waitUntil: 'domcontentloaded' });
+    const root = page.locator('html');
+    const canvas = page.locator('[data-neoverse-glass-renderer-canvas]');
+    const input = page.locator('#forms-input input');
+    await input.fill('Persistent value');
+    const handle = await input.elementHandle();
+    const control = page.locator('[data-playground-material-control="segments"]');
+
+    // Visit every directed edge: glass -> solid -> frosted -> glass -> frosted -> solid -> glass
+    const transitions = [
+      ['Solid', 'solid', 0],
+      ['Frosted', 'frosted', 0],
+      ['Glass', 'glass', 1],
+      ['Frosted', 'frosted', 0],
+      ['Solid', 'solid', 0],
+      ['Glass', 'glass', 1],
+    ] as const;
+
+    for (const [label, expectedMaterial, expectedCanvas] of transitions) {
+      await control.getByRole('radio', { name: label }).click();
+      await expect(root).toHaveAttribute('data-neoverse-material', expectedMaterial);
+      await expect(canvas).toHaveCount(expectedCanvas);
+      await expect(input).toHaveValue('Persistent value');
+      expect(await input.evaluate((node, before) => node === before, handle)).toBe(true);
+    }
+  });
+
+  test('simultaneous Theme and Material switching settles cleanly and persists across reload', async ({
+    page,
+  }, testInfo) => {
+    test.skip(
+      testInfo.project.name === 'mobile',
+      'Simultaneous toolbar selection uses the desktop controls.',
+    );
+    await page.goto('/?theme=light&material=glass&lang=en&fps=0#forms-textarea', {
+      waitUntil: 'domcontentloaded',
+    });
+    const root = page.locator('html');
+    const textarea = page.locator('#forms-textarea').getByRole('textbox');
+    await textarea.fill('Theme and material together');
+    const handle = await textarea.elementHandle();
+
+    // Trigger Theme and Material switches back-to-back without waiting for the first snapshot.
+    await page.evaluate(() => {
+      const dark = document
+        .querySelector('[data-playground-theme-control="segments"]')
+        ?.querySelector<HTMLElement>('[role="radio"][aria-label="Dark"]');
+      const frosted = document
+        .querySelector('[data-playground-material-control="segments"]')
+        ?.querySelector<HTMLElement>('[role="radio"][aria-label="Frosted"]');
+      dark?.click();
+      frosted?.click();
+    });
+
+    await expect(root).toHaveAttribute('data-theme', 'dark');
+    await expect(root).toHaveAttribute('data-neoverse-material', 'frosted');
+    await expect(root).not.toHaveAttribute('data-neoverse-appearance-motion');
+    await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCount(0);
+    await expect(textarea).toHaveValue('Theme and material together');
+    expect(await textarea.evaluate((node, before) => node === before, handle)).toBe(true);
+
+    // Reload must preserve the persisted interactive choices rather than reverting to URL query.
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await expect(root).toHaveAttribute('data-theme', 'dark');
+    await expect(root).toHaveAttribute('data-neoverse-material', 'frosted');
+    await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCount(0);
+  });
 });

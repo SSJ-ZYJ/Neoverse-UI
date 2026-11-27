@@ -24,7 +24,8 @@ docs/                          current state of the repository
   releases/                    process records and upgrade paths
     releasing.md               release process, gates and automation
     migration-0.3.0.md         historical upgrade path for 0.2.x
-    migration-0.3.1.md         current upgrade guide
+    migration-0.3.1.md         upgrade path for 0.3.1 / 0.4.0
+    migration-0.5.0.md         current v0.5.0 three-material upgrade guide
     release-0.3.1.md           latest published release record
   testing/
     README.md                  test layers, browser spec ownership and commands
@@ -36,6 +37,7 @@ docs/                          current state of the repository
     architecture/overlay-contract.md
     architecture/terminal-composition.md
     releases/migration-0.3.1.md
+    releases/migration-0.5.0.md
   images/                      README artwork
 .agents/notes/
   archives/                    dated audits, acceptance runs and incident records

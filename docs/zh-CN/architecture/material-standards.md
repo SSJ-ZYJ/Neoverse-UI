@@ -5,13 +5,13 @@ Status: adopted
 [English](../../architecture/material-standards.md)
 
 <!-- Source: docs/architecture/material-standards.md -->
-<!-- Source-SHA256: d7a37a5bd35af11c854011a8d574cac5663dcca94d4800404f28638a3a7665a2 -->
+<!-- Source-SHA256: 378f09f9fbeebc081c3fb8f32686147dca8f7aa026f0b8eecfca401b3a927e7e -->
 
 本文是[英文材质标准](../../architecture/material-standards.md)的中文摘要，覆盖消费项目最常用的材质、层级、嵌套与修复边界。具体光学数值、逐组件审计与历史验收记录以英文原文为准。
 
 ## 共享材质解析
 
-`@neoverse-ui/tokens` 定义 `Material`（材质）、`SurfaceRole`（表面角色）与 `GlassTier`（极光玻璃光学层级）。表面角色表达组件职责；表面配方决定该角色在给定材质中的绘制。Theme 独立控制主题颜色。
+`@neoverse-ui/tokens` 定义 `Material`（材质）、`SurfaceRole`（表面角色）与 `GlassTier`（极光玻璃光学层级），并通过 `materialCatalog` 提供统一的本地化材质展示名与短标签注册表。表面角色表达组件职责；表面配方决定该角色在给定材质中的绘制。Theme 独立控制主题颜色。
 
 在文档根、子树或表面自身设置 `data-neoverse-material`，取最近的有效值：`solid`、`frosted` 或 `glass`。未知值不阻断父级作用域，无有效值时默认极光玻璃。CSS 在框架挂载前解析作用域。显式 `surface` 只覆盖当前表面，不影响后代作用域；`none` 不绘制底板，`frosted` 为当前表面角色选择磨砂配方，原有 `inset` 仍保留轻薄层级采样。
 
@@ -33,11 +33,11 @@ Status: adopted
 
 ## 材质运行时与切换
 
-Playground、Frame 路由与 React 测试页面共用一个框架无关的材质模块。保存的 `material` 偏好在首绘启动脚本中写入 `data-neoverse-material`，首帧即使用所选材质。`?material=` 只是同一策略下的临时预览，不写入偏好；刷新保留最后一次交互选择。材质与 Theme、Locale、舞台背景和展示表面相互独立，属性仍是唯一生效规范。
+Playground、Frame 路由与 React 测试页面共用一个框架无关的材质模块（`runtime/material-runtime.ts`）。服务端 HTML 直接输出初始 `data-neoverse-material` 属性，首绘启动脚本在首帧前同步保存的 `material` 偏好。`?material=` 只是同一策略下的临时预览，不写入偏好；刷新保留最后一次交互选择。材质与 Theme、Locale、舞台背景和展示表面相互独立，属性仍是唯一生效规范。
 
-工具栏在桌面用分段控件、在触屏用循环按钮提供极光玻璃、实体与磨砂三种平级选项。显式表面仍优先于全局材质；切换不重置样例会话、表单值、选中项、焦点、滚动位置与 Stage 缩放。
+工具栏在桌面用分段控件、在触屏用循环按钮提供极光玻璃、实体与磨砂三种平级选项，选项统一来自 `materialCatalog`。Inspector 为可编辑示例提供会话级局部材质作用域覆盖（继承全局、实体、磨砂、极光玻璃）与显式表面预设；显式表面仍优先于全局材质。切换不重置样例会话、表单值、选中项、焦点、滚动位置与 Stage 缩放。
 
-切换使用外观快照（`material-fade`），不逐帧插值模糊、折射或阴影。减少动效与不支持 View Transition API 的浏览器立即切换。连续快速请求以最后一次为准：被取消的快照只绘制最新选择，切换结束后不残留光学边缘、浮层闪烁或布局跳变。
+切换使用外观快照（`material-fade`），不逐帧插值模糊、折射或阴影。减少动效与不支持 View Transition API 的浏览器立即切换。连续快速请求及主题与材质同时切换均以最新选择为准：被取消的快照先提交待生效状态再启动新过渡，切回当前材质时立即终止未完成过渡，切换结束后不残留光学边缘、浮层闪烁或布局跳变。
 
 ## 磨砂材质
 
@@ -130,7 +130,7 @@ Playground、Frame 路由与 React 测试页面共用一个框架无关的材质
 
 透明度效果不可用或用户偏好减少透明度时，表面必须保持可读。CSS 回退使用仅含 alpha 的渐变遮罩与背景亮度；减少透明度会禁用可选渲染器。强制颜色模式下，原生控件与系统颜色语义优先，材质不得覆盖可见焦点或文本对比。
 
-渲染器仅在存在可绘制的合格光学表面时激活。纯实体与纯磨砂页面不创建画布、WebGL 上下文、Shader Program 或 Buffer。最后一个合格表面消失后会释放上下文、原生 SVG 滤镜与缓存映射，整页过渡先暂停时除外。
+渲染器仅在存在可绘制的合格光学表面时激活。纯实体与纯磨砂页面不创建画布、WebGL 上下文、Shader Program 或 Buffer。最后一个合格表面消失后会释放上下文、原生 SVG 滤镜与缓存映射，整页过渡先暂停时除外。当 `document.hidden` 为真时，已调度的边缘重绘与激活探测会暂停，页面重新可见后通过 `visibilitychange` 刷新一次。
 
 ## Glass 修复守则
 

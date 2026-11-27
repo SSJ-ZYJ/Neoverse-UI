@@ -75,9 +75,9 @@ export function classifyPaths(paths) {
       path.startsWith('packages/glass-runtime/') ||
       path.startsWith('packages/tokens/src/') ||
       path.startsWith('packages/tailwind/src/') ||
-      path === 'apps/playground/src/glass-runtime.ts' ||
-      path === 'apps/playground/src/modules/MaterialsModule.vue' ||
-      path === 'apps/playground/src/modules/SurfaceModule.vue' ||
+      path === 'apps/playground/src/runtime/glass-runtime.ts' ||
+      path === 'apps/playground/src/catalogue/materials/MaterialsModule.vue' ||
+      path === 'apps/playground/src/catalogue/materials/SurfaceModule.vue' ||
       path.startsWith('tests/optics/') ||
       path === 'tests/support/glass-optics.ts' ||
       path === 'playwright.optics.config.ts' ||

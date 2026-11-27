@@ -16,7 +16,7 @@ packages/
     src/components/ domain-grouped component stylesheets (controls, forms, surfaces, navigation, overlays, feedback, display, terminal, prose)
   motion/           motion roles, presence and layout-width primitives
   overlay-runtime/  top-layer positioning, tracking and light dismiss
-  glass-runtime/    optional Aurora Glass edge renderer with WebGL and CSS fallback
+  glass-runtime/    optional Aurora Glass edge renderer with WebGL and CSS fallback (`src/rendering/`, `src/tests/`)
   vue/              Vue 3 SFC adapters (`src/components/<category>/`, `src/tests/`)
   react/            React 19 adapters (`src/components/<category>/`, `src/tests/`)
   giscus-theme/     standalone light/dark Giscus theme CSS

@@ -16,7 +16,8 @@ panel or overlay. A **Surface Recipe** supplies paint for a role. A **Material
 Scope** is a DOM region established with `data-neoverse-material`. A **Glass
 Tier** controls Aurora Glass optics only. **Theme** selects colors separately.
 
-Import `Material`, `materials`, and `isMaterial` from `@neoverse-ui/tokens`.
+Import `Material`, `materials`, `materialCatalog`, and `isMaterial` from `@neoverse-ui/tokens`.
+`materialCatalog` is the single localized registry of material display names and short labels; UI pickers derive options from it instead of hardcoding material lists.
 Set `data-neoverse-material` on the document, a subtree or the surface itself.
 The closest recognized value wins; unknown values are transparent to resolution.
 If none is present, the document uses Glass. This resolves in CSS before hydration.
@@ -61,23 +62,27 @@ parameters never leak into Solid or Frosted token contracts.
 ## Material runtime and switching
 
 The Playground, the frame route and the React fixture resolve material through
-one framework-neutral module. A stored `material` preference initializes the
-`data-neoverse-material` attribute in the pre-paint startup script, so the first
-paint already uses the selected material. A `?material=` value is a temporary
-preview resolved by the same policy and never writes a preference; a reload
-keeps the last interactive choice. Material stays independent of Theme, Locale,
-Stage background and Showcase surface, and the attribute remains the only live
-contract.
+one framework-neutral module (`runtime/material-runtime.ts`). The server-rendered
+HTML document emits the initial `data-neoverse-material` attribute and the pre-paint
+startup script reconciles any persisted `material` preference before the first paint.
+A `?material=` value is a temporary preview resolved by the same policy and never
+writes a preference; a reload keeps the last interactive choice. Material stays
+independent of Theme, Locale, Stage background and Showcase surface, and the
+attribute remains the only live contract.
 
 The toolbar exposes Glass, Solid, and Frosted through the shared
-SegmentedControl or a touch cycle control. Shell chrome follows the global
-scope. Explicit presets remain available for optical comparison. Switching
-does not reset the specimen session, form values, selection, focus, scroll or zoom.
+SegmentedControl or a touch cycle control, derived from `materialCatalog`. Shell
+chrome follows the global scope. Editable specimens in the Inspector also support
+a session-local Material Scope override (`Inherit global`, `Solid`, `Frosted`,
+`Aurora Glass`) plus explicit surface presets where applicable. Switching does not
+reset the specimen session, form values, selection, focus, scroll or zoom.
 
 Switching uses the appearance snapshot (`material-fade`) instead of
 interpolating blur, refraction or shadows. Reduced motion and engines without
-the View Transition API swap immediately. Rapid requests settle on the last
-selection: a canceled snapshot paints the newest request, and no optical edge,
+the View Transition API swap immediately. Rapid requests and simultaneous Theme
+and Material switches settle on the latest selections: a canceled snapshot commits
+its pending update before the newer transition starts, returning to the current
+DOM material cancels any in-flight transition cleanly, and no optical edge,
 overlay flash or layout jump survives the swap.
 
 ## Frosted material
@@ -276,8 +281,10 @@ The renderer activates only when a drawn surface advertises optical eligibility
 or explicitly selects a Glass tier. Pure Solid and Frosted pages own no optical
 canvas, WebGL context, shader program or buffer. Adding an eligible surface can
 activate the renderer; removing the last one releases the context, native SVG
-filters and cached maps unless a whole-page transition suspends it first.
-`mount()`, `refresh()`, `suspend()`, `resume()` and `destroy()` retain their contract.
+filters and cached maps unless a whole-page transition suspends it first. While
+`document.hidden` is true, scheduled frames and activation probes pause cleanly
+and resume with a fresh pass on `visibilitychange`. `mount()`, `refresh()`,
+`suspend()`, `resume()` and `destroy()` retain their contract.
 
 The canvas is fixed to the viewport and the rim is painted in viewport
 coordinates, so every scroll request has to reach it. The frame cap defers a

@@ -43,7 +43,7 @@ const docsPath = resolve(root, 'docs/architecture/component-contract-matrix.md')
 const vueIndexPath = resolve(root, 'packages/vue/src/index.ts');
 const reactIndexPath = resolve(root, 'packages/react/src/index.tsx');
 const reactFixturePath = resolve(root, 'apps/playground/src/react-fixture.tsx');
-const reactFixtureDir = resolve(root, 'apps/playground/src/react-fixture');
+const reactFixtureDir = resolve(root, 'apps/playground/src/fixtures/react');
 
 const matrix = (await Bun.file(matrixPath).json()) as ComponentMatrix;
 const vueIndex = await Bun.file(vueIndexPath).text();

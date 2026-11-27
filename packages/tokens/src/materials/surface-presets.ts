@@ -1,8 +1,36 @@
+import { glassMaterial } from './glass-material.js';
+
 /** Enumerate the material families independently of theme and surface role */
 export const materials = ['glass', 'solid', 'frosted'] as const;
 
 /** Identify a material family */
 export type Material = (typeof materials)[number];
+
+/** Localized display names for every material family; single source of truth for UI selectors. */
+export interface MaterialDescriptor {
+  readonly id: Material;
+  readonly name: { readonly zh: string; readonly en: string };
+  readonly shortName: { readonly zh: string; readonly en: string };
+}
+
+/** Shared registry describing every supported material in canonical order. */
+export const materialCatalog = {
+  glass: {
+    id: 'glass',
+    name: glassMaterial.name,
+    shortName: { zh: '玻璃', en: 'Glass' },
+  },
+  solid: {
+    id: 'solid',
+    name: { zh: '实体', en: 'Solid' },
+    shortName: { zh: '实体', en: 'Solid' },
+  },
+  frosted: {
+    id: 'frosted',
+    name: { zh: '磨砂', en: 'Frosted' },
+    shortName: { zh: '磨砂', en: 'Frosted' },
+  },
+} as const satisfies Record<Material, MaterialDescriptor>;
 
 /** Preserve the default paint for documents that do not select a material */
 export const defaultMaterial: Material = 'glass';

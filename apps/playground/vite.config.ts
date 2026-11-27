@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react';
 import vue from '@vitejs/plugin-vue';
 import { defineConfig, normalizePath, type Plugin } from 'vite';
 import { playgroundCssPath, seedPlaygroundCss } from '../../scripts/dev/playground-css';
-import { resolvePlaygroundDocument } from './src/playground-document';
+import { resolvePlaygroundDocument } from './src/app/playground-document';
 
 const playgroundDocuments = (): Plugin => ({
   name: 'playground-documents',

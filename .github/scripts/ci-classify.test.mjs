@@ -66,7 +66,7 @@ test('optical source and harness changes run the dedicated SwiftShader gate', ()
     'packages/glass-runtime/src/index.ts',
     'packages/tokens/src/materials/glass.css',
     'packages/tailwind/src/theme.css',
-    'apps/playground/src/glass-runtime.ts',
+    'apps/playground/src/runtime/glass-runtime.ts',
     'package.json',
     'bun.lock',
   ]) {

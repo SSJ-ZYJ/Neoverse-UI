@@ -1,7 +1,13 @@
 import { createServer as createNetServer } from 'node:net';
-import { waitForAssets } from './asset-state';
-import { appCopy, formatLocalized, isLocale, type Locale, localize } from './playground-content';
-import { resolvePlaygroundDocument } from './playground-document';
+import { waitForAssets } from './app/asset-state';
+import { resolvePlaygroundDocument } from './app/playground-document';
+import {
+  appCopy,
+  formatLocalized,
+  isLocale,
+  type Locale,
+  localize,
+} from './content/playground-content';
 
 const requestedPort = Number.parseInt(process.env.PORT ?? '3000', 10);
 const stylesheetPath = new URL('../../../packages/tailwind/dist/playground.css', import.meta.url);

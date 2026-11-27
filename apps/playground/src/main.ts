@@ -1,11 +1,11 @@
 import { createApp } from 'vue';
-import App from './App.vue';
-import { LabBoard, LabWorkspace } from './app-views';
+import App from './app/App.vue';
+import { LabBoard, LabWorkspace } from './app/app-views';
+import { frameView } from './app/frame-state';
+import { preloadComponent } from './app/lazy-component';
 import siteIconUrl from './assets/neoverse-site-icon.png';
-import { frameView } from './frame-state';
-import { preloadLabRoute } from './lab-modules';
-import { preloadComponent } from './lazy-component';
-import { mountPlaygroundEffects } from './playground-effects';
+import { preloadLabRoute } from './features/catalogue/lab-modules';
+import { mountPlaygroundEffects } from './runtime/playground-effects';
 
 const favicon =
   document.querySelector<HTMLLinkElement>('link[rel~="icon"]') ?? document.createElement('link');

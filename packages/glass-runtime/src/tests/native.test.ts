@@ -1,0 +1,161 @@
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { NativeGlassRenderer } from '../native';
+import { installGlassTierStyles } from './runtime.test-support';
+
+let renderer: NativeGlassRenderer;
+let release = vi.fn(() => undefined);
+function surface() {
+  const element = document.createElement('div');
+  element.className = 'material-glass-elevated';
+  element.style.cssText =
+    'width:120px;height:80px;box-sizing:border-box;border-radius:16px;backdrop-filter:blur(18px)!important';
+  vi.spyOn(element, 'getClientRects').mockReturnValue([{}] as unknown as DOMRectList);
+  document.body.append(element);
+  return element;
+}
+
+describe('native live-backdrop ownership', () => {
+  beforeEach(() => {
+    document.body.innerHTML = '';
+    document.documentElement.removeAttribute('data-neoverse-glass-renderer');
+    vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
+      () =>
+        ({
+          createImageData: (w: number, h: number) => ({ data: new Uint8ClampedArray(w * h * 4) }),
+          putImageData: vi.fn(),
+        }) as unknown as CanvasRenderingContext2D,
+    );
+    vi.spyOn(HTMLCanvasElement.prototype, 'toDataURL').mockReturnValue('data:image/png;base64,map');
+    release = vi.fn(() => undefined);
+    renderer = new NativeGlassRenderer(document, () => true, release);
+  });
+  afterEach(() => {
+    renderer.destroy();
+    vi.restoreAllMocks();
+  });
+
+  it('shares geometry maps and restores caller filters and priority across destroy/remount', () => {
+    const a = surface(),
+      b = surface();
+    renderer.mount();
+    renderer.mount();
+    expect(a.style.backdropFilter).toContain('url(');
+    expect(a.style.getPropertyPriority('backdrop-filter')).toBe('important');
+    expect(a.getAttribute('data-neoverse-glass-native-filter')).toBe(
+      b.getAttribute('data-neoverse-glass-native-filter'),
+    );
+    expect(document.querySelectorAll('feDisplacementMap')).toHaveLength(1);
+    renderer.destroy();
+    expect(a.style.backdropFilter).toBe('blur(18px)');
+    expect(a.style.getPropertyPriority('backdrop-filter')).toBe('important');
+    expect(a.hasAttribute('data-neoverse-glass-native-filter')).toBe(false);
+    expect(document.querySelector('[data-neoverse-glass-native-defs]')).toBeNull();
+    expect(release).toHaveBeenCalledTimes(1);
+    renderer.mount();
+    expect(document.querySelectorAll('feDisplacementMap')).toHaveLength(1);
+  });
+
+  it('keeps external filter edits when the owner opts out or is removed', () => {
+    const a = surface();
+    renderer.mount();
+    a.style.setProperty('backdrop-filter', 'blur(12px) saturate(1.2)');
+    renderer.refresh();
+    expect(a.style.backdropFilter).toMatch(/url\(.*\) saturate\(1.2\)/);
+    expect(document.querySelector('feGaussianBlur')?.getAttribute('stdDeviation')).toBe('12');
+    a.style.setProperty('--neoverse-material-refraction-strength', '0');
+    renderer.refresh();
+    expect(a.style.backdropFilter).toBe('blur(12px) saturate(1.2)');
+    expect(document.querySelectorAll('feDisplacementMap')).toHaveLength(0);
+    a.style.removeProperty('--neoverse-material-refraction-strength');
+    renderer.refresh();
+    a.remove();
+    renderer.refresh();
+    expect(a.style.backdropFilter).toBe('blur(12px) saturate(1.2)');
+    expect(document.querySelectorAll('feDisplacementMap')).toHaveLength(0);
+  });
+
+  it('does not attach effects to invisible or particle-capture surfaces', () => {
+    const a = surface();
+    a.style.visibility = 'hidden';
+    const capture = document.createElement('div');
+    capture.setAttribute('data-neoverse-particle-capture', '');
+    capture.append(surface());
+    document.body.append(capture);
+    renderer.mount();
+    expect(document.querySelectorAll('feDisplacementMap')).toHaveLength(0);
+    expect(a.style.backdropFilter).toBe('blur(18px)');
+  });
+
+  it.each(['solid', 'frosted'])(
+    'opts out under %s but keeps explicit and nearer Glass owners',
+    async (material) => {
+      const tierStyles = installGlassTierStyles();
+      try {
+        const region = document.createElement('section');
+        region.dataset.neoverseMaterial = material;
+        const automatic = surface();
+        automatic.className = 'material-role-panel';
+        document.body.append(region);
+        region.append(automatic);
+        renderer.mount();
+        expect(automatic.style.backdropFilter).toBe('blur(18px)');
+        expect(document.querySelector('[data-neoverse-glass-native-defs]')).toBeNull();
+        expect(document.documentElement.hasAttribute('data-neoverse-glass-renderer')).toBe(false);
+
+        const nested = surface();
+        nested.className = 'ui-input';
+        nested.dataset.neoverseMaterial = 'glass';
+        const explicit = surface();
+        region.append(nested, explicit);
+        await vi.waitFor(() => expect(nested.style.backdropFilter).toContain('url('));
+        expect(automatic.style.backdropFilter).toBe('blur(18px)');
+        expect(explicit.style.backdropFilter).toContain('url(');
+
+        region.removeAttribute('data-neoverse-material');
+        await vi.waitFor(() => expect(automatic.style.backdropFilter).toContain('url('));
+        nested.remove();
+        explicit.remove();
+        region.dataset.neoverseMaterial = material;
+        await vi.waitFor(() => {
+          expect(document.querySelector('[data-neoverse-glass-native-defs]')).toBeNull();
+          expect(document.documentElement.hasAttribute('data-neoverse-glass-renderer')).toBe(false);
+        });
+        expect(automatic.style.backdropFilter).toBe('blur(18px)');
+        expect(nested.style.backdropFilter).toBe('blur(18px)');
+        expect(explicit.style.backdropFilter).toBe('blur(18px)');
+      } finally {
+        tierStyles.remove();
+      }
+    },
+  );
+
+  it('does not overwrite a caller edit made immediately before destroy', () => {
+    const a = surface();
+    renderer.mount();
+    a.style.setProperty('backdrop-filter', 'blur(8px)', 'important');
+    renderer.destroy();
+    expect(a.style.backdropFilter).toBe('blur(8px)');
+    expect(a.style.getPropertyPriority('backdrop-filter')).toBe('important');
+  });
+
+  it('suspend defers filter rebuilds and resume applies the settled scene once', () => {
+    const element = surface();
+    renderer.suspend();
+    renderer.mount();
+    expect(element.style.backdropFilter).toBe('blur(18px)');
+    expect(document.querySelector('[data-neoverse-glass-native-defs]')).toBeNull();
+
+    renderer.resume();
+    expect(element.style.backdropFilter).toContain('url(');
+    expect(document.querySelectorAll('feDisplacementMap')).toHaveLength(1);
+    const settledFilter = element.getAttribute('data-neoverse-glass-native-filter');
+
+    // Explicit refresh remains the escape hatch for geometry changes while
+    // suspended; the rebuilt map reflects the new width.
+    renderer.suspend();
+    element.style.cssText =
+      'width:240px;height:80px;box-sizing:border-box;border-radius:16px;backdrop-filter:blur(18px)!important';
+    renderer.refresh();
+    expect(element.getAttribute('data-neoverse-glass-native-filter')).not.toBe(settledFilter);
+  });
+});

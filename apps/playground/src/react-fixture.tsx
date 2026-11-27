@@ -1,5 +1,5 @@
-import type { Locale } from './playground-content';
-import { applyThemeMode, resolveInitialThemeMode } from './theme-runtime';
+import type { Locale } from './content/playground-content';
+import { applyThemeMode, resolveInitialThemeMode } from './runtime/theme-runtime';
 
 const locale: Locale =
   new URLSearchParams(window.location.search).get('lang') === 'zh' ? 'zh' : 'en';
@@ -18,7 +18,7 @@ if (root === null) {
   throw new Error('React fixture root is missing.');
 }
 
-void Promise.all([import('react-dom/client'), import('./react-fixture/ReactFixtureApp')]).then(
+void Promise.all([import('react-dom/client'), import('./fixtures/react/ReactFixtureApp')]).then(
   ([{ createRoot }, { default: ReactFixtureApp }]) => {
     createRoot(root).render(
       <ReactFixtureApp

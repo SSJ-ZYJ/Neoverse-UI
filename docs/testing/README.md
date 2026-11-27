@@ -15,7 +15,7 @@ Registration does not execute a test. Every `bun-test` or `vitest` file must add
 | `packages/*/src/*.test.ts` | unit | bun-test | — | — |
 | `packages/*/src/tests/*.test.ts` | unit | bun-test | — | — |
 | `packages/*/src/tests/*.test.tsx` | unit | bun-test | — | — |
-| `apps/playground/src/*.test.ts` | unit | bun-test | — | — |
+| `apps/playground/src/tests/*.test.ts` | unit | bun-test | — | — |
 | `scripts/dev/*.test.ts` | unit | bun-test | — | — |
 | `scripts/dev/integration/*.test.ts` | module | bun-test | — | isolated |
 | `scripts/gates/*.test.ts` | unit | bun-test | — | — |

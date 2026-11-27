@@ -300,7 +300,7 @@
       "evidence": [
         "packages/vue/src/tests/portal-components.test.ts",
         "packages/react/src/tests/portal-components.test.tsx",
-        "apps/playground/src/lab-specimens/data-display.ts",
+        "apps/playground/src/features/specimens/data-display.ts",
         "tests/e2e/components/surfaces.spec.ts"
       ],
       "reactValidation": {

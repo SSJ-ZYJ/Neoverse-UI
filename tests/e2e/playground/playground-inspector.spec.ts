@@ -556,4 +556,49 @@ test.describe('playground', () => {
     await expect(activity).toBeEnabled();
     await expect(overview).toBeChecked();
   });
+
+  test('the Inspector overrides local material scope and explicit Frosted surfaces without remounting', async ({
+    page,
+  }, testInfo) => {
+    const mobile = testInfo.project.name === 'mobile';
+    await page.emulateMedia({ reducedMotion: 'reduce' });
+    await page.goto('/?theme=light&material=glass&lang=en&fps=0#forms-input', {
+      waitUntil: 'domcontentloaded',
+    });
+    const stageContent = page.locator('#forms-input .playground-stage__specimen-content');
+    const input = page.locator('#forms-input input');
+    await input.fill('Local override stays mounted');
+    const handle = await input.elementHandle();
+    await expect(stageContent).not.toHaveAttribute('data-neoverse-material');
+
+    const inspector = await showInspector(page, mobile);
+    await chooseOption(inspector, 'materialScope', 'Frosted');
+    await expect(stageContent).toHaveAttribute('data-neoverse-material', 'frosted');
+    await expect(page.locator('html')).toHaveAttribute('data-neoverse-material', 'glass');
+    await expect(inspector.locator('[data-specimen-control="materialScope"]')).toContainText(
+      'Modified',
+    );
+    await expect(inspector.locator('a[href^="/frame"]')).toHaveAttribute(
+      'href',
+      /material=frosted/,
+    );
+    await expect(input).toHaveValue('Local override stays mounted');
+    expect(await input.evaluate((node, before) => node === before, handle)).toBe(true);
+
+    await inspector.getByRole('button', { name: 'Reset specimen' }).click();
+    await expect(stageContent).not.toHaveAttribute('data-neoverse-material');
+    expect(await input.evaluate((node, before) => node === before, handle)).toBe(true);
+
+    if (mobile) await page.keyboard.press('Escape');
+    await page.goto('/?theme=light&material=solid&lang=en&fps=0#dock-component', {
+      waitUntil: 'domcontentloaded',
+    });
+    const dock = page.locator('#dock-component nav');
+    const dockInspector = await showInspector(page, mobile);
+    await chooseOption(dockInspector, 'surface', 'Frosted');
+    await expect(dock).toHaveAttribute('data-surface', 'frosted');
+    await expect(dock).toHaveCSS('backdrop-filter', /blur\(/);
+    await dockInspector.getByRole('button', { name: 'Reset specimen' }).click();
+    await expect(dock).toHaveAttribute('data-surface', 'auto');
+  });
 });
