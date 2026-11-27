@@ -15,7 +15,7 @@ export async function collectMissingAdapterSelectors(
   baseUrl: URL,
 ): Promise<string[]> {
   const vueClassesSource = new URL('../../vue/src/components/actions/classes.ts', baseUrl);
-  const surfacePresetsSource = new URL('../../tokens/src/foundation/surface-presets.ts', baseUrl);
+  const surfacePresetsSource = new URL('../../tokens/src/materials/surface-presets.ts', baseUrl);
   const reactSourceDirectory = fileURLToPath(new URL('../../react/src/', baseUrl));
   const reactFiles = [
     ...new Bun.Glob('components/**/*.{ts,tsx}').scanSync({ cwd: reactSourceDirectory }),
@@ -54,7 +54,7 @@ export async function collectMissingAdapterSelectors(
 
 export async function collectComponentCssIssues(componentSourceDirectory: string) {
   const componentSourceFiles = [
-    ...new Bun.Glob('*.css').scanSync({ cwd: componentSourceDirectory }),
+    ...new Bun.Glob('**/*.css').scanSync({ cwd: componentSourceDirectory }),
   ];
   const componentSources = await Promise.all(
     componentSourceFiles.map(async (file) => ({

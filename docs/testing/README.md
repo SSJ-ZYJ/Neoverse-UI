@@ -13,7 +13,8 @@ Registration does not execute a test. Every `bun-test` or `vitest` file must add
 | Scope | Level | Runner | Args | Metadata |
 | --- | --- | --- | --- | --- |
 | `packages/*/src/*.test.ts` | unit | bun-test | — | — |
-| `packages/*/src/*.test.tsx` | unit | bun-test | — | — |
+| `packages/*/src/tests/*.test.ts` | unit | bun-test | — | — |
+| `packages/*/src/tests/*.test.tsx` | unit | bun-test | — | — |
 | `apps/playground/src/*.test.ts` | unit | bun-test | — | — |
 | `scripts/dev/*.test.ts` | unit | bun-test | — | — |
 | `scripts/dev/integration/*.test.ts` | module | bun-test | — | isolated |
@@ -21,7 +22,7 @@ Registration does not execute a test. Every `bun-test` or `vitest` file must add
 | `scripts/release/*.test.ts` | module | bun-test | — | isolated |
 | `scripts/requests/*.test.ts` | module | bun-test | — | isolated |
 | `scripts/sync/*.test.ts` | module | bun-test | — | isolated |
-| `tests/e2e/*.spec.ts` | system | playwright | — | browser |
+| `tests/e2e/*/*.spec.ts` | system | playwright | — | browser |
 | `tests/optics/*.spec.ts` | system | playwright | — | browser |
 
 Cross-browser coverage is declared in `playwright.cross-browser.config.ts` and checked against the `tests/e2e` rows. The `scripts/gates/` checks are static repository checks, not tests; their inventory lives in [scripts/AGENTS.md](../../scripts/AGENTS.md).
@@ -37,33 +38,34 @@ running every theme, width, and language combination.
 
 ## Browser specs
 
-`tests/e2e/` is organised by product module, not by component: one spec per area, split into focused specs when an area outgrows the test-file budget, with the shared adapter and fixture helpers in `tests/support/e2e.ts`.
+`tests/e2e/` is organised by responsibility domain (`materials/`, `components/`, `overlays/`, `motion/`, `playground/`, `accessibility/`, `parity/`), split into focused specs when an area outgrows the test-file budget, with the shared adapter and fixture helpers in `tests/support/e2e.ts`.
 
 | Spec | Covers |
 | --- | --- |
-| `forms.spec.ts` | Field wiring, text submission and IME, Select keyboard and controlled rejection, readonly choice submission and consumer reset, number inputs, accessibility roles |
-| `overlays.spec.ts` | Dialog, popover and dropdown lifecycle, dismissal, focus return, anchor tracking, tooltip and toast behavior, unified overlay typography and destructive confirmation |
-| `context-menu.spec.ts` | Cursor menu and submenu lifecycle, keyboard entry, hover wash, parent rim and positioning corrections, viewport clamping, touch and no-Popover fallback, native menu passthrough |
-| `overlay-layering.spec.ts` | Modal drawer and higher-layer toolbar hit testing, anchored fallback overlap and dismissal |
-| `navigation.spec.ts` | Breadcrumb, dock and step flow, shared navigation indicator inside a magnified preview |
-| `segmented-control.spec.ts` | Segmented control direction keys and roving tab stop, rejected and disabled reconciliation, held-drag preview and release commit, theme icon and language label geometry, Aurora Glass well |
-| `surfaces.spec.ts` | Grouped-control scale motion, tabs, pagination, disclosure, table, skeleton, timeline, stat card, scrollbar, avatar initials and placeholder icon |
-| `terminal.spec.ts` | Transcript composition, suggestions, IME guard, tail following, reader intent |
-| `motion.spec.ts` | List reorder, entrance replay, page transitions, page dissolve, disclosure expansion and collapse, React presence exit, reduced motion, layout width on a language switch, theme reveal reversal and thumb color continuity |
-| `motion-hierarchy.spec.ts` | Promoted Motion section, right-hand Inspector category switching, distinct-scene zero-flash transitions |
-| `materials.spec.ts` | Solid opacity and contrast, Glass tier paint and reduced transparency, adapter/portal paint, Prose and focus |
-| `material-scopes.spec.ts` | All nine parent/child material combinations, unknown and removed boundaries, all seven Surface Roles across Solid/Frosted/Glass in Light and Dark, Frosted non-optical isolation and nested blur suppression, contrast, reduced transparency state preservation, forced colors, and scroll stability |
-| `glass-runtime.spec.ts` | One shared noninteractive renderer canvas, fixed placement, theme stability, context loss/restore, on-demand allocation (a pure Solid page keeps zero optical resources and releases them), runtime reduced transparency, forced colors and adapter lifecycle |
-| `layout.spec.ts` | Control size baseline in both adapters, badge type scale, 24px minimum target, no implicit specimen magnification, table caption placement and corner consistency across previews and composition scenes |
-| `contrast.spec.ts` | WCAG contrast floors for the primary, secondary and muted text roles in both themes |
-| `playground.spec.ts` | Explorer disclosure and specimen search, theme and layout continuity on reload, preview persistence and reading position, browser history and deep links, drawer focus, responsive shell overflow |
-| `material-switching.spec.ts` | Three-material desktop and touch switching, specimen form/zoom/scroll continuity, last-request-wins, appearance snapshot cleanup, Solid status and selection |
-| `playground-stage.spec.ts` | Focused stage canvas, stage background switcher and persistence, specimen move handle and Home recentering, preview zoom, wheel zoom around the pointer, magnified pan without clipping the shadow, chrome and heading above a magnified preview |
-| `playground-specimens.spec.ts` | Catalogue previews at their own size, Colors gallery, Markdown heading and inline style rendering, specimen title hierarchy, stage backdrop without painted specimen wrappers, focused and QA galleries |
-| `playground-composition.spec.ts` | Composition presets and reset without remounting, dynamic focus fallback, mobile composition drawer, preset geometry at representative widths in both languages, reduced motion, anchored overlay isolation and cleanup |
-| `playground-inspector.spec.ts` | Inspector edits shared with Button, Badge, SegmentedControl, Select, Checkbox, Tabs, Card and Dock |
-| `playground-shell.spec.ts` | Isolated specimen frame, desktop and mobile toolbar, Giscus themes, direct Explorer leaves, demo destinations, React fixture link |
-| `parity.spec.ts` | Every React adapter renders, theme resolution, shared control names |
+| `components/forms.spec.ts` | Field wiring, text submission and IME, Select keyboard and controlled rejection, readonly choice submission and consumer reset, number inputs, accessibility roles |
+| `overlays/overlays.spec.ts` | Dialog, popover and dropdown lifecycle, dismissal, focus return, anchor tracking, tooltip and toast behavior, unified overlay typography and destructive confirmation |
+| `overlays/context-menu.spec.ts` | Cursor menu and submenu lifecycle, keyboard entry, hover wash, parent rim and positioning corrections, viewport clamping, touch and no-Popover fallback, native menu passthrough |
+| `overlays/overlay-layering.spec.ts` | Modal drawer and higher-layer toolbar hit testing, anchored fallback overlap and dismissal |
+| `components/navigation.spec.ts` | Breadcrumb, dock and step flow, shared navigation indicator inside a magnified preview |
+| `components/segmented-control.spec.ts` | Segmented control direction keys and roving tab stop, rejected and disabled reconciliation, held-drag preview and release commit, theme icon and language label geometry, Aurora Glass well |
+| `components/surfaces.spec.ts` | Grouped-control scale motion, tabs, pagination, disclosure, table, skeleton, timeline, stat card, scrollbar, avatar initials and placeholder icon |
+| `components/terminal.spec.ts` | Transcript composition, suggestions, IME guard, tail following, reader intent |
+| `motion/motion.spec.ts` | List reorder, entrance replay, page transitions, page dissolve, disclosure expansion and collapse, React presence exit, reduced motion, layout width on a language switch, theme reveal reversal and thumb color continuity |
+| `motion/motion-hierarchy.spec.ts` | Promoted Motion section, right-hand Inspector category switching, distinct-scene zero-flash transitions |
+| `materials/materials.spec.ts` | Solid opacity and contrast, Glass tier paint and reduced transparency, adapter/portal paint, Prose and focus |
+| `materials/material-scopes.spec.ts` | All nine parent/child material combinations, unknown and removed boundaries, all seven Surface Roles across Solid/Frosted/Glass in Light and Dark, Frosted non-optical isolation and nested blur suppression, contrast, reduced transparency state preservation, forced colors, and scroll stability |
+| `materials/component-materials.spec.ts` | Component-level three-material integration across controls, forms, tooltip pointers, avatars, status plates, terminals, Prose, explicit Frosted surfaces, portaled dialog scope bridging, and zero Glass canvas on pure Solid/Frosted pages |
+| `materials/glass-runtime.spec.ts` | One shared noninteractive renderer canvas, fixed placement, theme stability, context loss/restore, on-demand allocation (a pure Solid page keeps zero optical resources and releases them), runtime reduced transparency, forced colors and adapter lifecycle |
+| `accessibility/layout.spec.ts` | Control size baseline in both adapters, badge type scale, 24px minimum target, no implicit specimen magnification, table caption placement and corner consistency across previews and composition scenes |
+| `accessibility/contrast.spec.ts` | WCAG contrast floors for the primary, secondary and muted text roles in both themes |
+| `playground/playground.spec.ts` | Explorer disclosure and specimen search, theme and layout continuity on reload, preview persistence and reading position, browser history and deep links, drawer focus, responsive shell overflow |
+| `materials/material-switching.spec.ts` | Three-material desktop and touch switching, specimen form/zoom/scroll continuity, last-request-wins, appearance snapshot cleanup, Solid status and selection |
+| `playground/playground-stage.spec.ts` | Focused stage canvas, stage background switcher and persistence, specimen move handle and Home recentering, preview zoom, wheel zoom around the pointer, magnified pan without clipping the shadow, chrome and heading above a magnified preview |
+| `playground/playground-specimens.spec.ts` | Catalogue previews at their own size, Colors gallery, Markdown heading and inline style rendering, specimen title hierarchy, stage backdrop without painted specimen wrappers, focused and QA galleries |
+| `playground/playground-composition.spec.ts` | Composition presets and reset without remounting, dynamic focus fallback, mobile composition drawer, preset geometry at representative widths in both languages, reduced motion, anchored overlay isolation and cleanup |
+| `playground/playground-inspector.spec.ts` | Inspector edits shared with Button, Badge, SegmentedControl, Select, Checkbox, Tabs, Card and Dock |
+| `playground/playground-shell.spec.ts` | Isolated specimen frame, desktop and mobile toolbar, Giscus themes, direct Explorer leaves, demo destinations, React fixture link |
+| `parity/parity.spec.ts` | Every React adapter renders, theme resolution, shared control names |
 
 The cross-browser configuration runs forms, overlays, context menu, navigation, segmented control, surfaces, motion, parity, and the engine-neutral material tests for Solid paint and scope resolution. `@chromium-materials` identifies the Chromium tier and transparency probes; `tests/optics/glass.spec.ts` runs separately under Linux Chromium with SwiftShader and reports optical diagnostics rather than a release pass/fail signal.
 

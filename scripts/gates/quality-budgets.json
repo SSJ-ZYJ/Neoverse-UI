@@ -4,22 +4,42 @@
     "css": [400, 600],
     "test": [400, 700]
   },
+  "directoryLimits": {
+    "source": [15, 25],
+    "css": [15, 25],
+    "test": [15, 25]
+  },
+  "forbiddenDirectoryNames": ["utils", "helpers", "common", "misc"],
   "exceptions": {
     "packages/glass-runtime/src/rendering/glass-renderer.ts": {
       "ceiling": 1570,
       "reason": "2026-11-26: on-demand activation, release and the scene-mutation probe share the renderer lifecycle state; remove when render, lifecycle and observation can be owned independently."
     },
-    "packages/tailwind/src/components/form-control.css": {
-      "ceiling": 980,
-      "reason": "2026-11-23: Shared form-control selectors include the flowing choice-state fill and mirrored input/textarea caret overlays; remove when selectors are generated from Tokens."
-    },
     "packages/tailwind/src/theme.css": {
       "ceiling": 860,
       "reason": "2026-11-26: Tailwind v4 theme mapping and @scope (.material-scopes) Glass utilities formatted by Biome; remove when the theme is generated from Tokens."
     },
-    "packages/tokens/src/fonts.css": {
+    "packages/tokens/src/foundation/fonts.css": {
       "ceiling": 1512,
       "reason": "2026-11-22: Font face declarations with embedded subsets; remove when font assets move to a generated sheet."
+    }
+  },
+  "directoryExceptions": {
+    "apps/playground/src": {
+      "ceiling": 65,
+      "reason": "2026-11-27: Design Lab shell and runtime entry files precede the M8 Playground architecture refactor; remove when M8 organizes the Playground by feature domain."
+    },
+    "apps/playground/src/modules": {
+      "ceiling": 48,
+      "reason": "2026-11-27: Flat Design Lab gallery modules precede the M8 Playground refactor; remove when M8 groups modules by design-system domain."
+    },
+    "apps/playground/src/previews": {
+      "ceiling": 36,
+      "reason": "2026-11-27: Flat Design Lab focused previews precede the M8 Playground refactor; remove when M8 groups previews by component domain."
+    },
+    "packages/glass-runtime/src": {
+      "ceiling": 30,
+      "reason": "2026-11-27: Flat runtime unit tests at package src root; remove when glass-runtime tests move under src/tests/."
     }
   }
 }

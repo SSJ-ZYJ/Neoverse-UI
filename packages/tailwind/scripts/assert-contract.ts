@@ -18,9 +18,12 @@ import { expectedSelectors, forbiddenSelectors } from './contract-checks/expecte
 import { expectedValues } from './contract-checks/expected-values.ts';
 
 const output = new URL('../dist/contract.css', import.meta.url);
-const buttonSource = new URL('../src/components/button.css', import.meta.url);
-const navigationItemSource = new URL('../src/components/navigation-item.css', import.meta.url);
-const tooltipSource = new URL('../src/components/tooltip.css', import.meta.url);
+const buttonSource = new URL('../src/components/controls/button.css', import.meta.url);
+const navigationItemSource = new URL(
+  '../src/components/navigation/navigation-item.css',
+  import.meta.url,
+);
+const tooltipSource = new URL('../src/components/overlays/tooltip.css', import.meta.url);
 const componentsOutput = new URL('../dist/components.css', import.meta.url);
 const proseOutput = new URL('../dist/prose.css', import.meta.url);
 

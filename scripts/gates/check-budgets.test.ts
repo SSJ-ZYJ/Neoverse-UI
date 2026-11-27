@@ -162,3 +162,73 @@ describe('budget validation', () => {
     expect(result.errors).toContain('missing.ts: exception names a file that does not exist');
   });
 });
+
+describe('directory governance budgets', () => {
+  const dirBudgets = (directoryExceptions: Budgets['directoryExceptions'] = {}): Budgets => ({
+    limits: { source: [300, 500], css: [400, 600], test: [400, 700] },
+    directoryLimits: { source: [15, 25], css: [15, 25], test: [15, 25] },
+    forbiddenDirectoryNames: ['utils', 'helpers', 'common', 'misc'],
+    exceptions: {},
+    directoryExceptions,
+  });
+
+  test('flags directories that exceed the direct-file hard limit without an exception', () => {
+    const files = Array.from({ length: 26 }, (_, index) => `packages/demo/src/file-${index}.ts`);
+    const result = checkBudgets(
+      input(
+        files,
+        files.map((file) => [file, 20]),
+        dirBudgets(),
+      ),
+    );
+    expect(result.errors).toContain(
+      'packages/demo/src: 26 direct files exceeds the source directory hard limit 25; split by domain responsibility or register a dated exception',
+    );
+  });
+
+  test('accepts a dated directory exception within ceiling and rejects stale ones', () => {
+    const files = Array.from({ length: 26 }, (_, index) => `packages/demo/src/file-${index}.css`);
+    const accepted = checkBudgets(
+      input(
+        files,
+        files.map((file) => [file, 20]),
+        dirBudgets({
+          'packages/demo/src': {
+            ceiling: 30,
+            reason: '2026-11-27: Legacy styles awaiting domain split.',
+          },
+        }),
+      ),
+    );
+    expect(accepted.errors).toEqual([]);
+
+    const stale = checkBudgets(
+      input(
+        files.slice(0, 10),
+        files.slice(0, 10).map((file) => [file, 20]),
+        dirBudgets({
+          'packages/demo/src': {
+            ceiling: 30,
+            reason: '2026-11-27: Legacy styles awaiting domain split.',
+          },
+        }),
+      ),
+    );
+    expect(stale.errors).toContain(
+      'packages/demo/src: directory exception is within the hard limit 25; remove it',
+    );
+  });
+
+  test('rejects forbidden generic dumping-ground directory names', () => {
+    const result = checkBudgets(
+      input(
+        ['packages/demo/src/utils/format.ts'],
+        [['packages/demo/src/utils/format.ts', 20]],
+        dirBudgets(),
+      ),
+    );
+    expect(result.errors).toContain(
+      'packages/demo/src/utils: forbidden generic directory name "utils"; organize files by domain responsibility instead',
+    );
+  });
+});

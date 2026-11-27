@@ -2,20 +2,20 @@ import { mkdir } from 'node:fs/promises';
 import { materialRecipes } from './material-recipes.js';
 
 const packageDirectory = new URL('../', import.meta.url);
-const source = new URL('src/theme.css', packageDirectory);
-const componentsSource = new URL('src/components.css', packageDirectory);
-const componentsDirectory = new URL('src/components/', packageDirectory);
+const sourceDirectory = new URL('src/', packageDirectory);
+const source = new URL('theme.css', sourceDirectory);
+const componentsSource = new URL('components.css', sourceDirectory);
 const outputDirectory = new URL('dist/', packageDirectory);
 const output = new URL('theme.css', outputDirectory);
 const componentsOutput = new URL('components.css', outputDirectory);
-const proseSource = new URL('src/components/prose.css', packageDirectory);
-const tableSource = new URL('src/components/table.css', packageDirectory);
-const disclosureSource = new URL('src/components/disclosure.css', packageDirectory);
+const proseSource = new URL('components/prose/prose.css', sourceDirectory);
+const tableSource = new URL('components/display/table.css', sourceDirectory);
+const disclosureSource = new URL('components/display/disclosure.css', sourceDirectory);
 const proseOutput = new URL('prose.css', outputDirectory);
 await mkdir(outputDirectory, { recursive: true });
 const componentFacade = await Bun.file(componentsSource).text();
 const componentFiles = [
-  ...componentFacade.matchAll(/^@import ['"]\.\/components\/([^'"]+)['"];?$/gm),
+  ...componentFacade.matchAll(/^@import ['"]\.\/((?:materials|components)\/[^'"]+)['"];?$/gm),
 ].flatMap((match) => (match[1] === undefined ? [] : [match[1]]));
 
 if (componentFiles.length === 0) {
@@ -24,7 +24,7 @@ if (componentFiles.length === 0) {
 
 const componentCss = (
   await Promise.all(
-    componentFiles.map((fileName) => Bun.file(new URL(fileName, componentsDirectory)).text()),
+    componentFiles.map((fileName) => Bun.file(new URL(fileName, sourceDirectory)).text()),
   )
 ).join('\n\n');
 

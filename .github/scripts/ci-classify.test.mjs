@@ -50,7 +50,7 @@ test('runtime, browser tests, contract definitions and dependency changes need f
     'packages/react/src/index.tsx',
     'apps/playground/src/app.tsx',
     'apps/playground/src/fixture.md',
-    'tests/e2e/playground.spec.ts',
+    'tests/e2e/playground/playground.spec.ts',
     'tests/support/e2e.ts',
     'contracts/component-matrix.json',
     'playwright.config.ts',
@@ -64,7 +64,7 @@ test('runtime, browser tests, contract definitions and dependency changes need f
 test('optical source and harness changes run the dedicated SwiftShader gate', () => {
   for (const file of [
     'packages/glass-runtime/src/index.ts',
-    'packages/tokens/src/material.css',
+    'packages/tokens/src/materials/glass.css',
     'packages/tailwind/src/theme.css',
     'apps/playground/src/glass-runtime.ts',
     'package.json',

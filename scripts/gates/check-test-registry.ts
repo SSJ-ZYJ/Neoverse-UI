@@ -328,8 +328,8 @@ export function checkRegistry(input: RegistryInput): string[] {
   }
 
   const e2eSpecs = testFiles
-    .filter((file) => /^tests\/e2e\/[^/]+\.spec\.ts$/.test(file))
-    .map((file) => file.split('/').at(-1) ?? '');
+    .filter((file) => /^tests\/e2e\/.+\.spec\.ts$/.test(file))
+    .map((file) => file.slice('tests/e2e/'.length));
   for (const spec of e2eSpecs) {
     if (!browserSpecs.includes(spec))
       errors.push(`${spec}: browser spec is missing from docs/testing/README.md`);

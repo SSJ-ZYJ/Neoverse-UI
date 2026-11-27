@@ -1,0 +1,158 @@
+@layer components {
+  /* The panel reuses .ui-overlay-panel for positioning, material and motion;
+     this block only adds the compact row grid a context menu needs. */
+  .ui-context-menu {
+    display: none;
+    min-width: var(--neoverse-context-menu-min-inline-size);
+    padding: var(--neoverse-space-1);
+    gap: 0;
+  }
+
+  .ui-context-menu:popover-open,
+  .ui-context-menu.ui-overlay-panel--fallback-open {
+    display: grid;
+  }
+
+  .ui-context-menu__heading {
+    margin: 0;
+    padding: var(--neoverse-space-1) var(--neoverse-space-3);
+    color: var(--neoverse-context-menu-heading-foreground);
+    font-size: var(--neoverse-context-menu-heading-font-size);
+  }
+
+  /* A rule is a native hr so the separator role and its semantics are free. */
+  .ui-context-menu__separator {
+    height: 0;
+    margin: var(--neoverse-space-1) var(--neoverse-space-3);
+    border: 0;
+    border-top: var(--neoverse-border-width-thin) solid var(--neoverse-context-menu-separator-color);
+  }
+
+  .ui-context-menu__item {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: var(--neoverse-context-menu-item-gap);
+    border: 0;
+    border-radius: var(--neoverse-overlay-item-radius);
+    padding: var(--neoverse-overlay-item-padding-block) var(--neoverse-overlay-item-padding-inline);
+    color: var(--neoverse-context-menu-item-foreground);
+    background: transparent;
+    font: inherit;
+    font-size: var(--neoverse-context-menu-font-size);
+    line-height: var(--neoverse-overlay-item-line-height);
+    text-align: left;
+    cursor: pointer;
+    transition: color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  /* Only checkable rows reserve a check column; a plain action starts at the padding.
+     The mark is a hairline glyph rather than a filled dot: a filled disc at this size
+     reads as a status light instead of a selection mark. */
+  .ui-context-menu__check {
+    display: inline-flex;
+    flex: none;
+    width: var(--neoverse-context-menu-check-inline-size);
+    justify-content: center;
+    color: var(--neoverse-context-menu-check-foreground);
+    font-size: var(--neoverse-font-size-2xs);
+    line-height: 1;
+  }
+
+  .ui-context-menu__label {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* A submenu is its own manual popover in the top layer, flush with the panel edge the way
+     a native submenu is. It paints the shared overlay recipe itself rather than nesting a
+     glass utility, which the material contract forbids, and the panel registers it as an
+     inside element for dismissal. */
+  /* The adapter overlaps the column onto the panel so the submenu covers the parent's rim. */
+  :where(.ui-context-menu, .ui-context-menu__submenu) {
+    min-width: var(--neoverse-context-menu-min-inline-size);
+    gap: 0;
+  }
+
+  /* Submenus inherit .ui-overlay-panel, .material-glass-elevated and .nv-presence,
+     adding only submenu stacking and its fallback-open display class. */
+  .ui-context-menu__submenu {
+    z-index: calc(var(--neoverse-overlay-layer) + 1);
+  }
+
+  .ui-context-menu__submenu:popover-open,
+  .ui-context-menu__submenu--open {
+    display: grid;
+  }
+
+  .ui-context-menu__level {
+    display: grid;
+    gap: 0;
+    min-width: var(--neoverse-context-menu-min-inline-size);
+  }
+
+  /* Keep the same wash as hover when the pointer crosses into the submenu. */
+  .ui-context-menu__item[data-open='true'] {
+    --neoverse-quiet-control-rest-feedback: var(--neoverse-control-ghost-hover-background);
+  }
+
+  .ui-context-menu__chevron {
+    flex: none;
+    color: var(--neoverse-context-menu-shortcut-foreground);
+    font-size: var(--neoverse-context-menu-heading-font-size);
+  }
+
+  .ui-context-menu__shortcut {
+    flex: none;
+    margin-inline-start: var(--neoverse-space-4);
+    color: var(--neoverse-context-menu-shortcut-foreground);
+    font-size: var(--neoverse-context-menu-heading-font-size);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ui-context-menu__item:focus-visible:not([data-neoverse-focus-origin='pointer']) {
+    color: var(--neoverse-color-text-primary);
+    background: var(--neoverse-overlay-item-active-background);
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: calc(var(--neoverse-focus-ring-offset) * -1);
+  }
+
+  .ui-context-menu__item[data-tone='danger'] {
+    color: var(--neoverse-overlay-item-danger-foreground);
+  }
+
+  .ui-context-menu__item:disabled {
+    cursor: not-allowed;
+    opacity: var(--neoverse-overlay-item-disabled-opacity);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-context-menu__item {
+      transition: none;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ui-context-menu__separator {
+      background: CanvasText;
+    }
+
+    .ui-context-menu__item:focus-visible:not([data-neoverse-focus-origin='pointer']) {
+      outline-color: Highlight;
+    }
+  }
+}
+
+@layer neoverse-material-mode {
+  @scope (.material-solid-scope) {
+    :where(:scope, :scope *).ui-context-menu__separator {
+      border-top-color: var(--neoverse-material-solid-divider);
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *).ui-context-menu__separator {
+      border-top-color: var(--neoverse-material-frosted-divider);
+    }
+  }
+}

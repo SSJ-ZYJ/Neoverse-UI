@@ -2,9 +2,13 @@ import { getSurfaceClass } from '@neoverse-ui/tokens';
 import { type ComponentPropsWithRef, useEffect, useRef, useState } from 'react';
 import { mergeClassNames } from '../../internal.js';
 import { useCaretMotion } from '../motion/caret-motion.js';
-import { type FormControlValidation, resolveAriaInvalid } from './form-control.js';
+import {
+  type FormControlMaterialScope,
+  type FormControlValidation,
+  resolveAriaInvalid,
+} from './form-control.js';
 
-export interface UiInputProps extends ComponentPropsWithRef<'input'> {
+export interface UiInputProps extends ComponentPropsWithRef<'input'>, FormControlMaterialScope {
   validation?: FormControlValidation;
   incrementLabel?: string;
   decrementLabel?: string;
@@ -49,6 +53,7 @@ export function UiInput({
   onCompositionEnd,
   onBlur,
   'aria-invalid': ariaInvalid,
+  'data-neoverse-material': material,
   ...props
 }: UiInputProps) {
   const input = useRef<HTMLInputElement | null>(null);
@@ -191,7 +196,7 @@ export function UiInput({
   );
   if (number) {
     return (
-      <span className="ui-input-number">
+      <span className="ui-input-number" data-neoverse-material={material}>
         {control}
         <span className="ui-input-number__steps">
           {[1, -1].map((direction) => (
@@ -222,7 +227,11 @@ export function UiInput({
     );
   }
   return (
-    <span className="ui-input-shell" data-caret={showsCaret ? 'overlay' : 'native'}>
+    <span
+      className="ui-input-shell"
+      data-caret={showsCaret ? 'overlay' : 'native'}
+      data-neoverse-material={material}
+    >
       {control}
       {showsCaret && caret ? (
         <span

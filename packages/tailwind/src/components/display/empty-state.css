@@ -1,0 +1,154 @@
+@layer components {
+  .ui-empty-state {
+    display: grid;
+    justify-items: center;
+    align-content: center;
+    gap: var(--neoverse-empty-state-gap);
+    min-height: var(--neoverse-empty-state-min-height);
+    padding: var(--neoverse-empty-state-padding);
+    color: var(--neoverse-color-text-primary);
+    text-align: center;
+  }
+
+  .ui-empty-state[data-empty-state-variant='outlined'] {
+    border: var(--neoverse-border-width-strong) dashed var(--neoverse-empty-state-outline-color);
+    border-radius: var(--neoverse-radius-card);
+  }
+
+  .ui-empty-state[data-empty-state-variant='compact'] {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    min-height: 0;
+    padding: var(--neoverse-empty-state-compact-padding);
+    gap: var(--neoverse-empty-state-compact-gap);
+  }
+
+  .ui-empty-state[data-empty-state-variant='compact'] > .ui-empty-state__content {
+    flex: 1 1 10em;
+    min-inline-size: 0;
+  }
+
+  .ui-empty-state[data-empty-state-variant='subtle'] {
+    grid-template-columns: minmax(0, 1fr);
+    align-content: start;
+    align-items: start;
+    justify-items: stretch;
+    min-height: 0;
+  }
+
+  .ui-empty-state[data-empty-state-variant='subtle']:has(> .ui-empty-state__icon) {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .ui-empty-state[data-empty-state-variant='subtle'] > .ui-empty-state__action {
+    grid-column: -2 / -1;
+  }
+
+  .ui-empty-state:is([data-empty-state-variant='compact'], [data-empty-state-variant='subtle']) {
+    text-align: start;
+  }
+
+  .ui-empty-state:is([data-empty-state-variant='compact'], [data-empty-state-variant='subtle'])
+    > .ui-empty-state__content {
+    justify-items: start;
+  }
+
+  .ui-empty-state:is([data-empty-state-variant='compact'], [data-empty-state-variant='subtle'])
+    > .ui-empty-state__icon {
+    flex: none;
+    width: var(--neoverse-empty-state-compact-icon-size);
+    height: var(--neoverse-empty-state-compact-icon-size);
+    background: transparent;
+  }
+
+  .ui-empty-state:is([data-empty-state-variant='compact'], [data-empty-state-variant='subtle'])
+    > .ui-empty-state__action {
+    justify-content: flex-start;
+    margin-top: 0;
+  }
+
+  .ui-empty-state__icon {
+    display: grid;
+    width: var(--neoverse-empty-state-icon-size);
+    height: var(--neoverse-empty-state-icon-size);
+    place-items: center;
+    border-radius: var(--neoverse-empty-state-icon-radius);
+    background: var(--neoverse-empty-state-icon-background);
+    color: var(--neoverse-empty-state-icon-color);
+  }
+
+  .ui-empty-state:is([data-empty-state-variant='default'], [data-empty-state-variant='outlined'])
+    > .ui-empty-state__icon {
+    border: var(--neoverse-border-width-thin) solid var(--neoverse-empty-state-outline-color);
+  }
+
+  .ui-empty-state__content {
+    display: grid;
+    justify-items: center;
+    gap: var(--neoverse-space-1);
+    max-width: var(--neoverse-empty-state-max-width);
+  }
+
+  .ui-empty-state__title {
+    margin: 0;
+    font-size: var(--neoverse-empty-state-title-size);
+    font-weight: var(--neoverse-font-weight-semibold);
+    overflow-wrap: anywhere;
+  }
+
+  .ui-empty-state__description {
+    margin: 0;
+    color: var(--neoverse-color-text-secondary);
+    font-size: var(--neoverse-empty-state-description-size);
+    overflow-wrap: anywhere;
+  }
+
+  .ui-empty-state__action {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: var(--neoverse-space-2);
+    margin-top: var(--neoverse-space-1);
+  }
+}
+
+@layer neoverse-material-mode {
+  @scope (.material-solid-scope) {
+    /* `subtle` is an explicit preset and keeps its own paint; only the default
+       automatic plate, outlined border, and internal icon follow Solid mode. */
+    .ui-empty-state[data-empty-state-variant='outlined'] {
+      border-color: var(--neoverse-material-solid-divider);
+    }
+
+    .ui-empty-state:is([data-empty-state-variant='default'], [data-empty-state-variant='outlined'])
+      > .ui-empty-state__icon {
+      background-color: var(--neoverse-material-solid-selection);
+      border-color: transparent;
+      color: var(--neoverse-material-solid-selection-text);
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    .ui-empty-state[data-empty-state-variant='outlined'] {
+      border-color: var(--neoverse-material-frosted-border-strong);
+    }
+
+    .ui-empty-state:is([data-empty-state-variant='default'], [data-empty-state-variant='outlined'])
+      > .ui-empty-state__icon {
+      background-color: var(--neoverse-material-frosted-selection);
+      border-color: var(--neoverse-material-frosted-border-subtle);
+      color: var(--neoverse-material-frosted-selection-text);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      .ui-empty-state:is(
+          [data-empty-state-variant='default'],
+          [data-empty-state-variant='outlined']
+        )
+        > .ui-empty-state__icon {
+        background-color: var(--neoverse-material-frosted-selection-fallback);
+      }
+    }
+  }
+}

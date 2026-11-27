@@ -170,19 +170,21 @@ describe('registry consistency', () => {
   test('checks browser spec registration and cross-browser references', () => {
     const errors = checkRegistry(
       input({
-        rows: [row('tests/e2e/*.spec.ts', { runner: 'playwright', metadata: ['browser'] })],
-        testFiles: ['tests/e2e/forms.spec.ts'],
-        contents: new Map([['tests/e2e/forms.spec.ts', 'test("opens", () => {});']]),
-        browserSpecs: ['missing.spec.ts'],
-        crossBrowserSpecs: ['forms.spec.ts'],
+        rows: [row('tests/e2e/*/*.spec.ts', { runner: 'playwright', metadata: ['browser'] })],
+        testFiles: ['tests/e2e/components/forms.spec.ts'],
+        contents: new Map([['tests/e2e/components/forms.spec.ts', 'test("opens", () => {});']]),
+        browserSpecs: ['components/missing.spec.ts'],
+        crossBrowserSpecs: ['components/forms.spec.ts'],
       }),
     );
-    expect(errors).toContain('forms.spec.ts: browser spec is missing from docs/testing/README.md');
     expect(errors).toContain(
-      'missing.spec.ts: registered browser spec does not exist in tests/e2e',
+      'components/forms.spec.ts: browser spec is missing from docs/testing/README.md',
     );
     expect(errors).toContain(
-      'forms.spec.ts: cross-browser spec must be registered in docs/testing/README.md',
+      'components/missing.spec.ts: registered browser spec does not exist in tests/e2e',
+    );
+    expect(errors).toContain(
+      'components/forms.spec.ts: cross-browser spec must be registered in docs/testing/README.md',
     );
   });
 });

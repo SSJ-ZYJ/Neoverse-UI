@@ -5,7 +5,7 @@ Status: adopted
 [English](../../architecture/material-standards.md)
 
 <!-- Source: docs/architecture/material-standards.md -->
-<!-- Source-SHA256: 61ea44b5729838b747f13a9673d895464d695dda4229f94685cbb8d3a235d635 -->
+<!-- Source-SHA256: d7a37a5bd35af11c854011a8d574cac5663dcca94d4800404f28638a3a7665a2 -->
 
 本文是[英文材质标准](../../architecture/material-standards.md)的中文摘要，覆盖消费项目最常用的材质、层级、嵌套与修复边界。具体光学数值、逐组件审计与历史验收记录以英文原文为准。
 
@@ -29,7 +29,7 @@ Status: adopted
 | 磨砂材质（Frosted） | 半透明、柔和漫反射、克制边缘与空间层次 | 原生 CSS `backdrop-filter` | 不启用 |
 | 极光玻璃（Aurora Glass） | 光学透明感、方向性边缘高光、三层级深度 | CSS + 可选 Glass Runtime | 仅合格极光玻璃表面 |
 
-基础数值由 `packages/tokens/src/material.css`（极光玻璃）、`packages/tokens/src/material-solid.css`（不透明状态底板）、`packages/tokens/src/material-frosted.css`（磨砂尺度与各角色配方）及 `packages/tokens/src/themes/{light,dark}.css` 定义。极光玻璃的光学参数不进入其他两种材质的样式变量。
+基础数值由 `packages/tokens/src/materials/glass.css`（极光玻璃）、`packages/tokens/src/materials/solid.css`（不透明状态底板）、`packages/tokens/src/materials/frosted.css`（磨砂尺度与各角色配方）及 `packages/tokens/src/themes/{light,dark}.css` 定义。极光玻璃的光学参数不进入其他两种材质的样式变量。
 
 ## 材质运行时与切换
 
@@ -89,7 +89,7 @@ Playground、Frame 路由与 React 测试页面共用一个框架无关的材质
 
 `glass-*` 是稳定的技术 surface 标识，不代表另一种玻璃样式。展示名称与层级短名从 `@neoverse-ui/tokens` 的 `glassMaterial` 获取，不要自行定义。
 
-具体数值归 `packages/tokens/src/material.css`、`effects.css` 与 `control-effects.css` 所有；组件变量是兼容别名。消费项目不需要第二套材质实现。
+具体数值归 `packages/tokens/src/materials/glass.css`、`packages/tokens/src/semantic/effects.css` 与 `packages/tokens/src/semantic/control-effects.css` 所有；组件变量是兼容别名。消费项目不需要第二套材质实现。
 
 ## 光学与主题
 

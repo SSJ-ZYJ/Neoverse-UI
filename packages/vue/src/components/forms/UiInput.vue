@@ -41,6 +41,7 @@ const forwardedAttrs = computed(() => {
     style: _style,
     value: _value,
     'aria-invalid': _ariaInvalid,
+    'data-neoverse-material': _material,
     ...rest
   } = attrs;
   return rest;
@@ -176,7 +177,11 @@ function onBlur(event: FocusEvent) {
 </script>
 
 <template>
-  <span v-if="isNumber" class="ui-input-number">
+  <span
+    v-if="isNumber"
+    class="ui-input-number"
+    :data-neoverse-material="attrs['data-neoverse-material']"
+  >
     <input
       ref="numberInput"
       v-bind="forwardedAttrs"
@@ -211,7 +216,12 @@ function onBlur(event: FocusEvent) {
       </button>
     </span>
   </span>
-  <span v-else class="ui-input-shell" :data-caret="showsCaret ? 'overlay' : 'native'">
+  <span
+    v-else
+    class="ui-input-shell"
+    :data-caret="showsCaret ? 'overlay' : 'native'"
+    :data-neoverse-material="attrs['data-neoverse-material']"
+  >
     <input
       ref="inputElement"
       v-model="value"

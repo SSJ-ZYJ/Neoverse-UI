@@ -2,11 +2,11 @@ export type { ActionToken } from './components/actions/action.js';
 export type { ButtonToken, ButtonVariantToken } from './components/actions/button.js';
 export type { ComponentToken } from './components/component-variables.js';
 export type { AvatarToken } from './components/display/avatar.js';
-export type { BadgeToken } from './components/display/badge.js';
 export type { EmptyStateToken } from './components/display/empty-state.js';
-export type { NoticeToken } from './components/display/notice.js';
-export type { SkeletonToken } from './components/display/skeleton.js';
-export type { StatusIndicatorToken } from './components/display/status-indicator.js';
+export type { BadgeToken } from './components/feedback/badge.js';
+export type { NoticeToken } from './components/feedback/notice.js';
+export type { SkeletonToken } from './components/feedback/skeleton.js';
+export type { StatusIndicatorToken } from './components/feedback/status-indicator.js';
 export type { BreadcrumbToken } from './components/navigation/breadcrumb.js';
 export type { DockToken } from './components/navigation/dock.js';
 export type { NavigationItemToken } from './components/navigation/navigation-item.js';
@@ -21,8 +21,6 @@ export type { ControlSurfaceToken } from './components/surfaces/control-surface.
 export type { ImmersiveScrollbarToken, ScrollbarToken } from './components/surfaces/scrollbar.js';
 export { type CssVariables, cssVariables } from './css-variables.js';
 export type { BorderWidthToken } from './foundation/border.js';
-export type { ColorPrimitiveFamily, ColorToken } from './foundation/color.js';
-export type { FocusToken } from './foundation/focus.js';
 export type {
   FontFamilyToken,
   FontSizeToken,
@@ -30,12 +28,11 @@ export type {
   LetterSpacingToken,
   LineHeightToken,
 } from './foundation/font.js';
-export { glassMaterial } from './foundation/glass-material.js';
-export {
-  type LayoutBreakpoint,
-  type LayoutContainerToken,
-  layoutBreakpoints,
-} from './foundation/layout.js';
+export type { MotionDurationToken, MotionEasingToken, MotionToken } from './foundation/motion.js';
+export type { RadiusToken } from './foundation/radius.js';
+export type { ShadowToken } from './foundation/shadow.js';
+export type { SpaceToken } from './foundation/space.js';
+export { glassMaterial } from './materials/glass-material.js';
 export type {
   MaterialBloomToken,
   MaterialBlurToken,
@@ -53,11 +50,7 @@ export type {
   MaterialSurfaceToken,
   MaterialTintToken,
   MaterialTransparencyToken,
-} from './foundation/material.js';
-export type { MotionDurationToken, MotionEasingToken, MotionToken } from './foundation/motion.js';
-export type { RadiusToken } from './foundation/radius.js';
-export type { ShadowToken } from './foundation/shadow.js';
-export type { SpaceToken } from './foundation/space.js';
+} from './materials/material.js';
 export {
   type ControlSurfacePreset,
   defaultMaterial,
@@ -70,5 +63,12 @@ export {
   materials,
   type SurfacePreset,
   type SurfaceRole,
-} from './foundation/surface-presets.js';
-export type { TypographyRole } from './foundation/typography.js';
+} from './materials/surface-presets.js';
+export type { ColorPrimitiveFamily, ColorToken } from './semantic/color.js';
+export type { FocusToken } from './semantic/focus.js';
+export {
+  type LayoutBreakpoint,
+  type LayoutContainerToken,
+  layoutBreakpoints,
+} from './semantic/layout.js';
+export type { TypographyRole } from './semantic/typography.js';

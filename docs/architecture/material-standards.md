@@ -5,7 +5,7 @@ Status: adopted
 [Chinese summary](../zh-CN/architecture/material-standards.md)
 
 Components use shared material and effect roles. Concrete optical values belong to
-`packages/tokens/src/material.css`, `effects.css`, and `control-effects.css`; component tokens are compatibility
+`packages/tokens/src/materials/glass.css`, `packages/tokens/src/semantic/effects.css`, and `packages/tokens/src/semantic/control-effects.css`; component tokens are compatibility
 aliases and consumers never need a second material implementation.
 
 ## Shared material selection
@@ -52,9 +52,9 @@ semantics, and motion roles while expressing three independent surface languages
 | Frosted | Translucent, soft, diffused matte depth, restrained edge | Native CSS `backdrop-filter` | Never |
 | Aurora Glass | Optical transparency, specular edge catches, multi-tier depth | CSS + optional Glass Runtime | Eligible Glass surfaces only |
 
-Concrete foundation values live in `packages/tokens/src/material.css` (Aurora Glass),
-`packages/tokens/src/material-solid.css` (Solid status plate compositions),
-`packages/tokens/src/material-frosted.css` (Frosted scales and per-role recipes),
+Concrete foundation values live in `packages/tokens/src/materials/glass.css` (Aurora Glass),
+`packages/tokens/src/materials/solid.css` (Solid status plate compositions),
+`packages/tokens/src/materials/frosted.css` (Frosted scales and per-role recipes),
 and `packages/tokens/src/themes/{light,dark}.css` (theme palettes). Glass optical
 parameters never leak into Solid or Frosted token contracts.
 
@@ -814,7 +814,7 @@ it.
 
 | Location | Remaining literals | Purpose / policy |
 | --- | --- | --- |
-| `tokens/src/material.css`, `effects.css`, `control-effects.css`, theme sources | Tier optics, semantic alpha scale, edge kernels, palette colors | Canonical shared standards; component tokens only alias these roles |
+| `tokens/src/materials/glass.css`, `semantic/effects.css`, `semantic/control-effects.css`, theme sources | Tier optics, semantic alpha scale, edge kernels, palette colors | Canonical shared standards; component tokens only alias these roles |
 | Component tokens | Sizes, radii, typography, durations, endpoint 0/1 and transparent/none | Existing geometry and visibility; not independently tuned optical intensity |
 | `tailwind/src/components/skeleton.css` | Shimmer angle and stop positions | Spatial distribution of a shared highlight, not alpha; pulse opacity is shared |
 | `motion/src/motion.css` | `opacity: 0/1`, `blur(0)` | Presence visibility/filter endpoints; veil blur is a shared motion role |

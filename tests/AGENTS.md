@@ -4,14 +4,14 @@ Read this file before changing browser or optical tests. The layer registry and 
 
 ```text
 tests/
-  e2e/        Playwright specs, one file per product module
+  e2e/        Playwright specs organised by responsibility domain (`materials/`, `components/`, `overlays/`, `motion/`, `playground/`, `accessibility/`, `parity/`)
   optics/     SwiftShader Aurora Glass optical diagnostics
   support/    shared browser, contrast and optical helpers
 ```
 
 ## e2e
 
-Specs are organised by product module, not by component. The ownership table lives in the [testing registry](../docs/testing/README.md#browser-specs); do not duplicate it here.
+Specs are organised by responsibility domain, not by individual component. The ownership table lives in the [testing registry](../docs/testing/README.md#browser-specs); do not duplicate it here.
 
 `tests/support/e2e.ts` owns the shared adapters, theme iteration, overflow assertions and fixture helpers; `tests/support/playground.ts` holds the Inspector and language helpers shared by the playground specs. A helper used by one spec stays in that spec.
 

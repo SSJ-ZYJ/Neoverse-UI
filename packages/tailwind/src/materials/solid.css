@@ -1,0 +1,114 @@
+@layer neoverse-material-mode {
+  @scope (.material-solid-scope) {
+    /* Reset nested tonal stepping at scope roots and floating overlays so
+       independent layers never inherit a parent card's nested step. */
+    :scope,
+    .material-role-overlay,
+    .material-role-compact-overlay {
+      --neoverse-solid-nested-panel-fill: initial;
+      --neoverse-solid-nested-panel-shadow: initial;
+      --neoverse-solid-control-fill: initial;
+      --neoverse-solid-borrowed: initial;
+    }
+
+    :where(.material-recipe-auto.material-role-panel)
+      > :not(.material-role-overlay, .material-role-compact-overlay, [data-neoverse-material]) {
+      --neoverse-solid-nested-panel-fill: var(--neoverse-material-solid-raised-nested);
+      --neoverse-solid-nested-panel-shadow: var(--neoverse-material-solid-nested-shadow);
+      --neoverse-solid-borrowed: none;
+    }
+
+    :where(.material-recipe-auto.material-role-group)
+      > :not(.material-role-overlay, .material-role-compact-overlay, [data-neoverse-material]) {
+      --neoverse-solid-control-fill: var(--neoverse-material-solid-control-in-group);
+      --neoverse-solid-borrowed: none;
+    }
+
+    :where(.material-recipe-auto):not(:where(.ui-button--ghost, [data-surface='none'])) {
+      --neoverse-solid-plate-shadow: none;
+      background-color: var(--neoverse-solid-plate-fill);
+      box-shadow: var(--neoverse-solid-plate-shadow);
+    }
+
+    :where(.material-recipe-auto.material-role-control):not(
+        :where(.ui-button--ghost, [data-surface='none'])
+      ) {
+      --neoverse-solid-plate-fill: var(
+        --neoverse-solid-control-fill,
+        var(--neoverse-material-solid-control)
+      );
+      --neoverse-solid-plate-shadow: var(--neoverse-material-solid-control-shadow);
+    }
+
+    :where(.material-recipe-auto.material-role-panel) {
+      --neoverse-solid-plate-fill: var(
+        --neoverse-solid-nested-panel-fill,
+        var(--neoverse-material-solid-raised)
+      );
+      --neoverse-solid-plate-shadow: var(
+        --neoverse-solid-nested-panel-shadow,
+        var(--neoverse-material-solid-raised-shadow)
+      );
+    }
+
+    :where(.material-recipe-auto.material-role-table) {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-raised);
+      --neoverse-solid-plate-shadow: var(--neoverse-material-solid-raised-shadow);
+    }
+
+    :where(.material-recipe-auto.material-role-group) {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-group);
+    }
+
+    :where(.material-recipe-auto.material-role-field) {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-inset);
+    }
+
+    :where(.material-recipe-auto.material-role-overlay) {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-overlay);
+      --neoverse-solid-plate-shadow: var(--neoverse-material-solid-overlay-shadow);
+    }
+
+    :where(.material-recipe-auto.material-role-compact-overlay) {
+      --neoverse-solid-plate-fill: var(--neoverse-material-solid-compact-overlay);
+      --neoverse-solid-plate-shadow: var(--neoverse-material-solid-compact-overlay-shadow);
+    }
+
+    .material-recipe-auto:not(
+        .ui-button,
+        .ui-segmented-control
+      )[data-neoverse-glass-nesting='inherit'] {
+      background: var(--neoverse-solid-borrowed, revert-layer);
+      border: var(--neoverse-solid-borrowed, revert-layer);
+      box-shadow: var(--neoverse-solid-borrowed, revert-layer);
+    }
+
+    /* Set feedback values on their owners so nested Glass or Frosted never inherits them. */
+    :where(:scope, :scope *):where(
+        .ui-tabs__list,
+        .ui-pagination__pages,
+        .ui-navigation-item,
+        .ui-input,
+        .ui-select,
+        .ui-textarea,
+        .ui-choice__control
+      ) {
+      --neoverse-solid-hover-wash: linear-gradient(
+        var(--neoverse-material-solid-hover),
+        var(--neoverse-material-solid-hover)
+      );
+      --neoverse-solid-press-wash: linear-gradient(
+        var(--neoverse-material-solid-press),
+        var(--neoverse-material-solid-press)
+      );
+    }
+
+    @media (forced-colors: active) {
+      :where(.material-recipe-auto):not(:where(.ui-button--ghost, [data-surface='none'])) {
+        background-color: Canvas;
+        border-color: ButtonText;
+        box-shadow: none;
+      }
+    }
+  }
+}

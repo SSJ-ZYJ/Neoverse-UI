@@ -1,0 +1,224 @@
+/* stylelint-disable property-no-vendor-prefix */
+@layer neoverse-material-mode {
+  @scope (.material-scopes) {
+    /* Reset Frosted backdrop-sampling nesting at every material scope boundary,
+       floating overlay plane, and explicit Glass surface so independent layers
+       keep their own backdrop sampling without inheriting a parent's suppression. */
+    :scope,
+    .material-role-overlay,
+    .material-role-compact-overlay,
+    .material-glass-subtle,
+    .material-glass-elevated,
+    .material-glass-immersive {
+      --neoverse-frosted-nested-filter: initial;
+      --neoverse-frosted-nested-panel-fill: initial;
+      --neoverse-frosted-nested-panel-shadow: initial;
+      --neoverse-frosted-nested-group-fill: initial;
+      --neoverse-frosted-nested-group-shadow: initial;
+      --neoverse-frosted-nested-control-fill: initial;
+      --neoverse-frosted-nested-field-fill: initial;
+      --neoverse-frosted-nested-table-fill: initial;
+      --neoverse-frosted-nested-border: initial;
+      --neoverse-frosted-borrowed: initial;
+    }
+
+    /* Descendants of a Frosted backdrop-owning plane skip redundant blur passes
+       and step to calm nested fills instead of double-blurring the backdrop. */
+    :where(
+        .material-recipe-frosted-panel,
+        .material-recipe-frosted-overlay,
+        .material-recipe-frosted-compact-overlay,
+        .material-recipe-frosted-group
+      )
+      > :not(
+        .material-role-overlay,
+        .material-role-compact-overlay,
+        [data-neoverse-material],
+        .material-glass-subtle,
+        .material-glass-elevated,
+        .material-glass-immersive
+      ) {
+      --neoverse-frosted-nested-filter: none;
+      --neoverse-frosted-nested-panel-fill: var(--neoverse-material-frosted-panel-nested-fill);
+      --neoverse-frosted-nested-panel-shadow: var(--neoverse-material-frosted-panel-nested-shadow);
+      --neoverse-frosted-nested-group-fill: var(--neoverse-material-frosted-group-nested-fill);
+      --neoverse-frosted-nested-group-shadow: none;
+      --neoverse-frosted-nested-control-fill: var(--neoverse-material-frosted-control-nested-fill);
+      --neoverse-frosted-nested-field-fill: var(--neoverse-material-frosted-field-nested-fill);
+      --neoverse-frosted-nested-table-fill: var(--neoverse-material-frosted-table-nested-fill);
+      --neoverse-frosted-nested-border: var(--neoverse-material-frosted-border-subtle);
+      --neoverse-frosted-borrowed: none;
+    }
+
+    .material-recipe-frosted {
+      --neoverse-frosted-plate-border: var(
+        --neoverse-frosted-nested-border,
+        var(--neoverse-material-frosted-border)
+      );
+      --neoverse-frosted-plate-shadow: none;
+      --neoverse-frosted-plate-filter: none;
+      background-color: var(--neoverse-frosted-plate-fallback);
+      border-color: var(--neoverse-frosted-plate-border);
+      box-shadow: var(--neoverse-frosted-plate-shadow);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    .material-recipe-frosted:not(.material-role-field, .material-role-table) {
+      border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+        var(--neoverse-frosted-plate-border);
+    }
+
+    .material-recipe-frosted-control {
+      --neoverse-frosted-plate-fill: var(
+        --neoverse-frosted-nested-control-fill,
+        var(--neoverse-material-frosted-control-fill)
+      );
+      --neoverse-frosted-plate-fallback: var(--neoverse-material-frosted-control-fallback);
+      --neoverse-frosted-plate-filter: var(
+        --neoverse-frosted-nested-filter,
+        var(--neoverse-material-frosted-control-filter)
+      );
+      --neoverse-frosted-plate-shadow: var(--neoverse-material-frosted-control-shadow);
+    }
+
+    .material-recipe-frosted-panel {
+      --neoverse-frosted-plate-fill: var(
+        --neoverse-frosted-nested-panel-fill,
+        var(--neoverse-material-frosted-panel-fill)
+      );
+      --neoverse-frosted-plate-fallback: var(--neoverse-material-frosted-panel-fallback);
+      --neoverse-frosted-plate-filter: var(
+        --neoverse-frosted-nested-filter,
+        var(--neoverse-material-frosted-panel-filter)
+      );
+      --neoverse-frosted-plate-shadow: var(
+        --neoverse-frosted-nested-panel-shadow,
+        var(--neoverse-material-frosted-panel-shadow)
+      );
+    }
+
+    .material-recipe-frosted-group {
+      --neoverse-frosted-plate-fill: var(
+        --neoverse-frosted-nested-group-fill,
+        var(--neoverse-material-frosted-group-fill)
+      );
+      --neoverse-frosted-plate-fallback: var(--neoverse-material-frosted-group-fallback);
+      --neoverse-frosted-plate-filter: var(
+        --neoverse-frosted-nested-filter,
+        var(--neoverse-material-frosted-group-filter)
+      );
+      --neoverse-frosted-plate-shadow: var(
+        --neoverse-frosted-nested-group-shadow,
+        var(--neoverse-material-frosted-group-shadow)
+      );
+    }
+
+    .material-recipe-frosted-field {
+      --neoverse-frosted-plate-fill: var(
+        --neoverse-frosted-nested-field-fill,
+        var(--neoverse-material-frosted-field-fill)
+      );
+      --neoverse-frosted-plate-fallback: var(--neoverse-material-frosted-field-fallback);
+      --neoverse-frosted-plate-filter: var(
+        --neoverse-frosted-nested-filter,
+        var(--neoverse-material-frosted-field-filter)
+      );
+      --neoverse-frosted-plate-border: var(--neoverse-material-frosted-border-strong);
+    }
+
+    /* Floating overlays own an independent spatial layer and always sample. */
+    .material-recipe-frosted-overlay {
+      --neoverse-frosted-plate-fill: var(--neoverse-material-frosted-overlay-fill);
+      --neoverse-frosted-plate-fallback: var(--neoverse-material-frosted-overlay-fallback);
+      --neoverse-frosted-plate-filter: var(--neoverse-material-frosted-overlay-filter);
+      --neoverse-frosted-plate-border: var(--neoverse-material-frosted-border-strong);
+      --neoverse-frosted-plate-shadow: var(--neoverse-material-frosted-overlay-shadow);
+    }
+
+    .ui-dialog.material-recipe-frosted-overlay {
+      --neoverse-frosted-plate-fill: var(--neoverse-material-frosted-dialog-fill);
+    }
+
+    .material-recipe-frosted-compact-overlay {
+      --neoverse-frosted-plate-fill: var(--neoverse-material-frosted-compact-overlay-fill);
+      --neoverse-frosted-plate-fallback: var(--neoverse-material-frosted-compact-overlay-fallback);
+      --neoverse-frosted-plate-filter: var(--neoverse-material-frosted-compact-overlay-filter);
+      --neoverse-frosted-plate-border: var(--neoverse-material-frosted-border-strong);
+      --neoverse-frosted-plate-shadow: var(--neoverse-material-frosted-compact-overlay-shadow);
+    }
+
+    .material-recipe-frosted-table {
+      --neoverse-frosted-plate-fill: transparent;
+      --neoverse-frosted-plate-fallback: transparent;
+      --neoverse-frosted-plate-filter: var(
+        --neoverse-frosted-nested-filter,
+        var(--neoverse-material-frosted-table-filter)
+      );
+      --neoverse-frosted-plate-shadow: var(
+        --neoverse-frosted-nested-panel-shadow,
+        var(--neoverse-material-frosted-panel-shadow)
+      );
+    }
+
+    @supports ((backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1))) and
+      (color: color-mix(in srgb, Canvas, CanvasText)) {
+      .material-recipe-frosted {
+        background-color: var(--neoverse-frosted-plate-fill);
+        -webkit-backdrop-filter: var(--neoverse-frosted-plate-filter);
+        backdrop-filter: var(--neoverse-frosted-plate-filter);
+      }
+    }
+
+    .material-recipe-frosted:not(
+        .ui-button,
+        .ui-segmented-control
+      )[data-neoverse-glass-nesting='inherit'] {
+      background: var(--neoverse-frosted-borrowed, revert-layer);
+      border: var(--neoverse-frosted-borrowed, revert-layer);
+      box-shadow: var(--neoverse-frosted-borrowed, revert-layer);
+      -webkit-backdrop-filter: var(--neoverse-frosted-borrowed, revert-layer);
+      backdrop-filter: var(--neoverse-frosted-borrowed, revert-layer);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      .material-recipe-frosted {
+        background-color: var(--neoverse-frosted-plate-fallback);
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+    }
+
+    @media (forced-colors: active) {
+      .material-recipe-frosted {
+        background-color: Canvas;
+        border-color: ButtonText;
+        box-shadow: none;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    :where(:scope, :scope *):where(
+        .ui-tabs__list,
+        .ui-pagination__pages,
+        .ui-navigation-item,
+        .ui-input,
+        .ui-select,
+        .ui-textarea,
+        .ui-choice__control
+      ) {
+      --neoverse-frosted-hover-wash: linear-gradient(
+        var(--neoverse-material-frosted-hover),
+        var(--neoverse-material-frosted-hover)
+      );
+      --neoverse-frosted-press-wash: linear-gradient(
+        var(--neoverse-material-frosted-press),
+        var(--neoverse-material-frosted-press)
+      );
+    }
+  }
+}
+/* stylelint-enable property-no-vendor-prefix */

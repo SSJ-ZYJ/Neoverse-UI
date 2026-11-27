@@ -1,0 +1,81 @@
+@layer components {
+  .ui-avatar {
+    position: relative;
+    display: inline-grid;
+    flex: none;
+    width: var(--neoverse-avatar-size-md);
+    height: var(--neoverse-avatar-size-md);
+    place-items: center;
+    overflow: hidden;
+    border-radius: var(--neoverse-avatar-rounded-radius);
+    vertical-align: middle;
+    color: var(--neoverse-avatar-fallback-foreground);
+    background: var(--neoverse-avatar-fallback-background);
+  }
+  .ui-avatar--rounded {
+    border-radius: var(--neoverse-avatar-rounded-radius);
+  }
+  .ui-avatar--circle {
+    border-radius: var(--neoverse-avatar-radius);
+  }
+  .ui-avatar--sm {
+    width: var(--neoverse-avatar-size-sm);
+    height: var(--neoverse-avatar-size-sm);
+    --neoverse-avatar-icon-size: var(--neoverse-avatar-icon-size-sm);
+  }
+  .ui-avatar--lg {
+    width: var(--neoverse-avatar-size-lg);
+    height: var(--neoverse-avatar-size-lg);
+    --neoverse-avatar-icon-size: var(--neoverse-avatar-icon-size-lg);
+  }
+  .ui-avatar__image {
+    position: relative;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .ui-avatar__fallback {
+    position: relative;
+    z-index: 1;
+    font-size: var(--neoverse-avatar-font-size);
+    font-weight: var(--neoverse-font-weight-semibold);
+    /* The grid centres the box, not the glyph inside its line box. A normal
+       line height leaves the capitals sitting high; a 1:1 line box centres the
+       text block itself in every size. */
+    line-height: 1;
+    user-select: none;
+  }
+  /* The default placeholder avatar: a neutral person glyph on the same plate. */
+  .ui-avatar__icon {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    place-items: center;
+    width: var(--neoverse-avatar-icon-size);
+    height: var(--neoverse-avatar-icon-size);
+    color: var(--neoverse-avatar-icon-foreground);
+  }
+  .ui-avatar__icon > :is(svg, img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+  }
+}
+
+@layer neoverse-material-mode {
+  @scope (.material-solid-scope) {
+    /* Clear the Glass inset gradient so Solid avatars paint only the Group fill. */
+    :where(:scope, :scope *).ui-avatar.material-recipe-auto {
+      background-image: none;
+    }
+  }
+
+  @scope (.material-scopes) {
+    .ui-avatar.material-recipe-frosted-group {
+      background-image: none;
+    }
+  }
+}

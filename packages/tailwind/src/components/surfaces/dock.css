@@ -1,0 +1,97 @@
+@layer components {
+  .ui-dock {
+    --neoverse-control-surface-scale-md: var(--neoverse-dock-scale-md);
+    --neoverse-control-surface-scale-lg: var(--neoverse-dock-scale-lg);
+    box-sizing: border-box;
+    width: max-content;
+    max-width: 100%;
+    min-height: 0;
+    isolation: isolate;
+    border-radius: var(--neoverse-radius-control);
+    --neoverse-control-surface-gap: var(--neoverse-space-0);
+    --neoverse-control-surface-divider-gap: var(--neoverse-space-2);
+  }
+
+  .ui-dock > .ui-control-surface__group--primary {
+    --neoverse-navigation-item-font-size-sm: calc(
+      var(--neoverse-font-size-sm) *
+      var(--neoverse-dock-navigation-type-factor)
+    );
+    --neoverse-navigation-item-font-size-md: var(--neoverse-navigation-item-font-size-sm);
+    --neoverse-navigation-item-font-size-lg: calc(
+      var(--neoverse-font-size-md) *
+      var(--neoverse-dock-navigation-type-factor)
+    );
+    display: flex;
+    width: max-content;
+    min-width: 0;
+    flex: 0 0 auto;
+    align-items: center;
+  }
+
+  .ui-dock > .ui-control-surface__group--primary > .ui-navigation-item {
+    flex: 0 0 auto;
+  }
+
+  .ui-dock--compact {
+    --neoverse-control-segmented-embedded-option-min-width: var(
+      --neoverse-control-segmented-option-min-width-compact
+    );
+  }
+}
+
+@layer neoverse-material-mode {
+  @scope (.material-solid-scope) {
+    :where(:scope, :scope *).ui-dock.material-recipe-auto {
+      border-color: var(--neoverse-material-solid-divider);
+
+      & > .ui-control-surface__group--trailing {
+        --neoverse-control-surface-trailing-background: var(--neoverse-material-solid-group);
+        --neoverse-control-surface-trailing-shadow: none;
+      }
+    }
+
+    @media (hover: hover) {
+      :where(:scope, :scope *).ui-dock.material-recipe-auto:not(
+          [data-neoverse-surface-hover='static']
+        ) {
+        @media (prefers-reduced-motion: no-preference) {
+          transition:
+            var(--neoverse-control-surface-scale-transition),
+            box-shadow var(--neoverse-motion-duration-standard)
+            var(--neoverse-motion-easing-emphasized);
+        }
+
+        &:hover {
+          --neoverse-solid-plate-shadow: var(--neoverse-material-solid-overlay-shadow);
+        }
+      }
+    }
+  }
+
+  @scope (.material-scopes) {
+    .ui-dock.material-recipe-frosted-panel {
+      & > .ui-control-surface__group--trailing {
+        --neoverse-control-surface-trailing-background: var(
+          --neoverse-material-frosted-group-nested-fill
+        );
+        --neoverse-control-surface-trailing-shadow: none;
+      }
+    }
+
+    @media (hover: hover) {
+      .ui-dock.material-recipe-frosted-panel:not([data-neoverse-surface-hover='static']) {
+        @media (prefers-reduced-motion: no-preference) {
+          transition:
+            var(--neoverse-control-surface-scale-transition),
+            box-shadow var(--neoverse-motion-duration-standard)
+            var(--neoverse-motion-easing-emphasized);
+        }
+
+        &:hover {
+          --neoverse-frosted-plate-shadow: var(--neoverse-material-frosted-overlay-shadow);
+        }
+      }
+    }
+  }
+}

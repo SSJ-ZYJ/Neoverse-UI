@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import ts from 'typescript';
-import { materials } from '../../packages/tokens/src/foundation/surface-presets';
+import { materials } from '../../packages/tokens/src/materials/surface-presets';
 import { collectReactRuntimeAdapters } from './react-runtime-fixture';
 
 type Track = 'canonical-shared' | 'consumer-driven';

@@ -1,0 +1,545 @@
+@layer components {
+  .ui-terminal-surface,
+  .ui-terminal-line,
+  .ui-terminal-transcript,
+  .ui-terminal-prompt,
+  .ui-terminal-echo {
+    font-variant-ligatures: common-ligatures contextual;
+    font-feature-settings:
+      'liga' 1,
+      'calt' 1;
+  }
+
+  /* Terminal chrome is a composition of UiSurface, never a second Aurora Glass renderer. */
+  .ui-terminal-surface {
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+    flex-direction: column;
+    overflow: hidden;
+    color: var(--neoverse-terminal-foreground);
+    font-family: var(--neoverse-font-family-code-maple);
+  }
+
+  .ui-terminal-surface__header {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: var(--neoverse-space-3);
+    padding: var(--neoverse-space-3) var(--neoverse-space-4);
+    background: var(--neoverse-terminal-header-background);
+  }
+
+  .ui-terminal-surface__title {
+    min-width: 0;
+    flex: 0 1 auto;
+    overflow: hidden;
+    color: var(--neoverse-terminal-foreground);
+    font-size: var(--neoverse-typography-caption-size);
+    font-weight: var(--neoverse-font-weight-medium);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ui-terminal-surface__status {
+    min-width: 0;
+    color: var(--neoverse-terminal-muted);
+    font-size: var(--neoverse-typography-caption-size);
+  }
+
+  .ui-terminal-surface__actions {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--neoverse-space-2);
+    margin-inline-start: auto;
+  }
+
+  .ui-terminal-surface__body {
+    display: flex;
+    min-width: 0;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--neoverse-space-2);
+    padding: var(--neoverse-space-4);
+    background: var(--neoverse-terminal-background);
+  }
+
+  .ui-terminal-surface[data-density='expanded'] .ui-terminal-surface__header,
+  .ui-terminal-surface[data-density='expanded'] .ui-terminal-surface__body {
+    padding: var(--neoverse-space-5);
+  }
+
+  .ui-terminal-line {
+    min-width: 0;
+    color: var(--neoverse-terminal-foreground);
+    font-family: var(--neoverse-font-family-code-maple);
+    font-size: var(--neoverse-typography-body-sm-size);
+    line-height: var(--neoverse-line-height-relaxed);
+    overflow-wrap: anywhere;
+    user-select: text;
+  }
+
+  .ui-terminal-line[data-kind='command'] {
+    color: var(--neoverse-terminal-command);
+  }
+
+  .ui-terminal-line[data-tone='muted'] {
+    color: var(--neoverse-terminal-muted);
+  }
+
+  .ui-terminal-line[data-tone='success'] {
+    color: var(--neoverse-effect-status-success-text);
+  }
+
+  .ui-terminal-line[data-tone='error'] {
+    color: var(--neoverse-effect-status-danger-text);
+  }
+
+  .ui-terminal-line[data-preformatted='true'] {
+    max-width: 100%;
+    overflow-x: auto;
+    overflow-wrap: normal;
+    white-space: pre;
+  }
+
+  .ui-terminal-line::selection,
+  .ui-terminal-transcript ::selection {
+    background: var(--neoverse-terminal-selection);
+  }
+
+  .ui-terminal-transcript {
+    min-width: 0;
+    min-height: 0;
+    max-height: var(--neoverse-terminal-transcript-max-height, calc(var(--neoverse-space-12) * 8));
+    overflow: auto;
+    overscroll-behavior: contain;
+    color: var(--neoverse-terminal-foreground);
+    font-family: var(--neoverse-font-family-code-maple);
+    scrollbar-gutter: stable;
+  }
+
+  .ui-terminal-transcript:focus-visible {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: var(--neoverse-focus-ring-offset);
+    border-radius: var(--neoverse-radius-control);
+  }
+
+  .ui-terminal-transcript[data-density='compact'] .ui-terminal-line {
+    line-height: var(--neoverse-line-height-normal);
+  }
+
+  /* The prompt looks like terminal output. Its editor remains a real, accessible
+     native input for IME, selection, caret, password masking and mobile keyboards. */
+  .ui-terminal-prompt,
+  .ui-terminal-echo {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    gap: var(--neoverse-space-1);
+    color: var(--neoverse-terminal-foreground);
+    font-family: var(--neoverse-font-family-code-maple);
+    font-size: var(--neoverse-typography-body-sm-size);
+    line-height: var(--neoverse-line-height-normal);
+  }
+
+  .ui-terminal-prompt__context {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: stretch;
+    /* Reserve the last cap inside the native horizontal scroll region. */
+    padding-inline-end: var(--neoverse-space-3);
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: thin;
+    white-space: nowrap;
+  }
+
+  .ui-terminal-prompt__lead {
+    display: inline-flex;
+    min-height: var(--neoverse-space-6);
+    flex: 0 0 auto;
+  }
+
+  .ui-terminal-prompt__lead > span {
+    width: var(--neoverse-space-2);
+    background: var(--neoverse-terminal-segment-host-background);
+    opacity: var(--neoverse-effect-terminal-dim-opacity);
+  }
+
+  .ui-terminal-prompt__lead > span:nth-child(2) {
+    opacity: var(--neoverse-effect-terminal-muted-opacity);
+  }
+
+  .ui-terminal-prompt__lead > span:nth-child(3) {
+    opacity: var(--neoverse-effect-terminal-soft-opacity);
+  }
+
+  .ui-terminal-prompt__segment {
+    position: relative;
+    display: inline-flex;
+    min-width: 0;
+    min-height: var(--neoverse-space-6);
+    flex: 0 0 auto;
+    align-items: center;
+    gap: var(--neoverse-space-2);
+    padding-inline: calc(var(--neoverse-space-3) + var(--neoverse-space-2)) var(--neoverse-space-2);
+    color: var(--neoverse-terminal-segment-soft-foreground);
+    background: var(--neoverse-terminal-segment-runtime-background);
+    font: inherit;
+  }
+
+  /* Each round cap paints above the next segment's flat background. The
+     shape is CSS geometry, so it does not depend on a Powerline/Nerd Font. */
+  .ui-terminal-prompt__segment::after {
+    position: absolute;
+    z-index: 1;
+    inset-block: 0;
+    inset-inline-start: 100%;
+    width: var(--neoverse-space-3);
+    border-start-end-radius: 100% 50%;
+    border-end-end-radius: 100% 50%;
+    background: inherit;
+    content: '';
+    pointer-events: none;
+  }
+
+  .ui-terminal-prompt__lead + .ui-terminal-prompt__segment {
+    padding-inline-start: var(--neoverse-space-2);
+  }
+
+  .ui-terminal-prompt__segment svg {
+    width: 1em;
+    height: 1em;
+    flex: 0 0 auto;
+  }
+
+  .ui-terminal-prompt__segment[data-tone='host'] {
+    color: var(--neoverse-terminal-segment-accent-foreground);
+    background: var(--neoverse-terminal-segment-host-background);
+  }
+
+  .ui-terminal-prompt__segment[data-tone='path'] {
+    color: var(--neoverse-terminal-segment-accent-foreground);
+    background: var(--neoverse-terminal-segment-path-background);
+  }
+
+  .ui-terminal-prompt__segment[data-tone='branch'] {
+    color: var(--neoverse-terminal-segment-branch-foreground);
+    background: var(--neoverse-terminal-segment-branch-background);
+  }
+
+  .ui-terminal-prompt__segment[data-tone='runtime'] {
+    color: var(--neoverse-terminal-segment-runtime-foreground);
+    background: var(--neoverse-terminal-segment-runtime-background);
+  }
+
+  .ui-terminal-prompt__segment[data-tone='time'] {
+    color: var(--neoverse-terminal-segment-time-foreground);
+    background: var(--neoverse-terminal-segment-time-background);
+  }
+
+  .ui-terminal-prompt__entry {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: baseline;
+    gap: var(--neoverse-space-2);
+    cursor: text;
+  }
+
+  .ui-terminal-prompt__symbol {
+    flex: 0 0 auto;
+    color: var(--neoverse-terminal-prompt);
+    font-size: inherit;
+    font-weight: var(--neoverse-font-weight-bold);
+    line-height: var(--neoverse-line-height-normal);
+  }
+
+  .ui-terminal-prompt__input-wrap {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .ui-terminal-prompt__ghost {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    white-space: pre;
+    color: var(--neoverse-terminal-muted);
+    font: inherit;
+    font-variant-ligatures: inherit;
+    font-feature-settings: inherit;
+    font-size: var(--neoverse-typography-body-sm-size);
+    line-height: var(--neoverse-line-height-normal);
+  }
+
+  .ui-terminal-prompt__ghost > span {
+    display: block;
+    width: max-content;
+  }
+
+  .ui-terminal-prompt__ghost-prefix {
+    visibility: hidden;
+  }
+
+  .ui-terminal-prompt__ghost-suffix {
+    font-style: italic;
+    /* Hosts may disable synthesis globally; keep this hint italic even when
+       their self-hosted monospace font only includes the regular face. */
+    font-synthesis: style;
+  }
+
+  /* The prompt draws a breathing caret so the command line reads as a live
+     terminal; states that need native editing keep the browser caret. The
+     breath animates opacity only, so it keeps running under reduced motion
+     exactly like the native caret it replaces. */
+  .ui-terminal-prompt__caret {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    white-space: pre;
+    color: var(--neoverse-terminal-cursor);
+    font: inherit;
+    font-variant-ligatures: inherit;
+    font-feature-settings: inherit;
+    font-size: var(--neoverse-typography-body-sm-size);
+    line-height: var(--neoverse-line-height-normal);
+  }
+
+  .ui-terminal-prompt__caret > span {
+    display: block;
+    width: max-content;
+  }
+
+  .ui-terminal-prompt__caret-prefix {
+    visibility: hidden;
+  }
+
+  /* The bar spans the glyph cell: text-top anchors it to the ascent, the extra
+     quarter em reaches through the descender, and the pill radius rounds it. */
+  .ui-terminal-prompt__caret-glyph {
+    display: inline-block;
+    width: calc(var(--neoverse-border-width-thin) * 2);
+    height: 1.25em;
+    border-radius: var(--neoverse-radius-pill);
+    background: currentColor;
+    vertical-align: text-top;
+    animation: ui-caret-breathe var(--neoverse-motion-caret-duration)
+      var(--neoverse-motion-caret-easing) infinite;
+    /* The bar glides without stretching, so it never covers the line it
+       travels over. */
+    transition-property: transform;
+    transition-duration: var(--neoverse-motion-caret-glide-duration);
+    transition-timing-function: var(--neoverse-motion-easing-standard);
+  }
+
+  /* Only the slide is motion; the opacity blink stays on in both preferences. */
+  @media (prefers-reduced-motion: reduce) {
+    .ui-terminal-prompt__caret-glyph {
+      transition: none;
+    }
+  }
+
+  /* Typing keeps the caret solid; the breath resumes once the visitor pauses. */
+  .ui-terminal-prompt__caret--holding .ui-terminal-prompt__caret-glyph {
+    animation: none;
+    opacity: 1;
+  }
+
+  .ui-terminal-prompt__editor {
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: 1lh;
+    flex: 1 1 auto;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    outline: none;
+    box-shadow: none;
+    color: var(--neoverse-terminal-command);
+    background: transparent;
+    -webkit-text-fill-color: currentColor;
+    font: inherit;
+    font-variant-ligatures: inherit;
+    font-feature-settings: inherit;
+    font-size: var(--neoverse-typography-body-sm-size);
+    line-height: var(--neoverse-line-height-normal);
+    caret-color: var(--neoverse-terminal-cursor);
+    appearance: none;
+  }
+
+  .ui-terminal-prompt__editor::placeholder {
+    color: var(--neoverse-terminal-muted);
+    opacity: 1;
+  }
+
+  .ui-terminal-prompt__editor::selection {
+    background: var(--neoverse-terminal-selection);
+  }
+
+  /* The mirrored caret replaces the native one only in the states above. */
+  :where(.ui-terminal-prompt[data-caret='overlay']) .ui-terminal-prompt__editor {
+    caret-color: transparent;
+  }
+
+  .ui-terminal-prompt__entry:has(.ui-terminal-prompt__editor:focus-visible)
+    .ui-terminal-prompt__symbol {
+    text-decoration: underline;
+    text-underline-offset: var(--neoverse-space-1);
+  }
+
+  .ui-terminal-prompt[data-disabled='true'] {
+    opacity: var(--neoverse-control-button-disabled-opacity);
+  }
+
+  .ui-terminal-prompt[data-disabled='true'] .ui-terminal-prompt__entry {
+    cursor: not-allowed;
+  }
+
+  .ui-terminal-prompt[data-error='true'] .ui-terminal-prompt__symbol {
+    color: var(--neoverse-effect-status-danger-text);
+  }
+
+  /* Recorded commands keep the same prompt chrome as the live editor, but as a
+     static text line: no input, no caret, no focus, selection still works. */
+  .ui-terminal-echo {
+    user-select: text;
+  }
+
+  .ui-terminal-echo__entry {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: baseline;
+    gap: var(--neoverse-space-2);
+    white-space: pre-wrap;
+  }
+
+  .ui-terminal-echo__text {
+    min-width: 0;
+    overflow-wrap: anywhere;
+    color: var(--neoverse-terminal-command);
+    font: inherit;
+    font-variant-ligatures: inherit;
+    font-feature-settings: inherit;
+  }
+
+  .ui-terminal-echo[data-error='true'] .ui-terminal-prompt__symbol {
+    color: var(--neoverse-effect-status-danger-text);
+  }
+
+  .ui-terminal-echo ::selection,
+  .ui-terminal-echo::selection {
+    background: var(--neoverse-terminal-selection);
+  }
+
+  @media (forced-colors: active) {
+    .ui-terminal-echo__text {
+      color: CanvasText;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ui-terminal-prompt__lead > span {
+      background: CanvasText;
+    }
+
+    .ui-terminal-prompt__context .ui-terminal-prompt__segment {
+      color: CanvasText;
+      background: Canvas;
+      outline: solid CanvasText;
+      outline-offset: calc(var(--neoverse-space-1) * -1);
+    }
+
+    .ui-terminal-prompt__editor {
+      color: CanvasText;
+      -webkit-text-fill-color: CanvasText;
+      caret-color: CanvasText;
+    }
+
+    .ui-terminal-prompt__caret {
+      display: none;
+    }
+
+    :where(.ui-terminal-prompt[data-caret='overlay']) .ui-terminal-prompt__editor {
+      caret-color: CanvasText;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ui-terminal-surface__body,
+    .ui-terminal-surface__header {
+      background: Canvas;
+    }
+  }
+}
+
+@layer neoverse-material-mode {
+  @scope (.material-solid-scope) {
+    .ui-terminal-surface.material-recipe-auto {
+      --neoverse-terminal-header-border: var(--neoverse-material-solid-divider);
+      --neoverse-terminal-window-caption-hover-background: var(--neoverse-material-solid-hover);
+      --neoverse-terminal-window-caption-active-background: var(--neoverse-material-solid-press);
+    }
+
+    .ui-terminal-surface.material-recipe-auto > .ui-terminal-surface__header {
+      background: var(--neoverse-material-solid-group);
+    }
+
+    .ui-terminal-surface.material-recipe-auto > .ui-terminal-surface__body {
+      background: var(--neoverse-material-solid-inset);
+    }
+
+    @media (forced-colors: active) {
+      .ui-terminal-surface.material-recipe-auto
+        > :is(.ui-terminal-surface__header, .ui-terminal-surface__body) {
+        background: Canvas;
+      }
+    }
+  }
+
+  @scope (.material-scopes) {
+    .ui-terminal-surface.material-recipe-frosted-panel {
+      --neoverse-terminal-header-border: var(--neoverse-material-frosted-divider);
+      --neoverse-terminal-window-caption-hover-background: var(--neoverse-material-frosted-hover);
+      --neoverse-terminal-window-caption-active-background: var(--neoverse-material-frosted-press);
+    }
+
+    .ui-terminal-surface.material-recipe-frosted-panel > .ui-terminal-surface__header {
+      background: var(--neoverse-material-frosted-group-nested-fill);
+      border-block-end: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+        var(--neoverse-material-frosted-divider);
+    }
+
+    .ui-terminal-surface.material-recipe-frosted-panel > .ui-terminal-surface__body {
+      background: var(--neoverse-material-frosted-field-nested-fill);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      .ui-terminal-surface.material-recipe-frosted-panel > .ui-terminal-surface__header {
+        background: var(--neoverse-material-frosted-group-fallback);
+      }
+
+      .ui-terminal-surface.material-recipe-frosted-panel > .ui-terminal-surface__body {
+        background: var(--neoverse-material-frosted-field-fallback);
+      }
+    }
+
+    @media (forced-colors: active) {
+      .ui-terminal-surface.material-recipe-frosted-panel
+        > :is(.ui-terminal-surface__header, .ui-terminal-surface__body) {
+        background: Canvas;
+      }
+    }
+  }
+}

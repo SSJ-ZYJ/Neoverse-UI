@@ -4,9 +4,9 @@ import { resolve } from 'node:path';
 const root = resolve(import.meta.dir, '../..');
 const errors: string[] = [];
 for (const directory of ['packages/tokens/src/components', 'packages/tailwind/src/components']) {
-  for (const file of await readdir(resolve(root, directory))) {
+  for (const file of await readdir(resolve(root, directory), { recursive: true })) {
     if (!file.endsWith('.css')) continue;
-    const path = `${directory}/${file}`;
+    const path = `${directory}/${file.replaceAll('\\', '/')}`;
     const source = (await Bun.file(resolve(root, path)).text()).replace(/\/\*[\s\S]*?\*\//g, '');
     if (
       directory.includes('/tokens/') &&

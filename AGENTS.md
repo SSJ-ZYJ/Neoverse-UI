@@ -37,7 +37,7 @@ scripts/                    gates, release tooling, request CLI, dev loop and sy
   requests/                 component request CLI and intake
   dev/                      development loop and Tailwind CLI lookup
   sync/                     local consumer synchronization
-tests/e2e/                  Playwright specs organised by product module
+tests/e2e/                  Playwright specs organised by responsibility domain
 tests/optics/               SwiftShader Aurora Glass optical diagnostics
 tests/support/              shared browser and optical fixtures
 .agents/notes/              dated audits, acceptance runs and implementation plans
@@ -118,9 +118,9 @@ Source, configuration and current user decisions override stale documentation. V
 | --- | --- |
 | Documentation only | `bun run check:docs`, `bun run check:budgets`, `bun run lint:language` |
 | Tokens, Tailwind, Motion, runtime or adapter source | `bun run test`, `bun run typecheck`, relevant `tests/e2e/` spec |
-| Public component or contract | component matrix, framework parity, unit tests, Design Lab, `tests/e2e/parity.spec.ts` |
+| Public component or contract | component matrix, framework parity, unit tests, Design Lab, `tests/e2e/parity/parity.spec.ts` |
 | Browser interaction or layout | `bun run test:e2e`; cross-browser suite for engine-sensitive behavior |
-| Aurora Glass | material checks, `tests/e2e/glass-runtime.spec.ts`, optical suite when rendering changes, manual optical acceptance |
+| Aurora Glass | material checks, `tests/e2e/materials/glass-runtime.spec.ts`, optical suite when rendering changes, manual optical acceptance |
 | Release tooling or manifest | `bun run test:release-tools`, `bun run verify:packages`, `bun run release:check` |
 
 Run the narrowest row that covers the change. A green unit test does not substitute for browser or consumer evidence; a Playground example does not substitute for consumer validation.

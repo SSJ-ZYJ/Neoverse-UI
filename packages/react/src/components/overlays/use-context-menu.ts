@@ -19,6 +19,7 @@ import {
   useCallback,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -134,7 +135,7 @@ export function useContextMenu({
     installFocusModality(document);
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (submenuState === null) return;
     const panel = panelRef.current;
     const submenu = submenuRef.current;

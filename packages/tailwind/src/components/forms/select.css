@@ -1,0 +1,174 @@
+@layer components {
+  .ui-select-shell {
+    position: relative;
+    width: 100%;
+  }
+
+  .ui-select-shell[open] {
+    z-index: var(--neoverse-select-popover-layer);
+  }
+
+  .ui-select {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--neoverse-form-control-gap);
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .ui-select::-webkit-details-marker {
+    display: none;
+  }
+
+  .ui-select__indicator,
+  .ui-select__check {
+    width: var(--neoverse-select-check-size);
+    height: var(--neoverse-select-check-size);
+    flex: 0 0 auto;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--neoverse-select-check-stroke-width);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
+  .ui-select__indicator {
+    color: var(--neoverse-select-check-color);
+  }
+
+  .ui-select__value {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ui-select__value--placeholder {
+    color: var(--neoverse-form-control-placeholder);
+  }
+
+  .ui-select__popover,
+  .ui-overlay-panel.ui-select__popover {
+    top: var(--neoverse-select-popover-top, var(--neoverse-overlay-top));
+    left: var(--neoverse-select-popover-left, var(--neoverse-overlay-left));
+    width: var(--neoverse-select-popover-inline-size, var(--neoverse-overlay-inline-size, auto));
+    gap: var(--neoverse-space-1);
+    padding: var(--neoverse-select-popover-padding);
+  }
+
+  .ui-select__popover:popover-open,
+  .ui-overlay-panel.ui-select__popover:popover-open,
+  .ui-select__popover--fallback-open,
+  .ui-overlay-panel.ui-select__popover--fallback-open {
+    display: grid;
+  }
+
+  /* The shared canvas cannot enter the browser's top layer. The established
+     CSS edge field also supplies a fallback when WebGL is unavailable. */
+  @scope (.material-glass-scope) {
+    @supports (backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1)) {
+      :where(.ui-select, .ui-choice__control, .ui-textarea-shell)::before {
+        position: absolute;
+        z-index: 0;
+        inset: 0;
+        border-radius: inherit;
+        background: transparent;
+        mask-image: var(--neoverse-material-glass-subtle-refraction-gradient);
+        mask-mode: alpha;
+        opacity: var(--neoverse-material-glass-subtle-edge-refraction-opacity);
+        pointer-events: none;
+        filter: var(--neoverse-material-glass-subtle-edge-refraction-softness);
+        -webkit-backdrop-filter: var(--neoverse-material-glass-subtle-edge-filter);
+        backdrop-filter: var(--neoverse-material-glass-subtle-edge-filter);
+        content: '';
+      }
+
+      :where(.ui-select, .ui-choice__control) > *,
+      .ui-textarea-shell > .ui-textarea {
+        z-index: 1;
+      }
+
+      .ui-textarea-shell::after {
+        z-index: 2;
+      }
+
+      [data-neoverse-glass-renderer='webgl']
+        :where(.ui-select, .ui-choice__control, .ui-textarea-shell)::before {
+        display: none;
+      }
+
+      [data-neoverse-glass-renderer='webgl']
+        :where(
+          :popover-open .ui-select,
+          :popover-open .ui-choice__control,
+          :popover-open .ui-textarea-shell,
+          :modal .ui-select,
+          :modal .ui-choice__control,
+          :modal .ui-textarea-shell,
+          .ui-select[data-neoverse-glass-edge-pass='css'],
+          .ui-choice__control[data-neoverse-glass-edge-pass='css'],
+          .ui-textarea-shell:has(> .ui-textarea[data-neoverse-glass-edge-pass='css'])
+        )::before {
+        display: block;
+      }
+    }
+  }
+
+  @media (prefers-reduced-transparency: reduce) {
+    :where(.ui-select, .ui-choice__control, .ui-textarea-shell)::before,
+    [data-neoverse-glass-renderer='webgl']
+      :where(.ui-select, .ui-choice__control, .ui-textarea-shell)::before {
+      display: none;
+    }
+  }
+
+  :where(.ui-select-shell--disabled, .ui-select-shell--readonly) .ui-select__popover {
+    display: none;
+  }
+
+  .ui-select__option {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--neoverse-form-control-gap);
+    border: 0;
+    border-radius: var(--neoverse-select-option-radius);
+    padding: var(--neoverse-select-option-padding-block)
+      var(--neoverse-select-option-padding-inline);
+    color: var(--neoverse-overlay-item-foreground);
+    background: transparent;
+    font: inherit;
+    font-size: var(--neoverse-overlay-item-font-size);
+    line-height: var(--neoverse-overlay-item-line-height);
+    text-align: left;
+    cursor: pointer;
+    transition: color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  .ui-select__option[aria-selected='true'] {
+    color: var(--neoverse-select-option-selected-foreground);
+    background: var(--neoverse-select-option-selected-background);
+    box-shadow: var(--neoverse-surface-inset-active-highlight);
+  }
+
+  .ui-select__option:focus-visible:not([data-neoverse-focus-origin='pointer']) {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: calc(var(--neoverse-focus-ring-offset) * -1);
+  }
+
+  .ui-select__option:disabled {
+    cursor: not-allowed;
+    opacity: var(--neoverse-select-option-disabled-opacity);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-select,
+    .ui-select__option {
+      transition: none;
+    }
+  }
+}

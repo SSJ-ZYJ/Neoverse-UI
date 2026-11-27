@@ -1,0 +1,263 @@
+@layer components {
+  /* Single-line inputs mirror the same breathing caret as the terminal prompt;
+     number spinners, masking and assistive states keep the browser caret. */
+  .ui-input-shell {
+    position: relative;
+    display: inline-grid;
+    width: 100%;
+    min-width: 0;
+  }
+
+  :where(.ui-input-shell[data-caret='overlay']) .ui-input,
+  :where(.ui-textarea-shell[data-caret='overlay']) .ui-textarea {
+    caret-color: transparent;
+  }
+
+  .ui-input-caret,
+  .ui-textarea-caret {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    color: var(--neoverse-color-accent-primary);
+    font: inherit;
+    font-size: var(--neoverse-form-control-font-size);
+    line-height: var(--neoverse-form-control-line-height);
+    letter-spacing: normal;
+    word-spacing: normal;
+    text-transform: none;
+    text-indent: 0;
+  }
+
+  .ui-input-caret {
+    display: flex;
+    align-items: center;
+    padding: var(--neoverse-form-control-padding-block) var(--neoverse-form-control-padding-inline);
+    white-space: pre;
+  }
+
+  .ui-textarea-caret {
+    white-space: pre-wrap;
+    overflow-wrap: break-word;
+  }
+
+  .ui-textarea-caret__mirror {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    padding: var(--neoverse-form-control-padding-block) var(--neoverse-form-control-padding-inline);
+  }
+
+  .ui-input-caret > span:first-child {
+    display: inline-flex;
+    align-items: center;
+    width: max-content;
+  }
+
+  .ui-input-caret__prefix,
+  .ui-textarea-caret__prefix,
+  .ui-textarea-caret__suffix {
+    visibility: hidden;
+  }
+
+  .ui-textarea-caret__anchor {
+    position: relative;
+    display: inline;
+  }
+
+  .ui-input-caret__glyph,
+  .ui-textarea-caret__glyph {
+    display: inline-block;
+    flex: 0 0 auto;
+    width: calc(var(--neoverse-border-width-thin) * 2);
+    height: 1.25em;
+    border-radius: var(--neoverse-radius-pill);
+    background: currentColor;
+    animation: ui-caret-breathe var(--neoverse-motion-caret-duration)
+      var(--neoverse-motion-caret-easing) infinite;
+  }
+
+  .ui-textarea-caret__glyph {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    margin-top: -0.625em;
+  }
+
+  .ui-caret-flight {
+    position: absolute;
+    inset: 0;
+    background: currentColor;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ui-input-caret__glyph[data-neoverse-caret-moving],
+    .ui-textarea-caret__glyph[data-neoverse-caret-moving] {
+      visibility: hidden;
+      animation: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-caret-flight {
+      display: none;
+    }
+  }
+
+  .ui-input-caret--holding .ui-input-caret__glyph,
+  .ui-textarea-caret--holding .ui-textarea-caret__glyph {
+    animation: none;
+    opacity: 1;
+  }
+
+  /* Shared blink for every mirrored caret: short soft ramps keep it calm while
+     staying unmistakably alive. Only opacity animates, so it also runs under
+     reduced motion like the native caret. */
+  @keyframes ui-caret-breathe {
+    0%,
+    40% {
+      opacity: 1;
+    }
+
+    54%,
+    88% {
+      opacity: 0;
+    }
+
+    100% {
+      opacity: 1;
+    }
+  }
+
+  @media (forced-colors: active) {
+    .ui-input-caret,
+    .ui-textarea-caret {
+      display: none;
+    }
+
+    :where(.ui-input-shell[data-caret='overlay']) .ui-input,
+    :where(.ui-textarea-shell[data-caret='overlay']) .ui-textarea {
+      caret-color: CanvasText;
+    }
+  }
+
+  .ui-input-number {
+    position: relative;
+    display: inline-grid;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .ui-input-number > .ui-input {
+    appearance: textfield;
+    padding-inline-end: calc(
+      var(--neoverse-input-step-inline-size) +
+      var(--neoverse-input-step-inset) *
+      2
+    );
+  }
+
+  .ui-input-number > .ui-input::-webkit-inner-spin-button,
+  .ui-input-number > .ui-input::-webkit-outer-spin-button {
+    margin: 0;
+    appearance: none;
+  }
+
+  .ui-input-number__steps {
+    position: absolute;
+    inset-block: var(--neoverse-input-step-inset);
+    inset-inline-end: var(--neoverse-input-step-inset);
+    display: grid;
+    grid-template-rows: 1fr 1fr;
+    width: var(--neoverse-input-step-inline-size);
+  }
+
+  .ui-input-number__step {
+    display: grid;
+    min-height: 0;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: var(--neoverse-input-step-radius);
+    color: var(--neoverse-input-step-foreground);
+    background-color: var(--neoverse-quiet-control-feedback);
+    cursor: pointer;
+    touch-action: manipulation;
+    transition: background-color var(--neoverse-motion-feedback-duration)
+      var(--neoverse-motion-feedback-easing);
+  }
+
+  .ui-input-number__step:focus-visible {
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: calc(var(--neoverse-focus-ring-offset) * -1);
+  }
+
+  .ui-input-number__step:disabled {
+    color: var(--neoverse-form-control-disabled-foreground);
+    cursor: default;
+  }
+
+  .ui-input-number__indicator {
+    width: var(--neoverse-input-step-icon-size);
+    height: var(--neoverse-input-step-icon-size);
+    fill: none;
+    stroke: currentColor;
+    stroke-width: var(--neoverse-border-width-strong);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    pointer-events: none;
+  }
+
+  .ui-textarea {
+    min-block-size: 100%;
+    block-size: 100%;
+    resize: none;
+  }
+
+  .ui-textarea-shell {
+    position: relative;
+    display: grid;
+    width: 100%;
+    min-block-size: var(--neoverse-textarea-min-block-size);
+    overflow: hidden;
+    border-radius: var(--neoverse-form-control-radius);
+    box-shadow: var(--neoverse-textarea-recipe-shadow, none);
+    resize: vertical;
+  }
+
+  .ui-textarea-shell::-webkit-resizer {
+    background: transparent;
+  }
+
+  .ui-textarea-shell::after {
+    position: absolute;
+    right: var(--neoverse-textarea-resize-handle-inset);
+    bottom: var(--neoverse-textarea-resize-handle-inset);
+    width: var(--neoverse-textarea-resize-handle-dot-size);
+    height: var(--neoverse-textarea-resize-handle-dot-size);
+    border-radius: var(--neoverse-radius-pill);
+    color: var(--neoverse-textarea-resize-handle-color);
+    background: currentColor;
+    box-shadow:
+      calc(var(--neoverse-textarea-resize-handle-dot-step) * -1)
+      calc(var(--neoverse-textarea-resize-handle-dot-step) * -1) 0 currentColor,
+      calc(var(--neoverse-textarea-resize-handle-dot-step) * -2)
+      calc(var(--neoverse-textarea-resize-handle-dot-step) * -2) 0 currentColor;
+    content: '';
+    pointer-events: none;
+    transition: color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  .ui-textarea-shell:focus-within::after {
+    color: var(--neoverse-textarea-resize-handle-focus-color);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    :where(.ui-input, .ui-textarea),
+    .ui-input-number__step {
+      transition: none;
+    }
+  }
+}

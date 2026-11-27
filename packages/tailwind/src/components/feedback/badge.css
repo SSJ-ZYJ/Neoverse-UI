@@ -1,0 +1,186 @@
+@layer components {
+  /* Both themes share quiet status tint, a hairline border and Aurora Glass depth. */
+  .ui-badge {
+    --ui-badge-status: var(--neoverse-color-text-secondary);
+    border: var(--neoverse-border-width-thin) var(--neoverse-border-style-solid)
+      var(--neoverse-effect-label-status-border);
+    background: var(--neoverse-badge-background);
+    box-shadow: var(--neoverse-badge-shadow);
+    -webkit-backdrop-filter: var(--neoverse-badge-backdrop-filter);
+    backdrop-filter: var(--neoverse-badge-backdrop-filter);
+    color: var(--neoverse-badge-foreground);
+    font-family: var(--neoverse-badge-font-family);
+    font-weight: var(--neoverse-badge-font-weight);
+    font-size: var(--neoverse-badge-font-size-sm);
+    line-height: var(--neoverse-badge-line-height-sm);
+    white-space: nowrap;
+  }
+
+  .ui-badge--md {
+    font-size: var(--neoverse-badge-font-size-md);
+    line-height: var(--neoverse-badge-line-height-md);
+  }
+
+  .ui-badge--lg {
+    font-size: var(--neoverse-badge-font-size-lg);
+    line-height: var(--neoverse-badge-line-height-lg);
+  }
+
+  .ui-badge__label {
+    display: block;
+    transform: translateY(var(--neoverse-badge-label-optical-offset));
+  }
+
+  .ui-badge--info {
+    --ui-badge-status: var(--neoverse-color-status-info);
+    background: var(--neoverse-badge-info-background);
+    color: var(--neoverse-badge-info-foreground);
+    box-shadow: var(--neoverse-badge-info-shadow);
+  }
+
+  .ui-badge--success {
+    --ui-badge-status: var(--neoverse-color-status-success);
+    background: var(--neoverse-badge-success-background);
+    color: var(--neoverse-badge-success-foreground);
+    box-shadow: var(--neoverse-badge-success-shadow);
+  }
+
+  .ui-badge--warning {
+    --ui-badge-status: var(--neoverse-color-status-warning);
+    background: var(--neoverse-badge-warning-background);
+    color: var(--neoverse-badge-warning-foreground);
+    box-shadow: var(--neoverse-badge-warning-shadow);
+  }
+
+  .ui-badge--danger {
+    --ui-badge-status: var(--neoverse-color-status-danger);
+    background: var(--neoverse-badge-danger-background);
+    color: var(--neoverse-badge-danger-foreground);
+    box-shadow: var(--neoverse-badge-danger-shadow);
+  }
+}
+
+@layer neoverse-material-mode {
+  @scope (.material-solid-scope) {
+    :where(:scope, :scope *).ui-badge {
+      background: var(--neoverse-material-solid-status-plate-neutral);
+      border-color: transparent;
+      color: var(--neoverse-color-text-secondary);
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    :where(:scope, :scope *).ui-badge--info {
+      background: var(--neoverse-material-solid-status-plate-info);
+      color: var(--neoverse-material-solid-status-info);
+    }
+
+    :where(:scope, :scope *).ui-badge--success {
+      background: var(--neoverse-material-solid-status-plate-success);
+      color: var(--neoverse-material-solid-status-success);
+    }
+
+    :where(:scope, :scope *).ui-badge--warning {
+      background: var(--neoverse-material-solid-status-plate-warning);
+      color: var(--neoverse-material-solid-status-warning);
+    }
+
+    :where(:scope, :scope *).ui-badge--danger {
+      background: var(--neoverse-material-solid-status-plate-danger);
+      color: var(--neoverse-material-solid-status-danger);
+    }
+
+    @media (forced-colors: active) {
+      :where(:scope, :scope *).ui-badge {
+        background: Canvas;
+        border: var(--neoverse-border-width-thin) solid CanvasText;
+        color: CanvasText;
+      }
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    /* Compact Badges stay non-sampling so dense pill rows never spawn extra
+       compositing layers. */
+    :where(:scope, :scope *).ui-badge {
+      background: var(
+        --neoverse-frosted-status-fallback,
+        var(--neoverse-material-frosted-status-plate-neutral-fallback)
+      );
+      border-color: var(--neoverse-material-frosted-border-subtle);
+      color: var(--neoverse-color-text-secondary);
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    :where(:scope, :scope *).ui-badge--info {
+      --neoverse-frosted-status-fallback: var(
+        --neoverse-material-frosted-status-plate-info-fallback
+      );
+      color: var(--neoverse-material-frosted-status-info);
+    }
+
+    :where(:scope, :scope *).ui-badge--success {
+      --neoverse-frosted-status-fallback: var(
+        --neoverse-material-frosted-status-plate-success-fallback
+      );
+      color: var(--neoverse-material-frosted-status-success);
+    }
+
+    :where(:scope, :scope *).ui-badge--warning {
+      --neoverse-frosted-status-fallback: var(
+        --neoverse-material-frosted-status-plate-warning-fallback
+      );
+      color: var(--neoverse-material-frosted-status-warning);
+    }
+
+    :where(:scope, :scope *).ui-badge--danger {
+      --neoverse-frosted-status-fallback: var(
+        --neoverse-material-frosted-status-plate-danger-fallback
+      );
+      color: var(--neoverse-material-frosted-status-danger);
+    }
+
+    @supports (backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1)) {
+      :where(:scope, :scope *).ui-badge {
+        background: var(--neoverse-material-frosted-status-plate-neutral);
+      }
+
+      :where(:scope, :scope *).ui-badge--info {
+        background: var(--neoverse-material-frosted-status-plate-info);
+      }
+
+      :where(:scope, :scope *).ui-badge--success {
+        background: var(--neoverse-material-frosted-status-plate-success);
+      }
+
+      :where(:scope, :scope *).ui-badge--warning {
+        background: var(--neoverse-material-frosted-status-plate-warning);
+      }
+
+      :where(:scope, :scope *).ui-badge--danger {
+        background: var(--neoverse-material-frosted-status-plate-danger);
+      }
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      :where(:scope, :scope *).ui-badge {
+        background: var(
+          --neoverse-frosted-status-fallback,
+          var(--neoverse-material-frosted-status-plate-neutral-fallback)
+        );
+      }
+    }
+
+    @media (forced-colors: active) {
+      :where(:scope, :scope *).ui-badge {
+        background: Canvas;
+        border: var(--neoverse-border-width-thin) solid CanvasText;
+        color: CanvasText;
+        box-shadow: none;
+      }
+    }
+  }
+}

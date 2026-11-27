@@ -12,6 +12,7 @@ import {
   type ReactNode,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
 } from 'react';
@@ -80,15 +81,18 @@ export function UiDialog({
     installFocusModality(document);
   }, []);
 
+  // Keep the invocation material scope mirrored while mounted so opening frames
+  // and exit animations both resolve the active scope without flashing.
+  useLayoutEffect(() => {
+    if (!mounted || !materialSource.current || !element.current) return;
+    return bridgeDialogMaterialScope(materialSource.current, element.current);
+  }, [mounted]);
+
   useEffect(() => {
     if (!mounted) return;
     const dialog = element.current;
     if (!dialog) return;
     installFocusModality(dialog.ownerDocument);
-    const disconnectMaterial =
-      open && materialSource.current
-        ? bridgeDialogMaterialScope(materialSource.current, dialog)
-        : undefined;
     if (open && !dialog.open) {
       focusReturn.current =
         document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -101,7 +105,6 @@ export function UiDialog({
     } else if (!open && dialog.open) {
       closeDialogNode(dialog);
     }
-    return disconnectMaterial;
   }, [open, mounted, motionSource]);
 
   useEffect(() => {

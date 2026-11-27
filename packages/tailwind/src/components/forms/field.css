@@ -1,0 +1,273 @@
+@layer components {
+  :where(.ui-input, .ui-textarea, .ui-select, .ui-choice__control) {
+    --neoverse-field-recipe-filter: initial;
+  }
+
+  :where(.ui-textarea-shell) {
+    --neoverse-textarea-recipe-shadow: initial;
+  }
+
+  @scope (.material-glass-scope) {
+    /* These inset controls own Light optics even inside a different Glass tier. */
+    :where(.ui-input, .ui-textarea, .ui-select, .ui-choice__control) {
+      --neoverse-field-recipe-filter: var(--neoverse-form-control-filter);
+      --neoverse-material-edge-refraction-width: var(
+        --neoverse-material-glass-subtle-edge-refraction-width
+      );
+      --neoverse-material-edge-refraction-softness: var(
+        --neoverse-material-glass-subtle-edge-refraction-softness
+      );
+      --neoverse-material-edge-refraction-opacity: var(
+        --neoverse-material-glass-subtle-edge-refraction-opacity
+      );
+      --neoverse-material-edge-refraction-carrier: var(
+        --neoverse-material-glass-subtle-edge-refraction-carrier
+      );
+      --neoverse-material-edge-refraction-chroma: var(
+        --neoverse-material-edge-refraction-chroma-subtle
+      );
+    }
+
+    :where(.ui-textarea-shell) {
+      --neoverse-textarea-recipe-shadow:
+        var(--neoverse-shadow-float), var(--neoverse-material-glass-subtle-bloom);
+    }
+    .ui-select__popover.material-role-overlay {
+      --neoverse-material-edge-refraction-opacity: var(
+        --neoverse-material-glass-elevated-edge-refraction-opacity
+      );
+      --neoverse-material-edge-refraction-chroma: var(
+        --neoverse-material-edge-refraction-chroma-elevated
+      );
+    }
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select) {
+    --neoverse-form-control-effective-shadow: var(--neoverse-form-control-shadow);
+    --neoverse-form-control-effective-hover-shadow: var(--neoverse-form-control-hover-shadow);
+    --neoverse-form-control-effective-focus-depth-shadow: var(
+      --neoverse-form-control-focus-depth-shadow
+    );
+    --neoverse-form-control-effective-focus-shadow: var(--neoverse-form-control-focus-shadow);
+    --neoverse-form-control-current-shadow: var(--neoverse-form-control-effective-shadow);
+    --neoverse-form-control-validation-shadow: 0 0 0 var(--neoverse-border-width-none) transparent;
+    width: 100%;
+    min-height: var(--neoverse-form-control-min-height);
+    border: 0;
+    border-radius: var(--neoverse-form-control-radius);
+    padding: var(--neoverse-form-control-padding-block) var(--neoverse-form-control-padding-inline);
+    color: var(--neoverse-form-control-foreground);
+    background: var(--neoverse-form-control-background);
+    box-shadow:
+      var(--neoverse-form-control-current-shadow), var(--neoverse-form-control-validation-shadow);
+    font: inherit;
+    font-size: var(--neoverse-form-control-font-size);
+    line-height: var(--neoverse-form-control-line-height);
+    caret-color: var(--neoverse-color-accent-primary);
+    -webkit-backdrop-filter: var(--neoverse-field-recipe-filter, none);
+    backdrop-filter: var(--neoverse-field-recipe-filter, none);
+    outline: none;
+    transition:
+      background var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      box-shadow var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing),
+      color var(--neoverse-motion-state-duration) var(--neoverse-motion-state-easing);
+  }
+
+  :where(.ui-input, .ui-textarea)::placeholder {
+    color: var(--neoverse-form-control-placeholder);
+    opacity: 1;
+  }
+
+  @media (hover: hover) {
+    :where(.ui-input, .ui-textarea, .ui-select):not(
+        :disabled,
+        [aria-disabled='true'],
+        [readonly],
+        [aria-readonly='true']
+      ):hover {
+      background: var(--neoverse-form-control-hover-background);
+      --neoverse-form-control-current-shadow: var(--neoverse-form-control-effective-hover-shadow);
+    }
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select):focus {
+    background: var(--neoverse-form-control-focus-background);
+    --neoverse-form-control-current-shadow: var(
+      --neoverse-form-control-effective-focus-depth-shadow
+    );
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select):focus-visible:not(
+    [data-neoverse-focus-origin='pointer']
+  ) {
+    background: var(--neoverse-form-control-focus-background);
+    outline: var(--neoverse-focus-ring-width) solid var(--neoverse-color-focus-ring);
+    outline-offset: var(--neoverse-focus-ring-offset);
+    --neoverse-form-control-current-shadow: var(--neoverse-form-control-effective-focus-shadow);
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select):is(:disabled, [aria-disabled='true']) {
+    cursor: not-allowed;
+    color: var(--neoverse-form-control-disabled-foreground);
+    background: var(--neoverse-form-control-disabled-background);
+    --neoverse-form-control-current-shadow: var(--neoverse-form-control-effective-shadow);
+    -webkit-text-fill-color: var(--neoverse-form-control-disabled-foreground);
+    opacity: 1;
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select):is([readonly], [aria-readonly='true']) {
+    cursor: default;
+    color: var(--neoverse-form-control-readonly-foreground);
+    background: var(--neoverse-form-control-readonly-background);
+  }
+
+  /* Locked fields keep selection but never paint an insertion caret. */
+  :where(.ui-input, .ui-textarea):is(:disabled, [readonly]) {
+    caret-color: transparent;
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select)[data-validation='error'] {
+    --neoverse-form-control-validation-shadow: var(--neoverse-form-control-validation-error-shadow);
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select)[data-validation='warning'] {
+    --neoverse-form-control-validation-shadow: var(
+      --neoverse-form-control-validation-warning-shadow
+    );
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select)[data-validation='success'] {
+    --neoverse-form-control-validation-shadow: var(
+      --neoverse-form-control-validation-success-shadow
+    );
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select)[data-validation='error']:focus-visible {
+    outline-color: var(--neoverse-form-control-validation-error);
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select)[data-validation='warning']:focus-visible {
+    outline-color: var(--neoverse-form-control-validation-warning);
+  }
+
+  :where(.ui-input, .ui-textarea, .ui-select)[data-validation='success']:focus-visible {
+    outline-color: var(--neoverse-form-control-validation-success);
+  }
+
+  :where(.ui-input, .ui-textarea):disabled::placeholder {
+    color: var(--neoverse-form-control-disabled-foreground);
+  }
+
+  /* A native top layer and an explicit CSS edge pass cannot use the document canvas. */
+  @scope (.material-glass-scope) {
+    [data-neoverse-glass-renderer='webgl']
+      :where(.ui-input, .ui-textarea, .ui-select):not([data-neoverse-glass-edge-pass='css']) {
+      --neoverse-form-control-effective-shadow: var(
+        --neoverse-form-control-webgl-shadow,
+        var(--neoverse-form-control-shadow)
+      );
+      --neoverse-form-control-effective-hover-shadow: var(
+        --neoverse-form-control-webgl-hover-shadow,
+        var(--neoverse-form-control-hover-shadow)
+      );
+      --neoverse-form-control-effective-focus-depth-shadow: var(
+        --neoverse-form-control-webgl-focus-depth-shadow,
+        var(--neoverse-form-control-focus-depth-shadow)
+      );
+      --neoverse-form-control-effective-focus-shadow: var(
+        --neoverse-form-control-webgl-focus-shadow,
+        var(--neoverse-form-control-focus-shadow)
+      );
+    }
+
+    [data-neoverse-glass-renderer='webgl']
+      :where(.ui-choice__control):not([data-neoverse-glass-edge-pass='css']) {
+      --neoverse-choice-control-effective-shadow: var(
+        --neoverse-choice-control-webgl-shadow,
+        var(--neoverse-choice-control-shadow)
+      );
+    }
+
+    [data-neoverse-glass-renderer='webgl']
+      :is(:popover-open, :modal)
+      :where(.ui-input, .ui-textarea, .ui-select) {
+      --neoverse-form-control-effective-shadow: var(--neoverse-form-control-shadow);
+      --neoverse-form-control-effective-hover-shadow: var(--neoverse-form-control-hover-shadow);
+      --neoverse-form-control-effective-focus-depth-shadow: var(
+        --neoverse-form-control-focus-depth-shadow
+      );
+      --neoverse-form-control-effective-focus-shadow: var(--neoverse-form-control-focus-shadow);
+    }
+
+    [data-neoverse-glass-renderer='webgl'] :is(:popover-open, :modal) :where(.ui-choice__control) {
+      --neoverse-choice-control-effective-shadow: var(--neoverse-choice-control-shadow);
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      [data-neoverse-glass-renderer='webgl']
+        :where(.ui-input, .ui-textarea, .ui-select):not([data-neoverse-glass-edge-pass='css']) {
+        --neoverse-form-control-effective-shadow: var(--neoverse-form-control-shadow);
+        --neoverse-form-control-effective-hover-shadow: var(--neoverse-form-control-hover-shadow);
+        --neoverse-form-control-effective-focus-depth-shadow: var(
+          --neoverse-form-control-focus-depth-shadow
+        );
+        --neoverse-form-control-effective-focus-shadow: var(--neoverse-form-control-focus-shadow);
+      }
+
+      [data-neoverse-glass-renderer='webgl']
+        :where(.ui-choice__control):not([data-neoverse-glass-edge-pass='css']) {
+        --neoverse-choice-control-effective-shadow: var(--neoverse-choice-control-shadow);
+      }
+    }
+  }
+
+  .ui-field {
+    display: grid;
+    gap: var(--neoverse-field-gap);
+    min-width: 0;
+  }
+
+  .ui-field__control {
+    min-width: 0;
+  }
+
+  .ui-field__label-row {
+    display: flex;
+    align-items: baseline;
+    gap: var(--neoverse-field-label-gap);
+  }
+
+  .ui-field__label {
+    color: var(--neoverse-field-label-foreground);
+    font-size: var(--neoverse-typography-label-sm-size);
+    line-height: var(--neoverse-typography-label-sm-line-height);
+    font-weight: var(--neoverse-typography-label-sm-weight);
+  }
+
+  .ui-field__required,
+  .ui-field__message {
+    color: var(--neoverse-field-message-foreground);
+  }
+
+  .ui-field__description,
+  .ui-field__message {
+    font-size: var(--neoverse-typography-caption-size);
+    line-height: var(--neoverse-typography-caption-line-height);
+  }
+
+  .ui-field__description {
+    color: var(--neoverse-field-description-foreground);
+  }
+
+  .ui-field[data-validation='error'] :where(.ui-field__required, .ui-field__message) {
+    color: var(--neoverse-effect-status-danger-text);
+  }
+
+  .ui-field[data-validation='warning'] .ui-field__message {
+    color: var(--neoverse-effect-status-warning-text);
+  }
+
+  .ui-field[data-validation='success'] .ui-field__message {
+    color: var(--neoverse-effect-status-success-text);
+  }
+}

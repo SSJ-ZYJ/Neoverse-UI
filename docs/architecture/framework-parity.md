@@ -23,7 +23,7 @@ React 的原生事件名称、`className`、`htmlFor` 和 ref 遵循 React 约�
 
 `ButtonVariant` 在两端共享：`primary` 为主要蓝色，`secondary` 为次要样式，`ghost` 无填充；`success` 为成功绿，`warning` 为警告琥珀色，`danger` 为危险红，`accent` 为强调紫。
 
-两端从 `@neoverse-ui/tokens` 重导出 `Material`、`SurfaceRole`、`GlassTier`、`SurfacePreset` 和 `ControlSurfacePreset`；门禁校验重导出指向同一份类型声明。两端共用自动材质、显式预设和 Portal 作用域规则。Tabs 省略 `variant` 时跟随作用域，显式 `variant="glass"` 保留极光玻璃。材质职责见[组件矩阵](../../contracts/component-matrix.json)，行为细节见[共享材质规范](material-standards.md#shared-material-selection)。
+两端从 `@neoverse-ui/tokens` 重导出 `Material`、`SurfaceRole`、`GlassTier`、`SurfacePreset`、`ControlSurfacePreset`、`getSurfaceClass` 和 `isGlassSurface`；门禁校验重导出指向同一份类型声明。两端共用自动材质、显式预设和 Portal 作用域规则。Tabs 省略 `variant` 时跟随作用域，显式 `variant="glass"` 保留极光玻璃。材质职责见[组件矩阵](../../contracts/component-matrix.json)，行为细节见[共享材质规范](material-standards.md#shared-material-selection)。
 
 ## 命名内容和根元素
 
@@ -45,9 +45,9 @@ TerminalPrompt 的 `suggestion` 在两端都只显示匹配的候选后缀；接
 ## 验证与边界
 
 - `contracts/framework-parity.json`：校验组件、数据结构、字面量类型和登记的命名插槽对应关系，覆盖两条成熟度轨道。
-- `packages/react/src/parity.test.tsx`：SSR、原生语义、可访问标签、默认状态与定制内容。
+- `packages/react/src/tests/parity.test.tsx`：SSR、原生语义、可访问标签、默认状态与定制内容。
 - `/react-fixture?contract-fixtures`：Design Lab 中的实际 React DOM 与状态示例。
-- `tests/e2e/parity.spec.ts`：桌面和移动端、深浅主题下每个 React 适配器的语义 DOM、主题解析与共享控件名称；键盘选择、受控拒绝、终端补全、输出跟随、滚动条拖拽等交互分别由 `navigation`、`terminal`、`surfaces` 模块覆盖。
+- `tests/e2e/parity/parity.spec.ts`：桌面和移动端、深浅主题下每个 React 适配器的语义 DOM、主题解析与共享控件名称；键盘选择、受控拒绝、终端补全、输出跟随、滚动条拖拽等交互分别由 `components/` 下的对应规格覆盖。
 - `scripts/release/verify-packages.ts`：在临时消费项目安装本地打包产物，检查公开导出和类型。
 
 新 React 适配的真实产品使用验证和发布级截图仍待补充。已有矩阵中的 Vue / 共享组件验收记录保留，新增 `reactValidation` 单独记录 React 的验证范围。新增运行态示例不作为真实产品验收或成熟度提升依据。

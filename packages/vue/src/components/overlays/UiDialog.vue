@@ -8,7 +8,7 @@ import {
   trapModalTabKey,
 } from '@neoverse-ui/overlay-runtime';
 import { getSurfaceClass } from '@neoverse-ui/tokens';
-import { nextTick, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
+import { nextTick, onBeforeUnmount, onMounted, ref, useId, watch, watchPostEffect } from 'vue';
 import type { DialogProps, DialogRole, DialogSize } from '../../types';
 
 defineOptions({ inheritAttrs: false });
@@ -37,7 +37,12 @@ const titleId = `${useId()}-dialog-title`;
 const descriptionId = `${useId()}-dialog-description`;
 let focusReturn: HTMLElement | null = null;
 let keydownListening = false;
-let disconnectMaterial: (() => void) | undefined;
+
+watchPostEffect((onCleanup) => {
+  if (!mounted.value || !materialSource.value || !element.value) return;
+  const disconnect = bridgeDialogMaterialScope(materialSource.value, element.value);
+  if (disconnect) onCleanup(disconnect);
+});
 
 function restoreFocus() {
   const target = focusReturn;
@@ -95,9 +100,6 @@ async function syncOpen() {
   if (!dialog) return;
   installFocusModality(dialog.ownerDocument);
   if (props.open && !dialog.open) {
-    if (materialSource.value) {
-      disconnectMaterial = bridgeDialogMaterialScope(materialSource.value, dialog);
-    }
     focusReturn = document.activeElement instanceof HTMLElement ? document.activeElement : null;
     openOverlayWithMotion(
       dialog,
@@ -125,8 +127,6 @@ function onBackdropClick() {
 
 function onNativeClose() {
   if (element.value?.open) return;
-  disconnectMaterial?.();
-  disconnectMaterial = undefined;
   setDocumentListeners(false);
   if (props.open) requestClose();
   restoreFocus();
@@ -143,7 +143,6 @@ onMounted(() => {
   void syncOpen();
 });
 onBeforeUnmount(() => {
-  disconnectMaterial?.();
   setDocumentListeners(false);
   if (element.value?.open) closeDialogNode(element.value);
   restoreFocus();

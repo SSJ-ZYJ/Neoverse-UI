@@ -1,0 +1,175 @@
+@layer components {
+  .ui-notice {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--neoverse-notice-gap);
+    border: 0;
+    border-radius: var(--neoverse-notice-radius);
+    padding: var(--neoverse-notice-padding-block) var(--neoverse-notice-padding-inline);
+    color: var(--neoverse-notice-foreground);
+    background: var(--neoverse-notice-neutral-background);
+    box-shadow: var(--neoverse-notice-neutral-shadow);
+    font-size: var(--neoverse-notice-font-size);
+    -webkit-backdrop-filter: var(--neoverse-surface-inset-filter);
+    backdrop-filter: var(--neoverse-surface-inset-filter);
+  }
+
+  .ui-notice--info {
+    background: var(--neoverse-notice-info-background);
+    box-shadow: var(--neoverse-notice-info-shadow);
+  }
+
+  .ui-notice--success {
+    background: var(--neoverse-notice-success-background);
+    box-shadow: var(--neoverse-notice-success-shadow);
+  }
+
+  .ui-notice--warning {
+    background: var(--neoverse-notice-warning-background);
+    box-shadow: var(--neoverse-notice-warning-shadow);
+  }
+
+  .ui-notice--danger {
+    background: var(--neoverse-notice-danger-background);
+    box-shadow: var(--neoverse-notice-danger-shadow);
+  }
+
+  .ui-notice__content {
+    min-width: 0;
+  }
+
+  .ui-notice__action {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+  }
+}
+
+@layer neoverse-material-mode {
+  @scope (.material-solid-scope) {
+    :where(:scope, :scope *).ui-notice {
+      background: var(--neoverse-material-solid-status-plate-neutral);
+      border-color: transparent;
+      color: var(--neoverse-color-text-secondary);
+      box-shadow: none;
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    :where(:scope, :scope *).ui-notice--info {
+      background: var(--neoverse-material-solid-status-plate-info);
+    }
+
+    :where(:scope, :scope *).ui-notice--success {
+      background: var(--neoverse-material-solid-status-plate-success);
+    }
+
+    :where(:scope, :scope *).ui-notice--warning {
+      background: var(--neoverse-material-solid-status-plate-warning);
+    }
+
+    :where(:scope, :scope *).ui-notice--danger {
+      background: var(--neoverse-material-solid-status-plate-danger);
+    }
+
+    @media (forced-colors: active) {
+      :where(:scope, :scope *).ui-notice {
+        background: Canvas;
+        border: var(--neoverse-border-width-thin) solid CanvasText;
+        color: CanvasText;
+      }
+    }
+  }
+
+  @scope (.material-frosted-scope) {
+    /* Notices sample only when standalone; nested notices inherit --neoverse-frosted-nested-filter. */
+    :where(:scope, :scope *).ui-notice {
+      background: var(
+        --neoverse-frosted-status-fallback,
+        var(--neoverse-material-frosted-status-plate-neutral-fallback)
+      );
+      border: var(--neoverse-border-width-thin) solid var(--neoverse-material-frosted-border);
+      color: var(--neoverse-color-text-secondary);
+      box-shadow: var(--neoverse-material-frosted-group-shadow);
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+    }
+
+    :where(:scope, :scope *).ui-notice--info {
+      --neoverse-frosted-status-fallback: var(
+        --neoverse-material-frosted-status-plate-info-fallback
+      );
+    }
+
+    :where(:scope, :scope *).ui-notice--success {
+      --neoverse-frosted-status-fallback: var(
+        --neoverse-material-frosted-status-plate-success-fallback
+      );
+    }
+
+    :where(:scope, :scope *).ui-notice--warning {
+      --neoverse-frosted-status-fallback: var(
+        --neoverse-material-frosted-status-plate-warning-fallback
+      );
+    }
+
+    :where(:scope, :scope *).ui-notice--danger {
+      --neoverse-frosted-status-fallback: var(
+        --neoverse-material-frosted-status-plate-danger-fallback
+      );
+    }
+
+    @supports (backdrop-filter: brightness(1)) or (-webkit-backdrop-filter: brightness(1)) {
+      :where(:scope, :scope *).ui-notice {
+        background: var(--neoverse-material-frosted-status-plate-neutral);
+        -webkit-backdrop-filter: var(
+          --neoverse-frosted-nested-filter,
+          var(--neoverse-material-frosted-control-filter)
+        );
+        backdrop-filter: var(
+          --neoverse-frosted-nested-filter,
+          var(--neoverse-material-frosted-control-filter)
+        );
+      }
+
+      :where(:scope, :scope *).ui-notice--info {
+        background: var(--neoverse-material-frosted-status-plate-info);
+      }
+
+      :where(:scope, :scope *).ui-notice--success {
+        background: var(--neoverse-material-frosted-status-plate-success);
+      }
+
+      :where(:scope, :scope *).ui-notice--warning {
+        background: var(--neoverse-material-frosted-status-plate-warning);
+      }
+
+      :where(:scope, :scope *).ui-notice--danger {
+        background: var(--neoverse-material-frosted-status-plate-danger);
+      }
+    }
+
+    @media (prefers-reduced-transparency: reduce) {
+      :where(:scope, :scope *).ui-notice {
+        background: var(
+          --neoverse-frosted-status-fallback,
+          var(--neoverse-material-frosted-status-plate-neutral-fallback)
+        );
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+    }
+
+    @media (forced-colors: active) {
+      :where(:scope, :scope *).ui-notice {
+        background: Canvas;
+        border: var(--neoverse-border-width-thin) solid CanvasText;
+        color: CanvasText;
+        box-shadow: none;
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+      }
+    }
+  }
+}

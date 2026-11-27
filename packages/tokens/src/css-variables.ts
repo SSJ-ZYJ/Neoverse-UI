@@ -1,17 +1,17 @@
 import { componentCssVariables } from './components/component-variables.js';
 import { borderCssVariables } from './foundation/border.js';
-import { colorCssVariables } from './foundation/color.js';
-import { effectsCssVariables } from './foundation/effects.js';
-import { focusCssVariables } from './foundation/focus.js';
 import { fontCssVariables } from './foundation/font.js';
 import { iconSizeCssVariables } from './foundation/icon-size.js';
-import { layoutCssVariables } from './foundation/layout.js';
-import { materialCssVariables } from './foundation/material.js';
 import { motionCssVariables } from './foundation/motion.js';
 import { radiusCssVariables } from './foundation/radius.js';
 import { shadowCssVariables } from './foundation/shadow.js';
 import { spaceCssVariables } from './foundation/space.js';
-import { typographyCssVariables } from './foundation/typography.js';
+import { materialCssVariables } from './materials/material.js';
+import { colorCssVariables } from './semantic/color.js';
+import { effectsCssVariables } from './semantic/effects.js';
+import { focusCssVariables } from './semantic/focus.js';
+import { layoutCssVariables } from './semantic/layout.js';
+import { typographyCssVariables } from './semantic/typography.js';
 
 export const cssVariables = {
   color: colorCssVariables,

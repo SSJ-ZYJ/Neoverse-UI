@@ -1,9 +1,11 @@
-export type {
-  ControlSurfacePreset,
-  GlassTier,
-  Material,
-  SurfacePreset,
-  SurfaceRole,
+export {
+  type ControlSurfacePreset,
+  type GlassTier,
+  getSurfaceClass,
+  isGlassSurface,
+  type Material,
+  type SurfacePreset,
+  type SurfaceRole,
 } from '@neoverse-ui/tokens';
 export {
   type ActionClassNameOptions,

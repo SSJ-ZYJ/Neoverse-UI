@@ -1,0 +1,260 @@
+@layer components {
+  .ui-control-surface {
+    display: inline-flex;
+    max-width: 100%;
+    align-items: stretch;
+    min-width: 0;
+    border-radius: var(--neoverse-control-surface-corner-radius);
+    gap: var(--neoverse-control-surface-gap);
+    padding-block: var(--neoverse-control-surface-padding-block);
+    padding-inline: var(--neoverse-control-surface-padding-inline);
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .ui-control-surface {
+      /* Scale changes affect layout, not just the painted surface. */
+      --neoverse-control-surface-scale-transition: zoom var(--neoverse-motion-spatial-duration)
+        var(--neoverse-motion-spatial-easing);
+      transition: var(--neoverse-control-surface-scale-transition);
+    }
+  }
+
+  .ui-control-surface[data-surface='none'] {
+    --neoverse-control-surface-boundary-width: var(--neoverse-border-width-none);
+  }
+
+  /* Grouped controls use the same inner corner contract as segmented
+     options. The surrounding ControlSurface uses the segmented shell radius,
+     so both layers stay visually consistent instead of becoming boxier. */
+  .ui-control-surface__group :is(.ui-button, .ui-action, .ui-navigation-item) {
+    border-radius: var(--neoverse-control-surface-inner-radius);
+  }
+
+  .ui-control-surface--scale-md {
+    zoom: var(--neoverse-control-surface-scale-md);
+  }
+
+  .ui-control-surface--scale-lg {
+    --neoverse-navigation-item-font-size-sm: calc(
+      var(--neoverse-font-size-xs) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    --neoverse-navigation-item-font-size-md: calc(
+      var(--neoverse-font-size-sm) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    --neoverse-navigation-item-font-size-lg: calc(
+      var(--neoverse-font-size-md) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    --neoverse-navigation-item-icon-size-sm: calc(
+      var(--neoverse-icon-size-sm) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    --neoverse-navigation-item-icon-size-md: calc(
+      var(--neoverse-icon-size-md) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    --neoverse-navigation-item-icon-size-lg: calc(
+      var(--neoverse-icon-size-lg) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    --neoverse-navigation-item-icon-size: var(--neoverse-navigation-item-icon-size-md);
+    --neoverse-control-segmented-option-font-size-sm: calc(
+      var(--neoverse-font-size-sm) *
+      var(--neoverse-control-surface-scale-lg-type-factor)
+    );
+    zoom: var(--neoverse-control-surface-scale-lg);
+  }
+
+  /* Generic navigation surfaces match their block inset so all four outer edges
+     stay concentric and balanced; Dock keeps its taller group edge inset. */
+  .ui-control-surface:has(.ui-control-surface__group--primary .ui-navigation-item) {
+    --neoverse-control-surface-padding-inline: var(--neoverse-control-surface-padding-block);
+  }
+
+  .ui-dock:has(.ui-control-surface__group--primary .ui-navigation-item) {
+    --neoverse-control-surface-padding-inline: var(
+      --neoverse-control-surface-navigation-edge-inset
+    );
+  }
+
+  .ui-control-surface__group {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    box-sizing: border-box;
+    min-width: 0;
+    gap: var(--neoverse-control-surface-item-gap);
+    align-items: center;
+  }
+
+  .ui-dock > .ui-control-surface__group {
+    height: var(--neoverse-control-surface-group-height);
+  }
+
+  .ui-control-surface--shared-indicator[data-neoverse-navigation-indicator-ready='true']
+    .ui-navigation-item__indicator {
+    visibility: hidden;
+    transition: none;
+  }
+
+  /* The shared indicator flies between selections on the compositor: the
+     adapters commit left/top/width/height once per settle and express the
+     flight as translate + scale from that base, so a selection never runs
+     per-frame layout inside the glass Dock. */
+  .ui-control-surface__indicator {
+    position: absolute;
+    z-index: 3;
+    width: var(--neoverse-navigation-item-indicator-width);
+    height: var(--neoverse-navigation-item-indicator-height);
+    border-radius: var(--neoverse-radius-pill);
+    background: var(--neoverse-navigation-item-indicator-color);
+    pointer-events: none;
+    transform-origin: top left;
+    will-change: transform;
+  }
+
+  .ui-control-surface__indicator[data-ready='true'] {
+    transition: transform var(--neoverse-control-surface-indicator-duration)
+      var(--neoverse-control-surface-indicator-easing);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ui-control-surface__indicator[data-ready='true'] {
+      transition: none;
+    }
+  }
+
+  .ui-control-surface__group--primary {
+    flex: 1 1 auto;
+  }
+
+  /* A grouped navigation inherits the surface's content-height token so its
+     md items can track the same rhythm as the trailing segmented options.
+     Keep this relationship here instead of making a consumer reach into
+     either component's internal size selector. */
+  .ui-control-surface__group--primary:has(.ui-navigation-item) {
+    --neoverse-navigation-item-height-md: var(--neoverse-control-surface-navigation-height);
+  }
+
+  .ui-control-surface__group--primary:has(.ui-navigation-item--compact) {
+    --neoverse-control-surface-item-gap: var(--neoverse-navigation-item-compact-gap);
+  }
+
+  .ui-control-surface__group--trailing {
+    flex: 0 0 auto;
+  }
+
+  .ui-dock > .ui-control-surface__group--trailing {
+    border: 0;
+    border-radius: var(--neoverse-control-surface-trailing-radius);
+    padding-block: var(--neoverse-control-surface-trailing-padding);
+    padding-inline: var(--neoverse-control-surface-trailing-padding-inline);
+    background: var(--neoverse-control-surface-trailing-background);
+    box-shadow: var(--neoverse-control-surface-trailing-shadow);
+  }
+
+  /* Keep embedded segmented controls aligned with their shape while borrowing
+     the parent Dock/ControlSurface glass plate and grouping tray. */
+  .ui-control-surface__group--trailing:has(.ui-segmented-control),
+  .ui-dock > .ui-control-surface__group--trailing:has(.ui-segmented-control) {
+    --neoverse-control-segmented-option-height-sm: var(--neoverse-control-surface-segmented-height);
+    --neoverse-control-segmented-option-min-width: var(
+      --neoverse-control-segmented-embedded-option-min-width
+    );
+    --neoverse-control-segmented-option-padding-inline-sm: var(
+      --neoverse-control-segmented-embedded-option-padding-inline-sm
+    );
+    --neoverse-control-segmented-option-font-size-sm: var(
+      --neoverse-control-segmented-embedded-option-font-size-sm
+    );
+    border-radius: var(--neoverse-control-segmented-corner-radius);
+    padding-block: var(--neoverse-control-surface-trailing-padding);
+    padding-inline: var(--neoverse-control-segmented-inset);
+    background: var(--neoverse-control-surface-trailing-background);
+    box-shadow: var(--neoverse-control-surface-trailing-shadow);
+  }
+
+  .ui-control-surface__group--trailing:has(.ui-segmented-control--rounded),
+  .ui-dock > .ui-control-surface__group--trailing:has(.ui-segmented-control--rounded) {
+    border-radius: var(--neoverse-control-segmented-rounded-corner-radius);
+  }
+
+  .ui-control-surface--scale-lg .ui-control-surface__group--trailing:has(.ui-segmented-control) {
+    --neoverse-control-segmented-option-font-size-sm: calc(
+      var(--neoverse-control-segmented-embedded-option-font-size-sm) *
+      var(--neoverse-control-segmented-embedded-option-scale-lg-type-factor)
+    );
+  }
+
+  /* Keep embedded height and option geometry independent of standalone
+     controls; the trailing group owns the shared side clearance. */
+  .ui-dock > .ui-control-surface__group--trailing:has(.ui-segmented-control) {
+    height: var(--neoverse-control-surface-segmented-group-height);
+    align-self: center;
+  }
+
+  .ui-control-surface__divider {
+    position: relative;
+    z-index: 1;
+    width: var(--neoverse-border-width-thin);
+    height: var(--neoverse-control-surface-divider-height);
+    flex: 0 0 auto;
+    align-self: center;
+    margin-inline: var(--neoverse-control-surface-divider-gap);
+    background: var(--neoverse-control-surface-divider-color);
+  }
+
+  @scope (.material-glass-scope) {
+    @media (prefers-reduced-transparency: reduce) {
+      .ui-control-surface:not([data-surface='none'], .material-frosted) {
+        background-color: var(--neoverse-material-glass-base-tint);
+      }
+    }
+  }
+}
+
+@layer utilities {
+  @scope (.material-scopes) {
+    @media (prefers-reduced-motion: no-preference) {
+      /* Compose scale with the transition in the shared Glass utility layer. */
+      .ui-control-surface:is(
+          .material-recipe-glass-subtle,
+          .material-recipe-glass-elevated,
+          .material-recipe-glass-immersive
+        ):not(.ui-button) {
+        transition:
+          var(--neoverse-material-transition), var(--neoverse-control-surface-scale-transition);
+      }
+    }
+  }
+}
+
+@layer neoverse-material-mode {
+  @scope (.material-solid-scope) {
+    .ui-control-surface.material-recipe-auto > .ui-control-surface__divider {
+      background-color: var(--neoverse-material-solid-divider);
+    }
+
+    .ui-control-surface.material-recipe-auto > .ui-control-surface__group--trailing {
+      --neoverse-control-surface-trailing-background: var(--neoverse-material-solid-group);
+      --neoverse-control-surface-trailing-shadow: none;
+    }
+  }
+
+  @scope (.material-scopes) {
+    .ui-control-surface:is(.material-recipe-frosted-group, .material-recipe-frosted-panel)
+      > .ui-control-surface__divider {
+      background-color: var(--neoverse-material-frosted-divider);
+    }
+
+    .ui-control-surface:is(.material-recipe-frosted-group, .material-recipe-frosted-panel)
+      > .ui-control-surface__group--trailing {
+      --neoverse-control-surface-trailing-background: var(
+        --neoverse-material-frosted-group-nested-fill
+      );
+      --neoverse-control-surface-trailing-shadow: none;
+    }
+  }
+}

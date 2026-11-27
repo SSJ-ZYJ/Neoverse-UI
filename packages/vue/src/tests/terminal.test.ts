@@ -1,0 +1,304 @@
+import { mount } from '@vue/test-utils';
+import { describe, expect, it, vi } from 'vitest';
+import { h, nextTick, ref } from 'vue';
+import UiButton from '../components/actions/UiButton.vue';
+import UiTerminalEcho from '../components/terminal/UiTerminalEcho.vue';
+import UiTerminalLine from '../components/terminal/UiTerminalLine.vue';
+import UiTerminalPrompt from '../components/terminal/UiTerminalPrompt.vue';
+import UiTerminalSurface from '../components/terminal/UiTerminalSurface.vue';
+import UiTerminalTranscript from '../components/terminal/UiTerminalTranscript.vue';
+
+describe('Terminal composition', () => {
+  it('reuses an automatic panel surface and exposes accessible header/action slots', () => {
+    const wrapper = mount(UiTerminalSurface, {
+      props: { title: 'Session', density: 'expanded' },
+      slots: {
+        status: () => h('span', 'Connected'),
+        actions: () => h('button', { type: 'button' }, 'Close'),
+        default: () => h('p', 'Ready'),
+      },
+    });
+    expect(wrapper.classes()).toContain('material-role-panel');
+    expect(wrapper.attributes('aria-label')).toBe('Session');
+    expect(wrapper.attributes('data-density')).toBe('expanded');
+    expect(wrapper.get('.ui-terminal-surface__title').text()).toBe('Session');
+    expect(wrapper.get('.ui-terminal-surface__status').text()).toBe('Connected');
+    expect(wrapper.get('[role="toolbar"] button').text()).toBe('Close');
+    expect(wrapper.get('[role="toolbar"]').attributes('aria-label')).toBe('Session actions');
+    expect(wrapper.get('.ui-terminal-surface__body').text()).toBe('Ready');
+  });
+
+  it('replaces only header contents with interactive consumer controls', async () => {
+    const closed = ref(false);
+    const wrapper = mount(UiTerminalSurface, {
+      props: { title: 'Fallback title', ariaLabel: 'Workspace console' },
+      slots: {
+        header: () =>
+          h(
+            UiButton,
+            {
+              onClick: () => {
+                closed.value = true;
+              },
+            },
+            () => 'Close window',
+          ),
+        status: () => h('span', 'Fallback status'),
+        actions: () => h('button', 'Fallback action'),
+        default: () => h('p', closed.value ? 'Closed' : 'Ready'),
+      },
+    });
+    expect(wrapper.element.tagName).toBe('SECTION');
+    expect(wrapper.attributes('aria-label')).toBe('Workspace console');
+    expect(wrapper.classes()).toContain('material-role-panel');
+    expect(wrapper.findAll('header')).toHaveLength(1);
+    expect(wrapper.get('header').text()).toBe('Close window');
+    expect(wrapper.findAll('button')).toHaveLength(1);
+    expect(wrapper.find('[role="toolbar"]').exists()).toBe(false);
+    expect(wrapper.text()).not.toContain('Fallback');
+    expect(wrapper.get('.ui-terminal-surface__body').text()).toBe('Ready');
+    await wrapper.get('header button').trigger('click');
+    expect(wrapper.get('.ui-terminal-surface__body').text()).toBe('Closed');
+    wrapper.unmount();
+  });
+
+  it('renders user-provided output as text and exposes preformatted line semantics', () => {
+    const payload = '<img src=x onerror=alert(1)>';
+    const wrapper = mount(UiTerminalLine, {
+      props: { kind: 'command', tone: 'error', preformatted: true, text: payload },
+    });
+    expect(wrapper.text()).toBe(payload);
+    expect(wrapper.find('img').exists()).toBe(false);
+    expect(wrapper.attributes('data-kind')).toBe('command');
+    expect(wrapper.attributes('data-preformatted')).toBe('true');
+    expect(wrapper.attributes('data-tone')).toBe('error');
+  });
+
+  it('edits directly after the prompt glyph without the shared form-input surface', async () => {
+    const wrapper = mount(UiTerminalPrompt, {
+      props: {
+        label: 'Terminal command',
+        modelValue: '',
+        segments: [
+          { id: 'host', label: 'Neoverse', tone: 'host' },
+          { id: 'path', label: '~/docs', tone: 'path' },
+        ],
+      },
+    });
+    const input = wrapper.get('input');
+    expect(wrapper.find('.ui-input').exists()).toBe(false);
+    expect(input.classes()).toContain('ui-terminal-prompt__editor');
+    expect(input.attributes('aria-label')).toBe('Terminal command');
+    expect(wrapper.get('label').attributes('for')).toBe(input.attributes('id'));
+    expect(wrapper.findAll('.ui-terminal-prompt__segment')).toHaveLength(2);
+
+    await input.setValue('echo hello');
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['echo hello']);
+    await input.trigger('compositionstart');
+    input.element.value = '你好';
+    await input.trigger('input');
+    await input.trigger('compositionend');
+    expect(wrapper.emitted('update:modelValue')?.at(-1)).toEqual(['你好']);
+  });
+
+  it('keeps native password, readonly, disabled and error states', () => {
+    const wrapper = mount(UiTerminalPrompt, {
+      props: {
+        label: 'Secret token',
+        modelValue: 'example',
+        type: 'password',
+        readonly: true,
+        error: true,
+      },
+      attrs: { autocomplete: 'current-password', spellcheck: 'true' },
+    });
+    const input = wrapper.get('input');
+    expect(input.attributes('type')).toBe('password');
+    expect(input.attributes('autocomplete')).toBe('current-password');
+    expect(input.attributes('spellcheck')).toBe('true');
+    expect(input.attributes('readonly')).toBeDefined();
+    expect(input.attributes('aria-invalid')).toBe('true');
+    expect(wrapper.attributes('data-error')).toBe('true');
+    wrapper.unmount();
+  });
+
+  it('draws a breathing caret while the native editor keeps selection, IME and masking', async () => {
+    const wrapper = mount(UiTerminalPrompt, { props: { label: 'Command', modelValue: 'clear' } });
+    const input = wrapper.get('input');
+    input.element.setSelectionRange(2, 2);
+    await input.trigger('focus');
+    expect(wrapper.attributes('data-caret')).toBe('overlay');
+    const caret = wrapper.get('.ui-terminal-prompt__caret');
+    expect(caret.attributes('aria-hidden')).toBe('true');
+    expect(caret.get('.ui-terminal-prompt__caret-prefix').text()).toBe('cl');
+    expect(caret.find('.ui-terminal-prompt__caret-glyph').exists()).toBe(true);
+    input.element.scrollLeft = 12;
+    await input.trigger('scroll');
+    expect(caret.get('span').attributes('style')).toContain('translateX(-12px)');
+    input.element.setSelectionRange(1, 3);
+    await input.trigger('select');
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    expect(wrapper.find('.ui-terminal-prompt__caret').exists()).toBe(false);
+    input.element.setSelectionRange(2, 2);
+    await input.trigger('select');
+    await input.trigger('compositionstart');
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    await input.trigger('compositionend');
+    expect(wrapper.attributes('data-caret')).toBe('overlay');
+    await wrapper.setProps({ type: 'password' });
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    expect(wrapper.find('.ui-terminal-prompt__caret').exists()).toBe(false);
+    await wrapper.setProps({ type: 'text', disabled: true });
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    await wrapper.setProps({ disabled: false, readonly: true });
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    await wrapper.setProps({ readonly: false });
+    await input.trigger('blur');
+    expect(wrapper.attributes('data-caret')).toBe('native');
+    expect(wrapper.find('.ui-terminal-prompt__caret').exists()).toBe(false);
+  });
+
+  it('holds the caret solid while typing and resumes the breath after a pause', async () => {
+    vi.useFakeTimers();
+    try {
+      const wrapper = mount(UiTerminalPrompt, { props: { label: 'Command', modelValue: 'cl' } });
+      const input = wrapper.get('input');
+      input.element.setSelectionRange(2, 2);
+      await input.trigger('focus');
+      const caret = wrapper.get('.ui-terminal-prompt__caret');
+      expect(caret.classes()).not.toContain('ui-terminal-prompt__caret--holding');
+      await input.trigger('input');
+      expect(caret.classes()).toContain('ui-terminal-prompt__caret--holding');
+      vi.advanceTimersByTime(700);
+      await nextTick();
+      expect(caret.classes()).not.toContain('ui-terminal-prompt__caret--holding');
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('shows a ghost suffix only during native editing at the end', async () => {
+    const wrapper = mount(UiTerminalPrompt, {
+      props: { label: 'Command', modelValue: 'c', suggestion: 'clear' },
+    });
+    const input = wrapper.get('input');
+    input.element.setSelectionRange(1, 1);
+    await input.trigger('focus');
+    expect(wrapper.get('.ui-terminal-prompt__ghost-suffix').text()).toBe('lear');
+    expect(wrapper.get('.ui-terminal-prompt__ghost').attributes('aria-hidden')).toBe('true');
+    expect(input.element.value).toBe('c');
+    expect(wrapper.emitted('update:modelValue')).toBeUndefined();
+    input.element.setSelectionRange(0, 1);
+    await input.trigger('select');
+    expect(wrapper.find('.ui-terminal-prompt__ghost').exists()).toBe(false);
+    input.element.setSelectionRange(1, 1);
+    await input.trigger('select');
+    await input.trigger('compositionstart');
+    expect(wrapper.find('.ui-terminal-prompt__ghost').exists()).toBe(false);
+    await input.trigger('compositionend');
+    expect(wrapper.find('.ui-terminal-prompt__ghost').exists()).toBe(true);
+    input.element.scrollLeft = 20;
+    await input.trigger('scroll');
+    expect(wrapper.get('.ui-terminal-prompt__ghost > span').attributes('style')).toContain(
+      'translateX(-20px)',
+    );
+    await input.trigger('blur');
+    expect(wrapper.find('.ui-terminal-prompt__ghost').exists()).toBe(false);
+    await input.trigger('focus');
+    for (const props of [
+      { suggestion: 'different' },
+      { suggestion: 'clear', readonly: true },
+      { readonly: false, disabled: true },
+      { disabled: false, type: 'password' as const },
+    ]) {
+      await wrapper.setProps(props);
+      expect(wrapper.find('.ui-terminal-prompt__ghost').exists()).toBe(false);
+    }
+  });
+
+  it('composes segment content without requiring a host or glyph font', () => {
+    const wrapper = mount(UiTerminalPrompt, {
+      props: {
+        label: 'Command',
+        segments: [
+          { id: 'path', label: '~/docs', tone: 'path' },
+          { id: 'time', label: '12:32', tone: 'time' },
+        ],
+      },
+      slots: {
+        segment: ({ segment }) => [
+          h('svg', { 'aria-hidden': 'true', viewBox: '0 0 16 16' }),
+          h('span', segment.label),
+        ],
+      },
+    });
+    const segments = wrapper.findAll('.ui-terminal-prompt__segment');
+    expect(segments.map((segment) => segment.text())).toEqual(['~/docs', '12:32']);
+    expect(segments[0]?.attributes('data-tone')).toBe('path');
+    expect(wrapper.findAll('svg[aria-hidden="true"]')).toHaveLength(2);
+    expect(wrapper.get('input').attributes('aria-label')).toBe('Command');
+  });
+
+  it('echoes recorded commands as selectable plain text without an editor or empty chrome', async () => {
+    const payload = '<img src=x onerror=alert(1)>';
+    const wrapper = mount(UiTerminalEcho, {
+      props: {
+        text: payload,
+        segments: [
+          { id: 'host', label: 'visitor@xca', tone: 'host' },
+          { id: 'path', label: '~', tone: 'path' },
+        ],
+      },
+    });
+    expect(wrapper.find('input').exists()).toBe(false);
+    expect(wrapper.attributes('data-readonly')).toBe('true');
+    expect(wrapper.get('.ui-terminal-echo__text').text()).toBe(payload);
+    expect(wrapper.find('img').exists()).toBe(false);
+    const segments = wrapper.findAll('.ui-terminal-prompt__segment');
+    expect(segments).toHaveLength(2);
+    expect(segments[0]?.attributes('data-tone')).toBe('host');
+    expect(segments[1]?.attributes('data-tone')).toBe('path');
+    expect(wrapper.get('.ui-terminal-prompt__symbol').text()).toBe('❯');
+    expect(wrapper.find('.ui-terminal-prompt__lead').exists()).toBe(true);
+    await wrapper.setProps({ segments: [], text: 'echo 你好\n  next' });
+    expect(wrapper.find('.ui-terminal-prompt__context').exists()).toBe(false);
+    expect(wrapper.get('.ui-terminal-echo__text').element.textContent).toBe('echo 你好\n  next');
+    expect(wrapper.find('input, button, [tabindex], label').exists()).toBe(false);
+  });
+
+  it('marks error state and composes segment content like the live prompt', () => {
+    const wrapper = mount(UiTerminalEcho, {
+      props: {
+        text: 'xca open about',
+        error: true,
+        segments: [{ id: 'path', label: '~/docs', tone: 'path' }],
+      },
+      slots: {
+        segment: ({ segment }) => [
+          h('svg', { 'aria-hidden': 'true', viewBox: '0 0 16 16' }),
+          h('span', segment.label),
+        ],
+      },
+    });
+    expect(wrapper.attributes('data-error')).toBe('true');
+    expect(wrapper.findAll('svg[aria-hidden="true"]')).toHaveLength(1);
+    expect(wrapper.get('.ui-terminal-echo__text').text()).toBe('xca open about');
+  });
+
+  it('exposes an accessible native scroll region and cleans observers on unmount', async () => {
+    const lines = ref(['first']);
+    const wrapper = mount(UiTerminalTranscript, {
+      attachTo: document.body,
+      props: { label: 'Build log', live: 'polite' },
+      slots: { default: () => lines.value.map((line) => h('p', { key: line }, line)) },
+    });
+    expect(wrapper.find('section').exists()).toBe(true);
+    expect(wrapper.get('[role="log"]').attributes('aria-live')).toBe('polite');
+    expect(wrapper.attributes('aria-label')).toBe('Build log');
+    expect(wrapper.classes()).toContain('scrollbar-immersive');
+    lines.value.push('second');
+    await nextTick();
+    expect(wrapper.text()).toContain('second');
+    wrapper.unmount();
+  });
+});

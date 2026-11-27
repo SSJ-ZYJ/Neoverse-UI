@@ -4,17 +4,21 @@ import { afterEach, describe, expect, it } from 'vitest';
 const read = (path: string): string => readFileSync(new URL(path, import.meta.url), 'utf8');
 const unwrap = (source: string): string =>
   source.slice(source.indexOf('{') + 1, source.lastIndexOf('}'));
-const source = read('../../tailwind/src/components/segmented-control.css');
+const source = read('../../tailwind/src/components/controls/segmented-control.css');
 const componentCss = unwrap(source.slice(0, source.indexOf('@layer utilities')));
-const primitivesCss = unwrap(read('../../tokens/src/primitives.css'));
-const materialCss = unwrap(read('../../tokens/src/material.css'));
-const geometryCss = unwrap(read('../../tokens/src/geometry.css'));
-const feedbackCss = unwrap(read('../../tokens/src/effects.css'));
-const effectsCss = unwrap(read('../../tokens/src/control-effects.css'));
-const sharedControlCss = unwrap(read('../../tokens/src/components/shared-control.css'));
-const controlSurfaceTokenCss = unwrap(read('../../tokens/src/components/control-surface.css'));
-const tokenCss = unwrap(read('../../tokens/src/components/segmented-control.css'));
-const navigationTokenCss = unwrap(read('../../tokens/src/components/navigation-item.css'));
+const primitivesCss = unwrap(read('../../tokens/src/foundation/primitives.css'));
+const materialCss = unwrap(read('../../tokens/src/materials/glass.css'));
+const geometryCss = unwrap(read('../../tokens/src/foundation/geometry.css'));
+const feedbackCss = unwrap(read('../../tokens/src/semantic/effects.css'));
+const effectsCss = unwrap(read('../../tokens/src/semantic/control-effects.css'));
+const sharedControlCss = unwrap(read('../../tokens/src/components/actions/shared-control.css'));
+const controlSurfaceTokenCss = unwrap(
+  read('../../tokens/src/components/surfaces/control-surface.css'),
+);
+const tokenCss = unwrap(read('../../tokens/src/components/navigation/segmented-control.css'));
+const navigationTokenCss = unwrap(
+  read('../../tokens/src/components/navigation/navigation-item.css'),
+);
 const lightCss = unwrap(read('../../tokens/src/themes/light.css'));
 const darkCss = unwrap(read('../../tokens/src/themes/dark.css'));
 

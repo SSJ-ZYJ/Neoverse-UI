@@ -15,15 +15,20 @@ const defaultGlassScope = (source: string): string =>
 // happy-dom does not support @layer and cannot resolve every nested var()
 // fallback. Keep the actual component rules and resolve their computed custom
 // properties separately, without pretending this is a rendered-pixel test.
-const componentCss = defaultGlassScope(
-  unwrap(read('../../tailwind/src/components/form-control.css'), '@layer'),
-)
+const componentCss = [
+  '../../tailwind/src/components/forms/field.css',
+  '../../tailwind/src/components/forms/text-input.css',
+  '../../tailwind/src/components/forms/select.css',
+  '../../tailwind/src/components/forms/choice.css',
+]
+  .map((path) => defaultGlassScope(unwrap(read(path), '@layer')))
+  .join('\n')
   .replaceAll(':popover-open', '[data-test-popover-open]')
   .replaceAll(':modal', '[data-test-modal]');
 // happy-dom fails to match a descendant selector inside :where(). Expand only
 // the table-owner selector so prose-table token resolution can be exercised.
 const tableCss = defaultGlassScope(
-  unwrap(read('../../tailwind/src/components/table.css'), '@layer'),
+  unwrap(read('../../tailwind/src/components/display/table.css'), '@layer'),
 )
   .replace(
     ':where(.ui-table, .neoverse-prose table) {',
@@ -31,17 +36,20 @@ const tableCss = defaultGlassScope(
   )
   .replaceAll('@media (hover: hover)', '@media all')
   .replaceAll('tr:hover td', 'tr[data-test-hover] td');
-const materialCss = unwrap(read('../../tokens/src/material.css'), '@layer');
-const controlEffectsCss = unwrap(read('../../tokens/src/control-effects.css'), '@layer');
-const tokenCss = unwrap(read('../../tokens/src/components/form-control.css'), '@layer');
-const tableTokenCss = unwrap(read('../../tokens/src/components/table.css'), '@layer');
+const materialCss = unwrap(read('../../tokens/src/materials/glass.css'), '@layer');
+const controlEffectsCss = unwrap(read('../../tokens/src/semantic/control-effects.css'), '@layer');
+const tokenCss = unwrap(read('../../tokens/src/components/forms/form-control.css'), '@layer');
+const tableTokenCss = unwrap(read('../../tokens/src/components/display/table.css'), '@layer');
 const disclosureCss = defaultGlassScope(
-  unwrap(read('../../tailwind/src/components/disclosure.css'), '@layer'),
+  unwrap(read('../../tailwind/src/components/display/disclosure.css'), '@layer'),
 ).replace(
   ':where(.ui-disclosure, .neoverse-prose details) {',
   ':where(.ui-disclosure), :where(.neoverse-prose) details {',
 );
-const disclosureTokenCss = unwrap(read('../../tokens/src/components/disclosure.css'), '@layer');
+const disclosureTokenCss = unwrap(
+  read('../../tokens/src/components/display/disclosure.css'),
+  '@layer',
+);
 const lightCss = unwrap(read('../../tokens/src/themes/light.css'), '@neoverse-light-tokens');
 const darkCss = unwrap(read('../../tokens/src/themes/dark.css'), '@neoverse-dark-tokens');
 

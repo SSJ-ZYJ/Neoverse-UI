@@ -43,26 +43,16 @@ Vue and React are intended to share Token names, Tailwind foundation, Material v
 
 ```text
 packages/tokens/src/
-  primitives.css  semantic.css  geometry.css  typography.css
-  material.css    material-solid.css          material-frosted.css
-  layout.css      motion.css
-  components/
-    shared-control.css   button.css          action.css
-    breadcrumb.css       navigation-item.css control-surface.css
-    form-control.css     overlay.css         disclosure.css
-    table.css
-    status-indicator.css segmented-control.css badge.css
-    skeleton.css         scrollbar.css       notice.css
-    tooltip.css          prose.css           terminal.css
-  themes/
-    light.css            dark.css
+  index.ts  css-variables.ts
+  foundation/   primitives.css  geometry.css  typography.css  layout.css  motion.css  fonts.css  + TS maps
+  semantic/     semantic.css    effects.css   surface-effects.css  control-effects.css  + TS maps
+  materials/    glass.css       solid.css     frosted.css     material.ts  glass-material.ts  surface-presets.ts
+  components/   component-variables.ts + domain folders (actions, display, feedback, forms, navigation, overlays, surfaces, terminal)
+  themes/       light.css       dark.css
+  tests/        unit and CSS variable contract tests
 ```
 
-The TypeScript `cssVariables` map composes foundation domains from
-`src/foundation/` and one token map per component from the category directories
-under `src/components/`. The CSS build emits `@neoverse-ui/tokens/css` in order:
-primitives, semantic roles, foundation layers, light mapping, component defaults,
-then the canonical dark mapping.
+The TypeScript `cssVariables` map composes foundation domains from `src/foundation/`, semantic roles from `src/semantic/`, material maps from `src/materials/`, and one token map per component from the domain directories under `src/components/`. The CSS build emits `@neoverse-ui/tokens/css` in order: primitives, semantic roles, foundation layers, light mapping, component defaults, then the canonical dark mapping.
 
 Tokens defines Material, Surface Role, and explicit surface selections. Both
 adapters emit the same unresolved role. Tailwind selects a Solid, Frosted, or
@@ -72,7 +62,7 @@ invocation scope without a provider. See [material selection](material-standards
 
 ## Tailwind Foundation
 
-`@neoverse-ui/tailwind` imports the token and Motion CSS, maps semantic values through Tailwind v4 `@theme inline`, and exposes the component selector facade. Component CSS is kept in `src/components/*.css`; `copy-theme.ts` flattens it for the generated package entries. The package does not own application source paths.
+`@neoverse-ui/tailwind` imports the token and Motion CSS, maps semantic values through Tailwind v4 `@theme inline`, and exposes the component selector facade. Shared material surface recipes live in `src/materials/*.css` and component CSS is grouped by domain under `src/components/<domain>/*.css`; `copy-theme.ts` flattens them for the generated package entries. The package does not own application source paths.
 
 The foundation provides semantic utilities such as `bg-surface-raised`, `text-primary`, `border-subtle`, `rounded-control`, `shadow-card`, and `ring-focus`. Business source is checked for accidental primitive color, radius, and shadow utilities.
 
@@ -82,7 +72,7 @@ The foundation provides semantic utilities such as `bg-surface-raised`, `text-pr
 | --- | --- |
 | `.` / `./index.css` | Compiled zero-config consumer bundle: Tailwind utilities over the Vue/React `src` trees + the theme |
 | `./theme.css` | Semantic theme + Material utilities (source of the compiled bundle) |
-| `./components.css` | Component selector facade flattened from `src/components/*.css` |
+| `./components.css` | Component selector facade flattened from `src/materials/*.css` and `src/components/<domain>/*.css` |
 | `./prose.css` | Standalone `.neoverse-prose` content semantics for headings, lists, definitions, code, quotes, tables, disclosures, and inline reading states; reading width remains a separate layout role |
 
 The playground-only compiled bundle is emitted as `dist/playground.css` and is not exported; the package does not own application source paths — the compiled entry exists only so consumers without their own Tailwind build still receive a complete utility set.
@@ -184,7 +174,7 @@ keyboard navigation, and tab-to-panel associations use the same contract.
 
 Vue and React use matching `src/components/<category>/` directories:
 `actions`, `display`, `forms`, `motion`, `navigation`, `overlays`, `surfaces`,
-and `terminal`. Give each public or private component its own file. Keep
+and `terminal`, with unit tests grouped under `src/tests/`. Give each public or private component its own file. Keep
 category-specific helpers next to the components that use them. The package
 entry re-exports the public API; internal modules import from the owning
 source files, not the package entry. Category paths are not public imports.

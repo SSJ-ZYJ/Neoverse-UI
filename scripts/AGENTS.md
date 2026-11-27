@@ -18,9 +18,9 @@ Only the `check.ts` entry stays at the root. Every other script belongs to the d
 
 | File | Responsibility |
 | --- | --- |
-| `check-budgets.ts` | Source, CSS and test line budgets with REVIEW/NEAR/AT LIMIT bands and dated exceptions |
-| `check-budgets.test.ts` | Covers classification, content units, severity bands and exception validation |
-| `quality-budgets.json` | Single owner of limit values and exception records |
+| `check-budgets.ts` | Source, CSS and test line budgets, directory file-count budgets, forbidden generic directory names (`utils`, `helpers`, `common`, `misc`), and dated exceptions |
+| `check-budgets.test.ts` | Covers file/directory classification, severity bands, forbidden directory names and exception validation |
+| `quality-budgets.json` | Single owner of file/directory limit values, forbidden directory names and exception records |
 | `check-docs.ts` | Docs structure registry, status lines, links, translation pairs and hashes, English-only prose and contract evidence paths |
 | `check-component-contracts.ts` | Matrix schema, public exports, React runtime coverage, evidence and docs rows |
 | `check-component-layout.ts` | Category directories, one React component per file and re-export-only package entries |
@@ -78,7 +78,7 @@ Only the `check.ts` entry stays at the root. Every other script belongs to the d
 
 - A new static check belongs in `gates/`, a release-only check or verifier in `release/`, request tooling in `requests/`, development orchestration in `dev/` and consumer synchronization in `sync/`.
 - Wire a new gate into `scripts/check.ts` and `package.json` in the same change, and add it to the table above.
-- Scale limits and exceptions live only in `gates/quality-budgets.json`. An exception carries a date, a ceiling the file must stay within, and a removal condition; a file back inside the hard limit loses its exception.
+- File line limits, directory direct-file limits (15 soft / 25 hard), forbidden generic dumping-ground directory names (`utils`, `helpers`, `common`, `misc`), and exceptions live only in `gates/quality-budgets.json`. An exception carries a date, a ceiling and a removal condition; a file or directory back inside the hard limit loses its exception.
 - Scripts resolve the repository root with `../..` from their domain directory. Do not use the current working directory for repository paths.
 - Use Bun APIs and Node built-ins already present. Do not add a dependency for one check.
 - A script that writes to the repository must be lock-protected, idempotent and tested against a temporary directory.
