@@ -38,6 +38,7 @@ test.describe('modal and transient feedback', () => {
     test(`${adapter.name}: a portaled modal keeps its invocation paint through exit`, async ({
       page,
     }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
       await page.goto(adapter.url('light', 'overlays'));
       const source = page.locator(
         adapter.name === 'Vue' ? '#overlays-dialog' : '[data-react-adapter="UiDialog"]',
@@ -226,9 +227,13 @@ test.describe('modal and transient feedback', () => {
       await expect(action).toBeVisible();
       const { actionLuminance, infoAccentLuminance, actionMatchesProseLink } = await toast.evaluate(
         (element) => {
+          // A detached DOM canvas works even when OffscreenCanvas is unavailable.
+          const canvas = document.createElement('canvas');
+          canvas.width = canvas.height = 1;
+          const context = canvas.getContext('2d');
+          if (!context) throw new Error('A 2D canvas context is required');
           const resolveRgba = (color: string) => {
-            const context = new OffscreenCanvas(1, 1).getContext('2d');
-            if (!context) throw new Error('A 2D canvas context is required');
+            context.clearRect(0, 0, 1, 1);
             context.fillStyle = color;
             context.fillRect(0, 0, 1, 1);
             return Array.from(context.getImageData(0, 0, 1, 1).data);
@@ -360,10 +365,15 @@ test.describe('overlays', () => {
         await page.goto(adapter.url('light', 'overlays'));
         const { trigger, panel } = await menuParts(page, adapter.name);
 
-        await trigger.click();
+        await trigger.press('Enter');
         await expectPanelOpen(panel);
+        const firstItem = panel.getByRole('menuitem', { name: 'Open', exact: true });
+        await expect(firstItem).toBeFocused();
         await page.keyboard.press('Tab');
         await expectPanelClosed(panel, trigger);
+        expect(
+          await panel.evaluate((menu) => menu.contains(menu.ownerDocument.activeElement)),
+        ).toBe(false);
       });
     }
 

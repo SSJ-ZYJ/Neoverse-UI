@@ -320,6 +320,7 @@ export default function SurfaceAndOverlaySection({
         <UiToast
           open={toastOpen}
           presentation={toastPresentation}
+          {...(contractMode ? { duration: 0 } : {})}
           message={
             toastPresentation === 'notification'
               ? 'Your changes are saved. Review the preview before sharing it with your team.'

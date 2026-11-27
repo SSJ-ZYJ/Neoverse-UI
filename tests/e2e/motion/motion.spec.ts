@@ -1,5 +1,9 @@
 import { expect, expectNoPageOverflow, test } from '../../support/e2e';
-import { capturePagePreset, expectPageDissolveSwap } from '../../support/motion';
+import {
+  capturePagePreset,
+  expectPageDissolveSwap,
+  observeStageResize,
+} from '../../support/motion';
 import { chooseOption, showInspector } from '../../support/playground';
 
 test.describe('motion', () => {
@@ -384,43 +388,46 @@ test('theme reveal stays clickable and reverses from its current edge', async ({
     animation.currentTime = 320;
     return true;
   });
-  // The stage scrolls on small viewports; measure the controls only after
-  // bringing them into view so the pointer coordinates hit the real targets.
-  await large.scrollIntoViewIfNeeded();
-  const sizeBox = await large.boundingBox();
-  const revealBox = await reveal.boundingBox();
-  if (!sizeBox || !revealBox) throw new Error('Demo controls are not laid out');
-
-  await page.mouse.click(sizeBox.x + sizeBox.width / 2, sizeBox.y + sizeBox.height / 2);
+  // Click the actual control after scrolling/layout settles; the native
+  // snapshot must not intercept it while the animation is paused.
+  await large.click();
   await expect(large).toBeChecked();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  const first = await page.evaluateHandle(() =>
-    document
+  const first = await page.evaluateHandle(() => {
+    const animation = document
       .getAnimations()
-      .find((entry) => entry instanceof CSSAnimation && entry.animationName === 'nv-theme-reveal'),
-  );
-  const clickReveal = () =>
-    page.mouse.click(revealBox.x + revealBox.width / 2, revealBox.y + revealBox.height / 2);
-  const playback = () =>
-    first.evaluate(async (animation) => {
-      if (!animation) throw new Error('First reveal was not captured');
-      const before = Number(animation.currentTime);
-      const { promise, resolve } = Promise.withResolvers<number>();
-      requestAnimationFrame(() => requestAnimationFrame(resolve));
-      await promise;
-      return {
+      .find((entry) => entry instanceof CSSAnimation && entry.animationName === 'nv-theme-reveal');
+    if (!animation) throw new Error('First reveal was not captured');
+    animation.currentTime = 320;
+    return animation;
+  });
+  // Step the JS playback clock, not the browser-owned snapshot animation.
+  // A slow software compositor can otherwise consume the whole reversal
+  // before the first sample even though it continued from the correct edge.
+  await page.clock.install({ time: 0 });
+  await page.clock.pauseAt(1000);
+  const clickReveal = async () => {
+    const box = await reveal.boundingBox();
+    if (!box) throw new Error('Reveal control is not laid out');
+    await page.mouse.click(box.x + box.width / 2, box.y + box.height / 2);
+  };
+  const playback = async () => {
+    const before = await first.evaluate((animation) => Number(animation.currentTime));
+    await page.clock.runFor(48);
+    return first.evaluate(
+      (animation, before) => ({
         active: document.getAnimations().includes(animation),
         before,
         time: Number(animation.currentTime),
-      };
-    });
+      }),
+      before,
+    );
+  };
   await clickReveal();
   const reversing = await playback();
   expect(reversing.active).toBe(true);
   expect(reversing.time).toBeLessThan(reversing.before);
-  // Reversal continues from the paused edge instead of restarting at zero. How
-  // much of the 320ms window is left by the time the click lands depends on the
-  // engine's input latency, so only the non-zero continuation is a contract.
+  // The existing effect must continue from the paused edge, not restart at zero.
   expect(reversing.time).toBeGreaterThan(0);
   expect(reversing.time).toBeLessThanOrEqual(320);
   await clickReveal();
@@ -431,6 +438,7 @@ test('theme reveal stays clickable and reverses from its current edge', async ({
   const returning = await playback();
   expect(returning.active).toBe(true);
   expect(returning.time).toBeLessThan(returning.before);
+  await page.clock.runFor(1000);
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-appearance-live');
   await expect(page.locator('[data-motion-size-sample="icon"]')).toHaveCSS('width', '44px');
@@ -626,20 +634,15 @@ test('scoped transitions, shared backdrops, and morph choreography preserve cont
     .locator('[data-motion-page-background]')
     .getByRole('radio', { name: 'Same canvas', exact: true })
     .click();
-  const [morph, stageResized] = await Promise.all([
-    capturePreset('morph'),
-    page
-      .waitForFunction(() => {
-        const el = document.querySelector('[data-motion-page-stage]');
-        return Boolean(el && el.getAnimations().length > 0);
-      })
-      .then(() => true),
-  ]);
+  await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-view-transitioning');
+  const resize = await observeStageResize(stage);
+  const morph = await capturePreset('morph');
   expect(morph?.backgroundMode).toBe('shared');
   expect(morph?.contentTargeted).toBe(true);
   expect(morph?.figureName).toBe('nv-morph-stage-figure');
   expect(morph?.morphGroupDuration).toBeGreaterThan(0);
-  expect(stageResized).toBe(true);
+  await expect.poll(async () => (await resize.jsonValue()).heightDelta).toBeGreaterThan(40);
+  await resize.dispose();
 
   await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-view-transitioning');
   await expect(page.locator('html')).not.toHaveAttribute('data-neoverse-page-transition');

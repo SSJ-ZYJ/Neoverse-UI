@@ -21,7 +21,9 @@ test.describe('material switching', () => {
     );
     const root = page.locator('html');
 
-    await (mobile ? control : control.getByRole('radio', { name: 'Solid' })).click();
+    const selectMaterial = (name: string) =>
+      mobile ? control.click() : control.getByRole('radio', { name, exact: true }).press('Space');
+    await selectMaterial('Solid');
     await expect(root).toHaveAttribute('data-neoverse-material', 'solid');
     await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCount(0);
     await expect(textarea).toHaveValue('Solid keeps state');
@@ -29,11 +31,11 @@ test.describe('material switching', () => {
     expect(await workspace.evaluate((element) => element.scrollTop)).toBe(scrollTop);
     await expect(mobile ? control : control.getByRole('radio', { name: 'Solid' })).toBeFocused();
 
-    await (mobile ? control : control.getByRole('radio', { name: /Frosted/ })).click();
+    await selectMaterial('Frosted');
     await expect(root).toHaveAttribute('data-neoverse-material', 'frosted');
     await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCount(0);
     await expect(textarea).toHaveValue('Solid keeps state');
-    await (mobile ? control : control.getByRole('radio', { name: 'Glass' })).click();
+    await selectMaterial('Aurora Glass');
     await expect(root).toHaveAttribute('data-neoverse-material', 'glass');
     await expect(page.locator('[data-neoverse-glass-renderer-canvas]')).toHaveCount(1);
     await expect(textarea).toHaveValue('Solid keeps state');
@@ -103,6 +105,7 @@ test.describe('material switching', () => {
     page,
   }, testInfo) => {
     const mobile = testInfo.project.name === 'mobile';
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.goto('/?theme=light&lang=en&fps=0#forms-textarea');
     const root = page.locator('html');
     const control = page.locator(
@@ -190,14 +193,14 @@ test.describe('material switching', () => {
     const transitions = [
       ['Solid', 'solid', 0],
       ['Frosted', 'frosted', 0],
-      ['Glass', 'glass', 1],
+      ['Aurora Glass', 'glass', 1],
       ['Frosted', 'frosted', 0],
       ['Solid', 'solid', 0],
-      ['Glass', 'glass', 1],
+      ['Aurora Glass', 'glass', 1],
     ] as const;
 
     for (const [label, expectedMaterial, expectedCanvas] of transitions) {
-      await control.getByRole('radio', { name: label }).click();
+      await control.getByRole('radio', { name: label, exact: true }).press('Space');
       await expect(root).toHaveAttribute('data-neoverse-material', expectedMaterial);
       await expect(canvas).toHaveCount(expectedCanvas);
       await expect(input).toHaveValue('Persistent value');
@@ -212,6 +215,7 @@ test.describe('material switching', () => {
       testInfo.project.name === 'mobile',
       'Simultaneous toolbar selection uses the desktop controls.',
     );
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.goto('/?theme=light&material=glass&lang=en&fps=0#forms-textarea', {
       waitUntil: 'domcontentloaded',
     });

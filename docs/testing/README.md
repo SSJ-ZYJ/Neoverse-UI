@@ -67,13 +67,26 @@ running every theme, width, and language combination.
 | `playground/playground-shell.spec.ts` | Isolated specimen frame, desktop and mobile toolbar, Giscus themes, direct Explorer leaves, demo destinations, React fixture link |
 | `parity/parity.spec.ts` | Every React adapter renders, theme resolution, shared control names |
 
-The cross-browser configuration runs forms, overlays, context menu, navigation, segmented control, surfaces, motion, parity, and the engine-neutral material tests for Solid paint and scope resolution. `@chromium-materials` identifies the Chromium tier and transparency probes; `tests/optics/glass.spec.ts` runs separately under Linux Chromium with SwiftShader and reports optical diagnostics rather than a release pass/fail signal.
+The cross-browser configuration runs forms, overlays and their layering,
+context menu, navigation, segmented control, surfaces, motion, parity, and
+engine-neutral material tests for scope resolution, switching, paint and
+component integration. `@chromium-materials`
+excludes Chromium-specific tier and media-emulation probes from that
+configuration. The separate SwiftShader suite runs under Linux Chromium: CI
+runs `@optics-smoke` for Glass-impacting changes, and publication requires that
+smoke on the publication commit. Run the full diagnostic suite locally when
+validating rendering; an optical pass does not replace manual visual acceptance.
 
 These specs import the `test` fixture from `tests/support/e2e.ts`, which keeps navigation on `domcontentloaded` and then waits until the document height is stable for ten animation frames. The Design Lab mounts its specimen backdrops after DOM ready, and Firefox's scroll anchoring can move a control between Playwright's scroll and the dispatched click, aiming it at a neighbouring row.
 
 Readonly choice checks also scroll each target into a stable position before forced
 pointer input. The force option is needed for `aria-disabled` controls, but it also
 bypasses Playwright's usual stability and hit-target checks.
+
+Tests that assert an animation opt into `reducedMotion: 'no-preference'` rather
+than inheriting the cross-browser suite's reduced-motion default. To exercise
+keyboard focus release, open the menu with the keyboard, assert that focus
+enters it, and then let the engine choose the next Tab stop.
 
 ## Commands
 

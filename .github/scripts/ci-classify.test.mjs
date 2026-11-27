@@ -33,10 +33,13 @@ test('documentation and issue templates need metadata checks but no runtime veri
 
 test('changesets, request archives, and workflow edits use lightweight metadata verification', () => {
   expectChecks(['.changeset/terminal-light-contrast.md'], metadata);
-  expectChecks(['.changeset/config.json'], metadata);
   expectChecks(['contracts/component-requests/archive/CR-001.json'], metadata);
   expectChecks(['.github/workflows/verify.yml'], metadata);
   expectChecks(['.github/scripts/ci-scope.sh'], metadata);
+});
+
+test('Changesets policy changes require package verification, not browser coverage', () => {
+  expectChecks(['.changeset/config.json'], { ...quality, metadataChecks: true });
 });
 
 test('generated contract document and quality tooling require source checks without browser work', () => {

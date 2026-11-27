@@ -59,9 +59,10 @@
     position: fixed;
     inset: 0;
     z-index: var(--neoverse-layout-layer-modal);
-    display: none;
+    /* A display transition can be parsed without actually delaying display:none. */
+    visibility: hidden;
     pointer-events: none;
-    transition: display var(--neoverse-motion-spatial-duration) allow-discrete;
+    transition: visibility var(--neoverse-motion-spatial-duration) linear;
   }
 
   .ui-drawer__host[data-side='right'] {
@@ -76,7 +77,9 @@
 
   .ui-drawer__host[data-open='true'] {
     --neoverse-drawer-shift: var(--neoverse-space-0);
-    display: block;
+    visibility: visible;
+    /* The dialog controller must be able to focus the panel in the opening turn. */
+    transition: none;
   }
 
   /* The host keeps painting during exit even after dialog.open is cleared. */

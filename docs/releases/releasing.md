@@ -111,7 +111,9 @@ consumers do not need Vue-specific resolution for `.vue` imports.
 
 `verify:published` selects API checks from each package's exact manifest version.
 Registry packages at 0.3.1 or later must expose React parity, Vue `UiTerminalEcho`,
-the React terminal header type, material names and the new token-map entries.
+the React terminal header type, Glass material names and the new token-map entries.
+Tokens 0.4.0 and later additionally validate the three-material catalog and
+public surface selection.
 Published 0.3.0 packages retain their older API baseline. Local tarballs always
 exercise the new assertions, including before manifest versioning. Both modes
 run the native Node, CSS, and TypeScript checks above. Published mode also
@@ -168,10 +170,13 @@ verification, but not Playwright. Unknown file types conservatively select both
 source and browser gates.
 
 CI and Release install the Bun version declared in the root `package.json`.
-Cross-browser smoke runs Firefox and WebKit under Xvfb in the official Ubuntu
-24.04 Playwright image. The image supplies browser binaries and system
-libraries, so shards do not depend on package mirrors during setup. Update
-the image tag and digest alongside `@playwright/test`.
+Cross-browser smoke uses the official Ubuntu 24.04 Playwright image, with Firefox
+headed under Xvfb for WebGL and WebKit headless to avoid a Linux display-backend
+crash in native View Transitions. Both run the full interaction matrix. The
+image supplies browser binaries and system libraries, so shards do not depend
+on package mirrors during setup. Update the image tag and digest alongside
+`@playwright/test`. Standalone and scheduled runs build once and distribute
+the result to the shards. Publication reuses the verified workspace build.
 
 Release also scopes ordinary `main` pushes, but does not repeat a browser matrix
 that already ran: CI gated the pull request that produced the commit, and Release
@@ -185,12 +190,15 @@ up to date, so the merged tree is the tree CI tested; the lookup fails closed, a
 a direct push, a bypassed or failing CI run, or an API error all keep the
 verification. Without that evidence, Release runs the browser checks its own change
 scope selects, because the browser matrix is then the only proof of the rendered
-UI. When its Changesets mode is `publish`, it always runs source quality before
-packing even if the triggering commit changed only documentation, because that job
-builds the package and Playground assets the pack step publishes, and `publish`
-always needs the verified build to download.
-A `version` run continues through the Changesets version workflow without forcing
-checks for unrelated changes. Publication automation remains opt-in.
+UI. In `publish` mode, change scope and previous CI evidence cannot waive
+verification: the exact publication commit must pass source quality, all
+Chromium shards, Windows interaction checks, Linux SwiftShader smoke, and the
+configured Firefox and WebKit suites before packing. These jobs consume the
+same build that is used to pack the release.
+A `version` run creates or updates the Version Packages PR only after scoped
+verification succeeds or the landed pull request provides reusable CI evidence.
+Changesets policy changes also run package checks; editing release-note entries
+does not force unrelated browser checks. Publication automation remains opt-in.
 
 Linux runs `release:check` once for source changes. It uploads the built package
 and Playground assets when browser shards run or a release needs to pack them.
@@ -199,7 +207,7 @@ Playwright suite with `--shard=1/3`, `2/3`, or `3/3`, two workers each.
 `Verify workspace (Linux)` remains the required aggregate gate, checking only
 the jobs selected by change scope and rejecting any selected failed job.
 Windows reuses the validated playground assets Linux already built, then runs its
-own four-file keyboard/overlay/theme browser gate only for UI-impacting
+own keyboard/overlay/theme browser gate only for UI-impacting or publication
 changes; it does not duplicate Linux's `release:check` static analysis or unit
 test matrix.
 

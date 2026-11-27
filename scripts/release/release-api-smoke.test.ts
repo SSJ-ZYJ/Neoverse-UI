@@ -34,7 +34,12 @@ const reactExports = [
 
 async function execute(
   smoke: string,
-  options: { missingReact?: string; missingVueEcho?: boolean; missingToken?: boolean } = {},
+  options: {
+    missingReact?: string;
+    missingVueEcho?: boolean;
+    missingToken?: boolean;
+    missingMaterial?: boolean;
+  } = {},
 ) {
   const directory = await mkdtemp(join(tmpdir(), 'neoverse-release-api-'));
   directories.push(directory);
@@ -44,26 +49,33 @@ async function execute(
       .map((name) => `export function ${name}() {}`)
       .join('\n'),
     vue: `export const UiTerminalEcho = ${options.missingVueEcho ? 'undefined' : '{}'};`,
-    tokens: `export const glassMaterial = ${JSON.stringify({
-      name: { en: 'Aurora Glass', zh: '极光玻璃' },
-      tiers: {
-        subtle: { en: 'Light' },
-        elevated: { en: 'Standard' },
-        immersive: { en: 'Immersive' },
-      },
-    })};\nexport const cssVariables = ${JSON.stringify({
-      components: {
-        controlSurface: { trailingPadding: '--neoverse-control-surface-trailing-padding' },
-        scrollbar: {
-          immersive: {
-            railInset: '--neoverse-scrollbar-immersive-rail-inset',
-            ...(!options.missingToken && {
-              thumbHoverBorderWidth: '--neoverse-scrollbar-immersive-thumb-hover-border-width',
-            }),
+    tokens:
+      `export const glassMaterial = ${JSON.stringify({
+        name: { en: 'Aurora Glass', zh: '极光玻璃' },
+        tiers: {
+          subtle: { en: 'Light' },
+          elevated: { en: 'Standard' },
+          immersive: { en: 'Immersive' },
+        },
+      })};\nexport const cssVariables = ${JSON.stringify({
+        components: {
+          controlSurface: { trailingPadding: '--neoverse-control-surface-trailing-padding' },
+          scrollbar: {
+            immersive: {
+              railInset: '--neoverse-scrollbar-immersive-rail-inset',
+              ...(!options.missingToken && {
+                thumbHoverBorderWidth: '--neoverse-scrollbar-immersive-thumb-hover-border-width',
+              }),
+            },
           },
         },
-      },
-    })};`,
+      })};\n` +
+      `export const materials = ['glass', 'solid', 'frosted'];\n` +
+      `export const defaultMaterial = 'glass';\n` +
+      `export const materialAttribute = 'data-neoverse-material';\n` +
+      `export const isMaterial = value => materials.includes(value);\n` +
+      `export const materialCatalog = { glass: { id: 'glass' }, solid: { id: 'solid' }, ${options.missingMaterial ? '' : "frosted: { id: 'frosted' }"} };\n` +
+      `export const getSurfaceClass = (surface, role) => 'material-role-' + role + (surface === 'frosted' ? ' material-frosted' : '');\n`,
   };
   for (const [name, source] of Object.entries(modules)) {
     const moduleDirectory = join(directory, 'node_modules', '@neoverse-ui', name);
@@ -133,6 +145,17 @@ describe('release API verification', () => {
     });
     expect(result.exitCode).not.toBe(0);
     expect(result.stderr).toContain('public 0.3.1 token map is incomplete');
+  });
+
+  test('rejects a missing material descriptor in the installed Tokens 0.4 API', async () => {
+    const mixedVersions = versions('0.3.1');
+    mixedVersions.set('@neoverse-ui/tokens', '0.4.0');
+    const smoke = releaseApiSmoke(mixedVersions, true);
+    const complete = await execute(smoke);
+    expect(complete.exitCode).toBe(0);
+    const incomplete = await execute(smoke, { missingMaterial: true });
+    expect(incomplete.exitCode).not.toBe(0);
+    expect(incomplete.stderr).toContain('public material catalog is incomplete');
   });
 
   test('does not silently skip a package with a missing release version', () => {

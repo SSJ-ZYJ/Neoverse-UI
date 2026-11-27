@@ -8,25 +8,25 @@
     position: fixed;
     inset: 0;
     z-index: var(--neoverse-layout-layer-modal);
-    display: none;
+    visibility: hidden;
     pointer-events: none;
     background: transparent;
     opacity: 0;
     transition:
       opacity var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
       background-color var(--neoverse-motion-exit-duration) var(--neoverse-motion-exit-easing),
-      display var(--neoverse-motion-exit-duration) allow-discrete;
+      visibility var(--neoverse-motion-exit-duration) linear;
   }
 
   .ui-dialog__backdrop[data-open='true'] {
-    display: block;
+    visibility: visible;
     pointer-events: auto;
     background: var(--neoverse-dialog-scrim);
     opacity: 1;
     transition:
       opacity var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
       background-color var(--neoverse-motion-enter-duration) var(--neoverse-motion-enter-easing),
-      display var(--neoverse-motion-enter-duration) allow-discrete;
+      visibility var(--neoverse-motion-enter-duration) linear;
   }
 
   @starting-style {

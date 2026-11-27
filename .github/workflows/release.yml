@@ -77,8 +77,8 @@ jobs:
 
   version:
     name: Version packages
-    if: needs.select-mode.outputs.mode == 'version'
-    needs: select-mode
+    needs: [scope, select-mode, verify]
+    if: ${{ !cancelled() && needs.scope.result == 'success' && needs.select-mode.outputs.mode == 'version' && (needs.verify.result == 'success' || (needs.verify.result == 'skipped' && needs.scope.outputs.ci-verified == 'true')) }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -120,19 +120,26 @@ jobs:
     with:
       metadata-checks: ${{ needs.scope.outputs.metadata-checks == 'true' || needs.select-mode.outputs.mode == 'publish' }}
       quality-checks: ${{ needs.scope.outputs.quality-checks == 'true' || needs.select-mode.outputs.mode == 'publish' }}
-      # CI gates the pull request that produced this commit, including the
-      # browser matrix. Release repacks that verified tree, so repeating the
-      # same Playwright shards here only duplicates a green CI run. Without
-      # that evidence (direct push, bypassed CI, failed lookup) the browser
-      # matrix is the only proof left, so it runs.
-      browser-checks: ${{ needs.scope.outputs.ci-verified != 'true' && needs.scope.outputs.browser-checks == 'true' }}
-      optics-checks: ${{ needs.scope.outputs.ci-verified != 'true' && needs.scope.outputs.optics-checks == 'true' }}
+      # Version-only commits still publish a new package set. Verify the actual
+      # publication SHA even if its merge or change scope was already green.
+      browser-checks: ${{ needs.select-mode.outputs.mode == 'publish' || (needs.scope.outputs.ci-verified != 'true' && needs.scope.outputs.browser-checks == 'true') }}
+      optics-checks: ${{ needs.select-mode.outputs.mode == 'publish' || (needs.scope.outputs.ci-verified != 'true' && needs.scope.outputs.optics-checks == 'true') }}
       release-assets: ${{ needs.select-mode.outputs.mode == 'publish' }}
+
+  cross-browser:
+    name: Verify release on Firefox and WebKit
+    needs: [select-mode, verify]
+    if: needs.select-mode.outputs.mode == 'publish'
+    uses: ./.github/workflows/cross-browser-smoke.yml
+    permissions:
+      contents: read
+    with:
+      verified-assets: true
 
   pack:
     name: Verify and pack release
     if: needs.select-mode.outputs.mode == 'publish'
-    needs: [select-mode, verify]
+    needs: [select-mode, verify, cross-browser]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:

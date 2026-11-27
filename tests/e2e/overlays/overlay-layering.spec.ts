@@ -11,25 +11,27 @@ test.describe('overlay layering', () => {
         const trigger = page.locator('[data-drawer-open]');
         const drawer = page.locator('[data-drawer-panel]');
         const transitions = await drawer.evaluateHandle((panel) => {
-          const completed: string[] = [];
-          panel.addEventListener('transitionend', (event) => {
-            if (
-              !(event instanceof TransitionEvent) ||
-              event.target !== panel ||
-              event.propertyName !== 'translate'
-            ) {
-              return;
+          const host = panel.parentElement;
+          if (!host) throw new Error('A modal drawer needs its host');
+          const started: string[] = [];
+          new MutationObserver(() => {
+            const sliding = panel.getAnimations().some((motion) => {
+              return motion instanceof CSSTransition && motion.transitionProperty === 'translate';
+            });
+            if (sliding && getComputedStyle(panel).visibility === 'visible') {
+              started.push(host.dataset.open === 'true' ? 'enter' : 'exit');
             }
-            completed.push(
-              panel.parentElement?.getAttribute('data-open') === 'true' ? 'enter' : 'exit',
-            );
-          });
-          return completed;
+          }).observe(host, { attributeFilter: ['data-open'] });
+          return started;
         });
 
         await trigger.press('Enter');
         await expect.poll(() => transitions.jsonValue()).toEqual(['enter']);
         await expect(drawer).toBeVisible();
+        expect(
+          await drawer.evaluate((panel) => panel.contains(panel.ownerDocument.activeElement)),
+        ).toBe(true);
+        await expect.poll(() => drawer.evaluate((panel) => panel.getAnimations().length)).toBe(0);
         await page.keyboard.press('Escape');
         await expect.poll(() => transitions.jsonValue()).toEqual(['enter', 'exit']);
         await expect(drawer).toBeHidden();
@@ -48,6 +50,11 @@ test.describe('overlay layering', () => {
       const close = drawer.locator('[data-drawer-close]');
       await trigger.focus();
       await trigger.press('Enter');
+      await expect
+        .poll(() => drawer.evaluate((panel) => panel.contains(panel.ownerDocument.activeElement)))
+        .toBe(true);
+      // Native dialog focus may start on the panel rather than on its button.
+      await page.keyboard.press('Tab');
       await expect(close).toBeFocused();
 
       const { x: overlapX, y: overlapY } = await close.evaluate((element) => {

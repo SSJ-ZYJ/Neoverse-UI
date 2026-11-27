@@ -15,6 +15,9 @@ export function classifyPaths(paths) {
 
     if (path === 'docs/architecture/component-contract-matrix.md') {
       checks.qualityChecks = true;
+    } else if (path === '.changeset/config.json') {
+      checks.metadataChecks = true;
+      checks.qualityChecks = true;
     } else if (path.startsWith('.github/ISSUE_TEMPLATE/')) {
       // Issue forms do not participate in source, package, or release validation.
     } else if (

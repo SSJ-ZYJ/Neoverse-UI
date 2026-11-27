@@ -80,7 +80,7 @@ test.describe('context menu', () => {
       await trigger.press('Enter');
       const panel = page.locator('.ui-context-menu');
       const submenu = page.locator('.ui-context-menu__submenu');
-      await expect(panel).toBeVisible();
+      await expect(panel.locator('[data-entry-id="copy"]')).toBeFocused();
       await panel.locator('[data-entry-id="theme"]').press('ArrowRight');
       await expect(submenu).toBeVisible();
       await expect(panel).toHaveCSS('backdrop-filter', 'none');
@@ -143,26 +143,52 @@ test.describe('context menu', () => {
         if (fallback) await disablePopoverApi(page);
         await page.emulateMedia({ reducedMotion: 'no-preference' });
         await page.goto(adapter.url('light', 'overlays'));
-        await page.addStyleTag({ content: ':root { --neoverse-motion-spatial-duration: 800ms; }' });
         const zone = page.locator('[data-context-menu-zone]');
         await zone.scrollIntoViewIfNeeded();
         const bounds = await zone.boundingBox();
         if (bounds === null) throw new Error('Missing context menu zone');
         const panel = await openContextMenuAtZone(page, { x: bounds.width - 28, y: 16 });
         await expect(panel).toHaveCSS('opacity', '1');
-        const start = await panel.evaluate((element) => element.getBoundingClientRect().left);
-        await page.mouse.click(bounds.x + 24, bounds.y + 16, { button: 'right' });
+        const slide = await panel.evaluateHandle(async (element) => {
+          await Promise.allSettled(
+            element
+              .getAnimations()
+              .filter((animation) => animation instanceof CSSTransition)
+              .map((animation) => animation.finished),
+          );
+          const state: { from: number; animation?: Animation } = {
+            from: element.getBoundingClientRect().left,
+          };
+          const animate = element.animate.bind(element);
+          element.animate = (keyframes, options) => {
+            const animation = animate(keyframes, options);
+            if (typeof options === 'object' && options.composite === 'add') {
+              animation.pause();
+              // The decelerating curve is almost at rest by half its duration.
+              animation.currentTime = Number(animation.effect?.getComputedTiming().duration) / 4;
+              state.animation = animation;
+            }
+            return animation;
+          };
+          return state;
+        });
+        const targetX = bounds.x + 24;
+        await page.mouse.click(targetX, bounds.y + 16, { button: 'right' });
         await expect
           .poll(() =>
-            panel.evaluate(
-              (element, { from, to }) => {
-                const x = element.getBoundingClientRect().left;
-                return x < from - 4 && x > to + 8 && getComputedStyle(element).opacity === '1';
-              },
-              { from: start, to: bounds.x + 24 },
-            ),
+            slide.evaluate(({ from, animation }, to) => {
+              if (!(animation?.effect instanceof KeyframeEffect)) return 'no additive slide';
+              const panel = animation.effect.target;
+              if (!(panel instanceof HTMLElement)) return 'no panel target';
+              const x = panel.getBoundingClientRect().left;
+              const opacity = getComputedStyle(panel).opacity;
+              if (x < from - 4 && x > to + 8 && opacity === '1') return 'mid-slide';
+              return { from, x, to, opacity, time: animation.currentTime };
+            }, targetX),
           )
-          .toBe(true);
+          .toBe('mid-slide');
+        await slide.evaluate(({ animation }) => animation?.finish());
+        await slide.dispose();
         await expect
           .poll(() =>
             panel.evaluate(
@@ -271,6 +297,7 @@ test.describe('context menu', () => {
     test(`${adapter.name}: a cursor submenu keeps the parent rim behind it and animates on open and switch`, async ({
       page,
     }) => {
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
       await page.goto(adapter.url('light', 'overlays'));
       const panel = await openContextMenuAtZone(page);
       await recordSubmenuMotion(page);
@@ -308,11 +335,12 @@ test.describe('context menu', () => {
       await panel.getByRole('menuitem', { name: 'Language' }).hover();
       await expect(submenu).toHaveAttribute('aria-label', 'Language');
       await expect.poll(() => submenuMotionCount(page)).toBeGreaterThan(0);
+      await expectSubmenuAtRest(page);
 
       // Activating the already-open row must not restart the entrance.
       await resetSubmenuMotion(page);
       await panel.getByRole('menuitem', { name: 'Language' }).click();
-      await page.waitForTimeout(150);
+      await expectSubmenuAtRest(page);
       expect(await submenuMotionCount(page)).toBe(0);
     });
   }

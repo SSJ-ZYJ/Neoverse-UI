@@ -35,6 +35,40 @@ export async function capturePagePreset(page: Page, specimen: Locator, variant: 
   return frame.jsonValue();
 }
 
+/** Records the real size transition without polling for a running animation frame. */
+export function observeStageResize(stage: Locator) {
+  return stage.evaluateHandle((element) => {
+    const card = element.querySelector('[data-motion-page-card]');
+    const outgoing = card?.getAttribute('data-motion-page-card');
+    if (!outgoing) throw new Error('The outgoing page needs content');
+    // Give the fixture two explicit sizes. Depending on the viewport, both
+    // pages can naturally settle at the same height after grid layout.
+    const normal = Math.ceil(element.getBoundingClientRect().height);
+    const selector = `[data-motion-page-card="${CSS.escape(outgoing)}"]`;
+    const style = document.createElement('style');
+    style.textContent = `
+      [data-motion-page-stage] { block-size: ${normal}px; }
+      [data-motion-page-stage]:has(${selector}) { block-size: ${normal + 100}px; }
+    `;
+    element.before(style);
+    const observed = { heightDelta: 0 };
+    const animate = element.animate.bind(element);
+    element.animate = (...args) => {
+      const animation = animate(...args);
+      if (animation.effect instanceof KeyframeEffect) {
+        const frames = animation.effect.getKeyframes();
+        const from = frames.at(0)?.height;
+        const to = frames.at(-1)?.height;
+        if (typeof from === 'string' && typeof to === 'string') {
+          observed.heightDelta = Math.abs(Number.parseFloat(to) - Number.parseFloat(from));
+        }
+      }
+      return animation;
+    };
+    return observed;
+  });
+}
+
 /** Verifies page dissolve swaps the region and leaves no active particle canvas behind. */
 export async function expectPageDissolveSwap(page: Page) {
   await page.goto('/frame?theme=light&lang=en#foundation-motion-page');

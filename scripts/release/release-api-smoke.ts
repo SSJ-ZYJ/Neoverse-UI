@@ -47,6 +47,16 @@ export function releaseApiSmoke(versions: ReadonlyMap<string, string>, published
         `if (releaseCssVariables.components.controlSurface.trailingPadding !== '--neoverse-control-surface-trailing-padding' || releaseCssVariables.components.scrollbar.immersive.railInset !== '--neoverse-scrollbar-immersive-rail-inset' || releaseCssVariables.components.scrollbar.immersive.thumbHoverBorderWidth !== '--neoverse-scrollbar-immersive-thumb-hover-border-width') throw new Error('public 0.3.1 token map is incomplete');\n`,
     );
   }
+  if (includesReleaseApi('@neoverse-ui/tokens', '>=0.4.0')) {
+    checks.push(
+      `import { defaultMaterial, getSurfaceClass, isMaterial, materialAttribute, materialCatalog, materials, type Material, type MaterialDescriptor, type SurfaceRole } from '@neoverse-ui/tokens';\n` +
+        `const installedMaterials: readonly Material[] = materials;\n` +
+        `const catalog: Readonly<Record<Material, MaterialDescriptor>> = materialCatalog;\n` +
+        `const role: SurfaceRole = 'overlay';\n` +
+        `if (installedMaterials.join(',') !== 'glass,solid,frosted' || defaultMaterial !== 'glass' || materialAttribute !== 'data-neoverse-material' || isMaterial('unknown') || installedMaterials.some(id => !isMaterial(id) || catalog[id]?.id !== id)) throw new Error('public material catalog is incomplete');\n` +
+        `if (getSurfaceClass('auto', role) !== 'material-role-overlay' || getSurfaceClass('frosted', role) !== 'material-role-overlay material-frosted') throw new Error('public surface selection is incomplete');\n`,
+    );
+  }
 
   return checks.join('');
 }

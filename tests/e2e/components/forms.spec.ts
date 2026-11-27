@@ -603,6 +603,16 @@ test.describe('forms', () => {
       page,
     }) => {
       await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.addInitScript(() => {
+        // Keep the real caret animation available even if the browser finishes
+        // the click round trip after its normal flight duration.
+        const animate = Element.prototype.animate;
+        Element.prototype.animate = function (...args) {
+          const animation = animate.apply(this, args);
+          if (this.classList.contains('ui-caret-flight')) animation.pause();
+          return animation;
+        };
+      });
       await page.goto(adapter.url('light'));
 
       for (const layout of ['input', 'newline', 'wrap']) {

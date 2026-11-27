@@ -258,11 +258,12 @@ test.describe('navigation', () => {
       await expect.poll(async () => (await readPlate()).image).toContain('gradient');
       await expect.poll(async () => (await readPlate()).transform).not.toBe('none');
       expect((await readPlate()).background).toBe(hovered.background);
-      // Park the pointer in the far corner. The stage can scroll the trail to
-      // the top edge, where 0,0 still falls inside the grown plate hit box.
-      const viewport = page.viewportSize();
-      await page.mouse.move((viewport?.width ?? 1280) - 2, (viewport?.height ?? 720) - 2);
+      // Release before moving off the draggable link; dragging an anchor can
+      // start the platform drag session rather than deliver a normal mouseup.
       await page.mouse.up();
+      const pressed = await link.boundingBox();
+      if (!pressed) throw new Error('The breadcrumb link must stay laid out');
+      await page.mouse.move(Math.max(1, pressed.x - 12), pressed.y + pressed.height / 2);
       // Firefox keeps `:focus-visible` on a link pressed with the pointer, which
       // keeps the plate lit for a keyboard reason. Clear it so the exit below
       // measures the hover state the test is about.
@@ -488,6 +489,7 @@ test.describe('navigation', () => {
   test('the navigation indicator travels when the Inspector changes placement', async ({
     page,
   }) => {
+    await page.emulateMedia({ reducedMotion: 'no-preference' });
     await page.goto('/?theme=light&lang=en#controls-navigation-item', {
       waitUntil: 'domcontentloaded',
     });
